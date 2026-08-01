@@ -1,0 +1,97 @@
+rules_version = '2';
+
+// Модель даних (за app.js):
+//   users/{uid}                       -- профіль: lang, currency,
+//                                         categoriesIncome, categoriesExpense, ...
+//   users/{uid}/transactions/{id}     -- {type, amount, category, note, date}
+//   users/{uid}/savings/{id}          -- {type, amount, currency, note, date, goalId}
+//   users/{uid}/savingsGoals/{id}     -- {name, createdAt}
+//   users/{uid}/pages/{id}            -- {title, content, createdAt, updatedAt}
+//
+// Правило: кожен користувач може читати й писати ЛИШЕ власні документи,
+// і лише якщо форма даних відповідає тому, що реально пише застосунок —
+// це другий рівень захисту (перший — App Check) на випадок зіпсованого/
+// зловмисного запиту напряму через Firestore SDK (в обхід UI застосунку).
+// Cloud Function walletSync працює через Admin SDK і ці правила не зачіпають.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isOwner(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    function isNonEmptyString(v, maxLen) {
+      return v is string && v.size() > 0 && v.size() <= maxLen;
+    }
+
+    match /users/{uid} {
+      // Профіль має гнучку, таку що еволюціонує, схему (нові налаштування
+      // додаються з часом) — перевіряємо типи тільки для полів, які реально
+      // присутні в записі, а не жорстко фіксуємо повний список ключів.
+      function isValidProfile(d) {
+        return (!('lang' in d) || d.lang is string) &&
+               (!('currency' in d) || d.currency is string) &&
+               (!('categoriesIncome' in d) || d.categoriesIncome is list) &&
+               (!('categoriesExpense' in d) || d.categoriesExpense is list);
+      }
+      allow read: if isOwner(uid);
+      allow write: if isOwner(uid) && isValidProfile(request.resource.data);
+
+      match /transactions/{txId} {
+        function isValidTx(d) {
+          return d.type in ['income', 'expense'] &&
+                 d.amount is number && d.amount > 0 && d.amount < 1000000000 &&
+                 isNonEmptyString(d.category, 100) &&
+                 d.date is string && d.date.size() == 10 &&
+                 d.note is string && d.note.size() <= 2000 &&
+                 (!('source' in d) || d.source is string) &&
+                 (!('createdAt' in d) || d.createdAt is timestamp) &&
+                 d.keys().hasOnly(['type', 'amount', 'category', 'note', 'date', 'source', 'createdAt']);
+        }
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid) && isValidTx(request.resource.data);
+      }
+
+      match /savings/{savingId} {
+        function isValidSaving(d) {
+          return d.type in ['deposit', 'withdraw'] &&
+                 d.amount is number && d.amount > 0 && d.amount < 1000000000 &&
+                 isNonEmptyString(d.currency, 10) &&
+                 d.date is string && d.date.size() == 10 &&
+                 d.note is string && d.note.size() <= 2000 &&
+                 isNonEmptyString(d.goalId, 200) &&
+                 d.keys().hasOnly(['type', 'amount', 'currency', 'note', 'date', 'goalId']);
+        }
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid) && isValidSaving(request.resource.data);
+      }
+
+      match /savingsGoals/{goalId} {
+        function isValidGoal(d) {
+          return isNonEmptyString(d.name, 200) &&
+                 d.createdAt is timestamp &&
+                 d.keys().hasOnly(['name', 'createdAt']);
+        }
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid) && isValidGoal(request.resource.data);
+      }
+
+      match /pages/{pageId} {
+        function isValidPage(d) {
+          return d.title is string && d.title.size() <= 300 &&
+                 d.content is string && d.content.size() <= 500000 &&
+                 d.createdAt is timestamp && d.updatedAt is timestamp &&
+                 d.keys().hasOnly(['title', 'content', 'createdAt', 'updatedAt']);
+        }
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid) && isValidPage(request.resource.data);
+      }
+    }
+
+    // Все інше — заборонено за замовчуванням.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
