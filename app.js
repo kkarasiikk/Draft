@@ -522,7 +522,7 @@ function applyStaticTranslations() {
   document.getElementById('tabEntriesLabel').textContent = t('tabEntries');
   document.getElementById('topbarBrandLabel').textContent = t('appTitle');
   document.getElementById('settingsMenuLabel').textContent = t('settingsTitle');
-  document.getElementById('aiChatMenuLabel').textContent = t('aiChatMenuLabel');
+  document.getElementById('aiChatBtn').setAttribute('aria-label', t('aiChatMenuLabel'));
   document.getElementById('aiChatTitle').textContent = t('aiChatTitle');
   document.getElementById('aiChatEmpty').textContent = t('aiChatEmpty');
   document.getElementById('aiChatInput').placeholder = t('aiChatInputPlaceholder');
@@ -1704,6 +1704,63 @@ async function sendAiChatMessage() {
   }
 }
 
+// ---- Голосове введення для чату (Web Speech API) ----
+// Підтримується нативно в Chrome/Edge/Safari (з префіксом webkit-), відсутнє
+// у Firefox — тому кнопку мікрофона показуємо лише якщо API справді є.
+const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
+const SPEECH_LANG_MAP = { uk: 'uk-UA', ru: 'ru-RU', pl: 'pl-PL', en: 'en-US' };
+let aiSpeechRecognition = null;
+let aiSpeechActive = false;
+
+function initAiVoiceInput() {
+  const micBtn = document.getElementById('aiChatMicBtn');
+  if (!SpeechRecognitionCtor) {
+    micBtn.style.display = 'none';
+    return;
+  }
+  micBtn.style.display = 'flex';
+
+  micBtn.addEventListener('click', () => {
+    if (aiSpeechActive) {
+      aiSpeechRecognition && aiSpeechRecognition.stop();
+      return;
+    }
+    const recognition = new SpeechRecognitionCtor();
+    aiSpeechRecognition = recognition;
+    recognition.lang = SPEECH_LANG_MAP[currentLang] || 'uk-UA';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.onstart = () => {
+      aiSpeechActive = true;
+      micBtn.classList.add('recording');
+    };
+    recognition.onresult = (e) => {
+      const transcript = e.results[0][0].transcript.trim();
+      if (transcript) {
+        document.getElementById('aiChatInput').value = transcript;
+        sendAiChatMessage();
+      }
+    };
+    recognition.onerror = () => {
+      // Мовчазно ігноруємо (напр. користувач не дав дозвіл на мікрофон) —
+      // просто повертаємось у звичайний стан вводу тексту.
+    };
+    recognition.onend = () => {
+      aiSpeechActive = false;
+      micBtn.classList.remove('recording');
+      aiSpeechRecognition = null;
+    };
+    try {
+      recognition.start();
+    } catch (err) {
+      console.error('speech recognition start failed', err);
+      aiSpeechActive = false;
+      micBtn.classList.remove('recording');
+    }
+  });
+}
+
 function openCategoryTxModal(catId, monthTx, ty, tm) {
   const nomMonths = MONTHS_NOM[currentLang] || MONTHS_NOM.uk;
   const genMonths = MONTHS_GEN[currentLang] || MONTHS_GEN.uk;
@@ -2221,7 +2278,6 @@ document.getElementById('settingsBtn').addEventListener('click', () => {
   document.getElementById('settingsOverlay').classList.add('show');
 });
 document.getElementById('aiChatBtn').addEventListener('click', () => {
-  document.getElementById('appMenuOverlay').classList.remove('show');
   document.getElementById('aiChatOverlay').classList.add('show');
   renderAiChat();
   setTimeout(() => document.getElementById('aiChatInput').focus(), 50);
@@ -2230,6 +2286,7 @@ document.getElementById('closeAiChat').addEventListener('click', () => document.
 document.getElementById('aiChatOverlay').addEventListener('click', (e) => { if (e.target.id === 'aiChatOverlay') e.currentTarget.classList.remove('show'); });
 document.getElementById('aiChatSendBtn').addEventListener('click', sendAiChatMessage);
 document.getElementById('aiChatInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') sendAiChatMessage(); });
+initAiVoiceInput();
 document.getElementById('closeSettings').addEventListener('click', () => document.getElementById('settingsOverlay').classList.remove('show'));
 document.getElementById('closeCategoryTx').addEventListener('click', () => document.getElementById('categoryTxOverlay').classList.remove('show'));
 document.getElementById('categoryTxOverlay').addEventListener('click', (e) => { if (e.target.id === 'categoryTxOverlay') e.currentTarget.classList.remove('show'); });
