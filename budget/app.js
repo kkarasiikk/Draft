@@ -1172,6 +1172,18 @@ auth.onAuthStateChanged((user) => {
   }
 });
 
+// Захист від вічного спінера: якщо через кеш браузера/мережеві проблеми
+// Firebase не встиг відповісти за кілька секунд — не лишаємо користувача
+// дивитись на спінер нескінченно, показуємо форму входу. Якщо сесія
+// насправді активна, onAuthStateChanged однаково спрацює й перемкне на застосунок.
+setTimeout(() => {
+  const loadingEl = document.getElementById('authLoading');
+  if (loadingEl && loadingEl.style.display !== 'none') {
+    loadingEl.style.display = 'none';
+    document.getElementById('authScreen').style.display = 'flex';
+  }
+}, 6000);
+
 // ---- Дані (Firestore, реалтайм-синхронізація) ----
 function subscribeToTransactions(uid) {
   if (unsubscribeSnapshot) unsubscribeSnapshot();

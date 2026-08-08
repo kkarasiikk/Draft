@@ -197,3 +197,14 @@ auth.onAuthStateChanged((user) => {
     }
   }
 });
+
+// Захист від вічного спінера (аналогічно budget/app.js) — якщо Firebase
+// не відповість за кілька секунд, показуємо форму входу замість того,
+// щоб лишати користувача дивитись на спінер нескінченно.
+setTimeout(() => {
+  const loadingEl = document.getElementById('authLoading');
+  if (loadingEl && loadingEl.style.display !== 'none') {
+    loadingEl.style.display = 'none';
+    document.getElementById('authScreen').style.display = 'flex';
+  }
+}, 6000);
