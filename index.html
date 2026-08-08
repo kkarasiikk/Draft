@@ -108,10 +108,12 @@
   .app-menu-item:hover{background:var(--glass-btn-bg-hover);}
   .app-menu-item svg{stroke:currentColor;flex-shrink:0;}
 
-  /* ---- Desktop layout — та сама ширина, що й у budget/ (960px усередині) ---- */
+  /* ---- Desktop layout — та сама структура, що й у budget/: .wrap на всю
+     ширину (кнопка меню біля справжнього краю), а вміст центрується на 960px ---- */
   @media (min-width:880px){
-    .wrap{max-width:1040px;margin:0 auto;padding:0 40px 48px;}
+    .wrap{max-width:none;margin:0;padding:0 40px 48px;}
     .home-topbar{padding-top:28px;}
+    .hero, .sections{max-width:960px;margin-left:auto;margin-right:auto;}
     .sections{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
   }
 
