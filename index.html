@@ -126,16 +126,16 @@
 
   .module-card{
     position:relative; overflow:hidden;
-    background:var(--surface); border:1px solid var(--border); border-radius:26px;
+    background:var(--surface); border:1px solid var(--border); border-radius:24px;
     padding:26px 24px; display:block; text-decoration:none; color:inherit;
     backdrop-filter: blur(var(--glass-blur)) saturate(150%);
     -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(150%);
     box-shadow: var(--glass-shadow);
-    transition: transform .35s cubic-bezier(.2,.8,.2,1), box-shadow .35s;
+    transition: transform .35s, border-color .35s, box-shadow .35s;
   }
   .module-card::before{content:"";position:absolute;inset:0;background:var(--card-glare);pointer-events:none;}
   .module-card:focus-visible{outline:2px solid var(--accent);outline-offset:3px;}
-  a.module-card:hover{transform:translateY(-4px); box-shadow: var(--card-hover-shadow), var(--glass-shadow);}
+  a.module-card:hover{transform:translateY(-8px) scale(1.015); border-color:var(--card-border-hover); box-shadow: var(--card-hover-shadow), var(--glass-shadow);}
   .module-card.soon{opacity:.55; cursor:default;}
 
   .module-icon{
