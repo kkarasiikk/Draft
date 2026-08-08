@@ -167,6 +167,7 @@ document.getElementById('logoutBtn').addEventListener('click', () => {
 });
 
 auth.onAuthStateChanged((user) => {
+  document.getElementById('authLoading').style.display = 'none';
   if (user) {
     document.getElementById('authScreen').style.display = 'none';
     document.getElementById('homeScreen').style.display = 'block';

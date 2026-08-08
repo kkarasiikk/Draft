@@ -155,7 +155,10 @@
   .open-btn svg{width:14px;height:14px;stroke:currentColor;}
 
   /* ---- Екран входу ---- */
-  #authScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+  #authScreen{display:none;min-height:100vh;align-items:center;justify-content:center;padding:24px;}
+  #authLoading{display:flex;min-height:100vh;align-items:center;justify-content:center;padding:24px;}
+  .spinner{width:32px;height:32px;border-radius:50%;border:3px solid var(--glass-btn-border);border-top-color:var(--accent);animation:spin .8s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
   .auth-box{max-width:360px;width:100%;background:var(--surface);border:1px solid var(--border);border-radius:26px;padding:32px 26px;
     backdrop-filter: blur(var(--glass-blur)) saturate(150%);-webkit-backdrop-filter: blur(var(--glass-blur)) saturate(150%);
     box-shadow: var(--glass-shadow);}
@@ -181,11 +184,15 @@
 
   @media (prefers-reduced-motion: reduce){
     a.module-card, .open-btn, .icon-btn, .theme-choice{transition:none;}
+    .spinner{animation:none;opacity:.55;}
   }
 </style>
 </head>
 <body>
   <div class="background" aria-hidden="true"></div>
+
+  <!-- ---- Нейтральний екран, поки Firebase перевіряє збережену сесію ---- -->
+  <div id="authLoading" aria-hidden="true"><div class="spinner"></div></div>
 
   <!-- ---- Екран входу ---- -->
   <div id="authScreen">
