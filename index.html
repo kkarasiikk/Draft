@@ -23,7 +23,7 @@
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
   font-src 'self' https://fonts.gstatic.com;
   img-src 'self' data:;
-  connect-src 'self' https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com https://firebaseinstallations.googleapis.com https://content-firebaseappcheck.googleapis.com https://bank.gov.ua https://us-central1-me-and-only-me-7f531.cloudfunctions.net;
+  connect-src 'self' https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com https://firebaseinstallations.googleapis.com https://content-firebaseappcheck.googleapis.com https://bank.gov.ua;
   frame-src https://www.google.com/recaptcha/ https://me-and-only-me-7f531.firebaseapp.com;
   worker-src 'self';
   manifest-src 'self';
@@ -38,26 +38,104 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-functions-compat.js"></script>
 <style>
   :root{
-    --bg:#FAF8F4; --surface:#FFFDF9; --ink:#2D2A26; --ink-soft:#524D45; --ink-muted:#8A8478;
-    --border:#EDEAE3; --income:#7FA88F; --income-light:#EEF4F0; --expense:#C97B5A; --expense-light:#FBEFE7; --accent:#5B7A9D; --accent-light:#EAF0F5;
+    --bg:#EDEEF3;
+    --bg-radial: radial-gradient(circle at top, #ffffff 0%, #eceef4 45%, #dfe1ea 100%);
+    --blob1:#ffffffb0; --blob2:#8fa6e070;
+    --surface:linear-gradient(155deg, rgba(255,255,255,.72), rgba(255,255,255,.38));
+    --surface-flat: rgba(255,255,255,.5);
+    --ink:#26262B; --ink-soft:#4E4E58; --ink-muted:#84838F;
+    --border:rgba(255,255,255,.55); --income:#4F9C74; --income-light:rgba(79,156,116,.14); --expense:#C9683F; --expense-light:rgba(201,104,63,.13); --accent:#4A6FA5; --accent-light:rgba(74,111,165,.13);
+    --control-bg:rgba(255,255,255,.35); --overlay:rgba(30,32,40,.28);
+    --glass-blur:22px; --glass-shadow:0 8px 32px rgba(40,44,70,.10), inset 0 1px 0 rgba(255,255,255,.6);
+    --card-bg: rgba(20,25,40,.035); --card-border: rgba(20,25,40,.10); --card-border-hover: rgba(20,25,40,.22);
+    --card-glare: linear-gradient(135deg, rgba(255,255,255,.55), rgba(255,255,255,0));
+    --card-hover-shadow: 0 20px 80px rgba(20,25,40,.10), 0 0 60px rgba(20,25,40,.05);
+    --glass-btn-bg: rgba(20,25,40,.05); --glass-btn-bg-hover: rgba(20,25,40,.09); --glass-btn-border: rgba(20,25,40,.16);
+    color-scheme: light;
   }
+  [data-theme="dark"]{
+    --bg:#0B0B0E;
+    --bg-radial: radial-gradient(circle at top, #353535 0%, #181818 45%, #0d0d0d 100%);
+    --blob1:#ffffff15; --blob2:#c48fe040;
+    --surface:linear-gradient(155deg, rgba(255,255,255,.10), rgba(255,255,255,.02));
+    --surface-flat: rgba(255,255,255,.06);
+    --ink:#EFEEF3; --ink-soft:#C4C2CE; --ink-muted:#8E8C99;
+    --border:rgba(255,255,255,.12); --income:#7FCB9E; --income-light:rgba(127,203,158,.14); --expense:#E39A76; --expense-light:rgba(227,154,118,.14);
+    --accent:#6F93D6; --accent-light:rgba(143,174,224,.16); --control-bg:rgba(255,255,255,.05); --overlay:rgba(0,0,0,.55);
+    --glass-blur:22px; --glass-shadow:0 8px 32px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.06);
+    --card-bg: rgba(255,255,255,.06); --card-border: rgba(255,255,255,.12); --card-border-hover: rgba(255,255,255,.25);
+    --card-glare: linear-gradient(135deg, rgba(255,255,255,.12), rgba(255,255,255,0));
+    --card-hover-shadow: 0 20px 80px rgba(255,255,255,.08), 0 0 60px rgba(255,255,255,.04);
+    --glass-btn-bg: rgba(255,255,255,.08); --glass-btn-bg-hover: rgba(255,255,255,.16); --glass-btn-border: rgba(255,255,255,.18);
+    color-scheme: dark;
+  }
+  body{transition:background-color .2s ease, color .2s ease;}
   *{box-sizing:border-box;}
-  html{overscroll-behavior-y:none;scrollbar-gutter:stable;overflow-y:scroll;}
-  body{margin:0;background:var(--bg);color:var(--ink);font-family:'Inter',sans-serif;
+  html{overscroll-behavior-y:none;scrollbar-gutter:stable;overflow-y:scroll;background:var(--bg);}
+  body{margin:0;color:var(--ink);font-family:'Inter',sans-serif;
     padding-bottom:calc(100px + env(safe-area-inset-bottom));
-    -webkit-tap-highlight-color:transparent;overscroll-behavior-y:none;-webkit-overflow-scrolling:touch;}
-  .wrap{max-width:480px;margin:0 auto;}
+    -webkit-tap-highlight-color:transparent;overscroll-behavior-y:none;-webkit-overflow-scrolling:touch;
+    background:var(--bg);min-height:100vh;}
+  .wrap{max-width:480px;margin:0 auto;position:relative;z-index:1;}
+
+  /* ---- Fixed background layer: base radial + two soft light blobs ---- */
+  .background{
+    position:fixed; inset:0; z-index:-1; overflow:hidden;
+    background: var(--bg-radial);
+    transition: background .2s ease;
+  }
+  .background::before{
+    content:""; position:absolute;
+    width:550px; height:550px; top:-180px; left:-120px;
+    background:var(--blob1); border-radius:50%;
+    filter:blur(90px);
+  }
+  .background::after{
+    content:""; position:absolute;
+    width:500px; height:500px; bottom:-160px; right:-100px;
+    background:var(--blob2); border-radius:50%;
+    filter:blur(110px);
+  }
+
+  /* ---- Glass surfaces: every panel that sits on --surface gets frosted blur + soft edge ---- */
+  .auth-box, .header, .app-menu, .entry-menu, .tab-btn.active, .search-bar, .day-card, .card,
+  .period-btn.active, .fab.exp, .modal, .data-action-btn, .confirm-box, .goal-card, .note-card,
+  .note-tb-btn, .stat-card{
+    backdrop-filter: blur(var(--glass-blur)) saturate(150%);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(150%);
+    box-shadow: var(--glass-shadow);
+  }
+  .modal-overlay, .confirm-modal, .app-menu-overlay, .entry-menu-overlay{
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+  .stat-card.inc, .stat-card.exp{backdrop-filter: blur(var(--glass-blur)) saturate(150%);-webkit-backdrop-filter: blur(var(--glass-blur)) saturate(150%);}
+
+  /* ---- Glass button (Apple/Vercel style) for neutral secondary actions ---- */
+  .btn-cancel, .data-action-btn, .note-tb-btn{
+    background:var(--glass-btn-bg) !important;
+    backdrop-filter:blur(15px);
+    -webkit-backdrop-filter:blur(15px);
+    border:1px solid var(--glass-btn-border) !important;
+    transition:background .35s, transform .35s, border-color .35s;
+  }
+  .btn-cancel:hover, .data-action-btn:hover, .note-tb-btn:hover{
+    background:var(--glass-btn-bg-hover) !important;
+    transform:translateY(-3px);
+  }
+
+  @keyframes cardIn{ from{opacity:0; transform:translateY(24px);} to{opacity:1; transform:translateY(0);} }
 
   /* ---- Auth screen ---- */
   #authScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
-  .auth-box{max-width:360px;width:100%;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px 26px;}
+  .auth-box{max-width:360px;width:100%;background:var(--surface);border:1px solid var(--border);border-radius:26px;padding:32px 26px;}
   .auth-logo{display:flex;align-items:center;gap:8px;margin-bottom:6px;color:var(--accent);}
   .auth-title{font-family:'Inter',sans-serif;font-size:22px;font-weight:700;margin-bottom:6px;letter-spacing:-0.01em;}
   .auth-sub{font-size:13.5px;color:var(--ink-muted);margin-bottom:22px;line-height:1.5;}
@@ -88,7 +166,8 @@
   /* ---- Main app ---- */
   #appScreen{display:none;}
   .header{background:var(--surface);border-bottom:1px solid var(--border);padding:calc(20px + env(safe-area-inset-top)) 20px 22px;}
-  .header-top-row{display:flex;align-items:center;gap:4px;margin-bottom:16px;min-height:32px;flex-wrap:wrap;}
+  .header-toprow-wrap{margin-bottom:16px;}
+  .header-top-row{display:flex;align-items:center;gap:4px;min-height:32px;flex-wrap:nowrap;}
   .header-back-btn{display:none;flex-shrink:0;background:none;border:none;cursor:pointer;color:var(--ink-muted);
     padding:6px;border-radius:8px;}
   .header-back-btn:hover{background:var(--bg);color:var(--ink);}
@@ -98,19 +177,17 @@
   .header-icon-btn.active{background:var(--accent-light);color:var(--accent);}
   .header-text-btn{padding:6px 8px;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;white-space:nowrap;}
   .header-section-title{display:none;}
-  .header-actions{display:flex;align-items:center;gap:2px;flex-shrink:0;margin-left:auto;}
-  .month-nav-header{display:none;flex:1;align-items:center;justify-content:center;gap:4px;min-width:0;}
+  .header-actions{display:flex;align-items:center;gap:2px;flex-shrink:1;min-width:0;margin-left:auto;overflow-x:auto;scrollbar-width:none;}
+  .header-actions::-webkit-scrollbar{display:none;}
+  .month-nav-header{display:none;align-items:center;justify-content:center;gap:4px;min-width:0;margin-top:10px;}
   .month-nav-header.show{display:flex;}
   .month-nav-header button{background:none;border:none;cursor:pointer;color:var(--ink-muted);padding:4px;display:flex;flex-shrink:0;}
   .month-nav-header button:disabled{color:var(--border);cursor:default;}
   .month-nav-header .month-label{font-family:'Inter',sans-serif;font-size:12.5px;font-weight:600;color:var(--ink-soft);
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .header.slim{padding-bottom:20px;}
-  .header.slim .header-top-row{margin-bottom:0;}
+  .header.slim .header-toprow-wrap{margin-bottom:0;}
   @media (max-width:879px){
-    .header-back-btn{order:1;}
-    .header-actions{order:2;flex:0 0 auto;margin-left:auto;margin-bottom:0;margin-top:0;}
-    .month-nav-header{order:3;flex:0 0 100%;justify-content:center;margin-top:10px;}
     .balance{text-align:center;}
   }
   .eyebrow{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
@@ -121,7 +198,7 @@
   .app-menu-overlay{position:fixed;inset:0;z-index:55;display:none;}
   .app-menu-overlay.show{display:block;}
   .app-menu{position:absolute;top:calc(52px + env(safe-area-inset-top));left:16px;background:var(--surface);
-    border:1px solid var(--border);border-radius:12px;box-shadow:0 10px 28px rgba(45,42,38,.14);
+    border:1px solid var(--border);border-radius:16px;box-shadow:0 10px 28px rgba(45,42,38,.14);
     padding:6px;min-width:220px;max-width:min(300px, calc(100vw - 32px));}
   .app-menu-item{display:flex;align-items:center;gap:10px;width:100%;padding:10px 12px;border:none;
     background:none;border-radius:8px;cursor:pointer;font-family:'Inter',sans-serif;font-size:14px;
@@ -155,7 +232,7 @@
   .stat-value{font-family:'Inter',sans-serif;font-size:16px;font-weight:600;margin-top:3px;font-variant-numeric:tabular-nums;}
   .stat-value.inc{color:var(--income);}
   .stat-value.exp{color:var(--expense);}
-  .tabs{display:flex;gap:4px;background:#F1EDE5;border-radius:10px;padding:4px;margin:16px 20px 0;
+  .tabs{display:flex;gap:4px;background:var(--control-bg);border-radius:10px;padding:4px;margin:16px 20px 0;
     overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
   .tabs::-webkit-scrollbar{display:none;}
   .tabs .tab-btn{flex:0 0 auto;white-space:nowrap;}
@@ -169,8 +246,18 @@
   .content{padding:12px 20px 0;}
   .empty{text-align:center;padding:48px 20px;color:var(--ink-muted);}
   .empty .title{font-family:'Inter',sans-serif;font-size:17px;font-weight:600;color:var(--ink-soft);margin-bottom:6px;}
-  .search-bar{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);
-    border-radius:12px;padding:10px 14px;margin-bottom:14px;color:var(--ink-muted);}
+  .recent-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+  .recent-header-title{font-family:'Inter',sans-serif;font-size:15.5px;font-weight:600;color:var(--ink);}
+  .search-toggle-btn{display:flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;
+    border-radius:50%;border:1px solid var(--border);background:var(--glass-btn-bg);color:var(--ink-soft);
+    cursor:pointer;transition:background .25s, border-color .25s, color .2s, transform .2s;}
+  .search-toggle-btn:hover{background:var(--glass-btn-bg-hover);}
+  .search-toggle-btn.active{color:#fff;background:var(--accent);border-color:var(--accent);}
+  .search-bar{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid transparent;
+    border-radius:12px;padding:0 14px;color:var(--ink-muted);
+    max-height:0;opacity:0;margin-bottom:0;overflow:hidden;pointer-events:none;
+    transition:max-height .32s ease, opacity .22s ease, padding .32s ease, margin .32s ease, border-color .22s ease;}
+  .search-bar.open{max-height:60px;opacity:1;padding:10px 14px;margin-bottom:14px;border-color:var(--border);pointer-events:auto;}
   .search-bar input{flex:1;width:auto;border:none;background:none;font-family:'Inter',sans-serif;font-size:15px;
     color:var(--ink);outline:none;padding:0;margin:0;}
   .search-bar svg{flex-shrink:0;}
@@ -180,7 +267,7 @@
   .day-group{margin-bottom:18px;}
   .day-label{font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-muted);
     font-family:'Inter',sans-serif;font-weight:600;margin-bottom:8px;padding-left:2px;}
-  .day-card{background:var(--surface);border-radius:12px;border:1px solid var(--border);overflow:hidden;}
+  .day-card{background:var(--surface);border-radius:20px;border:1px solid var(--border);overflow:hidden;}
   .entry{display:flex;align-items:center;gap:10px;padding:12px 14px;border-top:1px solid var(--border);}
   .entry:first-child{border-top:none;}
   .cat-tag{font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;white-space:nowrap;display:inline-block;}
@@ -188,19 +275,42 @@
   .entry-amount{font-family:'Inter',sans-serif;font-weight:600;font-size:14.5px;white-space:nowrap;font-variant-numeric:tabular-nums;}
   .entry-amount.inc{color:var(--income);}
   .del-btn{background:none;border:none;cursor:pointer;color:var(--ink-muted);padding:4px;display:flex;}
-  .card{background:var(--surface);border-radius:12px;border:1px solid var(--border);padding:18px;margin-bottom:16px;}
+  .card{
+    position:relative;
+    background:var(--card-bg);
+    backdrop-filter:blur(18px) saturate(150%);
+    -webkit-backdrop-filter:blur(18px) saturate(150%);
+    border:1px solid var(--card-border);
+    border-radius:24px;
+    padding:26px;
+    margin-bottom:16px;
+    overflow:hidden;
+    transition:transform .35s, border-color .35s, box-shadow .35s;
+    animation:cardIn .6s ease forwards;
+  }
+  .card::before{
+    content:""; position:absolute; inset:0;
+    background:var(--card-glare);
+    pointer-events:none;
+  }
+  .card:hover{
+    transform:translateY(-6px) scale(1.01);
+    border-color:var(--card-border-hover);
+    box-shadow:var(--card-hover-shadow);
+  }
   .card-title{font-family:'Inter',sans-serif;font-size:15.5px;font-weight:600;margin-bottom:4px;}
   .trend-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:8px;flex-wrap:wrap;}
   .trend-controls{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end;}
-  .trend-currency-select{border:none;background:#F1EDE5;border-radius:8px;padding:6px 8px;
+  .trend-currency-select{border:none;background:var(--control-bg);border-radius:8px;padding:6px 8px;
     font-family:'Inter',sans-serif;font-size:12.5px;font-weight:600;color:var(--ink);cursor:pointer;
     -webkit-appearance:none;appearance:none;}
-  .period-picker{display:flex;background:#F1EDE5;border-radius:8px;padding:3px;gap:2px;flex-shrink:0;}
+  .period-picker{display:flex;background:var(--control-bg);border-radius:8px;padding:3px;gap:2px;flex-shrink:0;}
   .period-btn{border:none;background:transparent;cursor:pointer;padding:5px 10px;border-radius:6px;
     font-family:'Inter',sans-serif;font-size:12.5px;font-weight:600;color:var(--ink-muted);}
   .period-btn.active{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(20,20,24,.06);}
   #savingsTrendPeriodPicker .period-btn{padding:5px 7px;}
   .card-sub{font-size:12.5px;color:var(--ink-muted);margin-bottom:8px;}
+  .card-sub.stale{color:var(--expense);font-weight:600;}
   .legend-row{display:flex;align-items:center;gap:8px;font-size:13px;margin-top:2px;width:100%;
     background:none;border:none;cursor:pointer;padding:6px 6px;border-radius:8px;text-align:left;font-family:'Inter',sans-serif;}
   .legend-row:hover{background:var(--bg);}
@@ -217,16 +327,14 @@
   .legend-toggle svg{display:none;width:13px;height:13px;}
   .legend-toggle.checked{background:var(--accent);border-color:var(--accent);}
   .legend-toggle.checked svg{display:block;}
-  .fab-row{position:fixed;bottom:calc(22px + env(safe-area-inset-bottom));left:0;right:0;display:flex;justify-content:center;gap:10px;padding:0 20px;}
+  .fab-row{position:fixed;bottom:calc(22px + env(safe-area-inset-bottom));left:0;right:0;z-index:20;display:flex;justify-content:center;gap:10px;padding:0 20px;}
   .fab{display:flex;align-items:center;gap:6px;border-radius:24px;padding:11px 18px;font-size:13.5px;font-weight:600;
     cursor:pointer;font-family:'Inter',sans-serif;}
   .fab.exp{background:var(--surface);color:var(--expense);border:1px solid var(--border);box-shadow:0 2px 10px rgba(20,20,24,.06);}
   .fab.inc{background:var(--accent);color:#fff;border:none;box-shadow:0 4px 14px rgba(92,124,250,.28);}
-  .fab.ai{width:44px;height:44px;padding:0;border-radius:50%;justify-content:center;background:var(--surface);
-    color:var(--accent);border:1px solid var(--border);box-shadow:0 2px 10px rgba(20,20,24,.06);flex-shrink:0;}
-  .modal-overlay{position:fixed;inset:0;background:rgba(34,38,43,.32);display:none;align-items:flex-end;justify-content:center;z-index:50;}
+  .modal-overlay{position:fixed;inset:0;background:var(--overlay);display:none;align-items:flex-end;justify-content:center;z-index:50;}
   .modal-overlay.show{display:flex;}
-  .modal{background:var(--surface);border-radius:18px 18px 0 0;padding:20px 20px calc(28px + env(safe-area-inset-bottom));width:100%;max-width:480px;
+  .modal{background:var(--surface);border-radius:26px 26px 0 0;padding:20px 20px calc(28px + env(safe-area-inset-bottom));width:100%;max-width:480px;
     max-height:85vh;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;}
   .modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
   .modal-title{font-family:'Inter',sans-serif;font-size:18px;font-weight:700;}
@@ -245,10 +353,21 @@
   .submit-btn{width:100%;margin-top:4px;padding:13px 0;border-radius:10px;border:none;cursor:pointer;color:#fff;
     font-size:15px;font-weight:600;font-family:'Inter',sans-serif;background:var(--accent);}
   .submit-btn:disabled{opacity:.55;cursor:default;}
+  .data-action-row{display:flex;flex-direction:column;gap:10px;margin-top:8px;margin-bottom:14px;}
+  .data-action-btn{display:flex;align-items:center;gap:12px;width:100%;text-align:left;
+    background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:12px 14px;
+    cursor:pointer;font-family:'Inter',sans-serif;transition:background-color .12s ease,border-color .12s ease;}
+  .data-action-btn:hover, .data-action-btn:focus-visible{border-color:var(--accent);background:var(--accent-light);}
+  .data-action-btn:active{transform:scale(.99);}
+  .data-action-icon{flex-shrink:0;width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;
+    background:var(--accent-light);color:var(--accent);}
+  .data-action-text{display:flex;flex-direction:column;gap:2px;min-width:0;}
+  .data-action-title{font-size:14px;font-weight:600;color:var(--ink);}
+  .data-action-sub{font-size:12px;color:var(--ink-muted);line-height:1.35;}
   .confirm-modal{position:fixed;inset:0;background:rgba(34,38,43,.32);display:none;align-items:center;justify-content:center;
     z-index:60;padding:20px;}
   .confirm-modal.show{display:flex;}
-  .confirm-box{background:var(--surface);border-radius:14px;padding:22px;max-width:340px;width:100%;}
+  .confirm-box{background:var(--surface);border-radius:22px;padding:22px;max-width:340px;width:100%;}
   .confirm-title{font-family:'Inter',sans-serif;font-size:16.5px;font-weight:700;margin-bottom:6px;}
   .confirm-sub{font-size:13.5px;color:var(--ink-muted);margin-bottom:18px;}
   .confirm-actions{display:flex;gap:8px;}
@@ -258,7 +377,7 @@
   svg.icon{display:inline-block;vertical-align:middle;}
   .page-view-card{padding:22px;}
   .page-view-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px;}
-  .goal-card{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--surface);
+  .goal-card{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--surface);border-radius:18px;
     border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:10px;cursor:pointer;
     text-align:left;width:100%;font-family:'Inter',sans-serif;}
   .goal-card:hover{border-color:var(--accent);}
@@ -287,7 +406,7 @@
   .tab-btn.tab-btn-with-icon{display:flex;align-items:center;gap:9px;}
   #pageTitleInput{margin-bottom:14px;}
   .note-toolbar{display:flex;gap:6px;margin-bottom:8px;}
-  .note-tb-btn{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:var(--surface);
+  .note-tb-btn{width:32px;height:32px;border-radius:10px;border:1px solid var(--border);background:var(--surface);
     color:var(--ink-soft);cursor:pointer;display:flex;align-items:center;justify-content:center;
     font-family:'Inter',sans-serif;font-size:12.5px;padding:0;}
   .note-tb-btn:hover{border-color:var(--accent);color:var(--accent);}
@@ -312,34 +431,6 @@
   .page-modal-actions{display:flex;gap:8px;}
   .page-modal-actions .submit-btn{margin-top:0;flex:1;}
   .page-modal-actions .btn-delete{border-radius:10px;padding:13px 18px;font-weight:600;font-size:15px;}
-  /* ---- AI-помічник ---- */
-  .ai-chat-modal{display:flex;flex-direction:column;height:78vh;max-height:640px;padding-bottom:calc(14px + env(safe-area-inset-bottom));}
-  .ai-chat-messages{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;
-    display:flex;flex-direction:column;gap:10px;padding:4px 2px 10px;}
-  .ai-msg{max-width:85%;padding:10px 13px;border-radius:14px;font-size:14px;line-height:1.45;white-space:pre-wrap;word-break:break-word;}
-  .ai-msg.user{align-self:flex-end;background:var(--accent);color:#fff;border-bottom-right-radius:4px;}
-  .ai-msg.assistant{align-self:flex-start;background:var(--bg);color:var(--ink);border-bottom-left-radius:4px;}
-  .ai-msg.error{align-self:flex-start;background:var(--expense-light);color:var(--expense);border-bottom-left-radius:4px;}
-  .ai-msg-action{align-self:flex-start;max-width:85%;display:flex;align-items:center;gap:6px;padding:7px 12px;
-    border-radius:10px;background:var(--income-light);color:var(--income);font-size:12.5px;font-weight:600;}
-  .ai-typing{align-self:flex-start;display:flex;gap:4px;padding:12px 14px;}
-  .ai-typing span{width:6px;height:6px;border-radius:50%;background:var(--ink-muted);opacity:.4;animation:ai-typing-bounce 1.1s infinite ease-in-out;}
-  .ai-typing span:nth-child(2){animation-delay:.15s;}
-  .ai-typing span:nth-child(3){animation-delay:.3s;}
-  @keyframes ai-typing-bounce{0%,60%,100%{transform:translateY(0);opacity:.4;}30%{transform:translateY(-4px);opacity:1;}}
-  .ai-chat-empty{color:var(--ink-muted);font-size:13.5px;text-align:center;margin:auto;padding:0 20px;line-height:1.5;}
-  .ai-chat-input-row{display:flex;gap:8px;align-items:flex-end;flex-shrink:0;border-top:1px solid var(--border);padding-top:12px;margin-top:4px;}
-  .ai-chat-input-row input{flex:1;font-family:'Inter',sans-serif;font-size:15px;border:1px solid var(--border);
-    border-radius:20px;padding:10px 16px;outline:none;color:var(--ink);background:var(--bg);margin:0;}
-  .ai-chat-input-row input:focus{border-color:var(--accent);}
-  .ai-chat-send-btn{flex-shrink:0;width:40px;height:40px;border-radius:50%;border:none;cursor:pointer;
-    background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;}
-  .ai-chat-send-btn:disabled{opacity:.5;cursor:default;}
-  .ai-chat-mic-btn{flex-shrink:0;width:40px;height:40px;border-radius:50%;cursor:pointer;
-    background:var(--bg);color:var(--ink-muted);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;}
-  .ai-chat-mic-btn.recording{background:var(--expense);color:#fff;border-color:var(--expense);animation:ai-mic-pulse 1.3s infinite;}
-  @keyframes ai-mic-pulse{0%{box-shadow:0 0 0 0 rgba(201,123,90,.45);}70%{box-shadow:0 0 0 10px rgba(201,123,90,0);}100%{box-shadow:0 0 0 0 rgba(201,123,90,0);}}
-
   .cat-manage-list{margin-top:8px;}
   .cat-manage-row{display:flex;align-items:center;gap:9px;padding:7px 2px;}
   .cat-manage-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
@@ -363,14 +454,15 @@
     .app-topbar{padding:28px 0 0;}
     .header{border-bottom:none;border-radius:16px;border:1px solid var(--border);
       padding:26px 26px 24px;margin:20px auto 0;max-width:960px;}
-    .header-top-row{position:relative;height:32px;}
+    .header-toprow-wrap{position:relative;min-height:32px;}
     .month-nav-header{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-      flex:none;width:auto;}
+      flex:none;width:auto;margin-top:0;}
     .month-nav-header .month-label{font-size:14px;}
     .month-nav{justify-content:center;padding:20px 4px 0;max-width:960px;margin:0 auto;}
     .content{padding:14px 4px 40px;}
     #entriesTab, #pageViewTab, #savingsTab, #notesTab{max-width:960px;margin:0 auto;}
     #searchBar{max-width:960px;margin-left:auto;margin-right:auto;}
+    .recent-header{max-width:960px;margin-left:auto;margin-right:auto;}
 
     #statsTab{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start;max-width:960px;margin:0 auto;}
     #statsTab .card{margin-bottom:0;}
@@ -383,6 +475,8 @@
 </style>
 </head>
 <body>
+
+<div class="background"></div>
 
 <!-- ---- Екран входу / реєстрації ---- -->
 <div id="authScreen">
@@ -405,7 +499,7 @@
         </label>
         <a id="forgotPasswordLink">Забув(ла) пароль?</a>
       </div>
-      <div class="auth-error" id="authError"></div>
+      <div class="auth-error" id="authError" role="alert" aria-live="assertive"></div>
       <div class="auth-info" id="authInfo"></div>
       <button class="auth-submit" id="authSubmit" type="submit">Увійти</button>
     </form>
@@ -448,28 +542,30 @@
   </div>
 
   <div class="header" id="header">
-    <div class="header-top-row">
-      <button class="header-back-btn" id="backToEntriesBtn" aria-label="Назад">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
-      </button>
+    <div class="header-toprow-wrap">
+      <div class="header-top-row">
+        <button class="header-back-btn" id="backToEntriesBtn" aria-label="Назад">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+        </button>
+        <div class="header-actions">
+          <button class="header-icon-btn header-text-btn" id="notesToggleBtn" aria-label="Нотатки">
+            <span id="notesToggleLabel">Нотатки</span>
+          </button>
+          <button class="header-icon-btn header-text-btn" id="statsToggleBtn" aria-label="Статистика">
+            <span id="statsToggleLabel">Статистика</span>
+          </button>
+          <button class="header-icon-btn header-text-btn" id="savingsToggleBtn" aria-label="Збереження">
+            <span id="savingsToggleLabel">Збереження</span>
+          </button>
+          <button class="header-icon-btn" id="categoriesBtn" aria-label="Категорії">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          </button>
+        </div>
+      </div>
       <div class="month-nav-header show" id="monthNavHeader">
         <button id="prevMonthHeader" aria-label="Попередній місяць"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></button>
         <div class="month-label" id="monthLabelHeader">—</div>
         <button id="nextMonthHeader" aria-label="Наступний місяць"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></button>
-      </div>
-      <div class="header-actions">
-        <button class="header-icon-btn header-text-btn" id="notesToggleBtn" aria-label="Нотатки">
-          <span id="notesToggleLabel">Нотатки</span>
-        </button>
-        <button class="header-icon-btn header-text-btn" id="statsToggleBtn" aria-label="Статистика">
-          <span id="statsToggleLabel">Статистика</span>
-        </button>
-        <button class="header-icon-btn header-text-btn" id="savingsToggleBtn" aria-label="Збереження">
-          <span id="savingsToggleLabel">Збереження</span>
-        </button>
-        <button class="header-icon-btn" id="categoriesBtn" aria-label="Категорії">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        </button>
       </div>
     </div>
     <div class="header-section-title" id="headerSectionTitle"></div>
@@ -495,7 +591,13 @@
   </div>
 
   <div class="content">
-    <div id="searchBar" class="search-bar" style="display:none;">
+    <div class="recent-header" id="recentHeader">
+      <span class="recent-header-title" id="recentHeaderTitle">Останні операції</span>
+      <button type="button" id="searchToggleBtn" class="search-toggle-btn" aria-label="Пошук" aria-expanded="false">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      </button>
+    </div>
+    <div id="searchBar" class="search-bar">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
       <input type="text" id="searchInput" placeholder="Пошук по нотатках і категоріях">
       <button type="button" id="clearSearchBtn" class="search-clear-btn" style="display:none;" aria-label="Очистити пошук">
@@ -608,7 +710,6 @@
 </div>
 
 <div class="fab-row" id="fabRow">
-  <button class="fab ai" id="aiChatBtn" aria-label="AI-помічник"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><circle cx="9" cy="11" r="1" fill="currentColor" stroke="none"/><circle cx="12" cy="11" r="1" fill="currentColor" stroke="none"/><circle cx="15" cy="11" r="1" fill="currentColor" stroke="none"/></svg></button>
   <button class="fab exp" id="openExpense"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg> <span id="fabExpLabel">Витрата</span></button>
   <button class="fab inc" id="openIncome"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg> <span id="fabIncLabel">Дохід</span></button>
 </div>
@@ -632,7 +733,7 @@
     <input type="date" id="dateInput">
     <label class="field-label" id="noteLabel">Нотатка (необовʼязково)</label>
     <input type="text" id="noteInput" placeholder="">
-    <div class="form-error" id="formError" style="display:none;"></div>
+    <div class="form-error" id="formError" style="display:none;" role="alert" aria-live="assertive"></div>
     <button class="submit-btn" id="submitBtn">Зберегти запис</button>
   </div>
 </div>
@@ -650,7 +751,7 @@
     <input type="date" id="savingsDateInput">
     <label class="field-label" id="savingsNoteLabel">Нотатка (необовʼязково)</label>
     <input type="text" id="savingsNoteInput" placeholder="">
-    <div class="form-error" id="savingsFormError" style="display:none;"></div>
+    <div class="form-error" id="savingsFormError" style="display:none;" role="alert" aria-live="assertive"></div>
     <button class="submit-btn" id="savingsSubmitBtn">Зберегти запис</button>
   </div>
 </div>
@@ -663,7 +764,7 @@
     </div>
     <label class="field-label" id="goalNameLabel">Назва</label>
     <input type="text" id="goalNameInput" placeholder="Напр. На відпустку">
-    <div class="form-error" id="goalFormError" style="display:none;"></div>
+    <div class="form-error" id="goalFormError" style="display:none;" role="alert" aria-live="assertive"></div>
     <button class="submit-btn" id="goalFormSubmitBtn" style="background:var(--accent);">Зберегти</button>
     <button type="button" id="deleteGoalBtn" style="display:none;margin-top:10px;width:100%;padding:11px 0;
       border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--expense);
@@ -714,10 +815,34 @@
       <div class="modal-title" id="settingsTitle">Налаштування</div>
       <button class="close-btn" id="closeSettings" aria-label="Закрити"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
     </div>
-    <label class="field-label" id="settingsLangLabel">Мова</label>
-    <div class="cat-picker" id="langPicker"></div>
-    <label class="field-label" id="settingsCurrencyLabel" style="margin-top:6px;">Валюта</label>
+    <label class="field-label" id="settingsCurrencyLabel">Валюта</label>
     <div class="cat-picker" id="currencyPicker"></div>
+    <label class="field-label" id="settingsLangLabel" style="margin-top:6px;">Мова</label>
+    <div class="cat-picker" id="langPicker"></div>
+    <label class="field-label" id="exportDataLabel" style="margin-top:14px;">Дані</label>
+    <div class="data-action-row">
+      <button type="button" class="data-action-btn" id="exportXlsxBtn">
+        <span class="data-action-icon" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 19h16"/></svg>
+        </span>
+        <span class="data-action-text">
+          <span class="data-action-title" id="exportXlsxBtnLabel">Експортувати в Excel (.xlsx)</span>
+          <span class="data-action-sub" id="exportDataDesc">Завантажить файл з усіма твоїми записами, категоріями, заощадженнями й нотатками.</span>
+        </span>
+      </button>
+      <input type="file" id="importCsvInput" accept=".csv,text/csv" style="display:none;">
+      <button type="button" class="data-action-btn" id="importCsvBtn">
+        <span class="data-action-icon" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V9"/><path d="M7 14l5-5 5 5"/><path d="M4 5h16"/></svg>
+        </span>
+        <span class="data-action-text">
+          <span class="data-action-title" id="importCsvBtnLabel">Імпортувати транзакції з CSV</span>
+          <span class="data-action-sub" id="importDataDesc">Колонки: дата (РРРР-ММ-ДД), тип (дохід/витрата), категорія, сума, нотатка.</span>
+        </span>
+      </button>
+    </div>
+    <label class="field-label" id="settingsThemeLabel" style="margin-top:14px;">Тема</label>
+    <div class="cat-picker" id="themePicker"></div>
   </div>
 </div>
 
@@ -806,27 +931,6 @@
   </div>
 </div>
 
-<div class="modal-overlay" id="aiChatOverlay">
-  <div class="modal ai-chat-modal">
-    <div class="modal-head">
-      <div class="modal-title" id="aiChatTitle">AI-помічник</div>
-      <button class="close-btn" id="closeAiChat" aria-label="Закрити"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
-    </div>
-    <div class="ai-chat-messages" id="aiChatMessages">
-      <div class="ai-chat-empty" id="aiChatEmpty">Напиши, наприклад: «кава 80 грн» — і я запишу витрату. Або запитай «скільки я витратив цього місяця на їжу?».</div>
-    </div>
-    <div class="ai-chat-input-row">
-      <input type="text" id="aiChatInput" placeholder="Напиши повідомлення…" maxlength="1000">
-      <button type="button" class="ai-chat-mic-btn" id="aiChatMicBtn" aria-label="Голосове введення" style="display:none;">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><path d="M12 19v4M8 23h8"/></svg>
-      </button>
-      <button type="button" class="ai-chat-send-btn" id="aiChatSendBtn" aria-label="Надіслати">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7Z"/></svg>
-      </button>
-    </div>
-  </div>
-</div>
-
 <div class="modal-overlay" id="pageOverlay">
   <div class="modal">
     <div class="modal-head">
@@ -848,7 +952,7 @@
       </button>
     </div>
     <div id="pageContentInput" class="note-editor" contenteditable="true" data-placeholder="Пиши тут що завгодно…"></div>
-    <div class="form-error" id="pageError" style="display:none;"></div>
+    <div class="form-error" id="pageError" style="display:none;" role="alert" aria-live="assertive"></div>
     <div class="page-modal-actions">
       <button class="btn-delete" id="deletePageBtn" style="display:none;">Видалити</button>
       <button class="submit-btn" id="savePageBtn">Зберегти</button>

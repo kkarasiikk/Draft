@@ -1,7 +1,7 @@
 rules_version = '2';
 
 // Модель даних (за app.js):
-//   users/{uid}                       -- профіль: lang, currency,
+//   users/{uid}                       -- профіль: lang, currency, theme,
 //                                         categoriesIncome, categoriesExpense, ...
 //   users/{uid}/transactions/{id}     -- {type, amount, category, note, date}
 //   users/{uid}/savings/{id}          -- {type, amount, currency, note, date, goalId}
@@ -12,7 +12,6 @@ rules_version = '2';
 // і лише якщо форма даних відповідає тому, що реально пише застосунок —
 // це другий рівень захисту (перший — App Check) на випадок зіпсованого/
 // зловмисного запиту напряму через Firestore SDK (в обхід UI застосунку).
-// Cloud Function walletSync працює через Admin SDK і ці правила не зачіпають.
 
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -32,6 +31,7 @@ service cloud.firestore {
       function isValidProfile(d) {
         return (!('lang' in d) || d.lang is string) &&
                (!('currency' in d) || d.currency is string) &&
+               (!('theme' in d) || d.theme is string) &&
                (!('categoriesIncome' in d) || d.categoriesIncome is list) &&
                (!('categoriesExpense' in d) || d.categoriesExpense is list);
       }
