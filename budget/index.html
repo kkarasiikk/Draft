@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="uk" id="htmlRoot">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#FAF8F4">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Life">
+<meta name="mobile-web-app-capable" content="yes">
+<!--
+  Content-Security-Policy — обмежує, звідки браузеру дозволено завантажувати
+  скрипти/стилі/шрифти і куди дозволено робити мережеві запити. Все, чого
+  немає в списку нижче, браузер заблокує — це підстраховка на випадок XSS
+  (навіть якщо колись з'явиться діра, шкідливий код не зможе завантажити
+  щось стороннє чи "злити" дані на чужий сервер).
+  GitHub Pages не дозволяє власні HTTP-заголовки, тому CSP тут — через meta-тег
+  (є обмеження: frame-ancestors у meta-тегу браузери ігнорують, це нормально).
+-->
+<meta http-equiv="Content-Security-Policy" content="
+  default-src 'self';
+  script-src 'self' https://cdnjs.cloudflare.com https://www.gstatic.com https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/;
+  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+  font-src 'self' https://fonts.gstatic.com;
+  img-src 'self' data:;
+  connect-src 'self' https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com https://firebaseinstallations.googleapis.com https://content-firebaseappcheck.googleapis.com https://bank.gov.ua;
+  frame-src https://www.google.com/recaptcha/ https://me-and-only-me-7f531.firebaseapp.com;
+  worker-src 'self';
+  manifest-src 'self';
+  object-src 'none';
+  base-uri 'self';
+  form-action 'self';
+">
+<title>Life</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check-compat.js"></script>
+<style>
+  :root{
+    --bg:#EDEEF3;
+    --bg-radial: radial-gradient(circle at top, #ffffff 0%, #eceef4 45%, #dfe1ea 100%);
+    --blob1:#ffffffb0; --blob2:#8fa6e070;
+    --surface:linear-gradient(155deg, rgba(255,255,255,.72), rgba(255,255,255,.38));
+    --surface-flat: rgba(255,255,255,.5);
+    --ink:#26262B; --ink-soft:#4E4E58; --ink-muted:#84838F;
+    --border:rgba(255,255,255,.55); --income:#4F9C74; --income-light:rgba(79,156,116,.14); --expense:#C9683F; --expense-light:rgba(201,104,63,.13); --accent:#4A6FA5; --accent-light:rgba(74,111,165,.13);
+    --control-bg:rgba(255,255,255,.35); --overlay:rgba(30,32,40,.28);
+    --glass-blur:22px; --glass-shadow:0 8px 32px rgba(40,44,70,.10), inset 0 1px 0 rgba(255,255,255,.6);
+    --card-bg: rgba(20,25,40,.035); --card-border: rgba(20,25,40,.10); --card-border-hover: rgba(20,25,40,.22);
+    --card-glare: linear-gradient(135deg, rgba(255,255,255,.55), rgba(255,255,255,0));
+    --card-hover-shadow: 0 20px 80px rgba(20,25,40,.10), 0 0 60px rgba(20,25,40,.05);
+    --glass-btn-bg: rgba(20,25,40,.05); --glass-btn-bg-hover: rgba(20,25,40,.09); --glass-btn-border: rgba(20,25,40,.16);
+    color-scheme: light;
+  }
+  [data-theme="dark"]{
+    --bg:#0B0B0E;
+    --bg-radial: radial-gradient(circle at top, #353535 0%, #181818 45%, #0d0d0d 100%);
+    --blob1:#ffffff15; --blob2:#c48fe040;
+    --surface:linear-gradient(155deg, rgba(255,255,255,.10), rgba(255,255,255,.02));
+    --surface-flat: rgba(255,255,255,.06);
+    --ink:#EFEEF3; --ink-soft:#C4C2CE; --ink-muted:#8E8C99;
+    --border:rgba(255,255,255,.12); --income:#7FCB9E; --income-light:rgba(127,203,158,.14); --expense:#E39A76; --expense-light:rgba(227,154,118,.14);
+    --accent:#6F93D6; --accent-light:rgba(143,174,224,.16); --control-bg:rgba(255,255,255,.05); --overlay:rgba(0,0,0,.55);
+    --glass-blur:22px; --glass-shadow:0 8px 32px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.06);
+    --card-bg: rgba(255,255,255,.06); --card-border: rgba(255,255,255,.12); --card-border-hover: rgba(255,255,255,.25);
+    --card-glare: linear-gradient(135deg, rgba(255,255,255,.12), rgba(255,255,255,0));
+    --card-hover-shadow: 0 20px 80px rgba(255,255,255,.08), 0 0 60px rgba(255,255,255,.04);
+    --glass-btn-bg: rgba(255,255,255,.08); --glass-btn-bg-hover: rgba(255,255,255,.16); --glass-btn-border: rgba(255,255,255,.18);
+    color-scheme: dark;
+  }
+  body{transition:background-color .2s ease, color .2s ease;}
+  *{box-sizing:border-box;}
+  html{overscroll-behavior-y:none;scrollbar-gutter:stable;overflow-y:scroll;background:var(--bg);}
+  body{margin:0;color:var(--ink);font-family:'Inter',sans-serif;
+    padding-bottom:calc(100px + env(safe-area-inset-bottom));
+    -webkit-tap-highlight-color:transparent;overscroll-behavior-y:none;-webkit-overflow-scrolling:touch;
+    background:var(--bg);min-height:100vh;}
+  .wrap{max-width:480px;margin:0 auto;position:relative;z-index:1;}
+
+  /* ---- Fixed background layer: base radial + two soft light blobs ---- */
+  .background{
+    position:fixed; inset:0; z-index:-1; overflow:hidden;
+    background: var(--bg-radial);
+    transition: background .2s ease;
+  }
+  .background::before{
+    content:""; position:absolute;
+    width:550px; height:550px; top:-180px; left:-120px;
+    background:var(--blob1); border-radius:50%;
+    filter:blur(90px);
+  }
+  .background::after{
+    content:""; position:absolute;
+    width:500px; height:500px; bottom:-160px; right:-100px;
+    background:var(--blob2); border-radius:50%;
+    filter:blur(110px);
+  }
+
+  /* ---- Glass surfaces: every panel that sits on --surface gets frosted blur + soft edge ---- */
+  .auth-box, .header, .app-menu, .entry-menu, .tab-btn.active, .search-bar, .day-card, .card,
+  .period-btn.active, .fab.exp, .modal, .data-action-btn, .confirm-box, .goal-card, .note-card,
+  .note-tb-btn, .stat-card{
+    backdrop-filter: blur(var(--glass-blur)) saturate(150%);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(150%);
+    box-shadow: var(--glass-shadow);
+  }
+  .modal-overlay, .confirm-modal, .app-menu-overlay, .entry-menu-overlay{
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+  .stat-card.inc, .stat-card.exp{backdrop-filter: blur(var(--glass-blur)) saturate(150%);-webkit-backdrop-filter: blur(var(--glass-blur)) saturate(150%);}
+
+  /* ---- Glass button (Apple/Vercel style) for neutral secondary actions ---- */
+  .btn-cancel, .data-action-btn, .note-tb-btn{
+    background:var(--glass-btn-bg) !important;
+    backdrop-filter:blur(15px);
+    -webkit-backdrop-filter:blur(15px);
+    border:1px solid var(--glass-btn-border) !important;
+    transition:background .35s, transform .35s, border-color .35s;
+  }
+  .btn-cancel:hover, .data-action-btn:hover, .note-tb-btn:hover{
+    background:var(--glass-btn-bg-hover) !important;
+    transform:translateY(-3px);
+  }
+
+  @keyframes cardIn{ from{opacity:0; transform:translateY(24px);} to{opacity:1; transform:translateY(0);} }
+
+  /* ---- Auth screen ---- */
+  #authScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+  .auth-box{max-width:360px;width:100%;background:var(--surface);border:1px solid var(--border);border-radius:26px;padding:32px 26px;}
+  .auth-logo{display:flex;align-items:center;gap:8px;margin-bottom:6px;color:var(--accent);}
+  .auth-title{font-family:'Inter',sans-serif;font-size:22px;font-weight:700;margin-bottom:6px;letter-spacing:-0.01em;}
+  .auth-sub{font-size:13.5px;color:var(--ink-muted);margin-bottom:22px;line-height:1.5;}
+  .auth-box label.field-label{font-size:12px;color:var(--ink-muted);font-weight:500;display:block;margin-top:2px;}
+  .auth-box input[type=email],.auth-box input[type=password]{width:100%;font-family:'Inter',sans-serif;font-size:16px;
+    border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-top:6px;margin-bottom:14px;outline:none;color:var(--ink);background:var(--bg);}
+  .auth-box input[type=email]:focus,.auth-box input[type=password]:focus{border-color:var(--accent);}
+  .auth-error{color:var(--expense);font-size:13px;margin-bottom:10px;display:none;}
+  .auth-info{color:var(--income);font-size:13px;margin-bottom:10px;display:none;}
+  .auth-options-row{display:flex;align-items:center;justify-content:space-between;margin:-6px 0 14px;gap:10px;}
+  .remember-me{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink-muted);cursor:pointer;user-select:none;}
+  .remember-me input{width:15px;height:15px;accent-color:var(--accent);cursor:pointer;margin:0;}
+  .setting-toggle-row{display:flex;align-items:center;gap:10px;padding:13px 2px;font-size:14px;color:var(--ink);
+    cursor:pointer;user-select:none;border-bottom:1px solid var(--border);}
+  .setting-toggle-row:last-child{border-bottom:none;}
+  .setting-toggle-row input{width:17px;height:17px;accent-color:var(--accent);cursor:pointer;margin:0;flex-shrink:0;}
+  #forgotPasswordLink{font-size:12.5px;color:var(--accent);font-weight:600;cursor:pointer;text-decoration:none;white-space:nowrap;}
+  .auth-submit{width:100%;padding:12px 0;border-radius:10px;border:none;cursor:pointer;color:#fff;background:var(--accent);
+    font-size:14.5px;font-weight:600;font-family:'Inter',sans-serif;}
+  .auth-submit:disabled{opacity:.6;cursor:default;}
+  .auth-switch{text-align:center;margin-top:16px;font-size:13px;color:var(--ink-muted);}
+  .auth-switch a{color:var(--accent);font-weight:600;cursor:pointer;text-decoration:none;}
+  .lang-row{display:flex;justify-content:center;gap:6px;margin-top:20px;}
+  .lang-chip{padding:5px 11px;border-radius:20px;font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;
+    border:1px solid var(--border);background:transparent;color:var(--ink-muted);}
+  .lang-chip.selected{background:var(--accent-light);color:var(--accent);border-color:transparent;font-weight:600;}
+
+  /* ---- Main app ---- */
+  #appScreen{display:none;}
+  .header{background:var(--surface);border-bottom:1px solid var(--border);padding:calc(20px + env(safe-area-inset-top)) 20px 22px;}
+  .header-toprow-wrap{margin-bottom:16px;}
+  .header-top-row{display:flex;align-items:center;gap:4px;min-height:32px;flex-wrap:nowrap;}
+  .header-back-btn{display:none;flex-shrink:0;background:none;border:none;cursor:pointer;color:var(--ink-muted);
+    padding:6px;border-radius:8px;}
+  .header-back-btn:hover{background:var(--bg);color:var(--ink);}
+  .header-back-btn.show{display:flex;}
+  .header-icon-btn{background:none;border:none;cursor:pointer;color:var(--ink-muted);padding:6px;border-radius:8px;display:flex;align-items:center;flex-shrink:0;}
+  .header-icon-btn:hover{background:var(--bg);color:var(--ink);}
+  .header-icon-btn.active{background:var(--accent-light);color:var(--accent);}
+  .header-text-btn{padding:6px 8px;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;white-space:nowrap;}
+  .header-section-title{display:none;}
+  .header-actions{display:flex;align-items:center;gap:2px;flex-shrink:1;min-width:0;margin-left:auto;overflow-x:auto;scrollbar-width:none;}
+  .header-actions::-webkit-scrollbar{display:none;}
+  .month-nav-header{display:none;align-items:center;justify-content:center;gap:4px;min-width:0;margin-top:10px;}
+  .month-nav-header.show{display:flex;}
+  .month-nav-header button{background:none;border:none;cursor:pointer;color:var(--ink-muted);padding:4px;display:flex;flex-shrink:0;}
+  .month-nav-header button:disabled{color:var(--border);cursor:default;}
+  .month-nav-header .month-label{font-family:'Inter',sans-serif;font-size:12.5px;font-weight:600;color:var(--ink-soft);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .header.slim{padding-bottom:20px;}
+  .header.slim .header-toprow-wrap{margin-bottom:0;}
+  @media (max-width:879px){
+    .balance{text-align:center;}
+  }
+  .eyebrow{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+  .app-topbar{display:flex;align-items:center;gap:10px;padding:calc(16px + env(safe-area-inset-top)) 20px 6px;}
+  .app-topbar-brand{display:flex;align-items:center;gap:8px;font-family:'Inter',sans-serif;font-weight:700;font-size:15px;color:var(--ink);}
+  .menu-btn{background:none;border:none;cursor:pointer;color:var(--ink);padding:7px;display:flex;border-radius:8px;margin-left:-7px;}
+  .menu-btn:hover{background:var(--border);}
+  .app-menu-overlay{position:fixed;inset:0;z-index:55;display:none;}
+  .app-menu-overlay.show{display:block;}
+  .app-menu{position:absolute;top:calc(52px + env(safe-area-inset-top));left:16px;background:var(--surface);
+    border:1px solid var(--border);border-radius:16px;box-shadow:0 10px 28px rgba(45,42,38,.14);
+    padding:6px;min-width:220px;max-width:min(300px, calc(100vw - 32px));}
+  .app-menu-item{display:flex;align-items:center;gap:10px;width:100%;padding:10px 12px;border:none;
+    background:none;border-radius:8px;cursor:pointer;font-family:'Inter',sans-serif;font-size:14px;
+    color:var(--ink-soft);text-align:left;}
+  .app-menu-item:hover{background:var(--bg);}
+  .app-menu-divider{height:1px;background:var(--border);margin:6px 2px;}
+  .entry-menu-overlay{position:fixed;inset:0;z-index:55;display:none;}
+  .entry-menu-overlay.show{display:block;}
+  .entry-menu{position:absolute;background:var(--surface);border:1px solid var(--border);border-radius:12px;
+    box-shadow:0 10px 28px rgba(45,42,38,.14);padding:6px;min-width:170px;}
+  .app-menu-divider:first-child{display:none;}
+  .app-menu #tabsList{display:flex;flex-direction:column;background:transparent;padding:0;gap:2px;
+    overflow-x:visible;margin:0 0 0;max-height:40vh;overflow-y:auto;}
+  .app-menu #tabsList .tab-btn{flex:none;width:100%;text-align:left;white-space:normal;padding:10px 12px;}
+  .app-menu #tabsList .tab-btn.active{background:var(--accent-light);color:var(--accent);box-shadow:none;}
+  #balanceSummary{}
+  .eyebrow-left{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-muted);font-weight:500;}
+  .logout-link{font-size:12px;color:var(--ink-muted);cursor:pointer;text-decoration:none;font-family:'Inter',sans-serif;background:none;border:none;}
+  .balance{font-family:'Inter',sans-serif;font-weight:700;font-size:38px;line-height:1.15;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;text-align:center;}
+  .balance.neg{color:var(--expense);}
+  .balance-multi{display:flex;flex-direction:row;flex-wrap:wrap;align-items:baseline;justify-content:center;gap:4px 14px;}
+  .balance-multi-row{font-family:'Inter',sans-serif;font-weight:700;font-size:22px;line-height:1.25;letter-spacing:-0.01em;font-variant-numeric:tabular-nums;white-space:nowrap;}
+  .balance-multi-row.neg{color:var(--expense);}
+  .stat-row{display:flex;gap:10px;margin-top:18px;}
+  .stat-card{flex:1;border-radius:12px;padding:12px 14px;}
+  .stat-card.inc{background:var(--income-light);}
+  .stat-card.exp{background:var(--expense-light);}
+  .stat-label{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:500;}
+  .stat-label.inc{color:var(--income);}
+  .stat-label.exp{color:var(--expense);}
+  .stat-value{font-family:'Inter',sans-serif;font-size:16px;font-weight:600;margin-top:3px;font-variant-numeric:tabular-nums;}
+  .stat-value.inc{color:var(--income);}
+  .stat-value.exp{color:var(--expense);}
+  .tabs{display:flex;gap:4px;background:var(--control-bg);border-radius:10px;padding:4px;margin:16px 20px 0;
+    overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+  .tabs::-webkit-scrollbar{display:none;}
+  .tabs .tab-btn{flex:0 0 auto;white-space:nowrap;}
+  .tab-btn{flex:1;padding:9px 0;border-radius:7px;border:none;cursor:pointer;font-size:14px;font-weight:500;
+    font-family:'Inter',sans-serif;background:transparent;color:var(--ink-muted);}
+  .tab-btn.active{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(20,20,24,.06);}
+  .month-nav{display:flex;align-items:center;justify-content:center;gap:16px;padding:16px 20px 0;}
+  .month-nav button{background:none;border:none;cursor:pointer;color:var(--ink-muted);padding:6px;display:flex;}
+  .month-nav button:disabled{color:var(--border);cursor:default;}
+  .month-label{font-family:'Inter',sans-serif;font-size:13.5px;font-weight:500;color:var(--ink-soft);min-width:140px;text-align:center;}
+  .content{padding:12px 20px 0;}
+  .empty{text-align:center;padding:48px 20px;color:var(--ink-muted);}
+  .empty .title{font-family:'Inter',sans-serif;font-size:17px;font-weight:600;color:var(--ink-soft);margin-bottom:6px;}
+  .recent-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+  .recent-header-title{font-family:'Inter',sans-serif;font-size:15.5px;font-weight:600;color:var(--ink);}
+  .search-toggle-btn{display:flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;
+    border-radius:50%;border:1px solid var(--border);background:var(--glass-btn-bg);color:var(--ink-soft);
+    cursor:pointer;transition:background .25s, border-color .25s, color .2s, transform .2s;}
+  .search-toggle-btn:hover{background:var(--glass-btn-bg-hover);}
+  .search-toggle-btn.active{color:#fff;background:var(--accent);border-color:var(--accent);}
+  .search-bar{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid transparent;
+    border-radius:12px;padding:0 14px;color:var(--ink-muted);
+    max-height:0;opacity:0;margin-bottom:0;overflow:hidden;pointer-events:none;
+    transition:max-height .32s ease, opacity .22s ease, padding .32s ease, margin .32s ease, border-color .22s ease;}
+  .search-bar.open{max-height:60px;opacity:1;padding:10px 14px;margin-bottom:14px;border-color:var(--border);pointer-events:auto;}
+  .search-bar input{flex:1;width:auto;border:none;background:none;font-family:'Inter',sans-serif;font-size:15px;
+    color:var(--ink);outline:none;padding:0;margin:0;}
+  .search-bar svg{flex-shrink:0;}
+  .search-clear-btn{background:none;border:none;cursor:pointer;color:var(--ink-muted);padding:2px;
+    display:flex;flex-shrink:0;}
+  .search-clear-btn:hover{color:var(--ink);}
+  .day-group{margin-bottom:18px;}
+  .day-label{font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-muted);
+    font-family:'Inter',sans-serif;font-weight:600;margin-bottom:8px;padding-left:2px;}
+  .day-card{background:var(--surface);border-radius:20px;border:1px solid var(--border);overflow:hidden;}
+  .entry{display:flex;align-items:center;gap:10px;padding:12px 14px;border-top:1px solid var(--border);}
+  .entry:first-child{border-top:none;}
+  .cat-tag{font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;white-space:nowrap;display:inline-block;}
+  .entry-note{flex:1;min-width:0;font-size:13.5px;color:var(--ink-soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .entry-amount{font-family:'Inter',sans-serif;font-weight:600;font-size:14.5px;white-space:nowrap;font-variant-numeric:tabular-nums;}
+  .entry-amount.inc{color:var(--income);}
+  .del-btn{background:none;border:none;cursor:pointer;color:var(--ink-muted);padding:4px;display:flex;}
+  .card{
+    position:relative;
+    background:var(--card-bg);
+    backdrop-filter:blur(18px) saturate(150%);
+    -webkit-backdrop-filter:blur(18px) saturate(150%);
+    border:1px solid var(--card-border);
+    border-radius:24px;
+    padding:26px;
+    margin-bottom:16px;
+    overflow:hidden;
+    transition:transform .35s, border-color .35s, box-shadow .35s;
+    animation:cardIn .6s ease forwards;
+  }
+  .card::before{
+    content:""; position:absolute; inset:0;
+    background:var(--card-glare);
+    pointer-events:none;
+  }
+  .card:hover{
+    transform:translateY(-6px) scale(1.01);
+    border-color:var(--card-border-hover);
+    box-shadow:var(--card-hover-shadow);
+  }
+  .card-title{font-family:'Inter',sans-serif;font-size:15.5px;font-weight:600;margin-bottom:4px;}
+  .trend-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:8px;flex-wrap:wrap;}
+  .trend-controls{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end;}
+  .trend-currency-select{border:none;background:var(--control-bg);border-radius:8px;padding:6px 8px;
+    font-family:'Inter',sans-serif;font-size:12.5px;font-weight:600;color:var(--ink);cursor:pointer;
+    -webkit-appearance:none;appearance:none;}
+  .period-picker{display:flex;background:var(--control-bg);border-radius:8px;padding:3px;gap:2px;flex-shrink:0;}
+  .period-btn{border:none;background:transparent;cursor:pointer;padding:5px 10px;border-radius:6px;
+    font-family:'Inter',sans-serif;font-size:12.5px;font-weight:600;color:var(--ink-muted);}
+  .period-btn.active{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(20,20,24,.06);}
+  #savingsTrendPeriodPicker .period-btn{padding:5px 7px;}
+  .card-sub{font-size:12.5px;color:var(--ink-muted);margin-bottom:8px;}
+  .card-sub.stale{color:var(--expense);font-weight:600;}
+  .legend-row{display:flex;align-items:center;gap:8px;font-size:13px;margin-top:2px;width:100%;
+    background:none;border:none;cursor:pointer;padding:6px 6px;border-radius:8px;text-align:left;font-family:'Inter',sans-serif;}
+  .legend-row:hover{background:var(--bg);}
+  .cat-tag-date{font-size:11.5px;color:var(--ink-muted);white-space:nowrap;min-width:64px;}
+  .legend-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+  .legend-name{flex:1;color:var(--ink-soft);}
+  .legend-val{font-family:'Inter',sans-serif;font-weight:500;font-variant-numeric:tabular-nums;}
+  .legend-row-wrap{display:flex;align-items:center;gap:2px;}
+  .legend-row-wrap .legend-row{flex:1;min-width:0;width:auto;}
+  .legend-row-wrap.hidden-cat .legend-dot{filter:grayscale(1);opacity:.5;}
+  .legend-row-wrap.hidden-cat .legend-name,.legend-row-wrap.hidden-cat .legend-val{color:var(--ink-muted);opacity:.55;}
+  .legend-toggle{flex-shrink:0;width:20px;height:20px;border-radius:5px;border:1.5px solid var(--border);
+    background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;color:#fff;}
+  .legend-toggle svg{display:none;width:13px;height:13px;}
+  .legend-toggle.checked{background:var(--accent);border-color:var(--accent);}
+  .legend-toggle.checked svg{display:block;}
+  .fab-row{position:fixed;bottom:calc(22px + env(safe-area-inset-bottom));left:0;right:0;z-index:20;display:flex;justify-content:center;gap:10px;padding:0 20px;}
+  .fab{display:flex;align-items:center;gap:6px;border-radius:24px;padding:11px 18px;font-size:13.5px;font-weight:600;
+    cursor:pointer;font-family:'Inter',sans-serif;}
+  .fab.exp{background:var(--surface);color:var(--expense);border:1px solid var(--border);box-shadow:0 2px 10px rgba(20,20,24,.06);}
+  .fab.inc{background:var(--accent);color:#fff;border:none;box-shadow:0 4px 14px rgba(92,124,250,.28);}
+  .modal-overlay{position:fixed;inset:0;background:var(--overlay);display:none;align-items:flex-end;justify-content:center;z-index:50;}
+  .modal-overlay.show{display:flex;}
+  .modal{background:var(--surface);border-radius:26px 26px 0 0;padding:20px 20px calc(28px + env(safe-area-inset-bottom));width:100%;max-width:480px;
+    max-height:85vh;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;}
+  .modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+  .modal-title{font-family:'Inter',sans-serif;font-size:18px;font-weight:700;}
+  .close-btn{background:none;border:none;cursor:pointer;color:var(--ink-muted);}
+  label.field-label{font-size:12px;color:var(--ink-muted);font-weight:500;display:block;margin-top:2px;}
+  .amount-input{width:100%;font-family:'Inter',sans-serif;font-size:26px;font-weight:700;border:none;
+    border-bottom:2px solid var(--border);padding:8px 0;margin-bottom:16px;outline:none;background:transparent;color:var(--ink);font-variant-numeric:tabular-nums;}
+  .cat-picker{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;margin-bottom:16px;}
+  .cat-choice{padding:7px 13px;border-radius:20px;font-size:13px;cursor:pointer;font-family:'Inter',sans-serif;
+    border:1px solid var(--border);background:transparent;color:var(--ink-soft);}
+  .cat-choice.selected{color:#fff;font-weight:600;border-color:transparent;}
+  input[type=date], input[type=text]{width:100%;font-family:'Inter',sans-serif;font-size:16px;
+    border:1px solid var(--border);border-radius:8px;padding:9px 12px;margin-top:6px;margin-bottom:16px;outline:none;color:var(--ink);}
+  input[type=date]:focus, input[type=text]:focus{border-color:var(--accent);}
+  .form-error{color:var(--expense);font-size:13px;margin-bottom:8px;}
+  .submit-btn{width:100%;margin-top:4px;padding:13px 0;border-radius:10px;border:none;cursor:pointer;color:#fff;
+    font-size:15px;font-weight:600;font-family:'Inter',sans-serif;background:var(--accent);}
+  .submit-btn:disabled{opacity:.55;cursor:default;}
+  .data-action-row{display:flex;flex-direction:column;gap:10px;margin-top:8px;margin-bottom:14px;}
+  .data-action-btn{display:flex;align-items:center;gap:12px;width:100%;text-align:left;
+    background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:12px 14px;
+    cursor:pointer;font-family:'Inter',sans-serif;transition:background-color .12s ease,border-color .12s ease;}
+  .data-action-btn:hover, .data-action-btn:focus-visible{border-color:var(--accent);background:var(--accent-light);}
+  .data-action-btn:active{transform:scale(.99);}
+  .data-action-icon{flex-shrink:0;width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;
+    background:var(--accent-light);color:var(--accent);}
+  .data-action-text{display:flex;flex-direction:column;gap:2px;min-width:0;}
+  .data-action-title{font-size:14px;font-weight:600;color:var(--ink);}
+  .data-action-sub{font-size:12px;color:var(--ink-muted);line-height:1.35;}
+  .confirm-modal{position:fixed;inset:0;background:rgba(34,38,43,.32);display:none;align-items:center;justify-content:center;
+    z-index:60;padding:20px;}
+  .confirm-modal.show{display:flex;}
+  .confirm-box{background:var(--surface);border-radius:22px;padding:22px;max-width:340px;width:100%;}
+  .confirm-title{font-family:'Inter',sans-serif;font-size:16.5px;font-weight:700;margin-bottom:6px;}
+  .confirm-sub{font-size:13.5px;color:var(--ink-muted);margin-bottom:18px;}
+  .confirm-actions{display:flex;gap:8px;}
+  .confirm-actions button{flex:1;padding:10px 0;border-radius:8px;cursor:pointer;font-family:'Inter',sans-serif;font-size:14px;}
+  .btn-cancel{border:1px solid var(--border);background:transparent;color:var(--ink-soft);}
+  .btn-delete{border:none;background:var(--expense);color:#fff;font-weight:500;}
+  svg.icon{display:inline-block;vertical-align:middle;}
+  .page-view-card{padding:22px;}
+  .page-view-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px;}
+  .goal-card{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--surface);border-radius:18px;
+    border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:10px;cursor:pointer;
+    text-align:left;width:100%;font-family:'Inter',sans-serif;}
+  .goal-card:hover{border-color:var(--accent);}
+  .goal-card-name{font-size:14.5px;font-weight:600;color:var(--ink);}
+  .goal-card-balance{font-size:16px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap;}
+  .goal-card-balances{display:flex;flex-direction:row;flex-wrap:wrap;align-items:baseline;justify-content:flex-end;gap:4px 10px;}
+  .goal-card-balances .goal-card-balance{font-size:14px;}
+  .goal-add-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px 0;
+    border-radius:12px;border:1.5px dashed var(--border);background:transparent;color:var(--ink-muted);
+    font-family:'Inter',sans-serif;font-size:14px;font-weight:600;cursor:pointer;margin-top:4px;}
+  .goal-add-btn:hover{border-color:var(--accent);color:var(--accent);}
+  .note-card{display:block;background:var(--surface);border:1px solid var(--border);border-radius:12px;
+    padding:14px 18px;margin-bottom:10px;cursor:pointer;text-align:left;width:100%;font-family:'Inter',sans-serif;}
+  .note-card:hover{border-color:var(--accent);}
+  .note-card-title{font-size:14.5px;font-weight:600;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .note-card-snippet{font-size:13px;color:var(--ink-muted);margin-top:4px;overflow:hidden;text-overflow:ellipsis;
+    white-space:nowrap;}
+  .note-card-date{font-size:11.5px;color:var(--ink-muted);margin-top:6px;}
+  .goal-detail-head{display:flex;align-items:center;gap:6px;margin-bottom:14px;}
+  .goal-detail-title{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+    color:var(--ink);font-family:'Inter',sans-serif;font-size:16px;font-weight:700;}
+  .page-view-title{font-family:'Inter',sans-serif;font-size:19px;font-weight:700;color:var(--ink);word-break:break-word;}
+  .page-view-actions{display:flex;gap:12px;flex-shrink:0;padding-top:2px;}
+  .page-view-content{font-size:14.5px;line-height:1.65;color:var(--ink-soft);white-space:pre-wrap;word-break:break-word;}
+  .tab-btn.tab-add{display:flex;align-items:center;gap:7px;color:var(--ink-muted);}
+  .tab-btn.tab-btn-with-icon{display:flex;align-items:center;gap:9px;}
+  #pageTitleInput{margin-bottom:14px;}
+  .note-toolbar{display:flex;gap:6px;margin-bottom:8px;}
+  .note-tb-btn{width:32px;height:32px;border-radius:10px;border:1px solid var(--border);background:var(--surface);
+    color:var(--ink-soft);cursor:pointer;display:flex;align-items:center;justify-content:center;
+    font-family:'Inter',sans-serif;font-size:12.5px;padding:0;}
+  .note-tb-btn:hover{border-color:var(--accent);color:var(--accent);}
+  .note-view-content{font-family:'Inter',sans-serif;font-size:14.5px;line-height:1.6;color:var(--ink-soft);}
+  .note-view-content h3{font-size:19px;font-weight:700;color:var(--ink);margin:14px 0 6px;}
+  .note-view-content h3:first-child{margin-top:0;}
+  .note-view-content h4{font-size:16px;font-weight:700;color:var(--ink);margin:12px 0 5px;}
+  .note-view-content h4:first-child{margin-top:0;}
+  .note-view-content ul{margin:0 0 8px;padding-left:20px;}
+  .note-view-content ul li{margin-bottom:3px;}
+  .note-check-row{display:flex;align-items:flex-start;gap:8px;margin-bottom:4px;list-style:none;}
+  .note-check-row input{width:17px;height:17px;accent-color:var(--accent);cursor:pointer;margin:2px 0 0;flex-shrink:0;}
+  .note-check-row .checked-text{color:var(--ink-muted);text-decoration:line-through;}
+  #pageContentInput{width:100%;font-family:'Inter',sans-serif;font-size:14.5px;line-height:1.55;border:1px solid var(--border);
+    border-radius:8px;padding:10px 12px;outline:none;color:var(--ink);background:var(--bg);min-height:180px;margin-bottom:16px;
+    overflow-y:auto;max-height:50vh;}
+  #pageContentInput:focus{border-color:var(--accent);}
+  #pageContentInput:empty:before{content:attr(data-placeholder);color:var(--ink-muted);}
+  .note-editor h3{font-size:19px;font-weight:700;color:var(--ink);margin:10px 0 6px;}
+  .note-editor h4{font-size:16px;font-weight:700;color:var(--ink);margin:8px 0 4px;}
+  .note-editor ul{margin:0 0 8px;padding-left:20px;}
+  .page-modal-actions{display:flex;gap:8px;}
+  .page-modal-actions .submit-btn{margin-top:0;flex:1;}
+  .page-modal-actions .btn-delete{border-radius:10px;padding:13px 18px;font-weight:600;font-size:15px;}
+  .cat-manage-list{margin-top:8px;}
+  .cat-manage-row{display:flex;align-items:center;gap:9px;padding:7px 2px;}
+  .cat-manage-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+  .cat-manage-input{flex:1;width:auto;font-family:'Inter',sans-serif;font-size:13.5px;border:1px solid transparent;
+    border-radius:7px;padding:6px 8px;margin:0;outline:none;color:var(--ink);background:transparent;}
+  .cat-manage-input:hover{background:var(--bg);}
+  .cat-manage-input:focus{border-color:var(--accent);background:var(--bg);}
+  .cat-manage-del{background:none;border:none;cursor:pointer;color:var(--ink-muted);padding:5px;display:flex;flex-shrink:0;}
+  .cat-manage-del:hover{color:var(--expense);}
+  .cat-add-row{display:flex;gap:8px;margin-top:6px;}
+  .cat-add-row input{width:auto;flex:1;font-family:'Inter',sans-serif;font-size:13.5px;border:1px solid var(--border);
+    border-radius:8px;padding:8px 11px;margin:0;outline:none;color:var(--ink);background:var(--bg);}
+  .cat-add-row input:focus{border-color:var(--accent);}
+  .cat-add-row button{border:none;border-radius:8px;background:var(--accent-light);color:var(--accent);
+    cursor:pointer;padding:0 12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+
+  /* ---- Desktop layout ---- */
+  @media (min-width:880px){
+    body{padding-bottom:32px;}
+    .wrap{max-width:none;margin:0;padding:0 40px;}
+    .app-topbar{padding:28px 0 0;}
+    .header{border-bottom:none;border-radius:16px;border:1px solid var(--border);
+      padding:26px 26px 24px;margin:20px auto 0;max-width:960px;}
+    .header-toprow-wrap{position:relative;min-height:32px;}
+    .month-nav-header{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+      flex:none;width:auto;margin-top:0;}
+    .month-nav-header .month-label{font-size:14px;}
+    .month-nav{justify-content:center;padding:20px 4px 0;max-width:960px;margin:0 auto;}
+    .content{padding:14px 4px 40px;}
+    #entriesTab, #pageViewTab, #savingsTab, #notesTab{max-width:960px;margin:0 auto;}
+    #searchBar{max-width:960px;margin-left:auto;margin-right:auto;}
+    .recent-header{max-width:960px;margin-left:auto;margin-right:auto;}
+
+    #statsTab{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start;max-width:960px;margin:0 auto;}
+    #statsTab .card{margin-bottom:0;}
+
+    .fab-row{left:auto;right:32px;bottom:32px;justify-content:flex-end;padding:0;}
+
+    .modal-overlay{align-items:center;}
+    .modal{border-radius:18px;max-height:88vh;}
+  }
+</style>
+</head>
+<body>
+
+<div class="background"></div>
+
+<!-- ---- Екран входу / реєстрації ---- -->
+<div id="authScreen">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5B7A9D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3.4.5-4.5 2-1.1-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z"/><path d="M3.22 12H9.5l.5-1.5 2 4 1.5-4.5 1.5 2h5.27"/></svg>
+    </div>
+    <div class="auth-title" id="authTitle">Вхід</div>
+    <div class="auth-sub" id="authSub">Увійди, щоб дані синхронізувались між твоїми пристроями.</div>
+    <form id="authForm" autocomplete="on">
+      <label class="field-label" id="authEmailLabel">Email</label>
+      <input type="email" id="authEmail" name="email" autocomplete="username">
+      <label class="field-label" id="authPasswordLabel">Пароль</label>
+      <input type="password" id="authPassword" name="password" autocomplete="current-password">
+      <div class="auth-hint" id="authPasswordHint" style="display:none;font-size:12px;color:var(--ink-muted);margin:4px 0 12px;">Мінімум 6 символів</div>
+      <div class="auth-options-row">
+        <label class="remember-me">
+          <input type="checkbox" id="rememberMe" checked>
+          <span id="rememberMeLabel">Запам'ятати мене</span>
+        </label>
+        <a id="forgotPasswordLink">Забув(ла) пароль?</a>
+      </div>
+      <div class="auth-error" id="authError" role="alert" aria-live="assertive"></div>
+      <div class="auth-info" id="authInfo"></div>
+      <button class="auth-submit" id="authSubmit" type="submit">Увійти</button>
+    </form>
+    <div class="auth-switch" id="authSwitch">Ще немає акаунта? <a id="authToggle">Зареєструватися</a></div>
+    <div class="lang-row" id="authLangRow"></div>
+  </div>
+</div>
+
+<!-- ---- Основний додаток ---- -->
+<div id="appScreen">
+<div class="wrap" id="wrap">
+  <div class="app-topbar">
+    <button id="menuBtn" class="menu-btn" aria-label="Меню">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+    <a href="../index.html" class="app-topbar-brand" id="topbarHomeLink" aria-label="На головну" style="text-decoration:none;color:inherit;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5B7A9D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3.4.5-4.5 2-1.1-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z"/><path d="M3.22 12H9.5l.5-1.5 2 4 1.5-4.5 1.5 2h5.27"/></svg>
+      <span id="topbarBrandLabel">Life</span>
+    </a>
+  </div>
+
+  <div class="app-menu-overlay" id="appMenuOverlay">
+    <div class="app-menu" id="appMenu">
+      <div class="tabs" id="tabsList">
+        <button class="tab-btn active tab-btn-with-icon" data-tab="entries" id="tabEntries">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
+          <span id="tabEntriesLabel">Записи</span>
+        </button>
+      </div>
+      <div class="app-menu-divider" id="appMenuDivider"></div>
+      <button class="app-menu-item" id="settingsBtn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span id="settingsMenuLabel">Налаштування</span>
+      </button>
+      <button class="app-menu-item" id="logoutBtn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+        <span id="logoutLabel">Вийти</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="header" id="header">
+    <div class="header-toprow-wrap">
+      <div class="header-top-row">
+        <button class="header-back-btn" id="backToEntriesBtn" aria-label="Назад">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+        </button>
+        <div class="header-actions">
+          <button class="header-icon-btn header-text-btn" id="notesToggleBtn" aria-label="Нотатки">
+            <span id="notesToggleLabel">Нотатки</span>
+          </button>
+          <button class="header-icon-btn header-text-btn" id="statsToggleBtn" aria-label="Статистика">
+            <span id="statsToggleLabel">Статистика</span>
+          </button>
+          <button class="header-icon-btn header-text-btn" id="savingsToggleBtn" aria-label="Збереження">
+            <span id="savingsToggleLabel">Збереження</span>
+          </button>
+          <button class="header-icon-btn" id="categoriesBtn" aria-label="Категорії">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="month-nav-header show" id="monthNavHeader">
+        <button id="prevMonthHeader" aria-label="Попередній місяць"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></button>
+        <div class="month-label" id="monthLabelHeader">—</div>
+        <button id="nextMonthHeader" aria-label="Наступний місяць"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></button>
+      </div>
+    </div>
+    <div class="header-section-title" id="headerSectionTitle"></div>
+    <div id="balanceSummary">
+      <div class="balance" id="balance">0,00 ₴</div>
+      <div class="stat-row">
+        <div class="stat-card inc">
+          <div class="stat-label inc" id="incomeLabel">Дохід за місяць</div>
+          <div class="stat-value inc" id="monthIncome">0,00 ₴</div>
+        </div>
+        <div class="stat-card exp">
+          <div class="stat-label exp" id="expenseLabel">Витрати за місяць</div>
+          <div class="stat-value exp" id="monthExpense">0,00 ₴</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="month-nav" id="monthNav" style="display:none;">
+    <button id="prevMonth" aria-label="Попередній місяць"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <div class="month-label" id="monthLabel">—</div>
+    <button id="nextMonth" aria-label="Наступний місяць"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></button>
+  </div>
+
+  <div class="content">
+    <div class="recent-header" id="recentHeader">
+      <span class="recent-header-title" id="recentHeaderTitle">Останні операції</span>
+      <button type="button" id="searchToggleBtn" class="search-toggle-btn" aria-label="Пошук" aria-expanded="false">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      </button>
+    </div>
+    <div id="searchBar" class="search-bar">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input type="text" id="searchInput" placeholder="Пошук по нотатках і категоріях">
+      <button type="button" id="clearSearchBtn" class="search-clear-btn" style="display:none;" aria-label="Очистити пошук">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div id="entriesTab"></div>
+    <div id="statsTab" style="display:none;">
+      <div class="card" id="pieChartCard">
+        <div class="card-title" id="statsCatTitle">Витрати за категоріями</div>
+        <div class="card-sub" id="statsMonthLabel">—</div>
+        <div id="pieEmpty" class="empty" style="display:none;padding:30px 0;font-size:13.5px;">Немає витрат цього місяця</div>
+        <div style="height:220px;"><canvas id="pieChart"></canvas></div>
+        <div id="pieLegend"></div>
+      </div>
+      <div class="card" id="trendChartCard">
+        <div class="trend-head">
+          <div>
+            <div class="card-title" id="statsTrendTitle">Дохід і витрати</div>
+            <div class="card-sub" id="statsTrendSub">Останні 6 місяців</div>
+          </div>
+          <div class="period-picker" id="trendPeriodPicker">
+            <button type="button" class="period-btn" data-months="3">3</button>
+            <button type="button" class="period-btn active" data-months="6">6</button>
+            <button type="button" class="period-btn" data-months="12">12</button>
+          </div>
+        </div>
+        <div style="height:220px;"><canvas id="barChart"></canvas></div>
+      </div>
+      <div class="card" id="savingsTrendCard">
+        <div class="trend-head">
+          <div>
+            <div class="card-title" id="savingsTrendTitle">Заощадження</div>
+            <div class="card-sub" id="savingsTrendSub">Динаміка за 6 місяців</div>
+          </div>
+          <div class="trend-controls">
+            <select id="savingsTrendCurrencySelect" class="trend-currency-select"></select>
+            <div class="period-picker" id="savingsTrendPeriodPicker">
+              <button type="button" class="period-btn" data-months="3">3</button>
+              <button type="button" class="period-btn active" data-months="6">6</button>
+              <button type="button" class="period-btn" data-months="12">12</button>
+              <button type="button" class="period-btn" data-months="24">24</button>
+              <button type="button" class="period-btn" data-months="36">36</button>
+            </div>
+          </div>
+        </div>
+        <div id="savingsTrendEmpty" class="empty" style="display:none;padding:30px 0;font-size:13.5px;">Ще немає заощаджень</div>
+        <div style="height:220px;"><canvas id="savingsTrendChart"></canvas></div>
+        <div id="savingsTrendLegend" style="margin-top:10px;"></div>
+      </div>
+    </div>
+    <div id="savingsTab" style="display:none;">
+      <div id="savingsGoalsList">
+        <div class="card" id="savingsTotalCard">
+          <div class="card-title" id="savingsTotalLabel">Загальний баланс</div>
+          <div class="balance" id="savingsTotalBalance" style="margin-top:6px;">0,00 ₴</div>
+          <div class="card-sub" id="savingsTotalRateSub" style="display:none;margin-top:6px;text-align:center;"></div>
+        </div>
+        <div id="savingsGoalsCards"></div>
+        <button type="button" class="goal-add-btn" id="addSavingsGoalBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+          <span id="addGoalLabel">Нова ціль</span>
+        </button>
+      </div>
+      <div id="savingsGoalDetail" style="display:none;">
+        <div class="goal-detail-head">
+          <button type="button" class="header-icon-btn" id="backToGoalsBtn" aria-label="Назад">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+          </button>
+          <span class="goal-detail-title" id="goalDetailTitle">Ціль</span>
+          <button type="button" class="header-icon-btn" id="editGoalBtn" aria-label="Редагувати ціль">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+          </button>
+        </div>
+        <div class="card">
+          <div class="card-title" id="savingsBalanceLabel">Баланс</div>
+          <div class="balance" id="savingsBalance" style="margin-top:6px;">0,00 ₴</div>
+        </div>
+        <div id="savingsList"></div>
+      </div>
+    </div>
+    <div id="notesTab" style="display:none;">
+      <div id="notesCards"></div>
+      <button type="button" class="goal-add-btn" id="addNoteBtn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        <span id="addNoteBtnLabel">Нова нотатка</span>
+      </button>
+      <div id="notesEmpty" class="empty" style="display:none;padding:30px 0;font-size:13.5px;">
+        <div class="title" id="notesEmptyTitle">Тут поки порожньо</div>
+        <div id="notesEmptySub">Додай першу нотатку кнопкою нижче</div>
+      </div>
+    </div>
+    <div id="pageViewTab" style="display:none;">
+      <div class="card page-view-card">
+        <div class="page-view-head">
+          <div class="page-view-title" id="pageViewTitle"></div>
+          <div class="page-view-actions">
+            <button class="logout-link" id="editPageBtn" aria-label="Редагувати">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+            </button>
+            <button class="logout-link" id="deletePageInlineBtn" aria-label="Видалити">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14Z"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="page-view-content note-view-content" id="pageViewContent"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="fab-row" id="fabRow">
+  <button class="fab exp" id="openExpense"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg> <span id="fabExpLabel">Витрата</span></button>
+  <button class="fab inc" id="openIncome"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg> <span id="fabIncLabel">Дохід</span></button>
+</div>
+
+<div class="fab-row" id="savingsFabRow" style="display:none;">
+  <button class="fab exp" id="openWithdraw"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg> <span id="fabWithdrawLabel">Зняти</span></button>
+  <button class="fab inc" id="openDeposit"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg> <span id="fabDepositLabel">Поповнити</span></button>
+</div>
+
+<div class="modal-overlay" id="formOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="modalTitle">Нова витрата</div>
+      <button class="close-btn" id="closeForm" aria-label="Закрити"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    <label class="field-label" id="amountLabel">Сума, ₴</label>
+    <input class="amount-input" id="amountInput" type="text" inputmode="decimal" placeholder="0.00">
+    <label class="field-label" id="catLabel">Категорія</label>
+    <div class="cat-picker" id="catPicker"></div>
+    <label class="field-label" id="dateLabel">Дата</label>
+    <input type="date" id="dateInput">
+    <label class="field-label" id="noteLabel">Нотатка (необовʼязково)</label>
+    <input type="text" id="noteInput" placeholder="">
+    <div class="form-error" id="formError" style="display:none;" role="alert" aria-live="assertive"></div>
+    <button class="submit-btn" id="submitBtn">Зберегти запис</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="savingsFormOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="savingsModalTitle">Поповнення</div>
+      <button class="close-btn" id="closeSavingsForm" aria-label="Закрити"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    <label class="field-label" id="savingsAmountLabel">Сума, ₴</label>
+    <input class="amount-input" id="savingsAmountInput" type="text" inputmode="decimal" placeholder="0.00">
+    <div class="cat-picker" id="savingsCurrencyPicker" style="margin-top:-6px;"></div>
+    <label class="field-label" id="savingsDateLabel">Дата</label>
+    <input type="date" id="savingsDateInput">
+    <label class="field-label" id="savingsNoteLabel">Нотатка (необовʼязково)</label>
+    <input type="text" id="savingsNoteInput" placeholder="">
+    <div class="form-error" id="savingsFormError" style="display:none;" role="alert" aria-live="assertive"></div>
+    <button class="submit-btn" id="savingsSubmitBtn">Зберегти запис</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="goalFormOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="goalFormTitle">Нова ціль</div>
+      <button class="close-btn" id="closeGoalForm" aria-label="Закрити"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    <label class="field-label" id="goalNameLabel">Назва</label>
+    <input type="text" id="goalNameInput" placeholder="Напр. На відпустку">
+    <div class="form-error" id="goalFormError" style="display:none;" role="alert" aria-live="assertive"></div>
+    <button class="submit-btn" id="goalFormSubmitBtn" style="background:var(--accent);">Зберегти</button>
+    <button type="button" id="deleteGoalBtn" style="display:none;margin-top:10px;width:100%;padding:11px 0;
+      border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--expense);
+      font-family:'Inter',sans-serif;font-size:14px;cursor:pointer;">Видалити ціль</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="categoryTxOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title" id="categoryTxTitle">Категорія</div>
+        <div class="card-sub" id="categoryTxSub" style="margin-top:2px;">—</div>
+      </div>
+      <button class="close-btn" id="closeCategoryTx" aria-label="Закрити"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div id="categoryTxList"></div>
+  </div>
+</div>
+
+<div class="entry-menu-overlay" id="entryMenuOverlay">
+  <div class="entry-menu" id="entryMenu">
+    <button class="app-menu-item" id="editEntryBtn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+      <span id="editEntryLabel">Редагувати</span>
+    </button>
+    <button class="app-menu-item" id="deleteEntryBtn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14Z"/></svg>
+      <span id="deleteEntryLabel">Видалити</span>
+    </button>
+  </div>
+</div>
+
+<div class="confirm-modal" id="confirmOverlay">
+  <div class="confirm-box">
+    <div class="confirm-title" id="confirmTitle">Видалити запис?</div>
+    <div class="confirm-sub" id="confirmSub">Цю дію не можна скасувати.</div>
+    <div class="confirm-actions">
+      <button class="btn-cancel" id="cancelDelete">Скасувати</button>
+      <button class="btn-delete" id="confirmDelete">Видалити</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="settingsOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="settingsTitle">Налаштування</div>
+      <button class="close-btn" id="closeSettings" aria-label="Закрити"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    <label class="field-label" id="settingsCurrencyLabel">Валюта</label>
+    <div class="cat-picker" id="currencyPicker"></div>
+    <label class="field-label" id="settingsLangLabel" style="margin-top:6px;">Мова</label>
+    <div class="cat-picker" id="langPicker"></div>
+    <label class="field-label" id="exportDataLabel" style="margin-top:14px;">Дані</label>
+    <div class="data-action-row">
+      <button type="button" class="data-action-btn" id="exportXlsxBtn">
+        <span class="data-action-icon" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 19h16"/></svg>
+        </span>
+        <span class="data-action-text">
+          <span class="data-action-title" id="exportXlsxBtnLabel">Експортувати в Excel (.xlsx)</span>
+          <span class="data-action-sub" id="exportDataDesc">Завантажить файл з усіма твоїми записами, категоріями, заощадженнями й нотатками.</span>
+        </span>
+      </button>
+      <input type="file" id="importCsvInput" accept=".csv,text/csv" style="display:none;">
+      <button type="button" class="data-action-btn" id="importCsvBtn">
+        <span class="data-action-icon" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V9"/><path d="M7 14l5-5 5 5"/><path d="M4 5h16"/></svg>
+        </span>
+        <span class="data-action-text">
+          <span class="data-action-title" id="importCsvBtnLabel">Імпортувати транзакції з CSV</span>
+          <span class="data-action-sub" id="importDataDesc">Колонки: дата (РРРР-ММ-ДД), тип (дохід/витрата), категорія, сума, нотатка.</span>
+        </span>
+      </button>
+    </div>
+    <label class="field-label" id="settingsThemeLabel" style="margin-top:14px;">Тема</label>
+    <div class="cat-picker" id="themePicker"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="categoriesOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="categoriesTitle">Категорії</div>
+      <button class="close-btn" id="closeCategories" aria-label="Закрити"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    <label class="field-label" id="expenseCatManageLabel">Категорії витрат</label>
+    <div class="cat-manage-list" id="expenseCatManageList"></div>
+    <div class="cat-add-row">
+      <input type="text" id="newExpenseCatInput" placeholder="Нова категорія">
+      <button type="button" id="addExpenseCatBtn" aria-label="Додати категорію">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+      </button>
+    </div>
+
+    <label class="field-label" id="incomeCatManageLabel" style="margin-top:14px;">Категорії доходів</label>
+    <div class="cat-manage-list" id="incomeCatManageList"></div>
+    <div class="cat-add-row">
+      <input type="text" id="newIncomeCatInput" placeholder="Нова категорія">
+      <button type="button" id="addIncomeCatBtn" aria-label="Додати категорію">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="statsSettingsOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="statsSettingsTitle">Налаштування статистики</div>
+      <button class="close-btn" id="closeStatsSettings" aria-label="Закрити"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    <label class="field-label" id="statsSettingsChartsLabel">Видимі діаграми</label>
+    <label class="setting-toggle-row">
+      <input type="checkbox" id="showChartPie" checked>
+      <span id="showChartPieLabel">Витрати за категоріями</span>
+    </label>
+    <label class="setting-toggle-row">
+      <input type="checkbox" id="showChartTrend" checked>
+      <span id="showChartTrendLabel">Дохід і витрати</span>
+    </label>
+    <label class="setting-toggle-row">
+      <input type="checkbox" id="showChartSavings" checked>
+      <span id="showChartSavingsLabel">Заощадження</span>
+    </label>
+  </div>
+</div>
+
+<div class="modal-overlay" id="savingsSettingsOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="savingsSettingsTitle">Налаштування заощаджень</div>
+      <button class="close-btn" id="closeSavingsSettings" aria-label="Закрити"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    <label class="setting-toggle-row">
+      <input type="checkbox" id="showSavingsTotalToggle" checked>
+      <span id="showSavingsTotalToggleLabel">Показувати загальний баланс заощаджень</span>
+    </label>
+    <label class="field-label" id="savingsTotalModeLabel" style="margin-top:14px;">Загальний баланс — валюта</label>
+    <div class="cat-picker" id="savingsTotalModePicker"></div>
+    <div id="savingsTotalCurrencyWrap" style="margin-top:10px;display:none;">
+      <select id="savingsTotalCurrencySelect" class="trend-currency-select"></select>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="notesSettingsOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="notesSettingsTitle">Налаштування нотаток</div>
+      <button class="close-btn" id="closeNotesSettings" aria-label="Закрити"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    <label class="field-label" id="notesSortLabel">Сортування</label>
+    <select id="notesSortSelect" class="trend-currency-select">
+      <option value="updated">Спочатку нещодавно оновлені</option>
+      <option value="created">Спочатку нещодавно створені</option>
+      <option value="title">За назвою (А-Я)</option>
+    </select>
+    <label class="setting-toggle-row" style="margin-top:14px;">
+      <input type="checkbox" id="showNoteSnippetToggle" checked>
+      <span id="showNoteSnippetToggleLabel">Показувати текст нотатки в списку</span>
+    </label>
+  </div>
+</div>
+
+<div class="modal-overlay" id="pageOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="pageModalTitle">Нова сторінка</div>
+      <button class="close-btn" id="closePage" aria-label="Закрити"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    <label class="field-label" id="pageTitleLabel">Назва</label>
+    <input type="text" id="pageTitleInput" placeholder="Напр. Ідеї на відпустку">
+    <label class="field-label" id="pageContentLabel">Текст</label>
+    <div class="note-toolbar" id="noteToolbar">
+      <button type="button" class="note-tb-btn" data-fmt="bold" title="Жирний"><b>Ж</b></button>
+      <button type="button" class="note-tb-btn" data-fmt="h1" title="Заголовок">H1</button>
+      <button type="button" class="note-tb-btn" data-fmt="h2" title="Підзаголовок">H2</button>
+      <button type="button" class="note-tb-btn" data-fmt="bullet" title="Список" aria-label="Список">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="4" cy="6" r="1.5" fill="currentColor" stroke="none"/><circle cx="4" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="4" cy="18" r="1.5" fill="currentColor" stroke="none"/><path d="M9 6h11M9 12h11M9 18h11"/></svg>
+      </button>
+      <button type="button" class="note-tb-btn" data-fmt="check" title="Чек-лист" aria-label="Чек-лист">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="14" height="14" rx="3"/><path d="M6 11l2 2 4-4"/></svg>
+      </button>
+    </div>
+    <div id="pageContentInput" class="note-editor" contenteditable="true" data-placeholder="Пиши тут що завгодно…"></div>
+    <div class="form-error" id="pageError" style="display:none;" role="alert" aria-live="assertive"></div>
+    <div class="page-modal-actions">
+      <button class="btn-delete" id="deletePageBtn" style="display:none;">Видалити</button>
+      <button class="submit-btn" id="savePageBtn">Зберегти</button>
+    </div>
+  </div>
+</div>
+</div><!-- /appScreen -->
+
+<script src="firebase-config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
