@@ -83,22 +83,34 @@
 
   .wrap{max-width:480px;margin:0 auto;padding:20px 20px 48px;}
 
-  /* ---- Верхня панель: тема + вихід (тільки коли залогінені) ---- */
-  .home-topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;}
-  .theme-picker{display:flex;gap:4px;background:var(--glass-btn-bg);border:1px solid var(--glass-btn-border);border-radius:999px;padding:3px;}
+  /* ---- Верхня панель: тема + вихід в одній менюшці зліва ---- */
+  .home-topbar{display:flex;align-items:center;justify-content:flex-start;margin-bottom:8px;}
+  .topbar-menu{
+    display:inline-flex;align-items:center;gap:2px;
+    background:var(--glass-btn-bg);border:1px solid var(--glass-btn-border);border-radius:999px;padding:3px;
+  }
+  .theme-picker{display:flex;gap:2px;}
   .theme-choice{
     border:none;background:transparent;color:var(--ink-muted);font-family:'Inter',sans-serif;
     font-size:12px;font-weight:600;padding:6px 11px;border-radius:999px;cursor:pointer;
     transition:background .25s, color .25s;
   }
   .theme-choice.selected{background:var(--accent);color:#fff;}
+  .topbar-divider{width:1px;height:18px;background:var(--glass-btn-border);margin:0 5px;flex-shrink:0;}
   .icon-btn{
-    display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:999px;
-    background:var(--glass-btn-bg);border:1px solid var(--glass-btn-border);color:var(--ink);cursor:pointer;
-    transition:background .25s, transform .25s;
+    display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:999px;
+    background:transparent;border:none;color:var(--ink);cursor:pointer;
+    transition:background .25s;
   }
-  .icon-btn:hover{background:var(--glass-btn-bg-hover);transform:translateY(-1px);}
-  .icon-btn svg{width:16px;height:16px;stroke:currentColor;}
+  .icon-btn:hover{background:var(--glass-btn-bg-hover);}
+  .icon-btn svg{width:15px;height:15px;stroke:currentColor;}
+
+  /* ---- Desktop layout — та сама ширина, що й у budget/ ---- */
+  @media (min-width:880px){
+    .wrap{max-width:960px;margin:0 auto;padding:0 40px 48px;}
+    .home-topbar{padding-top:28px;}
+    .sections{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+  }
 
   .hero{text-align:center;padding:24px 0 44px;}
   .hero h1{font-size:64px;font-weight:800;letter-spacing:-0.03em;margin:0 0 10px;line-height:0.95;}
@@ -203,10 +215,13 @@
   <div id="homeScreen" style="display:none;">
     <div class="wrap">
       <div class="home-topbar">
-        <div class="theme-picker" id="themePicker"></div>
-        <button class="icon-btn" id="logoutBtn" aria-label="Вийти" title="Вийти">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
-        </button>
+        <div class="topbar-menu">
+          <div class="theme-picker" id="themePicker"></div>
+          <span class="topbar-divider" aria-hidden="true"></span>
+          <button class="icon-btn" id="logoutBtn" aria-label="Вийти" title="Вийти">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+          </button>
+        </div>
       </div>
 
       <header class="hero">
