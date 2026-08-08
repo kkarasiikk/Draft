@@ -89,7 +89,7 @@
   .menu-btn:hover{background:var(--glass-btn-bg-hover);}
   .app-menu-overlay{position:fixed;inset:0;z-index:55;display:none;}
   .app-menu-overlay.show{display:block;}
-  .app-menu{position:absolute;top:calc(52px + env(safe-area-inset-top));left:16px;background:var(--surface);
+  .app-menu{position:absolute;top:calc(62px + env(safe-area-inset-top));left:13px;background:var(--surface);
     border:1px solid var(--border);border-radius:16px;box-shadow:var(--glass-shadow);
     backdrop-filter: blur(var(--glass-blur)) saturate(150%);-webkit-backdrop-filter: blur(var(--glass-blur)) saturate(150%);
     padding:14px;min-width:220px;max-width:min(280px, calc(100vw - 32px));}
@@ -113,6 +113,7 @@
   @media (min-width:880px){
     .wrap{max-width:none;margin:0;padding:0 40px 48px;}
     .home-topbar{padding-top:28px;}
+    .app-menu{top:74px;left:33px;}
     .hero, .sections{max-width:960px;margin-left:auto;margin-right:auto;}
     .sections{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
   }
