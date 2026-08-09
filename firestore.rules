@@ -7,6 +7,11 @@ rules_version = '2';
 //   users/{uid}/savings/{id}          -- {type, amount, currency, note, date, goalId}
 //   users/{uid}/savingsGoals/{id}     -- {name, createdAt}
 //   users/{uid}/pages/{id}            -- {title, content, createdAt, updatedAt}
+//   users/{uid}/tasks/{id}            -- {title, notes, done, priority, tags,
+//                                         dueDate, dueTime, reminderMinutesBefore,
+//                                         reminderAt, notifiedAt, subtasks,
+//                                         createdAt, updatedAt}
+//   users/{uid}/fcmTokens/{token}     -- {createdAt, userAgent} (для push-нагадувань)
 //
 // Правило: кожен користувач може читати й писати ЛИШЕ власні документи,
 // і лише якщо форма даних відповідає тому, що реально пише застосунок —
@@ -86,6 +91,49 @@ service cloud.firestore {
         }
         allow read, delete: if isOwner(uid);
         allow create, update: if isOwner(uid) && isValidPage(request.resource.data);
+      }
+
+      match /tasks/{taskId} {
+        // reminderAt/notifiedAt — обчислені клієнтом Timestamp-поля, за якими
+        // планова Cloud Function (tasks.js -> taskReminders) вибирає, кому й
+        // коли надіслати push. notifiedAt виставляє САМЕ Cloud Function
+        // (Admin SDK, обходить ці правила) після відправки — з боку клієнта
+        // дозволяємо лише скидати його в null (коли час/нагадування міняють).
+        // Примітка: правила тут не перевіряють форму КОЖНОГО елемента
+        // subtasks (мова правил Firestore не має зручного способу пройтись
+        // по списку довільної довжини) — лише що це список і не задовгий.
+        // Форму окремих підзадач ({id, title, done}) гарантує клієнтський
+        // код (renderSubtasksEditor у tasks/app.js), а не правила.
+        function isValidTask(d) {
+          return isNonEmptyString(d.title, 200) &&
+                 d.notes is string && d.notes.size() <= 5000 &&
+                 d.done is bool &&
+                 (d.priority == null || d.priority in ['low', 'medium', 'high']) &&
+                 d.tags is list && d.tags.size() <= 20 &&
+                 (d.dueDate == null || (d.dueDate is string && d.dueDate.size() == 10)) &&
+                 (d.dueTime == null || (d.dueTime is string && d.dueTime.size() == 5)) &&
+                 (d.reminderMinutesBefore == null || d.reminderMinutesBefore is number) &&
+                 (d.reminderAt == null || d.reminderAt is timestamp) &&
+                 d.notifiedAt == null &&
+                 d.subtasks is list && d.subtasks.size() <= 50 &&
+                 d.createdAt is timestamp && d.updatedAt is timestamp &&
+                 d.keys().hasOnly(['title', 'notes', 'done', 'priority', 'tags', 'dueDate',
+                   'dueTime', 'reminderMinutesBefore', 'reminderAt', 'notifiedAt', 'subtasks',
+                   'createdAt', 'updatedAt']);
+        }
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid) && isValidTask(request.resource.data);
+      }
+
+      match /fcmTokens/{token} {
+        // Документи для push-нагадувань (tasks.js). id документа = сам FCM-токен.
+        function isValidFcmToken(d) {
+          return d.createdAt is timestamp &&
+                 d.userAgent is string && d.userAgent.size() <= 300 &&
+                 d.keys().hasOnly(['createdAt', 'userAgent']);
+        }
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid) && isValidFcmToken(request.resource.data);
       }
     }
 

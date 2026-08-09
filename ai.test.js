@@ -22,7 +22,7 @@ function resetDb(seed) {
   mockCurrent = createFakeFirestore(seed);
 }
 
-const ai = require("../ai");
+const ai = require("./ai");
 
 beforeEach(() => {
   resetDb();

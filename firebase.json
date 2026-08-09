@@ -1,5 +1,20 @@
 {
   "firestore": {
-    "rules": "firestore.rules"
-  }
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "functions": [
+    {
+      "source": ".",
+      "codebase": "default",
+      "runtime": "nodejs20",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "budget",
+        "*.test.js",
+        "fakeFirestore.js"
+      ]
+    }
+  ]
 }

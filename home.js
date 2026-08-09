@@ -139,8 +139,7 @@ function applyTranslations() {
   document.getElementById('goalsCard').setAttribute('aria-label', `${t('goalsTitle')} — ${t('soon')}`);
   document.getElementById('tasksTitle').textContent = t('tasksTitle');
   document.getElementById('tasksDesc').textContent = t('tasksDesc');
-  document.getElementById('tasksBadge').textContent = t('soon');
-  document.getElementById('tasksCard').setAttribute('aria-label', `${t('tasksTitle')} — ${t('soon')}`);
+  document.getElementById('tasksOpenBtnLabel').textContent = t('openBtn');
   document.getElementById('workoutTitle').textContent = t('workoutTitle');
   document.getElementById('workoutDesc').textContent = t('workoutDesc');
   document.getElementById('workoutBadge').textContent = t('soon');
