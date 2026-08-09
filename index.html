@@ -39,7 +39,6 @@
     --ink:#26262B; --ink-soft:#4E4E58; --ink-muted:#84838F;
     --border:rgba(255,255,255,.85);
     --card-bg: rgba(20,25,40,.035); --card-border: rgba(20,25,40,.10); --card-border-hover: rgba(255,255,255,1);
-    --card-glare: linear-gradient(135deg, rgba(255,255,255,.65), rgba(255,255,255,0));
     --card-hover-shadow: 0 25px 70px rgba(40,50,70,.12), 0 0 50px rgba(170,190,255,.18);
     --glass-btn-bg: rgba(255,255,255,.55); --glass-btn-bg-hover: rgba(255,255,255,.85); --glass-btn-border: rgba(255,255,255,.9);
     --glass-blur:25px; --glass-shadow:0 15px 50px rgba(40,50,70,.08), inset 0 1px 1px rgba(255,255,255,.9);
@@ -49,13 +48,12 @@
   [data-theme="dark"]{
     --bg:#0B0B0E;
     --bg-radial: radial-gradient(circle at top, #353535 0%, #181818 45%, #0d0d0d 100%);
-    --blob1: radial-gradient(circle, rgba(255,255,255,.10), rgba(255,255,255,0));
-    --blob2: radial-gradient(circle, rgba(196,143,224,.30), rgba(196,143,224,0));
+    --blob1: radial-gradient(circle, rgba(255,255,255,.28), rgba(255,255,255,0));
+    --blob2: radial-gradient(circle, rgba(196,143,224,.60), rgba(196,143,224,0));
     --surface:linear-gradient(155deg, rgba(255,255,255,.10), rgba(255,255,255,.02));
     --ink:#EFEEF3; --ink-soft:#C4C2CE; --ink-muted:#8E8C99;
     --border:rgba(255,255,255,.12);
     --card-bg: rgba(255,255,255,.06); --card-border: rgba(255,255,255,.12); --card-border-hover: rgba(255,255,255,.25);
-    --card-glare: linear-gradient(135deg, rgba(255,255,255,.12), rgba(255,255,255,0));
     --card-hover-shadow: 0 20px 80px rgba(255,255,255,.08), 0 0 60px rgba(255,255,255,.04);
     --glass-btn-bg: rgba(255,255,255,.08); --glass-btn-bg-hover: rgba(255,255,255,.16); --glass-btn-border: rgba(255,255,255,.18);
     --glass-shadow:0 8px 32px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.06);
@@ -135,7 +133,12 @@
     box-shadow: var(--glass-shadow);
     transition: transform .35s, border-color .35s, box-shadow .35s;
   }
-  .module-card::before{content:"";position:absolute;inset:0;background:var(--card-glare);pointer-events:none;}
+  .module-card::before{
+    content:""; position:absolute; width:300px; height:300px; top:-220px; left:-80px;
+    border-radius:50%; pointer-events:none;
+    background:radial-gradient(circle, rgba(255,255,255,.95), rgba(255,255,255,0));
+    filter:blur(20px);
+  }
   .module-card::after{
     content:""; position:absolute; inset:0; pointer-events:none;
     background:linear-gradient(120deg, transparent 25%, rgba(255,255,255,.35) 50%, transparent 75%);
