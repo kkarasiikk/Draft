@@ -24,4 +24,4 @@ const RECAPTCHA_V3_SITE_KEY = "ВСТАВ_СЮДИ_СВІЙ_SITE_KEY";
 // Це теж публічний ключ (як apiKey і RECAPTCHA_V3_SITE_KEY вище).
 // Поки заглушка — кнопка "Увімкнути нагадування" на сторінці задач
 // покаже пояснення, що ключ ще не налаштований.
-const FCM_VAPID_KEY = "ВСТАВ_СЮДИ_СВІЙ_VAPID_KEY";
+const FCM_VAPID_KEY = "BNEdyox0tk4XTbZQXnbFyBXDB6KZGddK2jxmJRLk0Z4AYMFPPbbVF_ogNlWZ8E8mBJISCldZIA_uy7hsbxyRIZU";
