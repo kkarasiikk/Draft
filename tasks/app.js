@@ -953,24 +953,35 @@ async function refreshReminderStatus() {
     setReminderStatus(t('statusPermissionDenied'), 'err');
     return;
   }
-  const enabled = Notification.permission === 'granted' && !!(await getCurrentFcmToken());
-  toggle.checked = enabled;
-  setReminderStatus(enabled ? t('statusEnabled') : t('statusDisabled'), enabled ? 'ok' : '');
+  let token = null;
+  try {
+    token = Notification.permission === 'granted' ? await getCurrentFcmToken() : null;
+  } catch (err) {
+    console.warn('refreshReminderStatus:', err);
+  }
+  toggle.checked = !!token;
+  setReminderStatus(token ? t('statusEnabled') : t('statusDisabled'), token ? 'ok' : '');
 }
 
 let cachedFcmToken = null;
 async function getCurrentFcmToken() {
   if (Notification.permission !== 'granted') return null;
-  try {
-    const reg = await navigator.serviceWorker.getRegistration('/firebase-messaging-sw.js')
-      || await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-    const messaging = firebase.messaging();
-    cachedFcmToken = await messaging.getToken({ vapidKey: FCM_VAPID_KEY, serviceWorkerRegistration: reg });
-    return cachedFcmToken;
-  } catch (err) {
-    console.warn('getCurrentFcmToken:', err);
-    return null;
+  // ВАЖЛИВО: шлях відносний ('../firebase-messaging-sw.js' від /tasks/), а не
+  // абсолютний ('/firebase-messaging-sw.js'). Абсолютний шлях ламається на
+  // будь-якому хостингу, де сайт не лежить у корені домену (напр. GitHub
+  // Pages project-сторінка на кшталт username.github.io/Draft/) — там
+  // "/firebase-messaging-sw.js" веде на неіснуючий файл у корені ЦІЛОГО
+  // акаунта, а не сайту. Відносний шлях коректно резолвиться в межах
+  // фактичного кореня сайту незалежно від того, де він реально розміщений.
+  if (firebase.messaging.isSupported && !(await firebase.messaging.isSupported())) {
+    throw new Error('FCM не підтримується цим браузером/контекстом (потрібен HTTPS або localhost).');
   }
+  const reg = await navigator.serviceWorker.getRegistration('../firebase-messaging-sw.js')
+    || await navigator.serviceWorker.register('../firebase-messaging-sw.js');
+  await navigator.serviceWorker.ready;
+  const messaging = firebase.messaging();
+  cachedFcmToken = await messaging.getToken({ vapidKey: FCM_VAPID_KEY, serviceWorkerRegistration: reg });
+  return cachedFcmToken;
 }
 
 document.getElementById('pushToggle').addEventListener('change', async (e) => {
@@ -998,7 +1009,8 @@ document.getElementById('pushToggle').addEventListener('change', async (e) => {
     } catch (err) {
       console.error('enable push:', err);
       toggle.checked = false;
-      setReminderStatus(t('statusError'), 'err');
+      const detail = err && err.message ? err.message : '';
+      setReminderStatus(detail ? `${t('statusError')} (${detail})` : t('statusError'), 'err');
     }
   } else {
     try {

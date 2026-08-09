@@ -5,7 +5,10 @@
 // service worker покривав сторінку, з якої викликається getToken().
 //
 // Реєструється з tasks/app.js через:
-//   navigator.serviceWorker.register('/firebase-messaging-sw.js')
+//   navigator.serviceWorker.register('../firebase-messaging-sw.js')
+// (відносний шлях навмисно, а не абсолютний '/firebase-messaging-sw.js' —
+// абсолютний ламається, якщо сайт розміщений не в корені домену, напр. на
+// GitHub Pages project-сторінці на кшталт username.github.io/Draft/).
 //
 // Це "класичний" (не ES-модульний) service worker, тому SDK підключається
 // через importScripts, а не <script>/import — інакше довелось би тягнути
@@ -35,15 +38,20 @@ const messaging = firebase.messaging();
 // коли сайт закритий"). Коли сайт відкритий і у фокусі, повідомлення замість
 // цього ловить onMessage() у tasks/app.js (там ми показуємо його самі,
 // без дублювання від браузера).
+//
+// URL/іконку рахуємо від self.registration.scope (реальний корінь сайту,
+// яким би не був префікс шляху на хостингу), а НЕ беремо з корисного
+// навантаження пуша — Cloud Function (tasks.js) не знає префікс шляху
+// сайту на хостингу, тож абсолютний шлях від неї міг би вести в нікуди.
 messaging.onBackgroundMessage((payload) => {
   const title = (payload.notification && payload.notification.title) || "Завдання";
   const body = (payload.notification && payload.notification.body) || "";
   self.registration.showNotification(title, {
     body,
-    icon: "/budget/icon-192.png",
-    badge: "/budget/icon-192.png",
+    icon: new URL("budget/icon-192.png", self.registration.scope).href,
+    badge: new URL("budget/icon-192.png", self.registration.scope).href,
     tag: "life-task-reminder",
-    data: { url: (payload.fcmOptions && payload.fcmOptions.link) || "/tasks/index.html" },
+    data: { url: new URL("tasks/index.html", self.registration.scope).href },
   });
 });
 
@@ -51,7 +59,8 @@ messaging.onBackgroundMessage((payload) => {
 // інакше відкриваємо нову.
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  const url = (event.notification.data && event.notification.data.url) || "/tasks/index.html";
+  const url = (event.notification.data && event.notification.data.url)
+    || new URL("tasks/index.html", self.registration.scope).href;
   event.waitUntil(
     clients.matchAll({ type: "window", includeUncontrolled: true }).then((windowClients) => {
       for (const client of windowClients) {

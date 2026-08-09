@@ -73,13 +73,13 @@ async function sendRemindersForTask(taskDoc) {
     ? `Дедлайн о ${task.dueTime}${task.priority === "high" ? " · високий пріоритет" : ""}`
     : "На сьогодні заплановано це завдання";
 
+  // icon/link НЕ задаємо тут — сервер не знає префікс шляху сайту на
+  // хостингу (напр. GitHub Pages project-сторінка на кшталт .../Draft/).
+  // Їх обчислює сам service worker (firebase-messaging-sw.js) відносно
+  // self.registration.scope — це єдине місце, де реальний префікс відомий.
   const message = {
     tokens,
     notification: { title: task.title, body },
-    webpush: {
-      notification: { icon: "/budget/icon-192.png" },
-      fcmOptions: { link: "/tasks/index.html" },
-    },
   };
 
   try {
