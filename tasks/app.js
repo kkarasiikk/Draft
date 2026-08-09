@@ -23,15 +23,9 @@ const LOCALE_MAP = { uk: 'uk-UA', ru: 'ru-RU', pl: 'pl-PL', en: 'en-US' };
 const T = {
   uk: {
     pageTitle: 'Завдання', pageSub: 'Що зробити сьогодні, а що вже зроблено',
-    tabToday: 'Сьогодні', tabUpcoming: 'Найближчі', tabAll: 'Всі',
-    listToday: 'Сьогодні', listUpcoming: 'Найближчі 7 днів', listAll: 'Усі завдання',
     searchPlaceholder: 'Пошук за назвою, нотатками, тегами',
     fabLabel: 'Нове завдання',
-    emptyTodayTitle: 'На сьогодні нічого немає', emptyTodaySub: 'Додай завдання кнопкою внизу.',
-    emptyUpcomingTitle: 'Найближчі дні вільні', emptyUpcomingSub: 'Заплануй щось на цей тиждень.',
-    emptyAllTitle: 'Завдань ще немає', emptyAllSub: 'Додай перше завдання кнопкою внизу.',
-    emptySearch: 'Нічого не знайдено',
-    overdueLabel: 'Прострочено', todayLabel: 'Сьогодні', tomorrowLabel: 'Завтра', noDateLabel: 'Без дати',
+    noDateLabel: 'Без дати',
     completedLabel: (n) => `Виконано (${n})`,
     newTaskTitle: 'Нове завдання', editTaskTitle: 'Редагувати завдання',
     titlePlaceholder: 'Назва завдання',
@@ -76,15 +70,9 @@ const T = {
   },
   ru: {
     pageTitle: 'Задачи', pageSub: 'Что сделать сегодня, а что уже сделано',
-    tabToday: 'Сегодня', tabUpcoming: 'Ближайшие', tabAll: 'Все',
-    listToday: 'Сегодня', listUpcoming: 'Ближайшие 7 дней', listAll: 'Все задачи',
     searchPlaceholder: 'Поиск по названию, заметкам, тегам',
     fabLabel: 'Новая задача',
-    emptyTodayTitle: 'На сегодня ничего нет', emptyTodaySub: 'Добавь задачу кнопкой внизу.',
-    emptyUpcomingTitle: 'Ближайшие дни свободны', emptyUpcomingSub: 'Запланируй что-то на эту неделю.',
-    emptyAllTitle: 'Задач пока нет', emptyAllSub: 'Добавь первую задачу кнопкой внизу.',
-    emptySearch: 'Ничего не найдено',
-    overdueLabel: 'Просрочено', todayLabel: 'Сегодня', tomorrowLabel: 'Завтра', noDateLabel: 'Без даты',
+    noDateLabel: 'Без даты',
     completedLabel: (n) => `Выполнено (${n})`,
     newTaskTitle: 'Новая задача', editTaskTitle: 'Редактировать задачу',
     titlePlaceholder: 'Название задачи',
@@ -129,15 +117,9 @@ const T = {
   },
   pl: {
     pageTitle: 'Zadania', pageSub: 'Co zrobić dziś, a co już zrobione',
-    tabToday: 'Dziś', tabUpcoming: 'Nadchodzące', tabAll: 'Wszystkie',
-    listToday: 'Dziś', listUpcoming: 'Najbliższe 7 dni', listAll: 'Wszystkie zadania',
     searchPlaceholder: 'Szukaj po nazwie, notatkach, tagach',
     fabLabel: 'Nowe zadanie',
-    emptyTodayTitle: 'Na dziś nic nie zaplanowano', emptyTodaySub: 'Dodaj zadanie przyciskiem poniżej.',
-    emptyUpcomingTitle: 'Najbliższe dni są wolne', emptyUpcomingSub: 'Zaplanuj coś na ten tydzień.',
-    emptyAllTitle: 'Nie ma jeszcze zadań', emptyAllSub: 'Dodaj pierwsze zadanie przyciskiem poniżej.',
-    emptySearch: 'Nic nie znaleziono',
-    overdueLabel: 'Zaległe', todayLabel: 'Dziś', tomorrowLabel: 'Jutro', noDateLabel: 'Bez daty',
+    noDateLabel: 'Bez daty',
     completedLabel: (n) => `Ukończono (${n})`,
     newTaskTitle: 'Nowe zadanie', editTaskTitle: 'Edytuj zadanie',
     titlePlaceholder: 'Nazwa zadania',
@@ -182,15 +164,9 @@ const T = {
   },
   en: {
     pageTitle: 'Tasks', pageSub: "What to do today, and what's already done",
-    tabToday: 'Today', tabUpcoming: 'Upcoming', tabAll: 'All',
-    listToday: 'Today', listUpcoming: 'Next 7 days', listAll: 'All tasks',
     searchPlaceholder: 'Search title, notes, tags',
     fabLabel: 'New task',
-    emptyTodayTitle: 'Nothing for today', emptyTodaySub: 'Add a task with the button below.',
-    emptyUpcomingTitle: 'The days ahead are free', emptyUpcomingSub: 'Plan something for this week.',
-    emptyAllTitle: 'No tasks yet', emptyAllSub: 'Add your first task with the button below.',
-    emptySearch: 'Nothing found',
-    overdueLabel: 'Overdue', todayLabel: 'Today', tomorrowLabel: 'Tomorrow', noDateLabel: 'No date',
+    noDateLabel: 'No date',
     completedLabel: (n) => `Completed (${n})`,
     newTaskTitle: 'New task', editTaskTitle: 'Edit task',
     titlePlaceholder: 'Task title',
@@ -308,7 +284,7 @@ function setLang(lang) {
   renderAuthLangRow();
   renderPriorityPicker();
   renderReminderOptions();
-  renderList();
+  renderCalendar();
 }
 
 // ---- Переклад статичних елементів ----
@@ -317,9 +293,6 @@ function applyTranslations() {
   document.title = `${t('pageTitle')} · Life`;
   document.getElementById('pageTitle').textContent = t('pageTitle');
   document.getElementById('pageSub').textContent = t('pageSub');
-  document.getElementById('tabToday').textContent = t('tabToday');
-  document.getElementById('tabUpcoming').textContent = t('tabUpcoming');
-  document.getElementById('tabAll').textContent = t('tabAll');
   document.getElementById('searchInput').placeholder = t('searchPlaceholder');
   document.getElementById('fabLabel').textContent = t('fabLabel');
   document.getElementById('notesLabel').textContent = t('notesLabel');
@@ -354,7 +327,6 @@ function applyTranslations() {
   document.getElementById('rememberMeLabel').textContent = t('rememberMe');
   document.getElementById('forgotPasswordLink').textContent = t('forgotPassword');
   setAuthMode(authMode);
-  updateListHeader();
 }
 
 // ---- Пріоритет / нагадування: опції форми (залежать від мови) ----
@@ -480,25 +452,8 @@ function todayISO() {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
-function addDaysISO(iso, days) {
-  const d = parseISODate(iso);
-  d.setDate(d.getDate() + days);
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-}
-function parseISODate(s) {
-  const [y, m, d] = s.split('-').map(Number);
-  return new Date(y, m - 1, d);
-}
 function escapeHtml(s) {
   return (s || '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-}
-function formatDayLabel(iso) {
-  const today = todayISO();
-  const tomorrow = addDaysISO(today, 1);
-  if (iso === today) return t('todayLabel');
-  if (iso === tomorrow) return t('tomorrowLabel');
-  return new Intl.DateTimeFormat(LOCALE_MAP[currentLang] || 'uk-UA', { weekday: 'short', day: 'numeric', month: 'short' })
-    .format(parseISODate(iso));
 }
 function uid4() {
   return (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}_${Math.random().toString(36).slice(2)}`).slice(0, 36);
@@ -507,7 +462,6 @@ function uid4() {
 // ---- Стан ----
 let tasks = [];
 let unsubscribeTasks = null;
-let currentView = 'today';
 let searchQuery = '';
 let selectedTags = new Set();
 let editingTaskId = null;
@@ -515,6 +469,9 @@ let formPriority = null;
 let formTags = [];
 let formSubtasks = [];
 let pendingDeleteId = null;
+let calYear = new Date().getFullYear();
+let calMonth = new Date().getMonth(); // 0-based
+let expandedCalDays = new Set();
 
 // ---- Дані (Firestore, реалтайм) ----
 function subscribeToTasks(uid) {
@@ -522,7 +479,7 @@ function subscribeToTasks(uid) {
   const col = db.collection('users').doc(uid).collection('tasks');
   unsubscribeTasks = col.onSnapshot((snap) => {
     tasks = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-    renderList();
+    renderCalendar();
   }, (err) => console.error('subscribeToTasks:', err));
 }
 
@@ -569,14 +526,9 @@ function renderTagFilterRow() {
     btn.addEventListener('click', () => {
       const tag = btn.dataset.tag;
       if (selectedTags.has(tag)) selectedTags.delete(tag); else selectedTags.add(tag);
-      renderList();
+      renderCalendar();
     });
   });
-}
-
-function updateListHeader() {
-  const map = { today: 'listToday', upcoming: 'listUpcoming', all: 'listAll' };
-  document.getElementById('listHeaderTitle').textContent = t(map[currentView]);
 }
 
 function taskRowHtml(task) {
@@ -624,70 +576,115 @@ function completedSectionHtml(list) {
     </div>`;
 }
 
-function emptyHtml(titleKey, subKey) {
-  return `<div class="empty"><div class="title">${escapeHtml(t(titleKey))}</div><div>${escapeHtml(t(subKey))}</div></div>`;
+// ---- Мітки місяця/днів тижня для календаря (без ручного перекладу — через Intl) ----
+function calMonthLabelText() {
+  const locale = LOCALE_MAP[currentLang] || 'uk-UA';
+  const label = new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' }).format(new Date(calYear, calMonth, 1));
+  return label.charAt(0).toUpperCase() + label.slice(1);
+}
+function weekdayShortLabels() {
+  const locale = LOCALE_MAP[currentLang] || 'uk-UA';
+  const fmt = new Intl.DateTimeFormat(locale, { weekday: 'short' });
+  // 2024-01-01 — відомий понеділок; тиждень завжди рендеримо з понеділка.
+  const monday = new Date(2024, 0, 1);
+  const labels = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    labels.push(fmt.format(d));
+  }
+  return labels;
 }
 
-function renderList() {
+function renderCalendar() {
   renderTagFilterRow();
+  document.getElementById('calMonthLabel').textContent = calMonthLabelText();
+  document.getElementById('calWeekdays').innerHTML = weekdayShortLabels()
+    .map((w) => `<div class="cal-weekday">${escapeHtml(w)}</div>`).join('');
+
   const today = todayISO();
-  const listEl = document.getElementById('taskList');
+  const first = new Date(calYear, calMonth, 1);
+  const startOffset = (first.getDay() + 6) % 7; // 0 = понеділок
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  const totalCells = Math.ceil((startOffset + daysInMonth) / 7) * 7;
+
   const filtered = tasks.filter(matchesFilters);
-  const isFiltering = searchQuery || selectedTags.size > 0;
+  const tasksByDate = {};
+  filtered.forEach((tsk) => {
+    if (!tsk.dueDate) return;
+    (tasksByDate[tsk.dueDate] = tasksByDate[tsk.dueDate] || []).push(tsk);
+  });
 
   let html = '';
-  if (currentView === 'today') {
-    const overdue = filtered.filter((tsk) => !tsk.done && tsk.dueDate && tsk.dueDate < today);
-    const todays = filtered.filter((tsk) => !tsk.done && tsk.dueDate === today);
-    const doneToday = filtered.filter((tsk) => tsk.done && tsk.dueDate === today);
-    if (!overdue.length && !todays.length && !doneToday.length) {
-      html = emptyHtml(isFiltering ? 'emptySearch' : 'emptyTodayTitle', isFiltering ? 'emptySearch' : 'emptyTodaySub');
-    } else {
-      if (overdue.length) html += dayGroupHtml(t('overdueLabel'), overdue, true);
-      if (todays.length) html += dayGroupHtml(t('todayLabel'), todays, false);
-      html += completedSectionHtml(doneToday);
-    }
-  } else if (currentView === 'upcoming') {
-    const end = addDaysISO(today, 7);
-    const upcoming = filtered.filter((tsk) => !tsk.done && tsk.dueDate && tsk.dueDate > today && tsk.dueDate <= end);
-    if (!upcoming.length) {
-      html = emptyHtml(isFiltering ? 'emptySearch' : 'emptyUpcomingTitle', isFiltering ? 'emptySearch' : 'emptyUpcomingSub');
-    } else {
-      const byDate = {};
-      upcoming.forEach((tsk) => { (byDate[tsk.dueDate] = byDate[tsk.dueDate] || []).push(tsk); });
-      Object.keys(byDate).sort().forEach((iso) => { html += dayGroupHtml(formatDayLabel(iso), byDate[iso], false); });
-    }
-  } else {
-    const undone = filtered.filter((tsk) => !tsk.done);
-    const done = filtered.filter((tsk) => tsk.done);
-    if (!undone.length && !done.length) {
-      html = emptyHtml(isFiltering ? 'emptySearch' : 'emptyAllTitle', isFiltering ? 'emptySearch' : 'emptyAllSub');
-    } else {
-      const overdue = undone.filter((tsk) => tsk.dueDate && tsk.dueDate < today);
-      const dated = undone.filter((tsk) => tsk.dueDate && tsk.dueDate >= today);
-      const noDate = undone.filter((tsk) => !tsk.dueDate);
-      if (overdue.length) html += dayGroupHtml(t('overdueLabel'), overdue, true);
-      const byDate = {};
-      dated.forEach((tsk) => { (byDate[tsk.dueDate] = byDate[tsk.dueDate] || []).push(tsk); });
-      Object.keys(byDate).sort().forEach((iso) => { html += dayGroupHtml(formatDayLabel(iso), byDate[iso], false); });
-      if (noDate.length) html += dayGroupHtml(t('noDateLabel'), noDate, false);
-      html += completedSectionHtml(done);
-    }
+  for (let i = 0; i < totalCells; i++) {
+    const dayNum = i - startOffset + 1;
+    const cellDate = new Date(calYear, calMonth, dayNum);
+    const iso = `${cellDate.getFullYear()}-${String(cellDate.getMonth() + 1).padStart(2, '0')}-${String(cellDate.getDate()).padStart(2, '0')}`;
+    const inMonth = dayNum >= 1 && dayNum <= daysInMonth;
+    const dayTasks = sortTasks(tasksByDate[iso] || []);
+    const isToday = iso === today;
+    const isPast = iso < today;
+    const expanded = expandedCalDays.has(iso);
+    const visible = expanded ? dayTasks : dayTasks.slice(0, 3);
+    const extra = dayTasks.length - visible.length;
+    const chips = visible.map((tsk) => {
+      const doneClass = tsk.done ? ' cal-chip-done' : '';
+      const prioClass = tsk.priority ? ` cal-chip-${tsk.priority}` : '';
+      return `<div class="cal-chip${doneClass}${prioClass}" data-open-task="${tsk.id}">${escapeHtml(tsk.title)}</div>`;
+    }).join('');
+    const moreHtml = extra > 0 ? `<div class="cal-chip-more" data-cal-more="${iso}">+${extra}</div>` : '';
+    html += `
+      <div class="cal-day${inMonth ? '' : ' other-month'}${isToday ? ' today' : ''}${isPast && inMonth ? ' past' : ''}" data-cal-day="${iso}">
+        <div class="cal-day-num">${cellDate.getDate()}</div>
+        <div class="cal-day-tasks">${chips}${moreHtml}</div>
+      </div>`;
   }
-  listEl.innerHTML = html;
+  const gridEl = document.getElementById('calendarGrid');
+  gridEl.innerHTML = html;
 
-  listEl.querySelectorAll('[data-toggle]').forEach((btn) => {
+  gridEl.querySelectorAll('[data-cal-day]').forEach((cell) => {
+    cell.addEventListener('click', () => openTaskForm(null, cell.dataset.calDay));
+  });
+  gridEl.querySelectorAll('[data-open-task]').forEach((chip) => {
+    chip.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const tsk = tasks.find((x) => x.id === chip.dataset.openTask);
+      if (tsk) openTaskForm(tsk);
+    });
+  });
+  gridEl.querySelectorAll('[data-cal-more]').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      expandedCalDays.add(btn.dataset.calMore);
+      renderCalendar();
+    });
+  });
+
+  renderNoDateSection();
+}
+
+function renderNoDateSection() {
+  const el = document.getElementById('noDateSection');
+  const undated = tasks.filter(matchesFilters).filter((tsk) => !tsk.dueDate);
+  if (!undated.length) { el.innerHTML = ''; return; }
+  const undone = undated.filter((tsk) => !tsk.done);
+  const done = undated.filter((tsk) => tsk.done);
+  let html = '';
+  if (undone.length) html += dayGroupHtml(t('noDateLabel'), undone, false);
+  html += completedSectionHtml(done);
+  el.innerHTML = html;
+
+  el.querySelectorAll('[data-toggle]').forEach((btn) => {
     btn.addEventListener('click', (e) => { e.stopPropagation(); toggleDone(btn.dataset.toggle); });
   });
-  listEl.querySelectorAll('[data-open]').forEach((el) => {
-    el.addEventListener('click', () => openTaskForm(tasks.find((tsk) => tsk.id === el.dataset.open)));
+  el.querySelectorAll('[data-open]').forEach((elx) => {
+    elx.addEventListener('click', () => openTaskForm(tasks.find((tsk) => tsk.id === elx.dataset.open)));
   });
-  const completedToggle = document.getElementById('completedToggle');
+  const completedToggle = el.querySelector('#completedToggle');
   if (completedToggle) {
     completedToggle.addEventListener('click', () => {
-      const section = document.getElementById('completedSection');
-      section.classList.toggle('open');
-      renderList();
+      document.getElementById('completedSection').classList.toggle('open');
+      renderNoDateSection();
     });
   }
 }
@@ -701,14 +698,22 @@ function toggleDone(id) {
   }).catch((err) => console.error('toggleDone:', err));
 }
 
-// ---- Вкладки ----
-document.getElementById('viewTabs').addEventListener('click', (e) => {
-  const btn = e.target.closest('[data-view]');
-  if (!btn) return;
-  currentView = btn.dataset.view;
-  document.querySelectorAll('#viewTabs .tab-btn').forEach((b) => b.classList.toggle('active', b === btn));
-  updateListHeader();
-  renderList();
+// ---- Навігація календаря ----
+document.getElementById('calPrevBtn').addEventListener('click', () => {
+  calMonth -= 1;
+  if (calMonth < 0) { calMonth = 11; calYear -= 1; }
+  renderCalendar();
+});
+document.getElementById('calNextBtn').addEventListener('click', () => {
+  calMonth += 1;
+  if (calMonth > 11) { calMonth = 0; calYear += 1; }
+  renderCalendar();
+});
+document.getElementById('calMonthLabel').addEventListener('click', () => {
+  const now = new Date();
+  calYear = now.getFullYear();
+  calMonth = now.getMonth();
+  renderCalendar();
 });
 
 // ---- Пошук ----
@@ -719,18 +724,18 @@ document.getElementById('searchToggleBtn').addEventListener('click', () => {
   bar.classList.toggle('show', show);
   btn.classList.toggle('active', show);
   if (show) document.getElementById('searchInput').focus();
-  else { document.getElementById('searchInput').value = ''; searchQuery = ''; renderList(); }
+  else { document.getElementById('searchInput').value = ''; searchQuery = ''; renderCalendar(); }
 });
 document.getElementById('searchInput').addEventListener('input', (e) => {
   searchQuery = e.target.value.trim();
   document.getElementById('clearSearchBtn').style.display = searchQuery ? 'flex' : 'none';
-  renderList();
+  renderCalendar();
 });
 document.getElementById('clearSearchBtn').addEventListener('click', () => {
   document.getElementById('searchInput').value = '';
   searchQuery = '';
   document.getElementById('clearSearchBtn').style.display = 'none';
-  renderList();
+  renderCalendar();
 });
 
 // ---- Форма завдання ----
@@ -811,14 +816,14 @@ function updateReminderAvailability() {
 }
 document.getElementById('taskDueDate').addEventListener('change', updateReminderAvailability);
 
-function openTaskForm(existingTask) {
+function openTaskForm(existingTask, prefillDate) {
   editingTaskId = existingTask ? existingTask.id : null;
   document.getElementById('taskModalTitle').textContent = existingTask ? t('editTaskTitle') : t('newTaskTitle');
   document.getElementById('deleteTaskBtn').style.display = existingTask ? 'block' : 'none';
   document.getElementById('taskFormError').textContent = '';
   document.getElementById('taskTitleInput').value = existingTask ? existingTask.title : '';
   document.getElementById('taskNotesInput').value = existingTask ? existingTask.notes || '' : '';
-  document.getElementById('taskDueDate').value = existingTask ? existingTask.dueDate || '' : '';
+  document.getElementById('taskDueDate').value = existingTask ? existingTask.dueDate || '' : (prefillDate || '');
   document.getElementById('taskDueTime').value = existingTask ? existingTask.dueTime || '' : '';
   formPriority = existingTask ? existingTask.priority || null : null;
   formTags = existingTask ? [...(existingTask.tags || [])] : [];
