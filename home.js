@@ -127,7 +127,6 @@ function t(key) {
 
 function applyTranslations() {
   document.getElementById('htmlRoot').setAttribute('lang', currentLang);
-  document.getElementById('heroSubtitle').textContent = t('heroSubtitle');
   document.getElementById('themeMenuLabel').textContent = t('themeLabel');
   document.getElementById('langMenuLabel').textContent = t('langLabel');
   document.getElementById('logoutLabel').textContent = t('logout');
