@@ -94,8 +94,18 @@
 
   /* ---- Верхня панель: гамбургер-меню зліва (тема / мова / вихід) ---- */
   .home-topbar{display:flex;align-items:center;justify-content:flex-start;margin-bottom:8px;}
-  .menu-btn{background:none;border:none;cursor:pointer;color:var(--ink);padding:7px;display:flex;border-radius:8px;margin-left:-7px;transition:background .2s;}
+  .menu-btn{background:none;border:none;cursor:pointer;color:var(--ink);padding:7px;display:flex;border-radius:8px;margin-left:-7px;transition:background .2s, transform .15s;}
   .menu-btn:hover{background:var(--glass-btn-bg-hover);}
+  .menu-btn:active{transform:scale(.92);}
+  .menu-btn-lines{width:20px;height:16px;position:relative;display:inline-block;flex-shrink:0;}
+  .menu-btn-lines span{position:absolute;left:0;width:100%;height:2px;border-radius:2px;background:currentColor;
+    transition:top .3s cubic-bezier(.4,0,.2,1), transform .3s cubic-bezier(.4,0,.2,1), opacity .2s ease;}
+  .menu-btn-lines span:nth-child(1){top:0;}
+  .menu-btn-lines span:nth-child(2){top:7px;}
+  .menu-btn-lines span:nth-child(3){top:14px;}
+  .menu-btn.open .menu-btn-lines span:nth-child(1){top:7px; transform:rotate(45deg);}
+  .menu-btn.open .menu-btn-lines span:nth-child(2){opacity:0; transform:scaleX(0);}
+  .menu-btn.open .menu-btn-lines span:nth-child(3){top:7px; transform:rotate(-45deg);}
   .app-menu-overlay{position:fixed;inset:0;z-index:55;display:none;}
   .app-menu-overlay.show{display:block;}
   .app-menu{position:absolute;top:calc(62px + env(safe-area-inset-top));left:13px;background:var(--surface);
@@ -108,13 +118,15 @@
   .theme-choice, .lang-choice{
     border:none;background:var(--glass-btn-bg);color:var(--ink-muted);font-family:'Inter',sans-serif;
     font-size:12px;font-weight:600;padding:6px 11px;border-radius:999px;cursor:pointer;
-    transition:background .25s, color .25s;
+    transition:background .25s, color .25s, transform .15s;
   }
+  .theme-choice:active, .lang-choice:active{transform:scale(.92);}
   .theme-choice.selected, .lang-choice.selected{background:var(--accent);color:#fff;}
   .app-menu-item{display:flex;align-items:center;gap:10px;width:100%;padding:9px 10px;border:none;
     background:none;border-radius:8px;cursor:pointer;font-family:'Inter',sans-serif;font-size:13.5px;
-    color:var(--ink-soft);text-align:left;margin-top:2px;}
+    color:var(--ink-soft);text-align:left;margin-top:2px;transition:background .2s, transform .15s;}
   .app-menu-item:hover{background:var(--glass-btn-bg-hover);}
+  .app-menu-item:active{transform:scale(.97);}
   .app-menu-item svg{stroke:currentColor;flex-shrink:0;}
 
   /* ---- Desktop layout — та сама структура, що й у budget/: .wrap на всю
@@ -156,6 +168,7 @@
   a.module-card:hover::after{transform:translateX(120%);}
   .module-card:focus-visible{outline:2px solid var(--accent);outline-offset:3px;}
   a.module-card:hover{transform:translateY(-8px) scale(1.015); border-color:var(--card-border-hover); box-shadow: var(--card-hover-shadow), var(--glass-shadow);}
+  a.module-card:active{transform:translateY(-4px) scale(.99);}
   .module-card.soon{opacity:.55; cursor:default;}
 
   .module-icon{
@@ -203,7 +216,8 @@
   .remember-me input{width:15px;height:15px;accent-color:var(--accent);cursor:pointer;margin:0;}
   #forgotPasswordLink{font-size:12.5px;color:var(--accent);font-weight:600;cursor:pointer;text-decoration:none;white-space:nowrap;}
   .auth-submit{width:100%;padding:12px 0;border-radius:10px;border:none;cursor:pointer;color:#fff;background:var(--accent);
-    font-size:14.5px;font-weight:600;font-family:'Inter',sans-serif;}
+    font-size:14.5px;font-weight:600;font-family:'Inter',sans-serif;transition:transform .15s, opacity .2s;}
+  .auth-submit:active:not(:disabled){transform:scale(.97);}
   .auth-submit:disabled{opacity:.6;cursor:default;}
   .auth-switch{text-align:center;margin-top:16px;font-size:13px;color:var(--ink-muted);}
   .auth-switch a{color:var(--accent);font-weight:600;cursor:pointer;text-decoration:none;}
@@ -249,7 +263,7 @@
     <div class="wrap">
       <div class="home-topbar">
         <button class="menu-btn" id="menuBtn" aria-label="Меню">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+          <span class="menu-btn-lines" aria-hidden="true"><span></span><span></span><span></span></span>
         </button>
       </div>
 

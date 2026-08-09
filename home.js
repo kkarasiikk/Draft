@@ -226,10 +226,16 @@ darkMediaQuery.addEventListener('change', () => {
 
 // ---- Гамбургер-меню (тема / мова / вихід) ----
 document.getElementById('menuBtn').addEventListener('click', () => {
-  document.getElementById('appMenuOverlay').classList.add('show');
+  const overlay = document.getElementById('appMenuOverlay');
+  const btn = document.getElementById('menuBtn');
+  const isOpen = overlay.classList.toggle('show');
+  btn.classList.toggle('open', isOpen);
 });
 document.getElementById('appMenuOverlay').addEventListener('click', (e) => {
-  if (e.target.id === 'appMenuOverlay') e.currentTarget.classList.remove('show');
+  if (e.target.id === 'appMenuOverlay') {
+    e.currentTarget.classList.remove('show');
+    document.getElementById('menuBtn').classList.remove('open');
+  }
 });
 
 // ---- Вхід / реєстрація ----
