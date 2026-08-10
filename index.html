@@ -66,11 +66,11 @@
     color-scheme: dark;
   }
   *{box-sizing:border-box;}
-  html{background:var(--bg);overscroll-behavior-y:none;}
+  html{background:var(--bg);overscroll-behavior-y:none;scrollbar-gutter:stable;overflow-y:scroll;}
   body{
     margin:0; color:var(--ink); font-family:'Inter',sans-serif;
     min-height:100vh; background:var(--bg);
-    -webkit-tap-highlight-color:transparent;overscroll-behavior-y:none;
+    -webkit-tap-highlight-color:transparent;overscroll-behavior-y:none;-webkit-overflow-scrolling:touch;
     transition:background-color .2s ease, color .2s ease;
   }
   .background{
