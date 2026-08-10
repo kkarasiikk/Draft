@@ -17,11 +17,13 @@
   img-src 'self' data:;
   connect-src 'self' https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com https://firebaseinstallations.googleapis.com https://content-firebaseappcheck.googleapis.com;
   frame-src https://www.google.com/recaptcha/ https://me-and-only-me-7f531.firebaseapp.com;
+  manifest-src 'self';
   object-src 'none';
   base-uri 'self';
   form-action 'self';
 ">
 <title>Life</title>
+<link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="budget/icon-192.png">
 <link rel="icon" href="budget/icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
