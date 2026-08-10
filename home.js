@@ -223,33 +223,11 @@ darkMediaQuery.addEventListener('change', () => {
 });
 
 // ---- Гамбургер-меню (тема / мова / вихід) ----
-// ЧАСОВА ДІАГНОСТИКА (тимчасово, приберемо після знаходження причини затримки):
-function __debugLog(msg) {
-  let el = document.getElementById('__debugLog');
-  if (!el) {
-    el = document.createElement('div');
-    el.id = '__debugLog';
-    el.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:999999;background:#000;color:#0f0;'
-      + 'font:11px/1.4 monospace;padding:8px;max-height:45vh;overflow:auto;white-space:pre-wrap;'
-      + 'pointer-events:none;';
-    document.body.appendChild(el);
-  }
-  el.textContent += msg + '\n';
-}
-const __menuBtnEl = document.getElementById('menuBtn');
-__menuBtnEl.addEventListener('touchstart', () => {
-  __debugLog('touchstart @ ' + performance.now().toFixed(0) + 'ms');
-}, { passive: true });
-__menuBtnEl.addEventListener('click', () => {
-  __debugLog('click START @ ' + performance.now().toFixed(0) + 'ms');
+document.getElementById('menuBtn').addEventListener('click', () => {
   const overlay = document.getElementById('appMenuOverlay');
   const btn = document.getElementById('menuBtn');
   const isOpen = overlay.classList.toggle('show');
   btn.classList.toggle('open', isOpen);
-  __debugLog('classList toggled @ ' + performance.now().toFixed(0) + 'ms');
-  requestAnimationFrame(() => {
-    __debugLog('next frame painted @ ' + performance.now().toFixed(0) + 'ms');
-  });
 });
 document.getElementById('appMenuOverlay').addEventListener('click', (e) => {
   if (e.target.id === 'appMenuOverlay') {

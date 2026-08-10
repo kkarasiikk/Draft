@@ -66,11 +66,11 @@
     color-scheme: dark;
   }
   *{box-sizing:border-box;}
-  html{background:var(--bg);}
+  html{background:var(--bg);overscroll-behavior-y:none;}
   body{
     margin:0; color:var(--ink); font-family:'Inter',sans-serif;
     min-height:100vh; background:var(--bg);
-    -webkit-tap-highlight-color:transparent;
+    -webkit-tap-highlight-color:transparent;overscroll-behavior-y:none;
     transition:background-color .2s ease, color .2s ease;
   }
   .background{
