@@ -163,6 +163,7 @@
   .header-title{font-family:'Inter',sans-serif;font-weight:800;font-size:26px;letter-spacing:-.02em;}
   .header-sub{font-size:12.5px;color:var(--ink-muted);margin-top:2px;}
   .content{padding:12px 20px 0;}
+  #dayViewScreen{padding:16px 20px 40px;}
   .cal-header{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
   .cal-nav-btn{display:flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;
     border-radius:50%;border:1px solid var(--border);background:var(--glass-btn-bg);color:var(--ink-soft);
@@ -191,6 +192,11 @@
   .cal-chip-low{background:var(--low-light);color:var(--low);}
   .cal-chip-done{opacity:.5;text-decoration:line-through;}
   .cal-chip-more{font-size:9.5px;font-weight:600;color:var(--ink-muted);padding:1px 5px;cursor:pointer;}
+  .day-view-header{display:flex;align-items:center;gap:8px;margin-bottom:16px;}
+  .day-view-date{flex:1;text-align:center;font-family:'Inter',sans-serif;font-size:16.5px;font-weight:700;color:var(--ink);}
+  .day-view-spacer{width:34px;flex-shrink:0;}
+  .day-view-empty{text-align:center;padding:48px 20px;color:var(--ink-muted);}
+  .day-view-empty .title{font-family:'Inter',sans-serif;font-size:17px;font-weight:600;color:var(--ink-soft);margin-bottom:6px;}
   .search-toggle-btn{display:flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;
     border-radius:50%;border:1px solid var(--border);background:var(--glass-btn-bg);color:var(--ink-soft);
     cursor:pointer;transition:background .25s, border-color .25s, color .2s, transform .2s;}
@@ -331,6 +337,7 @@
     .app-topbar{padding:28px 0 0;}
     .header{border-bottom:none;border-radius:16px;border:1px solid var(--border);padding:26px 26px 22px;margin:20px auto 0;max-width:960px;}
     .content{max-width:960px;margin:0 auto;padding:14px 4px 40px;}
+    #dayViewScreen{max-width:960px;margin:0 auto;padding:20px 4px 40px;}
     .cal-day{min-height:100px;padding:8px 6px;}
     .cal-chip{font-size:11px;padding:3px 7px;}
     .fab-row{left:auto;right:32px;bottom:32px;justify-content:flex-end;padding:0;}
@@ -405,6 +412,7 @@
     </div>
   </div>
 
+  <div id="calendarScreen">
   <div class="header">
     <div class="header-title" id="pageTitle">Завдання</div>
     <div class="header-sub" id="pageSub">Що зробити сьогодні, а що вже зроблено</div>
@@ -434,6 +442,18 @@
     <div class="cal-weekdays" id="calWeekdays"></div>
     <div class="cal-grid" id="calendarGrid"></div>
     <div id="noDateSection"></div>
+  </div>
+  </div>
+
+  <div id="dayViewScreen" style="display:none;">
+    <div class="day-view-header">
+      <button type="button" id="dayViewBackBtn" class="cal-nav-btn" aria-label="Назад до календаря">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <div class="day-view-date" id="dayViewDateLabel"></div>
+      <div class="day-view-spacer"></div>
+    </div>
+    <div id="dayViewList"></div>
   </div>
 </div>
 </div>

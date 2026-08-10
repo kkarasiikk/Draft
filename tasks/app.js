@@ -26,6 +26,7 @@ const T = {
     searchPlaceholder: 'Пошук за назвою, нотатками, тегами',
     fabLabel: 'Нове завдання',
     noDateLabel: 'Без дати',
+    dayViewEmptyTitle: 'На цю дату завдань немає', dayViewEmptySub: 'Додай завдання кнопкою внизу.',
     completedLabel: (n) => `Виконано (${n})`,
     newTaskTitle: 'Нове завдання', editTaskTitle: 'Редагувати завдання',
     titlePlaceholder: 'Назва завдання',
@@ -73,6 +74,7 @@ const T = {
     searchPlaceholder: 'Поиск по названию, заметкам, тегам',
     fabLabel: 'Новая задача',
     noDateLabel: 'Без даты',
+    dayViewEmptyTitle: 'На эту дату задач нет', dayViewEmptySub: 'Добавь задачу кнопкой внизу.',
     completedLabel: (n) => `Выполнено (${n})`,
     newTaskTitle: 'Новая задача', editTaskTitle: 'Редактировать задачу',
     titlePlaceholder: 'Название задачи',
@@ -120,6 +122,7 @@ const T = {
     searchPlaceholder: 'Szukaj po nazwie, notatkach, tagach',
     fabLabel: 'Nowe zadanie',
     noDateLabel: 'Bez daty',
+    dayViewEmptyTitle: 'Na ten dzień nie ma zadań', dayViewEmptySub: 'Dodaj zadanie przyciskiem poniżej.',
     completedLabel: (n) => `Ukończono (${n})`,
     newTaskTitle: 'Nowe zadanie', editTaskTitle: 'Edytuj zadanie',
     titlePlaceholder: 'Nazwa zadania',
@@ -167,6 +170,7 @@ const T = {
     searchPlaceholder: 'Search title, notes, tags',
     fabLabel: 'New task',
     noDateLabel: 'No date',
+    dayViewEmptyTitle: 'No tasks for this date', dayViewEmptySub: 'Add a task with the button below.',
     completedLabel: (n) => `Completed (${n})`,
     newTaskTitle: 'New task', editTaskTitle: 'Edit task',
     titlePlaceholder: 'Task title',
@@ -284,7 +288,7 @@ function setLang(lang) {
   renderAuthLangRow();
   renderPriorityPicker();
   renderReminderOptions();
-  renderCalendar();
+  renderCurrentScreen();
 }
 
 // ---- Переклад статичних елементів ----
@@ -479,7 +483,7 @@ function subscribeToTasks(uid) {
   const col = db.collection('users').doc(uid).collection('tasks');
   unsubscribeTasks = col.onSnapshot((snap) => {
     tasks = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-    renderCalendar();
+    renderCurrentScreen();
   }, (err) => console.error('subscribeToTasks:', err));
 }
 
@@ -643,7 +647,7 @@ function renderCalendar() {
   gridEl.innerHTML = html;
 
   gridEl.querySelectorAll('[data-cal-day]').forEach((cell) => {
-    cell.addEventListener('click', () => openTaskForm(null, cell.dataset.calDay));
+    cell.addEventListener('click', () => showDayView(cell.dataset.calDay));
   });
   gridEl.querySelectorAll('[data-open-task]').forEach((chip) => {
     chip.addEventListener('click', (e) => {
@@ -688,6 +692,69 @@ function renderNoDateSection() {
     });
   }
 }
+
+// ---- Екран дня (детальний перегляд однієї дати) ----
+let currentScreen = 'calendar'; // 'calendar' | 'day'
+let dayViewDate = null;
+
+function renderCurrentScreen() {
+  if (currentScreen === 'day' && dayViewDate) renderDayView();
+  else renderCalendar();
+}
+
+function showDayView(iso) {
+  dayViewDate = iso;
+  currentScreen = 'day';
+  document.getElementById('calendarScreen').style.display = 'none';
+  document.getElementById('dayViewScreen').style.display = 'block';
+  renderDayView();
+}
+
+function showCalendarView() {
+  currentScreen = 'calendar';
+  dayViewDate = null;
+  document.getElementById('dayViewScreen').style.display = 'none';
+  document.getElementById('calendarScreen').style.display = '';
+  renderCalendar();
+}
+
+function renderDayView() {
+  const iso = dayViewDate;
+  const locale = LOCALE_MAP[currentLang] || 'uk-UA';
+  const [y, m, d] = iso.split('-').map(Number);
+  const label = new Intl.DateTimeFormat(locale, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+    .format(new Date(y, m - 1, d));
+  document.getElementById('dayViewDateLabel').textContent = label.charAt(0).toUpperCase() + label.slice(1);
+
+  const dayTasks = sortTasks(tasks.filter((tsk) => tsk.dueDate === iso));
+  const listEl = document.getElementById('dayViewList');
+  if (!dayTasks.length) {
+    listEl.innerHTML = `<div class="day-view-empty"><div class="title">${escapeHtml(t('dayViewEmptyTitle'))}</div><div>${escapeHtml(t('dayViewEmptySub'))}</div></div>`;
+    return;
+  }
+  const undone = dayTasks.filter((tsk) => !tsk.done);
+  const done = dayTasks.filter((tsk) => tsk.done);
+  let html = '';
+  if (undone.length) html += `<div class="day-card">${undone.map(taskRowHtml).join('')}</div>`;
+  html += completedSectionHtml(done);
+  listEl.innerHTML = html;
+
+  listEl.querySelectorAll('[data-toggle]').forEach((btn) => {
+    btn.addEventListener('click', (e) => { e.stopPropagation(); toggleDone(btn.dataset.toggle); });
+  });
+  listEl.querySelectorAll('[data-open]').forEach((elx) => {
+    elx.addEventListener('click', () => openTaskForm(tasks.find((tsk) => tsk.id === elx.dataset.open)));
+  });
+  const completedToggle = listEl.querySelector('#completedToggle');
+  if (completedToggle) {
+    completedToggle.addEventListener('click', () => {
+      document.getElementById('completedSection').classList.toggle('open');
+      renderDayView();
+    });
+  }
+}
+
+document.getElementById('dayViewBackBtn').addEventListener('click', showCalendarView);
 
 function toggleDone(id) {
   const task = tasks.find((tsk) => tsk.id === id);
@@ -838,7 +905,9 @@ function openTaskForm(existingTask, prefillDate) {
   document.getElementById('taskFormOverlay').classList.add('show');
   setTimeout(() => document.getElementById('taskTitleInput').focus(), 50);
 }
-document.getElementById('openNewTask').addEventListener('click', () => openTaskForm(null));
+document.getElementById('openNewTask').addEventListener('click', () => {
+  openTaskForm(null, currentScreen === 'day' ? dayViewDate : undefined);
+});
 document.getElementById('closeTaskForm').addEventListener('click', () => {
   document.getElementById('taskFormOverlay').classList.remove('show');
 });
