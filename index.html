@@ -37,7 +37,6 @@
     --bg-radial: radial-gradient(circle at 50% 0%, #ffffff 0%, #f8f9fb 40%, #eef1f5 100%);
     --blob1: radial-gradient(circle, rgba(185,198,255,.75), rgba(185,198,255,0));
     --blob2: radial-gradient(circle, rgba(218,198,255,.65), rgba(218,198,255,0));
-    --blob3: radial-gradient(circle, rgba(190,220,255,.55), rgba(190,220,255,0));
     --surface:linear-gradient(135deg, rgba(255,255,255,.78), rgba(255,255,255,.46));
     --ink:#26262B; --ink-soft:#4E4E58; --ink-muted:#84838F;
     --border:rgba(255,255,255,.85);
@@ -54,7 +53,6 @@
     --bg-radial: radial-gradient(circle at 50% 0%, #24262b 0%, #101113 42%, #050506 100%);
     --blob1: radial-gradient(circle, rgba(190,200,255,.42), rgba(190,200,255,0));
     --blob2: radial-gradient(circle, rgba(210,180,255,.34), rgba(210,180,255,0));
-    --blob3: radial-gradient(circle, rgba(130,180,255,.28), rgba(130,180,255,0));
     --surface:linear-gradient(135deg, rgba(255,255,255,.085), rgba(255,255,255,.025));
     --ink:#ffffff; --ink-soft:#a9acb4; --ink-muted:#75787f;
     --border:rgba(255,255,255,.12);
@@ -86,10 +84,6 @@
   .background::after{
     content:""; position:absolute; width:600px; height:600px; top:150px; right:-260px;
     background:var(--blob2); border-radius:50%; filter:blur(105px);
-  }
-  .background .blob3{
-    position:absolute; width:600px; height:600px; bottom:-300px; left:35%; transform:translateX(-50%);
-    background:var(--blob3); border-radius:50%; filter:blur(105px); pointer-events:none;
   }
 
   .wrap{max-width:480px;margin:0 auto;padding:20px 20px 48px;}
@@ -231,7 +225,7 @@
 </style>
 </head>
 <body>
-  <div class="background" aria-hidden="true"><span class="blob3"></span></div>
+  <div class="background" aria-hidden="true"></div>
 
   <!-- ---- Нейтральний екран, поки Firebase перевіряє збережену сесію ---- -->
   <div id="authLoading" aria-hidden="true"><div class="spinner"></div></div>
