@@ -24,7 +24,6 @@ const T = {
   uk: {
     pageTitle: 'Завдання', pageSub: 'Що зробити сьогодні, а що вже зроблено',
     searchPlaceholder: 'Пошук за назвою, нотатками, тегами',
-    fabLabel: 'Нове завдання',
     noDateLabel: 'Без дати',
     dayViewEmptyTitle: 'На цю дату завдань немає', dayViewEmptySub: 'Додай завдання кнопкою внизу.',
     completedLabel: (n) => `Виконано (${n})`,
@@ -72,7 +71,6 @@ const T = {
   ru: {
     pageTitle: 'Задачи', pageSub: 'Что сделать сегодня, а что уже сделано',
     searchPlaceholder: 'Поиск по названию, заметкам, тегам',
-    fabLabel: 'Новая задача',
     noDateLabel: 'Без даты',
     dayViewEmptyTitle: 'На эту дату задач нет', dayViewEmptySub: 'Добавь задачу кнопкой внизу.',
     completedLabel: (n) => `Выполнено (${n})`,
@@ -120,7 +118,6 @@ const T = {
   pl: {
     pageTitle: 'Zadania', pageSub: 'Co zrobić dziś, a co już zrobione',
     searchPlaceholder: 'Szukaj po nazwie, notatkach, tagach',
-    fabLabel: 'Nowe zadanie',
     noDateLabel: 'Bez daty',
     dayViewEmptyTitle: 'Na ten dzień nie ma zadań', dayViewEmptySub: 'Dodaj zadanie przyciskiem poniżej.',
     completedLabel: (n) => `Ukończono (${n})`,
@@ -168,7 +165,6 @@ const T = {
   en: {
     pageTitle: 'Tasks', pageSub: "What to do today, and what's already done",
     searchPlaceholder: 'Search title, notes, tags',
-    fabLabel: 'New task',
     noDateLabel: 'No date',
     dayViewEmptyTitle: 'No tasks for this date', dayViewEmptySub: 'Add a task with the button below.',
     completedLabel: (n) => `Completed (${n})`,
@@ -298,7 +294,6 @@ function applyTranslations() {
   document.getElementById('pageTitle').textContent = t('pageTitle');
   document.getElementById('pageSub').textContent = t('pageSub');
   document.getElementById('searchInput').placeholder = t('searchPlaceholder');
-  document.getElementById('fabLabel').textContent = t('fabLabel');
   document.getElementById('notesLabel').textContent = t('notesLabel');
   document.getElementById('taskNotesInput').placeholder = t('notesPlaceholder');
   document.getElementById('dueDateLabel').textContent = t('dueDateLabel');
@@ -905,9 +900,6 @@ function openTaskForm(existingTask, prefillDate) {
   document.getElementById('taskFormOverlay').classList.add('show');
   setTimeout(() => document.getElementById('taskTitleInput').focus(), 50);
 }
-document.getElementById('openNewTask').addEventListener('click', () => {
-  openTaskForm(null, currentScreen === 'day' ? dayViewDate : undefined);
-});
 document.getElementById('closeTaskForm').addEventListener('click', () => {
   document.getElementById('taskFormOverlay').classList.remove('show');
 });

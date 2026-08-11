@@ -251,12 +251,6 @@
   .card::before{content:""; position:absolute; inset:0; background:var(--card-glare); pointer-events:none;}
   .card-title{font-family:'Inter',sans-serif;font-size:15.5px;font-weight:600;margin-bottom:4px;position:relative;}
 
-  .fab-row{position:fixed;bottom:calc(22px + env(safe-area-inset-bottom));left:0;right:0;z-index:20;display:flex;justify-content:center;padding:0 20px;}
-  .fab{display:flex;align-items:center;gap:6px;border-radius:24px;padding:12px 22px;font-size:14px;font-weight:600;
-    cursor:pointer;font-family:'Inter',sans-serif;background:var(--accent);color:#fff;border:none;box-shadow:0 4px 14px rgba(92,124,250,.28);
-    transition:transform .15s;}
-  .fab:active{transform:scale(.95);}
-
   .modal-overlay{position:fixed;inset:0;background:var(--overlay);display:none;align-items:flex-end;justify-content:center;z-index:50;}
   .modal-overlay.show{display:flex;}
   .modal{background:var(--surface);border-radius:26px 26px 0 0;padding:20px 20px calc(28px + env(safe-area-inset-bottom));width:100%;max-width:480px;
@@ -340,7 +334,6 @@
     #dayViewScreen{max-width:960px;margin:0 auto;padding:20px 4px 40px;}
     .cal-day{min-height:100px;padding:8px 6px;}
     .cal-chip{font-size:11px;padding:3px 7px;}
-    .fab-row{left:auto;right:32px;bottom:32px;justify-content:flex-end;padding:0;}
     .modal-overlay{align-items:center;}
     .modal{border-radius:18px;max-height:88vh;}
   }
@@ -456,14 +449,6 @@
     <div id="dayViewList"></div>
   </div>
 </div>
-</div>
-
-<!-- ---- Кнопка додавання ---- -->
-<div class="fab-row" id="fabRow">
-  <button class="fab" id="openNewTask">
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
-    <span id="fabLabel">Нове завдання</span>
-  </button>
 </div>
 
 <!-- ---- Форма завдання (створення / редагування) ---- -->
