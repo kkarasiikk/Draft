@@ -23,7 +23,6 @@ const LOCALE_MAP = { uk: 'uk-UA', ru: 'ru-RU', pl: 'pl-PL', en: 'en-US' };
 const T = {
   uk: {
     pageTitle: 'Завдання', pageSub: 'Що зробити сьогодні, а що вже зроблено',
-    searchPlaceholder: 'Пошук за назвою, нотатками, тегами',
     noDateLabel: 'Без дати',
     dayViewEmptyTitle: 'На цю дату завдань немає', dayViewEmptySub: 'Додай завдання кнопкою внизу.',
     dayViewFabLabel: 'Нове завдання',
@@ -58,7 +57,6 @@ const T = {
   },
   ru: {
     pageTitle: 'Задачи', pageSub: 'Что сделать сегодня, а что уже сделано',
-    searchPlaceholder: 'Поиск по названию, заметкам, тегам',
     noDateLabel: 'Без даты',
     dayViewEmptyTitle: 'На эту дату задач нет', dayViewEmptySub: 'Добавь задачу кнопкой внизу.',
     dayViewFabLabel: 'Новая задача',
@@ -93,7 +91,6 @@ const T = {
   },
   pl: {
     pageTitle: 'Zadania', pageSub: 'Co zrobić dziś, a co już zrobione',
-    searchPlaceholder: 'Szukaj po nazwie, notatkach, tagach',
     noDateLabel: 'Bez daty',
     dayViewEmptyTitle: 'Na ten dzień nie ma zadań', dayViewEmptySub: 'Dodaj zadanie przyciskiem poniżej.',
     dayViewFabLabel: 'Nowe zadanie',
@@ -128,7 +125,6 @@ const T = {
   },
   en: {
     pageTitle: 'Tasks', pageSub: "What to do today, and what's already done",
-    searchPlaceholder: 'Search title, notes, tags',
     noDateLabel: 'No date',
     dayViewEmptyTitle: 'No tasks for this date', dayViewEmptySub: 'Add a task with the button below.',
     dayViewFabLabel: 'New task',
@@ -244,7 +240,6 @@ function applyTranslations() {
   document.title = `${t('pageTitle')} · Life`;
   document.getElementById('pageTitle').textContent = t('pageTitle');
   document.getElementById('pageSub').textContent = t('pageSub');
-  document.getElementById('searchInput').placeholder = t('searchPlaceholder');
   document.getElementById('dayViewFabLabel').textContent = t('dayViewFabLabel');
   document.getElementById('notesLabel').textContent = t('notesLabel');
   document.getElementById('taskNotesInput').placeholder = t('notesPlaceholder');
@@ -397,7 +392,6 @@ function uid4() {
 // ---- Стан ----
 let tasks = [];
 let unsubscribeTasks = null;
-let searchQuery = '';
 let selectedTags = new Set();
 let editingTaskId = null;
 let formPriority = null;
@@ -406,6 +400,7 @@ let formSubtasks = [];
 let pendingDeleteId = null;
 let calYear = new Date().getFullYear();
 let calMonth = new Date().getMonth(); // 0-based
+let calViewMode = 'month'; // 'month' | 'year'
 let expandedCalDays = new Set();
 
 // ---- Дані (Firestore, реалтайм) ----
@@ -433,11 +428,6 @@ function sortTasks(list) {
 
 function matchesFilters(task) {
   if (selectedTags.size > 0 && !(task.tags || []).some((tag) => selectedTags.has(tag))) return false;
-  if (searchQuery) {
-    const q = searchQuery.toLowerCase();
-    const hay = [task.title, task.notes, ...(task.tags || [])].join(' ').toLowerCase();
-    if (!hay.includes(q)) return false;
-  }
   return true;
 }
 
@@ -513,9 +503,20 @@ function completedSectionHtml(list) {
 
 // ---- Мітки місяця/днів тижня для календаря (без ручного перекладу — через Intl) ----
 function calMonthLabelText() {
+  if (calViewMode === 'year') return String(calYear);
   const locale = LOCALE_MAP[currentLang] || 'uk-UA';
   const label = new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' }).format(new Date(calYear, calMonth, 1));
   return label.charAt(0).toUpperCase() + label.slice(1);
+}
+function monthShortLabels() {
+  const locale = LOCALE_MAP[currentLang] || 'uk-UA';
+  const fmt = new Intl.DateTimeFormat(locale, { month: 'long' });
+  const labels = [];
+  for (let m = 0; m < 12; m++) {
+    const label = fmt.format(new Date(2024, m, 1));
+    labels.push(label.charAt(0).toUpperCase() + label.slice(1));
+  }
+  return labels;
 }
 function weekdayShortLabels() {
   const locale = LOCALE_MAP[currentLang] || 'uk-UA';
@@ -532,8 +533,58 @@ function weekdayShortLabels() {
 }
 
 function renderCalendar() {
-  renderTagFilterRow();
   document.getElementById('calMonthLabel').textContent = calMonthLabelText();
+  if (calViewMode === 'year') {
+    renderYearGrid();
+    return;
+  }
+  renderMonthGrid();
+}
+
+function renderYearGrid() {
+  const gridEl = document.getElementById('calendarGrid');
+  gridEl.classList.add('cal-year-grid');
+  gridEl.classList.remove('cal-grid');
+  document.getElementById('calWeekdays').innerHTML = '';
+  document.getElementById('tagFilterRow').innerHTML = '';
+  document.getElementById('noDateSection').innerHTML = '';
+
+  const today = new Date();
+  const labels = monthShortLabels();
+  const filtered = tasks.filter(matchesFilters);
+  const countByMonth = new Array(12).fill(0);
+  filtered.forEach((tsk) => {
+    if (!tsk.dueDate) return;
+    const [y, m] = tsk.dueDate.split('-').map(Number);
+    if (y === calYear) countByMonth[m - 1] += 1;
+  });
+
+  let html = '';
+  for (let m = 0; m < 12; m++) {
+    const isCurrentMonth = calYear === today.getFullYear() && m === today.getMonth();
+    const count = countByMonth[m];
+    html += `
+      <div class="cal-month-tile${isCurrentMonth ? ' today' : ''}" data-cal-month="${m}">
+        <div class="cal-month-tile-name">${escapeHtml(labels[m])}</div>
+        ${count ? `<div class="cal-month-tile-count">${count}</div>` : ''}
+      </div>`;
+  }
+  gridEl.innerHTML = html;
+
+  gridEl.querySelectorAll('[data-cal-month]').forEach((tile) => {
+    tile.addEventListener('click', () => {
+      calMonth = Number(tile.dataset.calMonth);
+      calViewMode = 'month';
+      renderCalendar();
+    });
+  });
+}
+
+function renderMonthGrid() {
+  const gridEl = document.getElementById('calendarGrid');
+  gridEl.classList.add('cal-grid');
+  gridEl.classList.remove('cal-year-grid');
+  renderTagFilterRow();
   document.getElementById('calWeekdays').innerHTML = weekdayShortLabels()
     .map((w) => `<div class="cal-weekday">${escapeHtml(w)}</div>`).join('');
 
@@ -574,7 +625,6 @@ function renderCalendar() {
         <div class="cal-day-tasks">${chips}${moreHtml}</div>
       </div>`;
   }
-  const gridEl = document.getElementById('calendarGrid');
   gridEl.innerHTML = html;
 
   gridEl.querySelectorAll('[data-cal-day]').forEach((cell) => {
@@ -701,41 +751,25 @@ function toggleDone(id) {
 
 // ---- Навігація календаря ----
 document.getElementById('calPrevBtn').addEventListener('click', () => {
-  calMonth -= 1;
-  if (calMonth < 0) { calMonth = 11; calYear -= 1; }
+  if (calViewMode === 'year') {
+    calYear -= 1;
+  } else {
+    calMonth -= 1;
+    if (calMonth < 0) { calMonth = 11; calYear -= 1; }
+  }
   renderCalendar();
 });
 document.getElementById('calNextBtn').addEventListener('click', () => {
-  calMonth += 1;
-  if (calMonth > 11) { calMonth = 0; calYear += 1; }
+  if (calViewMode === 'year') {
+    calYear += 1;
+  } else {
+    calMonth += 1;
+    if (calMonth > 11) { calMonth = 0; calYear += 1; }
+  }
   renderCalendar();
 });
 document.getElementById('calMonthLabel').addEventListener('click', () => {
-  const now = new Date();
-  calYear = now.getFullYear();
-  calMonth = now.getMonth();
-  renderCalendar();
-});
-
-// ---- Пошук ----
-document.getElementById('searchToggleBtn').addEventListener('click', () => {
-  const bar = document.getElementById('searchBar');
-  const btn = document.getElementById('searchToggleBtn');
-  const show = !bar.classList.contains('show');
-  bar.classList.toggle('show', show);
-  btn.classList.toggle('active', show);
-  if (show) document.getElementById('searchInput').focus();
-  else { document.getElementById('searchInput').value = ''; searchQuery = ''; renderCalendar(); }
-});
-document.getElementById('searchInput').addEventListener('input', (e) => {
-  searchQuery = e.target.value.trim();
-  document.getElementById('clearSearchBtn').style.display = searchQuery ? 'flex' : 'none';
-  renderCalendar();
-});
-document.getElementById('clearSearchBtn').addEventListener('click', () => {
-  document.getElementById('searchInput').value = '';
-  searchQuery = '';
-  document.getElementById('clearSearchBtn').style.display = 'none';
+  calViewMode = calViewMode === 'year' ? 'month' : 'year';
   renderCalendar();
 });
 
