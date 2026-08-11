@@ -26,6 +26,7 @@ const T = {
     searchPlaceholder: 'Пошук за назвою, нотатками, тегами',
     noDateLabel: 'Без дати',
     dayViewEmptyTitle: 'На цю дату завдань немає', dayViewEmptySub: 'Додай завдання кнопкою внизу.',
+    dayViewFabLabel: 'Нове завдання',
     completedLabel: (n) => `Виконано (${n})`,
     newTaskTitle: 'Нове завдання', editTaskTitle: 'Редагувати завдання',
     titlePlaceholder: 'Назва завдання',
@@ -73,6 +74,7 @@ const T = {
     searchPlaceholder: 'Поиск по названию, заметкам, тегам',
     noDateLabel: 'Без даты',
     dayViewEmptyTitle: 'На эту дату задач нет', dayViewEmptySub: 'Добавь задачу кнопкой внизу.',
+    dayViewFabLabel: 'Новая задача',
     completedLabel: (n) => `Выполнено (${n})`,
     newTaskTitle: 'Новая задача', editTaskTitle: 'Редактировать задачу',
     titlePlaceholder: 'Название задачи',
@@ -120,6 +122,7 @@ const T = {
     searchPlaceholder: 'Szukaj po nazwie, notatkach, tagach',
     noDateLabel: 'Bez daty',
     dayViewEmptyTitle: 'Na ten dzień nie ma zadań', dayViewEmptySub: 'Dodaj zadanie przyciskiem poniżej.',
+    dayViewFabLabel: 'Nowe zadanie',
     completedLabel: (n) => `Ukończono (${n})`,
     newTaskTitle: 'Nowe zadanie', editTaskTitle: 'Edytuj zadanie',
     titlePlaceholder: 'Nazwa zadania',
@@ -167,6 +170,7 @@ const T = {
     searchPlaceholder: 'Search title, notes, tags',
     noDateLabel: 'No date',
     dayViewEmptyTitle: 'No tasks for this date', dayViewEmptySub: 'Add a task with the button below.',
+    dayViewFabLabel: 'New task',
     completedLabel: (n) => `Completed (${n})`,
     newTaskTitle: 'New task', editTaskTitle: 'Edit task',
     titlePlaceholder: 'Task title',
@@ -294,6 +298,7 @@ function applyTranslations() {
   document.getElementById('pageTitle').textContent = t('pageTitle');
   document.getElementById('pageSub').textContent = t('pageSub');
   document.getElementById('searchInput').placeholder = t('searchPlaceholder');
+  document.getElementById('dayViewFabLabel').textContent = t('dayViewFabLabel');
   document.getElementById('notesLabel').textContent = t('notesLabel');
   document.getElementById('taskNotesInput').placeholder = t('notesPlaceholder');
   document.getElementById('dueDateLabel').textContent = t('dueDateLabel');
@@ -750,6 +755,9 @@ function renderDayView() {
 }
 
 document.getElementById('dayViewBackBtn').addEventListener('click', showCalendarView);
+document.getElementById('openNewTaskDay').addEventListener('click', () => {
+  openTaskForm(null, dayViewDate);
+});
 
 function toggleDone(id) {
   const task = tasks.find((tsk) => tsk.id === id);
