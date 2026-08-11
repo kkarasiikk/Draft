@@ -8,12 +8,11 @@ PWA (Progressive Web App) без збірки: чистий HTML/CSS/JS + Fireba
 ```
 index.html, index.js, home.js   -- домашній хаб (вибір розділу після входу)
 budget/                          -- модуль «Бюджет»: транзакції, заощадження, цілі, нотатки
-tasks/                           -- модуль «Завдання»: підзадачі, теги, пріоритет, push-нагадування
-firebase-messaging-sw.js         -- service worker для фонових push (Cloud Messaging), у корені сайту
+tasks/                           -- модуль «Завдання»: підзадачі, теги, пріоритет
 firestore.rules                  -- правила доступу Firestore (усі колекції, обидва модулі)
-firestore.indexes.json           -- складені індекси (потрібні для запиту нагадувань)
+firestore.indexes.json           -- складені індекси
 firebase.json                    -- деплой: Firestore rules/indexes + Cloud Functions
-index.js, ai.js, tasks.js        -- Cloud Functions (окремий Node-проєкт, package.json у корені)
+index.js, ai.js                  -- Cloud Functions (окремий Node-проєкт, package.json у корені)
 ```
 
 Кожен модуль (`budget/`, `tasks/`) — самодостатня сторінка зі своїм входом
@@ -26,12 +25,9 @@ index.js, ai.js, tasks.js        -- Cloud Functions (окремий Node-про�
 - **Frontend** — чистий HTML/CSS/JS на сторінку, без фреймворків і без кроку збірки
 - **Firebase Auth** — вхід через email/пароль
 - **Cloud Firestore** — зберігання даних (транзакції, категорії, заощадження, нотатки, завдання)
-- **Firebase Cloud Messaging** — push-нагадування про завдання (навіть коли сайт закритий)
-- **Cloud Functions** — `walletSync` (прийом транзакцій з Apple Shortcuts), `aiChat`
-  (AI-асистент), `taskReminders` (заплановане надсилання push-нагадувань, кожні 5 хв)
+- **Cloud Functions** — `walletSync` (прийом транзакцій з Apple Shortcuts), `aiChat` (AI-асистент)
 - **Firestore Security Rules** — `firestore.rules`
-- **Service Worker** — офлайн-кеш статики в `budget/` (`budget/service-worker.js`) +
-  окремий SW для фонових push у корені (`firebase-messaging-sw.js`)
+- **Service Worker** — офлайн-кеш статики в `budget/` (`budget/service-worker.js`)
 - **PWA manifest** — окремий `manifest.json` на кожен модуль (свій `scope`/`start_url`),
   іконки в т.ч. `maskable`-варіанти для Android — спільні, лежать у `budget/`
 - Зовнішні бібліотеки (з `cdnjs.cloudflare.com`, дозволено через CSP): Chart.js,
@@ -64,16 +60,15 @@ firebase deploy
 ```
 
 Це задеплоїть `firestore.rules`, `firestore.indexes.json` і Cloud Functions
-(`walletSync`, `aiChat`, `taskReminders`). Хостинг статичних файлів (GitHub
+(`walletSync`, `aiChat`). Хостинг статичних файлів (GitHub
 Pages чи Firebase Hosting) — окремо, залежно від того, де реально
 розміщений сайт.
 
-**Важливо:** `taskReminders` — це запланована функція (Cloud Scheduler),
-а Cloud Scheduler і вихідний трафік Cloud Functions вимагають, щоб проєкт
+**Важливо:** вихідний трафік Cloud Functions вимагає, щоб проєкт
 Firebase був на тарифі **Blaze** (pay-as-you-go). Без Blaze функції
-`walletSync`/`aiChat`/`taskReminders` задеплоїти не вдасться. У межах
-безкоштовних лімітів Blaze (2 млн викликів Cloud Functions і 3 завдання
-Cloud Scheduler на місяць) звичайне особисте використання нічого не коштує.
+`walletSync`/`aiChat` задеплоїти не вдасться. У межах
+безкоштовних лімітів Blaze (2 млн викликів Cloud Functions на місяць)
+звичайне особисте використання нічого не коштує.
 
 ## Конфігурація перед першим запуском
 
@@ -83,16 +78,7 @@ Cloud Scheduler на місяць) звичайне особисте викор�
 2. Там же встав реальний **App Check reCAPTCHA v3 site key**
    (`RECAPTCHA_V3_SITE_KEY`) — без нього другий рівень захисту Firestore
    не активний. Отримати ключ: Firebase Console → App Check → reCAPTCHA v3.
-3. Щоб увімкнути **push-нагадування про завдання**, там же встав реальний
-   **VAPID key** (`FCM_VAPID_KEY`): Firebase Console → Project settings →
-   Cloud Messaging → Web configuration → Web Push certificates → Generate
-   key pair. Без нього кнопка «Push-сповіщення» на сторінці завдань
-   пояснить, що ключ ще не налаштований, і не даватиме увімкнутись —
-   решта модуля «Завдання» (без push) працює й без цього кроку.
-4. У `firebase-messaging-sw.js` (корінь сайту) конфіг Firebase продубльовано
-   окремо (service worker не може підключити `budget/firebase-config.js`
-   як звичайний скрипт сторінки) — онови його там теж, якщо змінюєш проєкт.
-5. Переконайся, що `.firebaserc` вказує на твій `projectId` (створи файл,
+3. Переконайся, що `.firebaserc` вказує на твій `projectId` (створи файл,
    якщо його ще немає — `firebase use --add` зробить це автоматично).
 
 ## Модель даних (Firestore)
@@ -104,9 +90,7 @@ users/{uid}/savings/{id}        -- {type, amount, currency, note, date, goalId}
 users/{uid}/savingsGoals/{id}   -- {name, createdAt}
 users/{uid}/pages/{id}          -- {title, content, createdAt, updatedAt}
 users/{uid}/tasks/{id}          -- {title, notes, done, priority, tags, dueDate, dueTime,
-                                    reminderMinutesBefore, reminderAt, notifiedAt, subtasks,
-                                    createdAt, updatedAt}
-users/{uid}/fcmTokens/{token}   -- {createdAt, userAgent} — пристрої для push-нагадувань
+                                    subtasks, createdAt, updatedAt}
 ```
 
 Детальні правила доступу — у `firestore.rules`.
@@ -121,14 +105,6 @@ users/{uid}/fcmTokens/{token}   -- {createdAt, userAgent} — пристрої �
   тегах і пошуком за назвою/нотаткою/тегами), нотатка.
 - Підзадачі (чек-лист усередині завдання) — зберігаються як масив у
   документі завдання, без окремої підколекції.
-- **Push-нагадування** (Firebase Cloud Messaging): вмикаються перемикачем
-  у меню «Нагадування», працюють навіть коли сайт закритий. Момент
-  нагадування (`reminderAt`) рахує клієнт при збереженні завдання (у
-  локальному часовому поясі пристрою), а надсилає — запланована Cloud
-  Function `taskReminders` (`tasks.js`), яка кожні 5 хв перевіряє всі
-  завдання всіх користувачів (`collectionGroup('tasks')`) і шле push
-  через `admin.messaging().sendEachForMulticast()`, після чого прибирає
-  недійсні токени пристроїв.
 
 ## Мови
 
@@ -148,8 +124,7 @@ users/{uid}/fcmTokens/{token}   -- {createdAt, userAgent} — пристрої �
 ## Тести
 
 Юніт-тести для Cloud Functions (Jest, мок Firestore/Anthropic SDK — без
-живих викликів): `ai.test.js` (AI-асистент), `tasks.test.js` (розрахунок
-моменту нагадування). Запуск:
+живих викликів): `ai.test.js` (AI-асистент). Запуск:
 
 ```bash
 npm install

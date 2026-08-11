@@ -65,7 +65,3 @@ exports.walletSync = functions.https.onRequest(async (req, res) => {
 // AI-помічник (чат + запис транзакцій голосом/текстом) — окремий файл,
 // щоб не роздувати цей модуль. Дивись ai.js.
 exports.aiChat = require("./ai").aiChat;
-
-// Планові push-нагадування про завдання (Cloud Scheduler, кожні 5 хв) —
-// окремий файл, дивись tasks.js.
-exports.taskReminders = require("./tasks").taskReminders;

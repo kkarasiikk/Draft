@@ -16,12 +16,3 @@ const firebaseConfig = {
 // Поки тут заглушка — App Check просто не активується (initializeAppCheck
 // нижче обгорнутий у try/catch), застосунок працює як раніше.
 const RECAPTCHA_V3_SITE_KEY = "ВСТАВ_СЮДИ_СВІЙ_SITE_KEY";
-
-// Web Push сертифікат (VAPID key) для Firebase Cloud Messaging — потрібен,
-// щоб /tasks/ міг попросити браузер підписатись на push-нагадування.
-// Отримати: Firebase Console → Project settings → Cloud Messaging →
-// вкладка "Web configuration" → "Web Push certificates" → Generate key pair.
-// Це теж публічний ключ (як apiKey і RECAPTCHA_V3_SITE_KEY вище).
-// Поки заглушка — кнопка "Увімкнути нагадування" на сторінці задач
-// покаже пояснення, що ключ ще не налаштований.
-const FCM_VAPID_KEY = "BNEdyox0tk4XTbZQXnbFyBXDB6KZGddK2jxmJRLk0Z4AYMFPPbbVF_ogNlWZ8E8mBJISCldZIA_uy7hsbxyRIZU";

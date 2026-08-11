@@ -33,25 +33,12 @@ const T = {
     notesLabel: 'Нотатка', notesPlaceholder: 'Додаткові деталі (необовʼязково)',
     dueDateLabel: 'Дата', dueTimeLabel: 'Час',
     priorityLabel: 'Пріоритет', priorityNone: 'Немає', priorityLow: 'Низький', priorityMedium: 'Середній', priorityHigh: 'Високий',
-    reminderLabel: 'Нагадати',
-    reminderOff: 'Не нагадувати', reminderAtDue: 'У момент дедлайну',
-    reminder10: 'За 10 хв', reminder30: 'За 30 хв', reminder60: 'За 1 год', reminder1440: 'За 1 день',
-    reminderNeedsDate: 'Вкажи дату, щоб увімкнути нагадування',
     tagsLabel: 'Теги', tagsPlaceholder: 'Додай тег і натисни Enter',
     subtasksLabel: 'Підзадачі', subtaskPlaceholder: 'Нова підзадача',
     deleteBtn: 'Видалити', saveBtn: 'Зберегти',
     titleRequiredError: 'Введи назву завдання',
     confirmDeleteTitle: 'Видалити завдання?', confirmDeleteSub: 'Цю дію не можна скасувати.',
     cancelBtn: 'Скасувати', deleteConfirmBtn: 'Видалити',
-    remindersMenuLabel: 'Нагадування', remindersTitle: 'Нагадування',
-    pushToggleTitle: 'Push-сповіщення',
-    pushToggleSub: 'Отримувати нагадування про завдання на цьому пристрої, навіть коли сайт закритий.',
-    statusEnabled: 'Увімкнено на цьому пристрої.', statusDisabled: 'Вимкнено на цьому пристрої.',
-    statusNoVapid: 'Push ще не налаштований власником сайту (немає VAPID-ключа в firebase-config.js).',
-    statusPermissionDenied: 'Дозвіл на сповіщення відхилено в браузері. Дозволь його в налаштуваннях сайту.',
-    statusUnsupported: 'Цей браузер не підтримує push-сповіщення.',
-    statusRequesting: 'Запитуємо дозвіл…',
-    statusError: 'Не вдалося увімкнути сповіщення. Спробуй ще раз.',
     themeLabel: 'Тема', themeLight: 'Світла', themeDark: 'Темна', themeSystem: 'Системна',
     langLabel: 'Мова', logout: 'Вийти',
     authTitleLogin: 'Вхід', authTitleSignup: 'Реєстрація',
@@ -81,25 +68,12 @@ const T = {
     notesLabel: 'Заметка', notesPlaceholder: 'Дополнительные детали (необязательно)',
     dueDateLabel: 'Дата', dueTimeLabel: 'Время',
     priorityLabel: 'Приоритет', priorityNone: 'Нет', priorityLow: 'Низкий', priorityMedium: 'Средний', priorityHigh: 'Высокий',
-    reminderLabel: 'Напомнить',
-    reminderOff: 'Не напоминать', reminderAtDue: 'В момент дедлайна',
-    reminder10: 'За 10 мин', reminder30: 'За 30 мин', reminder60: 'За 1 час', reminder1440: 'За 1 день',
-    reminderNeedsDate: 'Укажи дату, чтобы включить напоминание',
     tagsLabel: 'Теги', tagsPlaceholder: 'Добавь тег и нажми Enter',
     subtasksLabel: 'Подзадачи', subtaskPlaceholder: 'Новая подзадача',
     deleteBtn: 'Удалить', saveBtn: 'Сохранить',
     titleRequiredError: 'Введи название задачи',
     confirmDeleteTitle: 'Удалить задачу?', confirmDeleteSub: 'Это действие нельзя отменить.',
     cancelBtn: 'Отмена', deleteConfirmBtn: 'Удалить',
-    remindersMenuLabel: 'Напоминания', remindersTitle: 'Напоминания',
-    pushToggleTitle: 'Push-уведомления',
-    pushToggleSub: 'Получать напоминания о задачах на этом устройстве, даже когда сайт закрыт.',
-    statusEnabled: 'Включено на этом устройстве.', statusDisabled: 'Выключено на этом устройстве.',
-    statusNoVapid: 'Push ещё не настроен владельцем сайта (нет VAPID-ключа в firebase-config.js).',
-    statusPermissionDenied: 'Разрешение на уведомления отклонено в браузере. Разреши его в настройках сайта.',
-    statusUnsupported: 'Этот браузер не поддерживает push-уведомления.',
-    statusRequesting: 'Запрашиваем разрешение…',
-    statusError: 'Не удалось включить уведомления. Попробуй ещё раз.',
     themeLabel: 'Тема', themeLight: 'Светлая', themeDark: 'Тёмная', themeSystem: 'Системная',
     langLabel: 'Язык', logout: 'Выйти',
     authTitleLogin: 'Вход', authTitleSignup: 'Регистрация',
@@ -129,25 +103,12 @@ const T = {
     notesLabel: 'Notatka', notesPlaceholder: 'Dodatkowe szczegóły (opcjonalnie)',
     dueDateLabel: 'Data', dueTimeLabel: 'Godzina',
     priorityLabel: 'Priorytet', priorityNone: 'Brak', priorityLow: 'Niski', priorityMedium: 'Średni', priorityHigh: 'Wysoki',
-    reminderLabel: 'Przypomnij',
-    reminderOff: 'Nie przypominaj', reminderAtDue: 'W momencie terminu',
-    reminder10: '10 min wcześniej', reminder30: '30 min wcześniej', reminder60: '1 godz. wcześniej', reminder1440: '1 dzień wcześniej',
-    reminderNeedsDate: 'Podaj datę, aby włączyć przypomnienie',
     tagsLabel: 'Tagi', tagsPlaceholder: 'Dodaj tag i naciśnij Enter',
     subtasksLabel: 'Podzadania', subtaskPlaceholder: 'Nowe podzadanie',
     deleteBtn: 'Usuń', saveBtn: 'Zapisz',
     titleRequiredError: 'Wpisz nazwę zadania',
     confirmDeleteTitle: 'Usunąć zadanie?', confirmDeleteSub: 'Tej czynności nie można cofnąć.',
     cancelBtn: 'Anuluj', deleteConfirmBtn: 'Usuń',
-    remindersMenuLabel: 'Przypomnienia', remindersTitle: 'Przypomnienia',
-    pushToggleTitle: 'Powiadomienia push',
-    pushToggleSub: 'Otrzymuj przypomnienia o zadaniach na tym urządzeniu, nawet gdy strona jest zamknięta.',
-    statusEnabled: 'Włączone na tym urządzeniu.', statusDisabled: 'Wyłączone na tym urządzeniu.',
-    statusNoVapid: 'Push nie jest jeszcze skonfigurowany przez właściciela strony (brak klucza VAPID w firebase-config.js).',
-    statusPermissionDenied: 'Zgoda na powiadomienia odrzucona w przeglądarce. Zezwól w ustawieniach strony.',
-    statusUnsupported: 'Ta przeglądarka nie obsługuje powiadomień push.',
-    statusRequesting: 'Prośba o zgodę…',
-    statusError: 'Nie udało się włączyć powiadomień. Spróbuj ponownie.',
     themeLabel: 'Motyw', themeLight: 'Jasny', themeDark: 'Ciemny', themeSystem: 'Systemowy',
     langLabel: 'Język', logout: 'Wyloguj',
     authTitleLogin: 'Logowanie', authTitleSignup: 'Rejestracja',
@@ -177,25 +138,12 @@ const T = {
     notesLabel: 'Notes', notesPlaceholder: 'Extra details (optional)',
     dueDateLabel: 'Date', dueTimeLabel: 'Time',
     priorityLabel: 'Priority', priorityNone: 'None', priorityLow: 'Low', priorityMedium: 'Medium', priorityHigh: 'High',
-    reminderLabel: 'Remind me',
-    reminderOff: "Don't remind", reminderAtDue: 'At due time',
-    reminder10: '10 min before', reminder30: '30 min before', reminder60: '1 hour before', reminder1440: '1 day before',
-    reminderNeedsDate: 'Set a date to enable a reminder',
     tagsLabel: 'Tags', tagsPlaceholder: 'Add a tag and press Enter',
     subtasksLabel: 'Subtasks', subtaskPlaceholder: 'New subtask',
     deleteBtn: 'Delete', saveBtn: 'Save',
     titleRequiredError: 'Enter a task title',
     confirmDeleteTitle: 'Delete task?', confirmDeleteSub: 'This action cannot be undone.',
     cancelBtn: 'Cancel', deleteConfirmBtn: 'Delete',
-    remindersMenuLabel: 'Reminders', remindersTitle: 'Reminders',
-    pushToggleTitle: 'Push notifications',
-    pushToggleSub: 'Get task reminders on this device, even when the site is closed.',
-    statusEnabled: 'Enabled on this device.', statusDisabled: 'Disabled on this device.',
-    statusNoVapid: "Push isn't configured by the site owner yet (no VAPID key in firebase-config.js).",
-    statusPermissionDenied: 'Notification permission was denied in the browser. Allow it in the site settings.',
-    statusUnsupported: "This browser doesn't support push notifications.",
-    statusRequesting: 'Requesting permission…',
-    statusError: 'Could not enable notifications. Try again.',
     themeLabel: 'Theme', themeLight: 'Light', themeDark: 'Dark', themeSystem: 'System',
     langLabel: 'Language', logout: 'Log out',
     authTitleLogin: 'Log in', authTitleSignup: 'Sign up',
@@ -287,7 +235,6 @@ function setLang(lang) {
   renderLangPicker();
   renderAuthLangRow();
   renderPriorityPicker();
-  renderReminderOptions();
   renderCurrentScreen();
 }
 
@@ -304,7 +251,6 @@ function applyTranslations() {
   document.getElementById('dueDateLabel').textContent = t('dueDateLabel');
   document.getElementById('dueTimeLabel').textContent = t('dueTimeLabel');
   document.getElementById('priorityLabel').textContent = t('priorityLabel');
-  document.getElementById('reminderLabel').textContent = t('reminderLabel');
   document.getElementById('tagsLabel').textContent = t('tagsLabel');
   document.getElementById('tagInput').placeholder = t('tagsPlaceholder');
   document.getElementById('subtasksLabel').textContent = t('subtasksLabel');
@@ -312,10 +258,6 @@ function applyTranslations() {
   document.getElementById('deleteTaskBtn').textContent = t('deleteBtn');
   document.getElementById('taskSubmitBtn').textContent = t('saveBtn');
   document.getElementById('taskTitleInput').placeholder = t('titlePlaceholder');
-  document.getElementById('remindersMenuLabel').textContent = t('remindersMenuLabel');
-  document.getElementById('remindersTitle').textContent = t('remindersTitle');
-  document.getElementById('pushToggleTitle').textContent = t('pushToggleTitle');
-  document.getElementById('pushToggleSub').textContent = t('pushToggleSub');
   document.getElementById('confirmTitle').textContent = t('confirmDeleteTitle');
   document.getElementById('confirmSub').textContent = t('confirmDeleteSub');
   document.getElementById('confirmCancel').textContent = t('cancelBtn');
@@ -346,17 +288,6 @@ function renderPriorityPicker() {
   el.querySelectorAll('[data-priority]').forEach((btn) => {
     btn.addEventListener('click', () => { formPriority = btn.dataset.priority || null; renderPriorityPicker(); });
   });
-}
-
-const REMINDER_OPTIONS = [
-  ['none', 'reminderOff'], ['0', 'reminderAtDue'], ['10', 'reminder10'],
-  ['30', 'reminder30'], ['60', 'reminder60'], ['1440', 'reminder1440'],
-];
-function renderReminderOptions() {
-  const sel = document.getElementById('reminderSelect');
-  const prev = sel.value;
-  sel.innerHTML = REMINDER_OPTIONS.map(([v, key]) => `<option value="${v}">${t(key)}</option>`).join('');
-  sel.value = prev || 'none';
 }
 
 // ---- Вхід / реєстрація ----
@@ -878,14 +809,6 @@ document.getElementById('subtaskInput').addEventListener('keydown', (e) => {
   if (e.key === 'Enter') { e.preventDefault(); addSubtaskFromInput(); }
 });
 
-function updateReminderAvailability() {
-  const hasDate = !!document.getElementById('taskDueDate').value;
-  const sel = document.getElementById('reminderSelect');
-  sel.disabled = !hasDate;
-  if (!hasDate) sel.value = 'none';
-}
-document.getElementById('taskDueDate').addEventListener('change', updateReminderAvailability);
-
 function openTaskForm(existingTask, prefillDate) {
   editingTaskId = existingTask ? existingTask.id : null;
   document.getElementById('taskModalTitle').textContent = existingTask ? t('editTaskTitle') : t('newTaskTitle');
@@ -899,10 +822,6 @@ function openTaskForm(existingTask, prefillDate) {
   formTags = existingTask ? [...(existingTask.tags || [])] : [];
   formSubtasks = existingTask ? (existingTask.subtasks || []).map((s) => ({ ...s })) : [];
   renderPriorityPicker();
-  renderReminderOptions();
-  document.getElementById('reminderSelect').value = existingTask && existingTask.reminderMinutesBefore != null
-    ? String(existingTask.reminderMinutesBefore) : 'none';
-  updateReminderAvailability();
   renderTagsInput();
   renderSubtasksEditor();
   document.getElementById('taskFormOverlay').classList.add('show');
@@ -929,11 +848,6 @@ document.getElementById('taskForm').addEventListener('submit', async (e) => {
 
   const dueDate = document.getElementById('taskDueDate').value || null;
   const dueTime = document.getElementById('taskDueTime').value || null;
-  const reminderRaw = document.getElementById('reminderSelect').value;
-  const reminderMinutesBefore = dueDate && reminderRaw !== 'none' ? Number(reminderRaw) : null;
-  const reminderAt = reminderMinutesBefore != null
-    ? firebase.firestore.Timestamp.fromDate(new Date(new Date(`${dueDate}T${dueTime || '09:00'}:00`).getTime() - reminderMinutesBefore * 60000))
-    : null;
 
   const cleanSubtasks = formSubtasks
     .map((s) => ({ id: s.id, title: (s.title || '').trim(), done: !!s.done }))
@@ -942,7 +856,6 @@ document.getElementById('taskForm').addEventListener('submit', async (e) => {
   const payload = {
     title, notes: document.getElementById('taskNotesInput').value.trim(),
     dueDate, dueTime, priority: formPriority, tags: formTags,
-    reminderMinutesBefore, reminderAt, notifiedAt: null,
     subtasks: cleanSubtasks,
     updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
   };
@@ -988,130 +901,6 @@ document.getElementById('confirmDelete').addEventListener('click', async () => {
   pendingDeleteId = null;
   document.getElementById('confirmOverlay').classList.remove('show');
 });
-
-// ---- Push-нагадування (Firebase Cloud Messaging) ----
-document.getElementById('remindersBtn').addEventListener('click', () => {
-  document.getElementById('appMenuOverlay').classList.remove('show');
-  document.getElementById('remindersOverlay').classList.add('show');
-  refreshReminderStatus();
-});
-document.getElementById('closeReminders').addEventListener('click', () => {
-  document.getElementById('remindersOverlay').classList.remove('show');
-});
-document.getElementById('remindersOverlay').addEventListener('click', (e) => {
-  if (e.target.id === 'remindersOverlay') e.currentTarget.classList.remove('show');
-});
-
-function setReminderStatus(text, kind) {
-  const el = document.getElementById('reminderStatus');
-  el.textContent = text;
-  el.className = 'reminder-status' + (kind ? ' ' + kind : '');
-}
-
-async function refreshReminderStatus() {
-  const toggle = document.getElementById('pushToggle');
-  if (!('Notification' in window) || !('serviceWorker' in navigator)) {
-    toggle.disabled = true;
-    setReminderStatus(t('statusUnsupported'), 'err');
-    return;
-  }
-  if (typeof FCM_VAPID_KEY !== 'string' || !FCM_VAPID_KEY || FCM_VAPID_KEY.startsWith('ВСТАВ_')) {
-    toggle.disabled = true;
-    setReminderStatus(t('statusNoVapid'), 'err');
-    return;
-  }
-  toggle.disabled = false;
-  if (Notification.permission === 'denied') {
-    toggle.checked = false;
-    toggle.disabled = true;
-    setReminderStatus(t('statusPermissionDenied'), 'err');
-    return;
-  }
-  let token = null;
-  try {
-    token = Notification.permission === 'granted' ? await getCurrentFcmToken() : null;
-  } catch (err) {
-    console.warn('refreshReminderStatus:', err);
-  }
-  toggle.checked = !!token;
-  setReminderStatus(token ? t('statusEnabled') : t('statusDisabled'), token ? 'ok' : '');
-}
-
-let cachedFcmToken = null;
-async function getCurrentFcmToken() {
-  if (Notification.permission !== 'granted') return null;
-  // ВАЖЛИВО: шлях відносний ('../firebase-messaging-sw.js' від /tasks/), а не
-  // абсолютний ('/firebase-messaging-sw.js'). Абсолютний шлях ламається на
-  // будь-якому хостингу, де сайт не лежить у корені домену (напр. GitHub
-  // Pages project-сторінка на кшталт username.github.io/Draft/) — там
-  // "/firebase-messaging-sw.js" веде на неіснуючий файл у корені ЦІЛОГО
-  // акаунта, а не сайту. Відносний шлях коректно резолвиться в межах
-  // фактичного кореня сайту незалежно від того, де він реально розміщений.
-  if (firebase.messaging.isSupported && !(await firebase.messaging.isSupported())) {
-    throw new Error('FCM не підтримується цим браузером/контекстом (потрібен HTTPS або localhost).');
-  }
-  const reg = await navigator.serviceWorker.getRegistration('../firebase-messaging-sw.js')
-    || await navigator.serviceWorker.register('../firebase-messaging-sw.js');
-  await navigator.serviceWorker.ready;
-  const messaging = firebase.messaging();
-  cachedFcmToken = await messaging.getToken({ vapidKey: FCM_VAPID_KEY, serviceWorkerRegistration: reg });
-  return cachedFcmToken;
-}
-
-document.getElementById('pushToggle').addEventListener('change', async (e) => {
-  const uidCur = auth.currentUser && auth.currentUser.uid;
-  if (!uidCur) return;
-  const toggle = e.target;
-  toggle.disabled = true;
-  if (toggle.checked) {
-    setReminderStatus(t('statusRequesting'));
-    try {
-      const permission = await Notification.requestPermission();
-      if (permission !== 'granted') {
-        toggle.checked = false;
-        setReminderStatus(permission === 'denied' ? t('statusPermissionDenied') : t('statusDisabled'), permission === 'denied' ? 'err' : '');
-        toggle.disabled = false;
-        return;
-      }
-      const token = await getCurrentFcmToken();
-      if (!token) throw new Error('no token');
-      await db.collection('users').doc(uidCur).collection('fcmTokens').doc(token).set({
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        userAgent: navigator.userAgent.slice(0, 300),
-      });
-      setReminderStatus(t('statusEnabled'), 'ok');
-    } catch (err) {
-      console.error('enable push:', err);
-      toggle.checked = false;
-      const detail = err && err.message ? err.message : '';
-      setReminderStatus(detail ? `${t('statusError')} (${detail})` : t('statusError'), 'err');
-    }
-  } else {
-    try {
-      if (cachedFcmToken) {
-        await db.collection('users').doc(uidCur).collection('fcmTokens').doc(cachedFcmToken).delete();
-      }
-    } catch (err) {
-      console.warn('disable push:', err);
-    }
-    setReminderStatus(t('statusDisabled'));
-  }
-  toggle.disabled = false;
-});
-
-// Показуємо сповіщення й самі, коли сайт відкритий і у фокусі — фонові пуші
-// (сайт закритий/у фоні) обробляє firebase-messaging-sw.js окремо.
-try {
-  if (typeof FCM_VAPID_KEY === 'string' && FCM_VAPID_KEY && !FCM_VAPID_KEY.startsWith('ВСТАВ_') && 'Notification' in window) {
-    firebase.messaging().onMessage((payload) => {
-      const title = (payload.notification && payload.notification.title) || t('pageTitle');
-      const body = (payload.notification && payload.notification.body) || '';
-      if (Notification.permission === 'granted') new Notification(title, { body, icon: '../budget/icon-192.png' });
-    });
-  }
-} catch (err) {
-  console.warn('FCM onMessage setup skipped:', err);
-}
 
 // ---- Автентифікація: стан ----
 auth.onAuthStateChanged((user) => {
@@ -1162,5 +951,4 @@ renderThemePicker();
 renderLangPicker();
 renderAuthLangRow();
 renderPriorityPicker();
-renderReminderOptions();
 setAuthMode('login');
