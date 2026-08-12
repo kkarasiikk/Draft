@@ -31,9 +31,7 @@ const T = {
     titlePlaceholder: 'Назва завдання',
     notesLabel: 'Нотатка', notesPlaceholder: 'Додаткові деталі (необовʼязково)',
     dueDateLabel: 'Дата', dueTimeLabel: 'Час',
-    priorityLabel: 'Пріоритет', priorityNone: 'Немає', priorityLow: 'Низький', priorityMedium: 'Середній', priorityHigh: 'Високий',
-    tagsLabel: 'Теги', tagsPlaceholder: 'Додай тег і натисни Enter',
-    subtasksLabel: 'Підзадачі', subtaskPlaceholder: 'Нова підзадача',
+    priorityNone: 'Немає', priorityLow: 'Низький', priorityMedium: 'Середній', priorityHigh: 'Високий',
     deleteBtn: 'Видалити', saveBtn: 'Зберегти',
     titleRequiredError: 'Введи назву завдання',
     confirmDeleteTitle: 'Видалити завдання?', confirmDeleteSub: 'Цю дію не можна скасувати.',
@@ -65,9 +63,7 @@ const T = {
     titlePlaceholder: 'Название задачи',
     notesLabel: 'Заметка', notesPlaceholder: 'Дополнительные детали (необязательно)',
     dueDateLabel: 'Дата', dueTimeLabel: 'Время',
-    priorityLabel: 'Приоритет', priorityNone: 'Нет', priorityLow: 'Низкий', priorityMedium: 'Средний', priorityHigh: 'Высокий',
-    tagsLabel: 'Теги', tagsPlaceholder: 'Добавь тег и нажми Enter',
-    subtasksLabel: 'Подзадачи', subtaskPlaceholder: 'Новая подзадача',
+    priorityNone: 'Нет', priorityLow: 'Низкий', priorityMedium: 'Средний', priorityHigh: 'Высокий',
     deleteBtn: 'Удалить', saveBtn: 'Сохранить',
     titleRequiredError: 'Введи название задачи',
     confirmDeleteTitle: 'Удалить задачу?', confirmDeleteSub: 'Это действие нельзя отменить.',
@@ -99,9 +95,7 @@ const T = {
     titlePlaceholder: 'Nazwa zadania',
     notesLabel: 'Notatka', notesPlaceholder: 'Dodatkowe szczegóły (opcjonalnie)',
     dueDateLabel: 'Data', dueTimeLabel: 'Godzina',
-    priorityLabel: 'Priorytet', priorityNone: 'Brak', priorityLow: 'Niski', priorityMedium: 'Średni', priorityHigh: 'Wysoki',
-    tagsLabel: 'Tagi', tagsPlaceholder: 'Dodaj tag i naciśnij Enter',
-    subtasksLabel: 'Podzadania', subtaskPlaceholder: 'Nowe podzadanie',
+    priorityNone: 'Brak', priorityLow: 'Niski', priorityMedium: 'Średni', priorityHigh: 'Wysoki',
     deleteBtn: 'Usuń', saveBtn: 'Zapisz',
     titleRequiredError: 'Wpisz nazwę zadania',
     confirmDeleteTitle: 'Usunąć zadanie?', confirmDeleteSub: 'Tej czynności nie można cofnąć.',
@@ -133,9 +127,7 @@ const T = {
     titlePlaceholder: 'Task title',
     notesLabel: 'Notes', notesPlaceholder: 'Extra details (optional)',
     dueDateLabel: 'Date', dueTimeLabel: 'Time',
-    priorityLabel: 'Priority', priorityNone: 'None', priorityLow: 'Low', priorityMedium: 'Medium', priorityHigh: 'High',
-    tagsLabel: 'Tags', tagsPlaceholder: 'Add a tag and press Enter',
-    subtasksLabel: 'Subtasks', subtaskPlaceholder: 'New subtask',
+    priorityNone: 'None', priorityLow: 'Low', priorityMedium: 'Medium', priorityHigh: 'High',
     deleteBtn: 'Delete', saveBtn: 'Save',
     titleRequiredError: 'Enter a task title',
     confirmDeleteTitle: 'Delete task?', confirmDeleteSub: 'This action cannot be undone.',
@@ -230,7 +222,6 @@ function setLang(lang) {
   applyTranslations();
   renderLangPicker();
   renderAuthLangRow();
-  renderPriorityPicker();
   renderCurrentScreen();
 }
 
@@ -243,11 +234,6 @@ function applyTranslations() {
   document.getElementById('taskNotesInput').placeholder = t('notesPlaceholder');
   document.getElementById('dueDateLabel').textContent = t('dueDateLabel');
   document.getElementById('dueTimeLabel').textContent = t('dueTimeLabel');
-  document.getElementById('priorityLabel').textContent = t('priorityLabel');
-  document.getElementById('tagsLabel').textContent = t('tagsLabel');
-  document.getElementById('tagInput').placeholder = t('tagsPlaceholder');
-  document.getElementById('subtasksLabel').textContent = t('subtasksLabel');
-  document.getElementById('subtaskInput').placeholder = t('subtaskPlaceholder');
   document.getElementById('deleteTaskBtn').textContent = t('deleteBtn');
   document.getElementById('taskSubmitBtn').textContent = t('saveBtn');
   document.getElementById('taskTitleInput').placeholder = t('titlePlaceholder');
@@ -268,19 +254,10 @@ function applyTranslations() {
   setAuthMode(authMode);
 }
 
-// ---- Пріоритет: опції форми (залежать від мови) ----
-const PRIORITIES = [null, 'low', 'medium', 'high'];
+// ---- Пріоритет: використовується для відображення чипа на картці
+// існуючого завдання (форма вибору пріоритету прибрана) ----
 function priorityLabel(p) {
   return p === 'low' ? t('priorityLow') : p === 'medium' ? t('priorityMedium') : p === 'high' ? t('priorityHigh') : t('priorityNone');
-}
-function renderPriorityPicker() {
-  const el = document.getElementById('priorityPicker');
-  el.innerHTML = PRIORITIES.map((p) =>
-    `<button type="button" class="choice${formPriority === p ? ' selected' : ''}${p ? ' ' + p : ''}" data-priority="${p || ''}">${priorityLabel(p)}</button>`
-  ).join('');
-  el.querySelectorAll('[data-priority]').forEach((btn) => {
-    btn.addEventListener('click', () => { formPriority = btn.dataset.priority || null; renderPriorityPicker(); });
-  });
 }
 
 // ---- Вхід / реєстрація ----
@@ -772,75 +749,6 @@ document.getElementById('calMonthLabel').addEventListener('click', () => {
 });
 
 // ---- Форма завдання ----
-function renderTagsInput() {
-  const row = document.getElementById('tagsInputRow');
-  const input = document.getElementById('tagInput');
-  row.querySelectorAll('.tag-chip-removable').forEach((el) => el.remove());
-  formTags.forEach((tag) => {
-    const chip = document.createElement('span');
-    chip.className = 'tag-chip-removable';
-    chip.innerHTML = `${escapeHtml(tag)} <button type="button" aria-label="remove">&times;</button>`;
-    chip.querySelector('button').addEventListener('click', () => {
-      formTags = formTags.filter((tg) => tg !== tag);
-      renderTagsInput();
-    });
-    row.insertBefore(chip, input);
-  });
-}
-document.getElementById('tagInput').addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' || e.key === ',') {
-    e.preventDefault();
-    const val = e.target.value.trim().replace(/,$/, '');
-    if (val && !formTags.includes(val) && formTags.length < 20) formTags.push(val);
-    e.target.value = '';
-    renderTagsInput();
-  } else if (e.key === 'Backspace' && !e.target.value && formTags.length) {
-    formTags.pop();
-    renderTagsInput();
-  }
-});
-
-function renderSubtasksEditor() {
-  const list = document.getElementById('subtasksList');
-  list.innerHTML = formSubtasks.map((s) => `
-    <div class="subtask-row${s.done ? ' done' : ''}" data-sid="${s.id}">
-      <input type="checkbox" data-sub-toggle="${s.id}" ${s.done ? 'checked' : ''}>
-      <input type="text" data-sub-title="${s.id}" value="${escapeHtml(s.title)}" maxlength="300">
-      <button type="button" class="subtask-del" data-sub-del="${s.id}" aria-label="delete"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
-    </div>`).join('');
-  list.querySelectorAll('[data-sub-toggle]').forEach((cb) => {
-    cb.addEventListener('change', () => {
-      const s = formSubtasks.find((x) => x.id === cb.dataset.subToggle);
-      if (s) s.done = cb.checked;
-      renderSubtasksEditor();
-    });
-  });
-  list.querySelectorAll('[data-sub-title]').forEach((inp) => {
-    inp.addEventListener('input', () => {
-      const s = formSubtasks.find((x) => x.id === inp.dataset.subTitle);
-      if (s) s.title = inp.value;
-    });
-  });
-  list.querySelectorAll('[data-sub-del]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      formSubtasks = formSubtasks.filter((x) => x.id !== btn.dataset.subDel);
-      renderSubtasksEditor();
-    });
-  });
-}
-function addSubtaskFromInput() {
-  const input = document.getElementById('subtaskInput');
-  const val = input.value.trim();
-  if (!val || formSubtasks.length >= 50) return;
-  formSubtasks.push({ id: uid4(), title: val, done: false });
-  input.value = '';
-  renderSubtasksEditor();
-}
-document.getElementById('addSubtaskBtn').addEventListener('click', addSubtaskFromInput);
-document.getElementById('subtaskInput').addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') { e.preventDefault(); addSubtaskFromInput(); }
-});
-
 function openTaskForm(existingTask, prefillDate) {
   editingTaskId = existingTask ? existingTask.id : null;
   document.getElementById('taskModalTitle').textContent = existingTask ? t('editTaskTitle') : t('newTaskTitle');
@@ -850,12 +758,12 @@ function openTaskForm(existingTask, prefillDate) {
   document.getElementById('taskNotesInput').value = existingTask ? existingTask.notes || '' : '';
   document.getElementById('taskDueDate').value = existingTask ? existingTask.dueDate || '' : (prefillDate || '');
   document.getElementById('taskDueTime').value = existingTask ? existingTask.dueTime || '' : '';
+  // Пріоритет/теги/підзадачі вже не редагуються у формі, але якщо це
+  // існуюче завдання зі старими значеннями — зберігаємо їх незмінними
+  // при наступному збереженні, а не стираємо.
   formPriority = existingTask ? existingTask.priority || null : null;
   formTags = existingTask ? [...(existingTask.tags || [])] : [];
   formSubtasks = existingTask ? (existingTask.subtasks || []).map((s) => ({ ...s })) : [];
-  renderPriorityPicker();
-  renderTagsInput();
-  renderSubtasksEditor();
   document.getElementById('taskFormOverlay').classList.add('show');
   setTimeout(() => document.getElementById('taskTitleInput').focus(), 50);
 }
@@ -982,5 +890,4 @@ applyTranslations();
 renderThemePicker();
 renderLangPicker();
 renderAuthLangRow();
-renderPriorityPicker();
 setAuthMode('login');

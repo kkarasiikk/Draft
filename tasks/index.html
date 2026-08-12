@@ -263,28 +263,6 @@
   textarea{resize:vertical;min-height:60px;font-family:'Inter',sans-serif;}
   .field-row{display:flex;gap:10px;}
   .field-row > div{flex:1;min-width:0;}
-  .choice-picker{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;margin-bottom:16px;}
-  .choice{padding:7px 13px;border-radius:20px;font-size:13px;cursor:pointer;font-family:'Inter',sans-serif;
-    border:1px solid var(--border);background:transparent;color:var(--ink-soft);}
-  .choice.selected{color:#fff;font-weight:600;border-color:transparent;}
-  .choice.selected.high{background:var(--high);} .choice.selected.medium{background:var(--medium);} .choice.selected.low{background:var(--low);}
-  .tags-input-row{display:flex;flex-wrap:wrap;gap:6px;align-items:center;border:1px solid var(--border);border-radius:8px;
-    padding:6px 8px;margin-top:6px;margin-bottom:16px;background:var(--bg);}
-  .tags-input-row input{flex:1;min-width:80px;border:none;background:none;margin:0;padding:4px 2px;font-size:14px;outline:none;color:var(--ink);}
-  .tag-chip-removable{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;padding:4px 6px 4px 10px;
-    border-radius:16px;background:var(--accent-light);color:var(--accent);white-space:nowrap;}
-  .tag-chip-removable button{background:none;border:none;cursor:pointer;color:inherit;padding:2px;display:flex;opacity:.7;}
-  .tag-chip-removable button:hover{opacity:1;}
-  .subtasks-list{margin-bottom:10px;}
-  .subtask-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
-  .subtask-row input[type=checkbox]{width:17px;height:17px;accent-color:var(--accent);cursor:pointer;margin:0;flex-shrink:0;}
-  .subtask-row input[type=text]{flex:1;margin:0;padding:7px 10px;font-size:13.5px;}
-  .subtask-row.done input[type=text]{color:var(--ink-muted);text-decoration:line-through;}
-  .subtask-del{background:none;border:none;cursor:pointer;color:var(--ink-muted);padding:4px;display:flex;flex-shrink:0;}
-  .subtask-add-row{display:flex;gap:8px;margin-bottom:16px;}
-  .subtask-add-row input{flex:1;margin:0;}
-  .subtask-add-row button{border:none;border-radius:8px;background:var(--accent-light);color:var(--accent);
-    cursor:pointer;padding:0 12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
   .form-error{color:var(--expense);font-size:13px;margin-bottom:8px;}
   .submit-btn{width:100%;margin-top:4px;padding:13px 0;border-radius:10px;border:none;cursor:pointer;color:#fff;
     font-size:15px;font-weight:600;font-family:'Inter',sans-serif;background:var(--accent);}
@@ -441,21 +419,6 @@
           <label class="field-label" id="dueTimeLabel">Час</label>
           <input type="time" id="taskDueTime">
         </div>
-      </div>
-
-      <label class="field-label" id="priorityLabel">Пріоритет</label>
-      <div class="choice-picker" id="priorityPicker"></div>
-
-      <label class="field-label" id="tagsLabel">Теги</label>
-      <div class="tags-input-row" id="tagsInputRow">
-        <input type="text" id="tagInput" placeholder="">
-      </div>
-
-      <label class="field-label" id="subtasksLabel">Підзадачі</label>
-      <div class="subtasks-list" id="subtasksList"></div>
-      <div class="subtask-add-row">
-        <input type="text" id="subtaskInput" placeholder="">
-        <button type="button" id="addSubtaskBtn" aria-label="Додати підзадачу"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg></button>
       </div>
 
       <div class="form-error" id="taskFormError"></div>
