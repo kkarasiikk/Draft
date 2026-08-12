@@ -454,14 +454,14 @@ function findColumn(header, names) {
 function normalizeImportDate(raw) {
   raw = (raw || '').trim();
   if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
-  const m = raw.match(/^(\d{1,2})[.\/](\d{1,2})[.\/](\d{4})$/);
+  const m = raw.match(/^(\d{1,2})[./](\d{1,2})[./](\d{4})$/);
   if (m) return `${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`;
   return null;
 }
 
 function normalizeImportAmount(raw) {
   if (raw == null) return null;
-  const cleaned = String(raw).replace(/\s/g, '').replace(/,/g, '.').replace(/[^\d.\-]/g, '');
+  const cleaned = String(raw).replace(/\s/g, '').replace(/,/g, '.').replace(/[^\d.-]/g, '');
   const n = parseFloat(cleaned);
   if (isNaN(n) || n === 0) return null;
   return Math.abs(n);
@@ -986,7 +986,7 @@ function renderCategoryManager() {
         if (src.length <= 1) { alert(t('catLastError')); return; }
         const used = transactions.filter(tx => tx.type === ty && tx.category === id).length;
         if (used > 0 && !confirm(t('catInUseConfirm', { count: used }))) return;
-        try { await deleteCategory(ty, id); } catch (e) {}
+        try { await deleteCategory(ty, id); } catch (e) { console.error(e); alert(t('err_generic')); }
       });
     });
   });

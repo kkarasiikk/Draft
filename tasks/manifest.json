@@ -1,7 +1,7 @@
 {
   "name": "Life — Завдання",
   "short_name": "Завдання",
-  "description": "Щоденні завдання, підзадачі й нагадування",
+  "description": "Щоденні завдання, підзадачі, теги й пріоритети",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

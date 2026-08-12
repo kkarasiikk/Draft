@@ -270,7 +270,7 @@ function applyTranslations() {
   setAuthMode(authMode);
 }
 
-// ---- Пріоритет / нагадування: опції форми (залежать від мови) ----
+// ---- Пріоритет: опції форми (залежать від мови) ----
 const PRIORITIES = [null, 'low', 'medium', 'high'];
 function priorityLabel(p) {
   return p === 'low' ? t('priorityLow') : p === 'medium' ? t('priorityMedium') : p === 'high' ? t('priorityHigh') : t('priorityNone');

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'moi-finansy-v4';
+const CACHE_NAME = 'moi-finansy-v5';
 const NETWORK_FIRST = ['./', './index.html', './app.js'];
 const FILES_TO_CACHE = ['./', './index.html', './app.js', './firebase-config.js', './manifest.json',
   './icon-192.png', './icon-512.png', './icon-192-maskable.png', './icon-512-maskable.png'];
@@ -12,6 +12,7 @@ const EXTERNAL_FILES_TO_CACHE = [
   'https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js',
   'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js',
   'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js',
+  'https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check-compat.js',
 ];
 
 self.addEventListener('install', (event) => {
