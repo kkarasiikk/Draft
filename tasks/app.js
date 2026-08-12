@@ -22,7 +22,7 @@ const LOCALE_MAP = { uk: 'uk-UA', ru: 'ru-RU', pl: 'pl-PL', en: 'en-US' };
 
 const T = {
   uk: {
-    pageTitle: 'Завдання', pageSub: 'Що зробити сьогодні, а що вже зроблено',
+    pageTitle: 'Завдання',
     noDateLabel: 'Без дати',
     dayViewEmptyTitle: 'На цю дату завдань немає', dayViewEmptySub: 'Додай завдання кнопкою внизу.',
     dayViewFabLabel: 'Нове завдання',
@@ -56,7 +56,7 @@ const T = {
     err_resetGeneric: 'Не вдалося надіслати лист. Спробуй пізніше.',
   },
   ru: {
-    pageTitle: 'Задачи', pageSub: 'Что сделать сегодня, а что уже сделано',
+    pageTitle: 'Задачи',
     noDateLabel: 'Без даты',
     dayViewEmptyTitle: 'На эту дату задач нет', dayViewEmptySub: 'Добавь задачу кнопкой внизу.',
     dayViewFabLabel: 'Новая задача',
@@ -90,7 +90,7 @@ const T = {
     err_resetGeneric: 'Не удалось отправить письмо. Попробуй позже.',
   },
   pl: {
-    pageTitle: 'Zadania', pageSub: 'Co zrobić dziś, a co już zrobione',
+    pageTitle: 'Zadania',
     noDateLabel: 'Bez daty',
     dayViewEmptyTitle: 'Na ten dzień nie ma zadań', dayViewEmptySub: 'Dodaj zadanie przyciskiem poniżej.',
     dayViewFabLabel: 'Nowe zadanie',
@@ -124,7 +124,7 @@ const T = {
     err_resetGeneric: 'Nie udało się wysłać wiadomości. Spróbuj później.',
   },
   en: {
-    pageTitle: 'Tasks', pageSub: "What to do today, and what's already done",
+    pageTitle: 'Tasks',
     noDateLabel: 'No date',
     dayViewEmptyTitle: 'No tasks for this date', dayViewEmptySub: 'Add a task with the button below.',
     dayViewFabLabel: 'New task',
@@ -238,8 +238,6 @@ function setLang(lang) {
 function applyTranslations() {
   document.getElementById('htmlRoot').setAttribute('lang', currentLang);
   document.title = `${t('pageTitle')} · Life`;
-  document.getElementById('pageTitle').textContent = t('pageTitle');
-  document.getElementById('pageSub').textContent = t('pageSub');
   document.getElementById('dayViewFabLabel').textContent = t('dayViewFabLabel');
   document.getElementById('notesLabel').textContent = t('notesLabel');
   document.getElementById('taskNotesInput').placeholder = t('notesPlaceholder');

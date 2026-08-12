@@ -82,7 +82,7 @@
   .background::before{content:""; position:absolute; width:550px; height:550px; top:-180px; left:-120px; background:var(--blob1); border-radius:50%; filter:blur(90px);}
   .background::after{content:""; position:absolute; width:500px; height:500px; bottom:-160px; right:-100px; background:var(--blob2); border-radius:50%; filter:blur(110px);}
 
-  .auth-box, .header, .app-menu, .task-menu, .tab-btn.active, .day-card, .card, .modal, .confirm-box{
+  .auth-box, .app-menu, .task-menu, .tab-btn.active, .day-card, .card, .modal, .confirm-box{
     backdrop-filter: blur(var(--glass-blur)) saturate(150%);
     -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(150%);
     box-shadow: var(--glass-shadow);
@@ -153,10 +153,7 @@
   .app-menu-divider{height:1px;background:var(--border);margin:6px 2px;}
   .task-menu{position:absolute;background:var(--surface);border:1px solid var(--border);border-radius:12px;
     box-shadow:0 10px 28px rgba(45,42,38,.14);padding:6px;min-width:170px;}
-  .header{background:var(--surface);border-bottom:1px solid var(--border);padding:calc(14px + env(safe-area-inset-top)) 20px 16px;}
-  .header-title{font-family:'Inter',sans-serif;font-weight:800;font-size:26px;letter-spacing:-.02em;}
-  .header-sub{font-size:12.5px;color:var(--ink-muted);margin-top:2px;}
-  .content{padding:12px 20px 0;}
+  .content{padding:20px 20px 0;}
   #dayViewScreen{padding:16px 20px 40px;}
   .cal-header{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
   .cal-nav-btn{display:flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;
@@ -311,8 +308,7 @@
     body{padding-bottom:32px;}
     .wrap{max-width:none;margin:0;padding:0 40px;}
     .app-topbar{padding:28px 0 0;}
-    .header{border-bottom:none;border-radius:16px;border:1px solid var(--border);padding:26px 26px 22px;margin:20px auto 0;max-width:960px;}
-    .content{max-width:960px;margin:0 auto;padding:14px 4px 40px;}
+    .content{max-width:960px;margin:0 auto;padding:20px 4px 40px;}
     #dayViewScreen{max-width:960px;margin:0 auto;padding:20px 4px 40px;}
     .cal-day{min-height:100px;padding:8px 6px;}
     .cal-chip{font-size:11px;padding:3px 7px;}
@@ -387,11 +383,6 @@
   </div>
 
   <div id="calendarScreen">
-  <div class="header">
-    <div class="header-title" id="pageTitle">Завдання</div>
-    <div class="header-sub" id="pageSub">Що зробити сьогодні, а що вже зроблено</div>
-  </div>
-
   <div class="content">
     <div class="cal-header">
       <button type="button" id="calPrevBtn" class="cal-nav-btn" aria-label="Попередній місяць">
