@@ -10,6 +10,9 @@ rules_version = '2';
 //   users/{uid}/tasks/{id}            -- {title, notes, done, priority, tags,
 //                                         dueDate, dueTime, subtasks,
 //                                         createdAt, updatedAt}
+//   users/{uid}/workouts/{id}         -- {date, name, notes, exercises: [
+//                                         {id, libId, muscle, name, sets: [
+//                                         {weight, reps}]}], createdAt, updatedAt}
 //
 // Правило: кожен користувач може читати й писати ЛИШЕ власні документи,
 // і лише якщо форма даних відповідає тому, що реально пише застосунок —
@@ -112,6 +115,24 @@ service cloud.firestore {
         }
         allow read, delete: if isOwner(uid);
         allow create, update: if isOwner(uid) && isValidTask(request.resource.data);
+      }
+
+      match /workouts/{workoutId} {
+        // Як і з tasks/subtasks, форму КОЖНОГО елемента exercises/sets тут не
+        // перевіряємо (мова правил не дає зручно пройтись по вкладеному
+        // списку довільної довжини) — лише що це список і не задовгий.
+        // Форму окремих вправ/підходів ({id, libId, muscle, name, sets:[{weight,reps}]})
+        // гарантує клієнтський код (sessionForm submit-handler у workout/app.js).
+        function isValidWorkout(d) {
+          return d.date is string && d.date.size() == 10 &&
+                 d.name is string && d.name.size() <= 120 &&
+                 d.notes is string && d.notes.size() <= 3000 &&
+                 d.exercises is list && d.exercises.size() >= 1 && d.exercises.size() <= 30 &&
+                 d.createdAt is timestamp && d.updatedAt is timestamp &&
+                 d.keys().hasOnly(['date', 'name', 'notes', 'exercises', 'createdAt', 'updatedAt']);
+        }
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid) && isValidWorkout(request.resource.data);
       }
     }
 

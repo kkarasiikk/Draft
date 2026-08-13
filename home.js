@@ -142,8 +142,7 @@ function applyTranslations() {
   document.getElementById('tasksOpenBtnLabel').textContent = t('openBtn');
   document.getElementById('workoutTitle').textContent = t('workoutTitle');
   document.getElementById('workoutDesc').textContent = t('workoutDesc');
-  document.getElementById('workoutBadge').textContent = t('soon');
-  document.getElementById('workoutCard').setAttribute('aria-label', `${t('workoutTitle')} — ${t('soon')}`);
+  document.getElementById('workoutOpenBtnLabel').textContent = t('openBtn');
   document.getElementById('authSub').textContent = t('authSub');
   document.getElementById('authEmailLabel').textContent = t('emailLabel');
   document.getElementById('authPasswordLabel').textContent = t('passwordLabel');
