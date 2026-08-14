@@ -83,7 +83,7 @@ const T = {
     chartIncome: 'Дохід', chartExpense: 'Витрати',
     fabExpense: 'Витрата', fabIncome: 'Дохід',
     newExpenseTitle: 'Нова витрата', newIncomeTitle: 'Новий дохід', editExpenseTitle: 'Редагувати витрату', editIncomeTitle: 'Редагувати дохід',
-    amountLabel: 'Сума, {symbol}', amountLabelPlain: 'Сума', catLabel: 'Категорія', dateLabel: 'Дата',
+    amountLabel: 'Сума, {symbol}', amountLabelPlain: 'Сума', catLabel: 'Категорія', dateLabel: 'Дата', dpTodayBtn: 'Сьогодні',
     noteLabel: 'Нотатка (необовʼязково)', notePlaceholder: 'Напр. кава з другом',
     saveBtn: 'Зберегти запис', amountError: 'Введи суму більшу за нуль',
     saveError: 'Не вдалося зберегти. Перевір інтернет-з’єднання',
@@ -148,7 +148,7 @@ const T = {
     chartIncome: 'Доход', chartExpense: 'Расходы',
     fabExpense: 'Расход', fabIncome: 'Доход',
     newExpenseTitle: 'Новый расход', newIncomeTitle: 'Новый доход', editExpenseTitle: 'Редактировать расход', editIncomeTitle: 'Редактировать доход',
-    amountLabel: 'Сумма, {symbol}', amountLabelPlain: 'Сумма', catLabel: 'Категория', dateLabel: 'Дата',
+    amountLabel: 'Сумма, {symbol}', amountLabelPlain: 'Сумма', catLabel: 'Категория', dateLabel: 'Дата', dpTodayBtn: 'Сегодня',
     noteLabel: 'Заметка (необязательно)', notePlaceholder: 'Напр. кофе с другом',
     saveBtn: 'Сохранить запись', amountError: 'Введи сумму больше нуля',
     saveError: 'Не удалось сохранить. Проверь интернет-соединение',
@@ -213,7 +213,7 @@ const T = {
     chartIncome: 'Przychód', chartExpense: 'Wydatki',
     fabExpense: 'Wydatek', fabIncome: 'Przychód',
     newExpenseTitle: 'Nowy wydatek', newIncomeTitle: 'Nowy przychód', editExpenseTitle: 'Edytuj wydatek', editIncomeTitle: 'Edytuj przychód',
-    amountLabel: 'Kwota, {symbol}', amountLabelPlain: 'Kwota', catLabel: 'Kategoria', dateLabel: 'Data',
+    amountLabel: 'Kwota, {symbol}', amountLabelPlain: 'Kwota', catLabel: 'Kategoria', dateLabel: 'Data', dpTodayBtn: 'Dzisiaj',
     noteLabel: 'Notatka (opcjonalnie)', notePlaceholder: 'Np. kawa ze znajomym',
     saveBtn: 'Zapisz wpis', amountError: 'Wpisz kwotę większą od zera',
     saveError: 'Nie udało się zapisać. Sprawdź połączenie z internetem',
@@ -278,7 +278,7 @@ const T = {
     chartIncome: 'Income', chartExpense: 'Expenses',
     fabExpense: 'Expense', fabIncome: 'Income',
     newExpenseTitle: 'New expense', newIncomeTitle: 'New income', editExpenseTitle: 'Edit expense', editIncomeTitle: 'Edit income',
-    amountLabel: 'Amount, {symbol}', amountLabelPlain: 'Amount', catLabel: 'Category', dateLabel: 'Date',
+    amountLabel: 'Amount, {symbol}', amountLabelPlain: 'Amount', catLabel: 'Category', dateLabel: 'Date', dpTodayBtn: 'Today',
     noteLabel: 'Note (optional)', notePlaceholder: 'E.g. coffee with a friend',
     saveBtn: 'Save entry', amountError: 'Enter an amount greater than zero',
     saveError: 'Could not save. Check your internet connection',
@@ -371,6 +371,13 @@ const MONTHS_GEN = {
   ru: ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'],
   pl: ['stycznia','lutego','marca','kwietnia','maja','czerwca','lipca','sierpnia','września','października','listopada','grudnia'],
   en: ['January','February','March','April','May','June','July','August','September','October','November','December'],
+};
+// ---- Дні тижня (коротко, понеділок першим) — для кастомного datepicker ----
+const WEEKDAYS_SHORT = {
+  uk: ['Пн','Вт','Ср','Чт','Пт','Сб','Нд'],
+  ru: ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'],
+  pl: ['Pn','Wt','Śr','Cz','Pt','So','Nd'],
+  en: ['Mo','Tu','We','Th','Fr','Sa','Su'],
 };
 
 // ---- Валюта ----
@@ -752,6 +759,197 @@ function escapeHtml(s) {
   return div.innerHTML;
 }
 
+// ---- Кастомний datepicker ----
+// Замінює непередбачувано-стилізований нативний календар браузера (input type=date)
+// на панель у стилі застосунку. Нативний <input> лишається в DOM (прихований, але
+// функціональний) — увесь існуючий код (`el.value = ...`, `el.max = ...`,
+// `el.value` при сабміті) працює без змін: сеттер `.value` перехоплено, щоб
+// кастомний UI оновлювався синхронно з будь-яким записом у нативний інпут.
+const datePickerInstances = [];
+function initDatePicker(nativeId) {
+  const native = document.getElementById(nativeId);
+  if (!native || native.dataset.dpInit) return;
+  native.dataset.dpInit = '1';
+
+  const field = document.createElement('div');
+  field.className = 'dp-field';
+  native.insertAdjacentElement('afterend', field);
+  field.appendChild(native);
+
+  const trigger = document.createElement('button');
+  trigger.type = 'button';
+  trigger.className = 'dp-trigger';
+  trigger.innerHTML = '<span class="dp-trigger-text"></span>' +
+    '<span class="dp-trigger-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10h18"/></svg></span>';
+  field.appendChild(trigger);
+
+  const panel = document.createElement('div');
+  panel.className = 'dp-panel';
+  panel.innerHTML =
+    '<div class="dp-head">' +
+      '<button type="button" class="dp-nav-btn dp-prev" aria-label="' + t('prevMonthAria') + '"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 18l-6-6 6-6"/></svg></button>' +
+      '<div class="dp-head-label"></div>' +
+      '<button type="button" class="dp-nav-btn dp-next" aria-label="' + t('nextMonthAria') + '"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg></button>' +
+    '</div>' +
+    '<div class="dp-weekdays"></div>' +
+    '<div class="dp-days"></div>' +
+    '<div class="dp-foot"><button type="button" class="dp-today-btn"></button></div>';
+  // Панель монтуємо в <body>, а не всередину .dp-field: .modal має
+  // backdrop-filter (створює containing block для position:fixed) і
+  // overflow-y:auto (обрізало б випадаючий календар знизу).
+  document.body.appendChild(panel);
+
+  const triggerText = trigger.querySelector('.dp-trigger-text');
+  const headLabel = panel.querySelector('.dp-head-label');
+  const weekdaysEl = panel.querySelector('.dp-weekdays');
+  const daysEl = panel.querySelector('.dp-days');
+  const todayBtn = panel.querySelector('.dp-today-btn');
+  const prevBtn = panel.querySelector('.dp-prev');
+  const nextBtn = panel.querySelector('.dp-next');
+
+  let viewYear, viewMonth;
+
+  function isoOf(d) {
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+  function selectedDate() {
+    const raw = nativeValueGetter.call(native);
+    if (!raw) return null;
+    const d = parseISODate(raw);
+    return isNaN(d) ? null : d;
+  }
+  function maxDate() {
+    const raw = native.getAttribute('max');
+    if (!raw) return null;
+    const d = parseISODate(raw);
+    return isNaN(d) ? null : d;
+  }
+
+  function refreshTriggerText() {
+    const sel = selectedDate();
+    const genMonths = MONTHS_GEN[currentLang] || MONTHS_GEN.uk;
+    triggerText.textContent = sel ? (sel.getDate() + ' ' + genMonths[sel.getMonth()] + ' ' + sel.getFullYear()) : '';
+  }
+
+  function renderPanel() {
+    const nomMonths = MONTHS_NOM[currentLang] || MONTHS_NOM.uk;
+    headLabel.textContent = nomMonths[viewMonth] + ' ' + viewYear;
+    const wd = WEEKDAYS_SHORT[currentLang] || WEEKDAYS_SHORT.uk;
+    weekdaysEl.innerHTML = wd.map((w) => '<div class="dp-weekday">' + w + '</div>').join('');
+    todayBtn.textContent = t('dpTodayBtn');
+
+    const sel = selectedDate();
+    const max = maxDate();
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+
+    const firstOfMonth = new Date(viewYear, viewMonth, 1);
+    const startOffset = (firstOfMonth.getDay() + 6) % 7; // понеділок = 0
+    const gridStart = new Date(viewYear, viewMonth, 1 - startOffset);
+
+    let html = '';
+    for (let i = 0; i < 42; i++) {
+      const d = new Date(gridStart.getFullYear(), gridStart.getMonth(), gridStart.getDate() + i);
+      const inMonth = d.getMonth() === viewMonth;
+      const isToday = d.getTime() === today.getTime();
+      const isSelected = sel && d.getTime() === new Date(sel.getFullYear(), sel.getMonth(), sel.getDate()).getTime();
+      const disabled = max && d.getTime() > new Date(max.getFullYear(), max.getMonth(), max.getDate()).getTime();
+      const cls = ['dp-day'];
+      if (!inMonth) cls.push('dp-day-muted');
+      if (isToday) cls.push('dp-day-today');
+      if (isSelected) cls.push('dp-day-selected');
+      html += '<button type="button" class="' + cls.join(' ') + '" data-date="' + isoOf(d) + '"' + (disabled ? ' disabled' : '') + '>' + d.getDate() + '</button>';
+    }
+    daysEl.innerHTML = html;
+    daysEl.querySelectorAll('.dp-day').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        native.value = btn.dataset.date;
+        close();
+      });
+    });
+  }
+
+  function positionPanel() {
+    const rect = trigger.getBoundingClientRect();
+    const panelWidth = panel.offsetWidth || 280;
+    let left = rect.left;
+    const maxLeft = window.innerWidth - panelWidth - 16;
+    if (left > maxLeft) left = Math.max(16, maxLeft);
+    let top = rect.bottom + 6;
+    const panelHeight = panel.offsetHeight || 320;
+    if (top + panelHeight > window.innerHeight - 12) {
+      // Не влазить знизу — розкриваємо вгору від поля.
+      top = Math.max(12, rect.top - panelHeight - 6);
+    }
+    panel.style.left = left + 'px';
+    panel.style.top = top + 'px';
+  }
+  function isOpen() { return panel.classList.contains('show'); }
+  function openPanel() {
+    const sel = selectedDate() || new Date();
+    viewYear = sel.getFullYear();
+    viewMonth = sel.getMonth();
+    renderPanel();
+    field.classList.add('open');
+    panel.classList.add('show');
+    positionPanel();
+    document.addEventListener('click', onOutsideClick, true);
+    document.addEventListener('keydown', onKeydown, true);
+    document.addEventListener('scroll', close, true);
+    window.addEventListener('resize', close);
+  }
+  function close() {
+    field.classList.remove('open');
+    panel.classList.remove('show');
+    document.removeEventListener('click', onOutsideClick, true);
+    document.removeEventListener('keydown', onKeydown, true);
+    document.removeEventListener('scroll', close, true);
+    window.removeEventListener('resize', close);
+  }
+  function onOutsideClick(e) {
+    if (!field.contains(e.target) && !panel.contains(e.target)) close();
+  }
+  function onKeydown(e) {
+    if (e.key === 'Escape') close();
+  }
+
+  trigger.addEventListener('click', () => {
+    if (isOpen()) close(); else openPanel();
+  });
+  prevBtn.addEventListener('click', () => {
+    viewMonth--; if (viewMonth < 0) { viewMonth = 11; viewYear--; }
+    renderPanel();
+  });
+  nextBtn.addEventListener('click', () => {
+    viewMonth++; if (viewMonth > 11) { viewMonth = 0; viewYear++; }
+    renderPanel();
+  });
+  todayBtn.addEventListener('click', () => {
+    const max = native.getAttribute('max');
+    const iso = todayISO();
+    if (max && iso > max) return;
+    native.value = iso;
+    close();
+  });
+
+  // Перехоплюємо .value, щоб `nativeInput.value = '...'` (як і надалі робить
+  // решта коду застосунку) синхронно оновлювало кастомний UI.
+  const proto = Object.getPrototypeOf(native);
+  const valueDesc = Object.getOwnPropertyDescriptor(proto, 'value');
+  const nativeValueGetter = valueDesc.get;
+  const nativeValueSetter = valueDesc.set;
+  Object.defineProperty(native, 'value', {
+    configurable: true,
+    get() { return nativeValueGetter.call(native); },
+    set(v) { nativeValueSetter.call(native, v); refreshTriggerText(); },
+  });
+
+  refreshTriggerText();
+  datePickerInstances.push({ field, panel, refreshLang: () => { refreshTriggerText(); if (isOpen()) renderPanel(); } });
+}
+function refreshDatePickersLang() {
+  datePickerInstances.forEach((dp) => dp.refreshLang());
+}
+
 // ---- Переклад статичних елементів ----
 function applyStaticTranslations() {
   document.getElementById('htmlRoot').setAttribute('lang', currentLang);
@@ -864,6 +1062,7 @@ function applyStaticTranslations() {
   renderCategoryManager();
   renderAuthLangRow();
   if (typeof currentTab !== 'undefined') updateHeaderSectionTitle();
+  refreshDatePickersLang();
 }
 
 function renderAuthLangRow() {
@@ -2711,5 +2910,7 @@ document.getElementById('deletePageBtn').addEventListener('click', () => {
 });
 
 // ---- Старт ----
+initDatePicker('dateInput');
+initDatePicker('savingsDateInput');
 applyStaticTranslations();
 selectTab('entries');

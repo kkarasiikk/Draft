@@ -350,10 +350,48 @@
   .cat-choice{padding:7px 13px;border-radius:20px;font-size:13px;cursor:pointer;font-family:'Inter',sans-serif;
     border:1px solid var(--border);background:transparent;color:var(--ink-soft);}
   .cat-choice.selected{color:#fff;font-weight:600;border-color:transparent;}
-  input[type=date], input[type=text]{width:100%;font-family:'Inter',sans-serif;font-size:16px;
+  input[type=text]{width:100%;font-family:'Inter',sans-serif;font-size:16px;
     border:1px solid var(--border);border-radius:8px;padding:9px 12px;margin-top:6px;margin-bottom:16px;outline:none;color:var(--ink);}
-  input[type=date]:focus, input[type=text]:focus{border-color:var(--accent);}
+  input[type=text]:focus{border-color:var(--accent);}
   .form-error{color:var(--expense);font-size:13px;margin-bottom:8px;}
+
+  /* ---- Кастомний datepicker (замінює нативний календар браузера) ---- */
+  .dp-field{position:relative;margin-top:6px;margin-bottom:16px;}
+  input[data-dp-native]{position:absolute;opacity:0;pointer-events:none;width:1px;height:1px;}
+  .dp-trigger{width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;
+    font-family:'Inter',sans-serif;font-size:16px;text-align:left;
+    border:1px solid var(--border);border-radius:8px;padding:9px 12px;background:transparent;color:var(--ink);
+    cursor:pointer;-webkit-tap-highlight-color:transparent;}
+  .dp-trigger:hover, .dp-trigger:focus-visible{border-color:var(--accent);}
+  .dp-field.open .dp-trigger{border-color:var(--accent);}
+  .dp-trigger-text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .dp-trigger-icon{flex-shrink:0;color:var(--ink-muted);display:flex;}
+  .dp-panel{position:fixed;z-index:55;width:280px;max-width:calc(100vw - 32px);
+    background:var(--surface);backdrop-filter:blur(var(--glass-blur)) saturate(150%);-webkit-backdrop-filter:blur(var(--glass-blur)) saturate(150%);
+    border:1px solid var(--border);border-radius:18px;box-shadow:var(--glass-shadow), 0 12px 34px rgba(20,20,30,.18);
+    padding:14px;opacity:0;transform:translateY(-6px) scale(.98);pointer-events:none;transition:opacity .14s ease,transform .14s ease;}
+  .dp-panel.show{opacity:1;transform:translateY(0) scale(1);pointer-events:auto;}
+  .dp-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+  .dp-head-label{font-size:14px;font-weight:600;color:var(--ink);text-transform:capitalize;}
+  .dp-nav{display:flex;gap:4px;}
+  .dp-nav-btn{width:28px;height:28px;border-radius:8px;border:1px solid var(--border);background:transparent;
+    color:var(--ink-soft);display:flex;align-items:center;justify-content:center;cursor:pointer;}
+  .dp-nav-btn:hover{border-color:var(--accent);color:var(--accent);}
+  .dp-weekdays{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:4px;}
+  .dp-weekday{font-size:11px;font-weight:600;color:var(--ink-muted);text-align:center;padding:4px 0;text-transform:uppercase;}
+  .dp-days{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+  .dp-day{position:relative;aspect-ratio:1;display:flex;align-items:center;justify-content:center;
+    font-size:13px;font-family:'Inter',sans-serif;color:var(--ink);background:transparent;border:none;border-radius:50%;
+    cursor:pointer;}
+  .dp-day:hover:not(:disabled):not(.dp-day-selected){background:var(--accent-light);}
+  .dp-day.dp-day-muted{color:var(--ink-muted);opacity:.45;}
+  .dp-day.dp-day-today:not(.dp-day-selected)::after{content:"";position:absolute;bottom:3px;left:50%;transform:translateX(-50%);
+    width:4px;height:4px;border-radius:50%;background:var(--accent);}
+  .dp-day.dp-day-selected{background:var(--accent);color:#fff;font-weight:600;}
+  .dp-day:disabled{opacity:.28;cursor:default;}
+  .dp-foot{display:flex;justify-content:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);}
+  .dp-today-btn{background:none;border:none;color:var(--accent);font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;padding:4px 10px;}
+  .dp-today-btn:hover{text-decoration:underline;}
   .submit-btn{width:100%;margin-top:4px;padding:13px 0;border-radius:10px;border:none;cursor:pointer;color:#fff;
     font-size:15px;font-weight:600;font-family:'Inter',sans-serif;background:var(--accent);}
   .submit-btn:disabled{opacity:.55;cursor:default;}
@@ -737,7 +775,7 @@
     <label class="field-label" id="catLabel">Категорія</label>
     <div class="cat-picker" id="catPicker"></div>
     <label class="field-label" id="dateLabel">Дата</label>
-    <input type="date" id="dateInput">
+    <input type="date" id="dateInput" data-dp-native>
     <label class="field-label" id="noteLabel">Нотатка (необовʼязково)</label>
     <input type="text" id="noteInput" placeholder="">
     <div class="form-error" id="formError" style="display:none;" role="alert" aria-live="assertive"></div>
@@ -755,7 +793,7 @@
     <input class="amount-input" id="savingsAmountInput" type="text" inputmode="decimal" placeholder="0.00">
     <div class="cat-picker" id="savingsCurrencyPicker" style="margin-top:-6px;"></div>
     <label class="field-label" id="savingsDateLabel">Дата</label>
-    <input type="date" id="savingsDateInput">
+    <input type="date" id="savingsDateInput" data-dp-native>
     <label class="field-label" id="savingsNoteLabel">Нотатка (необовʼязково)</label>
     <input type="text" id="savingsNoteInput" placeholder="">
     <div class="form-error" id="savingsFormError" style="display:none;" role="alert" aria-live="assertive"></div>
