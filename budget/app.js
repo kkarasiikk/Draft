@@ -66,7 +66,7 @@ const T = {
     err_resetFailed: 'Не вдалося надіслати лист. Перевір email і спробуй ще раз',
     balanceLabel: 'Кошти', logout: 'Вийти',
     incomeMonthLabel: 'Дохід за місяць', expenseMonthLabel: 'Витрати за місяць',
-    tabEntries: 'Кошти', tabStats: 'Статистика', tabPages: 'Нотатки', tabSavings: 'Збереження', savingsBalanceLabel: 'Баланс заощаджень', savingsEmptySub: 'Додай першу операцію кнопкою внизу', fabDepositLabel: 'Поповнити', fabWithdrawLabel: 'Зняти', newDepositTitle: 'Поповнення', newWithdrawTitle: 'Зняття коштів', editDepositTitle: 'Редагувати поповнення', editWithdrawTitle: 'Редагувати зняття', savingsTotalLabel: 'Загальний баланс', addGoalLabel: 'Нова ціль', goalFormTitleNew: 'Нова ціль', goalFormTitleEdit: 'Редагувати ціль', goalNameLabel: 'Назва', goalNamePlaceholder: 'Напр. На відпустку', goalNameError: 'Введи назву цілі', deleteGoalLabel: 'Видалити ціль', confirmTitleGoal: 'Видалити ціль?', confirmSubGoal: 'Усі операції в цій цілі теж буде видалено.', defaultGoalName: 'Загальні заощадження', savingsTrendTitle: 'Збереження', savingsTrendSub: 'Динаміка за 6 місяців', savingsTrendEmpty: 'Ще немає заощаджень',
+    tabEntries: 'Кошти', tabStats: 'Статистика', tabPages: 'Нотатки', tabSavings: 'Збереження', savingsBalanceLabel: 'Баланс заощаджень', savingsEmptySub: 'Додай першу операцію кнопкою внизу', fabDepositLabel: 'Поповнити', fabWithdrawLabel: 'Зняти', newDepositTitle: 'Поповнення', newWithdrawTitle: 'Зняття коштів', editDepositTitle: 'Редагувати поповнення', editWithdrawTitle: 'Редагувати зняття', savingsTotalLabel: 'Загальний баланс', hideBalanceAria: 'Приховати баланс', showBalanceAria: 'Показати баланс', addGoalLabel: 'Нова ціль', goalFormTitleNew: 'Нова ціль', goalFormTitleEdit: 'Редагувати ціль', goalNameLabel: 'Назва', goalNamePlaceholder: 'Напр. На відпустку', goalNameError: 'Введи назву цілі', deleteGoalLabel: 'Видалити ціль', confirmTitleGoal: 'Видалити ціль?', confirmSubGoal: 'Усі операції в цій цілі теж буде видалено.', defaultGoalName: 'Загальні заощадження', savingsTrendTitle: 'Збереження', savingsTrendSub: 'Динаміка за 6 місяців', savingsTrendEmpty: 'Ще немає заощаджень',
     prevMonthAria: 'Попередній місяць', nextMonthAria: 'Наступний місяць',
     newPageBtn: 'Нова нотатка', pageTitleLabel: 'Назва', pageContentLabel: 'Текст', tabNotes: 'Нотатки', addNoteBtnLabel: 'Нова нотатка', notesEmptyTitle: 'Тут поки порожньо', notesEmptySub: 'Додай першу нотатку кнопкою нижче',
     pageTitlePlaceholder: 'Напр. Ідеї на відпустку', pageContentPlaceholder: 'Пиши тут що завгодно…',
@@ -131,7 +131,7 @@ const T = {
     err_resetFailed: 'Не удалось отправить письмо. Проверь email и попробуй ещё раз',
     balanceLabel: 'Средства', logout: 'Выйти',
     incomeMonthLabel: 'Доход за месяц', expenseMonthLabel: 'Расходы за месяц',
-    tabEntries: 'Средства', tabStats: 'Статистика', tabPages: 'Заметки', tabSavings: 'Сбережения', savingsBalanceLabel: 'Баланс сбережений', savingsEmptySub: 'Добавь первую операцию кнопкой внизу', fabDepositLabel: 'Пополнить', fabWithdrawLabel: 'Снять', newDepositTitle: 'Пополнение', newWithdrawTitle: 'Снятие средств', editDepositTitle: 'Редактировать пополнение', editWithdrawTitle: 'Редактировать снятие', savingsTotalLabel: 'Общий баланс', addGoalLabel: 'Новая цель', goalFormTitleNew: 'Новая цель', goalFormTitleEdit: 'Редактировать цель', goalNameLabel: 'Название', goalNamePlaceholder: 'Напр. На отпуск', goalNameError: 'Введи название цели', deleteGoalLabel: 'Удалить цель', confirmTitleGoal: 'Удалить цель?', confirmSubGoal: 'Все операции в этой цели тоже будут удалены.', defaultGoalName: 'Общие сбережения', savingsTrendTitle: 'Сбережения', savingsTrendSub: 'Динамика за 6 месяцев', savingsTrendEmpty: 'Пока нет сбережений',
+    tabEntries: 'Средства', tabStats: 'Статистика', tabPages: 'Заметки', tabSavings: 'Сбережения', savingsBalanceLabel: 'Баланс сбережений', savingsEmptySub: 'Добавь первую операцию кнопкой внизу', fabDepositLabel: 'Пополнить', fabWithdrawLabel: 'Снять', newDepositTitle: 'Пополнение', newWithdrawTitle: 'Снятие средств', editDepositTitle: 'Редактировать пополнение', editWithdrawTitle: 'Редактировать снятие', savingsTotalLabel: 'Общий баланс', hideBalanceAria: 'Скрыть баланс', showBalanceAria: 'Показать баланс', addGoalLabel: 'Новая цель', goalFormTitleNew: 'Новая цель', goalFormTitleEdit: 'Редактировать цель', goalNameLabel: 'Название', goalNamePlaceholder: 'Напр. На отпуск', goalNameError: 'Введи название цели', deleteGoalLabel: 'Удалить цель', confirmTitleGoal: 'Удалить цель?', confirmSubGoal: 'Все операции в этой цели тоже будут удалены.', defaultGoalName: 'Общие сбережения', savingsTrendTitle: 'Сбережения', savingsTrendSub: 'Динамика за 6 месяцев', savingsTrendEmpty: 'Пока нет сбережений',
     prevMonthAria: 'Предыдущий месяц', nextMonthAria: 'Следующий месяц',
     newPageBtn: 'Новая заметка', pageTitleLabel: 'Название', pageContentLabel: 'Текст', tabNotes: 'Заметки', addNoteBtnLabel: 'Новая заметка', notesEmptyTitle: 'Здесь пока пусто', notesEmptySub: 'Добавь первую заметку кнопкой снизу',
     pageTitlePlaceholder: 'Напр. Идеи на отпуск', pageContentPlaceholder: 'Пиши здесь что угодно…',
@@ -196,7 +196,7 @@ const T = {
     err_resetFailed: 'Nie udało się wysłać emaila. Sprawdź adres i spróbuj ponownie',
     balanceLabel: 'Środki', logout: 'Wyloguj',
     incomeMonthLabel: 'Przychód w tym miesiącu', expenseMonthLabel: 'Wydatki w tym miesiącu',
-    tabEntries: 'Środki', tabStats: 'Statystyki', tabPages: 'Notatki', tabSavings: 'Oszczędności', savingsBalanceLabel: 'Saldo oszczędności', savingsEmptySub: 'Dodaj pierwszą operację przyciskiem poniżej', fabDepositLabel: 'Wpłać', fabWithdrawLabel: 'Wypłać', newDepositTitle: 'Wpłata', newWithdrawTitle: 'Wypłata środków', editDepositTitle: 'Edytuj wpłatę', editWithdrawTitle: 'Edytuj wypłatę', savingsTotalLabel: 'Łączne saldo', addGoalLabel: 'Nowy cel', goalFormTitleNew: 'Nowy cel', goalFormTitleEdit: 'Edytuj cel', goalNameLabel: 'Nazwa', goalNamePlaceholder: 'Np. Na wakacje', goalNameError: 'Wpisz nazwę celu', deleteGoalLabel: 'Usuń cel', confirmTitleGoal: 'Usunąć cel?', confirmSubGoal: 'Wszystkie operacje w tym celu też zostaną usunięte.', defaultGoalName: 'Ogólne oszczędności', savingsTrendTitle: 'Oszczędności', savingsTrendSub: 'Dynamika za 6 miesięcy', savingsTrendEmpty: 'Jeszcze brak oszczędności',
+    tabEntries: 'Środki', tabStats: 'Statystyki', tabPages: 'Notatki', tabSavings: 'Oszczędności', savingsBalanceLabel: 'Saldo oszczędności', savingsEmptySub: 'Dodaj pierwszą operację przyciskiem poniżej', fabDepositLabel: 'Wpłać', fabWithdrawLabel: 'Wypłać', newDepositTitle: 'Wpłata', newWithdrawTitle: 'Wypłata środków', editDepositTitle: 'Edytuj wpłatę', editWithdrawTitle: 'Edytuj wypłatę', savingsTotalLabel: 'Łączne saldo', hideBalanceAria: 'Ukryj saldo', showBalanceAria: 'Pokaż saldo', addGoalLabel: 'Nowy cel', goalFormTitleNew: 'Nowy cel', goalFormTitleEdit: 'Edytuj cel', goalNameLabel: 'Nazwa', goalNamePlaceholder: 'Np. Na wakacje', goalNameError: 'Wpisz nazwę celu', deleteGoalLabel: 'Usuń cel', confirmTitleGoal: 'Usunąć cel?', confirmSubGoal: 'Wszystkie operacje w tym celu też zostaną usunięte.', defaultGoalName: 'Ogólne oszczędności', savingsTrendTitle: 'Oszczędności', savingsTrendSub: 'Dynamika za 6 miesięcy', savingsTrendEmpty: 'Jeszcze brak oszczędności',
     prevMonthAria: 'Poprzedni miesiąc', nextMonthAria: 'Następny miesiąc',
     newPageBtn: 'Nowa notatka', pageTitleLabel: 'Tytuł', pageContentLabel: 'Treść', tabNotes: 'Notatki', addNoteBtnLabel: 'Nowa notatka', notesEmptyTitle: 'Tu jeszcze pusto', notesEmptySub: 'Dodaj pierwszą notatkę przyciskiem poniżej',
     pageTitlePlaceholder: 'Np. Pomysły na wakacje', pageContentPlaceholder: 'Napisz tu cokolwiek…',
@@ -261,7 +261,7 @@ const T = {
     err_resetFailed: 'Could not send the email. Check the address and try again',
     balanceLabel: 'Funds', logout: 'Log out',
     incomeMonthLabel: 'Income this month', expenseMonthLabel: 'Expenses this month',
-    tabEntries: 'Funds', tabStats: 'Stats', tabPages: 'Notes', tabSavings: 'Savings', savingsBalanceLabel: 'Savings balance', savingsEmptySub: 'Add your first entry using the button below', fabDepositLabel: 'Deposit', fabWithdrawLabel: 'Withdraw', newDepositTitle: 'Deposit', newWithdrawTitle: 'Withdrawal', editDepositTitle: 'Edit deposit', editWithdrawTitle: 'Edit withdrawal', savingsTotalLabel: 'Total balance', addGoalLabel: 'New goal', goalFormTitleNew: 'New goal', goalFormTitleEdit: 'Edit goal', goalNameLabel: 'Name', goalNamePlaceholder: 'E.g. Vacation fund', goalNameError: 'Enter a goal name', deleteGoalLabel: 'Delete goal', confirmTitleGoal: 'Delete goal?', confirmSubGoal: 'All entries in this goal will be deleted too.', defaultGoalName: 'General savings', savingsTrendTitle: 'Savings', savingsTrendSub: 'Trend over 6 months', savingsTrendEmpty: 'No savings yet',
+    tabEntries: 'Funds', tabStats: 'Stats', tabPages: 'Notes', tabSavings: 'Savings', savingsBalanceLabel: 'Savings balance', savingsEmptySub: 'Add your first entry using the button below', fabDepositLabel: 'Deposit', fabWithdrawLabel: 'Withdraw', newDepositTitle: 'Deposit', newWithdrawTitle: 'Withdrawal', editDepositTitle: 'Edit deposit', editWithdrawTitle: 'Edit withdrawal', savingsTotalLabel: 'Total balance', hideBalanceAria: 'Hide balance', showBalanceAria: 'Show balance', addGoalLabel: 'New goal', goalFormTitleNew: 'New goal', goalFormTitleEdit: 'Edit goal', goalNameLabel: 'Name', goalNamePlaceholder: 'E.g. Vacation fund', goalNameError: 'Enter a goal name', deleteGoalLabel: 'Delete goal', confirmTitleGoal: 'Delete goal?', confirmSubGoal: 'All entries in this goal will be deleted too.', defaultGoalName: 'General savings', savingsTrendTitle: 'Savings', savingsTrendSub: 'Trend over 6 months', savingsTrendEmpty: 'No savings yet',
     prevMonthAria: 'Previous month', nextMonthAria: 'Next month',
     newPageBtn: 'New note', pageTitleLabel: 'Title', pageContentLabel: 'Content', tabNotes: 'Notes', addNoteBtnLabel: 'New note', notesEmptyTitle: 'Nothing here yet', notesEmptySub: 'Add your first note using the button below',
     pageTitlePlaceholder: 'E.g. Vacation ideas', pageContentPlaceholder: 'Write anything here…',
@@ -675,6 +675,7 @@ let showNoteSnippet = localStorage.getItem('financeAppShowNoteSnippet') !== '0';
 let showChartTrend = localStorage.getItem('financeAppShowChartTrend') !== '0';
 let showChartSavings = localStorage.getItem('financeAppShowChartSavings') !== '0';
 let showSavingsTotal = localStorage.getItem('financeAppShowSavingsTotal') !== '0';
+let savingsBalanceHidden = localStorage.getItem('financeAppSavingsBalanceHidden') === '1';
 let savingsTotalMode = localStorage.getItem('financeAppSavingsTotalMode') || 'multi';
 if (!['multi', 'single'].includes(savingsTotalMode)) savingsTotalMode = 'multi';
 let savingsTotalCurrency = localStorage.getItem('financeAppSavingsTotalCurrency') || currentCurrency;
@@ -726,17 +727,29 @@ function formatMoneyCur(n, curCode) {
   const num = Math.abs(n).toLocaleString(LOCALE_MAP[currentLang] || 'uk-UA', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   return cur.position === 'before' ? `${sign}${cur.symbol}${num}` : `${sign}${num} ${cur.symbol}`;
 }
-function renderBalanceBlock(el, balancesObj) {
+function renderBalanceBlock(el, balancesObj, hidden) {
   const entries = Object.entries(balancesObj).sort((a, b) => a[0].localeCompare(b[0]));
   if (entries.length <= 1) {
     const cur = entries.length ? entries[0][0] : currentCurrency;
     const val = entries.length ? entries[0][1] : 0;
-    el.className = 'balance' + (val < 0 ? ' neg' : '');
-    el.textContent = formatMoneyCur(val, cur);
+    el.className = 'balance' + (val < 0 && !hidden ? ' neg' : '');
+    el.textContent = hidden ? maskedBalanceText(cur) : formatMoneyCur(val, cur);
   } else {
     el.className = 'balance balance-multi';
-    el.innerHTML = entries.map(([cur, val]) => `<div class="balance-multi-row${val < 0 ? ' neg' : ''}">${formatMoneyCur(val, cur)}</div>`).join('');
+    el.innerHTML = entries.map(([cur, val]) => `<div class="balance-multi-row${val < 0 && !hidden ? ' neg' : ''}">${hidden ? maskedBalanceText(cur) : formatMoneyCur(val, cur)}</div>`).join('');
   }
+}
+function maskedBalanceText(cur) {
+  const symbol = (CURRENCIES[cur] || CURRENCIES[currentCurrency] || {}).symbol || '';
+  return `• • • • ${symbol}`.trim();
+}
+const EYE_ICON = '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>';
+const EYE_OFF_ICON = '<path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 10 8 10 8a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 8 10 8a9.74 9.74 0 0 0 5.39-1.61"/><path d="M2 2l20 20"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/>';
+function updateSavingsBalanceToggleIcon() {
+  const btn = document.getElementById('savingsBalanceToggle');
+  if (!btn) return;
+  btn.querySelector('svg').innerHTML = savingsBalanceHidden ? EYE_OFF_ICON : EYE_ICON;
+  btn.setAttribute('aria-label', savingsBalanceHidden ? t('showBalanceAria') : t('hideBalanceAria'));
 }
 function todayISO() {
   const d = new Date();
@@ -981,8 +994,8 @@ function applyStaticTranslations() {
   document.getElementById('savingsTrendSub').textContent = t('savingsTrendSub');
   document.getElementById('savingsTrendEmpty').textContent = t('savingsTrendEmpty');
   document.getElementById('statsTrendSub').textContent = t('statsTrendSub');
-  document.getElementById('fabExpLabel').textContent = t('fabExpense');
-  document.getElementById('fabIncLabel').textContent = t('fabIncome');
+  document.getElementById('typeToggleExpense').textContent = t('fabExpense');
+  document.getElementById('typeToggleIncome').textContent = t('fabIncome');
   document.getElementById('catLabel').textContent = t('catLabel');
   document.getElementById('dateLabel').textContent = t('dateLabel');
   document.getElementById('noteLabel').textContent = t('noteLabel');
@@ -1759,6 +1772,7 @@ function lastUsedGoalCurrency(goalId) {
 
 function renderSavingsGoalsList() {
   document.getElementById('savingsTotalCard').style.display = showSavingsTotal ? '' : 'none';
+  updateSavingsBalanceToggleIcon();
   const rateSub = document.getElementById('savingsTotalRateSub');
   if (savingsTotalMode === 'single') {
     const needsConversion = savings.some(sv => (sv.currency || currentCurrency) !== savingsTotalCurrency);
@@ -1773,7 +1787,7 @@ function renderSavingsGoalsList() {
         const converted = convertAmount(sv.amount, sv.currency || currentCurrency, savingsTotalCurrency);
         return s + (sv.type === 'deposit' ? converted : -converted);
       }, 0);
-      renderBalanceBlock(document.getElementById('savingsTotalBalance'), { [savingsTotalCurrency]: totalConverted });
+      renderBalanceBlock(document.getElementById('savingsTotalBalance'), { [savingsTotalCurrency]: totalConverted }, savingsBalanceHidden);
     }
     if (exchangeRatesDate) {
       rateSub.textContent = isRateStale()
@@ -1789,7 +1803,7 @@ function renderSavingsGoalsList() {
       rateSub.style.display = 'none';
     }
   } else {
-    renderBalanceBlock(document.getElementById('savingsTotalBalance'), totalSavingsBalance());
+    renderBalanceBlock(document.getElementById('savingsTotalBalance'), totalSavingsBalance(), savingsBalanceHidden);
     rateSub.style.display = 'none';
   }
 
@@ -2503,6 +2517,9 @@ function openForm(type, existingTx) {
     ? (type === 'income' ? t('editIncomeTitle') : t('editExpenseTitle'))
     : (type === 'income' ? t('newIncomeTitle') : t('newExpenseTitle'));
   document.getElementById('modalTitle').style.color = type === 'income' ? 'var(--income)' : 'var(--expense)';
+  document.getElementById('modalTitle').style.display = isEdit ? 'block' : 'none';
+  document.getElementById('typeToggle').style.display = isEdit ? 'none' : 'flex';
+  updateTypeToggleUI();
   document.getElementById('submitBtn').style.background = type === 'income' ? 'var(--income)' : 'var(--expense)';
   document.getElementById('submitBtn').textContent = t('saveBtn');
   document.getElementById('amountInput').value = existingTx ? String(existingTx.amount).replace('.', ',') : '';
@@ -2513,6 +2530,21 @@ function openForm(type, existingTx) {
   renderCatPicker();
   document.getElementById('formOverlay').classList.add('show');
   setTimeout(() => document.getElementById('amountInput').focus(), 50);
+}
+
+function updateTypeToggleUI() {
+  document.getElementById('typeToggleExpense').classList.toggle('active', formType === 'expense');
+  document.getElementById('typeToggleIncome').classList.toggle('active', formType === 'income');
+}
+
+function switchFormType(type) {
+  if (formType === type || editingTxId) return;
+  formType = type;
+  const list = type === 'expense' ? categoriesExpense : categoriesIncome;
+  selectedCategory = list[0] ? list[0].id : null;
+  document.getElementById('submitBtn').style.background = type === 'income' ? 'var(--income)' : 'var(--expense)';
+  updateTypeToggleUI();
+  renderCatPicker();
 }
 
 function renderCatPicker() {
@@ -2586,8 +2618,7 @@ function selectTab(tabKey) {
   document.getElementById('pageViewTab').style.display = isPage ? 'block' : 'none';
   document.getElementById('categoriesBtn').style.display = isPage ? 'none' : 'flex';
   document.getElementById('monthNavHeader').classList.toggle('show', tabKey === 'entries' || tabKey === 'stats');
-  document.getElementById('backToEntriesBtn').classList.toggle('show', tabKey !== 'entries');
-  closeQuickAdd();
+  document.getElementById('backToEntriesBtn').classList.toggle('show', isPage);
   document.getElementById('appMenuOverlay').classList.remove('show');
   document.getElementById('categoriesBtn').setAttribute('aria-label',
     tabKey === 'stats' ? t('statsSettingsTitle') : tabKey === 'savings' ? t('savingsSettingsTitle') : tabKey === 'notes' ? t('notesSettingsTitle') : t('categoriesTitle'));
@@ -2605,25 +2636,11 @@ function selectTab(tabKey) {
   render();
 }
 
-// ---- Нижнє меню: попап швидкого додавання (Витрата/Дохід) ----
-function closeQuickAdd() {
-  document.getElementById('fabRow').classList.remove('show');
-  document.getElementById('bnAddBtn').classList.remove('open');
-}
-function toggleQuickAdd() {
-  const isOpen = document.getElementById('fabRow').classList.toggle('show');
-  document.getElementById('bnAddBtn').classList.toggle('open', isOpen);
-}
-document.getElementById('bnAddBtn').addEventListener('click', toggleQuickAdd);
+// ---- Нижнє меню: кнопка "+" одразу відкриває форму нового запису ----
+document.getElementById('bnAddBtn').addEventListener('click', () => openForm('expense'));
 document.querySelectorAll('.bn-item[data-tab]').forEach((btn) => {
   btn.addEventListener('click', () => selectTab(btn.dataset.tab));
 });
-document.addEventListener('click', (e) => {
-  const fabRow = document.getElementById('fabRow');
-  if (!fabRow.classList.contains('show')) return;
-  if (fabRow.contains(e.target) || e.target.closest('#bnAddBtn')) return;
-  closeQuickAdd();
-}, true);
 
 function updateHeaderSectionTitle() {
   const titleEl = document.getElementById('headerSectionTitle');
@@ -2706,8 +2723,8 @@ document.getElementById('savingsTrendPeriodPicker').addEventListener('click', (e
 });
 document.getElementById('prevMonthHeader').addEventListener('click', () => { monthOffset--; render(); });
 document.getElementById('nextMonthHeader').addEventListener('click', () => { if (monthOffset < 0) { monthOffset++; render(); } });
-document.getElementById('openExpense').addEventListener('click', () => { closeQuickAdd(); openForm('expense'); });
-document.getElementById('openIncome').addEventListener('click', () => { closeQuickAdd(); openForm('income'); });
+document.getElementById('typeToggleExpense').addEventListener('click', () => switchFormType('expense'));
+document.getElementById('typeToggleIncome').addEventListener('click', () => switchFormType('income'));
 document.getElementById('closeForm').addEventListener('click', () => { editingTxId = null; document.getElementById('formOverlay').classList.remove('show'); });
 document.getElementById('formOverlay').addEventListener('click', (e) => { if (e.target.id === 'formOverlay') { editingTxId = null; e.currentTarget.classList.remove('show'); } });
 document.getElementById('submitBtn').addEventListener('click', submitForm);
@@ -2848,6 +2865,11 @@ document.getElementById('showNoteSnippetToggle').addEventListener('change', (e) 
 document.getElementById('showSavingsTotalToggle').addEventListener('change', (e) => {
   showSavingsTotal = e.target.checked;
   localStorage.setItem('financeAppShowSavingsTotal', showSavingsTotal ? '1' : '0');
+  renderSavingsGoalsList();
+});
+document.getElementById('savingsBalanceToggle').addEventListener('click', () => {
+  savingsBalanceHidden = !savingsBalanceHidden;
+  localStorage.setItem('financeAppSavingsBalanceHidden', savingsBalanceHidden ? '1' : '0');
   renderSavingsGoalsList();
 });
 document.getElementById('addNoteBtn').addEventListener('click', () => {
