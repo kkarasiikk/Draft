@@ -331,11 +331,36 @@
   .legend-toggle svg{display:none;width:13px;height:13px;}
   .legend-toggle.checked{background:var(--accent);border-color:var(--accent);}
   .legend-toggle.checked svg{display:block;}
-  .fab-row{position:fixed;bottom:calc(22px + env(safe-area-inset-bottom));left:0;right:0;z-index:20;display:flex;justify-content:center;gap:10px;padding:0 20px;}
+  .fab-row{position:fixed;left:14px;right:14px;bottom:calc(96px + env(safe-area-inset-bottom));z-index:24;
+    max-width:400px;margin:0 auto;display:flex;justify-content:center;gap:10px;
+    opacity:0;transform:translateY(10px) scale(.96);pointer-events:none;transition:opacity .16s ease,transform .16s ease;}
+  .fab-row.show{opacity:1;transform:translateY(0) scale(1);pointer-events:auto;}
   .fab{display:flex;align-items:center;gap:6px;border-radius:24px;padding:11px 18px;font-size:13.5px;font-weight:600;
-    cursor:pointer;font-family:'Inter',sans-serif;}
+    cursor:pointer;font-family:'Inter',sans-serif;flex:1;justify-content:center;}
   .fab.exp{background:var(--surface);color:var(--expense);border:1px solid var(--border);box-shadow:0 2px 10px rgba(20,20,24,.06);}
   .fab.inc{background:var(--accent);color:#fff;border:none;box-shadow:0 4px 14px rgba(92,124,250,.28);}
+
+  /* ---- Нижнє меню-перемикач розділів ---- */
+  .bottom-nav{position:fixed;left:14px;right:14px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:25;
+    max-width:400px;margin:0 auto;display:flex;align-items:flex-end;justify-content:space-between;
+    padding:7px 4px;background:var(--surface);
+    backdrop-filter:blur(var(--glass-blur)) saturate(150%);-webkit-backdrop-filter:blur(var(--glass-blur)) saturate(150%);
+    border:1px solid var(--border);border-radius:26px;box-shadow:var(--glass-shadow), 0 12px 34px rgba(20,20,30,.16);}
+  .bn-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+    background:none;border:none;color:var(--ink-muted);cursor:pointer;padding:6px 1px;border-radius:14px;
+    -webkit-tap-highlight-color:transparent;min-width:0;}
+  .bn-item svg{flex-shrink:0;transition:transform .12s ease;}
+  .bn-item span{font-size:10px;font-weight:600;font-family:'Inter',sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
+  .bn-item:hover{color:var(--ink);}
+  .bn-item.active{color:var(--accent);}
+  .bn-item.active svg{transform:translateY(-1px);}
+  .bn-fab-wrap{flex:0 0 auto;width:54px;display:flex;justify-content:center;position:relative;}
+  .bn-fab{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);width:50px;height:50px;border-radius:50%;
+    background:var(--accent);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;
+    box-shadow:0 6px 18px rgba(92,124,250,.4), 0 2px 8px rgba(20,20,24,.12);transition:transform .15s ease;}
+  .bn-fab:active{transform:translateX(-50%) scale(.92);}
+  .bn-fab svg{transition:transform .18s ease;}
+  .bn-fab.open svg{transform:rotate(45deg);}
   .modal-overlay{position:fixed;inset:0;background:var(--overlay);display:none;align-items:flex-end;justify-content:center;z-index:50;}
   .modal-overlay.show{display:flex;}
   .modal{background:var(--surface);border-radius:26px 26px 0 0;padding:20px 20px calc(28px + env(safe-area-inset-bottom));width:100%;max-width:480px;
@@ -491,7 +516,7 @@
 
   /* ---- Desktop layout ---- */
   @media (min-width:880px){
-    body{padding-bottom:32px;}
+    body{padding-bottom:100px;}
     .wrap{max-width:none;margin:0;padding:0 40px;}
     .app-topbar{padding:28px 0 0;}
     .header{border-bottom:none;border-radius:16px;border:1px solid var(--border);
@@ -509,7 +534,8 @@
     #statsTab{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start;max-width:960px;margin:0 auto;}
     #statsTab .card{margin-bottom:0;}
 
-    .fab-row{left:auto;right:32px;bottom:32px;justify-content:flex-end;padding:0;}
+    .fab-row{left:auto;right:32px;bottom:calc(32px + 84px);justify-content:flex-end;padding:0;}
+    .bottom-nav{left:auto;right:32px;bottom:32px;margin:0;width:350px;}
 
     .modal-overlay{align-items:center;}
     .modal{border-radius:18px;max-height:88vh;}
@@ -593,15 +619,6 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
         </button>
         <div class="header-actions">
-          <button class="header-icon-btn header-text-btn" id="notesToggleBtn" aria-label="Нотатки">
-            <span id="notesToggleLabel">Нотатки</span>
-          </button>
-          <button class="header-icon-btn header-text-btn" id="statsToggleBtn" aria-label="Статистика">
-            <span id="statsToggleLabel">Статистика</span>
-          </button>
-          <button class="header-icon-btn header-text-btn" id="savingsToggleBtn" aria-label="Збереження">
-            <span id="savingsToggleLabel">Збереження</span>
-          </button>
           <button class="header-icon-btn" id="categoriesBtn" aria-label="Категорії">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
           </button>
@@ -763,6 +780,31 @@
   <button class="fab exp" id="openWithdraw"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg> <span id="fabWithdrawLabel">Зняти</span></button>
   <button class="fab inc" id="openDeposit"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg> <span id="fabDepositLabel">Поповнити</span></button>
 </div>
+
+<nav class="bottom-nav" id="bottomNav">
+  <button type="button" class="bn-item active" data-tab="entries" id="bnEntries" aria-label="Записи">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
+    <span id="bnEntriesLabel">Записи</span>
+  </button>
+  <button type="button" class="bn-item" data-tab="stats" id="bnStats" aria-label="Статистика">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
+    <span id="statsToggleLabel">Статистика</span>
+  </button>
+  <div class="bn-fab-wrap">
+    <button type="button" class="bn-fab" id="bnAddBtn" aria-label="Додати">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+    </button>
+  </div>
+  <button type="button" class="bn-item" data-tab="notes" id="bnNotes" aria-label="Нотатки">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>
+    <span id="notesToggleLabel">Нотатки</span>
+  </button>
+  <button type="button" class="bn-item" data-tab="savings" id="bnSavings" aria-label="Збереження">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5.5"/><circle cx="12" cy="12" r="2"/></svg>
+    <span id="savingsToggleLabel">Збереження</span>
+  </button>
+</nav>
+
 
 <div class="modal-overlay" id="formOverlay">
   <div class="modal">

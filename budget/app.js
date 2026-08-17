@@ -992,7 +992,7 @@ function applyStaticTranslations() {
   document.getElementById('confirmDelete').textContent = t('deleteBtn');
   document.getElementById('settingsTitle').textContent = t('settingsTitle');
   document.getElementById('categoriesTitle').textContent = t('categoriesTitle');
-  document.getElementById('statsToggleBtn').setAttribute('aria-label', t('tabStats'));
+  document.getElementById('bnStats').setAttribute('aria-label', t('tabStats'));
   document.getElementById('categoriesBtn').setAttribute('aria-label', t('categoriesTitle'));
   document.getElementById('statsSettingsTitle').textContent = t('statsSettingsTitle');
   document.getElementById('statsSettingsChartsLabel').textContent = t('statsSettingsChartsLabel');
@@ -1040,7 +1040,9 @@ function applyStaticTranslations() {
   document.getElementById('statsToggleLabel').textContent = t('tabStats');
   document.getElementById('savingsToggleLabel').textContent = t('tabSavings');
   document.getElementById('notesToggleLabel').textContent = t('tabNotes');
-  document.getElementById('notesToggleBtn').setAttribute('aria-label', t('tabNotes'));
+  document.getElementById('bnEntriesLabel').textContent = t('tabEntries');
+  document.getElementById('bnNotes').setAttribute('aria-label', t('tabNotes'));
+  document.getElementById('bnSavings').setAttribute('aria-label', t('tabSavings'));
   document.getElementById('addNoteBtnLabel').textContent = t('addNoteBtnLabel');
   document.getElementById('notesEmptyTitle').textContent = t('notesEmptyTitle');
   document.getElementById('notesEmptySub').textContent = t('notesEmptySub');
@@ -2566,9 +2568,10 @@ function selectTab(tabKey) {
   currentTab = tabKey;
   if (!tabKey.startsWith('page:')) pageOriginTab = 'entries';
   document.querySelectorAll('#tabsList .tab-btn[data-tab]').forEach(b => b.classList.toggle('active', b.dataset.tab === tabKey));
-  document.getElementById('statsToggleBtn').classList.toggle('active', tabKey === 'stats');
-  document.getElementById('savingsToggleBtn').classList.toggle('active', tabKey === 'savings');
-  document.getElementById('notesToggleBtn').classList.toggle('active', tabKey === 'notes');
+  document.getElementById('bnEntries').classList.toggle('active', tabKey === 'entries');
+  document.getElementById('bnStats').classList.toggle('active', tabKey === 'stats');
+  document.getElementById('bnSavings').classList.toggle('active', tabKey === 'savings');
+  document.getElementById('bnNotes').classList.toggle('active', tabKey === 'notes');
   const isPage = tabKey.startsWith('page:');
   const isSavings = tabKey === 'savings';
   const isNotes = tabKey === 'notes';
@@ -2584,7 +2587,7 @@ function selectTab(tabKey) {
   document.getElementById('categoriesBtn').style.display = isPage ? 'none' : 'flex';
   document.getElementById('monthNavHeader').classList.toggle('show', tabKey === 'entries' || tabKey === 'stats');
   document.getElementById('backToEntriesBtn').classList.toggle('show', tabKey !== 'entries');
-  document.getElementById('fabRow').style.display = (isPage || isSavings || isNotes) ? 'none' : 'flex';
+  closeQuickAdd();
   document.getElementById('appMenuOverlay').classList.remove('show');
   document.getElementById('categoriesBtn').setAttribute('aria-label',
     tabKey === 'stats' ? t('statsSettingsTitle') : tabKey === 'savings' ? t('savingsSettingsTitle') : tabKey === 'notes' ? t('notesSettingsTitle') : t('categoriesTitle'));
@@ -2601,6 +2604,26 @@ function selectTab(tabKey) {
   if (isNotes) renderNotesTab();
   render();
 }
+
+// ---- Нижнє меню: попап швидкого додавання (Витрата/Дохід) ----
+function closeQuickAdd() {
+  document.getElementById('fabRow').classList.remove('show');
+  document.getElementById('bnAddBtn').classList.remove('open');
+}
+function toggleQuickAdd() {
+  const isOpen = document.getElementById('fabRow').classList.toggle('show');
+  document.getElementById('bnAddBtn').classList.toggle('open', isOpen);
+}
+document.getElementById('bnAddBtn').addEventListener('click', toggleQuickAdd);
+document.querySelectorAll('.bn-item[data-tab]').forEach((btn) => {
+  btn.addEventListener('click', () => selectTab(btn.dataset.tab));
+});
+document.addEventListener('click', (e) => {
+  const fabRow = document.getElementById('fabRow');
+  if (!fabRow.classList.contains('show')) return;
+  if (fabRow.contains(e.target) || e.target.closest('#bnAddBtn')) return;
+  closeQuickAdd();
+}, true);
 
 function updateHeaderSectionTitle() {
   const titleEl = document.getElementById('headerSectionTitle');
@@ -2683,8 +2706,8 @@ document.getElementById('savingsTrendPeriodPicker').addEventListener('click', (e
 });
 document.getElementById('prevMonthHeader').addEventListener('click', () => { monthOffset--; render(); });
 document.getElementById('nextMonthHeader').addEventListener('click', () => { if (monthOffset < 0) { monthOffset++; render(); } });
-document.getElementById('openExpense').addEventListener('click', () => openForm('expense'));
-document.getElementById('openIncome').addEventListener('click', () => openForm('income'));
+document.getElementById('openExpense').addEventListener('click', () => { closeQuickAdd(); openForm('expense'); });
+document.getElementById('openIncome').addEventListener('click', () => { closeQuickAdd(); openForm('income'); });
 document.getElementById('closeForm').addEventListener('click', () => { editingTxId = null; document.getElementById('formOverlay').classList.remove('show'); });
 document.getElementById('formOverlay').addEventListener('click', (e) => { if (e.target.id === 'formOverlay') { editingTxId = null; e.currentTarget.classList.remove('show'); } });
 document.getElementById('submitBtn').addEventListener('click', submitForm);
@@ -2827,9 +2850,6 @@ document.getElementById('showSavingsTotalToggle').addEventListener('change', (e)
   localStorage.setItem('financeAppShowSavingsTotal', showSavingsTotal ? '1' : '0');
   renderSavingsGoalsList();
 });
-document.getElementById('statsToggleBtn').addEventListener('click', () => selectTab(currentTab === 'stats' ? 'entries' : 'stats'));
-document.getElementById('savingsToggleBtn').addEventListener('click', () => selectTab(currentTab === 'savings' ? 'entries' : 'savings'));
-document.getElementById('notesToggleBtn').addEventListener('click', () => selectTab(currentTab === 'notes' ? 'entries' : 'notes'));
 document.getElementById('addNoteBtn').addEventListener('click', () => {
   pageOriginTab = 'notes';
   openPageEditor(null);
