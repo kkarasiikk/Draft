@@ -131,17 +131,13 @@ function applyTranslations() {
   document.getElementById('langMenuLabel').textContent = t('langLabel');
   document.getElementById('logoutLabel').textContent = t('logout');
   document.getElementById('budgetTitle').textContent = t('budgetTitle');
-  document.getElementById('budgetDesc').textContent = t('budgetDesc');
   document.getElementById('openBtnLabel').textContent = t('openBtn');
   document.getElementById('goalsTitle').textContent = t('goalsTitle');
-  document.getElementById('goalsDesc').textContent = t('goalsDesc');
   document.getElementById('goalsBadge').textContent = t('soon');
   document.getElementById('goalsCard').setAttribute('aria-label', `${t('goalsTitle')} — ${t('soon')}`);
   document.getElementById('tasksTitle').textContent = t('tasksTitle');
-  document.getElementById('tasksDesc').textContent = t('tasksDesc');
   document.getElementById('tasksOpenBtnLabel').textContent = t('openBtn');
   document.getElementById('workoutTitle').textContent = t('workoutTitle');
-  document.getElementById('workoutDesc').textContent = t('workoutDesc');
   document.getElementById('workoutOpenBtnLabel').textContent = t('openBtn');
   document.getElementById('authSub').textContent = t('authSub');
   document.getElementById('authEmailLabel').textContent = t('emailLabel');
