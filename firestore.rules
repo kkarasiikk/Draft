@@ -13,6 +13,10 @@ rules_version = '2';
 //   users/{uid}/workouts/{id}         -- {date, name, notes, exercises: [
 //                                         {id, libId, muscle, name, sets: [
 //                                         {weight, reps}]}], createdAt, updatedAt}
+//   users/{uid}/goals/{id}            -- {title, category, why, targetDate,
+//                                         status, milestones: [{id, title, done}],
+//                                         checkins: [YYYY-MM-DD], journal: [
+//                                         {id, text, createdAt}], createdAt, updatedAt}
 //
 // Правило: кожен користувач може читати й писати ЛИШЕ власні документи,
 // і лише якщо форма даних відповідає тому, що реально пише застосунок —
@@ -133,6 +137,30 @@ service cloud.firestore {
         }
         allow read, delete: if isOwner(uid);
         allow create, update: if isOwner(uid) && isValidWorkout(request.resource.data);
+      }
+
+      match /goals/{goalId} {
+        // Як і з tasks/subtasks та workouts/exercises: форму КОЖНОГО елемента
+        // milestones/checkins/journal тут не перевіряємо — лише що це список
+        // і не задовгий. Форму окремих елементів гарантує клієнтський код
+        // (goals/app.js: submit-handler форми, toggleMilestone, toggleTodayCheckin,
+        // addJournalEntry).
+        function isValidLifeGoal(d) {
+          return isNonEmptyString(d.title, 200) &&
+                 d.category in ['health', 'finance', 'learning', 'career',
+                   'relationships', 'travel', 'creativity', 'other'] &&
+                 d.why is string && d.why.size() <= 1000 &&
+                 (d.targetDate == null || (d.targetDate is string && d.targetDate.size() == 10)) &&
+                 d.status in ['active', 'done', 'archived'] &&
+                 d.milestones is list && d.milestones.size() <= 50 &&
+                 d.checkins is list && d.checkins.size() <= 400 &&
+                 d.journal is list && d.journal.size() <= 200 &&
+                 d.createdAt is timestamp && d.updatedAt is timestamp &&
+                 d.keys().hasOnly(['title', 'category', 'why', 'targetDate', 'status',
+                   'milestones', 'checkins', 'journal', 'createdAt', 'updatedAt']);
+        }
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid) && isValidLifeGoal(request.resource.data);
       }
     }
 
