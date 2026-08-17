@@ -133,8 +133,7 @@ function applyTranslations() {
   document.getElementById('budgetTitle').textContent = t('budgetTitle');
   document.getElementById('openBtnLabel').textContent = t('openBtn');
   document.getElementById('goalsTitle').textContent = t('goalsTitle');
-  document.getElementById('goalsBadge').textContent = t('soon');
-  document.getElementById('goalsCard').setAttribute('aria-label', `${t('goalsTitle')} — ${t('soon')}`);
+  document.getElementById('goalsOpenBtnLabel').textContent = t('openBtn');
   document.getElementById('tasksTitle').textContent = t('tasksTitle');
   document.getElementById('tasksOpenBtnLabel').textContent = t('openBtn');
   document.getElementById('workoutTitle').textContent = t('workoutTitle');
