@@ -16,3 +16,8 @@ const firebaseConfig = {
 // Поки тут заглушка — App Check просто не активується (initializeAppCheck
 // нижче обгорнутий у try/catch), застосунок працює як раніше.
 const RECAPTCHA_V3_SITE_KEY = "ВСТАВ_СЮДИ_СВІЙ_SITE_KEY";
+// Публічний ключ Web Push (VAPID) для FCM.
+// Firebase Console -> Project Settings -> Cloud Messaging -> Web Push certificates.
+// Як і apiKey вище, він публічний за задумом: приватна половина пари
+// лишається на боці Firebase і клієнту ніколи не видається.
+const FCM_VAPID_KEY = "BNEdyox0tk4XTbZQXnbFyBXDB6KZGddK2jxmJRLk0Z4AYMFPPbbVF_ogNlWZ8E8mBJISCldZIA_uy7hsbxyRIZU";

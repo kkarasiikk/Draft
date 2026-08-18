@@ -49,7 +49,11 @@ service cloud.firestore {
                (!('currency' in d) || d.currency is string) &&
                (!('theme' in d) || d.theme is string) &&
                (!('categoriesIncome' in d) || d.categoriesIncome is list) &&
-               (!('categoriesExpense' in d) || d.categoriesExpense is list);
+               (!('categoriesExpense' in d) || d.categoriesExpense is list) &&
+               // Налаштування нагадувань: { enabled, morningHour, eveningHour,
+               // tz, lastMorning, lastEvening }. Дві останні дати пише Cloud
+               // Function (адмінський SDK правила обходить), решту — клієнт.
+               (!('taskReminders' in d) || d.taskReminders is map);
       }
       allow read: if isOwner(uid);
       allow write: if isOwner(uid) && isValidProfile(request.resource.data);

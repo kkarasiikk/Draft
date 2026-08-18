@@ -49,6 +49,23 @@ const T = {
     nowTitle: 'Зараз', nowSkip: 'Далі',
     swipeDone: 'Виконано', swipeTomorrow: 'Завтра',
     nowHaveTime: 'Маю час:',
+    remindersTitle: 'Нагадування', remindersMenu: 'Нагадування',
+    reminderLabel: 'Нагадати', reminderNone: 'Не треба',
+    reminderOnTime: 'У час завдання',
+    reminderBefore: (min) => (min >= 60 ? `За ${min / 60} год` : `За ${min} хв`),
+    reminderAtHour: (h) => `О ${String(h).padStart(2, '0')}:00`,
+    reminderNeedsDate: 'Щоб нагадати, завданню потрібна дата.',
+    reminderOff: 'Не треба',
+    remindMorning: 'Ранковий огляд дня', remindEvening: 'Вечірній підсумок',
+    remindHint: 'Ранковий пуш показує план на день, вечірній — що лишилось незакритим. Нагадування під конкретне завдання вмикається в самому завданні.',
+    pushEnable: 'Увімкнути сповіщення', pushDisable: 'Вимкнути на цьому пристрої',
+    pushOn: 'Сповіщення увімкнені на цьому пристрої.',
+    pushOff: 'Сповіщення вимкнені. Увімкни — і застосунок нагадає про завдання й пришле огляд дня.',
+    pushDenied: 'Браузер заблокував сповіщення для цього сайту. Дозволь їх у налаштуваннях сайту й спробуй ще раз.',
+    pushIosInstall: 'На iPhone сповіщення працюють лише для застосунку, доданого на домашній екран: «Поділитися» → «На домашній екран», далі відкрий Life звідти.',
+    pushUnsupported: 'Цей браузер не вміє push-сповіщень.',
+    pushNoKey: 'Не налаштований ключ Web Push (FCM_VAPID_KEY).',
+    pushFailed: 'Не вдалося увімкнути сповіщення. Перевір інтернет і спробуй ще раз.',
     templatesTitle: 'Шаблони', templatesMenu: 'Шаблони',
     saveAsTemplate: 'Зберегти як шаблон', templateSaved: 'Збережено ✓',
     templateSteps: (n) => `${n} ${plural(n, { one: 'крок', few: 'кроки', many: 'кроків', other: 'кроку' })}`,
@@ -137,6 +154,23 @@ const T = {
     nowTitle: 'Сейчас', nowSkip: 'Дальше',
     swipeDone: 'Выполнено', swipeTomorrow: 'Завтра',
     nowHaveTime: 'Есть время:',
+    remindersTitle: 'Напоминания', remindersMenu: 'Напоминания',
+    reminderLabel: 'Напомнить', reminderNone: 'Не надо',
+    reminderOnTime: 'В момент задачи',
+    reminderBefore: (min) => (min >= 60 ? `За ${min / 60} ч` : `За ${min} мин`),
+    reminderAtHour: (h) => `В ${String(h).padStart(2, '0')}:00`,
+    reminderNeedsDate: 'Чтобы напомнить, задаче нужна дата.',
+    reminderOff: 'Не надо',
+    remindMorning: 'Утренний обзор дня', remindEvening: 'Вечерний итог',
+    remindHint: 'Утренний пуш показывает план на день, вечерний — что осталось незакрытым. Напоминание под конкретную задачу включается в самой задаче.',
+    pushEnable: 'Включить уведомления', pushDisable: 'Выключить на этом устройстве',
+    pushOn: 'Уведомления включены на этом устройстве.',
+    pushOff: 'Уведомления выключены. Включи — и приложение напомнит о задачах и пришлёт обзор дня.',
+    pushDenied: 'Браузер заблокировал уведомления для этого сайта. Разреши их в настройках сайта и попробуй снова.',
+    pushIosInstall: 'На iPhone уведомления работают только для приложения, добавленного на домашний экран: «Поделиться» → «На экран Домой», затем открой Life оттуда.',
+    pushUnsupported: 'Этот браузер не умеет push-уведомлений.',
+    pushNoKey: 'Не настроен ключ Web Push (FCM_VAPID_KEY).',
+    pushFailed: 'Не удалось включить уведомления. Проверь интернет и попробуй ещё раз.',
     templatesTitle: 'Шаблоны', templatesMenu: 'Шаблоны',
     saveAsTemplate: 'Сохранить как шаблон', templateSaved: 'Сохранено ✓',
     templateSteps: (n) => `${n} ${plural(n, { one: 'шаг', few: 'шага', many: 'шагов', other: 'шага' })}`,
@@ -225,6 +259,23 @@ const T = {
     nowTitle: 'Teraz', nowSkip: 'Dalej',
     swipeDone: 'Zrobione', swipeTomorrow: 'Jutro',
     nowHaveTime: 'Mam czas:',
+    remindersTitle: 'Przypomnienia', remindersMenu: 'Przypomnienia',
+    reminderLabel: 'Przypomnij', reminderNone: 'Nie trzeba',
+    reminderOnTime: 'O godzinie zadania',
+    reminderBefore: (min) => (min >= 60 ? `${min / 60} godz. wcześniej` : `${min} min wcześniej`),
+    reminderAtHour: (h) => `O ${String(h).padStart(2, '0')}:00`,
+    reminderNeedsDate: 'Żeby przypomnieć, zadanie potrzebuje daty.',
+    reminderOff: 'Nie trzeba',
+    remindMorning: 'Poranny przegląd dnia', remindEvening: 'Wieczorne podsumowanie',
+    remindHint: 'Poranny push pokazuje plan dnia, wieczorny — co zostało niezamknięte. Przypomnienie o konkretnym zadaniu włącza się w samym zadaniu.',
+    pushEnable: 'Włącz powiadomienia', pushDisable: 'Wyłącz na tym urządzeniu',
+    pushOn: 'Powiadomienia włączone na tym urządzeniu.',
+    pushOff: 'Powiadomienia wyłączone. Włącz je — aplikacja przypomni o zadaniach i przyśle przegląd dnia.',
+    pushDenied: 'Przeglądarka zablokowała powiadomienia dla tej strony. Zezwól na nie w ustawieniach strony i spróbuj ponownie.',
+    pushIosInstall: 'Na iPhone powiadomienia działają tylko dla aplikacji dodanej do ekranu głównego: „Udostępnij" → „Do ekranu początkowego", potem otwórz Life stamtąd.',
+    pushUnsupported: 'Ta przeglądarka nie obsługuje powiadomień push.',
+    pushNoKey: 'Brak klucza Web Push (FCM_VAPID_KEY).',
+    pushFailed: 'Nie udało się włączyć powiadomień. Sprawdź internet i spróbuj ponownie.',
     templatesTitle: 'Szablony', templatesMenu: 'Szablony',
     saveAsTemplate: 'Zapisz jako szablon', templateSaved: 'Zapisano ✓',
     templateSteps: (n) => `${n} ${plural(n, { one: 'krok', few: 'kroki', many: 'kroków', other: 'kroku' })}`,
@@ -313,6 +364,23 @@ const T = {
     nowTitle: 'Now', nowSkip: 'Next',
     swipeDone: 'Done', swipeTomorrow: 'Tomorrow',
     nowHaveTime: 'I have:',
+    remindersTitle: 'Reminders', remindersMenu: 'Reminders',
+    reminderLabel: 'Remind me', reminderNone: 'No need',
+    reminderOnTime: 'At task time',
+    reminderBefore: (min) => (min >= 60 ? `${min / 60} h before` : `${min} min before`),
+    reminderAtHour: (h) => `At ${String(h).padStart(2, '0')}:00`,
+    reminderNeedsDate: 'A task needs a date before it can remind you.',
+    reminderOff: 'Off',
+    remindMorning: 'Morning look at the day', remindEvening: 'Evening wrap-up',
+    remindHint: 'The morning push shows the plan for the day, the evening one shows what is still open. Per-task reminders are set inside the task itself.',
+    pushEnable: 'Turn notifications on', pushDisable: 'Turn off on this device',
+    pushOn: 'Notifications are on for this device.',
+    pushOff: 'Notifications are off. Turn them on and the app will remind you about tasks and send a look at your day.',
+    pushDenied: 'The browser blocked notifications for this site. Allow them in site settings and try again.',
+    pushIosInstall: 'On iPhone, notifications only work for the app added to the home screen: Share → Add to Home Screen, then open Life from there.',
+    pushUnsupported: 'This browser has no push notifications.',
+    pushNoKey: 'Web Push key (FCM_VAPID_KEY) is not configured.',
+    pushFailed: 'Could not turn notifications on. Check your connection and try again.',
     templatesTitle: 'Templates', templatesMenu: 'Templates',
     saveAsTemplate: 'Save as template', templateSaved: 'Saved ✓',
     templateSteps: (n) => `${n} ${plural(n, { one: 'step', other: 'steps' })}`,
@@ -500,6 +568,14 @@ function applyTranslations() {
   document.getElementById('carryHint').textContent = t('carryHint');
   document.getElementById('carryLaterBtn').textContent = t('carryLater');
   document.getElementById('carryAllTodayBtn').textContent = t('carryAllToday');
+  document.getElementById('remindersTitle').textContent = t('remindersTitle');
+  document.getElementById('remindersMenuLabel').textContent = t('remindersMenu');
+  document.getElementById('reminderLabel').textContent = t('reminderLabel');
+  document.getElementById('remindMorningLabel').textContent = t('remindMorning');
+  document.getElementById('remindEveningLabel').textContent = t('remindEvening');
+  document.getElementById('remindHint').textContent = t('remindHint');
+  document.getElementById('enablePushBtn').textContent = t('pushEnable');
+  document.getElementById('disablePushBtn').textContent = t('pushDisable');
   document.getElementById('templatesTitle').textContent = t('templatesTitle');
   document.getElementById('templatesMenuLabel').textContent = t('templatesMenu');
   document.getElementById('saveAsTemplateBtn').textContent = t('saveAsTemplate');
@@ -670,6 +746,12 @@ let formEstimate = null;
 let formRecurrence = null; // { type, interval, weekdays, day, anchor } або null
 let quickAddDate = null;
 let searchQuery = '';
+let formReminder = null;   // {offsetMin} | {atHour} | null — вибір у формі завдання
+let reminderSettings = { enabled: false, morningHour: 8, eveningHour: 20, tz: null };
+// Причина, з якої не вдалося увімкнути push. Живе в стані, а не просто в
+// тексті на екрані: будь-який наступний перемальовок затер би повідомлення
+// саме тоді, коли воно потрібне.
+let pushError = null;
 let pendingDeleteId = null;
 let calYear = new Date().getFullYear();
 let calMonth = new Date().getMonth(); // 0-based
@@ -1260,6 +1342,188 @@ function renderStatsScreen() {
     + `<div class="stat-caption" style="text-align:left;margin-top:2px;">${escapeHtml(t('statsAllTime', summary.totalDone))}</div>`;
 }
 
+// ---- Нагадування ----
+// Клієнт відповідає лише за «коли» і «на який пристрій»: рахує момент
+// (tasks/reminders.js), зберігає його в завданні й тримає токен пристрою.
+// Саму розсилку робить Cloud Function — браузер закритий саме тоді, коли
+// нагадування потрібне найбільше.
+const DIGEST_HOURS = [6, 7, 8, 9, 10, 21];
+const EVENING_HOURS = [18, 19, 20, 21, 22];
+
+function reminderOptionLabel(option) {
+  if (!option) return t('reminderNone');
+  if (typeof option.atHour === 'number') return t('reminderAtHour', option.atHour);
+  return option.offsetMin === 0 ? t('reminderOnTime') : t('reminderBefore', option.offsetMin);
+}
+
+function sameReminderOption(a, b) {
+  if (!a || !b) return a === b;
+  return a.offsetMin === b.offsetMin && a.atHour === b.atHour;
+}
+
+// Набір варіантів залежить від того, чи є в завдання час: без нього
+// «за 10 хвилин» ні від чого відраховувати.
+function renderReminderPicker() {
+  const picker = document.getElementById('taskReminderPicker');
+  const draft = {
+    dueDate: document.getElementById('taskDueDate').value || null,
+    dueTime: document.getElementById('taskDueTime').value || null,
+  };
+  const options = reminderOptionsFor(draft);
+  if (!options.length) {
+    picker.innerHTML = `<div class="quick-hint" style="margin:0;">${escapeHtml(t('reminderNeedsDate'))}</div>`;
+    formReminder = null;
+    return;
+  }
+  if (formReminder && !options.some((opt) => sameReminderOption(opt, formReminder))) formReminder = null;
+  const all = [null].concat(options);
+  picker.innerHTML = all.map((option, i) => {
+    const selected = sameReminderOption(option, formReminder) || (!option && !formReminder);
+    return `<button type="button" class="priority-choice${selected ? ' selected' : ''}" data-reminder="${i}">${escapeHtml(reminderOptionLabel(option))}</button>`;
+  }).join('');
+  picker.querySelectorAll('[data-reminder]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      formReminder = all[Number(btn.dataset.reminder)];
+      renderReminderPicker();
+    });
+  });
+}
+
+// Момент нагадування рахуємо в момент збереження: до нього дата й час
+// у формі ще можуть змінитись скільки завгодно разів.
+function reminderTimestampForForm() {
+  if (!formReminder) return null;
+  const at = reminderAtFor({
+    dueDate: document.getElementById('taskDueDate').value || null,
+    dueTime: document.getElementById('taskDueTime').value || null,
+  }, formReminder);
+  return at ? firebase.firestore.Timestamp.fromDate(at) : null;
+}
+
+// Відновлення вибору при відкритті наявного завдання: у документі лежить
+// момент, а в інтерфейсі — варіант, тож підбираємо той, що дає цей момент.
+function reminderOptionFromTask(task) {
+  if (!task || !task.reminderAt || typeof task.reminderAt.toDate !== 'function') return null;
+  const saved = task.reminderAt.toDate().getTime();
+  const options = reminderOptionsFor(task);
+  for (const option of options) {
+    const at = reminderAtFor(task, option);
+    if (at && Math.abs(at.getTime() - saved) < 60000) return option;
+  }
+  return null;
+}
+
+function hourPickerHtml(hours, selected, attr) {
+  return hours.map((h) =>
+    `<button type="button" class="hour-chip${selected === h ? ' selected' : ''}" ${attr}="${h}">${String(h).padStart(2, '0')}:00</button>`
+  ).join('') +
+    `<button type="button" class="hour-chip${selected === null ? ' selected' : ''}" ${attr}="off">${escapeHtml(t('reminderOff'))}</button>`;
+}
+
+function renderReminderSettings() {
+  const supported = pushSupport();
+  const permission = pushPermission();
+  const stateEl = document.getElementById('remindState');
+  const enableBtn = document.getElementById('enablePushBtn');
+  const settingsEl = document.getElementById('remindSettings');
+
+  const active = supported === 'ok' && permission === 'granted' && reminderSettings.enabled;
+  stateEl.className = 'remind-state' + (pushError || supported !== 'ok' || permission === 'denied' ? ' warn' : '');
+  stateEl.textContent =
+    pushError ? pushError :
+    supported === 'ios-needs-install' ? t('pushIosInstall') :
+    supported === 'unsupported' ? t('pushUnsupported') :
+    permission === 'denied' ? t('pushDenied') :
+    active ? t('pushOn') : t('pushOff');
+
+  enableBtn.style.display = active || supported !== 'ok' || permission === 'denied' ? 'none' : '';
+  settingsEl.style.display = active ? '' : 'none';
+  if (!active) return;
+
+  document.getElementById('remindMorningPicker').innerHTML =
+    hourPickerHtml(DIGEST_HOURS, reminderSettings.morningHour, 'data-morning');
+  document.getElementById('remindEveningPicker').innerHTML =
+    hourPickerHtml(EVENING_HOURS, reminderSettings.eveningHour, 'data-evening');
+
+  settingsEl.querySelectorAll('[data-morning]').forEach((btn) => {
+    btn.addEventListener('click', () => saveReminderSettings({
+      morningHour: btn.dataset.morning === 'off' ? null : Number(btn.dataset.morning),
+    }));
+  });
+  settingsEl.querySelectorAll('[data-evening]').forEach((btn) => {
+    btn.addEventListener('click', () => saveReminderSettings({
+      eveningHour: btn.dataset.evening === 'off' ? null : Number(btn.dataset.evening),
+    }));
+  });
+}
+
+async function saveReminderSettings(patch) {
+  const uidCur = auth.currentUser && auth.currentUser.uid;
+  if (!uidCur) return;
+  reminderSettings = {
+    ...reminderSettings,
+    ...patch,
+    // Таймзона потрібна серверу: він живе в UTC і без неї надіслав би
+    // «ранковий» дайджест серед ночі.
+    tz: Intl.DateTimeFormat().resolvedOptions().timeZone || null,
+  };
+  renderReminderSettings();
+  try {
+    await db.collection('users').doc(uidCur).set({ taskReminders: reminderSettings }, { merge: true });
+  } catch (err) {
+    console.error('saveReminderSettings:', err);
+    document.getElementById('remindState').textContent = writeErrorMessage(err);
+  }
+}
+
+async function loadReminderSettings(uid) {
+  try {
+    const doc = await db.collection('users').doc(uid).get();
+    const saved = doc.exists && doc.data() ? doc.data().taskReminders : null;
+    if (saved) reminderSettings = { ...reminderSettings, ...saved };
+  } catch (err) {
+    console.warn('loadReminderSettings:', err);
+  }
+}
+
+document.getElementById('remindersMenuBtn').addEventListener('click', () => {
+  document.getElementById('appMenuOverlay').classList.remove('show');
+  // Стара помилка не має зустрічати людину при наступному відкритті.
+  pushError = null;
+  renderReminderSettings();
+  document.getElementById('remindersOverlay').classList.add('show');
+});
+document.getElementById('closeReminders').addEventListener('click', () => {
+  document.getElementById('remindersOverlay').classList.remove('show');
+});
+document.getElementById('remindersOverlay').addEventListener('click', (e) => {
+  if (e.target.id === 'remindersOverlay') e.currentTarget.classList.remove('show');
+});
+document.getElementById('enablePushBtn').addEventListener('click', async () => {
+  const btn = document.getElementById('enablePushBtn');
+  const uidCur = auth.currentUser && auth.currentUser.uid;
+  btn.disabled = true;
+  const result = await enablePush(db, uidCur);
+  btn.disabled = false;
+  if (result.ok) {
+    pushError = null;
+    await saveReminderSettings({ enabled: true });
+  } else {
+    pushError =
+      result.reason === 'denied' ? t('pushDenied') :
+      result.reason === 'ios-needs-install' ? t('pushIosInstall') :
+      result.reason === 'no-vapid-key' ? t('pushNoKey') :
+      result.reason === 'unsupported' ? t('pushUnsupported') : t('pushFailed');
+  }
+  renderReminderSettings();
+});
+document.getElementById('disablePushBtn').addEventListener('click', async () => {
+  const uidCur = auth.currentUser && auth.currentUser.uid;
+  await disablePush(db, uidCur);
+  await saveReminderSettings({ enabled: false });
+  renderReminderSettings();
+});
+
 // ---- Шаблони завдань ----
 // Ті самі кроки щотижня («поїздка», «тижневий огляд») набирати заново —
 // найдурніша робота, яку може вимагати планувальник. Шаблон народжується
@@ -1313,6 +1577,8 @@ async function applyTemplate(id) {
       dueTime: null,
       estimateMin: tpl.estimateMin || null,
       recurrence: null,
+      reminderAt: null,
+      notifiedAt: null,
       // Кроки завжди приходять невиконаними: шаблон описує, що треба
       // зробити, а не що вже зроблено минулого разу.
       subtasks: (tpl.subtasks || []).map((sub) => ({ id: uid4(), title: sub.title, done: false })),
@@ -2195,6 +2461,9 @@ function toggleDone(id) {
         dueTime: task.dueTime || null,
         estimateMin: task.estimateMin || null,
         recurrence: task.recurrence,
+        // Наступний повтор ще не нагадували — інакше він мовчав би.
+        reminderAt: null,
+        notifiedAt: null,
         // Підзадачі переносяться невиконаними — наступного разу їх робити знову.
         subtasks: (task.subtasks || []).map((sub) => ({ ...sub, done: false })),
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
@@ -2425,9 +2694,11 @@ function openTaskForm(existingTask, prefillDate) {
   formSubtasks = existingTask ? (existingTask.subtasks || []).map((s) => ({ ...s })) : [];
   formEstimate = existingTask ? existingTask.estimateMin || null : null;
   formRecurrence = existingTask && existingTask.recurrence ? { ...existingTask.recurrence } : null;
+  formReminder = reminderOptionFromTask(existingTask);
   document.getElementById('taskEstimateInput').value = formEstimate || '';
   document.getElementById('taskTagInput').value = '';
   renderPriorityPicker();
+  renderReminderPicker();
   renderRecurrencePicker();
   renderRecurrenceOptions();
   renderTagsEditor();
@@ -2464,11 +2735,16 @@ document.getElementById('taskForm').addEventListener('submit', async (e) => {
   const estimateRaw = parseInt(document.getElementById('taskEstimateInput').value, 10);
   const estimateMin = Number.isFinite(estimateRaw) && estimateRaw > 0 ? Math.min(estimateRaw, 1440) : null;
 
+  const reminderAt = reminderTimestampForForm();
   const payload = {
     title, notes: document.getElementById('taskNotesInput').value.trim(),
     dueDate, dueTime, priority: formPriority, tags: formTags,
     estimateMin,
     recurrence: formRecurrence,
+    reminderAt,
+    // Змінили час нагадування — його треба надіслати заново, тож скидаємо
+    // позначку «вже надіслано». Інакше перенесене завдання мовчало б.
+    notifiedAt: null,
     subtasks: cleanSubtasks,
     updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
   };
@@ -2608,6 +2884,8 @@ async function submitQuickAdd() {
       dueTime: parsed.dueTime,
       estimateMin: parsed.estimateMin,
       recurrence: parsed.recurrence,
+      reminderAt: null,
+      notifiedAt: null,
       subtasks: [],
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
@@ -2654,6 +2932,10 @@ document.getElementById('taskTagInput').addEventListener('keydown', (e) => {
   if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); addTagFromInput(); }
 });
 document.getElementById('taskTagInput').addEventListener('blur', addTagFromInput);
+// Варіанти нагадування залежать від дати й часу завдання, тож перемальовуємо
+// їх одразу після зміни, а не в момент збереження.
+document.getElementById('taskDueDate').addEventListener('change', renderReminderPicker);
+document.getElementById('taskDueTime').addEventListener('change', renderReminderPicker);
 document.getElementById('addSubtaskBtn').addEventListener('click', addEmptySubtask);
 
 // ---- Автентифікація: стан ----
@@ -2674,6 +2956,13 @@ auth.onAuthStateChanged((user) => {
     }).catch(() => {});
     subscribeToTasks(user.uid);
     subscribeToTemplates(user.uid);
+    loadReminderSettings(user.uid);
+    // Коли вкладка відкрита, системного сповіщення браузер не показує —
+    // повідомлення побачив би тільки SW. Показуємо самі.
+    listenForegroundPush((data) => {
+      if (!('Notification' in window) || Notification.permission !== 'granted') return;
+      new Notification(data.title || 'Life', { body: data.body || '', icon: '../budget/icon-192.png' });
+    });
   } else {
     if (unsubscribeTasks) { unsubscribeTasks(); unsubscribeTasks = null; }
     if (unsubscribeTemplates) { unsubscribeTemplates(); unsubscribeTemplates = null; }
