@@ -208,6 +208,42 @@
     border:1px solid var(--border);background:transparent;color:var(--ink-muted);white-space:nowrap;}
   .tag-filter-chip.selected{background:var(--accent-light);color:var(--accent);border-color:transparent;font-weight:600;}
 
+  /* ---- Швидке додавання ---- */
+  .quick-preview{display:flex;flex-wrap:wrap;gap:6px;min-height:26px;margin:2px 0 10px;}
+  .quick-chip{font-size:11.5px;font-weight:600;padding:4px 10px;border-radius:20px;white-space:nowrap;
+    background:var(--accent-light);color:var(--accent);}
+  .quick-chip.muted{background:var(--control-bg);color:var(--ink-muted);}
+  .quick-hint{font-size:12px;line-height:1.45;color:var(--ink-muted);margin-bottom:12px;}
+  .btn-secondary{border:1px solid var(--border);background:transparent;color:var(--ink-soft);font-weight:500;
+    border-radius:10px;padding:13px 18px;font-size:15px;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap;}
+
+  /* ---- Пріоритет / теги / підзадачі у формі ---- */
+  .priority-picker{display:flex;gap:4px;margin-top:6px;margin-bottom:16px;}
+  .priority-choice{flex:1;min-width:0;border:1px solid var(--border);background:transparent;color:var(--ink-muted);
+    font-family:'Inter',sans-serif;font-size:12.5px;font-weight:600;padding:9px 4px;border-radius:8px;cursor:pointer;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .priority-choice.selected{border-color:transparent;background:var(--accent-light);color:var(--accent);}
+  .priority-choice.selected[data-priority="high"]{background:var(--high-light);color:var(--high);}
+  .priority-choice.selected[data-priority="medium"]{background:var(--medium-light);color:var(--medium);}
+  .priority-choice.selected[data-priority="low"]{background:var(--low-light);color:var(--low);}
+  .estimate-field input{margin-top:6px;}
+  .tags-editor{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;min-height:26px;}
+  .tag-edit-chip{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;padding:4px 6px 4px 10px;
+    border-radius:20px;background:var(--accent-light);color:var(--accent);}
+  .tag-edit-chip button{border:none;background:none;color:inherit;cursor:pointer;display:flex;padding:0;opacity:.75;}
+  .tag-edit-chip button:hover{opacity:1;}
+  .subtasks-editor{display:flex;flex-direction:column;gap:6px;margin-top:6px;}
+  .subtask-row{display:flex;align-items:center;gap:8px;}
+  .subtask-row input[type=text]{margin:0;flex:1;min-width:0;}
+  .subtask-check{flex-shrink:0;width:20px;height:20px;border-radius:50%;border:2px solid var(--border);
+    background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff;padding:0;}
+  .subtask-check svg{display:none;width:12px;height:12px;}
+  .subtask-check.checked{background:var(--income);border-color:var(--income);}
+  .subtask-check.checked svg{display:block;}
+  .subtask-remove{flex-shrink:0;border:none;background:none;color:var(--ink-muted);cursor:pointer;display:flex;padding:4px;}
+  .add-subtask-btn{margin-top:8px;margin-bottom:16px;border:none;background:none;color:var(--accent);
+    font-family:'Inter',sans-serif;font-size:13.5px;font-weight:600;cursor:pointer;padding:4px 0;}
+
   .day-group{margin-bottom:18px;}
   .day-label{display:flex;align-items:baseline;gap:6px;font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-muted);
     font-family:'Inter',sans-serif;font-weight:600;margin-bottom:8px;padding-left:2px;}
@@ -416,6 +452,12 @@
     <div class="cal-grid" id="calendarGrid"></div>
     <div id="noDateSection"></div>
   </div>
+    <div class="fab-row" id="calendarFabRow">
+      <button class="fab" id="openQuickAdd">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        <span id="quickAddFabLabel">Додати</span>
+      </button>
+    </div>
   </div>
 
   <div id="dayViewScreen" style="display:none;">
@@ -438,6 +480,26 @@
 </div>
 
 <!-- ---- Форма завдання (створення / редагування) ---- -->
+<div class="modal-overlay" id="quickAddOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="quickAddTitle">Швидке додавання</div>
+      <button class="close-btn" id="closeQuickAdd" aria-label="Закрити"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    <form id="quickAddForm">
+      <input type="text" id="quickAddInput" class="title-input" maxlength="300" autocomplete="off"
+             placeholder="Купити молоко завтра о 18">
+      <div class="quick-preview" id="quickAddPreview"></div>
+      <div class="quick-hint" id="quickAddHint"></div>
+      <div class="form-error" id="quickAddError"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" id="quickAddDetailsBtn">Деталі…</button>
+        <button class="submit-btn" id="quickAddSubmitBtn" type="submit">Додати</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <div class="modal-overlay" id="taskFormOverlay">
   <div class="modal">
     <div class="modal-head">
@@ -461,6 +523,25 @@
         </div>
       </div>
 
+      <div class="field-row">
+        <div>
+          <label class="field-label" id="priorityLabel">Пріоритет</label>
+          <div class="priority-picker" id="taskPriorityPicker"></div>
+        </div>
+        <div class="estimate-field">
+          <label class="field-label" id="estimateLabel">Скільки часу займе</label>
+          <input type="number" id="taskEstimateInput" min="1" max="1440" step="1" inputmode="numeric" placeholder="хв">
+        </div>
+      </div>
+
+      <label class="field-label" id="tagsLabel">Теги</label>
+      <div class="tags-editor" id="taskTagsEditor"></div>
+      <input type="text" id="taskTagInput" maxlength="30" placeholder="Додати тег">
+
+      <label class="field-label" id="subtasksLabel">Підзадачі</label>
+      <div class="subtasks-editor" id="taskSubtasksEditor"></div>
+      <button type="button" class="add-subtask-btn" id="addSubtaskBtn">+ Додати підзадачу</button>
+
       <div class="form-error" id="taskFormError"></div>
       <div class="modal-actions">
         <button type="button" class="btn-delete" id="deleteTaskBtn" style="display:none;">Видалити</button>
@@ -483,6 +564,7 @@
 </div>
 
 <script src="../budget/firebase-config.js"></script>
+<script src="quick-parse.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

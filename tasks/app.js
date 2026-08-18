@@ -39,6 +39,17 @@ const T = {
     notesLabel: 'Нотатка', notesPlaceholder: 'Додаткові деталі (необовʼязково)',
     dueDateLabel: 'Дата', dueTimeLabel: 'Час', dpTodayBtn: 'Сьогодні',
     priorityNone: 'Немає', priorityLow: 'Низький', priorityMedium: 'Середній', priorityHigh: 'Високий',
+    priorityLabel: 'Пріоритет',
+    tagsLabel: 'Теги', tagPlaceholder: 'Додати тег', removeTagAria: 'Прибрати тег',
+    subtasksLabel: 'Підзадачі', subtaskPlaceholder: 'Наступний крок',
+    addSubtaskBtn: '+ Додати підзадачу', removeSubtaskAria: 'Прибрати підзадачу',
+    estimateLabel: 'Скільки часу займе', estimatePlaceholder: 'хв',
+    estimateShort: (min) => (min >= 60 ? `~${Math.floor(min / 60)} год${min % 60 ? ' ' + (min % 60) + ' хв' : ''}` : `~${min} хв`),
+    quickAddFabLabel: 'Додати', quickAddTitle: 'Швидке додавання',
+    quickAddPlaceholder: 'Купити молоко завтра о 18',
+    quickAddHint: 'Дату, час, #тег, ~тривалість і пріоритет (!1 !2 !3) можна писати прямо в рядку.',
+    quickAddSubmit: 'Додати', quickAddDetails: 'Деталі…',
+    quickAddNothing: 'Нічого не розпізнано — напиши хоча б назву',
     deleteBtn: 'Видалити', saveBtn: 'Зберегти',
     titleRequiredError: 'Введи назву завдання',
     confirmDeleteTitle: 'Видалити завдання?', confirmDeleteSub: 'Цю дію не можна скасувати.',
@@ -71,6 +82,17 @@ const T = {
     notesLabel: 'Заметка', notesPlaceholder: 'Дополнительные детали (необязательно)',
     dueDateLabel: 'Дата', dueTimeLabel: 'Время', dpTodayBtn: 'Сегодня',
     priorityNone: 'Нет', priorityLow: 'Низкий', priorityMedium: 'Средний', priorityHigh: 'Высокий',
+    priorityLabel: 'Приоритет',
+    tagsLabel: 'Теги', tagPlaceholder: 'Добавить тег', removeTagAria: 'Убрать тег',
+    subtasksLabel: 'Подзадачи', subtaskPlaceholder: 'Следующий шаг',
+    addSubtaskBtn: '+ Добавить подзадачу', removeSubtaskAria: 'Убрать подзадачу',
+    estimateLabel: 'Сколько времени займёт', estimatePlaceholder: 'мин',
+    estimateShort: (min) => (min >= 60 ? `~${Math.floor(min / 60)} ч${min % 60 ? ' ' + (min % 60) + ' мин' : ''}` : `~${min} мин`),
+    quickAddFabLabel: 'Добавить', quickAddTitle: 'Быстрое добавление',
+    quickAddPlaceholder: 'Купить молоко завтра в 18',
+    quickAddHint: 'Дату, время, #тег, ~длительность и приоритет (!1 !2 !3) можно писать прямо в строке.',
+    quickAddSubmit: 'Добавить', quickAddDetails: 'Детали…',
+    quickAddNothing: 'Ничего не распознано — напиши хотя бы название',
     deleteBtn: 'Удалить', saveBtn: 'Сохранить',
     titleRequiredError: 'Введи название задачи',
     confirmDeleteTitle: 'Удалить задачу?', confirmDeleteSub: 'Это действие нельзя отменить.',
@@ -103,6 +125,17 @@ const T = {
     notesLabel: 'Notatka', notesPlaceholder: 'Dodatkowe szczegóły (opcjonalnie)',
     dueDateLabel: 'Data', dueTimeLabel: 'Godzina', dpTodayBtn: 'Dzisiaj',
     priorityNone: 'Brak', priorityLow: 'Niski', priorityMedium: 'Średni', priorityHigh: 'Wysoki',
+    priorityLabel: 'Priorytet',
+    tagsLabel: 'Tagi', tagPlaceholder: 'Dodaj tag', removeTagAria: 'Usuń tag',
+    subtasksLabel: 'Podzadania', subtaskPlaceholder: 'Następny krok',
+    addSubtaskBtn: '+ Dodaj podzadanie', removeSubtaskAria: 'Usuń podzadanie',
+    estimateLabel: 'Ile czasu zajmie', estimatePlaceholder: 'min',
+    estimateShort: (min) => (min >= 60 ? `~${Math.floor(min / 60)} godz${min % 60 ? ' ' + (min % 60) + ' min' : ''}` : `~${min} min`),
+    quickAddFabLabel: 'Dodaj', quickAddTitle: 'Szybkie dodawanie',
+    quickAddPlaceholder: 'Kupić mleko jutro o 18',
+    quickAddHint: 'Datę, godzinę, #tag, ~czas trwania i priorytet (!1 !2 !3) możesz wpisać w tej samej linii.',
+    quickAddSubmit: 'Dodaj', quickAddDetails: 'Szczegóły…',
+    quickAddNothing: 'Nic nie rozpoznano — wpisz przynajmniej nazwę',
     deleteBtn: 'Usuń', saveBtn: 'Zapisz',
     titleRequiredError: 'Wpisz nazwę zadania',
     confirmDeleteTitle: 'Usunąć zadanie?', confirmDeleteSub: 'Tej czynności nie można cofnąć.',
@@ -135,6 +168,17 @@ const T = {
     notesLabel: 'Notes', notesPlaceholder: 'Extra details (optional)',
     dueDateLabel: 'Date', dueTimeLabel: 'Time', dpTodayBtn: 'Today',
     priorityNone: 'None', priorityLow: 'Low', priorityMedium: 'Medium', priorityHigh: 'High',
+    priorityLabel: 'Priority',
+    tagsLabel: 'Tags', tagPlaceholder: 'Add a tag', removeTagAria: 'Remove tag',
+    subtasksLabel: 'Subtasks', subtaskPlaceholder: 'Next step',
+    addSubtaskBtn: '+ Add subtask', removeSubtaskAria: 'Remove subtask',
+    estimateLabel: 'How long will it take', estimatePlaceholder: 'min',
+    estimateShort: (min) => (min >= 60 ? `~${Math.floor(min / 60)}h${min % 60 ? ' ' + (min % 60) + 'm' : ''}` : `~${min}m`),
+    quickAddFabLabel: 'Add', quickAddTitle: 'Quick add',
+    quickAddPlaceholder: 'Buy milk tomorrow at 6pm',
+    quickAddHint: 'Date, time, #tag, ~duration and priority (!1 !2 !3) can go right in the line.',
+    quickAddSubmit: 'Add', quickAddDetails: 'Details…',
+    quickAddNothing: 'Nothing recognised — type at least a title',
     deleteBtn: 'Delete', saveBtn: 'Save',
     titleRequiredError: 'Enter a task title',
     confirmDeleteTitle: 'Delete task?', confirmDeleteSub: 'This action cannot be undone.',
@@ -258,6 +302,19 @@ function applyTranslations() {
   document.getElementById('authPasswordHint').textContent = t('passwordHint');
   document.getElementById('rememberMeLabel').textContent = t('rememberMe');
   document.getElementById('forgotPasswordLink').textContent = t('forgotPassword');
+  document.getElementById('quickAddFabLabel').textContent = t('quickAddFabLabel');
+  document.getElementById('quickAddTitle').textContent = t('quickAddTitle');
+  document.getElementById('quickAddInput').placeholder = t('quickAddPlaceholder');
+  document.getElementById('quickAddHint').textContent = t('quickAddHint');
+  document.getElementById('quickAddSubmitBtn').textContent = t('quickAddSubmit');
+  document.getElementById('quickAddDetailsBtn').textContent = t('quickAddDetails');
+  document.getElementById('priorityLabel').textContent = t('priorityLabel');
+  document.getElementById('estimateLabel').textContent = t('estimateLabel');
+  document.getElementById('taskEstimateInput').placeholder = t('estimatePlaceholder');
+  document.getElementById('tagsLabel').textContent = t('tagsLabel');
+  document.getElementById('taskTagInput').placeholder = t('tagPlaceholder');
+  document.getElementById('subtasksLabel').textContent = t('subtasksLabel');
+  document.getElementById('addSubtaskBtn').textContent = t('addSubtaskBtn');
   setAuthMode(authMode);
   refreshDatePickersLang();
 }
@@ -392,6 +449,8 @@ let editingTaskId = null;
 let formPriority = null;
 let formTags = [];
 let formSubtasks = [];
+let formEstimate = null;
+let quickAddDate = null;
 let pendingDeleteId = null;
 let calYear = new Date().getFullYear();
 let calMonth = new Date().getMonth(); // 0-based
@@ -462,6 +521,7 @@ function taskRowHtml(task) {
   if (task.dueTime) metaParts.push(`<span class="task-time${isOverdue ? ' overdue' : ''}">${escapeHtml(task.dueTime)}</span>`);
   if (task.priority) metaParts.push(`<span class="priority-chip ${task.priority}">${priorityLabel(task.priority)}</span>`);
   if (subtasks.length) metaParts.push(`<span class="task-progress">${subDone}/${subtasks.length}</span>`);
+  if (task.estimateMin) metaParts.push(`<span class="task-progress">${escapeHtml(t('estimateShort', task.estimateMin))}</span>`);
   (task.tags || []).forEach((tag) => metaParts.push(`<span class="tag-chip">${escapeHtml(tag)}</span>`));
   return `
     <div class="task-row${doneRowClass}" data-id="${task.id}">
@@ -948,14 +1008,18 @@ function renderDayView() {
 
 document.getElementById('dayViewBackBtn').addEventListener('click', showCalendarView);
 document.getElementById('openNewTaskDay').addEventListener('click', () => {
-  openTaskForm(null, dayViewDate);
+  openQuickAdd(dayViewDate);
 });
 
 function toggleDone(id) {
   const task = tasks.find((tsk) => tsk.id === id);
   if (!task || !auth.currentUser) return;
+  const done = !task.done;
   db.collection('users').doc(auth.currentUser.uid).collection('tasks').doc(id).update({
-    done: !task.done,
+    done,
+    // Без часу виконання неможливі ні історія, ні статистика — і відновити
+    // його заднім числом уже не вийде, тож пишемо одразу.
+    completedAt: done ? firebase.firestore.FieldValue.serverTimestamp() : null,
     updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
   }).catch((err) => console.error('toggleDone:', err));
 }
@@ -984,6 +1048,93 @@ document.getElementById('calMonthLabel').addEventListener('click', () => {
   renderCalendar();
 });
 
+
+// ---- Редактори полів завдання ----
+// Пріоритет, теги й підзадачі зберігались у документі, але редагувати їх у
+// формі було нічим — значення можна було лише успадкувати від старого завдання.
+function renderPriorityPicker() {
+  const picker = document.getElementById('taskPriorityPicker');
+  const options = [
+    { value: null, label: t('priorityNone') },
+    { value: 'low', label: t('priorityLow') },
+    { value: 'medium', label: t('priorityMedium') },
+    { value: 'high', label: t('priorityHigh') },
+  ];
+  picker.innerHTML = options.map((o) => `
+    <button type="button" class="priority-choice${o.value === formPriority ? ' selected' : ''}"
+      data-priority="${o.value || ''}">${escapeHtml(o.label)}</button>`).join('');
+  picker.querySelectorAll('[data-priority]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      formPriority = btn.dataset.priority || null;
+      renderPriorityPicker();
+    });
+  });
+}
+
+function renderTagsEditor() {
+  const editor = document.getElementById('taskTagsEditor');
+  editor.innerHTML = formTags.map((tag) => `
+    <span class="tag-edit-chip">${escapeHtml(tag)}<button type="button" data-remove-tag="${escapeHtml(tag)}" aria-label="${escapeHtml(t('removeTagAria'))}">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button></span>`).join('');
+  editor.querySelectorAll('[data-remove-tag]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      formTags = formTags.filter((tag) => tag !== btn.dataset.removeTag);
+      renderTagsEditor();
+    });
+  });
+}
+
+function addTagFromInput() {
+  const input = document.getElementById('taskTagInput');
+  const raw = input.value.trim().replace(/^#/, '');
+  if (!raw) return;
+  if (formTags.length >= 20) { input.value = ''; return; } // стеля з firestore.rules
+  if (!formTags.some((tag) => tag.toLowerCase() === raw.toLowerCase())) formTags.push(raw);
+  input.value = '';
+  renderTagsEditor();
+}
+
+function renderSubtasksEditor() {
+  const editor = document.getElementById('taskSubtasksEditor');
+  editor.innerHTML = formSubtasks.map((sub, i) => `
+    <div class="subtask-row" data-idx="${i}">
+      <button type="button" class="subtask-check${sub.done ? ' checked' : ''}" data-toggle-sub="${i}" aria-label="done">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+      </button>
+      <input type="text" value="${escapeHtml(sub.title)}" data-sub-title="${i}" maxlength="200" placeholder="${escapeHtml(t('subtaskPlaceholder'))}">
+      <button type="button" class="subtask-remove" data-remove-sub="${i}" aria-label="${escapeHtml(t('removeSubtaskAria'))}">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>`).join('');
+  editor.querySelectorAll('[data-toggle-sub]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const sub = formSubtasks[Number(btn.dataset.toggleSub)];
+      sub.done = !sub.done;
+      renderSubtasksEditor();
+    });
+  });
+  editor.querySelectorAll('[data-sub-title]').forEach((input) => {
+    // Пишемо в стан на кожен ввід, без перемальовування — інакше поле
+    // втрачало б фокус після кожної набраної літери.
+    input.addEventListener('input', () => { formSubtasks[Number(input.dataset.subTitle)].title = input.value; });
+  });
+  editor.querySelectorAll('[data-remove-sub]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      formSubtasks.splice(Number(btn.dataset.removeSub), 1);
+      renderSubtasksEditor();
+    });
+  });
+}
+
+function addEmptySubtask() {
+  if (formSubtasks.length >= 50) return; // стеля з firestore.rules
+  formSubtasks.push({ id: uid4(), title: '', done: false });
+  renderSubtasksEditor();
+  const inputs = document.querySelectorAll('#taskSubtasksEditor [data-sub-title]');
+  if (inputs.length) inputs[inputs.length - 1].focus();
+}
+
 // ---- Форма завдання ----
 function openTaskForm(existingTask, prefillDate) {
   editingTaskId = existingTask ? existingTask.id : null;
@@ -994,12 +1145,15 @@ function openTaskForm(existingTask, prefillDate) {
   document.getElementById('taskNotesInput').value = existingTask ? existingTask.notes || '' : '';
   document.getElementById('taskDueDate').value = existingTask ? existingTask.dueDate || '' : (prefillDate || '');
   document.getElementById('taskDueTime').value = existingTask ? existingTask.dueTime || '' : '';
-  // Пріоритет/теги/підзадачі вже не редагуються у формі, але якщо це
-  // існуюче завдання зі старими значеннями — зберігаємо їх незмінними
-  // при наступному збереженні, а не стираємо.
   formPriority = existingTask ? existingTask.priority || null : null;
   formTags = existingTask ? [...(existingTask.tags || [])] : [];
   formSubtasks = existingTask ? (existingTask.subtasks || []).map((s) => ({ ...s })) : [];
+  formEstimate = existingTask ? existingTask.estimateMin || null : null;
+  document.getElementById('taskEstimateInput').value = formEstimate || '';
+  document.getElementById('taskTagInput').value = '';
+  renderPriorityPicker();
+  renderTagsEditor();
+  renderSubtasksEditor();
   document.getElementById('taskFormOverlay').classList.add('show');
   setTimeout(() => document.getElementById('taskTitleInput').focus(), 50);
 }
@@ -1029,9 +1183,13 @@ document.getElementById('taskForm').addEventListener('submit', async (e) => {
     .map((s) => ({ id: s.id, title: (s.title || '').trim(), done: !!s.done }))
     .filter((s) => s.title);
 
+  const estimateRaw = parseInt(document.getElementById('taskEstimateInput').value, 10);
+  const estimateMin = Number.isFinite(estimateRaw) && estimateRaw > 0 ? Math.min(estimateRaw, 1440) : null;
+
   const payload = {
     title, notes: document.getElementById('taskNotesInput').value.trim(),
     dueDate, dueTime, priority: formPriority, tags: formTags,
+    estimateMin,
     subtasks: cleanSubtasks,
     updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
   };
@@ -1043,7 +1201,7 @@ document.getElementById('taskForm').addEventListener('submit', async (e) => {
     if (editingTaskId) {
       await col.doc(editingTaskId).update(payload);
     } else {
-      await col.add({ ...payload, done: false, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+      await col.add({ ...payload, done: false, completedAt: null, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
     }
     document.getElementById('taskFormOverlay').classList.remove('show');
   } catch (err) {
@@ -1077,6 +1235,127 @@ document.getElementById('confirmDelete').addEventListener('click', async () => {
   pendingDeleteId = null;
   document.getElementById('confirmOverlay').classList.remove('show');
 });
+
+
+// ---- Швидке додавання ----
+// Один рядок замість форми з семи полів: розбір робить parseQuickTask
+// (tasks/quick-parse.js) — локально, без мережі й без AI. Що саме розпізналось,
+// показуємо чипами під полем, щоб людина бачила результат ДО збереження.
+function formatEstimate(min) {
+  return t('estimateShort', min);
+}
+
+function quickAddPreviewHtml(parsed) {
+  const chips = [];
+  if (parsed.dueDate) {
+    const [y, m, d] = parsed.dueDate.split('-').map(Number);
+    const locale = LOCALE_MAP[currentLang] || 'uk-UA';
+    const label = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long' }).format(new Date(y, m - 1, d));
+    chips.push(`<span class="quick-chip">${escapeHtml(label)}${parsed.dueTime ? ', ' + escapeHtml(parsed.dueTime) : ''}</span>`);
+  }
+  if (parsed.priority) {
+    chips.push(`<span class="quick-chip">${escapeHtml(priorityLabel(parsed.priority))}</span>`);
+  }
+  if (parsed.estimateMin) {
+    chips.push(`<span class="quick-chip">${escapeHtml(formatEstimate(parsed.estimateMin))}</span>`);
+  }
+  parsed.tags.forEach((tag) => chips.push(`<span class="quick-chip">#${escapeHtml(tag)}</span>`));
+  if (!chips.length && parsed.title) {
+    chips.push(`<span class="quick-chip muted">${escapeHtml(parsed.title)}</span>`);
+  }
+  return chips.join('');
+}
+
+function refreshQuickAddPreview() {
+  const parsed = parseQuickTask(document.getElementById('quickAddInput').value);
+  document.getElementById('quickAddPreview').innerHTML = quickAddPreviewHtml(parsed);
+  return parsed;
+}
+
+function openQuickAdd(prefillDate) {
+  const input = document.getElementById('quickAddInput');
+  input.value = '';
+  quickAddDate = prefillDate || null;
+  document.getElementById('quickAddError').textContent = '';
+  refreshQuickAddPreview();
+  document.getElementById('quickAddOverlay').classList.add('show');
+  setTimeout(() => input.focus(), 50);
+}
+
+function closeQuickAdd() {
+  document.getElementById('quickAddOverlay').classList.remove('show');
+}
+
+async function submitQuickAdd() {
+  const parsed = parseQuickTask(document.getElementById('quickAddInput').value);
+  const errorEl = document.getElementById('quickAddError');
+  if (!parsed.title) {
+    errorEl.textContent = t('quickAddNothing');
+    return;
+  }
+  errorEl.textContent = '';
+  const uidCur = auth.currentUser && auth.currentUser.uid;
+  if (!uidCur) return;
+
+  const btn = document.getElementById('quickAddSubmitBtn');
+  btn.disabled = true;
+  try {
+    await db.collection('users').doc(uidCur).collection('tasks').add({
+      title: parsed.title,
+      notes: '',
+      done: false,
+      completedAt: null,
+      priority: parsed.priority,
+      tags: parsed.tags,
+      // Дата з рядка важливіша за екран, з якого відкрили форму: якщо людина
+      // написала «завтра», вона мала на увазі саме завтра.
+      dueDate: parsed.dueDate || quickAddDate || null,
+      dueTime: parsed.dueTime,
+      estimateMin: parsed.estimateMin,
+      subtasks: [],
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+    closeQuickAdd();
+  } catch (err) {
+    console.error('quick add:', err);
+    errorEl.textContent = t('err_generic');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// «Деталі…» — те саме, що вже набрано, але у повній формі: нічого
+// перенабирати не треба.
+function openQuickAddInForm() {
+  const parsed = parseQuickTask(document.getElementById('quickAddInput').value);
+  const prefillDate = parsed.dueDate || quickAddDate || '';
+  closeQuickAdd();
+  openTaskForm(null, prefillDate);
+  document.getElementById('taskTitleInput').value = parsed.title;
+  document.getElementById('taskDueTime').value = parsed.dueTime || '';
+  formPriority = parsed.priority;
+  formTags = parsed.tags.slice();
+  formEstimate = parsed.estimateMin;
+  document.getElementById('taskEstimateInput').value = parsed.estimateMin || '';
+  renderPriorityPicker();
+  renderTagsEditor();
+}
+
+document.getElementById('openQuickAdd').addEventListener('click', () => openQuickAdd(null));
+document.getElementById('closeQuickAdd').addEventListener('click', closeQuickAdd);
+document.getElementById('quickAddOverlay').addEventListener('click', (e) => {
+  if (e.target.id === 'quickAddOverlay') closeQuickAdd();
+});
+document.getElementById('quickAddInput').addEventListener('input', refreshQuickAddPreview);
+document.getElementById('quickAddForm').addEventListener('submit', (e) => { e.preventDefault(); submitQuickAdd(); });
+document.getElementById('quickAddDetailsBtn').addEventListener('click', openQuickAddInForm);
+document.getElementById('taskTagInput').addEventListener('keydown', (e) => {
+  // Enter у полі тега додає тег, а не відправляє всю форму завдання.
+  if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); addTagFromInput(); }
+});
+document.getElementById('taskTagInput').addEventListener('blur', addTagFromInput);
+document.getElementById('addSubtaskBtn').addEventListener('click', addEmptySubtask);
 
 // ---- Автентифікація: стан ----
 auth.onAuthStateChanged((user) => {

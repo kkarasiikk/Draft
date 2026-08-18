@@ -96,8 +96,9 @@ users/{uid}/transactions/{id}   -- {type, amount, category, note, date}
 users/{uid}/savings/{id}        -- {type, amount, currency, note, date, goalId}
 users/{uid}/savingsGoals/{id}   -- {name, createdAt}
 users/{uid}/pages/{id}          -- {title, content, createdAt, updatedAt}
-users/{uid}/tasks/{id}          -- {title, notes, done, priority, tags, dueDate, dueTime,
-                                    subtasks, createdAt, updatedAt}
+users/{uid}/tasks/{id}          -- {title, notes, done, completedAt, priority, tags,
+                                    dueDate, dueTime, estimateMin, subtasks,
+                                    createdAt, updatedAt}
 users/{uid}/workouts/{id}       -- {date, name, notes, exercises: [{id, libId, muscle,
                                     name, sets: [{weight, reps}]}], createdAt, updatedAt}
 users/{uid}/goals/{id}          -- {title, category, why, targetDate, status,
@@ -128,10 +129,16 @@ users/{uid}/goals/{id}          -- {title, category, why, targetDate, status,
   по місяцях.
 - Завдання без дати — окремою секцією під календарем; виконані згорнуті
   в блок «Виконано (N)».
-- У формі редагуються назва, нотатка, дата й час. Пріоритет, теги й
-  підзадачі лишились у моделі даних (і показуються на картці та у фільтрі
-  по тегах), але через форму більше не задаються — при збереженні існуючі
-  значення зберігаються незмінними.
+- **Швидке додавання** — кнопка на календарі (і на екрані дня) відкриває одне
+  поле: `Купити молоко завтра о 18 #дім ~15хв !1`. Дата, час, тег,
+  тривалість і пріоритет розбираються прямо з рядка, а що саме розпізналось —
+  видно чипами ще до збереження. Розбір локальний (`tasks/quick-parse.js`),
+  без мережі й без AI, тож працює офлайн і миттєво; розуміє всі 4 мови
+  одночасно. Кнопка «Деталі…» переносить уже набране в повну форму.
+- У формі редагуються назва, нотатка, дата, час, **пріоритет, теги,
+  підзадачі й оцінка часу** (`estimateMin`, 1–1440 хв).
+- Момент виконання зберігається в `completedAt` — на ньому будуватимуться
+  історія й статистика.
 - Сортування в межах дня — за часом, потім пріоритетом, потім назвою.
 
 ## Модуль «Тренування» (`workout/`)
@@ -190,24 +197,33 @@ users/{uid}/goals/{id}          -- {title, category, why, targetDate, status,
 
 ## Тести
 
-Юніт-тести для Cloud Functions (Jest, мок Firestore/Anthropic SDK — без
-живих викликів): `ai.test.js` (AI-асистент). Запуск:
+Юніт-тести (Jest, без живих викликів — Firestore і Anthropic SDK замокані):
+
+- `ai.test.js` — Cloud Function AI-асистента;
+- `tasks/quick-parse.test.js` — розбір рядка швидкого додавання завдань
+  (дати, час, пріоритет, теги, оцінка часу, 4 мови).
+
+Запуск:
 
 ```bash
 npm install
 npm test
 ```
 
-Фронтенд (`home.js`, `budget/app.js`, `goals/app.js`, `tasks/app.js`,
-`workout/app.js`) автотестами поки не покритий — це основний пункт TODO нижче. Для нього в CI
+Решта фронтенду (`home.js`, `budget/app.js`, `goals/app.js`, `tasks/app.js`,
+`workout/app.js`) автотестами поки не покрита — це основний пункт TODO нижче. Для нього в CI
 є принаймні перевірка синтаксису (`node --check` по всіх `.js`).
 
 CI (`.github/workflows/ci.yml`) проганяє те саме на кожен push і pull request.
 
 ## Відомі обмеження / TODO
 
-- Немає автотестів для фронтенду (`home.js`, `budget/app.js`, `goals/app.js`,
-  `tasks/app.js`, `workout/app.js`) — лише для Cloud Functions, див. «Тести».
+- Логіка сторінок (`home.js`, `budget/app.js`, `goals/app.js`, `tasks/app.js`,
+  `workout/app.js`) автотестами не покрита — тести є лише для Cloud Functions
+  і для парсера швидкого додавання, див. «Тести». Причина проста: код
+  сторінок написаний як один скрипт на глобальних змінних, і щоб його
+  тестувати, спершу треба виносити чисті функції в окремі файли — як це
+  зроблено з `tasks/quick-parse.js`.
 - `budget/app.js` розрісся до ~3000 рядків одним файлом — просився б поділ
   на модулі, але без кроку збірки це означає кілька `<script>` і спільний
   глобальний scope, тож поки лишається як є.
