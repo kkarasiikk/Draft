@@ -23,7 +23,7 @@
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
   font-src 'self' https://fonts.gstatic.com;
   img-src 'self' data:;
-  connect-src 'self' https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com https://firebaseinstallations.googleapis.com https://content-firebaseappcheck.googleapis.com https://bank.gov.ua;
+  connect-src 'self' https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com https://firebaseinstallations.googleapis.com https://content-firebaseappcheck.googleapis.com https://bank.gov.ua https://us-central1-me-and-only-me-7f531.cloudfunctions.net;
   frame-src https://www.google.com/recaptcha/ https://me-and-only-me-7f531.firebaseapp.com;
   worker-src 'self';
   manifest-src 'self';
@@ -43,6 +43,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-functions-compat.js"></script>
 <style>
   :root{
     --bg:#EDEEF3;
@@ -360,6 +361,28 @@
   .bn-fab:active{transform:translateX(-50%) scale(.92);}
   .bn-fab svg{transition:transform .18s ease;}
   .bn-fab.open svg{transform:rotate(45deg);}
+  /* ---- AI-помічник (чат) ---- */
+  .chat-modal{display:flex;flex-direction:column;height:min(78vh, 640px);}
+  .chat-log{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;gap:10px;
+    padding:4px 2px 12px;margin-bottom:10px;}
+  .chat-empty{text-align:center;color:var(--ink-muted);font-size:13.5px;line-height:1.55;margin:auto 8px;}
+  .chat-msg{max-width:86%;padding:9px 13px;border-radius:16px;font-size:14.5px;line-height:1.45;white-space:pre-wrap;word-wrap:break-word;}
+  .chat-msg.user{align-self:flex-end;background:var(--accent);color:#fff;border-bottom-right-radius:6px;}
+  .chat-msg.assistant{align-self:flex-start;background:var(--control-bg);color:var(--ink);border-bottom-left-radius:6px;}
+  .chat-msg.error{align-self:flex-start;background:var(--expense-light);color:var(--expense);border-bottom-left-radius:6px;}
+  .chat-action{align-self:flex-start;display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;
+    color:var(--income);background:var(--income-light);border-radius:999px;padding:5px 11px;}
+  .chat-typing{align-self:flex-start;display:flex;gap:4px;padding:11px 13px;}
+  .chat-typing span{width:6px;height:6px;border-radius:50%;background:var(--ink-muted);animation:chatBlink 1.2s infinite;}
+  .chat-typing span:nth-child(2){animation-delay:.2s;}
+  .chat-typing span:nth-child(3){animation-delay:.4s;}
+  @keyframes chatBlink{0%,60%,100%{opacity:.25;}30%{opacity:.9;}}
+  .chat-form{display:flex;gap:8px;align-items:flex-end;}
+  .chat-form textarea{flex:1;margin:0;min-height:44px;max-height:120px;resize:none;}
+  .chat-send{flex-shrink:0;width:44px;height:44px;border-radius:12px;border:none;cursor:pointer;background:var(--accent);color:#fff;
+    display:flex;align-items:center;justify-content:center;}
+  .chat-send:disabled{opacity:.5;cursor:default;}
+  @media (prefers-reduced-motion: reduce){ .chat-typing span{animation:none;opacity:.6;} }
   .modal-overlay{position:fixed;inset:0;background:var(--overlay);display:none;align-items:flex-end;justify-content:center;z-index:50;}
   .modal-overlay.show{display:flex;}
   .modal{background:var(--surface);border-radius:26px 26px 0 0;padding:20px 20px calc(28px + env(safe-area-inset-bottom));width:100%;max-width:480px;
@@ -605,6 +628,10 @@
         </button>
       </div>
       <div class="app-menu-divider" id="appMenuDivider"></div>
+      <button class="app-menu-item" id="aiChatBtn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5Z"/></svg>
+        <span id="aiChatMenuLabel">AI-помічник</span>
+      </button>
       <button class="app-menu-item" id="settingsBtn">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         <span id="settingsMenuLabel">Налаштування</span>
@@ -858,6 +885,22 @@
     <button type="button" id="deleteGoalBtn" style="display:none;margin-top:10px;width:100%;padding:11px 0;
       border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--expense);
       font-family:'Inter',sans-serif;font-size:14px;cursor:pointer;">Видалити ціль</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="aiChatOverlay">
+  <div class="modal chat-modal">
+    <div class="modal-head">
+      <div class="modal-title" id="aiChatTitle">AI-помічник</div>
+      <button class="close-btn" id="closeAiChat" aria-label="Закрити"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="chat-log" id="aiChatLog" role="log" aria-live="polite"></div>
+    <form class="chat-form" id="aiChatForm">
+      <textarea id="aiChatInput" rows="1" maxlength="1000" placeholder="Напр. кава 80 грн"></textarea>
+      <button class="chat-send" id="aiChatSend" type="submit" aria-label="Надіслати">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7Z"/></svg>
+      </button>
+    </form>
   </div>
 </div>
 

@@ -1,3 +1,10 @@
+// ---- Service Worker ----
+// Реєструємо тут, а не інлайн у <script> в index.html, щоб CSP міг
+// забороняти інлайн-скрипти (script-src без 'unsafe-inline') без винятків.
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('service-worker.js').catch(() => {}));
+}
+
 // ---- Firebase ----
 firebase.initializeApp(firebaseConfig);
 
@@ -22,13 +29,12 @@ const LANG_NAMES = { uk: 'UA', ru: 'RU', pl: 'PL', en: 'EN' };
 
 const STRINGS = {
   uk: {
-    heroSubtitle: 'Гроші, цілі, справи і тіло — в одному місці.',
     themeLabel: 'Тема', themeLight: 'Світла', themeDark: 'Темна', themeSystem: 'Системна',
     langLabel: 'Мова', logout: 'Вийти',
-    budgetTitle: 'Бюджет', budgetDesc: 'Витрати, доходи, заощадження та обмін валют — усе, що вже працює.',
-    goalsTitle: 'Цілі', goalsDesc: 'Нотатки про те, куди рухаєшся — довгострокові цілі й прогрес до них.',
-    tasksTitle: 'Завдання', tasksDesc: 'Щоденні справи й нотатки — що зробити сьогодні, а що вже зроблено.',
-    workoutTitle: 'Тренування', workoutDesc: 'Записи тренувань і прогрес — що і коли робив(ла) для тіла.',
+    budgetTitle: 'Бюджет',
+    goalsTitle: 'Цілі',
+    tasksTitle: 'Завдання',
+    workoutTitle: 'Тренування',
     soon: 'Скоро', openBtn: 'Відкрити',
     authTitleLogin: 'Вхід', authTitleSignup: 'Реєстрація',
     authSub: 'Увійди, щоб потрапити у свій особистий простір.',
@@ -46,13 +52,12 @@ const STRINGS = {
     err_resetGeneric: 'Не вдалося надіслати лист. Спробуй пізніше.',
   },
   ru: {
-    heroSubtitle: 'Деньги, цели, дела и тело — в одном месте.',
     themeLabel: 'Тема', themeLight: 'Светлая', themeDark: 'Тёмная', themeSystem: 'Системная',
     langLabel: 'Язык', logout: 'Выйти',
-    budgetTitle: 'Бюджет', budgetDesc: 'Расходы, доходы, накопления и обмен валют — всё, что уже работает.',
-    goalsTitle: 'Цели', goalsDesc: 'Заметки о том, куда двигаешься — долгосрочные цели и прогресс к ним.',
-    tasksTitle: 'Задачи', tasksDesc: 'Повседневные дела и заметки — что сделать сегодня, а что уже сделано.',
-    workoutTitle: 'Тренировки', workoutDesc: 'Записи тренировок и прогресс — что и когда делал(а) для тела.',
+    budgetTitle: 'Бюджет',
+    goalsTitle: 'Цели',
+    tasksTitle: 'Задачи',
+    workoutTitle: 'Тренировки',
     soon: 'Скоро', openBtn: 'Открыть',
     authTitleLogin: 'Вход', authTitleSignup: 'Регистрация',
     authSub: 'Войди, чтобы попасть в своё личное пространство.',
@@ -70,13 +75,12 @@ const STRINGS = {
     err_resetGeneric: 'Не удалось отправить письмо. Попробуй позже.',
   },
   pl: {
-    heroSubtitle: 'Pieniądze, cele, sprawy i ciało — w jednym miejscu.',
     themeLabel: 'Motyw', themeLight: 'Jasny', themeDark: 'Ciemny', themeSystem: 'Systemowy',
     langLabel: 'Język', logout: 'Wyloguj',
-    budgetTitle: 'Budżet', budgetDesc: 'Wydatki, przychody, oszczędności i wymiana walut — wszystko, co już działa.',
-    goalsTitle: 'Cele', goalsDesc: 'Notatki o tym, dokąd zmierzasz — długoterminowe cele i postęp w ich realizacji.',
-    tasksTitle: 'Zadania', tasksDesc: 'Codzienne sprawy i notatki — co zrobić dziś, a co już zrobione.',
-    workoutTitle: 'Treningi', workoutDesc: 'Zapisy treningów i postępy — co i kiedy robiłeś(aś) dla ciała.',
+    budgetTitle: 'Budżet',
+    goalsTitle: 'Cele',
+    tasksTitle: 'Zadania',
+    workoutTitle: 'Treningi',
     soon: 'Wkrótce', openBtn: 'Otwórz',
     authTitleLogin: 'Logowanie', authTitleSignup: 'Rejestracja',
     authSub: 'Zaloguj się, aby przejść do swojej przestrzeni.',
@@ -94,13 +98,12 @@ const STRINGS = {
     err_resetGeneric: 'Nie udało się wysłać wiadomości. Spróbuj później.',
   },
   en: {
-    heroSubtitle: 'Money, goals, tasks and body — all in one place.',
     themeLabel: 'Theme', themeLight: 'Light', themeDark: 'Dark', themeSystem: 'System',
     langLabel: 'Language', logout: 'Log out',
-    budgetTitle: 'Budget', budgetDesc: 'Expenses, income, savings and currency exchange — everything that already works.',
-    goalsTitle: 'Goals', goalsDesc: "Notes on where you're headed — long-term goals and progress toward them.",
-    tasksTitle: 'Tasks', tasksDesc: "Daily to-dos and notes — what to do today, and what's already done.",
-    workoutTitle: 'Workouts', workoutDesc: 'Workout logs and progress — what and when you trained.',
+    budgetTitle: 'Budget',
+    goalsTitle: 'Goals',
+    tasksTitle: 'Tasks',
+    workoutTitle: 'Workouts',
     soon: 'Soon', openBtn: 'Open',
     authTitleLogin: 'Log in', authTitleSignup: 'Sign up',
     authSub: 'Sign in to get to your personal space.',
