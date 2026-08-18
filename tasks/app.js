@@ -1210,33 +1210,56 @@ function renderWeekScreen() {
   renderNoDateSection();
 }
 
-function renderWeekStrip() {
-  const days = weekDaysOf(selectedDate);
+// Доріжка з трьох тижнів: попередній, поточний, наступний. Сусідні
+// відрендерені наперед саме для того, щоб числа могли їхати за пальцем —
+// інакше в'їжджати було б нічому.
+function weekStripHtml(days, isCurrent) {
   const locale = LOCALE_MAP[currentLang] || 'uk-UA';
   const today = todayISO();
   const nameFmt = new Intl.DateTimeFormat(locale, { weekday: 'short' });
   const selMonth = selectedDate.slice(0, 7);
+  const filtered = tasks.filter(matchesFilters);
 
-  document.getElementById('weekLabel').textContent = weekLabelText(days);
-  document.getElementById('weekStrip').innerHTML = days.map((iso) => {
+  const cells = days.map((iso) => {
     const d = parseISODate(iso);
-    const stats = dayStats(tasks.filter(matchesFilters), iso);
+    const stats = dayStats(filtered, iso);
     const dotClass = stats.allDone ? ' all-done' : (stats.total ? ' has' : '');
     const cls = ['week-day'];
-    if (iso === selectedDate) cls.push('selected');
+    if (isCurrent && iso === selectedDate) cls.push('selected');
     if (iso === today) cls.push('today');
     if (iso.slice(0, 7) !== selMonth) cls.push('other-month');
     return `
-      <button type="button" class="${cls.join(' ')}" data-week-day="${iso}">
+      <button type="button" class="${cls.join(' ')}"${isCurrent ? ` data-week-day="${iso}"` : ' tabindex="-1"'}>
         <span class="week-day-name">${escapeHtml(nameFmt.format(d).replace('.', ''))}</span>
         <span class="week-day-num">${d.getDate()}</span>
         <span class="week-day-dot${dotClass}"></span>
       </button>`;
   }).join('');
+  return `<div class="week-strip${isCurrent ? '' : ' adjacent'}">${cells}</div>`;
+}
 
-  document.getElementById('weekStrip').querySelectorAll('[data-week-day]').forEach((btn) => {
+function renderWeekStrip() {
+  const days = weekDaysOf(selectedDate);
+  const track = document.getElementById('weekTrack');
+
+  document.getElementById('weekLabel').textContent = weekLabelText(days);
+  track.innerHTML =
+    weekStripHtml(weekDaysOf(isoDateShift(selectedDate, -7)), false) +
+    weekStripHtml(days, true) +
+    weekStripHtml(weekDaysOf(isoDateShift(selectedDate, 7)), false);
+  setTrackOffset(0, false);
+
+  track.querySelectorAll('[data-week-day]').forEach((btn) => {
     btn.addEventListener('click', () => selectDate(btn.dataset.weekDay));
   });
+}
+
+// Зсув доріжки: 0 — поточний тиждень по центру, dxPx — «недотягнутий» рух пальця.
+function setTrackOffset(dxPx, animated) {
+  const track = document.getElementById('weekTrack');
+  if (!track) return;
+  track.classList.toggle('animating', !!animated);
+  track.style.transform = `translate3d(calc(-33.3333% + ${Math.round(dxPx)}px), 0, 0)`;
 }
 
 // «17–23 серпня» або «31 серпня – 6 вересня», якщо тиждень на межі місяців.
@@ -1312,11 +1335,93 @@ document.getElementById('openMonthBtn').addEventListener('click', showMonthScree
 document.getElementById('closeMonthBtn').addEventListener('click', showWeekScreen);
 function shiftWeek(delta) {
   selectDate(isoDateShift(selectedDate, delta * 7));
-  playSlide(document.getElementById('weekSwipeArea'), delta);
 }
-document.getElementById('weekPrevBtn').addEventListener('click', () => shiftWeek(-1));
-document.getElementById('weekNextBtn').addEventListener('click', () => shiftWeek(1));
-onHorizontalSwipe(document.getElementById('weekSwipeArea'), () => shiftWeek(1), () => shiftWeek(-1));
+
+// Гортання тижня стрілками — той самий рух, що й пальцем: доріжка доїжджає
+// до сусіднього тижня, і вже тоді перемальовується на нього.
+function animateWeekTo(delta) {
+  const track = document.getElementById('weekTrack');
+  const width = track ? track.offsetWidth / 3 : 0;
+  slideWeekTo(-delta * width, () => shiftWeek(delta));
+}
+
+// Доводить доріжку до кінця й після анімації віддає керування колбеку.
+function slideWeekTo(targetPx, done) {
+  const track = document.getElementById('weekTrack');
+  if (!track) { done(); return; }
+  let finished = false;
+  const finish = () => {
+    if (finished) return;
+    finished = true;
+    track.removeEventListener('transitionend', finish);
+    track.classList.remove('animating');
+    done();
+  };
+  track.addEventListener('transitionend', finish);
+  // Запобіжник: якщо transitionend не прийде (вкладка у фоні, вимкнені
+  // анімації), тиждень усе одно має перемкнутись.
+  setTimeout(finish, 320);
+  setTrackOffset(targetPx, true);
+}
+
+document.getElementById('weekPrevBtn').addEventListener('click', () => animateWeekTo(-1));
+document.getElementById('weekNextBtn').addEventListener('click', () => animateWeekTo(1));
+initWeekDrag(document.getElementById('weekSwipeArea'));
+
+// Перетягування тижня: числа рухаються разом із пальцем, а на відпусканні
+// доріжка або доїжджає до сусіднього тижня, або повертається назад.
+function initWeekDrag(area) {
+  const MIN_DISTANCE = 45;   // менше — це тап із дрібним зсувом, а не гортання
+  const AXIS_LOCK = 8;       // після цих пікселів стає ясно, куди веде рух
+  let startX = 0, startY = 0, dragging = false, decided = false, horizontal = false;
+
+  const reset = () => { dragging = false; decided = false; horizontal = false; };
+
+  area.addEventListener('pointerdown', (e) => {
+    if (!e.isPrimary) { reset(); return; }
+    dragging = true;
+    decided = false;
+    horizontal = false;
+    startX = e.clientX;
+    startY = e.clientY;
+  });
+
+  area.addEventListener('pointermove', (e) => {
+    if (!dragging) return;
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+    if (!decided) {
+      if (Math.abs(dx) < AXIS_LOCK && Math.abs(dy) < AXIS_LOCK) return;
+      decided = true;
+      // Вертикальний намір лишаємо браузеру: людина гортає сторінку.
+      horizontal = Math.abs(dx) > Math.abs(dy);
+      if (!horizontal) { reset(); return; }
+    }
+    setTrackOffset(dx, false);
+  });
+
+  const release = (e) => {
+    if (!dragging) return;
+    const dx = horizontal ? e.clientX - startX : 0;
+    reset();
+    if (!dx) return;
+    swallowNextClick(area);
+    const width = document.getElementById('weekTrack').offsetWidth / 3;
+    if (Math.abs(dx) >= MIN_DISTANCE) {
+      const delta = dx < 0 ? 1 : -1;
+      slideWeekTo(-delta * width, () => shiftWeek(delta));
+    } else {
+      // Недотягнули — доріжка вертається на місце.
+      slideWeekTo(0, () => {});
+    }
+  };
+  area.addEventListener('pointerup', release);
+  area.addEventListener('pointercancel', () => {
+    if (!dragging) return;
+    reset();
+    slideWeekTo(0, () => {});
+  });
+}
 
 function toggleDone(id) {
   const task = tasks.find((tsk) => tsk.id === id);
