@@ -39,6 +39,15 @@ const T = {
     notesLabel: 'Нотатка', notesPlaceholder: 'Додаткові деталі (необовʼязково)',
     dueDateLabel: 'Дата', dueTimeLabel: 'Час', dpTodayBtn: 'Сьогодні',
     priorityNone: 'Немає', priorityLow: 'Низький', priorityMedium: 'Середній', priorityHigh: 'Високий',
+    nowTitle: 'Зараз', nowSkip: 'Далі',
+    nowNothingToday: 'На сьогодні завдань немає. Додай перше — або візьми щось із того, що без дати.',
+    nowAllDone: 'Усе на сьогодні зроблено. Можна видихнути 🎉',
+    nowOverdueBadge: 'Прострочено',
+    nowProgress: (done, total) => `Сьогодні: ${done}/${total}`,
+    nowRemaining: (time) => `лишилось роботи ~${time}`,
+    nowFree: (time) => `вільного часу ~${time}`,
+    nowOverloaded: 'Заплановано більше, ніж лишилось часу сьогодні',
+    nowOverdueCount: (n) => `Прострочено: ${n}`,
     priorityLabel: 'Пріоритет',
     tagsLabel: 'Теги', tagPlaceholder: 'Додати тег', removeTagAria: 'Прибрати тег',
     subtasksLabel: 'Підзадачі', subtaskPlaceholder: 'Наступний крок',
@@ -82,6 +91,15 @@ const T = {
     notesLabel: 'Заметка', notesPlaceholder: 'Дополнительные детали (необязательно)',
     dueDateLabel: 'Дата', dueTimeLabel: 'Время', dpTodayBtn: 'Сегодня',
     priorityNone: 'Нет', priorityLow: 'Низкий', priorityMedium: 'Средний', priorityHigh: 'Высокий',
+    nowTitle: 'Сейчас', nowSkip: 'Дальше',
+    nowNothingToday: 'На сегодня задач нет. Добавь первую — или возьми что-то из того, что без даты.',
+    nowAllDone: 'Всё на сегодня сделано. Можно выдохнуть 🎉',
+    nowOverdueBadge: 'Просрочено',
+    nowProgress: (done, total) => `Сегодня: ${done}/${total}`,
+    nowRemaining: (time) => `осталось работы ~${time}`,
+    nowFree: (time) => `свободного времени ~${time}`,
+    nowOverloaded: 'Запланировано больше, чем осталось времени сегодня',
+    nowOverdueCount: (n) => `Просрочено: ${n}`,
     priorityLabel: 'Приоритет',
     tagsLabel: 'Теги', tagPlaceholder: 'Добавить тег', removeTagAria: 'Убрать тег',
     subtasksLabel: 'Подзадачи', subtaskPlaceholder: 'Следующий шаг',
@@ -125,6 +143,15 @@ const T = {
     notesLabel: 'Notatka', notesPlaceholder: 'Dodatkowe szczegóły (opcjonalnie)',
     dueDateLabel: 'Data', dueTimeLabel: 'Godzina', dpTodayBtn: 'Dzisiaj',
     priorityNone: 'Brak', priorityLow: 'Niski', priorityMedium: 'Średni', priorityHigh: 'Wysoki',
+    nowTitle: 'Teraz', nowSkip: 'Dalej',
+    nowNothingToday: 'Na dziś nie ma zadań. Dodaj pierwsze — albo weź coś bez daty.',
+    nowAllDone: 'Wszystko na dziś zrobione. Można odetchnąć 🎉',
+    nowOverdueBadge: 'Zaległe',
+    nowProgress: (done, total) => `Dziś: ${done}/${total}`,
+    nowRemaining: (time) => `zostało pracy ~${time}`,
+    nowFree: (time) => `wolnego czasu ~${time}`,
+    nowOverloaded: 'Zaplanowano więcej, niż zostało dziś czasu',
+    nowOverdueCount: (n) => `Zaległe: ${n}`,
     priorityLabel: 'Priorytet',
     tagsLabel: 'Tagi', tagPlaceholder: 'Dodaj tag', removeTagAria: 'Usuń tag',
     subtasksLabel: 'Podzadania', subtaskPlaceholder: 'Następny krok',
@@ -168,6 +195,15 @@ const T = {
     notesLabel: 'Notes', notesPlaceholder: 'Extra details (optional)',
     dueDateLabel: 'Date', dueTimeLabel: 'Time', dpTodayBtn: 'Today',
     priorityNone: 'None', priorityLow: 'Low', priorityMedium: 'Medium', priorityHigh: 'High',
+    nowTitle: 'Now', nowSkip: 'Next',
+    nowNothingToday: 'Nothing scheduled for today. Add something — or pick one of the undated tasks.',
+    nowAllDone: 'Everything for today is done. Take a breath 🎉',
+    nowOverdueBadge: 'Overdue',
+    nowProgress: (done, total) => `Today: ${done}/${total}`,
+    nowRemaining: (time) => `~${time} of work left`,
+    nowFree: (time) => `~${time} free`,
+    nowOverloaded: 'You planned more than the time left today',
+    nowOverdueCount: (n) => `Overdue: ${n}`,
     priorityLabel: 'Priority',
     tagsLabel: 'Tags', tagPlaceholder: 'Add a tag', removeTagAria: 'Remove tag',
     subtasksLabel: 'Subtasks', subtaskPlaceholder: 'Next step',
@@ -302,6 +338,7 @@ function applyTranslations() {
   document.getElementById('authPasswordHint').textContent = t('passwordHint');
   document.getElementById('rememberMeLabel').textContent = t('rememberMe');
   document.getElementById('forgotPasswordLink').textContent = t('forgotPassword');
+  document.getElementById('nowTitle').textContent = t('nowTitle');
   document.getElementById('quickAddFabLabel').textContent = t('quickAddFabLabel');
   document.getElementById('quickAddTitle').textContent = t('quickAddTitle');
   document.getElementById('quickAddInput').placeholder = t('quickAddPlaceholder');
@@ -804,6 +841,7 @@ function refreshDatePickersLang() {
 }
 
 function renderCalendar() {
+  renderNowCard();
   document.getElementById('calMonthLabel').textContent = calMonthLabelText();
   if (calViewMode === 'year') {
     renderYearGrid();
@@ -943,6 +981,94 @@ function renderNoDateSection() {
       renderNoDateSection();
     });
   }
+}
+
+
+// ---- Картка «Зараз» ----
+// Календар відповідає на «які в мене завдання», ця картка — на «що робити
+// прямо зараз»: одна наступна дія плюс чесний підсумок дня. Порядок і
+// підрахунки живуть у tasks/now-queue.js (чисті функції, покриті тестами).
+let nowIndex = 0;      // на скільки кроків уперед людина «перегорнула» чергу
+let nowClockTimer = null;
+
+function formatMinutes(min) {
+  return t('estimateShort', min).replace(/^~/, '');
+}
+
+function renderNowCard() {
+  const bodyEl = document.getElementById('nowBody');
+  const footEl = document.getElementById('nowFoot');
+  if (!bodyEl) return;
+
+  const now = new Date();
+  const locale = LOCALE_MAP[currentLang] || 'uk-UA';
+  document.getElementById('nowClock').textContent =
+    new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit' }).format(now);
+
+  const queue = nowQueue(tasks, { now });
+  const summary = daySummary(tasks, { now });
+
+  if (!queue.length) {
+    nowIndex = 0;
+    // Порожньо буває з двох причин, і це різні новини для людини.
+    const message = summary.totalCount > 0 ? t('nowAllDone') : t('nowNothingToday');
+    bodyEl.innerHTML = `<div class="now-empty">${escapeHtml(message)}</div>`;
+  } else {
+    if (nowIndex >= queue.length) nowIndex = 0;
+    const task = queue[nowIndex];
+    const isOverdue = task.dueDate && task.dueDate < todayISO();
+    const meta = [];
+    if (isOverdue) meta.push(`<span class="task-time overdue">${escapeHtml(t('nowOverdueBadge'))}</span>`);
+    if (task.dueTime) meta.push(`<span class="task-time">${escapeHtml(task.dueTime)}</span>`);
+    if (task.priority) meta.push(`<span class="priority-chip ${task.priority}">${escapeHtml(priorityLabel(task.priority))}</span>`);
+    if (task.estimateMin) meta.push(`<span class="task-progress">${escapeHtml(t('estimateShort', task.estimateMin))}</span>`);
+    if (!task.dueDate) meta.push(`<span class="task-progress">${escapeHtml(t('noDateLabel'))}</span>`);
+
+    bodyEl.innerHTML = `
+      <div class="now-next">
+        <button type="button" class="task-check${task.priority ? ' priority-' + task.priority : ''}" data-now-done="${task.id}" aria-label="done">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+        </button>
+        <div class="now-body" data-now-open="${task.id}">
+          <div class="now-name">${escapeHtml(task.title)}</div>
+          ${meta.length ? `<div class="now-meta">${meta.join('')}</div>` : ''}
+        </div>
+        ${queue.length > 1 ? `<button type="button" class="now-skip" id="nowSkipBtn">${escapeHtml(t('nowSkip'))}</button>` : ''}
+      </div>`;
+
+    bodyEl.querySelector('[data-now-done]').addEventListener('click', (e) => {
+      e.stopPropagation();
+      // Після виконання показуємо наступне з початку черги, а не там,
+      // де людина зупинилась, гортаючи.
+      nowIndex = 0;
+      toggleDone(task.id);
+    });
+    bodyEl.querySelector('[data-now-open]').addEventListener('click', () => openTaskForm(task));
+    const skipBtn = bodyEl.querySelector('#nowSkipBtn');
+    if (skipBtn) {
+      skipBtn.addEventListener('click', () => {
+        nowIndex = (nowIndex + 1) % queue.length;
+        renderNowCard();
+      });
+    }
+  }
+
+  const parts = [];
+  if (summary.totalCount) parts.push(`<span>${escapeHtml(t('nowProgress', summary.doneCount, summary.totalCount))}</span>`);
+  if (summary.remainingMin) parts.push(`<span>${escapeHtml(t('nowRemaining', formatMinutes(summary.remainingMin)))}</span>`);
+  else if (summary.totalCount > summary.doneCount) parts.push(`<span>${escapeHtml(t('nowFree', formatMinutes(summary.freeMin)))}</span>`);
+  if (summary.overdueCount) parts.push(`<span class="now-overdue">${escapeHtml(t('nowOverdueCount', summary.overdueCount))}</span>`);
+  if (summary.overloaded) parts.push(`<span class="now-warn">${escapeHtml(t('nowOverloaded'))}</span>`);
+  footEl.innerHTML = parts.join('');
+}
+
+// Черга залежить від поточного часу (завдання «о 15:00» о 15:01 змінює групу),
+// тож раз на хвилину перемальовуємо картку — і заразом годинник у ній.
+function startNowClock() {
+  if (nowClockTimer) clearInterval(nowClockTimer);
+  nowClockTimer = setInterval(() => {
+    if (currentScreen === 'calendar') renderNowCard();
+  }, 60000);
 }
 
 // ---- Екран дня (детальний перегляд однієї дати) ----
@@ -1401,6 +1527,7 @@ setTimeout(() => {
 
 // ---- Ініціалізація ----
 initDatePicker('taskDueDate');
+startNowClock();
 applyTheme();
 applyTranslations();
 renderThemePicker();
