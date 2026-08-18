@@ -47,6 +47,12 @@ const T = {
     recurShortDaily: (n) => (n === 1 ? 'Щодня' : `Кожні ${n} дн.`),
     recurShortMonthly: (n, day) => (n === 1 ? `${day} числа` : `Кожні ${n} міс.`),
     nowTitle: 'Зараз', nowSkip: 'Далі',
+    swipeDone: 'Виконано', swipeTomorrow: 'Завтра',
+    nowHaveTime: 'Маю час:',
+    searchPlaceholder: 'Знайти завдання',
+    searchFound: (n) => `Знайдено: ${n}`,
+    searchEmpty: (q) => `За запитом «${q}» нічого не знайшлось.`,
+    nowNothingShort: (min) => `Нічого коротшого за ${min} хв у списку немає — або візьми щось довше, або познач оцінку часу в завданнях.`,
     nowNothingToday: 'На сьогодні завдань немає. Додай перше — або візьми щось із того, що без дати.',
     nowAllDone: 'Усе на сьогодні зроблено. Можна видихнути 🎉',
     nowOverdueBadge: 'Прострочено',
@@ -124,6 +130,12 @@ const T = {
     recurShortDaily: (n) => (n === 1 ? 'Ежедневно' : `Каждые ${n} дн.`),
     recurShortMonthly: (n, day) => (n === 1 ? `${day} числа` : `Каждые ${n} мес.`),
     nowTitle: 'Сейчас', nowSkip: 'Дальше',
+    swipeDone: 'Выполнено', swipeTomorrow: 'Завтра',
+    nowHaveTime: 'Есть время:',
+    searchPlaceholder: 'Найти задачу',
+    searchFound: (n) => `Найдено: ${n}`,
+    searchEmpty: (q) => `По запросу «${q}» ничего не нашлось.`,
+    nowNothingShort: (min) => `Ничего короче ${min} мин в списке нет — возьми что-то подлиннее или проставь оценку времени в задачах.`,
     nowNothingToday: 'На сегодня задач нет. Добавь первую — или возьми что-то из того, что без даты.',
     nowAllDone: 'Всё на сегодня сделано. Можно выдохнуть 🎉',
     nowOverdueBadge: 'Просрочено',
@@ -201,6 +213,12 @@ const T = {
     recurShortDaily: (n) => (n === 1 ? 'Codziennie' : `Co ${n} dni`),
     recurShortMonthly: (n, day) => (n === 1 ? `${day}. dnia` : `Co ${n} mies.`),
     nowTitle: 'Teraz', nowSkip: 'Dalej',
+    swipeDone: 'Zrobione', swipeTomorrow: 'Jutro',
+    nowHaveTime: 'Mam czas:',
+    searchPlaceholder: 'Znajdź zadanie',
+    searchFound: (n) => `Znaleziono: ${n}`,
+    searchEmpty: (q) => `Nic nie znaleziono dla „${q}".`,
+    nowNothingShort: (min) => `Nic krótszego niż ${min} min nie ma — weź coś dłuższego albo dodaj szacowany czas do zadań.`,
     nowNothingToday: 'Na dziś nie ma zadań. Dodaj pierwsze — albo weź coś bez daty.',
     nowAllDone: 'Wszystko na dziś zrobione. Można odetchnąć 🎉',
     nowOverdueBadge: 'Zaległe',
@@ -278,6 +296,12 @@ const T = {
     recurShortDaily: (n) => (n === 1 ? 'Daily' : `Every ${n} days`),
     recurShortMonthly: (n, day) => (n === 1 ? `On the ${day}th` : `Every ${n} months`),
     nowTitle: 'Now', nowSkip: 'Next',
+    swipeDone: 'Done', swipeTomorrow: 'Tomorrow',
+    nowHaveTime: 'I have:',
+    searchPlaceholder: 'Find a task',
+    searchFound: (n) => `Found: ${n}`,
+    searchEmpty: (q) => `Nothing found for "${q}".`,
+    nowNothingShort: (min) => `Nothing shorter than ${min} min on the list — take something longer, or add time estimates to your tasks.`,
     nowNothingToday: 'Nothing scheduled for today. Add something — or pick one of the undated tasks.',
     nowAllDone: 'Everything for today is done. Take a breath 🎉',
     nowOverdueBadge: 'Overdue',
@@ -456,6 +480,7 @@ function applyTranslations() {
   document.getElementById('carryHint').textContent = t('carryHint');
   document.getElementById('carryLaterBtn').textContent = t('carryLater');
   document.getElementById('carryAllTodayBtn').textContent = t('carryAllToday');
+  document.getElementById('searchInput').placeholder = t('searchPlaceholder');
   document.getElementById('bnWeekLabel').textContent = t('bnWeek');
   document.getElementById('bnMonthLabel').textContent = t('bnMonth');
   document.getElementById('bnStatsLabel').textContent = t('bnStats');
@@ -619,6 +644,7 @@ let formSubtasks = [];
 let formEstimate = null;
 let formRecurrence = null; // { type, interval, weekdays, day, anchor } або null
 let quickAddDate = null;
+let searchQuery = '';
 let pendingDeleteId = null;
 let calYear = new Date().getFullYear();
 let calMonth = new Date().getMonth(); // 0-based
@@ -692,14 +718,27 @@ function taskRowHtml(task) {
   if (task.estimateMin) metaParts.push(`<span class="task-progress">${escapeHtml(t('estimateShort', task.estimateMin))}</span>`);
   if (task.recurrence) metaParts.push(`<span class="task-progress">\u21BB ${escapeHtml(recurrenceShortLabel(task.recurrence))}</span>`);
   (task.tags || []).forEach((tag) => metaParts.push(`<span class="tag-chip">${escapeHtml(tag)}</span>`));
+  // Смуги дій під рядком малюємо лише для невиконаних: свайпнути «на завтра»
+  // те, що вже зроблене, немає сенсу.
+  const swipeBgs = task.done ? '' : `
+      <div class="swipe-bg done"><span class="swipe-bg-inner">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+        ${escapeHtml(t('swipeDone'))}
+      </span></div>
+      <div class="swipe-bg later"><span class="swipe-bg-inner">
+        ${escapeHtml(t('swipeTomorrow'))}
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+      </span></div>`;
   return `
-    <div class="task-row${doneRowClass}" data-id="${task.id}">
-      <button type="button" class="task-check${checkedClass}${prioClass}" data-toggle="${task.id}" aria-label="done">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
-      </button>
-      <div class="task-body" data-open="${task.id}">
-        <div class="task-title">${escapeHtml(task.title)}</div>
-        ${metaParts.length ? `<div class="task-meta">${metaParts.join('')}</div>` : ''}
+    <div class="task-swipe"${task.done ? '' : ` data-swipe="${task.id}"`}>${swipeBgs}
+      <div class="task-row${doneRowClass}" data-id="${task.id}">
+        <button type="button" class="task-check${checkedClass}${prioClass}" data-toggle="${task.id}" aria-label="done">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+        </button>
+        <div class="task-body" data-open="${task.id}">
+          <div class="task-title">${escapeHtml(task.title)}</div>
+          ${metaParts.length ? `<div class="task-meta">${metaParts.join('')}</div>` : ''}
+        </div>
       </div>
     </div>`;
 }
@@ -1183,6 +1222,151 @@ function renderStatsScreen() {
     + `<div class="stat-caption" style="text-align:left;margin-top:2px;">${escapeHtml(t('statsAllTime', summary.totalDone))}</div>`;
 }
 
+// ---- Пошук ----
+// Шукаємо по назві, нотатці й тегах — тобто по всьому, що людина сама
+// написала. Пошук іде по всіх завданнях, а не по обраному дню: сенс саме
+// в тому, щоб знайти те, дату чого вже не памʼятаєш.
+function matchesSearch(task, query) {
+  if (!query) return true;
+  const hay = [task.title, task.notes, ...(task.tags || []), ...((task.subtasks || []).map((sub) => sub.title))]
+    .filter(Boolean).join(' ').toLowerCase();
+  // Кожне слово запиту має знайтись — так «звіт пн» звужує, а не розширює.
+  return query.toLowerCase().split(/\s+/).filter(Boolean).every((word) => hay.indexOf(word) !== -1);
+}
+
+function renderSearchResults() {
+  const el = document.getElementById('searchResults');
+  const found = tasks.filter((task) => matchesSearch(task, searchQuery)).filter(matchesFilters);
+  if (!found.length) {
+    el.innerHTML = `<div class="search-empty">${escapeHtml(t('searchEmpty', searchQuery))}</div>`;
+    return;
+  }
+  // Групуємо за датою: спершу все датоване від найдавнішого, потім «без дати».
+  const byDate = new Map();
+  found.forEach((task) => {
+    const key = task.dueDate || '';
+    if (!byDate.has(key)) byDate.set(key, []);
+    byDate.get(key).push(task);
+  });
+  const keys = [...byDate.keys()].sort((a, b) => (a === '' ? 1 : b === '' ? -1 : a < b ? -1 : 1));
+  el.innerHTML = `<div class="day-heading">${escapeHtml(t('searchFound', found.length))}</div>` +
+    keys.map((key) => dayGroupHtml(
+      key ? dayHeadingText(key) : t('noDateLabel'),
+      byDate.get(key),
+      !!key && key < todayISO()
+    )).join('');
+
+  el.querySelectorAll('[data-toggle]').forEach((btn) => {
+    btn.addEventListener('click', (e) => { e.stopPropagation(); toggleDone(btn.dataset.toggle); });
+  });
+  el.querySelectorAll('[data-open]').forEach((row) => {
+    row.addEventListener('click', () => openTaskForm(tasks.find((tsk) => tsk.id === row.dataset.open)));
+  });
+}
+
+function setSearchQuery(value) {
+  searchQuery = (value || '').trim();
+  renderWeekScreen();
+}
+
+function toggleSearch(open) {
+  const bar = document.getElementById('searchBar');
+  const input = document.getElementById('searchInput');
+  const show = open === undefined ? bar.style.display === 'none' : open;
+  bar.style.display = show ? 'flex' : 'none';
+  if (show) {
+    showWeekScreen();
+    input.focus();
+  } else {
+    input.value = '';
+    setSearchQuery('');
+  }
+}
+
+document.getElementById('searchToggleBtn').addEventListener('click', () => toggleSearch());
+document.getElementById('searchClearBtn').addEventListener('click', () => toggleSearch(false));
+document.getElementById('searchInput').addEventListener('input', (e) => setSearchQuery(e.target.value));
+document.getElementById('searchInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') toggleSearch(false);
+});
+
+// ---- Свайп по завданню ----
+// Вправо — виконано, вліво — на завтра. Дві найчастіші дії зі списком, і
+// обидві раніше вимагали або влучити в маленьке коло, або відкрити форму.
+//
+// Слухач один на весь список (делегування), бо рядки перемальовуються на
+// кожен снапшот із Firestore — вішати обробник на кожен рядок означало б
+// губити їх після першого ж оновлення даних.
+const SWIPE_TRIGGER = 72;   // з якого зсуву дія спрацьовує
+const SWIPE_MAX = 118;      // далі рядок не їде, щоб не оголювати картку
+const SWIPE_AXIS_LOCK = 8;  // до цього не вирішуємо, це гортання чи прокрутка
+
+// Ширина смуги = наскільки відʼїхав рядок, тож під самим рядком її ніколи
+// немає, і напівпрозоре скло картки лишається чистим.
+function setSwipeStrips(box, dx) {
+  const done = box.querySelector('.swipe-bg.done');
+  const later = box.querySelector('.swipe-bg.later');
+  if (done) done.style.width = dx > 0 ? dx + 'px' : '0';
+  if (later) later.style.width = dx < 0 ? -dx + 'px' : '0';
+}
+
+function initRowSwipe(listEl) {
+  let box = null, row = null, id = null;
+  let startX = 0, startY = 0, dx = 0, axis = null, pointerId = null;
+
+  function reset(animated) {
+    if (!box) return;
+    box.classList.remove('dragging');
+    row.style.transform = '';
+    // Смугу ховаємо не миттєво, а разом із рядком, що їде назад.
+    const closing = box;
+    setTimeout(() => setSwipeStrips(closing, 0), animated ? 160 : 0);
+    box = row = id = null; axis = null; dx = 0; pointerId = null;
+  }
+
+  listEl.addEventListener('pointerdown', (e) => {
+    if (box || e.button !== 0) return;
+    const target = e.target.closest('[data-swipe]');
+    if (!target) return;
+    box = target; row = target.querySelector('.task-row'); id = target.dataset.swipe;
+    startX = e.clientX; startY = e.clientY; dx = 0; axis = null; pointerId = e.pointerId;
+  });
+
+  listEl.addEventListener('pointermove', (e) => {
+    if (!box || e.pointerId !== pointerId) return;
+    const mx = e.clientX - startX;
+    const my = e.clientY - startY;
+    if (!axis) {
+      if (Math.abs(mx) < SWIPE_AXIS_LOCK && Math.abs(my) < SWIPE_AXIS_LOCK) return;
+      // Вертикальний намір віддаємо сторінці: прокрутка списку важливіша
+      // за жест, і перехоплювати її було б неприємно.
+      axis = Math.abs(mx) > Math.abs(my) ? 'x' : 'y';
+      if (axis === 'y') { reset(false); return; }
+      box.classList.add('dragging');
+      box.setPointerCapture(e.pointerId);
+    }
+    e.preventDefault();
+    dx = Math.max(-SWIPE_MAX, Math.min(SWIPE_MAX, mx));
+    row.style.transform = `translate3d(${dx}px,0,0)`;
+    setSwipeStrips(box, dx);
+  });
+
+  function finish() {
+    if (!box) return;
+    const done = dx >= SWIPE_TRIGGER;
+    const later = dx <= -SWIPE_TRIGGER;
+    const taskId = id;
+    // Клік після свайпу мав би відкрити завдання — гасимо його, інакше
+    // кожен жест закінчувався б відкритою формою.
+    if (axis === 'x' && Math.abs(dx) > SWIPE_AXIS_LOCK) swallowNextClick(listEl);
+    reset(true);
+    if (done) toggleDone(taskId);
+    else if (later) moveTaskDate(taskId, isoDateShift(todayISO(), 1));
+  }
+  listEl.addEventListener('pointerup', finish);
+  listEl.addEventListener('pointercancel', () => { if (box) { reset(true); } });
+}
+
 // ---- Розбір минулих днів ----
 // Невиконане з минулого нікуди не дівається саме собою: через місяць список
 // перетворюється на кладовище, і людина перестає його відкривати. Тому раз на
@@ -1208,7 +1392,7 @@ function renderCarryBanner() {
   const list = carryOver(tasks, { today: todayISO() });
   // Банер тільки на сьогоднішньому дні: гортаючи тиждень уперед, людина
   // планує, а не розбирає борги.
-  const show = list.length > 0 && selectedDate === todayISO() && !carryDismissedToday();
+  const show = !searchQuery && list.length > 0 && selectedDate === todayISO() && !carryDismissedToday();
   carryBannerVisible = show;
   banner.style.display = show ? 'flex' : 'none';
   if (!show) return;
@@ -1309,6 +1493,7 @@ document.getElementById('carryAllTodayBtn').addEventListener('click', async () =
 // прямо зараз»: одна наступна дія плюс чесний підсумок дня. Порядок і
 // підрахунки живуть у tasks/now-queue.js (чисті функції, покриті тестами).
 let nowIndex = 0;      // на скільки кроків уперед людина «перегорнула» чергу
+let nowTimeLimit = null; // «маю 15 хвилин»: стеля тривалості для черги, у хвилинах
 let nowClockTimer = null;
 
 function formatMinutes(min) {
@@ -1330,15 +1515,23 @@ function renderNowCard() {
   document.getElementById('nowClock').textContent =
     new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit' }).format(now);
 
-  const queue = nowQueue(tasks, { now });
+  let queue = nowQueue(tasks, { now });
+  // «Маю 15 хвилин» — не окремий екран, а звуження тієї самої черги: людина
+  // питає не «покажи короткі справи», а «що з мого списку зараз влізе».
+  const fullQueueLength = queue.length;
+  if (nowTimeLimit) {
+    queue = queue.filter((task) => typeof task.estimateMin === 'number' && task.estimateMin <= nowTimeLimit);
+  }
   // Норма з власної історії робить попередження чесним: до 22:00 формально
   // лишається 8 годин, але ніхто не працює 8 годин поспіль.
   const summary = daySummary(tasks, { now, norm: personalNorm(tasks, { today: todayISO() }) });
 
   if (!queue.length) {
     nowIndex = 0;
-    // Порожньо буває з двох причин, і це різні новини для людини.
-    const message = summary.totalCount > 0 ? t('nowAllDone') : t('nowNothingToday');
+    // Порожньо буває з трьох причин, і це різні новини для людини.
+    const message = nowTimeLimit && fullQueueLength
+      ? t('nowNothingShort', nowTimeLimit)
+      : summary.totalCount > 0 ? t('nowAllDone') : t('nowNothingToday');
     bodyEl.innerHTML = `<div class="now-empty">${escapeHtml(message)}</div>`;
   } else {
     if (nowIndex >= queue.length) nowIndex = 0;
@@ -1381,6 +1574,8 @@ function renderNowCard() {
     }
   }
 
+  renderNowTimeRow(fullQueueLength);
+
   const parts = [];
   if (summary.totalCount) parts.push(`<span>${escapeHtml(t('nowProgress', summary.doneCount, summary.totalCount))}</span>`);
   if (summary.remainingMin) parts.push(`<span>${escapeHtml(t('nowRemaining', formatMinutes(summary.remainingMin)))}</span>`);
@@ -1393,6 +1588,30 @@ function renderNowCard() {
   // одну — інакше картка починає бурчати двома рядками про те саме.
   else if (summary.overCapacity) parts.push(`<span class="now-warn">${escapeHtml(t('nowOverCapacity', summary.leftCount, summary.norm))}</span>`);
   footEl.innerHTML = parts.join('');
+}
+
+// Скільки часу «є прямо зараз». Ці три значення покривають реальні паузи:
+// коротка пауза між справами, півгодини і година.
+const NOW_TIME_LIMITS = [15, 30, 60];
+
+function renderNowTimeRow(queueLength) {
+  const row = document.getElementById('nowTimeRow');
+  if (!row) return;
+  // Коли робити взагалі нема чого, питання «скільки в мене часу» беззмістовне.
+  if (!queueLength) { row.innerHTML = ''; return; }
+  row.innerHTML = `<span class="now-time-label">${escapeHtml(t('nowHaveTime'))}</span>` +
+    NOW_TIME_LIMITS.map((min) =>
+      `<button type="button" class="now-time-chip${nowTimeLimit === min ? ' selected' : ''}" data-limit="${min}">${escapeHtml(formatMinutes(min))}</button>`
+    ).join('');
+  row.querySelectorAll('[data-limit]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const min = Number(btn.dataset.limit);
+      // Повторний тап знімає обмеження — окрема кнопка «скинути» тут зайва.
+      nowTimeLimit = nowTimeLimit === min ? null : min;
+      nowIndex = 0;
+      renderNowCard();
+    });
+  });
 }
 
 // Черга залежить від поточного часу (завдання «о 15:00» о 15:01 змінює групу),
@@ -1517,7 +1736,26 @@ function selectDate(iso) {
   if (currentScreen === 'month') showWeekScreen(); else renderWeekScreen();
 }
 
+let swipeInited = false;
+
 function renderWeekScreen() {
+  if (!swipeInited) {
+    initRowSwipe(document.getElementById('dayList'));
+    initRowSwipe(document.getElementById('noDateSection'));
+    initRowSwipe(document.getElementById('searchResults'));
+    swipeInited = true;
+  }
+  // У режимі пошуку тиждень, «Зараз» і список дня ховаються: людина шукає
+  // конкретну справу, а не планує день, і зайві блоки лише відсувають
+  // результати вниз.
+  const searching = !!searchQuery;
+  ['weekSwipeArea', 'carryBanner', 'nowCard', 'tagFilterRow', 'dayHeading', 'dayList', 'noDateSection'].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = searching ? 'none' : '';
+  });
+  document.getElementById('searchResults').style.display = searching ? 'block' : 'none';
+  if (searching) { renderSearchResults(); return; }
+
   renderWeekStrip();
   renderCarryBanner();
   renderNowCard();
