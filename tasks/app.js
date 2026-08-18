@@ -63,6 +63,14 @@ const T = {
     carryToday: 'Сьогодні', carryTomorrow: 'Завтра', carryNoDate: 'Без дати',
     carryAllToday: 'Перенести все на сьогодні',
     carryEmpty: 'Розібрано. Тепер список дня чесний 👌',
+    statsTitle: 'Що я зробив',
+    statToday: 'сьогодні', statWeek: 'цього тижня',
+    statStreak: (n) => plural(n, { one: 'день поспіль', few: 'дні поспіль', many: 'днів поспіль', other: 'дня поспіль' }),
+    statChartTitle: 'Останні два тижні', statRecentTitle: 'Закрито днями',
+    statNorm: (n) => `Зазвичай ти закриваєш ${n} ${plural(n, { one: 'справу', few: 'справи', many: 'справ', other: 'справи' })} за день — на цю цифру й спирається попередження про перевантажений день.`,
+    statNormUnknown: 'Норма зʼявиться, коли назбирається кілька активних днів — тоді застосунок зможе казати не «до 22:00 ще купа часу», а скільки ти встигаєш насправді.',
+    statsEmpty: 'Тут зʼявиться те, що ти закрив. Позначай зроблене — і за тиждень буде видно свій темп.',
+    statsAllTime: (n) => `Усього закрито: ${n}`,
     priorityLabel: 'Пріоритет',
     tagsLabel: 'Теги', tagPlaceholder: 'Додати тег', removeTagAria: 'Прибрати тег',
     subtasksLabel: 'Підзадачі', subtaskPlaceholder: 'Наступний крок',
@@ -131,6 +139,14 @@ const T = {
     carryToday: 'Сегодня', carryTomorrow: 'Завтра', carryNoDate: 'Без даты',
     carryAllToday: 'Перенести всё на сегодня',
     carryEmpty: 'Разобрано. Теперь список дня честный 👌',
+    statsTitle: 'Что я сделал',
+    statToday: 'сегодня', statWeek: 'на этой неделе',
+    statStreak: (n) => plural(n, { one: 'день подряд', few: 'дня подряд', many: 'дней подряд', other: 'дня подряд' }),
+    statChartTitle: 'Последние две недели', statRecentTitle: 'Закрыто по дням',
+    statNorm: (n) => `Обычно ты закрываешь ${n} ${plural(n, { one: 'дело', few: 'дела', many: 'дел', other: 'дела' })} за день — на эту цифру и опирается предупреждение о перегруженном дне.`,
+    statNormUnknown: 'Норма появится, когда накопится несколько активных дней — тогда приложение сможет говорить не «до 22:00 ещё уйма времени», а сколько ты успеваешь на самом деле.',
+    statsEmpty: 'Здесь появится то, что ты закрыл. Отмечай сделанное — и через неделю будет виден свой темп.',
+    statsAllTime: (n) => `Всего закрыто: ${n}`,
     priorityLabel: 'Приоритет',
     tagsLabel: 'Теги', tagPlaceholder: 'Добавить тег', removeTagAria: 'Убрать тег',
     subtasksLabel: 'Подзадачи', subtaskPlaceholder: 'Следующий шаг',
@@ -199,6 +215,14 @@ const T = {
     carryToday: 'Dziś', carryTomorrow: 'Jutro', carryNoDate: 'Bez daty',
     carryAllToday: 'Przenieś wszystko na dziś',
     carryEmpty: 'Przejrzane. Lista dnia jest uczciwa 👌',
+    statsTitle: 'Co zrobiłem',
+    statToday: 'dziś', statWeek: 'w tym tygodniu',
+    statStreak: (n) => plural(n, { one: 'dzień z rzędu', few: 'dni z rzędu', many: 'dni z rzędu', other: 'dnia z rzędu' }),
+    statChartTitle: 'Ostatnie dwa tygodnie', statRecentTitle: 'Zamknięte dzień po dniu',
+    statNorm: (n) => `Zwykle zamykasz ${n} ${plural(n, { one: 'sprawę', few: 'sprawy', many: 'spraw', other: 'sprawy' })} dziennie — na tej liczbie opiera się ostrzeżenie o przeciążonym dniu.`,
+    statNormUnknown: 'Norma pojawi się, gdy uzbiera się kilka aktywnych dni — wtedy aplikacja powie nie „do 22:00 jeszcze mnóstwo czasu", tylko ile naprawdę zdążysz.',
+    statsEmpty: 'Tu pojawi się to, co zamkniesz. Odznaczaj zrobione — po tygodniu zobaczysz swoje tempo.',
+    statsAllTime: (n) => `Łącznie zamknięte: ${n}`,
     priorityLabel: 'Priorytet',
     tagsLabel: 'Tagi', tagPlaceholder: 'Dodaj tag', removeTagAria: 'Usuń tag',
     subtasksLabel: 'Podzadania', subtaskPlaceholder: 'Następny krok',
@@ -267,6 +291,14 @@ const T = {
     carryToday: 'Today', carryTomorrow: 'Tomorrow', carryNoDate: 'No date',
     carryAllToday: 'Move everything to today',
     carryEmpty: 'All sorted. The day list is honest now 👌',
+    statsTitle: 'What I got done',
+    statToday: 'today', statWeek: 'this week',
+    statStreak: (n) => plural(n, { one: 'day in a row', other: 'days in a row' }),
+    statChartTitle: 'Last two weeks', statRecentTitle: 'Closed day by day',
+    statNorm: (n) => `You usually close ${n} ${plural(n, { one: 'task', other: 'tasks' })} a day — that is the number the overload warning is based on.`,
+    statNormUnknown: 'The norm shows up once a few active days add up — then the app can tell you how much you actually get done, instead of "there are hours left until 22:00".',
+    statsEmpty: 'What you close will show up here. Tick things off — after a week you will see your own pace.',
+    statsAllTime: (n) => `Closed in total: ${n}`,
     priorityLabel: 'Priority',
     tagsLabel: 'Tags', tagPlaceholder: 'Add a tag', removeTagAria: 'Remove tag',
     subtasksLabel: 'Subtasks', subtaskPlaceholder: 'Next step',
@@ -307,6 +339,16 @@ if (!LANGS.includes(currentLang)) currentLang = 'uk';
 function t(key, ...args) {
   const val = (T[currentLang] && T[currentLang][key]) || T.uk[key] || key;
   return typeof val === 'function' ? val(...args) : val;
+}
+
+// Слов'янські мови мають три форми множини («1 день», «2 дні», «5 днів»),
+// і підставити число в готовий рядок недостатньо. Категорію дає Intl,
+// а самі форми лишаються в перекладах поруч із рештою тексту.
+function plural(n, forms) {
+  var locale = LOCALE_MAP[currentLang] || 'uk-UA';
+  var cat = 'other';
+  try { cat = new Intl.PluralRules(locale).select(n); } catch (err) { cat = 'other'; }
+  return forms[cat] || forms.other || forms.many || '';
 }
 
 // ---- Тема ----
@@ -403,6 +445,9 @@ function applyTranslations() {
   document.getElementById('forgotPasswordLink').textContent = t('forgotPassword');
   document.getElementById('nowTitle').textContent = t('nowTitle');
   document.getElementById('monthHint').textContent = t('monthHintText');
+  document.getElementById('statsHeading').textContent = t('statsTitle');
+  document.getElementById('statChartTitle').textContent = t('statChartTitle');
+  document.getElementById('statRecentTitle').textContent = t('statRecentTitle');
   document.getElementById('carryTitle').textContent = t('carryTitle');
   document.getElementById('carryHint').textContent = t('carryHint');
   document.getElementById('carryLaterBtn').textContent = t('carryLater');
@@ -1059,6 +1104,77 @@ function renderNoDateSection() {
 }
 
 
+// ---- Статистика: «що я зробив» ----
+// Застосунок увесь час нагадує про невиконане; цей екран існує, щоб хоч
+// десь було видно зроблене. Плюс тут живе особиста норма — з неї картка
+// «Зараз» бере чесне попередження про перевантажений день.
+const STATS_CHART_DAYS = 14;
+const STATS_RECENT_DAYS = 7;
+
+// Підпис під стовпчиком: перша літера дня тижня.
+function barLabel(iso) {
+  const d = parseISODate(iso);
+  if (!d) return '';
+  const locale = LOCALE_MAP[currentLang] || 'uk-UA';
+  return new Intl.DateTimeFormat(locale, { weekday: 'narrow' }).format(d).toUpperCase();
+}
+
+// Заголовок дня в історії: «Сьогодні», «Вчора» — і далі звичайна дата.
+function historyDayLabel(iso) {
+  const today = todayISO();
+  if (iso === today) return t('todayLabel');
+  if (iso === isoDateShift(today, -1)) return t('yesterdayLabel');
+  const d = parseISODate(iso);
+  const locale = LOCALE_MAP[currentLang] || 'uk-UA';
+  return new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long' }).format(d);
+}
+
+function renderStatsScreen() {
+  const today = todayISO();
+  const summary = statsSummary(tasks, { today });
+
+  document.getElementById('statTiles').innerHTML = [
+    { value: summary.todayDone, caption: t('statToday') },
+    { value: summary.weekDone, caption: t('statWeek') },
+    { value: summary.streak, caption: t('statStreak', summary.streak) },
+  ].map((tile) => `
+    <div class="stat-tile">
+      <div class="stat-value">${tile.value}</div>
+      <div class="stat-caption">${escapeHtml(tile.caption)}</div>
+    </div>`).join('');
+
+  document.getElementById('statNorm').textContent =
+    summary.norm !== null ? t('statNorm', summary.norm) : t('statNormUnknown');
+
+  const days = historyDays(tasks, { today, days: STATS_CHART_DAYS });
+  const max = Math.max(1, ...days.map((d) => d.count));
+  document.getElementById('statBars').innerHTML = days.map((d) => `
+    <div class="bar-col" title="${escapeHtml(d.iso)}: ${d.count}">
+      <div class="bar${d.count ? ' has' : ''}" style="height:${d.count ? Math.round((d.count / max) * 100) : 0}%"></div>
+    </div>`).join('');
+  document.getElementById('statBarLabels').innerHTML =
+    days.map((d) => `<div${d.iso === today ? ' class="today"' : ''}>${escapeHtml(barLabel(d.iso))}</div>`).join('');
+
+  // Сам список зробленого: те, заради чого екран і робився.
+  const byDay = [];
+  for (let i = 0; i < STATS_RECENT_DAYS; i++) {
+    const iso = isoDateShift(today, -i);
+    const items = tasks.filter((task) => completedIso(task) === iso);
+    if (items.length) byDay.push({ iso, items });
+  }
+  const recentEl = document.getElementById('statRecent');
+  if (!byDay.length) {
+    recentEl.innerHTML = `<div class="stats-empty">${escapeHtml(t('statsEmpty'))}</div>`;
+    return;
+  }
+  recentEl.innerHTML = byDay.map((day) => `
+    <div class="done-day">
+      <div class="done-day-head">${escapeHtml(historyDayLabel(day.iso))} · ${day.items.length}</div>
+      ${day.items.map((task) => `<div class="done-item">${escapeHtml(task.title)}</div>`).join('')}
+    </div>`).join('')
+    + `<div class="stat-caption" style="text-align:left;margin-top:2px;">${escapeHtml(t('statsAllTime', summary.totalDone))}</div>`;
+}
+
 // ---- Розбір минулих днів ----
 // Невиконане з минулого нікуди не дівається саме собою: через місяць список
 // перетворюється на кладовище, і людина перестає його відкривати. Тому раз на
@@ -1347,18 +1463,34 @@ let selectedDate = todayISO();
 
 function renderCurrentScreen() {
   if (currentScreen === 'month') renderCalendar();
+  else if (currentScreen === 'stats') renderStatsScreen();
   else renderWeekScreen();
   // Розбір відкритий поверх екрана і живе з тих самих даних: після переносу
   // (свого чи з іншого пристрою) список має оновитись, а не показувати старе.
   if (document.getElementById('carryOverlay').classList.contains('show')) renderCarryList();
 }
 
+// Три екрани й один набір кнопок у шапці: тримаємо перемикання в одному
+// місці, щоб не лишалось станів, де видно і «календар», і «назад».
+function showScreenChrome(screen) {
+  document.getElementById('weekScreen').style.display = screen === 'week' ? '' : 'none';
+  document.getElementById('monthScreen').style.display = screen === 'month' ? 'block' : 'none';
+  document.getElementById('statsScreen').style.display = screen === 'stats' ? 'block' : 'none';
+  const isWeek = screen === 'week';
+  document.getElementById('openMonthBtn').style.display = isWeek ? 'flex' : 'none';
+  document.getElementById('openStatsBtn').style.display = isWeek ? 'flex' : 'none';
+  document.getElementById('closeMonthBtn').style.display = isWeek ? 'none' : 'flex';
+}
+
+function showStatsScreen() {
+  currentScreen = 'stats';
+  showScreenChrome('stats');
+  renderStatsScreen();
+}
+
 function showMonthScreen() {
   currentScreen = 'month';
-  document.getElementById('weekScreen').style.display = 'none';
-  document.getElementById('monthScreen').style.display = 'block';
-  document.getElementById('openMonthBtn').style.display = 'none';
-  document.getElementById('closeMonthBtn').style.display = 'flex';
+  showScreenChrome('month');
   // Відкриваємо місяць саме на обраному дні, а не там, де його лишили минулого разу.
   const d = parseISODate(selectedDate);
   calYear = d.getFullYear();
@@ -1369,10 +1501,7 @@ function showMonthScreen() {
 
 function showWeekScreen() {
   currentScreen = 'week';
-  document.getElementById('monthScreen').style.display = 'none';
-  document.getElementById('weekScreen').style.display = '';
-  document.getElementById('closeMonthBtn').style.display = 'none';
-  document.getElementById('openMonthBtn').style.display = 'flex';
+  showScreenChrome('week');
   renderWeekScreen();
 }
 
@@ -1511,6 +1640,7 @@ function renderSelectedDay() {
   }
 }
 
+document.getElementById('openStatsBtn').addEventListener('click', showStatsScreen);
 document.getElementById('openMonthBtn').addEventListener('click', showMonthScreen);
 document.getElementById('closeMonthBtn').addEventListener('click', showWeekScreen);
 function shiftWeek(delta) {
