@@ -1,11 +1,11 @@
 // Service Worker модуля «Завдання» (scope /tasks/). Кожен модуль має власний
 // SW — для сторінки виграє реєстрація з найдовшим збігом scope.
-const CACHE_NAME = 'life-tasks-v1';
+const CACHE_NAME = 'life-tasks-v2';
 // Чистимо лише власні (застарілі) кеші: `caches` спільний для всього
 // походження, тож видалення "всього зайвого" стерло б кеші інших модулів.
 const CACHE_PREFIXES = ['life-tasks-'];
-const NETWORK_FIRST = ['./', './index.html', './app.js', './quick-parse.js', './now-queue.js', './recurrence.js'];
-const FILES_TO_CACHE = ['./', './index.html', './app.js', './quick-parse.js', './now-queue.js', './recurrence.js', './manifest.json',
+const NETWORK_FIRST = ['./', './index.html', './app.js', './quick-parse.js', './now-queue.js', './recurrence.js', './stats.js'];
+const FILES_TO_CACHE = ['./', './index.html', './app.js', './quick-parse.js', './now-queue.js', './recurrence.js', './stats.js', './manifest.json',
   '../budget/firebase-config.js', '../budget/icon-192.png', '../budget/icon-512.png',
   '../budget/icon-192-maskable.png', '../budget/icon-512-maskable.png'];
 // Сторінка жорстко залежить від Firebase SDK (firebase.initializeApp() —

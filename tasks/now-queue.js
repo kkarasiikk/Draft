@@ -94,6 +94,11 @@
    * Підсумок дня: скільки зроблено, скільки лишилось часу за оцінками і чи
    * реалістичний план. Прострочене свідомо не додаємо в «сьогодні»: людина
    * має бачити навантаження на день, а не борг за весь місяць.
+   *
+   * opts.norm — особиста норма справ на день (tasks/stats.js). Оцінки часу
+   * стоять не всюди, тож перевірка «сума хвилин проти часу до 22:00» мовчить
+   * саме тоді, коли план найбільш роздутий. Норма ловить цей випадок за
+   * кількістю: «зазвичай закриваєш 4, а заплановано 9».
    */
   function daySummary(tasks, opts) {
     opts = opts || {};
@@ -110,9 +115,16 @@
     var freeMin = minutesLeftToday(now);
     var estimated = left.filter(function (t) { return typeof t.estimateMin === 'number'; }).length;
 
+    var norm = typeof opts.norm === 'number' && opts.norm > 0 ? opts.norm : null;
+
     return {
       doneCount: done.length,
       totalCount: todays.length,
+      leftCount: left.length,
+      norm: norm,
+      // Порівнюємо з тим, що ще лишилось, а не з планом на весь день:
+      // після п'яти закритих справ шосте завдання — не перевантаження.
+      overCapacity: norm !== null && left.length > norm,
       remainingMin: remainingMin,
       freeMin: freeMin,
       // Попереджаємо тільки коли є на чому базуватись: якщо жодне з

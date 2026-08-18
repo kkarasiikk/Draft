@@ -55,6 +55,14 @@ const T = {
     nowFree: (time) => `вільного часу ~${time}`,
     nowOverloaded: 'Заплановано більше, ніж лишилось часу сьогодні',
     nowOverdueCount: (n) => `Прострочено: ${n}`,
+    nowOverCapacity: (left, norm) => `Заплановано ${left}, а зазвичай закриваєш ${norm}`,
+    carryTitle: 'Розбір минулих днів',
+    carryBannerText: (n) => `З минулих днів лишилось ${n}`,
+    carryOpen: 'Розібрати', carryLater: 'Пізніше',
+    carryHint: 'Перенеси те, що досі актуальне, решту познач «без дати». Щоб день показував правду, а не борги за місяць.',
+    carryToday: 'Сьогодні', carryTomorrow: 'Завтра', carryNoDate: 'Без дати',
+    carryAllToday: 'Перенести все на сьогодні',
+    carryEmpty: 'Розібрано. Тепер список дня чесний 👌',
     priorityLabel: 'Пріоритет',
     tagsLabel: 'Теги', tagPlaceholder: 'Додати тег', removeTagAria: 'Прибрати тег',
     subtasksLabel: 'Підзадачі', subtaskPlaceholder: 'Наступний крок',
@@ -115,6 +123,14 @@ const T = {
     nowFree: (time) => `свободного времени ~${time}`,
     nowOverloaded: 'Запланировано больше, чем осталось времени сегодня',
     nowOverdueCount: (n) => `Просрочено: ${n}`,
+    nowOverCapacity: (left, norm) => `Запланировано ${left}, а обычно закрываешь ${norm}`,
+    carryTitle: 'Разбор прошлых дней',
+    carryBannerText: (n) => `С прошлых дней осталось ${n}`,
+    carryOpen: 'Разобрать', carryLater: 'Позже',
+    carryHint: 'Перенеси то, что ещё актуально, остальное отметь «без даты». Чтобы день показывал правду, а не долги за месяц.',
+    carryToday: 'Сегодня', carryTomorrow: 'Завтра', carryNoDate: 'Без даты',
+    carryAllToday: 'Перенести всё на сегодня',
+    carryEmpty: 'Разобрано. Теперь список дня честный 👌',
     priorityLabel: 'Приоритет',
     tagsLabel: 'Теги', tagPlaceholder: 'Добавить тег', removeTagAria: 'Убрать тег',
     subtasksLabel: 'Подзадачи', subtaskPlaceholder: 'Следующий шаг',
@@ -175,6 +191,14 @@ const T = {
     nowFree: (time) => `wolnego czasu ~${time}`,
     nowOverloaded: 'Zaplanowano więcej, niż zostało dziś czasu',
     nowOverdueCount: (n) => `Zaległe: ${n}`,
+    nowOverCapacity: (left, norm) => `Zaplanowano ${left}, a zwykle zamykasz ${norm}`,
+    carryTitle: 'Przegląd zaległości',
+    carryBannerText: (n) => `Z poprzednich dni zostało ${n}`,
+    carryOpen: 'Przejrzyj', carryLater: 'Później',
+    carryHint: 'Przenieś to, co nadal aktualne, resztę oznacz „bez daty". Żeby dzień pokazywał prawdę, a nie długi z miesiąca.',
+    carryToday: 'Dziś', carryTomorrow: 'Jutro', carryNoDate: 'Bez daty',
+    carryAllToday: 'Przenieś wszystko na dziś',
+    carryEmpty: 'Przejrzane. Lista dnia jest uczciwa 👌',
     priorityLabel: 'Priorytet',
     tagsLabel: 'Tagi', tagPlaceholder: 'Dodaj tag', removeTagAria: 'Usuń tag',
     subtasksLabel: 'Podzadania', subtaskPlaceholder: 'Następny krok',
@@ -235,6 +259,14 @@ const T = {
     nowFree: (time) => `~${time} free`,
     nowOverloaded: 'You planned more than the time left today',
     nowOverdueCount: (n) => `Overdue: ${n}`,
+    nowOverCapacity: (left, norm) => `${left} planned, and you usually close ${norm}`,
+    carryTitle: 'Unfinished days',
+    carryBannerText: (n) => `${n} left from previous days`,
+    carryOpen: 'Sort out', carryLater: 'Later',
+    carryHint: 'Move what is still relevant, mark the rest as "no date". So the day shows the truth, not a month of debt.',
+    carryToday: 'Today', carryTomorrow: 'Tomorrow', carryNoDate: 'No date',
+    carryAllToday: 'Move everything to today',
+    carryEmpty: 'All sorted. The day list is honest now 👌',
     priorityLabel: 'Priority',
     tagsLabel: 'Tags', tagPlaceholder: 'Add a tag', removeTagAria: 'Remove tag',
     subtasksLabel: 'Subtasks', subtaskPlaceholder: 'Next step',
@@ -371,6 +403,10 @@ function applyTranslations() {
   document.getElementById('forgotPasswordLink').textContent = t('forgotPassword');
   document.getElementById('nowTitle').textContent = t('nowTitle');
   document.getElementById('monthHint').textContent = t('monthHintText');
+  document.getElementById('carryTitle').textContent = t('carryTitle');
+  document.getElementById('carryHint').textContent = t('carryHint');
+  document.getElementById('carryLaterBtn').textContent = t('carryLater');
+  document.getElementById('carryAllTodayBtn').textContent = t('carryAllToday');
   document.getElementById('quickAddFabLabel').textContent = t('quickAddFabLabel');
   document.getElementById('quickAddTitle').textContent = t('quickAddTitle');
   document.getElementById('quickAddInput').placeholder = t('quickAddPlaceholder');
@@ -1023,6 +1059,127 @@ function renderNoDateSection() {
 }
 
 
+// ---- Розбір минулих днів ----
+// Невиконане з минулого нікуди не дівається саме собою: через місяць список
+// перетворюється на кладовище, і людина перестає його відкривати. Тому раз на
+// день пропонуємо явно вирішити долю кожного боргу — перенести або відпустити
+// (позначити «без дати»). Список і порядок рахує carryOver у tasks/stats.js.
+const CARRY_DISMISS_KEY = 'tasksCarryDismissed';
+
+// «Пізніше» ховає банер до кінця дня, а не назавжди: завтра питання
+// актуальне знову, але сьогодні людина вже відповіла.
+function carryDismissedToday() {
+  return localStorage.getItem(CARRY_DISMISS_KEY) === todayISO();
+}
+function dismissCarryToday() {
+  localStorage.setItem(CARRY_DISMISS_KEY, todayISO());
+  renderCarryBanner();
+}
+
+let carryBannerVisible = false;
+
+function renderCarryBanner() {
+  const banner = document.getElementById('carryBanner');
+  if (!banner) return;
+  const list = carryOver(tasks, { today: todayISO() });
+  // Банер тільки на сьогоднішньому дні: гортаючи тиждень уперед, людина
+  // планує, а не розбирає борги.
+  const show = list.length > 0 && selectedDate === todayISO() && !carryDismissedToday();
+  carryBannerVisible = show;
+  banner.style.display = show ? 'flex' : 'none';
+  if (!show) return;
+  document.getElementById('carryBannerText').textContent = t('carryBannerText', list.length);
+  banner.setAttribute('aria-label', t('carryOpen'));
+}
+
+// Скільки днів тому мало бути зроблено — словами й потрібною мовою.
+function relativeDayLabel(iso) {
+  const today = parseISODate(todayISO());
+  const then = parseISODate(iso);
+  if (!then) return iso;
+  const days = Math.round((then - today) / 86400000);
+  const locale = LOCALE_MAP[currentLang] || 'uk-UA';
+  try {
+    return new Intl.RelativeTimeFormat(locale, { numeric: 'auto' }).format(days, 'day');
+  } catch (err) {
+    return iso;
+  }
+}
+
+function renderCarryList() {
+  const listEl = document.getElementById('carryList');
+  const actionsEl = document.getElementById('carryActions');
+  const list = carryOver(tasks, { today: todayISO() });
+
+  if (!list.length) {
+    listEl.innerHTML = `<div class="carry-empty">${escapeHtml(t('carryEmpty'))}</div>`;
+    actionsEl.style.display = 'none';
+    return;
+  }
+  actionsEl.style.display = 'flex';
+  listEl.innerHTML = list.map((task) => `
+    <div class="carry-item">
+      <div class="carry-item-name" data-carry-open="${task.id}">${escapeHtml(task.title)}</div>
+      <div class="carry-item-when">${escapeHtml(relativeDayLabel(task.dueDate))}</div>
+      <div class="carry-actions">
+        <button type="button" class="carry-action" data-carry-move="${task.id}" data-to="today">${escapeHtml(t('carryToday'))}</button>
+        <button type="button" class="carry-action" data-carry-move="${task.id}" data-to="tomorrow">${escapeHtml(t('carryTomorrow'))}</button>
+        <button type="button" class="carry-action" data-carry-move="${task.id}" data-to="none">${escapeHtml(t('carryNoDate'))}</button>
+      </div>
+    </div>`).join('');
+
+  listEl.querySelectorAll('[data-carry-move]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const to = btn.dataset.to;
+      moveTaskDate(btn.dataset.carryMove,
+        to === 'today' ? todayISO() : to === 'tomorrow' ? isoDateShift(todayISO(), 1) : null);
+    });
+  });
+  listEl.querySelectorAll('[data-carry-open]').forEach((el) => {
+    el.addEventListener('click', () => {
+      closeCarryOver();
+      openTaskForm(tasks.find((tsk) => tsk.id === el.dataset.carryOpen));
+    });
+  });
+}
+
+// Перенос — це зміна лише дати. Час свідомо лишаємо: «о 9:00» переїжджає
+// разом із завданням, інакше довелось би виставляти його заново.
+function moveTaskDate(id, iso) {
+  if (!auth.currentUser) return Promise.resolve();
+  return db.collection('users').doc(auth.currentUser.uid).collection('tasks').doc(id).update({
+    dueDate: iso,
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+  }).catch((err) => console.error('moveTaskDate:', err));
+}
+
+function openCarryOver() {
+  renderCarryList();
+  document.getElementById('carryOverlay').classList.add('show');
+}
+function closeCarryOver() {
+  document.getElementById('carryOverlay').classList.remove('show');
+}
+
+document.getElementById('carryBanner').addEventListener('click', (e) => {
+  // Хрестик усередині банера — це «пізніше», а не «відкрити».
+  if (e.target.closest('#carryBannerClose')) { dismissCarryToday(); return; }
+  openCarryOver();
+});
+document.getElementById('closeCarry').addEventListener('click', closeCarryOver);
+document.getElementById('carryLaterBtn').addEventListener('click', () => { dismissCarryToday(); closeCarryOver(); });
+document.getElementById('carryOverlay').addEventListener('click', (e) => {
+  if (e.target.id === 'carryOverlay') closeCarryOver();
+});
+document.getElementById('carryAllTodayBtn').addEventListener('click', async () => {
+  const btn = document.getElementById('carryAllTodayBtn');
+  btn.disabled = true;
+  const list = carryOver(tasks, { today: todayISO() });
+  await Promise.all(list.map((task) => moveTaskDate(task.id, todayISO())));
+  btn.disabled = false;
+  renderCarryList();
+});
+
 // ---- Картка «Зараз» ----
 // Календар відповідає на «які в мене завдання», ця картка — на «що робити
 // прямо зараз»: одна наступна дія плюс чесний підсумок дня. Порядок і
@@ -1050,7 +1207,9 @@ function renderNowCard() {
     new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit' }).format(now);
 
   const queue = nowQueue(tasks, { now });
-  const summary = daySummary(tasks, { now });
+  // Норма з власної історії робить попередження чесним: до 22:00 формально
+  // лишається 8 годин, але ніхто не працює 8 годин поспіль.
+  const summary = daySummary(tasks, { now, norm: personalNorm(tasks, { today: todayISO() }) });
 
   if (!queue.length) {
     nowIndex = 0;
@@ -1102,8 +1261,13 @@ function renderNowCard() {
   if (summary.totalCount) parts.push(`<span>${escapeHtml(t('nowProgress', summary.doneCount, summary.totalCount))}</span>`);
   if (summary.remainingMin) parts.push(`<span>${escapeHtml(t('nowRemaining', formatMinutes(summary.remainingMin)))}</span>`);
   else if (summary.totalCount > summary.doneCount) parts.push(`<span>${escapeHtml(t('nowFree', formatMinutes(summary.freeMin)))}</span>`);
-  if (summary.overdueCount) parts.push(`<span class="now-overdue">${escapeHtml(t('nowOverdueCount', summary.overdueCount))}</span>`);
+  // Коли банер розбору вже показує це число вгорі, повторювати його в
+  // підсумку — просто бурчати двічі про одне.
+  if (summary.overdueCount && !carryBannerVisible) parts.push(`<span class="now-overdue">${escapeHtml(t('nowOverdueCount', summary.overdueCount))}</span>`);
   if (summary.overloaded) parts.push(`<span class="now-warn">${escapeHtml(t('nowOverloaded'))}</span>`);
+  // Дві різні правди про перевантаження: за часом і за кількістю. Показуємо
+  // одну — інакше картка починає бурчати двома рядками про те саме.
+  else if (summary.overCapacity) parts.push(`<span class="now-warn">${escapeHtml(t('nowOverCapacity', summary.leftCount, summary.norm))}</span>`);
   footEl.innerHTML = parts.join('');
 }
 
@@ -1184,6 +1348,9 @@ let selectedDate = todayISO();
 function renderCurrentScreen() {
   if (currentScreen === 'month') renderCalendar();
   else renderWeekScreen();
+  // Розбір відкритий поверх екрана і живе з тих самих даних: після переносу
+  // (свого чи з іншого пристрою) список має оновитись, а не показувати старе.
+  if (document.getElementById('carryOverlay').classList.contains('show')) renderCarryList();
 }
 
 function showMonthScreen() {
@@ -1216,6 +1383,7 @@ function selectDate(iso) {
 
 function renderWeekScreen() {
   renderWeekStrip();
+  renderCarryBanner();
   renderNowCard();
   renderTagFilterRow();
   renderSelectedDay();
