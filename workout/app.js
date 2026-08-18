@@ -325,9 +325,9 @@ function setLang(lang) {
 function applyTranslations() {
   document.getElementById('htmlRoot').setAttribute('lang', currentLang);
   document.title = `${t('pageTitle')} · Life`;
-  document.getElementById('tabSessionsBtn').textContent = t('tabSessions');
-  document.getElementById('tabRecordsBtn').textContent = t('tabRecords');
-  document.getElementById('newSessionLabel').textContent = t('newSessionLabel');
+  document.getElementById('bnSessionsLabel').textContent = t('tabSessions');
+  document.getElementById('bnRecordsLabel').textContent = t('tabRecords');
+  document.getElementById('newSessionBtn').setAttribute('aria-label', t('newSessionLabel'));
   document.getElementById('sessionNameInput').placeholder = t('sessionNamePlaceholder');
   document.getElementById('sessionDateLabel').textContent = t('sessionDateLabel');
   document.getElementById('exercisesLabel').textContent = t('exercisesLabel');
@@ -943,15 +943,18 @@ document.getElementById('historyOverlay').addEventListener('click', (e) => {
 // ---- Вкладки ----
 function switchTab(tab) {
   activeTab = tab;
-  document.getElementById('tabSessionsBtn').classList.toggle('active', tab === 'sessions');
-  document.getElementById('tabRecordsBtn').classList.toggle('active', tab === 'records');
+  document.querySelectorAll('#bottomNav [data-tab]').forEach((btn) => {
+    btn.classList.toggle('active', btn.dataset.tab === tab);
+  });
   document.getElementById('sessionsTab').style.display = tab === 'sessions' ? 'block' : 'none';
   document.getElementById('recordsTab').style.display = tab === 'records' ? 'block' : 'none';
-  document.getElementById('fabRow').style.display = tab === 'sessions' ? 'flex' : 'none';
+  // «Рекорди» лише показують історію — додавати там нема чого.
+  document.getElementById('newSessionBtn').style.visibility = tab === 'sessions' ? '' : 'hidden';
   renderCurrentScreen();
 }
-document.getElementById('tabSessionsBtn').addEventListener('click', () => switchTab('sessions'));
-document.getElementById('tabRecordsBtn').addEventListener('click', () => switchTab('records'));
+document.querySelectorAll('#bottomNav [data-tab]').forEach((btn) => {
+  btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+});
 
 // ---- Форма тренування ----
 function findLastPerformance(ex) {

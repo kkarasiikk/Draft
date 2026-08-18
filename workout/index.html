@@ -182,11 +182,27 @@
   .empty-state .title{font-family:'Inter',sans-serif;font-size:17px;font-weight:600;color:var(--ink-soft);margin-bottom:6px;}
   .empty-state svg{margin-bottom:14px;opacity:.5;}
 
-  .fab-row{position:fixed;bottom:calc(22px + env(safe-area-inset-bottom));left:0;right:0;z-index:20;display:flex;justify-content:center;padding:0 20px;}
-  .fab{display:flex;align-items:center;gap:6px;border-radius:24px;padding:12px 22px;font-size:14px;font-weight:600;
-    cursor:pointer;font-family:'Inter',sans-serif;background:var(--accent);color:#fff;border:none;box-shadow:0 4px 14px rgba(92,124,250,.28);
-    transition:transform .15s;}
-  .fab:active{transform:scale(.95);}
+  /* ---- Нижня панель навігації (та сама, що в «Бюджеті») ---- */
+  /* Групи ліворуч і праворуч однакової ширини, тож кругла кнопка «+» завжди
+     рівно посередині, скільки б вкладок не було в модулі. */
+  .bottom-nav{position:fixed;left:14px;right:14px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:25;
+    max-width:400px;margin:0 auto;display:flex;align-items:flex-end;justify-content:space-between;
+    padding:7px 4px;background:var(--surface);
+    backdrop-filter:blur(var(--glass-blur)) saturate(150%);-webkit-backdrop-filter:blur(var(--glass-blur)) saturate(150%);
+    border:1px solid var(--border);border-radius:26px;box-shadow:var(--glass-shadow), 0 12px 34px rgba(20,20,30,.16);}
+  .bn-side{flex:1;min-width:0;display:flex;justify-content:space-around;}
+  .bn-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+    background:none;border:none;color:var(--ink-muted);cursor:pointer;padding:6px 1px;border-radius:14px;
+    text-decoration:none;-webkit-tap-highlight-color:transparent;min-width:0;}
+  .bn-item svg{flex-shrink:0;transition:transform .12s ease;}
+  .bn-item span{font-size:10px;font-weight:600;font-family:'Inter',sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
+  .bn-item.active{color:var(--accent);}
+  .bn-item.active svg{transform:translateY(-1px);}
+  .bn-fab-wrap{flex:0 0 auto;width:54px;display:flex;justify-content:center;position:relative;}
+  .bn-fab{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);width:50px;height:50px;border-radius:50%;
+    background:var(--accent);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;
+    box-shadow:0 6px 18px rgba(92,124,250,.4), 0 2px 8px rgba(20,20,24,.12);transition:transform .15s ease;}
+  .bn-fab:active{transform:translateX(-50%) scale(.92);}
 
   /* ---- PR / Records tab ---- */
   .muscle-group{margin-bottom:18px;}
@@ -343,7 +359,7 @@
     .wrap{max-width:none;margin:0;padding:0 40px;}
     .app-topbar{padding:28px 0 0;}
     .content{max-width:960px;margin:0 auto;padding:14px 4px 40px;}
-    .fab-row{left:auto;right:32px;bottom:32px;justify-content:flex-end;padding:0;}
+    .bottom-nav{left:auto;right:32px;bottom:32px;margin:0;width:350px;}
     .modal-overlay, .picker-overlay{align-items:center;}
     .modal, .picker-modal{border-radius:18px;max-height:88vh;}
   }
@@ -412,21 +428,29 @@
   </div>
 
   <div class="content">
-    <div class="tab-row">
-      <button type="button" class="tab-btn active" id="tabSessionsBtn" data-tab="sessions"></button>
-      <button type="button" class="tab-btn" id="tabRecordsBtn" data-tab="records"></button>
-    </div>
-
     <div id="sessionsTab"></div>
     <div id="recordsTab" style="display:none;"></div>
   </div>
 
-  <div class="fab-row" id="fabRow">
-    <button class="fab" id="newSessionBtn">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
-      <span id="newSessionLabel">Нове тренування</span>
-    </button>
-  </div>
+  <nav class="bottom-nav" id="bottomNav">
+    <div class="bn-side">
+      <button type="button" class="bn-item active" data-tab="sessions" id="bnSessions">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6v12M18 6v12"/><path d="M3 9v6M21 9v6"/><path d="M6 12h12"/></svg>
+        <span id="bnSessionsLabel">Тренування</span>
+      </button>
+    </div>
+    <div class="bn-fab-wrap">
+      <button type="button" class="bn-fab" id="newSessionBtn" aria-label="Нове тренування">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      </button>
+    </div>
+    <div class="bn-side">
+      <button type="button" class="bn-item" data-tab="records" id="bnRecords">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0Z"/><path d="M17 5h3v2a3 3 0 0 1-3 3"/><path d="M7 5H4v2a3 3 0 0 0 3 3"/></svg>
+        <span id="bnRecordsLabel">Рекорди</span>
+      </button>
+    </div>
+  </nav>
 </div>
 </div>
 

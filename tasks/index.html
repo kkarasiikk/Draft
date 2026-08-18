@@ -207,11 +207,27 @@
   .day-view-spacer{width:34px;flex-shrink:0;}
   .day-view-empty{text-align:center;padding:48px 20px;color:var(--ink-muted);}
   .day-view-empty .title{font-family:'Inter',sans-serif;font-size:17px;font-weight:600;color:var(--ink-soft);margin-bottom:6px;}
-  .fab-row{position:fixed;bottom:calc(22px + env(safe-area-inset-bottom));left:0;right:0;z-index:20;display:flex;justify-content:center;padding:0 20px;}
-  .fab{display:flex;align-items:center;gap:6px;border-radius:24px;padding:12px 22px;font-size:14px;font-weight:600;
-    cursor:pointer;font-family:'Inter',sans-serif;background:var(--accent);color:#fff;border:none;box-shadow:0 4px 14px rgba(92,124,250,.28);
-    transition:transform .15s;}
-  .fab:active{transform:scale(.95);}
+  /* ---- Нижня панель навігації (та сама, що в «Бюджеті») ---- */
+  /* Групи ліворуч і праворуч однакової ширини, тож кругла кнопка «+» завжди
+     рівно посередині, скільки б вкладок не було в модулі. */
+  .bottom-nav{position:fixed;left:14px;right:14px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:25;
+    max-width:400px;margin:0 auto;display:flex;align-items:flex-end;justify-content:space-between;
+    padding:7px 4px;background:var(--surface);
+    backdrop-filter:blur(var(--glass-blur)) saturate(150%);-webkit-backdrop-filter:blur(var(--glass-blur)) saturate(150%);
+    border:1px solid var(--border);border-radius:26px;box-shadow:var(--glass-shadow), 0 12px 34px rgba(20,20,30,.16);}
+  .bn-side{flex:1;min-width:0;display:flex;justify-content:space-around;}
+  .bn-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+    background:none;border:none;color:var(--ink-muted);cursor:pointer;padding:6px 1px;border-radius:14px;
+    text-decoration:none;-webkit-tap-highlight-color:transparent;min-width:0;}
+  .bn-item svg{flex-shrink:0;transition:transform .12s ease;}
+  .bn-item span{font-size:10px;font-weight:600;font-family:'Inter',sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
+  .bn-item.active{color:var(--accent);}
+  .bn-item.active svg{transform:translateY(-1px);}
+  .bn-fab-wrap{flex:0 0 auto;width:54px;display:flex;justify-content:center;position:relative;}
+  .bn-fab{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);width:50px;height:50px;border-radius:50%;
+    background:var(--accent);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;
+    box-shadow:0 6px 18px rgba(92,124,250,.4), 0 2px 8px rgba(20,20,24,.12);transition:transform .15s ease;}
+  .bn-fab:active{transform:translateX(-50%) scale(.92);}
   .tag-filter-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;}
   .tag-filter-chip{padding:5px 12px;border-radius:20px;font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;
     border:1px solid var(--border);background:transparent;color:var(--ink-muted);white-space:nowrap;}
@@ -513,7 +529,7 @@
     .cal-chip{font-size:11px;padding:3px 7px;}
     .cal-year-grid{grid-template-columns:repeat(4,minmax(0,1fr));}
     .cal-month-tile{min-height:96px;}
-    .fab-row{left:auto;right:32px;bottom:32px;justify-content:flex-end;padding:0;}
+    .bottom-nav{left:auto;right:32px;bottom:32px;margin:0;width:350px;}
     .modal-overlay{align-items:center;}
     .modal{border-radius:18px;max-height:88vh;}
   }
@@ -564,17 +580,6 @@
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5B7A9D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3.4.5-4.5 2-1.1-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z"/><path d="M3.22 12H9.5l.5-1.5 2 4 1.5-4.5 1.5 2h5.27"/></svg>
       <span id="topbarBrandLabel">Life</span>
     </a>
-    <div class="topbar-actions">
-    <button id="openStatsBtn" class="topbar-icon-btn" aria-label="Статистика">
-      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M22 20H2"/></svg>
-    </button>
-    <button id="openMonthBtn" class="topbar-icon-btn" aria-label="Календар">
-      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>
-    </button>
-    <button id="closeMonthBtn" class="topbar-icon-btn" style="display:none;" aria-label="Назад до тижня">
-      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
-    </button>
-    </div>
   </div>
 
   <div class="app-menu-overlay" id="appMenuOverlay">
@@ -633,12 +638,6 @@
     <div id="dayList"></div>
     <div id="noDateSection"></div>
   </div>
-    <div class="fab-row" id="weekFabRow">
-      <button class="fab" id="openQuickAdd">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
-        <span id="quickAddFabLabel">Додати</span>
-      </button>
-    </div>
   </div>
 
   <!-- ---- Окремий екран: місяць/рік, щоб планувати на будь-який день ---- -->
@@ -658,6 +657,35 @@
     <div class="month-hint" id="monthHint"></div>
   </div>
   </div>
+
+  
+<nav class="bottom-nav" id="bottomNav">
+  <div class="bn-side">
+    <button type="button" class="bn-item active" data-screen="week" id="bnWeek">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg>
+      <span id="bnWeekLabel">Тиждень</span>
+    </button>
+    <button type="button" class="bn-item" data-screen="month" id="bnMonth">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>
+      <span id="bnMonthLabel">Календар</span>
+    </button>
+  </div>
+  <div class="bn-fab-wrap">
+    <button type="button" class="bn-fab" id="openQuickAdd" aria-label="Додати">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+    </button>
+  </div>
+  <div class="bn-side">
+    <button type="button" class="bn-item" data-screen="stats" id="bnStats">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M22 20H2"/></svg>
+      <span id="bnStatsLabel">Статистика</span>
+    </button>
+    <a class="bn-item" href="../index.html" id="bnHome">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 10v10h14V10"/></svg>
+      <span id="bnHomeLabel">Головна</span>
+    </a>
+  </div>
+</nav>
 
   <!-- ---- Окремий екран: що я зробив ---- -->
   <div id="statsScreen" style="display:none;">

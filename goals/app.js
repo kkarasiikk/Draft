@@ -43,7 +43,7 @@ const T = {
     saveBtn: 'Зберегти', deleteBtn: 'Видалити', cancelBtn: 'Скасувати', deleteConfirmBtn: 'Видалити',
     confirmDeleteTitle: 'Видалити ціль?',
     confirmDeleteSub: 'Цю дію не можна скасувати. Усі віхи, нотатки й серія теж зникнуть.',
-    fabNewGoalLabel: 'Нова ціль',
+    fabNewGoalLabel: 'Нова ціль', bnGoals: 'Цілі', bnHome: 'Головна',
     statusAll: 'Усі', statusActive: 'Активні', statusDone: 'Завершені', statusArchived: 'Архів',
     noMilestonesYet: 'Ще немає віх — додай перший крок у редагуванні цілі',
     allMilestonesDoneMsg: '🎉 Усі віхи пройдено!',
@@ -91,7 +91,7 @@ const T = {
     saveBtn: 'Сохранить', deleteBtn: 'Удалить', cancelBtn: 'Отмена', deleteConfirmBtn: 'Удалить',
     confirmDeleteTitle: 'Удалить цель?',
     confirmDeleteSub: 'Это действие нельзя отменить. Все вехи, заметки и серия тоже исчезнут.',
-    fabNewGoalLabel: 'Новая цель',
+    fabNewGoalLabel: 'Новая цель', bnGoals: 'Цели', bnHome: 'Главная',
     statusAll: 'Все', statusActive: 'Активные', statusDone: 'Завершённые', statusArchived: 'Архив',
     noMilestonesYet: 'Ещё нет вех — добавь первый шаг в редактировании цели',
     allMilestonesDoneMsg: '🎉 Все вехи пройдены!',
@@ -139,7 +139,7 @@ const T = {
     saveBtn: 'Zapisz', deleteBtn: 'Usuń', cancelBtn: 'Anuluj', deleteConfirmBtn: 'Usuń',
     confirmDeleteTitle: 'Usunąć cel?',
     confirmDeleteSub: 'Tej czynności nie można cofnąć. Wszystkie kamienie milowe, notatki i seria też znikną.',
-    fabNewGoalLabel: 'Nowy cel',
+    fabNewGoalLabel: 'Nowy cel', bnGoals: 'Cele', bnHome: 'Główna',
     statusAll: 'Wszystkie', statusActive: 'Aktywne', statusDone: 'Ukończone', statusArchived: 'Archiwum',
     noMilestonesYet: 'Jeszcze brak kamieni milowych — dodaj pierwszy krok w edycji celu',
     allMilestonesDoneMsg: '🎉 Wszystkie kamienie milowe osiągnięte!',
@@ -187,7 +187,7 @@ const T = {
     saveBtn: 'Save', deleteBtn: 'Delete', cancelBtn: 'Cancel', deleteConfirmBtn: 'Delete',
     confirmDeleteTitle: 'Delete goal?',
     confirmDeleteSub: 'This action cannot be undone. Milestones, notes and streak will be lost too.',
-    fabNewGoalLabel: 'New goal',
+    fabNewGoalLabel: 'New goal', bnGoals: 'Goals', bnHome: 'Home',
     statusAll: 'All', statusActive: 'Active', statusDone: 'Done', statusArchived: 'Archived',
     noMilestonesYet: 'No milestones yet — add the first step by editing the goal',
     allMilestonesDoneMsg: '🎉 All milestones reached!',
@@ -305,7 +305,9 @@ function setLang(lang) {
 function applyTranslations() {
   document.getElementById('htmlRoot').setAttribute('lang', currentLang);
   document.title = `${t('pageTitle')} · Life`;
-  document.getElementById('fabNewGoalLabel').textContent = t('fabNewGoalLabel');
+  document.getElementById('openNewGoalBtn').setAttribute('aria-label', t('fabNewGoalLabel'));
+  document.getElementById('bnGoalsLabel').textContent = t('bnGoals');
+  document.getElementById('bnHomeLabel').textContent = t('bnHome');
   document.getElementById('goalModalTitle').textContent = editingGoalId ? t('editGoalTitle') : t('newGoalTitle');
   document.getElementById('categoryLabel').textContent = t('categoryLabel');
   document.getElementById('whyLabel').textContent = t('whyLabel');
@@ -655,6 +657,8 @@ function showDashboard() {
   renderCurrentScreen();
 }
 document.getElementById('detailBackBtn').addEventListener('click', showDashboard);
+// Вкладка «Цілі» — і повернення з екрана деталей, і просто підсвічений стан.
+document.getElementById('bnGoals').addEventListener('click', showDashboard);
 
 // ---- Рендер: деталі цілі ----
 function renderGoalDetail(goal) {

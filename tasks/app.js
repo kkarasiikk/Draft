@@ -77,6 +77,7 @@ const T = {
     addSubtaskBtn: '+ Додати підзадачу', removeSubtaskAria: 'Прибрати підзадачу',
     estimateLabel: 'Скільки часу займе', estimatePlaceholder: 'хв',
     estimateShort: (min) => (min >= 60 ? `~${Math.floor(min / 60)} год${min % 60 ? ' ' + (min % 60) + ' хв' : ''}` : `~${min} хв`),
+    bnWeek: 'Тиждень', bnMonth: 'Календар', bnStats: 'Статистика', bnHome: 'Головна',
     quickAddFabLabel: 'Додати', quickAddTitle: 'Швидке додавання',
     quickAddPlaceholder: 'Купити молоко завтра о 18',
     quickAddHint: 'Дату, час, #тег, ~тривалість, пріоритет (!1 !2 !3) і повторення («щодня», «щосуботи», «кожні 3 дні») можна писати прямо в рядку.',
@@ -153,6 +154,7 @@ const T = {
     addSubtaskBtn: '+ Добавить подзадачу', removeSubtaskAria: 'Убрать подзадачу',
     estimateLabel: 'Сколько времени займёт', estimatePlaceholder: 'мин',
     estimateShort: (min) => (min >= 60 ? `~${Math.floor(min / 60)} ч${min % 60 ? ' ' + (min % 60) + ' мин' : ''}` : `~${min} мин`),
+    bnWeek: 'Неделя', bnMonth: 'Календарь', bnStats: 'Статистика', bnHome: 'Главная',
     quickAddFabLabel: 'Добавить', quickAddTitle: 'Быстрое добавление',
     quickAddPlaceholder: 'Купить молоко завтра в 18',
     quickAddHint: 'Дату, время, #тег, ~длительность, приоритет (!1 !2 !3) и повтор («ежедневно», «по субботам», «каждые 3 дня») можно писать прямо в строке.',
@@ -229,6 +231,7 @@ const T = {
     addSubtaskBtn: '+ Dodaj podzadanie', removeSubtaskAria: 'Usuń podzadanie',
     estimateLabel: 'Ile czasu zajmie', estimatePlaceholder: 'min',
     estimateShort: (min) => (min >= 60 ? `~${Math.floor(min / 60)} godz${min % 60 ? ' ' + (min % 60) + ' min' : ''}` : `~${min} min`),
+    bnWeek: 'Tydzień', bnMonth: 'Kalendarz', bnStats: 'Statystyki', bnHome: 'Główna',
     quickAddFabLabel: 'Dodaj', quickAddTitle: 'Szybkie dodawanie',
     quickAddPlaceholder: 'Kupić mleko jutro o 18',
     quickAddHint: 'Datę, godzinę, #tag, ~czas trwania, priorytet (!1 !2 !3) i powtarzanie („codziennie", „co sobotę") możesz wpisać w tej samej linii.',
@@ -305,6 +308,7 @@ const T = {
     addSubtaskBtn: '+ Add subtask', removeSubtaskAria: 'Remove subtask',
     estimateLabel: 'How long will it take', estimatePlaceholder: 'min',
     estimateShort: (min) => (min >= 60 ? `~${Math.floor(min / 60)}h${min % 60 ? ' ' + (min % 60) + 'm' : ''}` : `~${min}m`),
+    bnWeek: 'Week', bnMonth: 'Calendar', bnStats: 'Stats', bnHome: 'Home',
     quickAddFabLabel: 'Add', quickAddTitle: 'Quick add',
     quickAddPlaceholder: 'Buy milk tomorrow at 6pm',
     quickAddHint: 'Date, time, #tag, ~duration, priority (!1 !2 !3) and repetition ("daily", "every friday", "every 3 days") can go right in the line.',
@@ -452,7 +456,11 @@ function applyTranslations() {
   document.getElementById('carryHint').textContent = t('carryHint');
   document.getElementById('carryLaterBtn').textContent = t('carryLater');
   document.getElementById('carryAllTodayBtn').textContent = t('carryAllToday');
-  document.getElementById('quickAddFabLabel').textContent = t('quickAddFabLabel');
+  document.getElementById('bnWeekLabel').textContent = t('bnWeek');
+  document.getElementById('bnMonthLabel').textContent = t('bnMonth');
+  document.getElementById('bnStatsLabel').textContent = t('bnStats');
+  document.getElementById('bnHomeLabel').textContent = t('bnHome');
+  document.getElementById('openQuickAdd').setAttribute('aria-label', t('quickAddFabLabel'));
   document.getElementById('quickAddTitle').textContent = t('quickAddTitle');
   document.getElementById('quickAddInput').placeholder = t('quickAddPlaceholder');
   document.getElementById('quickAddHint').textContent = t('quickAddHint');
@@ -1470,16 +1478,15 @@ function renderCurrentScreen() {
   if (document.getElementById('carryOverlay').classList.contains('show')) renderCarryList();
 }
 
-// Три екрани й один набір кнопок у шапці: тримаємо перемикання в одному
-// місці, щоб не лишалось станів, де видно і «календар», і «назад».
+// Три екрани й одна нижня панель: тримаємо перемикання в одному місці,
+// щоб підсвічена вкладка не розʼїжджалась із тим, що насправді видно.
 function showScreenChrome(screen) {
   document.getElementById('weekScreen').style.display = screen === 'week' ? '' : 'none';
   document.getElementById('monthScreen').style.display = screen === 'month' ? 'block' : 'none';
   document.getElementById('statsScreen').style.display = screen === 'stats' ? 'block' : 'none';
-  const isWeek = screen === 'week';
-  document.getElementById('openMonthBtn').style.display = isWeek ? 'flex' : 'none';
-  document.getElementById('openStatsBtn').style.display = isWeek ? 'flex' : 'none';
-  document.getElementById('closeMonthBtn').style.display = isWeek ? 'none' : 'flex';
+  document.querySelectorAll('#bottomNav [data-screen]').forEach((btn) => {
+    btn.classList.toggle('active', btn.dataset.screen === screen);
+  });
 }
 
 function showStatsScreen() {
@@ -1640,9 +1647,14 @@ function renderSelectedDay() {
   }
 }
 
-document.getElementById('openStatsBtn').addEventListener('click', showStatsScreen);
-document.getElementById('openMonthBtn').addEventListener('click', showMonthScreen);
-document.getElementById('closeMonthBtn').addEventListener('click', showWeekScreen);
+document.querySelectorAll('#bottomNav [data-screen]').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    const screen = btn.dataset.screen;
+    if (screen === 'month') showMonthScreen();
+    else if (screen === 'stats') showStatsScreen();
+    else showWeekScreen();
+  });
+});
 function shiftWeek(delta) {
   selectDate(isoDateShift(selectedDate, delta * 7));
 }

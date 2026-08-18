@@ -221,11 +221,27 @@
   .empty-state{text-align:center;padding:48px 20px;color:var(--ink-muted);}
   .empty-state .title{font-family:'Inter',sans-serif;font-size:17px;font-weight:600;color:var(--ink-soft);margin-bottom:6px;}
 
-  .fab-row{position:fixed;bottom:calc(22px + env(safe-area-inset-bottom));left:0;right:0;z-index:20;display:flex;justify-content:center;padding:0 20px;}
-  .fab{display:flex;align-items:center;gap:6px;border-radius:24px;padding:12px 22px;font-size:14px;font-weight:600;
-    cursor:pointer;font-family:'Inter',sans-serif;background:var(--accent);color:#fff;border:none;box-shadow:0 4px 14px rgba(92,124,250,.28);
-    transition:transform .15s;}
-  .fab:active{transform:scale(.95);}
+  /* ---- Нижня панель навігації (та сама, що в «Бюджеті») ---- */
+  /* Групи ліворуч і праворуч однакової ширини, тож кругла кнопка «+» завжди
+     рівно посередині, скільки б вкладок не було в модулі. */
+  .bottom-nav{position:fixed;left:14px;right:14px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:25;
+    max-width:400px;margin:0 auto;display:flex;align-items:flex-end;justify-content:space-between;
+    padding:7px 4px;background:var(--surface);
+    backdrop-filter:blur(var(--glass-blur)) saturate(150%);-webkit-backdrop-filter:blur(var(--glass-blur)) saturate(150%);
+    border:1px solid var(--border);border-radius:26px;box-shadow:var(--glass-shadow), 0 12px 34px rgba(20,20,30,.16);}
+  .bn-side{flex:1;min-width:0;display:flex;justify-content:space-around;}
+  .bn-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+    background:none;border:none;color:var(--ink-muted);cursor:pointer;padding:6px 1px;border-radius:14px;
+    text-decoration:none;-webkit-tap-highlight-color:transparent;min-width:0;}
+  .bn-item svg{flex-shrink:0;transition:transform .12s ease;}
+  .bn-item span{font-size:10px;font-weight:600;font-family:'Inter',sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
+  .bn-item.active{color:var(--accent);}
+  .bn-item.active svg{transform:translateY(-1px);}
+  .bn-fab-wrap{flex:0 0 auto;width:54px;display:flex;justify-content:center;position:relative;}
+  .bn-fab{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);width:50px;height:50px;border-radius:50%;
+    background:var(--accent);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;
+    box-shadow:0 6px 18px rgba(92,124,250,.4), 0 2px 8px rgba(20,20,24,.12);transition:transform .15s ease;}
+  .bn-fab:active{transform:translateX(-50%) scale(.92);}
 
   /* ---- Деталі цілі ---- */
   #goalDetailScreen{display:none;padding:16px 20px 40px;}
@@ -381,7 +397,7 @@
     .app-topbar{padding:28px 0 0;}
     .content{max-width:640px;margin:0 auto;padding:20px 4px 40px;}
     #goalDetailScreen{max-width:640px;margin:0 auto;padding:20px 4px 40px;}
-    .fab-row{left:auto;right:32px;bottom:32px;justify-content:flex-end;padding:0;}
+    .bottom-nav{left:auto;right:32px;bottom:32px;margin:0;width:350px;}
     .modal-overlay{align-items:center;}
     .modal{border-radius:18px;max-height:88vh;}
   }
@@ -456,13 +472,28 @@
     <div class="status-filter-row" id="statusFilterRow"></div>
     <div id="goalsList"></div>
   </div>
-  <div class="fab-row" id="dashboardFabRow">
-    <button class="fab" id="openNewGoalBtn">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
-      <span id="fabNewGoalLabel">Нова ціль</span>
-    </button>
   </div>
-  </div>
+
+
+  <nav class="bottom-nav" id="bottomNav">
+    <div class="bn-side">
+      <button type="button" class="bn-item active" id="bnGoals">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/></svg>
+        <span id="bnGoalsLabel">Цілі</span>
+      </button>
+    </div>
+    <div class="bn-fab-wrap">
+      <button type="button" class="bn-fab" id="openNewGoalBtn" aria-label="Нова ціль">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      </button>
+    </div>
+    <div class="bn-side">
+      <a class="bn-item" href="../index.html" id="bnHome">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 10v10h14V10"/></svg>
+        <span id="bnHomeLabel">Головна</span>
+      </a>
+    </div>
+  </nav>
 
   <div id="goalDetailScreen">
     <div class="detail-header">
