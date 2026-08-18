@@ -208,6 +208,17 @@
     border:1px solid var(--border);background:transparent;color:var(--ink-muted);white-space:nowrap;}
   .tag-filter-chip.selected{background:var(--accent-light);color:var(--accent);border-color:transparent;font-weight:600;}
 
+  /* ---- Повторення ---- */
+  .recur-weekdays{display:flex;gap:4px;margin-bottom:10px;}
+  .recur-weekday{flex:1;min-width:0;border:1px solid var(--border);background:transparent;color:var(--ink-muted);
+    font-family:'Inter',sans-serif;font-size:12px;font-weight:600;padding:8px 2px;border-radius:8px;cursor:pointer;}
+  .recur-weekday.selected{border-color:transparent;background:var(--accent-light);color:var(--accent);}
+  .recur-interval{display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:13.5px;color:var(--ink-soft);}
+  .recur-interval input{width:72px;margin:0;flex-shrink:0;}
+  .recur-anchor{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-soft);
+    margin-bottom:16px;cursor:pointer;user-select:none;}
+  .recur-anchor input{width:16px;height:16px;margin:0;accent-color:var(--accent);flex-shrink:0;}
+
   /* ---- Картка «Зараз» ---- */
   .now-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;
     padding:14px 16px;margin-bottom:16px;}
@@ -561,6 +572,10 @@
         </div>
       </div>
 
+      <label class="field-label" id="recurrenceLabel">Повторювати</label>
+      <div class="priority-picker" id="taskRecurrencePicker"></div>
+      <div id="recurrenceOptions"></div>
+
       <label class="field-label" id="tagsLabel">Теги</label>
       <div class="tags-editor" id="taskTagsEditor"></div>
       <input type="text" id="taskTagInput" maxlength="30" placeholder="Додати тег">
@@ -593,6 +608,7 @@
 <script src="../budget/firebase-config.js"></script>
 <script src="quick-parse.js"></script>
 <script src="now-queue.js"></script>
+<script src="recurrence.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

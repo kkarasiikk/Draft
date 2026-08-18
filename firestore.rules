@@ -9,7 +9,7 @@ rules_version = '2';
 //   users/{uid}/pages/{id}            -- {title, content, createdAt, updatedAt}
 //   users/{uid}/tasks/{id}            -- {title, notes, done, completedAt,
 //                                         priority, tags, dueDate, dueTime,
-//                                         estimateMin, subtasks,
+//                                         estimateMin, recurrence, subtasks,
 //                                         createdAt, updatedAt}
 //   users/{uid}/workouts/{id}         -- {date, name, notes, exercises: [
 //                                         {id, libId, muscle, name, sets: [
@@ -120,10 +120,15 @@ service cloud.firestore {
                  // Оцінка тривалості у хвилинах — від 1 хвилини до доби.
                  (!('estimateMin' in d) || d.estimateMin == null ||
                    (d.estimateMin is number && d.estimateMin > 0 && d.estimateMin <= 1440)) &&
+                 // Форму правила повторення ({type, interval, weekdays, day,
+                 // anchor}) гарантує клієнтський код і tasks/recurrence.js —
+                 // як і з subtasks, тут перевіряємо лише тип поля.
+                 (!('recurrence' in d) || d.recurrence == null || d.recurrence is map) &&
                  d.subtasks is list && d.subtasks.size() <= 50 &&
                  d.createdAt is timestamp && d.updatedAt is timestamp &&
                  d.keys().hasOnly(['title', 'notes', 'done', 'completedAt', 'priority', 'tags',
-                   'dueDate', 'dueTime', 'estimateMin', 'subtasks', 'createdAt', 'updatedAt']);
+                   'dueDate', 'dueTime', 'estimateMin', 'recurrence', 'subtasks',
+                   'createdAt', 'updatedAt']);
         }
         allow read, delete: if isOwner(uid);
         allow create, update: if isOwner(uid) && isValidTask(request.resource.data);
