@@ -124,9 +124,48 @@
     };
   }
 
+  function parseIso(iso) {
+    var parts = String(iso || '').split('-').map(Number);
+    if (parts.length !== 3 || parts.some(isNaN)) return null;
+    var d = new Date(parts[0], parts[1] - 1, parts[2]);
+    return isNaN(d) ? null : d;
+  }
+
+  /**
+   * Сім днів тижня (понеділок -> неділя), у який потрапляє задана дата.
+   * Тиждень скрізь у застосунку починається з понеділка.
+   */
+  function weekDaysOf(iso) {
+    var d = parseIso(iso) || new Date();
+    d = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    var weekday = d.getDay() === 0 ? 7 : d.getDay();
+    var monday = new Date(d.getFullYear(), d.getMonth(), d.getDate() - (weekday - 1));
+    var days = [];
+    for (var i = 0; i < 7; i++) {
+      days.push(isoOf(new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + i)));
+    }
+    return days;
+  }
+
+  /** Скільки завдань на дату і скільки з них виконано — для позначок у рядку тижня. */
+  function dayStats(tasks, iso) {
+    var total = 0, done = 0;
+    (tasks || []).forEach(function (t) {
+      if (!t || t.dueDate !== iso) return;
+      total++;
+      if (t.done) done++;
+    });
+    return { total: total, done: done, allDone: total > 0 && total === done };
+  }
+
+  root.weekDaysOf = weekDaysOf;
+  root.dayStats = dayStats;
   root.nowQueue = nowQueue;
   root.daySummary = daySummary;
   if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { nowQueue: nowQueue, daySummary: daySummary, DAY_END_HOUR: DAY_END_HOUR };
+    module.exports = {
+      nowQueue: nowQueue, daySummary: daySummary, DAY_END_HOUR: DAY_END_HOUR,
+      weekDaysOf: weekDaysOf, dayStats: dayStats,
+    };
   }
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -32,13 +32,14 @@ const T = {
     pageTitle: 'Завдання',
     noDateLabel: 'Без дати',
     dayViewEmptyTitle: 'На цю дату завдань немає', dayViewEmptySub: 'Додай завдання кнопкою внизу.',
-    dayViewFabLabel: 'Нове завдання',
     completedLabel: (n) => `Виконано (${n})`,
     newTaskTitle: 'Нове завдання', editTaskTitle: 'Редагувати завдання',
     titlePlaceholder: 'Назва завдання',
     notesLabel: 'Нотатка', notesPlaceholder: 'Додаткові деталі (необовʼязково)',
     dueDateLabel: 'Дата', dueTimeLabel: 'Час', dpTodayBtn: 'Сьогодні',
     priorityNone: 'Немає', priorityLow: 'Низький', priorityMedium: 'Середній', priorityHigh: 'Високий',
+    todayLabel: 'Сьогодні', tomorrowLabel: 'Завтра', yesterdayLabel: 'Вчора',
+    monthHintText: 'Тап по дню — і його завдання відкриються у тижні, готові до додавання.',
     recurrenceLabel: 'Повторювати',
     recurNever: 'Ніколи', recurDaily: 'Щодня', recurWeekly: 'Щотижня', recurMonthly: 'Щомісяця',
     recurEveryDays: 'Кожні … днів:', recurEveryMonths: 'Кожні … місяців:',
@@ -90,13 +91,14 @@ const T = {
     pageTitle: 'Задачи',
     noDateLabel: 'Без даты',
     dayViewEmptyTitle: 'На эту дату задач нет', dayViewEmptySub: 'Добавь задачу кнопкой внизу.',
-    dayViewFabLabel: 'Новая задача',
     completedLabel: (n) => `Выполнено (${n})`,
     newTaskTitle: 'Новая задача', editTaskTitle: 'Редактировать задачу',
     titlePlaceholder: 'Название задачи',
     notesLabel: 'Заметка', notesPlaceholder: 'Дополнительные детали (необязательно)',
     dueDateLabel: 'Дата', dueTimeLabel: 'Время', dpTodayBtn: 'Сегодня',
     priorityNone: 'Нет', priorityLow: 'Низкий', priorityMedium: 'Средний', priorityHigh: 'Высокий',
+    todayLabel: 'Сегодня', tomorrowLabel: 'Завтра', yesterdayLabel: 'Вчера',
+    monthHintText: 'Тап по дню — и его задачи откроются в неделе, готовые к добавлению.',
     recurrenceLabel: 'Повторять',
     recurNever: 'Никогда', recurDaily: 'Ежедневно', recurWeekly: 'Еженедельно', recurMonthly: 'Ежемесячно',
     recurEveryDays: 'Каждые … дней:', recurEveryMonths: 'Каждые … месяцев:',
@@ -148,13 +150,14 @@ const T = {
     pageTitle: 'Zadania',
     noDateLabel: 'Bez daty',
     dayViewEmptyTitle: 'Na ten dzień nie ma zadań', dayViewEmptySub: 'Dodaj zadanie przyciskiem poniżej.',
-    dayViewFabLabel: 'Nowe zadanie',
     completedLabel: (n) => `Ukończono (${n})`,
     newTaskTitle: 'Nowe zadanie', editTaskTitle: 'Edytuj zadanie',
     titlePlaceholder: 'Nazwa zadania',
     notesLabel: 'Notatka', notesPlaceholder: 'Dodatkowe szczegóły (opcjonalnie)',
     dueDateLabel: 'Data', dueTimeLabel: 'Godzina', dpTodayBtn: 'Dzisiaj',
     priorityNone: 'Brak', priorityLow: 'Niski', priorityMedium: 'Średni', priorityHigh: 'Wysoki',
+    todayLabel: 'Dziś', tomorrowLabel: 'Jutro', yesterdayLabel: 'Wczoraj',
+    monthHintText: 'Dotknij dnia — jego zadania otworzą się w widoku tygodnia, gotowe do uzupełnienia.',
     recurrenceLabel: 'Powtarzaj',
     recurNever: 'Nigdy', recurDaily: 'Codziennie', recurWeekly: 'Co tydzień', recurMonthly: 'Co miesiąc',
     recurEveryDays: 'Co … dni:', recurEveryMonths: 'Co … miesięcy:',
@@ -206,13 +209,14 @@ const T = {
     pageTitle: 'Tasks',
     noDateLabel: 'No date',
     dayViewEmptyTitle: 'No tasks for this date', dayViewEmptySub: 'Add a task with the button below.',
-    dayViewFabLabel: 'New task',
     completedLabel: (n) => `Completed (${n})`,
     newTaskTitle: 'New task', editTaskTitle: 'Edit task',
     titlePlaceholder: 'Task title',
     notesLabel: 'Notes', notesPlaceholder: 'Extra details (optional)',
     dueDateLabel: 'Date', dueTimeLabel: 'Time', dpTodayBtn: 'Today',
     priorityNone: 'None', priorityLow: 'Low', priorityMedium: 'Medium', priorityHigh: 'High',
+    todayLabel: 'Today', tomorrowLabel: 'Tomorrow', yesterdayLabel: 'Yesterday',
+    monthHintText: 'Tap a day — its tasks open in the week view, ready to add to.',
     recurrenceLabel: 'Repeat',
     recurNever: 'Never', recurDaily: 'Daily', recurWeekly: 'Weekly', recurMonthly: 'Monthly',
     recurEveryDays: 'Every … days:', recurEveryMonths: 'Every … months:',
@@ -340,7 +344,6 @@ function setLang(lang) {
 function applyTranslations() {
   document.getElementById('htmlRoot').setAttribute('lang', currentLang);
   document.title = `${t('pageTitle')} · Life`;
-  document.getElementById('dayViewFabLabel').textContent = t('dayViewFabLabel');
   document.getElementById('notesLabel').textContent = t('notesLabel');
   document.getElementById('taskNotesInput').placeholder = t('notesPlaceholder');
   document.getElementById('dueDateLabel').textContent = t('dueDateLabel');
@@ -363,6 +366,7 @@ function applyTranslations() {
   document.getElementById('rememberMeLabel').textContent = t('rememberMe');
   document.getElementById('forgotPasswordLink').textContent = t('forgotPassword');
   document.getElementById('nowTitle').textContent = t('nowTitle');
+  document.getElementById('monthHint').textContent = t('monthHintText');
   document.getElementById('quickAddFabLabel').textContent = t('quickAddFabLabel');
   document.getElementById('quickAddTitle').textContent = t('quickAddTitle');
   document.getElementById('quickAddInput').placeholder = t('quickAddPlaceholder');
@@ -568,7 +572,7 @@ function renderTagFilterRow() {
     btn.addEventListener('click', () => {
       const tag = btn.dataset.tag;
       if (selectedTags.has(tag)) selectedTags.delete(tag); else selectedTags.add(tag);
-      renderCalendar();
+      renderCurrentScreen();
     });
   });
 }
@@ -868,7 +872,6 @@ function refreshDatePickersLang() {
 }
 
 function renderCalendar() {
-  renderNowCard();
   document.getElementById('calMonthLabel').textContent = calMonthLabelText();
   if (calViewMode === 'year') {
     renderYearGrid();
@@ -882,8 +885,6 @@ function renderYearGrid() {
   gridEl.classList.add('cal-year-grid');
   gridEl.classList.remove('cal-grid');
   document.getElementById('calWeekdays').innerHTML = '';
-  document.getElementById('tagFilterRow').innerHTML = '';
-  document.getElementById('noDateSection').innerHTML = '';
 
   const today = new Date();
   const labels = monthShortLabels();
@@ -920,7 +921,6 @@ function renderMonthGrid() {
   const gridEl = document.getElementById('calendarGrid');
   gridEl.classList.add('cal-grid');
   gridEl.classList.remove('cal-year-grid');
-  renderTagFilterRow();
   document.getElementById('calWeekdays').innerHTML = weekdayShortLabels()
     .map((w) => `<div class="cal-weekday">${escapeHtml(w)}</div>`).join('');
 
@@ -964,7 +964,7 @@ function renderMonthGrid() {
   gridEl.innerHTML = html;
 
   gridEl.querySelectorAll('[data-cal-day]').forEach((cell) => {
-    cell.addEventListener('click', () => showDayView(cell.dataset.calDay));
+    cell.addEventListener('click', () => selectDate(cell.dataset.calDay));
   });
   gridEl.querySelectorAll('[data-open-task]').forEach((chip) => {
     chip.addEventListener('click', (e) => {
@@ -1026,6 +1026,11 @@ function renderNowCard() {
   const bodyEl = document.getElementById('nowBody');
   const footEl = document.getElementById('nowFoot');
   if (!bodyEl) return;
+  // «Зараз» має сенс тільки для сьогоднішнього дня: коли людина гортає тиждень
+  // уперед, картка про поточний момент лише плутала б.
+  const isToday = selectedDate === todayISO();
+  document.getElementById('nowCard').style.display = isToday ? '' : 'none';
+  if (!isToday) return;
 
   const now = new Date();
   const locale = LOCALE_MAP[currentLang] || 'uk-UA';
@@ -1095,45 +1100,130 @@ function renderNowCard() {
 function startNowClock() {
   if (nowClockTimer) clearInterval(nowClockTimer);
   nowClockTimer = setInterval(() => {
-    if (currentScreen === 'calendar') renderNowCard();
+    if (currentScreen === 'week') renderNowCard();
   }, 60000);
 }
 
-// ---- Екран дня (детальний перегляд однієї дати) ----
-let currentScreen = 'calendar'; // 'calendar' | 'day'
-let dayViewDate = null;
+// ---- Екрани ----
+// Головний екран — тиждень: рядок із семи днів, під ним завдання обраного дня.
+// Місяць живе окремим екраном і потрібен лише для планування на далекі дати,
+// тож не займає місце там, де людина буває щодня.
+let currentScreen = 'week'; // 'week' | 'month'
+let selectedDate = todayISO();
 
 function renderCurrentScreen() {
-  if (currentScreen === 'day' && dayViewDate) renderDayView();
-  else renderCalendar();
+  if (currentScreen === 'month') renderCalendar();
+  else renderWeekScreen();
 }
 
-function showDayView(iso) {
-  dayViewDate = iso;
-  currentScreen = 'day';
-  document.getElementById('calendarScreen').style.display = 'none';
-  document.getElementById('dayViewScreen').style.display = 'block';
-  renderDayView();
-}
-
-function showCalendarView() {
-  currentScreen = 'calendar';
-  dayViewDate = null;
-  document.getElementById('dayViewScreen').style.display = 'none';
-  document.getElementById('calendarScreen').style.display = '';
+function showMonthScreen() {
+  currentScreen = 'month';
+  document.getElementById('weekScreen').style.display = 'none';
+  document.getElementById('monthScreen').style.display = 'block';
+  document.getElementById('openMonthBtn').style.display = 'none';
+  document.getElementById('closeMonthBtn').style.display = 'flex';
+  // Відкриваємо місяць саме на обраному дні, а не там, де його лишили минулого разу.
+  const d = parseISODate(selectedDate);
+  calYear = d.getFullYear();
+  calMonth = d.getMonth();
+  calViewMode = 'month';
   renderCalendar();
 }
 
-function renderDayView() {
-  const iso = dayViewDate;
-  const locale = LOCALE_MAP[currentLang] || 'uk-UA';
-  const [y, m, d] = iso.split('-').map(Number);
-  const label = new Intl.DateTimeFormat(locale, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
-    .format(new Date(y, m - 1, d));
-  document.getElementById('dayViewDateLabel').textContent = label.charAt(0).toUpperCase() + label.slice(1);
+function showWeekScreen() {
+  currentScreen = 'week';
+  document.getElementById('monthScreen').style.display = 'none';
+  document.getElementById('weekScreen').style.display = '';
+  document.getElementById('closeMonthBtn').style.display = 'none';
+  document.getElementById('openMonthBtn').style.display = 'flex';
+  renderWeekScreen();
+}
 
-  const dayTasks = sortTasks(tasks.filter((tsk) => tsk.dueDate === iso));
-  const listEl = document.getElementById('dayViewList');
+function selectDate(iso) {
+  selectedDate = iso;
+  if (currentScreen === 'month') showWeekScreen(); else renderWeekScreen();
+}
+
+function renderWeekScreen() {
+  renderWeekStrip();
+  renderNowCard();
+  renderTagFilterRow();
+  renderSelectedDay();
+  renderNoDateSection();
+}
+
+function renderWeekStrip() {
+  const days = weekDaysOf(selectedDate);
+  const locale = LOCALE_MAP[currentLang] || 'uk-UA';
+  const today = todayISO();
+  const nameFmt = new Intl.DateTimeFormat(locale, { weekday: 'short' });
+  const selMonth = selectedDate.slice(0, 7);
+
+  document.getElementById('weekLabel').textContent = weekLabelText(days);
+  document.getElementById('weekStrip').innerHTML = days.map((iso) => {
+    const d = parseISODate(iso);
+    const stats = dayStats(tasks.filter(matchesFilters), iso);
+    const dotClass = stats.allDone ? ' all-done' : (stats.total ? ' has' : '');
+    const cls = ['week-day'];
+    if (iso === selectedDate) cls.push('selected');
+    if (iso === today) cls.push('today');
+    if (iso.slice(0, 7) !== selMonth) cls.push('other-month');
+    return `
+      <button type="button" class="${cls.join(' ')}" data-week-day="${iso}">
+        <span class="week-day-name">${escapeHtml(nameFmt.format(d).replace('.', ''))}</span>
+        <span class="week-day-num">${d.getDate()}</span>
+        <span class="week-day-dot${dotClass}"></span>
+      </button>`;
+  }).join('');
+
+  document.getElementById('weekStrip').querySelectorAll('[data-week-day]').forEach((btn) => {
+    btn.addEventListener('click', () => selectDate(btn.dataset.weekDay));
+  });
+}
+
+// «17–23 серпня» або «31 серпня – 6 вересня», якщо тиждень на межі місяців.
+function weekLabelText(days) {
+  const locale = LOCALE_MAP[currentLang] || 'uk-UA';
+  const first = parseISODate(days[0]);
+  const last = parseISODate(days[6]);
+  const sameMonth = first.getMonth() === last.getMonth();
+  const fmtLast = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long' }).format(last);
+  const fmtFirst = sameMonth
+    ? String(first.getDate())
+    : new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long' }).format(first);
+  const label = `${fmtFirst} – ${fmtLast}`;
+  return label.charAt(0).toUpperCase() + label.slice(1);
+}
+
+// Заголовок над списком: «Сьогодні», «Завтра» і «Вчора» людині зрозуміліші
+// за дату, а для решти днів лишається звичайна дата.
+function dayHeadingText(iso) {
+  const locale = LOCALE_MAP[currentLang] || 'uk-UA';
+  const d = parseISODate(iso);
+  // День тижня форматуємо ОКРЕМО: у слов'янських мовах Intl у складеному
+  // форматі ставить його у знахідний відмінок («середу, 19 серпня»), бо
+  // очікує прийменник. Окремо він у називному — як і має бути в заголовку.
+  const dayName = new Intl.DateTimeFormat(locale, { weekday: 'long' }).format(d);
+  const dateStr = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long' }).format(d);
+  const today = todayISO();
+  let name = dayName;
+  if (iso === today) name = t('todayLabel');
+  else if (iso === isoDateShift(today, 1)) name = t('tomorrowLabel');
+  else if (iso === isoDateShift(today, -1)) name = t('yesterdayLabel');
+  return `${name.charAt(0).toUpperCase() + name.slice(1)}, ${dateStr}`;
+}
+
+function isoDateShift(iso, deltaDays) {
+  const d = parseISODate(iso);
+  const shifted = new Date(d.getFullYear(), d.getMonth(), d.getDate() + deltaDays);
+  return `${shifted.getFullYear()}-${String(shifted.getMonth() + 1).padStart(2, '0')}-${String(shifted.getDate()).padStart(2, '0')}`;
+}
+
+function renderSelectedDay() {
+  document.getElementById('dayHeading').textContent = dayHeadingText(selectedDate);
+  const dayTasks = sortTasks(tasks.filter((tsk) => tsk.dueDate === selectedDate).filter(matchesFilters));
+  const listEl = document.getElementById('dayList');
+
   if (!dayTasks.length) {
     listEl.innerHTML = `<div class="day-view-empty"><div class="title">${escapeHtml(t('dayViewEmptyTitle'))}</div><div>${escapeHtml(t('dayViewEmptySub'))}</div></div>`;
     return;
@@ -1155,15 +1245,15 @@ function renderDayView() {
   if (completedToggle) {
     completedToggle.addEventListener('click', () => {
       document.getElementById('completedSection').classList.toggle('open');
-      renderDayView();
+      renderSelectedDay();
     });
   }
 }
 
-document.getElementById('dayViewBackBtn').addEventListener('click', showCalendarView);
-document.getElementById('openNewTaskDay').addEventListener('click', () => {
-  openQuickAdd(dayViewDate);
-});
+document.getElementById('openMonthBtn').addEventListener('click', showMonthScreen);
+document.getElementById('closeMonthBtn').addEventListener('click', showWeekScreen);
+document.getElementById('weekPrevBtn').addEventListener('click', () => selectDate(isoDateShift(selectedDate, -7)));
+document.getElementById('weekNextBtn').addEventListener('click', () => selectDate(isoDateShift(selectedDate, 7)));
 
 function toggleDone(id) {
   const task = tasks.find((tsk) => tsk.id === id);
@@ -1646,7 +1736,7 @@ function openQuickAddInForm() {
   renderTagsEditor();
 }
 
-document.getElementById('openQuickAdd').addEventListener('click', () => openQuickAdd(null));
+document.getElementById('openQuickAdd').addEventListener('click', () => openQuickAdd(selectedDate));
 document.getElementById('closeQuickAdd').addEventListener('click', closeQuickAdd);
 document.getElementById('quickAddOverlay').addEventListener('click', (e) => {
   if (e.target.id === 'quickAddOverlay') closeQuickAdd();
@@ -1712,3 +1802,4 @@ renderThemePicker();
 renderLangPicker();
 renderAuthLangRow();
 setAuthMode('login');
+showWeekScreen();
