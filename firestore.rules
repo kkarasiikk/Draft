@@ -10,7 +10,12 @@ rules_version = '2';
 //   users/{uid}/tasks/{id}            -- {title, notes, done, completedAt,
 //                                         priority, tags, dueDate, dueTime,
 //                                         estimateMin, recurrence, subtasks,
+//                                         reminderAt, notifiedAt,
 //                                         createdAt, updatedAt}
+//   users/{uid}/taskTemplates/{id}    -- {title, notes, priority, tags,
+//                                         estimateMin, subtasks,
+//                                         createdAt, updatedAt}
+//   users/{uid}/fcmTokens/{token}     -- {createdAt, ua, tz}
 //   users/{uid}/workouts/{id}         -- {date, name, notes, exercises: [
 //                                         {id, libId, muscle, name, sets: [
 //                                         {weight, reps}]}], createdAt, updatedAt}
@@ -124,14 +129,53 @@ service cloud.firestore {
                  // anchor}) гарантує клієнтський код і tasks/recurrence.js —
                  // як і з subtasks, тут перевіряємо лише тип поля.
                  (!('recurrence' in d) || d.recurrence == null || d.recurrence is map) &&
+                 // Нагадування: момент, коли слати push, і момент, коли його
+                 // вже надіслали. Друге поле пише Cloud Function, тому воно
+                 // теж має бути дозволене.
+                 (!('reminderAt' in d) || d.reminderAt == null || d.reminderAt is timestamp) &&
+                 (!('notifiedAt' in d) || d.notifiedAt == null || d.notifiedAt is timestamp) &&
                  d.subtasks is list && d.subtasks.size() <= 50 &&
                  d.createdAt is timestamp && d.updatedAt is timestamp &&
                  d.keys().hasOnly(['title', 'notes', 'done', 'completedAt', 'priority', 'tags',
                    'dueDate', 'dueTime', 'estimateMin', 'recurrence', 'subtasks',
-                   'createdAt', 'updatedAt']);
+                   'reminderAt', 'notifiedAt', 'createdAt', 'updatedAt']);
         }
         allow read, delete: if isOwner(uid);
         allow create, update: if isOwner(uid) && isValidTask(request.resource.data);
+      }
+
+      // Шаблони завдань: готовий набір кроків, з якого одним тапом
+      // народжується звичайне завдання. Дати тут немає свідомо — шаблон не
+      // живе в календарі, дату він отримує в момент застосування.
+      match /taskTemplates/{templateId} {
+        function isValidTemplate(d) {
+          return isNonEmptyString(d.title, 200) &&
+                 d.notes is string && d.notes.size() <= 5000 &&
+                 (d.priority == null || d.priority in ['low', 'medium', 'high']) &&
+                 d.tags is list && d.tags.size() <= 20 &&
+                 (!('estimateMin' in d) || d.estimateMin == null ||
+                   (d.estimateMin is number && d.estimateMin > 0 && d.estimateMin <= 1440)) &&
+                 d.subtasks is list && d.subtasks.size() <= 50 &&
+                 d.createdAt is timestamp && d.updatedAt is timestamp &&
+                 d.keys().hasOnly(['title', 'notes', 'priority', 'tags', 'estimateMin',
+                   'subtasks', 'createdAt', 'updatedAt']);
+        }
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid) && isValidTemplate(request.resource.data);
+      }
+
+      // Токени пристроїв для push-нагадувань. Ідентифікатор документа — сам
+      // токен від FCM, тож повторна реєстрація того самого пристрою просто
+      // перезаписує запис, а не плодить дублікати.
+      match /fcmTokens/{token} {
+        function isValidToken(d) {
+          return d.createdAt is timestamp &&
+                 (!('ua' in d) || (d.ua is string && d.ua.size() <= 500)) &&
+                 (!('tz' in d) || (d.tz is string && d.tz.size() <= 60)) &&
+                 d.keys().hasOnly(['createdAt', 'ua', 'tz']);
+        }
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid) && isValidToken(request.resource.data);
       }
 
       match /workouts/{workoutId} {

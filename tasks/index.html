@@ -228,6 +228,26 @@
     background:var(--accent);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;
     box-shadow:0 6px 18px rgba(92,124,250,.4), 0 2px 8px rgba(20,20,24,.12);transition:transform .15s ease;}
   .bn-fab:active{transform:translateX(-50%) scale(.92);}
+  /* ---- Шаблони ---- */
+  /* Шаблон — це готовий набір кроків. Живуть вони в швидкому додаванні,
+     бо саме там людина вирішує «що зараз завести». */
+  .template-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-bottom:12px;}
+  .template-row:empty{display:none;}
+  .template-chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);
+    background:var(--control-bg);color:var(--ink-soft);font-family:'Inter',sans-serif;font-size:12.5px;
+    font-weight:600;padding:6px 12px;border-radius:20px;cursor:pointer;max-width:100%;}
+  .template-chip .count{color:var(--ink-muted);font-weight:500;}
+  .template-chip .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .template-manage{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
+  .template-item{display:flex;align-items:center;gap:10px;border:1px solid var(--border);border-radius:14px;padding:10px 12px;}
+  .template-item-body{flex:1;min-width:0;}
+  .template-item-name{font-size:14.5px;font-weight:600;word-break:break-word;}
+  .template-item-meta{font-size:11.5px;color:var(--ink-muted);margin-top:2px;}
+  .template-item-del{flex-shrink:0;border:none;background:none;color:var(--high);cursor:pointer;padding:6px;display:flex;}
+  .template-empty{font-size:13.5px;line-height:1.5;color:var(--ink-muted);text-align:center;padding:22px 6px;}
+  .link-btn{background:none;border:none;color:var(--accent);font-family:'Inter',sans-serif;font-size:13px;
+    font-weight:600;cursor:pointer;padding:6px 0;}
+
   /* ---- Пошук ---- */
   .search-bar{display:flex;align-items:center;gap:9px;margin-bottom:16px;padding:10px 14px;border-radius:16px;
     background:var(--surface);border:1px solid var(--border);color:var(--ink-muted);}
@@ -629,6 +649,11 @@
       <div class="app-menu-label" style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-muted);padding:8px 12px 4px;" id="langMenuLabel">Мова</div>
       <div class="lang-picker" id="langPicker" style="display:flex;gap:6px;padding:0 8px 6px;flex-wrap:wrap;"></div>
       <div class="app-menu-divider"></div>
+      <button class="app-menu-item" id="templatesMenuBtn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6h11"/><path d="M9 12h11"/><path d="M9 18h11"/><path d="M4 6h.01M4 12h.01M4 18h.01"/></svg>
+        <span id="templatesMenuLabel">Шаблони</span>
+      </button>
+      <div class="app-menu-divider"></div>
       <button class="app-menu-item" id="logoutBtn">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
         <span id="logoutLabel">Вийти</span>
@@ -750,6 +775,17 @@
   </div>
   </div>
 
+<!-- ---- Шаблони ---- -->
+<div class="modal-overlay" id="templatesOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="templatesTitle">Шаблони</div>
+      <button class="close-btn" id="closeTemplates" aria-label="Закрити"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="template-manage" id="templateManageList"></div>
+  </div>
+</div>
+
 <!-- ---- Розбір минулих днів ---- -->
 <div class="modal-overlay" id="carryOverlay">
   <div class="modal">
@@ -776,6 +812,7 @@
     <form id="quickAddForm">
       <input type="text" id="quickAddInput" class="title-input" maxlength="300" autocomplete="off"
              placeholder="Купити молоко завтра о 18">
+      <div class="template-row" id="templateRow"></div>
       <div class="quick-preview" id="quickAddPreview"></div>
       <div class="quick-hint" id="quickAddHint"></div>
       <div class="form-error" id="quickAddError"></div>
@@ -829,6 +866,9 @@
       <button type="button" class="add-subtask-btn" id="addSubtaskBtn">+ Додати підзадачу</button>
 
       <div class="form-error" id="taskFormError"></div>
+      <!-- Шаблон народжується з уже набраного завдання, а не з окремого
+           редактора: так у ньому одразу правильні кроки й теги. -->
+      <button type="button" class="link-btn" id="saveAsTemplateBtn">Зберегти як шаблон</button>
       <div class="modal-actions">
         <button type="button" class="btn-delete" id="deleteTaskBtn" style="display:none;">Видалити</button>
         <button class="submit-btn" id="taskSubmitBtn" type="submit">Зберегти</button>

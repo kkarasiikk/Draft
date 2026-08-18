@@ -49,6 +49,11 @@ const T = {
     nowTitle: 'Зараз', nowSkip: 'Далі',
     swipeDone: 'Виконано', swipeTomorrow: 'Завтра',
     nowHaveTime: 'Маю час:',
+    templatesTitle: 'Шаблони', templatesMenu: 'Шаблони',
+    saveAsTemplate: 'Зберегти як шаблон', templateSaved: 'Збережено ✓',
+    templateSteps: (n) => `${n} ${plural(n, { one: 'крок', few: 'кроки', many: 'кроків', other: 'кроку' })}`,
+    templateEmpty: 'Шаблонів ще немає. Відкрий будь-яке завдання з кроками і натисни «Зберегти як шаблон» — далі його можна буде завести одним тапом.',
+    templateLimit: (n) => `Більше ${n} шаблонів — це вже список завдань. Видали зайві в меню «Шаблони».`,
     searchPlaceholder: 'Знайти завдання',
     searchFound: (n) => `Знайдено: ${n}`,
     searchEmpty: (q) => `За запитом «${q}» нічого не знайшлось.`,
@@ -132,6 +137,11 @@ const T = {
     nowTitle: 'Сейчас', nowSkip: 'Дальше',
     swipeDone: 'Выполнено', swipeTomorrow: 'Завтра',
     nowHaveTime: 'Есть время:',
+    templatesTitle: 'Шаблоны', templatesMenu: 'Шаблоны',
+    saveAsTemplate: 'Сохранить как шаблон', templateSaved: 'Сохранено ✓',
+    templateSteps: (n) => `${n} ${plural(n, { one: 'шаг', few: 'шага', many: 'шагов', other: 'шага' })}`,
+    templateEmpty: 'Шаблонов пока нет. Открой любую задачу с шагами и нажми «Сохранить как шаблон» — дальше её можно будет завести одним тапом.',
+    templateLimit: (n) => `Больше ${n} шаблонов — это уже список задач. Удали лишние в меню «Шаблоны».`,
     searchPlaceholder: 'Найти задачу',
     searchFound: (n) => `Найдено: ${n}`,
     searchEmpty: (q) => `По запросу «${q}» ничего не нашлось.`,
@@ -215,6 +225,11 @@ const T = {
     nowTitle: 'Teraz', nowSkip: 'Dalej',
     swipeDone: 'Zrobione', swipeTomorrow: 'Jutro',
     nowHaveTime: 'Mam czas:',
+    templatesTitle: 'Szablony', templatesMenu: 'Szablony',
+    saveAsTemplate: 'Zapisz jako szablon', templateSaved: 'Zapisano ✓',
+    templateSteps: (n) => `${n} ${plural(n, { one: 'krok', few: 'kroki', many: 'kroków', other: 'kroku' })}`,
+    templateEmpty: 'Nie ma jeszcze szablonów. Otwórz dowolne zadanie z krokami i naciśnij „Zapisz jako szablon" — potem założysz je jednym tapnięciem.',
+    templateLimit: (n) => `Więcej niż ${n} szablonów to już lista zadań. Usuń zbędne w menu „Szablony".`,
     searchPlaceholder: 'Znajdź zadanie',
     searchFound: (n) => `Znaleziono: ${n}`,
     searchEmpty: (q) => `Nic nie znaleziono dla „${q}".`,
@@ -298,6 +313,11 @@ const T = {
     nowTitle: 'Now', nowSkip: 'Next',
     swipeDone: 'Done', swipeTomorrow: 'Tomorrow',
     nowHaveTime: 'I have:',
+    templatesTitle: 'Templates', templatesMenu: 'Templates',
+    saveAsTemplate: 'Save as template', templateSaved: 'Saved ✓',
+    templateSteps: (n) => `${n} ${plural(n, { one: 'step', other: 'steps' })}`,
+    templateEmpty: 'No templates yet. Open any task with steps and hit "Save as template" — after that you can create it with one tap.',
+    templateLimit: (n) => `More than ${n} templates is a task list of its own. Remove some in the "Templates" menu.`,
     searchPlaceholder: 'Find a task',
     searchFound: (n) => `Found: ${n}`,
     searchEmpty: (q) => `Nothing found for "${q}".`,
@@ -480,6 +500,9 @@ function applyTranslations() {
   document.getElementById('carryHint').textContent = t('carryHint');
   document.getElementById('carryLaterBtn').textContent = t('carryLater');
   document.getElementById('carryAllTodayBtn').textContent = t('carryAllToday');
+  document.getElementById('templatesTitle').textContent = t('templatesTitle');
+  document.getElementById('templatesMenuLabel').textContent = t('templatesMenu');
+  document.getElementById('saveAsTemplateBtn').textContent = t('saveAsTemplate');
   document.getElementById('searchInput').placeholder = t('searchPlaceholder');
   document.getElementById('bnWeekLabel').textContent = t('bnWeek');
   document.getElementById('bnMonthLabel').textContent = t('bnMonth');
@@ -635,7 +658,9 @@ function uid4() {
 
 // ---- Стан ----
 let tasks = [];
+let templates = [];
 let unsubscribeTasks = null;
+let unsubscribeTemplates = null;
 let selectedTags = new Set();
 let editingTaskId = null;
 let formPriority = null;
@@ -659,6 +684,19 @@ function subscribeToTasks(uid) {
     tasks = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
     renderCurrentScreen();
   }, (err) => console.error('subscribeToTasks:', err));
+}
+
+// Шаблони — окрема невелика колекція; тримаємо її в памʼяті так само
+// реалтайм, щоб створений на телефоні шаблон одразу зʼявився на компʼютері.
+function subscribeToTemplates(uid) {
+  if (unsubscribeTemplates) unsubscribeTemplates();
+  const col = db.collection('users').doc(uid).collection('taskTemplates');
+  unsubscribeTemplates = col.onSnapshot((snap) => {
+    templates = snap.docs.map((d) => ({ id: d.id, ...d.data() }))
+      .sort((a, b) => (a.title || '').localeCompare(b.title || ''));
+    renderTemplateRow();
+    if (document.getElementById('templatesOverlay').classList.contains('show')) renderTemplateManageList();
+  }, (err) => console.error('subscribeToTemplates:', err));
 }
 
 function sortTasks(list) {
@@ -1221,6 +1259,149 @@ function renderStatsScreen() {
     </div>`).join('')
     + `<div class="stat-caption" style="text-align:left;margin-top:2px;">${escapeHtml(t('statsAllTime', summary.totalDone))}</div>`;
 }
+
+// ---- Шаблони завдань ----
+// Ті самі кроки щотижня («поїздка», «тижневий огляд») набирати заново —
+// найдурніша робота, яку може вимагати планувальник. Шаблон народжується
+// з уже набраного завдання, а застосовується одним тапом у швидкому
+// додаванні: дату він отримує саме в цей момент.
+const MAX_TEMPLATES = 12;
+
+function templateSummary(tpl) {
+  const parts = [];
+  const subCount = (tpl.subtasks || []).length;
+  if (subCount) parts.push(t('templateSteps', subCount));
+  if (tpl.estimateMin) parts.push(t('estimateShort', tpl.estimateMin));
+  if (tpl.priority) parts.push(priorityLabel(tpl.priority));
+  (tpl.tags || []).forEach((tag) => parts.push('#' + tag));
+  return parts.join(' · ');
+}
+
+function renderTemplateRow() {
+  const row = document.getElementById('templateRow');
+  if (!row) return;
+  if (!templates.length) { row.innerHTML = ''; return; }
+  row.innerHTML = `<span class="now-time-label">${escapeHtml(t('templatesTitle'))}:</span>` + templates.map((tpl) => {
+    const subCount = (tpl.subtasks || []).length;
+    return `<button type="button" class="template-chip" data-template="${tpl.id}">
+      <span class="name">${escapeHtml(tpl.title)}</span>
+      ${subCount ? `<span class="count">${subCount}</span>` : ''}
+    </button>`;
+  }).join('');
+  row.querySelectorAll('[data-template]').forEach((btn) => {
+    btn.addEventListener('click', () => applyTemplate(btn.dataset.template));
+  });
+}
+
+// Застосування шаблону — це створення звичайного завдання. Ніякого звʼязку
+// з шаблоном далі не лишається: змінивши шаблон, старі завдання не хочеться
+// переписувати заднім числом.
+async function applyTemplate(id) {
+  const tpl = templates.find((x) => x.id === id);
+  const uidCur = auth.currentUser && auth.currentUser.uid;
+  if (!tpl || !uidCur) return;
+  const errorEl = document.getElementById('quickAddError');
+  try {
+    await db.collection('users').doc(uidCur).collection('tasks').add({
+      title: tpl.title,
+      notes: tpl.notes || '',
+      done: false,
+      completedAt: null,
+      priority: tpl.priority || null,
+      tags: tpl.tags || [],
+      dueDate: quickAddDate || todayISO(),
+      dueTime: null,
+      estimateMin: tpl.estimateMin || null,
+      recurrence: null,
+      // Кроки завжди приходять невиконаними: шаблон описує, що треба
+      // зробити, а не що вже зроблено минулого разу.
+      subtasks: (tpl.subtasks || []).map((sub) => ({ id: uid4(), title: sub.title, done: false })),
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+    closeQuickAdd();
+  } catch (err) {
+    console.error('applyTemplate:', err);
+    errorEl.textContent = writeErrorMessage(err);
+  }
+}
+
+async function saveCurrentFormAsTemplate() {
+  const uidCur = auth.currentUser && auth.currentUser.uid;
+  const title = document.getElementById('taskTitleInput').value.trim();
+  const errorEl = document.getElementById('taskFormError');
+  if (!uidCur) return;
+  if (!title) { errorEl.textContent = t('titleRequiredError'); return; }
+  if (templates.length >= MAX_TEMPLATES) { errorEl.textContent = t('templateLimit', MAX_TEMPLATES); return; }
+
+  const cleanSubtasks = formSubtasks
+    .map((sub) => ({ id: sub.id, title: (sub.title || '').trim(), done: false }))
+    .filter((sub) => sub.title);
+  const estimateRaw = parseInt(document.getElementById('taskEstimateInput').value, 10);
+  const btn = document.getElementById('saveAsTemplateBtn');
+  btn.disabled = true;
+  try {
+    await db.collection('users').doc(uidCur).collection('taskTemplates').add({
+      title,
+      notes: document.getElementById('taskNotesInput').value.trim(),
+      priority: formPriority,
+      tags: formTags,
+      estimateMin: Number.isFinite(estimateRaw) && estimateRaw > 0 ? Math.min(estimateRaw, 1440) : null,
+      subtasks: cleanSubtasks,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+    errorEl.textContent = '';
+    // Підтвердження прямо на кнопці: окремий тост заради одного слова —
+    // зайва конструкція, а без відгуку незрозуміло, чи спрацювало.
+    btn.textContent = t('templateSaved');
+    setTimeout(() => { btn.textContent = t('saveAsTemplate'); }, 2000);
+  } catch (err) {
+    console.error('saveAsTemplate:', err);
+    errorEl.textContent = writeErrorMessage(err);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function renderTemplateManageList() {
+  const el = document.getElementById('templateManageList');
+  if (!templates.length) {
+    el.innerHTML = `<div class="template-empty">${escapeHtml(t('templateEmpty'))}</div>`;
+    return;
+  }
+  el.innerHTML = templates.map((tpl) => `
+    <div class="template-item">
+      <div class="template-item-body">
+        <div class="template-item-name">${escapeHtml(tpl.title)}</div>
+        ${templateSummary(tpl) ? `<div class="template-item-meta">${escapeHtml(templateSummary(tpl))}</div>` : ''}
+      </div>
+      <button type="button" class="template-item-del" data-del-template="${tpl.id}" aria-label="${escapeHtml(t('deleteBtn'))}">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg>
+      </button>
+    </div>`).join('');
+  el.querySelectorAll('[data-del-template]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const uidCur = auth.currentUser && auth.currentUser.uid;
+      if (!uidCur) return;
+      db.collection('users').doc(uidCur).collection('taskTemplates').doc(btn.dataset.delTemplate).delete()
+        .catch((err) => console.error('deleteTemplate:', err));
+    });
+  });
+}
+
+document.getElementById('saveAsTemplateBtn').addEventListener('click', saveCurrentFormAsTemplate);
+document.getElementById('templatesMenuBtn').addEventListener('click', () => {
+  document.getElementById('appMenuOverlay').classList.remove('show');
+  renderTemplateManageList();
+  document.getElementById('templatesOverlay').classList.add('show');
+});
+document.getElementById('closeTemplates').addEventListener('click', () => {
+  document.getElementById('templatesOverlay').classList.remove('show');
+});
+document.getElementById('templatesOverlay').addEventListener('click', (e) => {
+  if (e.target.id === 'templatesOverlay') e.currentTarget.classList.remove('show');
+});
 
 // ---- Пошук ----
 // Шукаємо по назві, нотатці й тегах — тобто по всьому, що людина сама
@@ -2492,9 +2673,12 @@ auth.onAuthStateChanged((user) => {
       }
     }).catch(() => {});
     subscribeToTasks(user.uid);
+    subscribeToTemplates(user.uid);
   } else {
     if (unsubscribeTasks) { unsubscribeTasks(); unsubscribeTasks = null; }
+    if (unsubscribeTemplates) { unsubscribeTemplates(); unsubscribeTemplates = null; }
     tasks = [];
+    templates = [];
     document.getElementById('appScreen').style.display = 'none';
     document.getElementById('authScreen').style.display = 'flex';
     document.getElementById('authPassword').value = '';
