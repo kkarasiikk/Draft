@@ -233,6 +233,16 @@
     background:var(--control-bg);color:var(--ink-soft);display:flex;align-items:center;justify-content:center;
     cursor:pointer;-webkit-tap-highlight-color:transparent;}
   .topbar-icon-btn:active{transform:scale(.94);}
+  /* pan-y лишає браузеру вертикальний скрол, а горизонтальний рух віддає нам —
+     без цього браузер міг би перехопити жест і гортання не спрацювало б. */
+  .swipe-area{touch-action:pan-y;}
+  .swipe-slide-left{animation:slideFromRight .18s ease-out;}
+  .swipe-slide-right{animation:slideFromLeft .18s ease-out;}
+  @keyframes slideFromRight{from{opacity:.4;transform:translateX(14px);}to{opacity:1;transform:none;}}
+  @keyframes slideFromLeft{from{opacity:.4;transform:translateX(-14px);}to{opacity:1;transform:none;}}
+  @media (prefers-reduced-motion: reduce){
+    .swipe-slide-left,.swipe-slide-right{animation:none;}
+  }
   .week-head{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
   .week-label{flex:1;text-align:center;font-size:14.5px;font-weight:700;color:var(--ink);}
   .week-strip{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;margin-bottom:18px;}
@@ -515,6 +525,7 @@
   <!-- ---- Головний екран: тиждень + завдання обраного дня ---- -->
   <div id="weekScreen">
   <div class="content">
+    <div id="weekSwipeArea" class="swipe-area">
     <div class="week-head">
       <button type="button" id="weekPrevBtn" class="cal-nav-btn" aria-label="Попередній тиждень">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
@@ -525,6 +536,7 @@
       </button>
     </div>
     <div class="week-strip" id="weekStrip"></div>
+    </div>
 
     <section class="now-card" id="nowCard">
       <div class="now-head">
@@ -561,7 +573,7 @@
       </button>
     </div>
     <div class="cal-weekdays" id="calWeekdays"></div>
-    <div class="cal-grid" id="calendarGrid"></div>
+    <div class="cal-grid swipe-area" id="calendarGrid"></div>
     <div class="month-hint" id="monthHint"></div>
   </div>
   </div>

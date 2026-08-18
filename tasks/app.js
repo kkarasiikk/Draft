@@ -1104,6 +1104,64 @@ function startNowClock() {
   }, 60000);
 }
 
+// ---- Горизонтальне гортання пальцем ----
+// Один хелпер на тиждень і на місяць. Pointer Events, а не touch: так само
+// працює і мишею на десктопі, і пальцем на телефоні, без подвійних обробників.
+function onHorizontalSwipe(el, onLeft, onRight) {
+  // Менше 45px — це вже випадковий зсув пальця під час тапу, а не жест.
+  const MIN_DISTANCE = 45;
+  // Якщо вертикальна складова помітна, людина гортає сторінку, а не календар.
+  const MAX_OFF_AXIS = 0.6;
+  let startX = 0, startY = 0, tracking = false;
+
+  el.addEventListener('pointerdown', (e) => {
+    if (!e.isPrimary) { tracking = false; return; }
+    tracking = true;
+    startX = e.clientX;
+    startY = e.clientY;
+  });
+  el.addEventListener('pointercancel', () => { tracking = false; });
+  el.addEventListener('pointerup', (e) => {
+    if (!tracking) return;
+    tracking = false;
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+    if (Math.abs(dx) < MIN_DISTANCE) return;
+    if (Math.abs(dy) > Math.abs(dx) * MAX_OFF_AXIS) return;
+    // Жест завершується на кнопці дня, і слідом браузер надішле звичайний
+    // click — без цього гортання ще й обирало б день, на якому спинився палець.
+    swallowNextClick(el);
+    if (dx < 0) onLeft(); else onRight();
+  });
+}
+
+function swallowNextClick(el) {
+  const swallow = (ev) => {
+    ev.stopPropagation();
+    ev.preventDefault();
+    cleanup();
+  };
+  const cleanup = () => {
+    clearTimeout(timer);
+    el.removeEventListener('click', swallow, true);
+  };
+  // Клік від самого жесту браузер надсилає одразу за pointerup, тож вікна в
+  // кілька десятків мілісекунд досить. Довше тримати не можна: свідомий тап
+  // одразу після гортання теж був би з'їдений.
+  const timer = setTimeout(cleanup, 50);
+  el.addEventListener('click', swallow, true);
+}
+
+// Коротка підказка руху: новий вміст «в'їжджає» з того боку, звідки прийшов жест.
+function playSlide(el, direction) {
+  if (!el) return;
+  el.classList.remove('swipe-slide-left', 'swipe-slide-right');
+  // Перезапуск анімації: без читання offsetWidth браузер склеїть зміну класу
+  // з попереднім станом і анімація не програється двічі поспіль.
+  void el.offsetWidth;
+  el.classList.add(direction < 0 ? 'swipe-slide-left' : 'swipe-slide-right');
+}
+
 // ---- Екрани ----
 // Головний екран — тиждень: рядок із семи днів, під ним завдання обраного дня.
 // Місяць живе окремим екраном і потрібен лише для планування на далекі дати,
@@ -1252,8 +1310,13 @@ function renderSelectedDay() {
 
 document.getElementById('openMonthBtn').addEventListener('click', showMonthScreen);
 document.getElementById('closeMonthBtn').addEventListener('click', showWeekScreen);
-document.getElementById('weekPrevBtn').addEventListener('click', () => selectDate(isoDateShift(selectedDate, -7)));
-document.getElementById('weekNextBtn').addEventListener('click', () => selectDate(isoDateShift(selectedDate, 7)));
+function shiftWeek(delta) {
+  selectDate(isoDateShift(selectedDate, delta * 7));
+  playSlide(document.getElementById('weekSwipeArea'), delta);
+}
+document.getElementById('weekPrevBtn').addEventListener('click', () => shiftWeek(-1));
+document.getElementById('weekNextBtn').addEventListener('click', () => shiftWeek(1));
+onHorizontalSwipe(document.getElementById('weekSwipeArea'), () => shiftWeek(1), () => shiftWeek(-1));
 
 function toggleDone(id) {
   const task = tasks.find((tsk) => tsk.id === id);
@@ -1296,24 +1359,20 @@ function toggleDone(id) {
 }
 
 // ---- Навігація календаря ----
-document.getElementById('calPrevBtn').addEventListener('click', () => {
+function shiftMonth(delta) {
   if (calViewMode === 'year') {
-    calYear -= 1;
+    calYear += delta;
   } else {
-    calMonth -= 1;
+    calMonth += delta;
     if (calMonth < 0) { calMonth = 11; calYear -= 1; }
-  }
-  renderCalendar();
-});
-document.getElementById('calNextBtn').addEventListener('click', () => {
-  if (calViewMode === 'year') {
-    calYear += 1;
-  } else {
-    calMonth += 1;
     if (calMonth > 11) { calMonth = 0; calYear += 1; }
   }
   renderCalendar();
-});
+  playSlide(document.getElementById('calendarGrid'), delta);
+}
+document.getElementById('calPrevBtn').addEventListener('click', () => shiftMonth(-1));
+document.getElementById('calNextBtn').addEventListener('click', () => shiftMonth(1));
+onHorizontalSwipe(document.getElementById('calendarGrid'), () => shiftMonth(1), () => shiftMonth(-1));
 document.getElementById('calMonthLabel').addEventListener('click', () => {
   calViewMode = calViewMode === 'year' ? 'month' : 'year';
   renderCalendar();
