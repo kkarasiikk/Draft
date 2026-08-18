@@ -31,10 +31,10 @@ const STRINGS = {
   uk: {
     themeLabel: 'Тема', themeLight: 'Світла', themeDark: 'Темна', themeSystem: 'Системна',
     langLabel: 'Мова', logout: 'Вийти',
-    budgetTitle: 'Бюджет',
-    goalsTitle: 'Цілі на рік',
-    tasksTitle: 'Справи дня',
-    workoutTitle: 'Тренування',
+    budgetTitle: 'Бюджет', budgetSub: 'витрати й доходи',
+    goalsTitle: 'Цілі', goalsSub: 'довгострокові',
+    tasksTitle: 'Завдання', tasksSub: 'на кожен день',
+    workoutTitle: 'Тренування', workoutSub: 'сесії й рекорди',
  openBtn: 'Відкрити',
     authTitleLogin: 'Вхід', authTitleSignup: 'Реєстрація',
     authSub: 'Увійди, щоб потрапити у свій особистий простір.',
@@ -54,10 +54,10 @@ const STRINGS = {
   ru: {
     themeLabel: 'Тема', themeLight: 'Светлая', themeDark: 'Тёмная', themeSystem: 'Системная',
     langLabel: 'Язык', logout: 'Выйти',
-    budgetTitle: 'Бюджет',
-    goalsTitle: 'Цели на год',
-    tasksTitle: 'Дела дня',
-    workoutTitle: 'Тренировки',
+    budgetTitle: 'Бюджет', budgetSub: 'расходы и доходы',
+    goalsTitle: 'Цели', goalsSub: 'долгосрочные',
+    tasksTitle: 'Задачи', tasksSub: 'на каждый день',
+    workoutTitle: 'Тренировки', workoutSub: 'сессии и рекорды',
  openBtn: 'Открыть',
     authTitleLogin: 'Вход', authTitleSignup: 'Регистрация',
     authSub: 'Войди, чтобы попасть в своё личное пространство.',
@@ -77,10 +77,10 @@ const STRINGS = {
   pl: {
     themeLabel: 'Motyw', themeLight: 'Jasny', themeDark: 'Ciemny', themeSystem: 'Systemowy',
     langLabel: 'Język', logout: 'Wyloguj',
-    budgetTitle: 'Budżet',
-    goalsTitle: 'Cele na rok',
-    tasksTitle: 'Sprawy dnia',
-    workoutTitle: 'Treningi',
+    budgetTitle: 'Budżet', budgetSub: 'wydatki i dochody',
+    goalsTitle: 'Cele', goalsSub: 'długoterminowe',
+    tasksTitle: 'Zadania', tasksSub: 'na każdy dzień',
+    workoutTitle: 'Treningi', workoutSub: 'sesje i rekordy',
  openBtn: 'Otwórz',
     authTitleLogin: 'Logowanie', authTitleSignup: 'Rejestracja',
     authSub: 'Zaloguj się, aby przejść do swojej przestrzeni.',
@@ -100,10 +100,10 @@ const STRINGS = {
   en: {
     themeLabel: 'Theme', themeLight: 'Light', themeDark: 'Dark', themeSystem: 'System',
     langLabel: 'Language', logout: 'Log out',
-    budgetTitle: 'Budget',
-    goalsTitle: 'Goals for the year',
-    tasksTitle: 'Today’s tasks',
-    workoutTitle: 'Workouts',
+    budgetTitle: 'Budget', budgetSub: 'spending & income',
+    goalsTitle: 'Goals', goalsSub: 'long-term',
+    tasksTitle: 'Tasks', tasksSub: 'day to day',
+    workoutTitle: 'Workouts', workoutSub: 'sessions & records',
  openBtn: 'Open',
     authTitleLogin: 'Log in', authTitleSignup: 'Sign up',
     authSub: 'Sign in to get to your personal space.',
@@ -134,12 +134,16 @@ function applyTranslations() {
   document.getElementById('langMenuLabel').textContent = t('langLabel');
   document.getElementById('logoutLabel').textContent = t('logout');
   document.getElementById('budgetTitle').textContent = t('budgetTitle');
+  document.getElementById('budgetSub').textContent = t('budgetSub');
   document.getElementById('openBtnLabel').textContent = t('openBtn');
   document.getElementById('goalsTitle').textContent = t('goalsTitle');
+  document.getElementById('goalsSub').textContent = t('goalsSub');
   document.getElementById('goalsOpenBtnLabel').textContent = t('openBtn');
   document.getElementById('tasksTitle').textContent = t('tasksTitle');
+  document.getElementById('tasksSub').textContent = t('tasksSub');
   document.getElementById('tasksOpenBtnLabel').textContent = t('openBtn');
   document.getElementById('workoutTitle').textContent = t('workoutTitle');
+  document.getElementById('workoutSub').textContent = t('workoutSub');
   document.getElementById('workoutOpenBtnLabel').textContent = t('openBtn');
   document.getElementById('authSub').textContent = t('authSub');
   document.getElementById('authEmailLabel').textContent = t('emailLabel');
