@@ -1,3 +1,10 @@
+// ---- Service Worker ----
+// Реєструємо тут, а не інлайн у <script> в index.html, щоб CSP міг
+// забороняти інлайн-скрипти (script-src без 'unsafe-inline') без винятків.
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('service-worker.js').catch(() => {}));
+}
+
 // ---- Firebase ----
 firebase.initializeApp(firebaseConfig);
 
@@ -375,7 +382,11 @@ document.getElementById('authForm').addEventListener('submit', async (e) => {
   submitBtn.disabled = true;
   submitBtn.textContent = t('waitLabel');
   try {
-    if (document.getElementById('rememberMe').checked) {
+    // Той самий контракт, що й у budget/app.js та home.js: без "запам'ятати мене"
+    // сесія живе лише до закриття вкладки (SESSION), інакше — зберігається (LOCAL).
+    const remember = document.getElementById('rememberMe').checked;
+    await auth.setPersistence(remember ? firebase.auth.Auth.Persistence.LOCAL : firebase.auth.Auth.Persistence.SESSION);
+    if (remember) {
       localStorage.setItem('financeAppLastEmail', email);
     } else {
       localStorage.removeItem('financeAppLastEmail');

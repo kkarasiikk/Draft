@@ -9,6 +9,7 @@ PWA (Progressive Web App) без збірки: чистий HTML/CSS/JS + Fireba
 index.html, home.js              -- домашній хаб (вибір розділу після входу)
 service-worker.js                -- офлайн-кеш хаба (свій SW є в кожному модулі)
 budget/                          -- модуль «Бюджет»: транзакції, заощадження, цілі, нотатки
+goals/                           -- модуль «Цілі»: віхи, серії, щоденник, прогрес
 tasks/                           -- модуль «Завдання»: підзадачі, теги, пріоритет
 workout/                         -- модуль «Тренування»: сесії, прогресія, особисті рекорди
 firestore.rules                  -- правила доступу Firestore (усі колекції, всі модулі)
@@ -18,7 +19,7 @@ index.js, ai.js                  -- Cloud Functions (окремий Node-про�
 .github/workflows/ci.yml         -- CI: перевірка синтаксису JS + тести Cloud Functions
 ```
 
-Кожен модуль (`budget/`, `tasks/`, `workout/`) — самодостатня сторінка зі своїм входом
+Кожен модуль (`budget/`, `goals/`, `tasks/`, `workout/`) — самодостатня сторінка зі своїм входом
 (email/пароль), темою й мовою; профіль і сесія спільні (той самий Firebase
 проєкт), тому вхід один раз на домашній сторінці не обов'язковий — можна
 увійти прямо в модулі.
@@ -32,7 +33,7 @@ index.js, ai.js                  -- Cloud Functions (окремий Node-про�
   `aiChat` (AI-асистент у модулі «Бюджет»)
 - **Firestore Security Rules** — `firestore.rules`
 - **Service Worker** — офлайн-кеш статики, окремий на кожен модуль
-  (`service-worker.js`, `budget/`, `tasks/`, `workout/`); для сторінки виграє
+  (`service-worker.js`, `budget/`, `goals/`, `tasks/`, `workout/`); для сторінки виграє
   реєстрація з найдовшим збігом scope, а кожен SW чистить лише власні кеші
 - **PWA manifest** — окремий `manifest.json` на кожен модуль (свій `scope`/`start_url`),
   іконки в т.ч. `maskable`-варіанти для Android — спільні, лежать у `budget/`
@@ -99,9 +100,25 @@ users/{uid}/tasks/{id}          -- {title, notes, done, priority, tags, dueDate,
                                     subtasks, createdAt, updatedAt}
 users/{uid}/workouts/{id}       -- {date, name, notes, exercises: [{id, libId, muscle,
                                     name, sets: [{weight, reps}]}], createdAt, updatedAt}
+users/{uid}/goals/{id}          -- {title, category, why, targetDate, status,
+                                    milestones: [{id, title, done}], checkins: [YYYY-MM-DD],
+                                    journal: [{id, text, createdAt}], createdAt, updatedAt}
 ```
 
-Детальні правила доступу — у `firestore.rules`.
+Детальні правила доступу — у `firestore.rules`, складені індекси — у
+`firestore.indexes.json` (там індекс `(type, date)` для `transactions`:
+без нього запит `query_transactions` з `aiChat` падає з `FAILED_PRECONDITION`).
+
+## Модуль «Цілі» (`goals/`)
+
+- Довгострокові цілі з категорією (здоров'я, фінанси, навчання, кар'єра,
+  стосунки, подорожі, творчість, інше), полем «навіщо тобі це» й
+  необов'язковим дедлайном.
+- **Віхи** — кроки всередині цілі; прогрес рахується як частка пройдених
+  віх, наступна непройдена підсвічується як «наступна зупинка».
+- **Серія (streak)** — щоденні відмітки «зробив крок сьогодні» (`checkins`),
+  плюс **щоденник** коротких нотаток по цілі.
+- Фільтр за станом: усі / активні / завершені / архів.
 
 ## Модуль «Завдання» (`tasks/`)
 
@@ -158,8 +175,8 @@ users/{uid}/workouts/{id}       -- {date, name, notes, exercises: [{id, libId, m
 ## Мови
 
 Інтерфейс перекладений на 4 мови: українська, російська, польська, англійська
-(`LANGS` та словники перекладів окремо в `home.js`, `budget/app.js`, `tasks/app.js`,
-`workout/app.js`).
+(`LANGS` та словники перекладів окремо в `home.js`, `budget/app.js`, `goals/app.js`,
+`tasks/app.js`, `workout/app.js`).
 
 ## Резервне копіювання та імпорт даних
 
@@ -181,16 +198,16 @@ npm install
 npm test
 ```
 
-Фронтенд (`home.js`, `budget/app.js`, `tasks/app.js`, `workout/app.js`)
-автотестами поки не покритий — це основний пункт TODO нижче. Для нього в CI
+Фронтенд (`home.js`, `budget/app.js`, `goals/app.js`, `tasks/app.js`,
+`workout/app.js`) автотестами поки не покритий — це основний пункт TODO нижче. Для нього в CI
 є принаймні перевірка синтаксису (`node --check` по всіх `.js`).
 
 CI (`.github/workflows/ci.yml`) проганяє те саме на кожен push і pull request.
 
 ## Відомі обмеження / TODO
 
-- Немає автотестів для фронтенду (`home.js`, `budget/app.js`, `tasks/app.js`,
-  `workout/app.js`) — лише для Cloud Functions, див. розділ «Тести».
+- Немає автотестів для фронтенду (`home.js`, `budget/app.js`, `goals/app.js`,
+  `tasks/app.js`, `workout/app.js`) — лише для Cloud Functions, див. «Тести».
 - `budget/app.js` розрісся до ~3000 рядків одним файлом — просився б поділ
   на модулі, але без кроку збірки це означає кілька `<script>` і спільний
   глобальний scope, тож поки лишається як є.
@@ -204,4 +221,3 @@ CI (`.github/workflows/ci.yml`) проганяє те саме на кожен p
   лише трекінг + прогресія + рекорди, без звернень до `aiChat`. Немає
   також бібліотек/шаблонів тренувань, recovery-трекінгу (сон/RPE) і
   інтеграції з Apple Health/Garmin.
-- Модуль «Цілі» на домашній сторінці — ще заглушка («Скоро»).
