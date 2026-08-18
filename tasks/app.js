@@ -85,6 +85,7 @@ const T = {
     err_emailInUse: 'Цей email вже зареєстрований.', err_invalidCred: 'Невірний email або пароль.',
     err_userNotFound: 'Користувача з таким email не знайдено.',
     err_tooMany: 'Забагато спроб. Спробуй трохи пізніше.', err_generic: 'Щось пішло не так. Спробуй ще раз.',
+    err_denied: 'Сервер відхилив запис: правила Firestore застаріли. Опублікуй свіжий firestore.rules.',
     err_resetGeneric: 'Не вдалося надіслати лист. Спробуй пізніше.',
   },
   ru: {
@@ -144,6 +145,7 @@ const T = {
     err_emailInUse: 'Этот email уже зарегистрирован.', err_invalidCred: 'Неверный email или пароль.',
     err_userNotFound: 'Аккаунт с таким email не найден.',
     err_tooMany: 'Слишком много попыток. Попробуй позже.', err_generic: 'Что-то пошло не так. Попробуй ещё раз.',
+    err_denied: 'Сервер отклонил запись: правила Firestore устарели. Опубликуй свежий firestore.rules.',
     err_resetGeneric: 'Не удалось отправить письмо. Попробуй позже.',
   },
   pl: {
@@ -203,6 +205,7 @@ const T = {
     err_emailInUse: 'Ten email już zarejestrowano.', err_invalidCred: 'Nieprawidłowy email lub hasło.',
     err_userNotFound: 'Nie znaleziono konta z tym emailem.',
     err_tooMany: 'Zbyt wiele prób. Spróbuj później.', err_generic: 'Coś poszło nie tak. Spróbuj ponownie.',
+    err_denied: 'Serwer odrzucił zapis: reguły Firestore są nieaktualne. Opublikuj świeży firestore.rules.',
     err_resetGeneric: 'Nie udało się wysłać wiadomości. Spróbuj później.',
   },
   en: {
@@ -262,6 +265,7 @@ const T = {
     err_emailInUse: 'This email is already registered.', err_invalidCred: 'Incorrect email or password.',
     err_userNotFound: 'No account found with this email.',
     err_tooMany: 'Too many attempts. Try again later.', err_generic: 'Something went wrong. Try again.',
+    err_denied: 'The server rejected the write: Firestore rules are out of date. Publish the current firestore.rules.',
     err_resetGeneric: 'Could not send the email. Try again later.',
   },
 };
@@ -402,6 +406,14 @@ function authErrorMessage(code) {
   };
   return t(map[code] || 'err_generic');
 }
+// Найчастіша причина відмови запису в цьому проєкті — не мережа й не баг у
+// формі, а правила Firestore, які лишились від попередньої версії схеми
+// (нове поле не перелічене в hasOnly). Тоді Firestore відповідає
+// permission-denied, і сказати про це прямо корисніше за «щось пішло не так».
+function writeErrorMessage(err) {
+  return t(err && err.code === 'permission-denied' ? 'err_denied' : 'err_generic');
+}
+
 function setAuthMode(mode) {
   authMode = mode;
   const isLogin = mode === 'login';
@@ -1744,7 +1756,7 @@ document.getElementById('taskForm').addEventListener('submit', async (e) => {
     document.getElementById('taskFormOverlay').classList.remove('show');
   } catch (err) {
     console.error('save task:', err);
-    errorEl.textContent = t('err_generic');
+    errorEl.textContent = writeErrorMessage(err);
   } finally {
     submitBtn.disabled = false;
   }
@@ -1874,7 +1886,7 @@ async function submitQuickAdd() {
     closeQuickAdd();
   } catch (err) {
     console.error('quick add:', err);
-    errorEl.textContent = t('err_generic');
+    errorEl.textContent = writeErrorMessage(err);
   } finally {
     btn.disabled = false;
   }

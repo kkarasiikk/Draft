@@ -66,6 +66,18 @@ firebase use --add          # вибрати/додати свій проєкт,
 firebase deploy
 ```
 
+**Правила треба публікувати щоразу, коли в документі з'являється нове поле.**
+`firestore.rules` перелічує дозволені ключі через `hasOnly(...)`, тож зі
+старими правилами запис із новим полем відхиляється — застосунок показує
+«Сервер відхилив запис: правила Firestore застаріли». Найшвидший спосіб:
+
+```bash
+firebase deploy --only firestore:rules
+```
+
+або вставити вміст `firestore.rules` у Firebase Console -> Firestore Database
+-> Rules -> Publish.
+
 Це задеплоїть `firestore.rules`, `firestore.indexes.json` і Cloud Functions
 (`walletSync`, `aiChat`). Хостинг статичних файлів (GitHub
 Pages чи Firebase Hosting) — окремо, залежно від того, де реально
