@@ -36,14 +36,35 @@
   // Понеділок = 1 … неділя = 7 (як у ISO), бо тиждень скрізь у застосунку
   // починається з понеділка.
   var WEEKDAYS = [
-    { day: 1, words: 'понеділок|понеділка|понедельник|poniedziałek|poniedzialek|monday' },
-    { day: 2, words: 'вівторок|вівторка|вторник|wtorek|tuesday' },
-    { day: 3, words: 'середа|середу|среда|среду|środa|środę|sroda|wednesday' },
-    { day: 4, words: 'четвер|четверга|czwartek|thursday' },
-    { day: 5, words: "п'ятниця|п'ятницю|пятница|пятницу|piątek|piatek|friday" },
-    { day: 6, words: 'субота|суботу|суббота|субботу|sobota|sobotę|sobote|saturday' },
-    { day: 7, words: 'неділя|неділю|воскресенье|niedziela|niedzielę|niedziele|sunday' },
+    { day: 1, words: 'понеділок|понеділка|понеділку|понедельник|понедельника|poniedziałek|poniedzialek|monday' },
+    { day: 2, words: 'вівторок|вівторка|вівторку|вторник|вторника|wtorek|tuesday' },
+    { day: 3, words: 'середа|середу|середи|среда|среду|среды|środa|środę|sroda|wednesday' },
+    { day: 4, words: 'четвер|четверга|четвергу|четверг|czwartek|thursday' },
+    { day: 5, words: "п'ятниця|п'ятницю|п'ятниці|пятница|пятницу|пятницы|piątek|piatek|friday" },
+    { day: 6, words: 'субота|суботу|суботи|суббота|субботу|субботы|sobota|sobotę|sobote|saturday' },
+    { day: 7, words: 'неділя|неділю|неділі|воскресенье|воскресенья|niedziela|niedzielę|niedziele|sunday' },
   ];
+
+  // Повторення словами. Форми «щосуботи» / «по суботах» вирізаються ДО розбору
+  // дати — інакше parseDate побачив би в них назву дня тижня й зробив із
+  // повторюваного завдання одноразове.
+  var RECUR_WEEKDAYS = [
+    { day: 1, words: 'щопонеділка|щопонеділкам|по понеділках|по понедельникам|every monday|co poniedziałek|w każdy poniedziałek' },
+    { day: 2, words: 'щовівторка|по вівторках|по вторникам|every tuesday|co wtorek|w każdy wtorek' },
+    { day: 3, words: 'щосереди|по середах|по средам|every wednesday|co środę|co srode|w każdą środę' },
+    { day: 4, words: 'щочетверга|по четвергах|по четвергам|every thursday|co czwartek|w każdy czwartek' },
+    { day: 5, words: "щоп'ятниці|по п'ятницях|по пятницам|every friday|co piątek|w każdy piątek" },
+    { day: 6, words: 'щосуботи|по суботах|по субботам|every saturday|co sobotę|co sobote|w każdą sobotę' },
+    { day: 7, words: 'щонеділі|по неділях|по воскресеньям|every sunday|co niedzielę|w każdą niedzielę' },
+  ];
+  var RECUR_DAILY = 'щодня|щоденно|кожен день|кожного дня|каждый день|ежедневно|codziennie|daily|every day';
+  var RECUR_WEEKLY = 'щотижня|щотижнево|еженедельно|каждую неделю|co tydzień|co tydzien|weekly|every week';
+  var RECUR_MONTHLY = 'щомісяця|щомісячно|ежемесячно|каждый месяц|co miesiąc|co miesiac|monthly|every month';
+  // «Кожні N днів» — той самий маркер, але з числом.
+  var RECUR_EVERY_N = '(?:кожні|кожних|каждые|co|every)\\s+(\\d{1,3})\\s*(?:днів|дні|дня|дней|день|dni|days|day)';
+  // «Кожної суботи» / «every saturday» — маркер + назва дня тижня загальним
+  // списком, щоб не дублювати всі відмінки з WEEKDAYS.
+  var RECUR_MARKER = '(?:кожної|кожного|кожен|каждую|каждый|каждое|every|co|w każdy|w każdą)';
 
   var MIN_UNITS = 'хвилин\\w*|хвилі?в?|хв|мин\\w*|мін|minut\\w*|minutes|minute|mins|min|m';
   var HOUR_UNITS = 'годин\\w*|год|час[іао]?в?|godzin\\w*|godz|hours|hour|hrs|hr|h';
@@ -117,6 +138,54 @@
       }
     }
     state.priority = priority;
+  }
+
+  function parseRecurrence(state) {
+    var rule = null;
+
+    // 1. «Кожні N днів» — перевіряємо першим: містить те саме слово-маркер,
+    // що й «кожної суботи», але з числом.
+    var everyNRe = wordRe(RECUR_EVERY_N);
+    var em = state.text.match(new RegExp(everyNRe.source, 'iu'));
+    if (em) {
+      var n = Number(em[1]);
+      if (n > 0 && n <= 365) {
+        rule = { type: 'daily', interval: n, weekdays: [], day: null, anchor: 'schedule' };
+        state.text = cut(state.text, everyNRe);
+      }
+    }
+
+    // 2. Конкретний день тижня: «щосуботи», «кожної суботи», «every friday».
+    if (!rule) {
+      for (var i = 0; i < RECUR_WEEKDAYS.length; i++) {
+        var directRe = wordRe(RECUR_WEEKDAYS[i].words);
+        var markerRe = wordRe(RECUR_MARKER + '\\s+(?:' + WEEKDAYS[i].words + ')');
+        var re = directRe.test(state.text) ? directRe : (markerRe.test(state.text) ? markerRe : null);
+        if (re) {
+          rule = { type: 'weekly', interval: 1, weekdays: [RECUR_WEEKDAYS[i].day], day: null, anchor: 'schedule' };
+          state.text = cut(state.text, re);
+          break;
+        }
+      }
+    }
+
+    // 3. Загальні «щодня / щотижня / щомісяця».
+    if (!rule) {
+      var generic = [
+        { re: wordRe(RECUR_DAILY), type: 'daily' },
+        { re: wordRe(RECUR_WEEKLY), type: 'weekly' },
+        { re: wordRe(RECUR_MONTHLY), type: 'monthly' },
+      ];
+      for (var g = 0; g < generic.length; g++) {
+        if (generic[g].re.test(state.text)) {
+          rule = { type: generic[g].type, interval: 1, weekdays: [], day: null, anchor: 'schedule' };
+          state.text = cut(state.text, generic[g].re);
+          break;
+        }
+      }
+    }
+
+    state.recurrence = rule;
   }
 
   function parseDate(state) {
@@ -304,12 +373,20 @@
 
     parseTags(state);
     parsePriority(state);
+    // Повторення — до дати: «щосуботи» містить назву дня тижня, і без цього
+    // порядку воно перетворилось би на одноразове завдання на суботу.
+    parseRecurrence(state);
     parseDate(state);
     parseTime(state);
     parseEstimate(state);
 
     // Час без дати сам по собі марний — це майже завжди «сьогодні».
     if (state.dueTime && !state.dueDate) state.dueDate = isoOf(startOfDay(state.now));
+
+    // Повторення «щомісяця» прив'язується до числа з дати завдання.
+    if (state.recurrence && state.recurrence.type === 'monthly' && state.dueDate) {
+      state.recurrence.day = Number(state.dueDate.split('-')[2]);
+    }
 
     return {
       title: cleanTitle(state.text),
@@ -318,6 +395,7 @@
       priority: state.priority,
       tags: state.tags,
       estimateMin: state.estimateMin,
+      recurrence: state.recurrence,
     };
   }
 

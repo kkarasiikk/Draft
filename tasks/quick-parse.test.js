@@ -140,6 +140,53 @@ describe('parseQuickTask: пріоритет, теги, оцінка часу', 
   });
 });
 
+describe('parseQuickTask: повторення', () => {
+  test('щодня / ежедневно / codziennie / daily', () => {
+    ['Вітаміни щодня', 'Витамины ежедневно', 'Witaminy codziennie', 'Vitamins daily'].forEach((s) => {
+      expect(parse(s).recurrence).toEqual({ type: 'daily', interval: 1, weekdays: [], day: null, anchor: 'schedule' });
+    });
+  });
+
+  test('кожні N днів', () => {
+    expect(parse('Тренування кожні 3 дні').recurrence)
+      .toEqual({ type: 'daily', interval: 3, weekdays: [], day: null, anchor: 'schedule' });
+    expect(parse('Water plants every 5 days').recurrence.interval).toBe(5);
+  });
+
+  test('конкретний день тижня і не з\'їдає його як дату', () => {
+    const r = parse('Прибирання щосуботи');
+    expect(r.recurrence).toEqual({ type: 'weekly', interval: 1, weekdays: [6], day: null, anchor: 'schedule' });
+    // Найважливіше: «щосуботи» не має перетворитись на разове завдання на суботу.
+    expect(r.dueDate).toBeNull();
+    expect(r.title).toBe('Прибирання');
+  });
+
+  test('«кожної п\'ятниці» через маркер + назву дня', () => {
+    expect(parse("Звіт кожної п'ятниці").recurrence.weekdays).toEqual([5]);
+    expect(parse('Take out trash every friday').recurrence.weekdays).toEqual([5]);
+    expect(parse('Уборка по субботам').recurrence.weekdays).toEqual([6]);
+  });
+
+  test('щомісяця бере число з дати завдання', () => {
+    const r = parse('Оплатити оренду щомісяця 01.09');
+    expect(r.dueDate).toBe('2026-09-01');
+    expect(r.recurrence.type).toBe('monthly');
+    expect(r.recurrence.day).toBe(1);
+  });
+
+  test('повторення поєднується з часом і тегом', () => {
+    const r = parse('Вітаміни щодня о 9 #здоровя');
+    expect(r.recurrence.type).toBe('daily');
+    expect(r.dueTime).toBe('09:00');
+    expect(r.tags).toEqual(['здоровя']);
+    expect(r.title).toBe('Вітаміни');
+  });
+
+  test('звичайне завдання не отримує повторення', () => {
+    expect(parse('Купити молоко завтра').recurrence).toBeNull();
+  });
+});
+
 describe('parseQuickTask: назва', () => {
   test('усе разом', () => {
     const r = parse('Купити молоко завтра о 18 #дім ~15хв !1');
@@ -150,6 +197,7 @@ describe('parseQuickTask: назва', () => {
       priority: 'high',
       tags: ['дім'],
       estimateMin: 15,
+      recurrence: null,
     });
   });
 
@@ -162,6 +210,7 @@ describe('parseQuickTask: назва', () => {
       priority: 'medium',
       tags: ['health'],
       estimateMin: 10,
+      recurrence: null,
     });
   });
 
@@ -186,6 +235,7 @@ describe('parseQuickTask: назва', () => {
       priority: null,
       tags: [],
       estimateMin: null,
+      recurrence: null,
     });
   });
 

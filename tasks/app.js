@@ -62,7 +62,7 @@ const T = {
     estimateShort: (min) => (min >= 60 ? `~${Math.floor(min / 60)} год${min % 60 ? ' ' + (min % 60) + ' хв' : ''}` : `~${min} хв`),
     quickAddFabLabel: 'Додати', quickAddTitle: 'Швидке додавання',
     quickAddPlaceholder: 'Купити молоко завтра о 18',
-    quickAddHint: 'Дату, час, #тег, ~тривалість і пріоритет (!1 !2 !3) можна писати прямо в рядку.',
+    quickAddHint: 'Дату, час, #тег, ~тривалість, пріоритет (!1 !2 !3) і повторення («щодня», «щосуботи», «кожні 3 дні») можна писати прямо в рядку.',
     quickAddSubmit: 'Додати', quickAddDetails: 'Деталі…',
     quickAddNothing: 'Нічого не розпізнано — напиши хоча б назву',
     deleteBtn: 'Видалити', saveBtn: 'Зберегти',
@@ -120,7 +120,7 @@ const T = {
     estimateShort: (min) => (min >= 60 ? `~${Math.floor(min / 60)} ч${min % 60 ? ' ' + (min % 60) + ' мин' : ''}` : `~${min} мин`),
     quickAddFabLabel: 'Добавить', quickAddTitle: 'Быстрое добавление',
     quickAddPlaceholder: 'Купить молоко завтра в 18',
-    quickAddHint: 'Дату, время, #тег, ~длительность и приоритет (!1 !2 !3) можно писать прямо в строке.',
+    quickAddHint: 'Дату, время, #тег, ~длительность, приоритет (!1 !2 !3) и повтор («ежедневно», «по субботам», «каждые 3 дня») можно писать прямо в строке.',
     quickAddSubmit: 'Добавить', quickAddDetails: 'Детали…',
     quickAddNothing: 'Ничего не распознано — напиши хотя бы название',
     deleteBtn: 'Удалить', saveBtn: 'Сохранить',
@@ -178,7 +178,7 @@ const T = {
     estimateShort: (min) => (min >= 60 ? `~${Math.floor(min / 60)} godz${min % 60 ? ' ' + (min % 60) + ' min' : ''}` : `~${min} min`),
     quickAddFabLabel: 'Dodaj', quickAddTitle: 'Szybkie dodawanie',
     quickAddPlaceholder: 'Kupić mleko jutro o 18',
-    quickAddHint: 'Datę, godzinę, #tag, ~czas trwania i priorytet (!1 !2 !3) możesz wpisać w tej samej linii.',
+    quickAddHint: 'Datę, godzinę, #tag, ~czas trwania, priorytet (!1 !2 !3) i powtarzanie („codziennie", „co sobotę") możesz wpisać w tej samej linii.',
     quickAddSubmit: 'Dodaj', quickAddDetails: 'Szczegóły…',
     quickAddNothing: 'Nic nie rozpoznano — wpisz przynajmniej nazwę',
     deleteBtn: 'Usuń', saveBtn: 'Zapisz',
@@ -236,7 +236,7 @@ const T = {
     estimateShort: (min) => (min >= 60 ? `~${Math.floor(min / 60)}h${min % 60 ? ' ' + (min % 60) + 'm' : ''}` : `~${min}m`),
     quickAddFabLabel: 'Add', quickAddTitle: 'Quick add',
     quickAddPlaceholder: 'Buy milk tomorrow at 6pm',
-    quickAddHint: 'Date, time, #tag, ~duration and priority (!1 !2 !3) can go right in the line.',
+    quickAddHint: 'Date, time, #tag, ~duration, priority (!1 !2 !3) and repetition ("daily", "every friday", "every 3 days") can go right in the line.',
     quickAddSubmit: 'Add', quickAddDetails: 'Details…',
     quickAddNothing: 'Nothing recognised — type at least a title',
     deleteBtn: 'Delete', saveBtn: 'Save',
@@ -1529,6 +1529,19 @@ function formatEstimate(min) {
   return t('estimateShort', min);
 }
 
+// Повторюване завдання без явної дати має з чогось починатись: якщо сьогодні
+// вже підходящий день — стартуємо сьогодні, інакше з найближчого за правилом.
+function initialRecurrenceDate(rule) {
+  if (!rule) return null;
+  const today = todayISO();
+  if (rule.type === 'weekly' && Array.isArray(rule.weekdays) && rule.weekdays.length) {
+    const weekday = parseISODate(today).getDay() || 7;
+    if (rule.weekdays.indexOf(weekday) !== -1) return today;
+    return nextOccurrence(rule, { today });
+  }
+  return today;
+}
+
 function quickAddPreviewHtml(parsed) {
   const chips = [];
   if (parsed.dueDate) {
@@ -1542,6 +1555,9 @@ function quickAddPreviewHtml(parsed) {
   }
   if (parsed.estimateMin) {
     chips.push(`<span class="quick-chip">${escapeHtml(formatEstimate(parsed.estimateMin))}</span>`);
+  }
+  if (parsed.recurrence) {
+    chips.push(`<span class="quick-chip">\u21BB ${escapeHtml(recurrenceShortLabel(parsed.recurrence))}</span>`);
   }
   parsed.tags.forEach((tag) => chips.push(`<span class="quick-chip">#${escapeHtml(tag)}</span>`));
   if (!chips.length && parsed.title) {
@@ -1593,9 +1609,10 @@ async function submitQuickAdd() {
       tags: parsed.tags,
       // Дата з рядка важливіша за екран, з якого відкрили форму: якщо людина
       // написала «завтра», вона мала на увазі саме завтра.
-      dueDate: parsed.dueDate || quickAddDate || null,
+      dueDate: parsed.dueDate || quickAddDate || initialRecurrenceDate(parsed.recurrence),
       dueTime: parsed.dueTime,
       estimateMin: parsed.estimateMin,
+      recurrence: parsed.recurrence,
       subtasks: [],
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
@@ -1613,7 +1630,7 @@ async function submitQuickAdd() {
 // перенабирати не треба.
 function openQuickAddInForm() {
   const parsed = parseQuickTask(document.getElementById('quickAddInput').value);
-  const prefillDate = parsed.dueDate || quickAddDate || '';
+  const prefillDate = parsed.dueDate || quickAddDate || initialRecurrenceDate(parsed.recurrence) || '';
   closeQuickAdd();
   openTaskForm(null, prefillDate);
   document.getElementById('taskTitleInput').value = parsed.title;
@@ -1621,8 +1638,11 @@ function openQuickAddInForm() {
   formPriority = parsed.priority;
   formTags = parsed.tags.slice();
   formEstimate = parsed.estimateMin;
+  formRecurrence = parsed.recurrence;
   document.getElementById('taskEstimateInput').value = parsed.estimateMin || '';
   renderPriorityPicker();
+  renderRecurrencePicker();
+  renderRecurrenceOptions();
   renderTagsEditor();
 }
 
