@@ -227,6 +227,43 @@
   .modal{background:var(--surface);border-radius:26px 26px 0 0;padding:20px 20px calc(28px + env(safe-area-inset-bottom));width:100%;max-width:480px;
     max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;}
   .modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+  /* ---- Кастомний datepicker (замінює нативний календар браузера) ---- */
+  .dp-field{position:relative;margin-top:6px;margin-bottom:16px;}
+  input[data-dp-native]{position:absolute;opacity:0;pointer-events:none;width:1px;height:1px;}
+  .dp-trigger{width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;
+    font-family:'Inter',sans-serif;font-size:15.5px;text-align:left;
+    border:1px solid var(--border);border-radius:8px;padding:9px 12px;background:var(--bg);color:var(--ink);
+    cursor:pointer;-webkit-tap-highlight-color:transparent;}
+  .dp-trigger:hover, .dp-trigger:focus-visible{border-color:var(--accent);}
+  .dp-field.open .dp-trigger{border-color:var(--accent);}
+  .dp-trigger-text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .dp-trigger-text.dp-placeholder{color:var(--ink-muted);}
+  .dp-trigger-icon{flex-shrink:0;color:var(--ink-muted);display:flex;}
+  .dp-panel{position:fixed;z-index:55;width:280px;max-width:calc(100vw - 32px);
+    background:var(--surface);backdrop-filter:blur(var(--glass-blur)) saturate(150%);-webkit-backdrop-filter:blur(var(--glass-blur)) saturate(150%);
+    border:1px solid var(--border);border-radius:18px;box-shadow:var(--glass-shadow), 0 12px 34px rgba(20,20,30,.18);
+    padding:14px;opacity:0;transform:translateY(-6px) scale(.98);pointer-events:none;transition:opacity .14s ease,transform .14s ease;}
+  .dp-panel.show{opacity:1;transform:translateY(0) scale(1);pointer-events:auto;}
+  .dp-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+  .dp-head-label{font-size:14px;font-weight:600;color:var(--ink);text-transform:capitalize;}
+  .dp-nav-btn{width:28px;height:28px;border-radius:8px;border:1px solid var(--border);background:transparent;
+    color:var(--ink-soft);display:flex;align-items:center;justify-content:center;cursor:pointer;}
+  .dp-nav-btn:hover{border-color:var(--accent);color:var(--accent);}
+  .dp-weekdays{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:4px;}
+  .dp-weekday{font-size:11px;font-weight:600;color:var(--ink-muted);text-align:center;padding:4px 0;text-transform:uppercase;}
+  .dp-days{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+  .dp-day{position:relative;aspect-ratio:1;display:flex;align-items:center;justify-content:center;
+    font-size:13px;font-family:'Inter',sans-serif;color:var(--ink);background:transparent;border:none;border-radius:50%;
+    cursor:pointer;}
+  .dp-day:hover:not(:disabled):not(.dp-day-selected){background:var(--accent-light);}
+  .dp-day.dp-day-muted{color:var(--ink-muted);opacity:.45;}
+  .dp-day.dp-day-today:not(.dp-day-selected)::after{content:"";position:absolute;bottom:3px;left:50%;transform:translateX(-50%);
+    width:4px;height:4px;border-radius:50%;background:var(--accent);}
+  .dp-day.dp-day-selected{background:var(--accent);color:#fff;font-weight:600;}
+  .dp-day:disabled{opacity:.28;cursor:default;}
+  .dp-foot{display:flex;align-items:center;justify-content:flex-start;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);}
+  .dp-today-btn{background:none;border:none;color:var(--accent);font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;padding:4px 6px;}
+  .dp-today-btn:hover{text-decoration:underline;}
   .modal-title{font-family:'Inter',sans-serif;font-size:18px;font-weight:700;}
   .close-btn{background:none;border:none;cursor:pointer;color:var(--ink-muted);}
   label.field-label{font-size:12px;color:var(--ink-muted);font-weight:500;display:block;margin-top:2px;}
@@ -407,7 +444,7 @@
       <div class="field-row">
         <div>
           <label class="field-label" id="sessionDateLabel">Дата</label>
-          <input type="date" id="sessionDateInput">
+          <input type="date" id="sessionDateInput" data-dp-native>
         </div>
       </div>
 

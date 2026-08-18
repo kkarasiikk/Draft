@@ -1,3 +1,10 @@
+// ---- Service Worker ----
+// Реєструємо тут, а не інлайн у <script> в index.html, щоб CSP міг
+// забороняти інлайн-скрипти (script-src без 'unsafe-inline') без винятків.
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('service-worker.js').catch(() => {}));
+}
+
 // ---- Firebase ----
 firebase.initializeApp(firebaseConfig);
 
@@ -32,6 +39,32 @@ const T = {
     notesLabel: 'Нотатка', notesPlaceholder: 'Додаткові деталі (необовʼязково)',
     dueDateLabel: 'Дата', dueTimeLabel: 'Час', dpTodayBtn: 'Сьогодні',
     priorityNone: 'Немає', priorityLow: 'Низький', priorityMedium: 'Середній', priorityHigh: 'Високий',
+    recurrenceLabel: 'Повторювати',
+    recurNever: 'Ніколи', recurDaily: 'Щодня', recurWeekly: 'Щотижня', recurMonthly: 'Щомісяця',
+    recurEveryDays: 'Кожні … днів:', recurEveryMonths: 'Кожні … місяців:',
+    recurAnchorCompletion: 'Рахувати від дня виконання, а не від плану',
+    recurShortDaily: (n) => (n === 1 ? 'Щодня' : `Кожні ${n} дн.`),
+    recurShortMonthly: (n, day) => (n === 1 ? `${day} числа` : `Кожні ${n} міс.`),
+    nowTitle: 'Зараз', nowSkip: 'Далі',
+    nowNothingToday: 'На сьогодні завдань немає. Додай перше — або візьми щось із того, що без дати.',
+    nowAllDone: 'Усе на сьогодні зроблено. Можна видихнути 🎉',
+    nowOverdueBadge: 'Прострочено',
+    nowProgress: (done, total) => `Сьогодні: ${done}/${total}`,
+    nowRemaining: (time) => `лишилось роботи ~${time}`,
+    nowFree: (time) => `вільного часу ~${time}`,
+    nowOverloaded: 'Заплановано більше, ніж лишилось часу сьогодні',
+    nowOverdueCount: (n) => `Прострочено: ${n}`,
+    priorityLabel: 'Пріоритет',
+    tagsLabel: 'Теги', tagPlaceholder: 'Додати тег', removeTagAria: 'Прибрати тег',
+    subtasksLabel: 'Підзадачі', subtaskPlaceholder: 'Наступний крок',
+    addSubtaskBtn: '+ Додати підзадачу', removeSubtaskAria: 'Прибрати підзадачу',
+    estimateLabel: 'Скільки часу займе', estimatePlaceholder: 'хв',
+    estimateShort: (min) => (min >= 60 ? `~${Math.floor(min / 60)} год${min % 60 ? ' ' + (min % 60) + ' хв' : ''}` : `~${min} хв`),
+    quickAddFabLabel: 'Додати', quickAddTitle: 'Швидке додавання',
+    quickAddPlaceholder: 'Купити молоко завтра о 18',
+    quickAddHint: 'Дату, час, #тег, ~тривалість, пріоритет (!1 !2 !3) і повторення («щодня», «щосуботи», «кожні 3 дні») можна писати прямо в рядку.',
+    quickAddSubmit: 'Додати', quickAddDetails: 'Деталі…',
+    quickAddNothing: 'Нічого не розпізнано — напиши хоча б назву',
     deleteBtn: 'Видалити', saveBtn: 'Зберегти',
     titleRequiredError: 'Введи назву завдання',
     confirmDeleteTitle: 'Видалити завдання?', confirmDeleteSub: 'Цю дію не можна скасувати.',
@@ -64,6 +97,32 @@ const T = {
     notesLabel: 'Заметка', notesPlaceholder: 'Дополнительные детали (необязательно)',
     dueDateLabel: 'Дата', dueTimeLabel: 'Время', dpTodayBtn: 'Сегодня',
     priorityNone: 'Нет', priorityLow: 'Низкий', priorityMedium: 'Средний', priorityHigh: 'Высокий',
+    recurrenceLabel: 'Повторять',
+    recurNever: 'Никогда', recurDaily: 'Ежедневно', recurWeekly: 'Еженедельно', recurMonthly: 'Ежемесячно',
+    recurEveryDays: 'Каждые … дней:', recurEveryMonths: 'Каждые … месяцев:',
+    recurAnchorCompletion: 'Считать от дня выполнения, а не от плана',
+    recurShortDaily: (n) => (n === 1 ? 'Ежедневно' : `Каждые ${n} дн.`),
+    recurShortMonthly: (n, day) => (n === 1 ? `${day} числа` : `Каждые ${n} мес.`),
+    nowTitle: 'Сейчас', nowSkip: 'Дальше',
+    nowNothingToday: 'На сегодня задач нет. Добавь первую — или возьми что-то из того, что без даты.',
+    nowAllDone: 'Всё на сегодня сделано. Можно выдохнуть 🎉',
+    nowOverdueBadge: 'Просрочено',
+    nowProgress: (done, total) => `Сегодня: ${done}/${total}`,
+    nowRemaining: (time) => `осталось работы ~${time}`,
+    nowFree: (time) => `свободного времени ~${time}`,
+    nowOverloaded: 'Запланировано больше, чем осталось времени сегодня',
+    nowOverdueCount: (n) => `Просрочено: ${n}`,
+    priorityLabel: 'Приоритет',
+    tagsLabel: 'Теги', tagPlaceholder: 'Добавить тег', removeTagAria: 'Убрать тег',
+    subtasksLabel: 'Подзадачи', subtaskPlaceholder: 'Следующий шаг',
+    addSubtaskBtn: '+ Добавить подзадачу', removeSubtaskAria: 'Убрать подзадачу',
+    estimateLabel: 'Сколько времени займёт', estimatePlaceholder: 'мин',
+    estimateShort: (min) => (min >= 60 ? `~${Math.floor(min / 60)} ч${min % 60 ? ' ' + (min % 60) + ' мин' : ''}` : `~${min} мин`),
+    quickAddFabLabel: 'Добавить', quickAddTitle: 'Быстрое добавление',
+    quickAddPlaceholder: 'Купить молоко завтра в 18',
+    quickAddHint: 'Дату, время, #тег, ~длительность, приоритет (!1 !2 !3) и повтор («ежедневно», «по субботам», «каждые 3 дня») можно писать прямо в строке.',
+    quickAddSubmit: 'Добавить', quickAddDetails: 'Детали…',
+    quickAddNothing: 'Ничего не распознано — напиши хотя бы название',
     deleteBtn: 'Удалить', saveBtn: 'Сохранить',
     titleRequiredError: 'Введи название задачи',
     confirmDeleteTitle: 'Удалить задачу?', confirmDeleteSub: 'Это действие нельзя отменить.',
@@ -96,6 +155,32 @@ const T = {
     notesLabel: 'Notatka', notesPlaceholder: 'Dodatkowe szczegóły (opcjonalnie)',
     dueDateLabel: 'Data', dueTimeLabel: 'Godzina', dpTodayBtn: 'Dzisiaj',
     priorityNone: 'Brak', priorityLow: 'Niski', priorityMedium: 'Średni', priorityHigh: 'Wysoki',
+    recurrenceLabel: 'Powtarzaj',
+    recurNever: 'Nigdy', recurDaily: 'Codziennie', recurWeekly: 'Co tydzień', recurMonthly: 'Co miesiąc',
+    recurEveryDays: 'Co … dni:', recurEveryMonths: 'Co … miesięcy:',
+    recurAnchorCompletion: 'Licz od dnia wykonania, nie od planu',
+    recurShortDaily: (n) => (n === 1 ? 'Codziennie' : `Co ${n} dni`),
+    recurShortMonthly: (n, day) => (n === 1 ? `${day}. dnia` : `Co ${n} mies.`),
+    nowTitle: 'Teraz', nowSkip: 'Dalej',
+    nowNothingToday: 'Na dziś nie ma zadań. Dodaj pierwsze — albo weź coś bez daty.',
+    nowAllDone: 'Wszystko na dziś zrobione. Można odetchnąć 🎉',
+    nowOverdueBadge: 'Zaległe',
+    nowProgress: (done, total) => `Dziś: ${done}/${total}`,
+    nowRemaining: (time) => `zostało pracy ~${time}`,
+    nowFree: (time) => `wolnego czasu ~${time}`,
+    nowOverloaded: 'Zaplanowano więcej, niż zostało dziś czasu',
+    nowOverdueCount: (n) => `Zaległe: ${n}`,
+    priorityLabel: 'Priorytet',
+    tagsLabel: 'Tagi', tagPlaceholder: 'Dodaj tag', removeTagAria: 'Usuń tag',
+    subtasksLabel: 'Podzadania', subtaskPlaceholder: 'Następny krok',
+    addSubtaskBtn: '+ Dodaj podzadanie', removeSubtaskAria: 'Usuń podzadanie',
+    estimateLabel: 'Ile czasu zajmie', estimatePlaceholder: 'min',
+    estimateShort: (min) => (min >= 60 ? `~${Math.floor(min / 60)} godz${min % 60 ? ' ' + (min % 60) + ' min' : ''}` : `~${min} min`),
+    quickAddFabLabel: 'Dodaj', quickAddTitle: 'Szybkie dodawanie',
+    quickAddPlaceholder: 'Kupić mleko jutro o 18',
+    quickAddHint: 'Datę, godzinę, #tag, ~czas trwania, priorytet (!1 !2 !3) i powtarzanie („codziennie", „co sobotę") możesz wpisać w tej samej linii.',
+    quickAddSubmit: 'Dodaj', quickAddDetails: 'Szczegóły…',
+    quickAddNothing: 'Nic nie rozpoznano — wpisz przynajmniej nazwę',
     deleteBtn: 'Usuń', saveBtn: 'Zapisz',
     titleRequiredError: 'Wpisz nazwę zadania',
     confirmDeleteTitle: 'Usunąć zadanie?', confirmDeleteSub: 'Tej czynności nie można cofnąć.',
@@ -128,6 +213,32 @@ const T = {
     notesLabel: 'Notes', notesPlaceholder: 'Extra details (optional)',
     dueDateLabel: 'Date', dueTimeLabel: 'Time', dpTodayBtn: 'Today',
     priorityNone: 'None', priorityLow: 'Low', priorityMedium: 'Medium', priorityHigh: 'High',
+    recurrenceLabel: 'Repeat',
+    recurNever: 'Never', recurDaily: 'Daily', recurWeekly: 'Weekly', recurMonthly: 'Monthly',
+    recurEveryDays: 'Every … days:', recurEveryMonths: 'Every … months:',
+    recurAnchorCompletion: 'Count from the day it is done, not from the plan',
+    recurShortDaily: (n) => (n === 1 ? 'Daily' : `Every ${n} days`),
+    recurShortMonthly: (n, day) => (n === 1 ? `On the ${day}th` : `Every ${n} months`),
+    nowTitle: 'Now', nowSkip: 'Next',
+    nowNothingToday: 'Nothing scheduled for today. Add something — or pick one of the undated tasks.',
+    nowAllDone: 'Everything for today is done. Take a breath 🎉',
+    nowOverdueBadge: 'Overdue',
+    nowProgress: (done, total) => `Today: ${done}/${total}`,
+    nowRemaining: (time) => `~${time} of work left`,
+    nowFree: (time) => `~${time} free`,
+    nowOverloaded: 'You planned more than the time left today',
+    nowOverdueCount: (n) => `Overdue: ${n}`,
+    priorityLabel: 'Priority',
+    tagsLabel: 'Tags', tagPlaceholder: 'Add a tag', removeTagAria: 'Remove tag',
+    subtasksLabel: 'Subtasks', subtaskPlaceholder: 'Next step',
+    addSubtaskBtn: '+ Add subtask', removeSubtaskAria: 'Remove subtask',
+    estimateLabel: 'How long will it take', estimatePlaceholder: 'min',
+    estimateShort: (min) => (min >= 60 ? `~${Math.floor(min / 60)}h${min % 60 ? ' ' + (min % 60) + 'm' : ''}` : `~${min}m`),
+    quickAddFabLabel: 'Add', quickAddTitle: 'Quick add',
+    quickAddPlaceholder: 'Buy milk tomorrow at 6pm',
+    quickAddHint: 'Date, time, #tag, ~duration, priority (!1 !2 !3) and repetition ("daily", "every friday", "every 3 days") can go right in the line.',
+    quickAddSubmit: 'Add', quickAddDetails: 'Details…',
+    quickAddNothing: 'Nothing recognised — type at least a title',
     deleteBtn: 'Delete', saveBtn: 'Save',
     titleRequiredError: 'Enter a task title',
     confirmDeleteTitle: 'Delete task?', confirmDeleteSub: 'This action cannot be undone.',
@@ -251,6 +362,21 @@ function applyTranslations() {
   document.getElementById('authPasswordHint').textContent = t('passwordHint');
   document.getElementById('rememberMeLabel').textContent = t('rememberMe');
   document.getElementById('forgotPasswordLink').textContent = t('forgotPassword');
+  document.getElementById('nowTitle').textContent = t('nowTitle');
+  document.getElementById('quickAddFabLabel').textContent = t('quickAddFabLabel');
+  document.getElementById('quickAddTitle').textContent = t('quickAddTitle');
+  document.getElementById('quickAddInput').placeholder = t('quickAddPlaceholder');
+  document.getElementById('quickAddHint').textContent = t('quickAddHint');
+  document.getElementById('quickAddSubmitBtn').textContent = t('quickAddSubmit');
+  document.getElementById('quickAddDetailsBtn').textContent = t('quickAddDetails');
+  document.getElementById('priorityLabel').textContent = t('priorityLabel');
+  document.getElementById('estimateLabel').textContent = t('estimateLabel');
+  document.getElementById('taskEstimateInput').placeholder = t('estimatePlaceholder');
+  document.getElementById('tagsLabel').textContent = t('tagsLabel');
+  document.getElementById('taskTagInput').placeholder = t('tagPlaceholder');
+  document.getElementById('recurrenceLabel').textContent = t('recurrenceLabel');
+  document.getElementById('subtasksLabel').textContent = t('subtasksLabel');
+  document.getElementById('addSubtaskBtn').textContent = t('addSubtaskBtn');
   setAuthMode(authMode);
   refreshDatePickersLang();
 }
@@ -302,7 +428,11 @@ document.getElementById('authForm').addEventListener('submit', async (e) => {
   submitBtn.disabled = true;
   submitBtn.textContent = t('waitLabel');
   try {
-    if (document.getElementById('rememberMe').checked) {
+    // Той самий контракт, що й у budget/app.js та home.js: без "запам'ятати мене"
+    // сесія живе лише до закриття вкладки (SESSION), інакше — зберігається (LOCAL).
+    const remember = document.getElementById('rememberMe').checked;
+    await auth.setPersistence(remember ? firebase.auth.Auth.Persistence.LOCAL : firebase.auth.Auth.Persistence.SESSION);
+    if (remember) {
       localStorage.setItem('financeAppLastEmail', email);
     } else {
       localStorage.removeItem('financeAppLastEmail');
@@ -381,6 +511,9 @@ let editingTaskId = null;
 let formPriority = null;
 let formTags = [];
 let formSubtasks = [];
+let formEstimate = null;
+let formRecurrence = null; // { type, interval, weekdays, day, anchor } або null
+let quickAddDate = null;
 let pendingDeleteId = null;
 let calYear = new Date().getFullYear();
 let calMonth = new Date().getMonth(); // 0-based
@@ -451,6 +584,8 @@ function taskRowHtml(task) {
   if (task.dueTime) metaParts.push(`<span class="task-time${isOverdue ? ' overdue' : ''}">${escapeHtml(task.dueTime)}</span>`);
   if (task.priority) metaParts.push(`<span class="priority-chip ${task.priority}">${priorityLabel(task.priority)}</span>`);
   if (subtasks.length) metaParts.push(`<span class="task-progress">${subDone}/${subtasks.length}</span>`);
+  if (task.estimateMin) metaParts.push(`<span class="task-progress">${escapeHtml(t('estimateShort', task.estimateMin))}</span>`);
+  if (task.recurrence) metaParts.push(`<span class="task-progress">\u21BB ${escapeHtml(recurrenceShortLabel(task.recurrence))}</span>`);
   (task.tags || []).forEach((tag) => metaParts.push(`<span class="tag-chip">${escapeHtml(tag)}</span>`));
   return `
     <div class="task-row${doneRowClass}" data-id="${task.id}">
@@ -733,6 +868,7 @@ function refreshDatePickersLang() {
 }
 
 function renderCalendar() {
+  renderNowCard();
   document.getElementById('calMonthLabel').textContent = calMonthLabelText();
   if (calViewMode === 'year') {
     renderYearGrid();
@@ -874,6 +1010,95 @@ function renderNoDateSection() {
   }
 }
 
+
+// ---- Картка «Зараз» ----
+// Календар відповідає на «які в мене завдання», ця картка — на «що робити
+// прямо зараз»: одна наступна дія плюс чесний підсумок дня. Порядок і
+// підрахунки живуть у tasks/now-queue.js (чисті функції, покриті тестами).
+let nowIndex = 0;      // на скільки кроків уперед людина «перегорнула» чергу
+let nowClockTimer = null;
+
+function formatMinutes(min) {
+  return t('estimateShort', min).replace(/^~/, '');
+}
+
+function renderNowCard() {
+  const bodyEl = document.getElementById('nowBody');
+  const footEl = document.getElementById('nowFoot');
+  if (!bodyEl) return;
+
+  const now = new Date();
+  const locale = LOCALE_MAP[currentLang] || 'uk-UA';
+  document.getElementById('nowClock').textContent =
+    new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit' }).format(now);
+
+  const queue = nowQueue(tasks, { now });
+  const summary = daySummary(tasks, { now });
+
+  if (!queue.length) {
+    nowIndex = 0;
+    // Порожньо буває з двох причин, і це різні новини для людини.
+    const message = summary.totalCount > 0 ? t('nowAllDone') : t('nowNothingToday');
+    bodyEl.innerHTML = `<div class="now-empty">${escapeHtml(message)}</div>`;
+  } else {
+    if (nowIndex >= queue.length) nowIndex = 0;
+    const task = queue[nowIndex];
+    const isOverdue = task.dueDate && task.dueDate < todayISO();
+    const meta = [];
+    if (isOverdue) meta.push(`<span class="task-time overdue">${escapeHtml(t('nowOverdueBadge'))}</span>`);
+    if (task.dueTime) meta.push(`<span class="task-time">${escapeHtml(task.dueTime)}</span>`);
+    if (task.priority) meta.push(`<span class="priority-chip ${task.priority}">${escapeHtml(priorityLabel(task.priority))}</span>`);
+    if (task.estimateMin) meta.push(`<span class="task-progress">${escapeHtml(t('estimateShort', task.estimateMin))}</span>`);
+    if (task.recurrence) meta.push(`<span class="task-progress">\u21BB ${escapeHtml(recurrenceShortLabel(task.recurrence))}</span>`);
+    if (!task.dueDate) meta.push(`<span class="task-progress">${escapeHtml(t('noDateLabel'))}</span>`);
+
+    bodyEl.innerHTML = `
+      <div class="now-next">
+        <button type="button" class="task-check${task.priority ? ' priority-' + task.priority : ''}" data-now-done="${task.id}" aria-label="done">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+        </button>
+        <div class="now-body" data-now-open="${task.id}">
+          <div class="now-name">${escapeHtml(task.title)}</div>
+          ${meta.length ? `<div class="now-meta">${meta.join('')}</div>` : ''}
+        </div>
+        ${queue.length > 1 ? `<button type="button" class="now-skip" id="nowSkipBtn">${escapeHtml(t('nowSkip'))}</button>` : ''}
+      </div>`;
+
+    bodyEl.querySelector('[data-now-done]').addEventListener('click', (e) => {
+      e.stopPropagation();
+      // Після виконання показуємо наступне з початку черги, а не там,
+      // де людина зупинилась, гортаючи.
+      nowIndex = 0;
+      toggleDone(task.id);
+    });
+    bodyEl.querySelector('[data-now-open]').addEventListener('click', () => openTaskForm(task));
+    const skipBtn = bodyEl.querySelector('#nowSkipBtn');
+    if (skipBtn) {
+      skipBtn.addEventListener('click', () => {
+        nowIndex = (nowIndex + 1) % queue.length;
+        renderNowCard();
+      });
+    }
+  }
+
+  const parts = [];
+  if (summary.totalCount) parts.push(`<span>${escapeHtml(t('nowProgress', summary.doneCount, summary.totalCount))}</span>`);
+  if (summary.remainingMin) parts.push(`<span>${escapeHtml(t('nowRemaining', formatMinutes(summary.remainingMin)))}</span>`);
+  else if (summary.totalCount > summary.doneCount) parts.push(`<span>${escapeHtml(t('nowFree', formatMinutes(summary.freeMin)))}</span>`);
+  if (summary.overdueCount) parts.push(`<span class="now-overdue">${escapeHtml(t('nowOverdueCount', summary.overdueCount))}</span>`);
+  if (summary.overloaded) parts.push(`<span class="now-warn">${escapeHtml(t('nowOverloaded'))}</span>`);
+  footEl.innerHTML = parts.join('');
+}
+
+// Черга залежить від поточного часу (завдання «о 15:00» о 15:01 змінює групу),
+// тож раз на хвилину перемальовуємо картку — і заразом годинник у ній.
+function startNowClock() {
+  if (nowClockTimer) clearInterval(nowClockTimer);
+  nowClockTimer = setInterval(() => {
+    if (currentScreen === 'calendar') renderNowCard();
+  }, 60000);
+}
+
 // ---- Екран дня (детальний перегляд однієї дати) ----
 let currentScreen = 'calendar'; // 'calendar' | 'day'
 let dayViewDate = null;
@@ -937,16 +1162,47 @@ function renderDayView() {
 
 document.getElementById('dayViewBackBtn').addEventListener('click', showCalendarView);
 document.getElementById('openNewTaskDay').addEventListener('click', () => {
-  openTaskForm(null, dayViewDate);
+  openQuickAdd(dayViewDate);
 });
 
 function toggleDone(id) {
   const task = tasks.find((tsk) => tsk.id === id);
   if (!task || !auth.currentUser) return;
-  db.collection('users').doc(auth.currentUser.uid).collection('tasks').doc(id).update({
-    done: !task.done,
+  const done = !task.done;
+  const col = db.collection('users').doc(auth.currentUser.uid).collection('tasks');
+  col.doc(id).update({
+    done,
+    // Без часу виконання неможливі ні історія, ні статистика — і відновити
+    // його заднім числом уже не вийде, тож пишемо одразу.
+    completedAt: done ? firebase.firestore.FieldValue.serverTimestamp() : null,
     updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
   }).catch((err) => console.error('toggleDone:', err));
+
+  // Виконане повторюване завдання лишається в історії як виконане, а наступне
+  // створюється окремим документом — інакше статистика бачила б одну задачу
+  // замість двадцяти зроблених прибирань. Знята галочка наступне НЕ видаляє:
+  // мовчки прибирати вже створене завдання було б несподівано.
+  if (done && task.recurrence) {
+    const nextDate = nextOccurrence(task.recurrence, { dueDate: task.dueDate, today: todayISO() });
+    if (nextDate) {
+      col.add({
+        title: task.title,
+        notes: task.notes || '',
+        done: false,
+        completedAt: null,
+        priority: task.priority || null,
+        tags: task.tags || [],
+        dueDate: nextDate,
+        dueTime: task.dueTime || null,
+        estimateMin: task.estimateMin || null,
+        recurrence: task.recurrence,
+        // Підзадачі переносяться невиконаними — наступного разу їх робити знову.
+        subtasks: (task.subtasks || []).map((sub) => ({ ...sub, done: false })),
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      }).catch((err) => console.error('recurring next:', err));
+    }
+  }
 }
 
 // ---- Навігація календаря ----
@@ -973,6 +1229,192 @@ document.getElementById('calMonthLabel').addEventListener('click', () => {
   renderCalendar();
 });
 
+
+// ---- Редактори полів завдання ----
+// Пріоритет, теги й підзадачі зберігались у документі, але редагувати їх у
+// формі було нічим — значення можна було лише успадкувати від старого завдання.
+function renderPriorityPicker() {
+  const picker = document.getElementById('taskPriorityPicker');
+  const options = [
+    { value: null, label: t('priorityNone') },
+    { value: 'low', label: t('priorityLow') },
+    { value: 'medium', label: t('priorityMedium') },
+    { value: 'high', label: t('priorityHigh') },
+  ];
+  picker.innerHTML = options.map((o) => `
+    <button type="button" class="priority-choice${o.value === formPriority ? ' selected' : ''}"
+      data-priority="${o.value || ''}">${escapeHtml(o.label)}</button>`).join('');
+  picker.querySelectorAll('[data-priority]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      formPriority = btn.dataset.priority || null;
+      renderPriorityPicker();
+    });
+  });
+}
+
+function renderTagsEditor() {
+  const editor = document.getElementById('taskTagsEditor');
+  editor.innerHTML = formTags.map((tag) => `
+    <span class="tag-edit-chip">${escapeHtml(tag)}<button type="button" data-remove-tag="${escapeHtml(tag)}" aria-label="${escapeHtml(t('removeTagAria'))}">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button></span>`).join('');
+  editor.querySelectorAll('[data-remove-tag]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      formTags = formTags.filter((tag) => tag !== btn.dataset.removeTag);
+      renderTagsEditor();
+    });
+  });
+}
+
+function addTagFromInput() {
+  const input = document.getElementById('taskTagInput');
+  const raw = input.value.trim().replace(/^#/, '');
+  if (!raw) return;
+  if (formTags.length >= 20) { input.value = ''; return; } // стеля з firestore.rules
+  if (!formTags.some((tag) => tag.toLowerCase() === raw.toLowerCase())) formTags.push(raw);
+  input.value = '';
+  renderTagsEditor();
+}
+
+function renderSubtasksEditor() {
+  const editor = document.getElementById('taskSubtasksEditor');
+  editor.innerHTML = formSubtasks.map((sub, i) => `
+    <div class="subtask-row" data-idx="${i}">
+      <button type="button" class="subtask-check${sub.done ? ' checked' : ''}" data-toggle-sub="${i}" aria-label="done">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+      </button>
+      <input type="text" value="${escapeHtml(sub.title)}" data-sub-title="${i}" maxlength="200" placeholder="${escapeHtml(t('subtaskPlaceholder'))}">
+      <button type="button" class="subtask-remove" data-remove-sub="${i}" aria-label="${escapeHtml(t('removeSubtaskAria'))}">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>`).join('');
+  editor.querySelectorAll('[data-toggle-sub]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const sub = formSubtasks[Number(btn.dataset.toggleSub)];
+      sub.done = !sub.done;
+      renderSubtasksEditor();
+    });
+  });
+  editor.querySelectorAll('[data-sub-title]').forEach((input) => {
+    // Пишемо в стан на кожен ввід, без перемальовування — інакше поле
+    // втрачало б фокус після кожної набраної літери.
+    input.addEventListener('input', () => { formSubtasks[Number(input.dataset.subTitle)].title = input.value; });
+  });
+  editor.querySelectorAll('[data-remove-sub]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      formSubtasks.splice(Number(btn.dataset.removeSub), 1);
+      renderSubtasksEditor();
+    });
+  });
+}
+
+function addEmptySubtask() {
+  if (formSubtasks.length >= 50) return; // стеля з firestore.rules
+  formSubtasks.push({ id: uid4(), title: '', done: false });
+  renderSubtasksEditor();
+  const inputs = document.querySelectorAll('#taskSubtasksEditor [data-sub-title]');
+  if (inputs.length) inputs[inputs.length - 1].focus();
+}
+
+
+// ---- Редактор повторення ----
+// Наперед серія не створюється: наступне завдання з'являється в момент
+// виконання поточного (див. toggleDone) — обчислення дати в tasks/recurrence.js.
+function renderRecurrencePicker() {
+  const picker = document.getElementById('taskRecurrencePicker');
+  const options = [
+    { value: null, label: t('recurNever') },
+    { value: 'daily', label: t('recurDaily') },
+    { value: 'weekly', label: t('recurWeekly') },
+    { value: 'monthly', label: t('recurMonthly') },
+  ];
+  const current = formRecurrence ? formRecurrence.type : null;
+  picker.innerHTML = options.map((o) => `
+    <button type="button" class="priority-choice${o.value === current ? ' selected' : ''}"
+      data-recur="${o.value || ''}">${escapeHtml(o.label)}</button>`).join('');
+  picker.querySelectorAll('[data-recur]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const type = btn.dataset.recur || null;
+      if (!type) {
+        formRecurrence = null;
+      } else {
+        const dueDate = document.getElementById('taskDueDate').value;
+        const base = dueDate ? parseISODate(dueDate) : new Date();
+        formRecurrence = {
+          type,
+          interval: 1,
+          // За замовчуванням повторюємо в той самий день тижня / того ж числа,
+          // що й саме завдання — це майже завжди те, що людина мала на увазі.
+          weekdays: type === 'weekly' ? [base.getDay() === 0 ? 7 : base.getDay()] : [],
+          day: type === 'monthly' ? base.getDate() : null,
+          anchor: formRecurrence ? formRecurrence.anchor : 'schedule',
+        };
+      }
+      renderRecurrencePicker();
+      renderRecurrenceOptions();
+    });
+  });
+}
+
+function renderRecurrenceOptions() {
+  const box = document.getElementById('recurrenceOptions');
+  if (!formRecurrence) { box.innerHTML = ''; return; }
+  const r = formRecurrence;
+  let html = '';
+
+  if (r.type === 'daily' || r.type === 'monthly') {
+    const label = r.type === 'daily' ? t('recurEveryDays') : t('recurEveryMonths');
+    html += `<div class="recur-interval"><span>${escapeHtml(label)}</span>
+      <input type="number" id="recurIntervalInput" min="1" max="365" step="1" inputmode="numeric" value="${r.interval}"></div>`;
+  }
+  if (r.type === 'weekly') {
+    html += `<div class="recur-weekdays">${weekdayShortLabels().map((w, i) => {
+      const day = i + 1; // понеділок = 1
+      return `<button type="button" class="recur-weekday${r.weekdays.indexOf(day) !== -1 ? ' selected' : ''}"
+        data-weekday="${day}">${escapeHtml(w)}</button>`;
+    }).join('')}</div>`;
+  }
+  html += `<label class="recur-anchor"><input type="checkbox" id="recurAnchorInput"${r.anchor === 'completion' ? ' checked' : ''}>
+    <span>${escapeHtml(t('recurAnchorCompletion'))}</span></label>`;
+  box.innerHTML = html;
+
+  const intervalInput = box.querySelector('#recurIntervalInput');
+  if (intervalInput) {
+    intervalInput.addEventListener('input', () => {
+      const n = parseInt(intervalInput.value, 10);
+      formRecurrence.interval = Number.isFinite(n) && n > 0 ? Math.min(n, 365) : 1;
+    });
+  }
+  box.querySelectorAll('[data-weekday]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const day = Number(btn.dataset.weekday);
+      const idx = formRecurrence.weekdays.indexOf(day);
+      if (idx === -1) formRecurrence.weekdays.push(day);
+      else formRecurrence.weekdays.splice(idx, 1);
+      // Порожній перелік означав би «невідомо коли» — лишаємо хоча б один день.
+      if (!formRecurrence.weekdays.length) formRecurrence.weekdays.push(day);
+      formRecurrence.weekdays.sort();
+      renderRecurrenceOptions();
+    });
+  });
+  const anchorInput = box.querySelector('#recurAnchorInput');
+  if (anchorInput) {
+    anchorInput.addEventListener('change', () => {
+      formRecurrence.anchor = anchorInput.checked ? 'completion' : 'schedule';
+    });
+  }
+}
+
+// Короткий підпис правила для картки завдання: «Щодня», «Пн/Ср/Пт», «1 числа».
+function recurrenceShortLabel(rule) {
+  const r = normalizeRecurrence(rule);
+  if (!r) return '';
+  if (r.type === 'daily') return t('recurShortDaily', r.interval);
+  if (r.type === 'monthly') return t('recurShortMonthly', r.interval, r.day || 1);
+  const names = weekdayShortLabels();
+  return (r.weekdays.length ? r.weekdays : [1]).map((d) => names[d - 1]).join('/');
+}
+
 // ---- Форма завдання ----
 function openTaskForm(existingTask, prefillDate) {
   editingTaskId = existingTask ? existingTask.id : null;
@@ -983,12 +1425,18 @@ function openTaskForm(existingTask, prefillDate) {
   document.getElementById('taskNotesInput').value = existingTask ? existingTask.notes || '' : '';
   document.getElementById('taskDueDate').value = existingTask ? existingTask.dueDate || '' : (prefillDate || '');
   document.getElementById('taskDueTime').value = existingTask ? existingTask.dueTime || '' : '';
-  // Пріоритет/теги/підзадачі вже не редагуються у формі, але якщо це
-  // існуюче завдання зі старими значеннями — зберігаємо їх незмінними
-  // при наступному збереженні, а не стираємо.
   formPriority = existingTask ? existingTask.priority || null : null;
   formTags = existingTask ? [...(existingTask.tags || [])] : [];
   formSubtasks = existingTask ? (existingTask.subtasks || []).map((s) => ({ ...s })) : [];
+  formEstimate = existingTask ? existingTask.estimateMin || null : null;
+  formRecurrence = existingTask && existingTask.recurrence ? { ...existingTask.recurrence } : null;
+  document.getElementById('taskEstimateInput').value = formEstimate || '';
+  document.getElementById('taskTagInput').value = '';
+  renderPriorityPicker();
+  renderRecurrencePicker();
+  renderRecurrenceOptions();
+  renderTagsEditor();
+  renderSubtasksEditor();
   document.getElementById('taskFormOverlay').classList.add('show');
   setTimeout(() => document.getElementById('taskTitleInput').focus(), 50);
 }
@@ -1018,9 +1466,14 @@ document.getElementById('taskForm').addEventListener('submit', async (e) => {
     .map((s) => ({ id: s.id, title: (s.title || '').trim(), done: !!s.done }))
     .filter((s) => s.title);
 
+  const estimateRaw = parseInt(document.getElementById('taskEstimateInput').value, 10);
+  const estimateMin = Number.isFinite(estimateRaw) && estimateRaw > 0 ? Math.min(estimateRaw, 1440) : null;
+
   const payload = {
     title, notes: document.getElementById('taskNotesInput').value.trim(),
     dueDate, dueTime, priority: formPriority, tags: formTags,
+    estimateMin,
+    recurrence: formRecurrence,
     subtasks: cleanSubtasks,
     updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
   };
@@ -1032,7 +1485,7 @@ document.getElementById('taskForm').addEventListener('submit', async (e) => {
     if (editingTaskId) {
       await col.doc(editingTaskId).update(payload);
     } else {
-      await col.add({ ...payload, done: false, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+      await col.add({ ...payload, done: false, completedAt: null, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
     }
     document.getElementById('taskFormOverlay').classList.remove('show');
   } catch (err) {
@@ -1066,6 +1519,147 @@ document.getElementById('confirmDelete').addEventListener('click', async () => {
   pendingDeleteId = null;
   document.getElementById('confirmOverlay').classList.remove('show');
 });
+
+
+// ---- Швидке додавання ----
+// Один рядок замість форми з семи полів: розбір робить parseQuickTask
+// (tasks/quick-parse.js) — локально, без мережі й без AI. Що саме розпізналось,
+// показуємо чипами під полем, щоб людина бачила результат ДО збереження.
+function formatEstimate(min) {
+  return t('estimateShort', min);
+}
+
+// Повторюване завдання без явної дати має з чогось починатись: якщо сьогодні
+// вже підходящий день — стартуємо сьогодні, інакше з найближчого за правилом.
+function initialRecurrenceDate(rule) {
+  if (!rule) return null;
+  const today = todayISO();
+  if (rule.type === 'weekly' && Array.isArray(rule.weekdays) && rule.weekdays.length) {
+    const weekday = parseISODate(today).getDay() || 7;
+    if (rule.weekdays.indexOf(weekday) !== -1) return today;
+    return nextOccurrence(rule, { today });
+  }
+  return today;
+}
+
+function quickAddPreviewHtml(parsed) {
+  const chips = [];
+  if (parsed.dueDate) {
+    const [y, m, d] = parsed.dueDate.split('-').map(Number);
+    const locale = LOCALE_MAP[currentLang] || 'uk-UA';
+    const label = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long' }).format(new Date(y, m - 1, d));
+    chips.push(`<span class="quick-chip">${escapeHtml(label)}${parsed.dueTime ? ', ' + escapeHtml(parsed.dueTime) : ''}</span>`);
+  }
+  if (parsed.priority) {
+    chips.push(`<span class="quick-chip">${escapeHtml(priorityLabel(parsed.priority))}</span>`);
+  }
+  if (parsed.estimateMin) {
+    chips.push(`<span class="quick-chip">${escapeHtml(formatEstimate(parsed.estimateMin))}</span>`);
+  }
+  if (parsed.recurrence) {
+    chips.push(`<span class="quick-chip">\u21BB ${escapeHtml(recurrenceShortLabel(parsed.recurrence))}</span>`);
+  }
+  parsed.tags.forEach((tag) => chips.push(`<span class="quick-chip">#${escapeHtml(tag)}</span>`));
+  if (!chips.length && parsed.title) {
+    chips.push(`<span class="quick-chip muted">${escapeHtml(parsed.title)}</span>`);
+  }
+  return chips.join('');
+}
+
+function refreshQuickAddPreview() {
+  const parsed = parseQuickTask(document.getElementById('quickAddInput').value);
+  document.getElementById('quickAddPreview').innerHTML = quickAddPreviewHtml(parsed);
+  return parsed;
+}
+
+function openQuickAdd(prefillDate) {
+  const input = document.getElementById('quickAddInput');
+  input.value = '';
+  quickAddDate = prefillDate || null;
+  document.getElementById('quickAddError').textContent = '';
+  refreshQuickAddPreview();
+  document.getElementById('quickAddOverlay').classList.add('show');
+  setTimeout(() => input.focus(), 50);
+}
+
+function closeQuickAdd() {
+  document.getElementById('quickAddOverlay').classList.remove('show');
+}
+
+async function submitQuickAdd() {
+  const parsed = parseQuickTask(document.getElementById('quickAddInput').value);
+  const errorEl = document.getElementById('quickAddError');
+  if (!parsed.title) {
+    errorEl.textContent = t('quickAddNothing');
+    return;
+  }
+  errorEl.textContent = '';
+  const uidCur = auth.currentUser && auth.currentUser.uid;
+  if (!uidCur) return;
+
+  const btn = document.getElementById('quickAddSubmitBtn');
+  btn.disabled = true;
+  try {
+    await db.collection('users').doc(uidCur).collection('tasks').add({
+      title: parsed.title,
+      notes: '',
+      done: false,
+      completedAt: null,
+      priority: parsed.priority,
+      tags: parsed.tags,
+      // Дата з рядка важливіша за екран, з якого відкрили форму: якщо людина
+      // написала «завтра», вона мала на увазі саме завтра.
+      dueDate: parsed.dueDate || quickAddDate || initialRecurrenceDate(parsed.recurrence),
+      dueTime: parsed.dueTime,
+      estimateMin: parsed.estimateMin,
+      recurrence: parsed.recurrence,
+      subtasks: [],
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+    closeQuickAdd();
+  } catch (err) {
+    console.error('quick add:', err);
+    errorEl.textContent = t('err_generic');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// «Деталі…» — те саме, що вже набрано, але у повній формі: нічого
+// перенабирати не треба.
+function openQuickAddInForm() {
+  const parsed = parseQuickTask(document.getElementById('quickAddInput').value);
+  const prefillDate = parsed.dueDate || quickAddDate || initialRecurrenceDate(parsed.recurrence) || '';
+  closeQuickAdd();
+  openTaskForm(null, prefillDate);
+  document.getElementById('taskTitleInput').value = parsed.title;
+  document.getElementById('taskDueTime').value = parsed.dueTime || '';
+  formPriority = parsed.priority;
+  formTags = parsed.tags.slice();
+  formEstimate = parsed.estimateMin;
+  formRecurrence = parsed.recurrence;
+  document.getElementById('taskEstimateInput').value = parsed.estimateMin || '';
+  renderPriorityPicker();
+  renderRecurrencePicker();
+  renderRecurrenceOptions();
+  renderTagsEditor();
+}
+
+document.getElementById('openQuickAdd').addEventListener('click', () => openQuickAdd(null));
+document.getElementById('closeQuickAdd').addEventListener('click', closeQuickAdd);
+document.getElementById('quickAddOverlay').addEventListener('click', (e) => {
+  if (e.target.id === 'quickAddOverlay') closeQuickAdd();
+});
+document.getElementById('quickAddInput').addEventListener('input', refreshQuickAddPreview);
+document.getElementById('quickAddForm').addEventListener('submit', (e) => { e.preventDefault(); submitQuickAdd(); });
+document.getElementById('quickAddDetailsBtn').addEventListener('click', openQuickAddInForm);
+document.getElementById('taskTagInput').addEventListener('keydown', (e) => {
+  // Enter у полі тега додає тег, а не відправляє всю форму завдання.
+  if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); addTagFromInput(); }
+});
+document.getElementById('taskTagInput').addEventListener('blur', addTagFromInput);
+document.getElementById('addSubtaskBtn').addEventListener('click', addEmptySubtask);
 
 // ---- Автентифікація: стан ----
 auth.onAuthStateChanged((user) => {
@@ -1111,6 +1705,7 @@ setTimeout(() => {
 
 // ---- Ініціалізація ----
 initDatePicker('taskDueDate');
+startNowClock();
 applyTheme();
 applyTranslations();
 renderThemePicker();

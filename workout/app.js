@@ -1,3 +1,10 @@
+// ---- Service Worker ----
+// Реєструємо тут, а не інлайн у <script> в index.html, щоб CSP міг
+// забороняти інлайн-скрипти (script-src без 'unsafe-inline') без винятків.
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('service-worker.js').catch(() => {}));
+}
+
 // ---- Firebase ----
 firebase.initializeApp(firebaseConfig);
 
@@ -51,6 +58,7 @@ const T = {
     newSessionTitle: 'Нове тренування', editSessionTitle: 'Редагувати тренування',
     sessionNamePlaceholder: 'Назва (необовʼязково)',
     sessionDateLabel: 'Дата',
+    dpTodayBtn: 'Сьогодні',
     exercisesLabel: 'Вправи', addExerciseLabel: 'Додати вправу',
     sessionNotesLabel: 'Нотатка', sessionNotesPlaceholder: 'Як пройшло тренування? (необовʼязково)',
     saveBtn: 'Зберегти', deleteBtn: 'Видалити',
@@ -98,6 +106,7 @@ const T = {
     newSessionTitle: 'Новая тренировка', editSessionTitle: 'Редактировать тренировку',
     sessionNamePlaceholder: 'Название (необязательно)',
     sessionDateLabel: 'Дата',
+    dpTodayBtn: 'Сегодня',
     exercisesLabel: 'Упражнения', addExerciseLabel: 'Добавить упражнение',
     sessionNotesLabel: 'Заметка', sessionNotesPlaceholder: 'Как прошла тренировка? (необязательно)',
     saveBtn: 'Сохранить', deleteBtn: 'Удалить',
@@ -145,6 +154,7 @@ const T = {
     newSessionTitle: 'Nowy trening', editSessionTitle: 'Edytuj trening',
     sessionNamePlaceholder: 'Nazwa (opcjonalnie)',
     sessionDateLabel: 'Data',
+    dpTodayBtn: 'Dziś',
     exercisesLabel: 'Ćwiczenia', addExerciseLabel: 'Dodaj ćwiczenie',
     sessionNotesLabel: 'Notatka', sessionNotesPlaceholder: 'Jak poszedł trening? (opcjonalnie)',
     saveBtn: 'Zapisz', deleteBtn: 'Usuń',
@@ -192,6 +202,7 @@ const T = {
     newSessionTitle: 'New workout', editSessionTitle: 'Edit workout',
     sessionNamePlaceholder: 'Name (optional)',
     sessionDateLabel: 'Date',
+    dpTodayBtn: 'Today',
     exercisesLabel: 'Exercises', addExerciseLabel: 'Add exercise',
     sessionNotesLabel: 'Notes', sessionNotesPlaceholder: 'How did the workout go? (optional)',
     saveBtn: 'Save', deleteBtn: 'Delete',
@@ -345,6 +356,7 @@ function applyTranslations() {
   document.getElementById('rememberMeLabel').textContent = t('rememberMe');
   document.getElementById('forgotPasswordLink').textContent = t('forgotPassword');
   setAuthMode(authMode);
+  refreshDatePickersLang();
 }
 
 // ---- Вхід / реєстрація ----
@@ -388,7 +400,11 @@ document.getElementById('authForm').addEventListener('submit', async (e) => {
   submitBtn.disabled = true;
   submitBtn.textContent = t('waitLabel');
   try {
-    if (document.getElementById('rememberMe').checked) {
+    // Той самий контракт, що й у budget/app.js та home.js: без "запам'ятати мене"
+    // сесія живе лише до закриття вкладки (SESSION), інакше — зберігається (LOCAL).
+    const remember = document.getElementById('rememberMe').checked;
+    await auth.setPersistence(remember ? firebase.auth.Auth.Persistence.LOCAL : firebase.auth.Auth.Persistence.SESSION);
+    if (remember) {
       localStorage.setItem('financeAppLastEmail', email);
     } else {
       localStorage.removeItem('financeAppLastEmail');
@@ -450,6 +466,26 @@ function escapeHtml(s) {
 function uid4() {
   return (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}_${Math.random().toString(36).slice(2)}`).slice(0, 36);
 }
+// Парсить "YYYY-MM-DD" як ЛОКАЛЬНУ дату (без часу) — на відміну від
+// `new Date("YYYY-MM-DD")`, який трактує рядок як UTC-північ і в поясах
+// з від'ємним зсувом зсуває дату на день назад.
+function parseISODate(s) {
+  if (!s) return new Date(NaN);
+  const [y, m, d] = s.split('-').map(Number);
+  return new Date(y, (m || 1) - 1, d || 1);
+}
+// Короткі назви днів тижня, понеділок першим — для кастомного datepicker.
+function weekdayShortLabels() {
+  const fmt = new Intl.DateTimeFormat(LOCALE_MAP[currentLang] || 'uk-UA', { weekday: 'short' });
+  const monday = new Date(2024, 0, 1); // відомий понеділок
+  const labels = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    labels.push(fmt.format(d));
+  }
+  return labels;
+}
 function fmtNum(n) {
   // Прибирає зайві .0, залишає до 2 знаків після коми (для дробової ваги).
   return Number.isFinite(n) ? (Math.round(n * 100) / 100).toString() : '0';
@@ -477,6 +513,207 @@ function exerciseKey(ex) {
 }
 function exerciseDisplayName(ex) {
   return ex.libId ? exerciseLabel(ex.libId) : (ex.name || '');
+}
+
+// ---- Кастомний datepicker ----
+// Замінює нативний календар браузера (input type=date) на панель у стилі
+// застосунку — так само, як у budget/ і tasks/. Нативний <input> лишається в
+// DOM (прихований, але функціональний): увесь існуючий код
+// (`sessionDateInput.value = ...`) працює без змін, бо сеттер `.value`
+// перехоплено, щоб кастомний UI оновлювався синхронно. Місяці/дні тижня —
+// через Intl, без ручних словників перекладу.
+const datePickerInstances = [];
+function initDatePicker(nativeId) {
+  const native = document.getElementById(nativeId);
+  if (!native || native.dataset.dpInit) return;
+  native.dataset.dpInit = '1';
+
+  const field = document.createElement('div');
+  field.className = 'dp-field';
+  native.insertAdjacentElement('afterend', field);
+  field.appendChild(native);
+
+  const trigger = document.createElement('button');
+  trigger.type = 'button';
+  trigger.className = 'dp-trigger';
+  trigger.innerHTML = '<span class="dp-trigger-text"></span>' +
+    '<span class="dp-trigger-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10h18"/></svg></span>';
+  field.appendChild(trigger);
+
+  const panel = document.createElement('div');
+  panel.className = 'dp-panel';
+  panel.innerHTML =
+    '<div class="dp-head">' +
+      '<button type="button" class="dp-nav-btn dp-prev" aria-label="‹"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 18l-6-6 6-6"/></svg></button>' +
+      '<div class="dp-head-label"></div>' +
+      '<button type="button" class="dp-nav-btn dp-next" aria-label="›"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg></button>' +
+    '</div>' +
+    '<div class="dp-weekdays"></div>' +
+    '<div class="dp-days"></div>' +
+    '<div class="dp-foot"><button type="button" class="dp-today-btn"></button></div>';
+  // Панель монтуємо в <body>, а не всередину .dp-field: .modal має
+  // overflow-y:auto, що обрізало б випадаючий календар знизу.
+  document.body.appendChild(panel);
+
+  const triggerText = trigger.querySelector('.dp-trigger-text');
+  const headLabel = panel.querySelector('.dp-head-label');
+  const weekdaysEl = panel.querySelector('.dp-weekdays');
+  const daysEl = panel.querySelector('.dp-days');
+  const todayBtn = panel.querySelector('.dp-today-btn');
+  const prevBtn = panel.querySelector('.dp-prev');
+  const nextBtn = panel.querySelector('.dp-next');
+
+  let viewYear, viewMonth;
+
+  function isoOf(d) {
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+  function selectedDate() {
+    const raw = nativeValueGetter.call(native);
+    if (!raw) return null;
+    const d = parseISODate(raw);
+    return isNaN(d) ? null : d;
+  }
+  function maxDate() {
+    const raw = native.getAttribute('max');
+    if (!raw) return null;
+    const d = parseISODate(raw);
+    return isNaN(d) ? null : d;
+  }
+  function minDate() {
+    const raw = native.getAttribute('min');
+    if (!raw) return null;
+    const d = parseISODate(raw);
+    return isNaN(d) ? null : d;
+  }
+
+  function refreshTriggerText() {
+    const sel = selectedDate();
+    if (!sel) {
+      triggerText.textContent = '—';
+      triggerText.classList.add('dp-placeholder');
+      return;
+    }
+    const locale = LOCALE_MAP[currentLang] || 'uk-UA';
+    triggerText.textContent = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long', year: 'numeric' }).format(sel);
+    triggerText.classList.remove('dp-placeholder');
+  }
+
+  function renderPanel() {
+    const locale = LOCALE_MAP[currentLang] || 'uk-UA';
+    const label = new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' }).format(new Date(viewYear, viewMonth, 1));
+    headLabel.textContent = label.charAt(0).toUpperCase() + label.slice(1);
+    weekdaysEl.innerHTML = weekdayShortLabels().map((w) => '<div class="dp-weekday">' + escapeHtml(w) + '</div>').join('');
+    todayBtn.textContent = t('dpTodayBtn');
+
+    const sel = selectedDate();
+    const max = maxDate();
+    const min = minDate();
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+
+    const firstOfMonth = new Date(viewYear, viewMonth, 1);
+    const startOffset = (firstOfMonth.getDay() + 6) % 7; // понеділок = 0
+    const gridStart = new Date(viewYear, viewMonth, 1 - startOffset);
+
+    let html = '';
+    for (let i = 0; i < 42; i++) {
+      const d = new Date(gridStart.getFullYear(), gridStart.getMonth(), gridStart.getDate() + i);
+      const inMonth = d.getMonth() === viewMonth;
+      const isToday = d.getTime() === today.getTime();
+      const isSelected = sel && d.getTime() === new Date(sel.getFullYear(), sel.getMonth(), sel.getDate()).getTime();
+      const disabled = (max && d.getTime() > new Date(max.getFullYear(), max.getMonth(), max.getDate()).getTime()) ||
+        (min && d.getTime() < new Date(min.getFullYear(), min.getMonth(), min.getDate()).getTime());
+      const cls = ['dp-day'];
+      if (!inMonth) cls.push('dp-day-muted');
+      if (isToday) cls.push('dp-day-today');
+      if (isSelected) cls.push('dp-day-selected');
+      html += '<button type="button" class="' + cls.join(' ') + '" data-date="' + isoOf(d) + '"' + (disabled ? ' disabled' : '') + '>' + d.getDate() + '</button>';
+    }
+    daysEl.innerHTML = html;
+    daysEl.querySelectorAll('.dp-day').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        native.value = btn.dataset.date;
+        close();
+      });
+    });
+  }
+
+  function positionPanel() {
+    const rect = trigger.getBoundingClientRect();
+    const panelWidth = panel.offsetWidth || 280;
+    let left = rect.left;
+    const maxLeft = window.innerWidth - panelWidth - 16;
+    if (left > maxLeft) left = Math.max(16, maxLeft);
+    let top = rect.bottom + 6;
+    const panelHeight = panel.offsetHeight || 320;
+    if (top + panelHeight > window.innerHeight - 12) {
+      top = Math.max(12, rect.top - panelHeight - 6);
+    }
+    panel.style.left = left + 'px';
+    panel.style.top = top + 'px';
+  }
+  function isOpen() { return panel.classList.contains('show'); }
+  function openPanel() {
+    const sel = selectedDate() || new Date();
+    viewYear = sel.getFullYear();
+    viewMonth = sel.getMonth();
+    renderPanel();
+    field.classList.add('open');
+    panel.classList.add('show');
+    positionPanel();
+    document.addEventListener('click', onOutsideClick, true);
+    document.addEventListener('keydown', onKeydown, true);
+    document.addEventListener('scroll', close, true);
+    window.addEventListener('resize', close);
+  }
+  function close() {
+    field.classList.remove('open');
+    panel.classList.remove('show');
+    document.removeEventListener('click', onOutsideClick, true);
+    document.removeEventListener('keydown', onKeydown, true);
+    document.removeEventListener('scroll', close, true);
+    window.removeEventListener('resize', close);
+  }
+  function onOutsideClick(e) {
+    if (!field.contains(e.target) && !panel.contains(e.target)) close();
+  }
+  function onKeydown(e) {
+    if (e.key === 'Escape') close();
+  }
+
+  trigger.addEventListener('click', () => {
+    if (isOpen()) close(); else openPanel();
+  });
+  prevBtn.addEventListener('click', () => {
+    viewMonth--; if (viewMonth < 0) { viewMonth = 11; viewYear--; }
+    renderPanel();
+  });
+  nextBtn.addEventListener('click', () => {
+    viewMonth++; if (viewMonth > 11) { viewMonth = 0; viewYear++; }
+    renderPanel();
+  });
+  todayBtn.addEventListener('click', () => {
+    native.value = todayISO();
+    close();
+  });
+
+  // Перехоплюємо .value, щоб `nativeInput.value = '...'` (як робить решта
+  // коду застосунку) синхронно оновлювало кастомний UI.
+  const proto = Object.getPrototypeOf(native);
+  const valueDesc = Object.getOwnPropertyDescriptor(proto, 'value');
+  const nativeValueGetter = valueDesc.get;
+  const nativeValueSetter = valueDesc.set;
+  Object.defineProperty(native, 'value', {
+    configurable: true,
+    get() { return nativeValueGetter.call(native); },
+    set(v) { nativeValueSetter.call(native, v); refreshTriggerText(); },
+  });
+
+  refreshTriggerText();
+  datePickerInstances.push({ refreshLang: () => { refreshTriggerText(); if (isOpen()) renderPanel(); } });
+}
+function refreshDatePickersLang() {
+  datePickerInstances.forEach((dp) => dp.refreshLang());
 }
 
 // ---- Стан ----
@@ -1038,6 +1275,7 @@ setTimeout(() => {
 }, 6000);
 
 // ---- Ініціалізація ----
+initDatePicker('sessionDateInput');
 applyTheme();
 applyTranslations();
 renderThemePicker();
