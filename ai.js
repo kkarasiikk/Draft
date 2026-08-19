@@ -64,6 +64,10 @@ async function enforceRateLimit(uid) {
 // ---- Валідація полів транзакції ----
 // Дзеркалить firestore.rules (isValidTx) — Admin SDK ці правила не перевіряє
 // автоматично, тож той самий контракт даних треба гарантувати тут вручну.
+// Символи валют — лише для підпису виконаної дії в чаті («Записано: Їжа ·
+// 80 ₴»). Самі суми ніде більше тут не форматуються.
+const CURRENCY_SYMBOLS = { UAH: "\u20B4", USD: "$", EUR: "\u20AC", PLN: "z\u0142" };
+
 function sanitizeTransactionInput(input, categoriesExpense, categoriesIncome) {
   const type = input.type === "income" ? "income" : input.type === "expense" ? "expense" : null;
   if (!type) return { error: "type має бути 'income' або 'expense'" };
@@ -215,9 +219,18 @@ async function executeTool(uid, name, input, ctx) {
       .doc(uid)
       .collection("transactions")
       .add({ ...result.value, createdAt: admin.firestore.FieldValue.serverTimestamp() });
+    // Підпис дії збирається тут, а не на клієнті: спільний чат живе в усіх
+    // модулях і не має доступу до списку категорій конкретної сторінки.
+    const catList = result.value.type === "income" ? ctx.categoriesIncome : ctx.categoriesExpense;
+    const cat = catList.find((c) => c.id === result.value.category);
     return {
       output: { ok: true, id: docRef.id, ...result.value },
-      action: { kind: "transaction_added", ...result.value },
+      action: {
+        kind: "transaction_added",
+        ...result.value,
+        categoryLabel: cat ? cat.label : result.value.category,
+        currency: CURRENCY_SYMBOLS[ctx.currency] || ctx.currency,
+      },
     };
   }
 

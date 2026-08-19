@@ -16,6 +16,7 @@ rules_version = '2';
 //                                         estimateMin, subtasks,
 //                                         createdAt, updatedAt}
 //   users/{uid}/fcmTokens/{token}     -- {createdAt, ua, tz}
+//   users/{uid}/aiMessages/{id}       -- {role, text, at}
 //   users/{uid}/workouts/{id}         -- {date, name, notes, exercises: [
 //                                         {id, libId, muscle, name, sets: [
 //                                         {weight, reps}]}], createdAt, updatedAt}
@@ -168,6 +169,22 @@ service cloud.firestore {
         }
         allow read, delete: if isOwner(uid);
         allow create, update: if isOwner(uid) && isValidTemplate(request.resource.data);
+      }
+
+      // Історія чату з AI-помічником. Лежить у Firestore, а не в
+      // localStorage, щоб розмова не зникала після перезавантаження і була
+      // та сама на телефоні й на комп'ютері. Порядок задає `at` (мілісекунди
+      // клієнта): serverTimestamp дав би однаковий час кільком реплікам,
+      // записаним однією відповіддю, і вони переставлялися б місцями.
+      match /aiMessages/{messageId} {
+        function isValidAiMessage(d) {
+          return d.role in ['user', 'assistant', 'action'] &&
+                 isNonEmptyString(d.text, 8000) &&
+                 d.at is number &&
+                 d.keys().hasOnly(['role', 'text', 'at']);
+        }
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid) && isValidAiMessage(request.resource.data);
       }
 
       // Токени пристроїв для push-нагадувань. Ідентифікатор документа — сам

@@ -15,7 +15,7 @@
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
   font-src 'self' https://fonts.gstatic.com;
   img-src 'self' data:;
-  connect-src 'self' https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com https://firebaseinstallations.googleapis.com https://content-firebaseappcheck.googleapis.com;
+  connect-src 'self' https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com https://firebaseinstallations.googleapis.com https://content-firebaseappcheck.googleapis.com https://us-central1-me-and-only-me-7f531.cloudfunctions.net;
   frame-src https://www.google.com/recaptcha/ https://me-and-only-me-7f531.firebaseapp.com;
   worker-src 'self';
   manifest-src 'self';
@@ -28,11 +28,13 @@
 <link rel="apple-touch-icon" href="budget/icon-192.png">
 <link rel="icon" href="budget/icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="ai-chat.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-functions-compat.js"></script>
 <style>
   :root{
     --bg:#F4F6FB;
@@ -94,6 +96,12 @@
 
   /* ---- Верхня панель: гамбургер-меню зліва (тема / мова / вихід) ---- */
   .home-topbar{display:flex;align-items:center;justify-content:flex-start;margin-bottom:8px;}
+  /* Помічник — праворуч, навпроти меню: це друга «точка входу» на екрані,
+     і тримати її поруч з гамбургером означало б два схожі значки в кутку. */
+  .home-ai-btn{margin-left:auto;background:none;border:none;cursor:pointer;color:var(--ink);padding:13px;
+    display:flex;border-radius:10px;transition:background .2s, transform .15s;touch-action:manipulation;}
+  .home-ai-btn:hover{background:var(--glass-btn-bg-hover);}
+  .home-ai-btn:active{transform:scale(.92);}
   .menu-btn{background:none;border:none;cursor:pointer;color:var(--ink);padding:13px;display:flex;border-radius:10px;transition:background .2s, transform .15s;touch-action:manipulation;}
   .menu-btn:hover{background:var(--glass-btn-bg-hover);}
   .menu-btn:active{transform:scale(.92);}
@@ -264,6 +272,9 @@
         <button class="menu-btn" id="menuBtn" aria-label="Меню">
           <span class="menu-btn-lines" aria-hidden="true"><span></span><span></span><span></span></span>
         </button>
+        <button class="home-ai-btn" id="aiChatBtn" aria-label="AI-помічник">
+          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5Z"/></svg>
+        </button>
       </div>
 
       <div class="app-menu-overlay" id="appMenuOverlay">
@@ -333,5 +344,6 @@
   <script src="budget/categories-default.js"></script>
   <script src="export-xlsx.js"></script>
   <script src="home.js"></script>
+  <script src="ai-chat.js"></script>
 </body>
 </html>

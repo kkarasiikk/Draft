@@ -2,12 +2,12 @@
 // scope (`/`, `/budget/`, `/tasks/`, `/workout/`) — для сторінки завжди
 // виграє реєстрація з найдовшим збігом scope, тож цей файл фактично
 // обслуговує лише хаб.
-const CACHE_NAME = 'life-home-v2';
+const CACHE_NAME = 'life-home-v3';
 // Чистимо лише власні (застарілі) кеші: `caches` спільний для всього
 // походження, тож видалення "всього зайвого" стерло б кеші інших модулів.
 const CACHE_PREFIXES = ['life-home-'];
-const NETWORK_FIRST = ['./', './index.html', './home.js', './export-xlsx.js'];
-const FILES_TO_CACHE = ['./', './index.html', './home.js', './export-xlsx.js',
+const NETWORK_FIRST = ['./ai-chat.js', './ai-chat.css', './', './index.html', './home.js', './export-xlsx.js'];
+const FILES_TO_CACHE = ['./ai-chat.js', './ai-chat.css', './', './index.html', './home.js', './export-xlsx.js',
   './budget/categories-default.js', './manifest.json',
   './budget/firebase-config.js', './budget/icon-192.png', './budget/icon-512.png',
   './budget/icon-192-maskable.png', './budget/icon-512-maskable.png'];
@@ -20,6 +20,7 @@ const EXTERNAL_FILES_TO_CACHE = [
   'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js',
   'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js',
   'https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check-compat.js',
+  'https://www.gstatic.com/firebasejs/10.12.2/firebase-functions-compat.js',
 ];
 
 self.addEventListener('install', (event) => {

@@ -1,11 +1,11 @@
 // Service Worker модуля «Тренування» (scope /workout/). Кожен модуль має
 // власний SW — для сторінки виграє реєстрація з найдовшим збігом scope.
-const CACHE_NAME = 'life-workout-v7';
+const CACHE_NAME = 'life-workout-v8';
 // Чистимо лише власні (застарілі) кеші: `caches` спільний для всього
 // походження, тож видалення "всього зайвого" стерло б кеші інших модулів.
 const CACHE_PREFIXES = ['life-workout-'];
-const NETWORK_FIRST = ['./', './index.html', './app.js'];
-const FILES_TO_CACHE = ['./', './index.html', './app.js', './manifest.json',
+const NETWORK_FIRST = ['./ai-chat.js', './ai-chat.css', './', './index.html', './app.js'];
+const FILES_TO_CACHE = ['../ai-chat.js', '../ai-chat.css', './', './index.html', './app.js', './manifest.json',
   '../budget/firebase-config.js', '../budget/icon-192.png', '../budget/icon-512.png',
   '../budget/icon-192-maskable.png', '../budget/icon-512-maskable.png'];
 // Сторінка жорстко залежить від Firebase SDK (firebase.initializeApp() —
@@ -16,6 +16,7 @@ const EXTERNAL_FILES_TO_CACHE = [
   'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js',
   'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js',
   'https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check-compat.js',
+  'https://www.gstatic.com/firebasejs/10.12.2/firebase-functions-compat.js',
 ];
 
 self.addEventListener('install', (event) => {

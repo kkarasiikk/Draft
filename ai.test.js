@@ -101,6 +101,20 @@ describe("executeTool", () => {
     expect(snap.docs[0].data().amount).toBe(80);
   });
 
+  // Підпис для чату збирає сервер: спільний чат живе на п'яти сторінках і
+  // назв категорій конкретного модуля не знає.
+  test("add_transaction віддає готовий підпис дії — назву категорії й символ валюти", async () => {
+    const result = await ai.executeTool("uid1", "add_transaction", { type: "expense", amount: 80, category: "food" }, ctx);
+    expect(result.action.categoryLabel).toBe("Їжа");
+    expect(result.action.currency).toBe("\u20B4");
+  });
+
+  test("невідома валюта лишається кодом, а не зникає з підпису", async () => {
+    const result = await ai.executeTool("uid1", "add_transaction",
+      { type: "expense", amount: 10, category: "food" }, { ...ctx, currency: "GBP" });
+    expect(result.action.currency).toBe("GBP");
+  });
+
   test("query_transactions рахує суми і фільтрує за типом/періодом", async () => {
     const col = mockCurrent.collection("users").doc("uid1").collection("transactions");
     await col.add({ type: "expense", amount: 100, category: "food", date: "2026-07-01", note: "" });

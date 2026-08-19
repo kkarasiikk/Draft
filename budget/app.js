@@ -89,13 +89,6 @@ const T = {
     saveError: 'Не вдалося зберегти. Перевір інтернет-з’єднання',
     confirmTitle: 'Видалити запис?', confirmSub: 'Цю дію не можна скасувати.', confirmTitleLogout: 'Вийти з акаунту?', confirmSubLogout: 'Доведеться увійти знову, щоб побачити свої дані.',
     cancelBtn: 'Скасувати', deleteBtn: 'Видалити',
-    aiChatMenuLabel: 'AI-помічник', aiChatTitle: 'AI-помічник',
-    aiChatPlaceholder: 'Напр. кава 80 грн', aiChatSendAria: 'Надіслати',
-    aiChatEmpty: 'Запиши витрату словами («кава 80 грн») або запитай про свої фінанси («скільки я витратив(ла) на їжу цього місяця?»).',
-    aiChatActionAdded: 'Записано: {category} · {amount}',
-    aiChatError: 'Не вдалося отримати відповідь. Спробуй ще раз',
-    aiChatLimitError: 'Забагато повідомлень. Спробуй трохи пізніше',
-    aiChatUnavailable: 'AI-помічник поки недоступний — функцію aiChat не задеплоєно',
     settingsTitle: 'Налаштування', themeLabel: 'Тема', themeLight: 'Світла', themeDark: 'Темна', themeSystem: 'Як в системі',
     langLabel: 'Мова', currencyLabel: 'Валюта', categoriesTitle: 'Категорії',
     expenseCatManageLabel: 'Категорії витрат', incomeCatManageLabel: 'Категорії доходів',
@@ -152,13 +145,6 @@ const T = {
     saveError: 'Не удалось сохранить. Проверь интернет-соединение',
     confirmTitle: 'Удалить запись?', confirmSub: 'Это действие нельзя отменить.', confirmTitleLogout: 'Выйти из аккаунта?', confirmSubLogout: 'Придётся войти снова, чтобы увидеть свои данные.',
     cancelBtn: 'Отмена', deleteBtn: 'Удалить',
-    aiChatMenuLabel: 'AI-помощник', aiChatTitle: 'AI-помощник',
-    aiChatPlaceholder: 'Напр. кофе 80 грн', aiChatSendAria: 'Отправить',
-    aiChatEmpty: 'Запиши расход словами («кофе 80 грн») или спроси о своих финансах («сколько я потратил(а) на еду в этом месяце?»).',
-    aiChatActionAdded: 'Записано: {category} · {amount}',
-    aiChatError: 'Не удалось получить ответ. Попробуй ещё раз',
-    aiChatLimitError: 'Слишком много сообщений. Попробуй позже',
-    aiChatUnavailable: 'AI-помощник пока недоступен — функция aiChat не задеплоена',
     settingsTitle: 'Настройки', themeLabel: 'Тема', themeLight: 'Светлая', themeDark: 'Тёмная', themeSystem: 'Как в системе',
     langLabel: 'Язык', currencyLabel: 'Валюта', categoriesTitle: 'Категории',
     expenseCatManageLabel: 'Категории расходов', incomeCatManageLabel: 'Категории доходов',
@@ -215,13 +201,6 @@ const T = {
     saveError: 'Nie udało się zapisać. Sprawdź połączenie z internetem',
     confirmTitle: 'Usunąć wpis?', confirmSub: 'Tej czynności nie można cofnąć.', confirmTitleLogout: 'Wylogować się?', confirmSubLogout: 'Aby zobaczyć swoje dane, trzeba będzie zalogować się ponownie.',
     cancelBtn: 'Anuluj', deleteBtn: 'Usuń',
-    aiChatMenuLabel: 'Asystent AI', aiChatTitle: 'Asystent AI',
-    aiChatPlaceholder: 'Np. kawa 20 zł', aiChatSendAria: 'Wyślij',
-    aiChatEmpty: 'Zapisz wydatek słowami („kawa 20 zł") albo zapytaj o swoje finanse („ile wydałem(am) na jedzenie w tym miesiącu?").',
-    aiChatActionAdded: 'Zapisano: {category} · {amount}',
-    aiChatError: 'Nie udało się uzyskać odpowiedzi. Spróbuj ponownie',
-    aiChatLimitError: 'Zbyt wiele wiadomości. Spróbuj później',
-    aiChatUnavailable: 'Asystent AI jest niedostępny — funkcja aiChat nie została wdrożona',
     settingsTitle: 'Ustawienia', themeLabel: 'Motyw', themeLight: 'Jasny', themeDark: 'Ciemny', themeSystem: 'Jak w systemie',
     langLabel: 'Język', currencyLabel: 'Waluta', categoriesTitle: 'Kategorie',
     expenseCatManageLabel: 'Kategorie wydatków', incomeCatManageLabel: 'Kategorie przychodów',
@@ -278,13 +257,6 @@ const T = {
     saveError: 'Could not save. Check your internet connection',
     confirmTitle: 'Delete entry?', confirmSub: 'This action cannot be undone.', confirmTitleLogout: 'Log out?', confirmSubLogout: "You'll need to sign in again to see your data.",
     cancelBtn: 'Cancel', deleteBtn: 'Delete',
-    aiChatMenuLabel: 'AI assistant', aiChatTitle: 'AI assistant',
-    aiChatPlaceholder: 'e.g. coffee 80', aiChatSendAria: 'Send',
-    aiChatEmpty: 'Log an expense in plain words ("coffee 80"), or ask about your finances ("how much did I spend on food this month?").',
-    aiChatActionAdded: 'Saved: {category} · {amount}',
-    aiChatError: 'Could not get a response. Try again',
-    aiChatLimitError: 'Too many messages. Try again a bit later',
-    aiChatUnavailable: 'The AI assistant is unavailable — the aiChat function is not deployed',
     settingsTitle: 'Settings', themeLabel: 'Theme', themeLight: 'Light', themeDark: 'Dark', themeSystem: 'System',
     langLabel: 'Language', currencyLabel: 'Currency', categoriesTitle: 'Categories',
     expenseCatManageLabel: 'Expense categories', incomeCatManageLabel: 'Income categories',
@@ -1011,10 +983,6 @@ function applyStaticTranslations() {
   document.getElementById('addIncomeCatBtn').setAttribute('aria-label', t('addCatAria'));
   const cur = CURRENCIES[currentCurrency] || CURRENCIES.UAH;
   document.getElementById('amountLabel').textContent = t('amountLabel', { symbol: cur.symbol });
-  document.getElementById('aiChatTitle').textContent = t('aiChatTitle');
-  document.getElementById('aiChatInput').placeholder = t('aiChatPlaceholder');
-  document.getElementById('aiChatSend').setAttribute('aria-label', t('aiChatSendAria'));
-  renderAiChat();
   document.getElementById('editEntryLabel').textContent = t('menuEdit');
   document.getElementById('deleteEntryLabel').textContent = t('menuDelete');
   document.getElementById('statsToggleLabel').textContent = t('tabStats');
@@ -2363,80 +2331,6 @@ function renderStats(monthTx, ty, tm) {
   }
 }
 
-// ---- AI-помічник ----
-// Тонка обгортка над Cloud Function aiChat (див. ai.js): вона говорить з
-// моделлю й сама пише транзакції в Firestore, тож записане нею з'являється
-// в списку саме через той onSnapshot, що й будь-яка інша зміна — окремо
-// перемальовувати нічого не треба.
-const AI_HISTORY_LIMIT = 16; // стільки ж реплік, скільки бере на вхід сама функція
-let aiChatHistory = [];      // [{ role: 'user' | 'assistant' | 'action', text, error? }]
-let aiChatPending = false;
-
-function renderAiChat() {
-  const log = document.getElementById('aiChatLog');
-  if (!log) return;
-  if (!aiChatHistory.length && !aiChatPending) {
-    log.innerHTML = `<div class="chat-empty">${escapeHtml(t('aiChatEmpty'))}</div>`;
-    return;
-  }
-  const msgs = aiChatHistory.map(m => {
-    if (m.role === 'action') return `<div class="chat-action">\u2713 ${escapeHtml(m.text)}</div>`;
-    return `<div class="chat-msg ${m.role === 'user' ? 'user' : m.error ? 'error' : 'assistant'}">${escapeHtml(m.text)}</div>`;
-  }).join('');
-  log.innerHTML = msgs + (aiChatPending ? '<div class="chat-typing"><span></span><span></span><span></span></div>' : '');
-  log.scrollTop = log.scrollHeight;
-}
-
-function autoGrowAiChatInput() {
-  const input = document.getElementById('aiChatInput');
-  input.style.height = 'auto';
-  input.style.height = Math.min(input.scrollHeight, 120) + 'px';
-}
-
-async function sendAiChatMessage() {
-  const input = document.getElementById('aiChatInput');
-  const text = input.value.trim();
-  if (!text || aiChatPending) return;
-  input.value = '';
-  autoGrowAiChatInput();
-  aiChatHistory.push({ role: 'user', text });
-  aiChatPending = true;
-  document.getElementById('aiChatSend').disabled = true;
-  renderAiChat();
-  try {
-    // Віддаємо лише реальні репліки діалогу (без службових рядків про
-    // записані транзакції й без помилок) і без щойно доданого повідомлення —
-    // воно передається окремим полем message.
-    const history = aiChatHistory
-      .filter(m => (m.role === 'user' || m.role === 'assistant') && !m.error)
-      .slice(0, -1)
-      .slice(-AI_HISTORY_LIMIT)
-      .map(m => ({ role: m.role, text: m.text }));
-    const res = await firebase.functions().httpsCallable('aiChat')({ message: text, history });
-    const data = res.data || {};
-    (data.actions || []).forEach(a => {
-      if (a.kind !== 'transaction_added') return;
-      aiChatHistory.push({
-        role: 'action',
-        text: t('aiChatActionAdded', { category: catLabel(a.type, a.category), amount: formatMoney(a.amount) }),
-      });
-    });
-    aiChatHistory.push({ role: 'assistant', text: data.reply || '\u2026' });
-  } catch (err) {
-    console.error('aiChat error', err);
-    // firebase-functions віддає код у форматі "functions/resource-exhausted".
-    const code = err && err.code ? String(err.code).replace('functions/', '') : '';
-    const msg = code === 'resource-exhausted' ? t('aiChatLimitError')
-      : (code === 'not-found' || code === 'unimplemented') ? t('aiChatUnavailable')
-      : t('aiChatError');
-    aiChatHistory.push({ role: 'assistant', text: msg, error: true });
-  } finally {
-    aiChatPending = false;
-    document.getElementById('aiChatSend').disabled = false;
-    renderAiChat();
-  }
-}
-
 // ---- Форма додавання ----
 function openForm(type, existingTx) {
   formType = type;
@@ -2719,19 +2613,6 @@ document.getElementById('openWithdraw').addEventListener('click', () => openSavi
 document.getElementById('closeSavingsForm').addEventListener('click', () => { editingSavingId = null; document.getElementById('savingsFormOverlay').classList.remove('show'); });
 document.getElementById('savingsFormOverlay').addEventListener('click', (e) => { if (e.target.id === 'savingsFormOverlay') { editingSavingId = null; e.currentTarget.classList.remove('show'); } });
 document.getElementById('savingsSubmitBtn').addEventListener('click', submitSavingsForm);
-document.getElementById('aiChatBtn').addEventListener('click', () => {
-  document.getElementById('aiChatOverlay').classList.add('show');
-  renderAiChat();
-  setTimeout(() => document.getElementById('aiChatInput').focus(), 50);
-});
-document.getElementById('closeAiChat').addEventListener('click', () => document.getElementById('aiChatOverlay').classList.remove('show'));
-document.getElementById('aiChatOverlay').addEventListener('click', (e) => { if (e.target.id === 'aiChatOverlay') e.currentTarget.classList.remove('show'); });
-document.getElementById('aiChatForm').addEventListener('submit', (e) => { e.preventDefault(); sendAiChatMessage(); });
-// Enter надсилає, Shift+Enter — новий рядок (звична поведінка чату).
-document.getElementById('aiChatInput').addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendAiChatMessage(); }
-});
-document.getElementById('aiChatInput').addEventListener('input', autoGrowAiChatInput);
 document.getElementById('importCsvBtn').addEventListener('click', () => document.getElementById('importCsvInput').click());
 document.getElementById('importCsvInput').addEventListener('change', (e) => {
   const file = e.target.files && e.target.files[0];
