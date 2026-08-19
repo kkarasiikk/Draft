@@ -1,17 +1,22 @@
-/* ---- Кнопка виклику: кружечок «AI» над нижнім меню ----
+/* ---- Кнопка виклику: хмаринка з «AI» над нижнім меню ----
    Стоїть рівно над правим краєм нижнього меню й з того самого скла, що й
    воно, — читається як його продовження, а не як ще один плаваючий елемент.
    Заповненого акцентом кола тут свідомо немає: у модулях уже є акцентний
    «+», і два однакові кола сперечалися б за увагу.
    Зсув знизу — висота меню (62px) + його відступ + просвіт; на головному
-   екрані меню немає, тож там сторінка задає свій --ai-fab-bottom. */
+   екрані меню немає, тож там сторінка задає свій --ai-fab-bottom.
+
+   Літери всередині значка — контури, а не <text>: сторінка бюджету
+   підвантажує Inter лише до 700, тож текст накресленням 800 браузер
+   підробляв би синтетично, і значок виглядав би там інакше, ніж на
+   решті сторінок. Контури ще й не залежать від того, чи шрифт узагалі
+   встиг завантажитись. */
 .ai-fab{position:fixed;right:var(--ai-fab-right, 14px);
   bottom:calc(var(--ai-fab-bottom, 86px) + env(safe-area-inset-bottom));z-index:26;
   width:52px;height:52px;border-radius:50%;cursor:pointer;
   border:1px solid var(--border);background:var(--surface);color:var(--accent);
   backdrop-filter:blur(var(--glass-blur, 22px)) saturate(150%);
   -webkit-backdrop-filter:blur(var(--glass-blur, 22px)) saturate(150%);
-  font-family:'Inter',sans-serif;font-size:14.5px;font-weight:800;letter-spacing:.06em;
   display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;
   box-shadow:var(--glass-shadow, 0 8px 32px rgba(40,44,70,.10)), 0 10px 24px rgba(20,20,30,.14);
   transition:transform .15s ease;}
