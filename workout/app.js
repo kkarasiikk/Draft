@@ -761,7 +761,7 @@ function renderSessionsTab() {
   if (!list.length) {
     root.innerHTML = `
       <div class="empty-state">
-        <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5l11 11"/><rect x="2.5" y="9.5" width="3" height="5" rx="1"/><rect x="18.5" y="9.5" width="3" height="5" rx="1"/><rect x="5" y="8" width="2.2" height="8" rx="1"/><rect x="16.8" y="8" width="2.2" height="8" rx="1"/></svg>
+        <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="10" width="1.8" height="4" rx=".9"/><rect x="2.6" y="7.2" width="2.8" height="9.6" rx="1.4"/><rect x="5.2" y="5.5" width="3.4" height="13" rx="1.7"/><path d="M8.6 12h6.8"/><rect x="15.4" y="5.5" width="3.4" height="13" rx="1.7"/><rect x="18.6" y="7.2" width="2.8" height="9.6" rx="1.4"/><rect x="21.2" y="10" width="1.8" height="4" rx=".9"/></svg>
         <div class="title">${escapeHtml(t('emptySessionsTitle'))}</div>
         <div>${escapeHtml(t('emptySessionsSub'))}</div>
       </div>`;
