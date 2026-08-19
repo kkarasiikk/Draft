@@ -1,6 +1,6 @@
 // Service Worker модуля «Завдання» (scope /tasks/). Кожен модуль має власний
 // SW — для сторінки виграє реєстрація з найдовшим збігом scope.
-const CACHE_NAME = 'life-tasks-v10';
+const CACHE_NAME = 'life-tasks-v11';
 // Чистимо лише власні (застарілі) кеші: `caches` спільний для всього
 // походження, тож видалення "всього зайвого" стерло б кеші інших модулів.
 const CACHE_PREFIXES = ['life-tasks-'];
