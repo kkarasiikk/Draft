@@ -22,6 +22,7 @@
       modelHint: 'Дешевша відповідає швидше, дорожча краще розбирає складені запити («запиши три завдання…») і рідше відповідає загальниками замість цифр.',
       settings: 'Налаштування помічника',
       clear: 'Очистити розмову',
+      ageHint: 'Розмова сама зникає через добу — стирати вручну треба лише щоб почати спочатку раніше.',
       added: (a) => `Записано: ${a.categoryLabel} · ${a.amount} ${a.currency || ''}`.trim(),
       taskAdded: (a) => `Завдання: ${a.title}${a.dueDate ? ' · ' + a.dueDate : ''}`,
       taskDone: (a) => `Виконано: ${a.title}`,
@@ -37,6 +38,7 @@
       modelHint: 'Дешёвая отвечает быстрее, дорогая лучше разбирает составные запросы («запиши три задачи…») и реже отвечает общими словами вместо цифр.',
       settings: 'Настройки помощника',
       clear: 'Очистить разговор',
+      ageHint: 'Разговор сам исчезает через сутки — стирать вручную нужно лишь чтобы начать заново раньше.',
       added: (a) => `Записано: ${a.categoryLabel} · ${a.amount} ${a.currency || ''}`.trim(),
       taskAdded: (a) => `Задача: ${a.title}${a.dueDate ? ' · ' + a.dueDate : ''}`,
       taskDone: (a) => `Выполнено: ${a.title}`,
@@ -52,6 +54,7 @@
       modelHint: 'Tańszy jest szybszy, droższy lepiej rozumie złożone polecenia („zapisz trzy zadania…") i rzadziej odpowiada ogólnikami zamiast liczbami.',
       settings: 'Ustawienia asystenta',
       clear: 'Wyczyść rozmowę',
+      ageHint: 'Rozmowa znika sama po dobie — ręczne czyszczenie przydaje się tylko, gdy chcesz zacząć od nowa wcześniej.',
       added: (a) => `Zapisano: ${a.categoryLabel} · ${a.amount} ${a.currency || ''}`.trim(),
       taskAdded: (a) => `Zadanie: ${a.title}${a.dueDate ? ' · ' + a.dueDate : ''}`,
       taskDone: (a) => `Zrobione: ${a.title}`,
@@ -67,6 +70,7 @@
       modelHint: 'The cheaper one is faster; the pricier one handles compound requests better ("add three tasks…") and less often answers in generalities instead of numbers.',
       settings: 'Assistant settings',
       clear: 'Clear conversation',
+      ageHint: 'The conversation clears itself after a day — wiping it by hand only helps if you want a fresh start sooner.',
       added: (a) => `Logged: ${a.categoryLabel} · ${a.amount} ${a.currency || ''}`.trim(),
       taskAdded: (a) => `Task: ${a.title}${a.dueDate ? ' · ' + a.dueDate : ''}`,
       taskDone: (a) => `Done: ${a.title}`,
@@ -149,7 +153,8 @@
         `<button type="button" class="aic-model${m === model ? ' selected' : ''}" data-model="${m}">${m}</button>`
       ).join('') +
       `<span class="aic-model-hint">${esc(t('modelHint'))}</span>` +
-      `<button type="button" class="aic-clear" id="aicClear">${esc(t('clear'))}</button>`;
+      `<button type="button" class="aic-clear" id="aicClear">${esc(t('clear'))}</button>` +
+      `<span class="aic-model-hint">${esc(t('ageHint'))}</span>`;
     box.querySelectorAll('[data-model]').forEach((btn) => {
       btn.addEventListener('click', () => setModel(btn.dataset.model));
     });
@@ -179,7 +184,12 @@
   // кожному переході між вкладками застосунку — а вкладок п'ять.
   // Порядок задає власне поле `at` (мілісекунди): serverTimestamp дав би
   // однаковий момент кільком реплікам однієї відповіді.
-  const STORE_LIMIT = 120; // скільки реплік тримаємо; старші прибираємо
+  //
+  // Розмова живе добу. Прибирання робиться при відкритті чату, а не за
+  // розкладом на сервері: побачити прострочене можна тільки відкривши чат,
+  // тож саме там воно і зникає — без Cloud Function і без деплою.
+  const STORE_LIMIT = 120;                    // скільки реплік читаємо за раз
+  const MAX_AGE_MS = 24 * 60 * 60 * 1000;     // розмова живе добу, далі згасає
 
   function messagesCol() {
     const user = typeof auth !== 'undefined' && auth.currentUser;
@@ -201,27 +211,32 @@
     const col = messagesCol();
     if (!col) return;
     loaded = true;
+    const cutoff = Date.now() - MAX_AGE_MS;
     try {
-      const snap = await col.orderBy('at', 'desc').limit(STORE_LIMIT).get();
-      const docs = snap.docs.slice().reverse();
-      history = docs.map((d) => {
+      // Читаємо тільки те, що ще в добі. Обмеження за кількістю лишається
+      // запобіжником на випадок дуже балакучого дня — за добу 120 реплік
+      // набрати можна, і тягнути їх усі в пам'ять ні до чого.
+      const snap = await col.where('at', '>=', cutoff)
+        .orderBy('at', 'desc').limit(STORE_LIMIT).get();
+      history = snap.docs.slice().reverse().map((d) => {
         const m = d.data();
         return { role: m.role, text: m.text };
       });
       render();
-      // Дійшли до стелі — значить, нижче лежить хвіст, який уже ніхто не
-      // побачить. Прибираємо його, щоб колекція не росла безкінечно.
-      if (docs.length === STORE_LIMIT && docs[0]) prune(col, docs[0].data().at);
+      expire(col, cutoff);
     } catch (err) {
       console.error('aiMessages load:', err);
       loaded = false; // наступне відкриття спробує ще раз
     }
   }
 
-  function prune(col, oldestKeptAt) {
-    col.where('at', '<', oldestKeptAt).get()
+  // Прибирання прострочених — окремим запитом і без await: те, що вже не
+  // показується, чекати на екрані немає сенсу. Якщо не вдалось — не біда,
+  // наступне відкриття чату спробує знову.
+  function expire(col, cutoff) {
+    col.where('at', '<', cutoff).get()
       .then((snap) => Promise.all(snap.docs.map((d) => d.ref.delete())))
-      .catch((err) => console.error('aiMessages prune:', err));
+      .catch((err) => console.error('aiMessages expire:', err));
   }
 
   async function clearHistory() {
