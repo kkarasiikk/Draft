@@ -286,6 +286,122 @@ describe("executeTool", () => {
     });
   });
 
+  // ---- Запис тренувань ----
+  describe("запис тренувань", () => {
+    test("вправа з бібліотеки отримує libId, групу мʼязів і назву мовою користувача", async () => {
+      const r = await ai.executeTool("uid1", "add_workout", {
+        name: "Груди",
+        exercises: [{ libId: "benchPress", sets: [{ weight: 60, reps: 8 }, { weight: 60, reps: 8 }] }],
+      }, ctx);
+      expect(r.output.ok).toBe(true);
+
+      const snap = await mockCurrent.collection("users").doc("uid1").collection("workouts").get();
+      const ex = snap.docs[0].data().exercises[0];
+      expect(ex).toMatchObject({ libId: "benchPress", muscle: "chest", name: "Жим лежачи" });
+      expect(ex.sets).toEqual([{ weight: 60, reps: 8 }, { weight: 60, reps: 8 }]);
+    });
+
+    test("дата за замовчуванням — сьогоднішня з контексту", async () => {
+      const r = await ai.executeTool("uid1", "add_workout",
+        { exercises: [{ libId: "squat", sets: [{ weight: 80, reps: 5 }] }] },
+        { ...ctx, today: "2026-08-19" });
+      expect(r.output.date).toBe("2026-08-19");
+      expect(r.action).toMatchObject({ kind: "workout_added", exercises: ["Присідання зі штангою"] });
+    });
+
+    test("вправа з власною вагою: нульова вага не робить підхід порожнім", async () => {
+      await ai.executeTool("uid1", "add_workout",
+        { exercises: [{ libId: "plank", sets: [{ weight: 0, reps: 60 }] }] }, ctx);
+      const snap = await mockCurrent.collection("users").doc("uid1").collection("workouts").get();
+      expect(snap.docs[0].data().exercises[0].sets).toEqual([{ weight: 0, reps: 60 }]);
+    });
+
+    test("вигаданий libId не приймається — інакше рекорди рахувались би по неіснуючій вправі", async () => {
+      const r = await ai.executeTool("uid1", "add_workout",
+        { exercises: [{ libId: "megaPress", name: "Мега-жим", sets: [{ weight: 50, reps: 5 }] }] }, ctx);
+      const snap = await mockCurrent.collection("users").doc("uid1").collection("workouts").get();
+      const ex = snap.docs[0].data().exercises[0];
+      expect(ex.libId).toBe(null);
+      expect(ex.name).toBe("Мега-жим");
+      expect(r.output.ok).toBe(true);
+    });
+
+    test("вправа без жодного підходу відкидається, як і у формі", async () => {
+      const r = await ai.executeTool("uid1", "add_workout", {
+        exercises: [
+          { libId: "benchPress", sets: [] },
+          { libId: "squat", sets: [{ weight: 80, reps: 5 }] },
+        ],
+      }, ctx);
+      const snap = await mockCurrent.collection("users").doc("uid1").collection("workouts").get();
+      expect(snap.docs[0].data().exercises.map((e) => e.libId)).toEqual(["squat"]);
+      expect(r.output.exercises).toBe(1);
+      expect(r.output.sets).toBe(1);
+    });
+
+    test("тренування зовсім без вправ не створює документа", async () => {
+      const r = await ai.executeTool("uid1", "add_workout", { exercises: [] }, ctx);
+      expect(r.isError).toBe(true);
+      const snap = await mockCurrent.collection("users").doc("uid1").collection("workouts").get();
+      expect(snap.docs.length).toBe(0);
+    });
+
+    test("записане тренування одразу видно у workout_history", async () => {
+      await ai.executeTool("uid1", "add_workout",
+        { date: "2026-08-19", exercises: [{ libId: "deadlift", sets: [{ weight: 100, reps: 3 }] }] }, ctx);
+      const r = await ai.executeTool("uid1", "workout_history", {}, ctx);
+      expect(r.output.sessions[0].exercises[0]).toMatchObject({ name: "Станова тяга", muscle: "back" });
+    });
+  });
+
+  // ---- Дії з цілями ----
+  describe("дії з цілями", () => {
+    async function seedGoal(extra) {
+      return mockCurrent.collection("users").doc("uid1").collection("goals").add({
+        title: "Марафон", status: "active", checkins: [],
+        milestones: [{ id: "m1", title: "10 км", done: false }, { id: "m2", title: "21 км", done: false }],
+        ...extra,
+      });
+    }
+    const today = () => new Date().toISOString().slice(0, 10);
+
+    test("goal_checkin додає сьогоднішній день", async () => {
+      const ref = await seedGoal();
+      const r = await ai.executeTool("uid1", "goal_checkin", { id: ref.id }, ctx);
+      expect(r.output).toMatchObject({ ok: true, alreadyDone: false, totalCheckins: 1 });
+      const doc = await mockCurrent.collection("users").doc("uid1").collection("goals").doc(ref.id).get();
+      expect(doc.data().checkins).toEqual([today()]);
+    });
+
+    // Модель може викликати інструмент двічі — від цього не має ні
+    // задвоїтись, ні зникнути вже поставлений чекін.
+    test("повторний goal_checkin нічого не змінює", async () => {
+      const ref = await seedGoal({ checkins: [today()] });
+      const r = await ai.executeTool("uid1", "goal_checkin", { id: ref.id }, ctx);
+      expect(r.output.alreadyDone).toBe(true);
+      const doc = await mockCurrent.collection("users").doc("uid1").collection("goals").doc(ref.id).get();
+      expect(doc.data().checkins).toEqual([today()]);
+    });
+
+    test("complete_milestone закриває саме вказану віху", async () => {
+      const ref = await seedGoal();
+      const r = await ai.executeTool("uid1", "complete_milestone", { goalId: ref.id, milestoneId: "m2" }, ctx);
+      expect(r.output).toMatchObject({ ok: true, milestonesDone: 1, milestonesTotal: 2 });
+      const doc = await mockCurrent.collection("users").doc("uid1").collection("goals").doc(ref.id).get();
+      expect(doc.data().milestones).toEqual([
+        { id: "m1", title: "10 км", done: false },
+        { id: "m2", title: "21 км", done: true },
+      ]);
+    });
+
+    test("неіснуючі id цілі чи віхи повертають помилку, а не мовчазний успіх", async () => {
+      const ref = await seedGoal();
+      expect((await ai.executeTool("uid1", "goal_checkin", { id: "вигаданий" }, ctx)).isError).toBe(true);
+      expect((await ai.executeTool("uid1", "complete_milestone",
+        { goalId: ref.id, milestoneId: "вигадана" }, ctx)).isError).toBe(true);
+    });
+  });
+
   // ---- Цілі й заощадження ----
   describe("цілі й заощадження", () => {
     test("goals_progress рахує виконані віхи", async () => {
@@ -295,10 +411,21 @@ describe("executeTool", () => {
         checkins: ["2026-08-01", "2026-08-02"],
       });
       const r = await ai.executeTool("uid1", "goals_progress", {}, ctx);
-      expect(r.output.goals[0]).toEqual({
+      expect(r.output.goals[0]).toMatchObject({
         title: "Вивчити польську", status: "active", targetDate: "2026-12-31",
-        milestonesDone: 1, milestonesTotal: 2, checkins: 2,
+        milestonesDone: 1, milestonesTotal: 2, checkins: 2, checkedInToday: false,
       });
+    });
+
+    // Без id адресувати goal_checkin і complete_milestone нічим — модель
+    // могла б хіба вгадувати, а вгадані id мовчки нічого не зроблять.
+    test("goals_progress віддає id цілі та id віх", async () => {
+      const ref = await mockCurrent.collection("users").doc("uid1").collection("goals").add({
+        title: "Марафон", status: "active", milestones: [{ id: "m1", title: "10 км", done: false }], checkins: [],
+      });
+      const r = await ai.executeTool("uid1", "goals_progress", {}, ctx);
+      expect(r.output.goals[0].id).toBe(ref.id);
+      expect(r.output.goals[0].milestones).toEqual([{ id: "m1", title: "10 км", done: false }]);
     });
 
     test("savings_summary віднімає зняття, а не додає", async () => {

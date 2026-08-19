@@ -17,7 +17,7 @@
     uk: {
       title: 'Помічник', open: 'AI-помічник',
       placeholder: 'Напиши або спитай…',
-      empty: 'Запиши витрату, додай завдання або спитай поради — «на чому мені зекономити цього місяця?», «яке тренування зробити сьогодні?». Перед відповіддю помічник дивиться у твої дані.',
+      empty: 'Запиши витрату, тренування чи завдання — або спитай поради — «на чому мені зекономити цього місяця?», «яке тренування зробити сьогодні?». Перед відповіддю помічник дивиться у твої дані.',
       modelLabel: 'Модель:',
       modelHint: 'Дешевша відповідає швидше, дорожча краще розбирає складені запити («запиши три завдання…») і рідше відповідає загальниками замість цифр.',
       settings: 'Налаштування помічника',
@@ -26,6 +26,9 @@
       added: (a) => `Записано: ${a.categoryLabel} · ${a.amount} ${a.currency || ''}`.trim(),
       taskAdded: (a) => `Завдання: ${a.title}${a.dueDate ? ' · ' + a.dueDate : ''}`,
       taskDone: (a) => `Виконано: ${a.title}`,
+      workout: (a) => `Тренування: ${a.exercises.join(', ')}${a.name ? ' · ' + a.name : ''}`,
+      checkin: (a) => `Відмічено: ${a.title}`,
+      milestone: (a) => `Віха: ${a.title}${a.goal ? ' · ' + a.goal : ''}`,
       error: 'Не вдалося отримати відповідь. Спробуй ще раз.',
       limit: 'Забагато повідомлень поспіль. Спробуй трохи пізніше.',
       unavailable: 'Помічник ще не підключений: треба задеплоїти Cloud Functions і додати ключ Anthropic.',
@@ -33,7 +36,7 @@
     ru: {
       title: 'Помощник', open: 'AI-помощник',
       placeholder: 'Напиши или спроси…',
-      empty: 'Запиши расход, добавь задачу или спроси совета — «на чём сэкономить в этом месяце?», «какую тренировку сделать сегодня?». Перед ответом помощник смотрит в твои данные.',
+      empty: 'Запиши расход, тренировку или задачу — или спроси совета — «на чём сэкономить в этом месяце?», «какую тренировку сделать сегодня?». Перед ответом помощник смотрит в твои данные.',
       modelLabel: 'Модель:',
       modelHint: 'Дешёвая отвечает быстрее, дорогая лучше разбирает составные запросы («запиши три задачи…») и реже отвечает общими словами вместо цифр.',
       settings: 'Настройки помощника',
@@ -42,6 +45,9 @@
       added: (a) => `Записано: ${a.categoryLabel} · ${a.amount} ${a.currency || ''}`.trim(),
       taskAdded: (a) => `Задача: ${a.title}${a.dueDate ? ' · ' + a.dueDate : ''}`,
       taskDone: (a) => `Выполнено: ${a.title}`,
+      workout: (a) => `Тренировка: ${a.exercises.join(', ')}${a.name ? ' · ' + a.name : ''}`,
+      checkin: (a) => `Отмечено: ${a.title}`,
+      milestone: (a) => `Веха: ${a.title}${a.goal ? ' · ' + a.goal : ''}`,
       error: 'Не удалось получить ответ. Попробуй ещё раз.',
       limit: 'Слишком много сообщений подряд. Попробуй чуть позже.',
       unavailable: 'Помощник ещё не подключён: нужно задеплоить Cloud Functions и добавить ключ Anthropic.',
@@ -49,7 +55,7 @@
     pl: {
       title: 'Asystent', open: 'Asystent AI',
       placeholder: 'Napisz albo zapytaj…',
-      empty: 'Zapisz wydatek, dodaj zadanie albo poproś o radę — „na czym oszczędzić w tym miesiącu?", „jaki trening dziś zrobić?". Przed odpowiedzią asystent zagląda w twoje dane.',
+      empty: 'Zapisz wydatek, trening albo zadanie — lub poproś o radę — „na czym oszczędzić w tym miesiącu?", „jaki trening dziś zrobić?". Przed odpowiedzią asystent zagląda w twoje dane.',
       modelLabel: 'Model:',
       modelHint: 'Tańszy jest szybszy, droższy lepiej rozumie złożone polecenia („zapisz trzy zadania…") i rzadziej odpowiada ogólnikami zamiast liczbami.',
       settings: 'Ustawienia asystenta',
@@ -58,6 +64,9 @@
       added: (a) => `Zapisano: ${a.categoryLabel} · ${a.amount} ${a.currency || ''}`.trim(),
       taskAdded: (a) => `Zadanie: ${a.title}${a.dueDate ? ' · ' + a.dueDate : ''}`,
       taskDone: (a) => `Zrobione: ${a.title}`,
+      workout: (a) => `Trening: ${a.exercises.join(', ')}${a.name ? ' · ' + a.name : ''}`,
+      checkin: (a) => `Odhaczono: ${a.title}`,
+      milestone: (a) => `Kamień milowy: ${a.title}${a.goal ? ' · ' + a.goal : ''}`,
       error: 'Nie udało się uzyskać odpowiedzi. Spróbuj ponownie.',
       limit: 'Zbyt wiele wiadomości pod rząd. Spróbuj później.',
       unavailable: 'Asystent nie jest jeszcze podłączony: trzeba wdrożyć Cloud Functions i dodać klucz Anthropic.',
@@ -65,7 +74,7 @@
     en: {
       title: 'Assistant', open: 'AI assistant',
       placeholder: 'Write or ask…',
-      empty: 'Log an expense, add a task, or ask for advice — "what can I cut back on this month?", "what workout should I do today?". The assistant reads your own data before answering.',
+      empty: 'Log an expense, a workout or a task — or ask for advice — "what can I cut back on this month?", "what workout should I do today?". The assistant reads your own data before answering.',
       modelLabel: 'Model:',
       modelHint: 'The cheaper one is faster; the pricier one handles compound requests better ("add three tasks…") and less often answers in generalities instead of numbers.',
       settings: 'Assistant settings',
@@ -74,6 +83,9 @@
       added: (a) => `Logged: ${a.categoryLabel} · ${a.amount} ${a.currency || ''}`.trim(),
       taskAdded: (a) => `Task: ${a.title}${a.dueDate ? ' · ' + a.dueDate : ''}`,
       taskDone: (a) => `Done: ${a.title}`,
+      workout: (a) => `Workout: ${a.exercises.join(', ')}${a.name ? ' · ' + a.name : ''}`,
+      checkin: (a) => `Checked in: ${a.title}`,
+      milestone: (a) => `Milestone: ${a.title}${a.goal ? ' · ' + a.goal : ''}`,
       error: 'Could not get an answer. Try again.',
       limit: 'Too many messages in a row. Try again a bit later.',
       unavailable: 'The assistant is not connected yet: deploy Cloud Functions and add an Anthropic key.',
@@ -256,6 +268,9 @@
     if (a.kind === 'transaction_added') return t('added')(a);
     if (a.kind === 'task_added') return t('taskAdded')(a);
     if (a.kind === 'task_completed') return t('taskDone')(a);
+    if (a.kind === 'workout_added') return t('workout')(a);
+    if (a.kind === 'goal_checkin') return t('checkin')(a);
+    if (a.kind === 'milestone_done') return t('milestone')(a);
     return '';
   }
 

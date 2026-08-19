@@ -30,25 +30,9 @@ const LOCALE_MAP = { uk: 'uk-UA', ru: 'ru-RU', pl: 'pl-PL', en: 'en-US' };
 // ---- Невелика вбудована бібліотека вправ ----
 // id — стабільний ключ (не перекладається, зберігається в документі),
 // muscle — група м'язів для групування у пікері й на екрані рекордів.
-const EXERCISE_LIB = [
-  { id: 'benchPress', muscle: 'chest' },
-  { id: 'inclineDbPress', muscle: 'chest' },
-  { id: 'chestFly', muscle: 'chest' },
-  { id: 'barbellRow', muscle: 'back' },
-  { id: 'pullUp', muscle: 'back' },
-  { id: 'deadlift', muscle: 'back' },
-  { id: 'squat', muscle: 'legs' },
-  { id: 'legPress', muscle: 'legs' },
-  { id: 'lunge', muscle: 'legs' },
-  { id: 'overheadPress', muscle: 'shoulders' },
-  { id: 'lateralRaise', muscle: 'shoulders' },
-  { id: 'bicepCurl', muscle: 'arms' },
-  { id: 'tricepExtension', muscle: 'arms' },
-  { id: 'dip', muscle: 'arms' },
-  { id: 'plank', muscle: 'core' },
-  { id: 'crunch', muscle: 'core' },
-];
-const MUSCLE_ORDER = ['chest', 'back', 'legs', 'shoulders', 'arms', 'core'];
+// Бібліотека вправ і їхні назви — у workout/exercises.js: той самий список
+// читає Cloud Function AI-помічника, коли записує тренування з чату.
+const { EXERCISE_LIB, MUSCLE_ORDER, exerciseLabel: libLabel } = window.WorkoutExercises;
 
 const T = {
   uk: {
@@ -76,12 +60,6 @@ const T = {
     historyBestLabel: 'Найкраще', historyEstLabel: '1ПМ (оцінка)', historySessionsLabel: 'Тренувань',
     prBadge: 'PR', trendUp: (p) => `+${p}% від першого разу`, trendFlat: 'Без змін',
     muscle_chest: "Груди", muscle_back: 'Спина', muscle_legs: 'Ноги', muscle_shoulders: 'Плечі', muscle_arms: 'Руки', muscle_core: 'Кор',
-    ex_benchPress: 'Жим лежачи', ex_inclineDbPress: 'Жим гантелей на похилій', ex_chestFly: 'Розведення гантелей лежачи',
-    ex_barbellRow: 'Тяга штанги в нахилі', ex_pullUp: 'Підтягування', ex_deadlift: 'Станова тяга',
-    ex_squat: 'Присідання зі штангою', ex_legPress: 'Жим ногами', ex_lunge: 'Випади',
-    ex_overheadPress: 'Жим стоячи', ex_lateralRaise: 'Розведення гантелей в сторони',
-    ex_bicepCurl: 'Підйом на біцепс', ex_tricepExtension: 'Французький жим', ex_dip: 'Віджимання на брусах',
-    ex_plank: 'Планка', ex_crunch: 'Скручування',
     themeLabel: 'Тема', themeLight: 'Світла', themeDark: 'Темна', themeSystem: 'Системна',
     langLabel: 'Мова', logout: 'Вийти',
     authTitleLogin: 'Вхід', authTitleSignup: 'Реєстрація',
@@ -124,12 +102,6 @@ const T = {
     historyBestLabel: 'Лучшее', historyEstLabel: '1ПМ (оценка)', historySessionsLabel: 'Тренировок',
     prBadge: 'PR', trendUp: (p) => `+${p}% с первого раза`, trendFlat: 'Без изменений',
     muscle_chest: 'Грудь', muscle_back: 'Спина', muscle_legs: 'Ноги', muscle_shoulders: 'Плечи', muscle_arms: 'Руки', muscle_core: 'Кор',
-    ex_benchPress: 'Жим лёжа', ex_inclineDbPress: 'Жим гантелей на наклонной', ex_chestFly: 'Разведение гантелей лёжа',
-    ex_barbellRow: 'Тяга штанги в наклоне', ex_pullUp: 'Подтягивания', ex_deadlift: 'Становая тяга',
-    ex_squat: 'Приседания со штангой', ex_legPress: 'Жим ногами', ex_lunge: 'Выпады',
-    ex_overheadPress: 'Жим стоя', ex_lateralRaise: 'Разведение гантелей в стороны',
-    ex_bicepCurl: 'Подъём на бицепс', ex_tricepExtension: 'Французский жим', ex_dip: 'Отжимания на брусьях',
-    ex_plank: 'Планка', ex_crunch: 'Скручивания',
     themeLabel: 'Тема', themeLight: 'Светлая', themeDark: 'Тёмная', themeSystem: 'Системная',
     langLabel: 'Язык', logout: 'Выйти',
     authTitleLogin: 'Вход', authTitleSignup: 'Регистрация',
@@ -172,12 +144,6 @@ const T = {
     historyBestLabel: 'Najlepszy', historyEstLabel: '1RM (szac.)', historySessionsLabel: 'Treningów',
     prBadge: 'PR', trendUp: (p) => `+${p}% od pierwszego razu`, trendFlat: 'Bez zmian',
     muscle_chest: 'Klatka', muscle_back: 'Plecy', muscle_legs: 'Nogi', muscle_shoulders: 'Barki', muscle_arms: 'Ręce', muscle_core: 'Core',
-    ex_benchPress: 'Wyciskanie leżąc', ex_inclineDbPress: 'Wyciskanie hantli skos dodatni', ex_chestFly: 'Rozpiętki z hantlami',
-    ex_barbellRow: 'Wiosłowanie sztangą', ex_pullUp: 'Podciąganie', ex_deadlift: 'Martwy ciąg',
-    ex_squat: 'Przysiad ze sztangą', ex_legPress: 'Wyciskanie nogami', ex_lunge: 'Wykroki',
-    ex_overheadPress: 'Wyciskanie nad głowę', ex_lateralRaise: 'Unoszenie hantli bokiem',
-    ex_bicepCurl: 'Uginanie na biceps', ex_tricepExtension: 'Francuskie wyciskanie', ex_dip: 'Pompki na poręczach',
-    ex_plank: 'Deska', ex_crunch: 'Brzuszki',
     themeLabel: 'Motyw', themeLight: 'Jasny', themeDark: 'Ciemny', themeSystem: 'Systemowy',
     langLabel: 'Język', logout: 'Wyloguj',
     authTitleLogin: 'Logowanie', authTitleSignup: 'Rejestracja',
@@ -220,12 +186,6 @@ const T = {
     historyBestLabel: 'Best', historyEstLabel: 'Est. 1RM', historySessionsLabel: 'Workouts',
     prBadge: 'PR', trendUp: (p) => `+${p}% since first log`, trendFlat: 'No change',
     muscle_chest: 'Chest', muscle_back: 'Back', muscle_legs: 'Legs', muscle_shoulders: 'Shoulders', muscle_arms: 'Arms', muscle_core: 'Core',
-    ex_benchPress: 'Bench Press', ex_inclineDbPress: 'Incline DB Press', ex_chestFly: 'DB Chest Fly',
-    ex_barbellRow: 'Barbell Row', ex_pullUp: 'Pull-up', ex_deadlift: 'Deadlift',
-    ex_squat: 'Barbell Squat', ex_legPress: 'Leg Press', ex_lunge: 'Lunges',
-    ex_overheadPress: 'Overhead Press', ex_lateralRaise: 'Lateral Raise',
-    ex_bicepCurl: 'Bicep Curl', ex_tricepExtension: 'Tricep Extension', ex_dip: 'Dips',
-    ex_plank: 'Plank', ex_crunch: 'Crunches',
     themeLabel: 'Theme', themeLight: 'Light', themeDark: 'Dark', themeSystem: 'System',
     langLabel: 'Language', logout: 'Log out',
     authTitleLogin: 'Log in', authTitleSignup: 'Sign up',
@@ -251,7 +211,7 @@ function t(key, ...args) {
   const val = (T[currentLang] && T[currentLang][key]) || T.uk[key] || key;
   return typeof val === 'function' ? val(...args) : val;
 }
-function exerciseLabel(libId) { return t(`ex_${libId}`); }
+function exerciseLabel(libId) { return libLabel(libId, currentLang); }
 function muscleLabel(muscle) { return t(`muscle_${muscle}`); }
 
 // ---- Тема ----

@@ -1,6 +1,9 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const Anthropic = require("@anthropic-ai/sdk");
+// Той самий список, що й у формі тренувань — див. коментар у файлі про те,
+// чому копія має бути одна.
+const { EXERCISE_LIB, exerciseLabel, exerciseMuscle } = require("./workout/exercises");
 
 // admin.initializeApp() уже викликано в index.js — тут просто перевикористовуємо
 // той самий інстанс. У тестах цей рядок працює з jest.mock("firebase-admin", ...)
@@ -193,6 +196,70 @@ const tools = [
     input_schema: { type: "object", properties: {} },
   },
   {
+    name: "add_workout",
+    description:
+      "Записати проведене тренування. Кожна вправа — окремий запис з підходами (вага в кг і кількість повторень). " +
+      "Для вправ із бібліотеки обов'язково передавай libId: саме за ним рахуються рекорди, і без нього вправа не " +
+      "склеїться з попередніми. Якщо вправи в бібліотеці немає — лиши libId порожнім і задай name.",
+    input_schema: {
+      type: "object",
+      properties: {
+        date: { type: "string", description: "Дата YYYY-MM-DD; за замовчуванням сьогодні" },
+        name: { type: "string", description: "Назва тренування, напр. «Груди й трицепс» (необов'язково)" },
+        notes: { type: "string", description: "Нотатка до тренування (необов'язково)" },
+        exercises: {
+          type: "array",
+          description: "Вправи тренування, хоча б одна",
+          items: {
+            type: "object",
+            properties: {
+              libId: { type: "string", enum: EXERCISE_LIB.map((e) => e.id), description: "Вправа з бібліотеки" },
+              name: { type: "string", description: "Назва власної вправи — тільки якщо libId не підходить" },
+              sets: {
+                type: "array",
+                description: "Підходи. «4 по 8 на 60 кг» — це чотири однакові підходи, а не один.",
+                items: {
+                  type: "object",
+                  properties: {
+                    weight: { type: "number", description: "Вага в кг; 0 для вправ з власною вагою" },
+                    reps: { type: "number", description: "Кількість повторень" },
+                  },
+                  required: ["reps"],
+                },
+              },
+            },
+            required: ["sets"],
+          },
+        },
+      },
+      required: ["exercises"],
+    },
+  },
+  {
+    name: "goal_checkin",
+    description:
+      "Відзначити сьогоднішній чекін по довгостроковій цілі — це те, що тримає серію (streak). " +
+      "Спершу виклич goals_progress, щоб узяти id потрібної цілі.",
+    input_schema: {
+      type: "object",
+      properties: { id: { type: "string", description: "id цілі зі списку goals_progress" } },
+      required: ["id"],
+    },
+  },
+  {
+    name: "complete_milestone",
+    description:
+      "Позначити віху цілі виконаною. id цілі й id віхи бери з goals_progress.",
+    input_schema: {
+      type: "object",
+      properties: {
+        goalId: { type: "string", description: "id цілі" },
+        milestoneId: { type: "string", description: "id віхи" },
+      },
+      required: ["goalId", "milestoneId"],
+    },
+  },
+  {
     name: "query_transactions",
     description:
       "Отримати список і суму транзакцій користувача за період/фільтром. Використовуй, щоб відповісти на питання про витрати, доходи чи баланс — не вигадуй цифри.",
@@ -267,6 +334,9 @@ async function executeTool(uid, name, input, ctx) {
   if (name === "workout_history") return workoutHistory(uid, input);
   if (name === "personal_records") return personalRecords(uid);
   if (name === "goals_progress") return goalsProgress(uid);
+  if (name === "add_workout") return addWorkout(uid, input, ctx);
+  if (name === "goal_checkin") return goalCheckin(uid, input);
+  if (name === "complete_milestone") return completeMilestone(uid, input);
 
   return { output: { ok: false, error: "unknown tool" }, isError: true };
 }
@@ -497,6 +567,123 @@ async function personalRecords(uid) {
 }
 
 // ---- Цілі ----
+// ---- Запис: тренування ----
+// Форма тренувань складає документ так само (див. submit-handler у
+// workout/app.js): вправа без жодного підходу з вагою чи повтореннями туди
+// не потрапляє, бо в історії від неї немає користі. Повторюємо ту саму
+// вибагливість — інакше з чату можна було б записати порожню вправу, якої
+// руками не створити.
+function sanitizeWorkoutInput(input, ctx) {
+  const isDate = (v) => typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v);
+  const raw = Array.isArray(input.exercises) ? input.exercises.slice(0, 30) : [];
+
+  const exercises = raw.map((ex, i) => {
+    const libId = typeof ex.libId === "string" && EXERCISE_LIB.some((e) => e.id === ex.libId) ? ex.libId : null;
+    // Назва з бібліотеки береться мовою користувача, а не з тексту моделі:
+    // так запис із чату виглядає в списку рівно як створений руками.
+    const name = libId
+      ? exerciseLabel(libId, ctx.lang)
+      : (typeof ex.name === "string" ? ex.name.trim().slice(0, 120) : "");
+    const sets = (Array.isArray(ex.sets) ? ex.sets : []).slice(0, 30).map((st) => {
+      const weight = Number(st && st.weight);
+      const reps = Number(st && st.reps);
+      return {
+        weight: Number.isFinite(weight) && weight > 0 ? Math.round(weight * 100) / 100 : 0,
+        reps: Number.isFinite(reps) && reps > 0 ? Math.min(Math.round(reps), 1000) : 0,
+      };
+    }).filter((st) => st.weight > 0 || st.reps > 0);
+
+    return {
+      id: `ai${Date.now().toString(36)}${i}`,
+      libId,
+      muscle: libId ? exerciseMuscle(libId) : null,
+      name,
+      sets,
+    };
+  }).filter((ex) => ex.name && ex.sets.length);
+
+  if (!exercises.length) return { error: "потрібна хоча б одна вправа з підходами" };
+
+  return {
+    value: {
+      date: isDate(input.date) ? input.date : ctx.today,
+      name: typeof input.name === "string" ? input.name.trim().slice(0, 120) : "",
+      notes: typeof input.notes === "string" ? input.notes.slice(0, 3000) : "",
+      exercises,
+    },
+  };
+}
+
+async function addWorkout(uid, input, ctx) {
+  const result = sanitizeWorkoutInput(input, ctx);
+  if (result.error) return { output: { ok: false, error: result.error }, isError: true };
+
+  const now = admin.firestore.FieldValue.serverTimestamp();
+  const ref = await userCol(uid, "workouts").add({ ...result.value, createdAt: now, updatedAt: now });
+  const setCount = result.value.exercises.reduce((n, ex) => n + ex.sets.length, 0);
+  return {
+    output: { ok: true, id: ref.id, date: result.value.date, exercises: result.value.exercises.length, sets: setCount },
+    action: {
+      kind: "workout_added",
+      date: result.value.date,
+      name: result.value.name,
+      exercises: result.value.exercises.map((ex) => ex.name),
+    },
+  };
+}
+
+// ---- Запис: цілі ----
+// Обидві дії ідемпотентні: повторний виклик нічого не псує. Модель може
+// викликати інструмент двічі (наприклад, не розпізнавши, що вже зробила це
+// в попередньому раунді), і чекін від цього не має задвоїтись чи зникнути —
+// тому тут саме «поставити», а не «перемкнути», як у кнопці на сторінці.
+async function goalCheckin(uid, input) {
+  const id = typeof input.id === "string" ? input.id : "";
+  const ref = userCol(uid, "goals").doc(id);
+  const doc = await ref.get();
+  if (!doc.exists) return { output: { ok: false, error: "ціль не знайдена" }, isError: true };
+
+  const goal = doc.data() || {};
+  const today = new Date().toISOString().slice(0, 10);
+  const had = (goal.checkins || []).includes(today);
+  let checkins = had ? goal.checkins : [...new Set([...(goal.checkins || []), today])].sort();
+  // ISO-рядки сортуються хронологічно, тож зайве відрізається з початку.
+  if (checkins.length > 400) checkins = checkins.slice(checkins.length - 400);
+
+  if (!had) {
+    await ref.update({ checkins, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
+  }
+  return {
+    output: { ok: true, date: today, alreadyDone: had, totalCheckins: checkins.length },
+    action: { kind: "goal_checkin", title: goal.title || "", date: today },
+  };
+}
+
+async function completeMilestone(uid, input) {
+  const goalId = typeof input.goalId === "string" ? input.goalId : "";
+  const milestoneId = typeof input.milestoneId === "string" ? input.milestoneId : "";
+  const ref = userCol(uid, "goals").doc(goalId);
+  const doc = await ref.get();
+  if (!doc.exists) return { output: { ok: false, error: "ціль не знайдена" }, isError: true };
+
+  const goal = doc.data() || {};
+  const milestones = goal.milestones || [];
+  const target = milestones.find((m) => m.id === milestoneId);
+  if (!target) return { output: { ok: false, error: "віха не знайдена" }, isError: true };
+
+  if (!target.done) {
+    await ref.update({
+      milestones: milestones.map((m) => (m.id === milestoneId ? { ...m, done: true } : m)),
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+  }
+  const doneCount = milestones.filter((m) => m.done || m.id === milestoneId).length;
+  return {
+    output: { ok: true, alreadyDone: !!target.done, milestonesDone: doneCount, milestonesTotal: milestones.length },
+    action: { kind: "milestone_done", goal: goal.title || "", title: target.title || "" },
+  };
+}
+
 async function goalsProgress(uid) {
   const snap = await userCol(uid, "goals").get();
   return {
@@ -505,13 +692,19 @@ async function goalsProgress(uid) {
       goals: snap.docs.map((d) => {
         const g = d.data() || {};
         const milestones = g.milestones || [];
+        const today = new Date().toISOString().slice(0, 10);
         return {
+          // id потрібні, щоб було чим адресувати goal_checkin і
+          // complete_milestone — без них модель могла б хіба вгадувати.
+          id: d.id,
           title: g.title || "",
           status: g.status || "active",
           targetDate: g.targetDate || null,
+          milestones: milestones.map((m) => ({ id: m.id, title: m.title || "", done: !!m.done })),
           milestonesDone: milestones.filter((m) => m.done).length,
           milestonesTotal: milestones.length,
           checkins: (g.checkins || []).length,
+          checkedInToday: (g.checkins || []).includes(today),
         };
       }),
     },
@@ -526,7 +719,11 @@ function buildSystemPrompt(ctx) {
     `Категорії витрат: ${catList(ctx.categoriesExpense)}.`,
     `Категорії доходів: ${catList(ctx.categoriesIncome)}.`,
     "",
-    "ЗАПИСУВАТИ. 'кава 80 грн' -> add_transaction (expense, 80, category 'food'). 'запиши подзвонити мамі завтра о 18' -> add_task. Не питай уточнень, якщо сенс зрозумілий; якщо в одному повідомленні кілька справ — створи кожну окремим викликом.",
+    "ЗАПИСУВАТИ. 'кава 80 грн' -> add_transaction (expense, 80, category 'food'). 'запиши подзвонити мамі завтра о 18' -> add_task. 'записав тренування: жим лежачи 4 по 8 на 60' -> add_workout. Не питай уточнень, якщо сенс зрозумілий; якщо в одному повідомленні кілька справ — створи кожну окремим викликом.",
+    "",
+    "ТРЕНУВАННЯ. '4 по 8 на 60 кг' означає чотири однакові підходи по 8 повторень з вагою 60 — перелічи їх усі, а не один. Вправу з бібліотеки завжди передавай через libId (жим лежачи -> benchPress, присідання -> squat, станова -> deadlift і так далі): рекорди рахуються саме за ним, і без libId запис не склеїться з попередніми тренуваннями тієї ж вправи. Для планки й інших вправ з власною вагою став weight 0. Якщо людина каже 'запиши тренування' без жодної вправи — спитай, які саме вправи були.",
+    "",
+    "ЦІЛІ. goal_checkin відзначає сьогоднішній день у серії, complete_milestone закриває віху. Обидва беруть id, тож спершу виклич goals_progress і візьми id звідти — вгадувати id не можна. Якщо назва цілі збігається з кількома — перепитай, з якою саме.",
     "",
     "РАДИТИ. Це головне правило: спершу подивись у дані, потім говори. Порада без цифр — марна, людина і так знає, що треба менше витрачати й більше рухатись.",
     "- порада про економію -> спершу month_summary за потрібний місяць, і говори про конкретні категорії й суми;",
@@ -638,6 +835,7 @@ module.exports.executeTool = executeTool;
 module.exports.buildSystemPrompt = buildSystemPrompt;
 module.exports.enforceRateLimit = enforceRateLimit;
 module.exports.sanitizeTaskInput = sanitizeTaskInput;
+module.exports.sanitizeWorkoutInput = sanitizeWorkoutInput;
 module.exports.modelIdFor = modelIdFor;
 module.exports.MODELS = MODELS;
 module.exports.RATE_LIMIT_MAX_MESSAGES = RATE_LIMIT_MAX_MESSAGES;
