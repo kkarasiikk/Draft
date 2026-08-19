@@ -105,15 +105,6 @@ const T = {
     catInUseConfirm: 'Ця категорія використовується у {count} записах. Їх буде перенесено в іншу категорію. Видалити її?',
     chooseFileBtn: 'Обрати файл',
     exportDataLabel: 'Дані',
-    exportDataDesc: 'Завантажить файл з усіма твоїми записами, категоріями, заощадженнями й нотатками.',
-    exportDataError: 'Не вдалося підготувати експорт. Спробуй ще раз.',
-    exportXlsxBtn: 'Експортувати в Excel (.xlsx)',
-    exportXlsxSheetTx: 'Транзакції', exportXlsxSheetSavings: 'Заощадження', exportXlsxSheetGoals: 'Цілі заощаджень',
-    exportXlsxSheetNotes: 'Нотатки', exportXlsxSheetCats: 'Категорії',
-    exportXlsxColDate: 'Дата', exportXlsxColType: 'Тип', exportXlsxColCategory: 'Категорія', exportXlsxColAmount: 'Сума',
-    exportXlsxColCurrency: 'Валюта', exportXlsxColNote: 'Нотатка', exportXlsxColGoal: 'Ціль', exportXlsxColName: 'Назва',
-    exportXlsxColCreated: 'Створено', exportXlsxColUpdated: 'Оновлено', exportXlsxColTitle: 'Заголовок', exportXlsxColContent: 'Зміст',
-    exportXlsxTypeExpense: 'Витрата', exportXlsxTypeIncome: 'Дохід', exportXlsxTypeDeposit: 'Поповнення', exportXlsxTypeWithdraw: 'Зняття',
     importCsvBtn: 'Імпортувати транзакції з CSV', importDataDesc: 'Колонки: дата (РРРР-ММ-ДД), тип (дохід/витрата), категорія, сума, нотатка.',
     importConfirm: 'Знайдено рядків: {total}. Буде додано записів: {ok}, нових категорій: {newCats}. Пропущено через помилки: {skipped}. Продовжити?',
     importSuccess: 'Імпортовано записів: {count}', importNoValidRows: 'У файлі не знайдено жодного коректного рядка',
@@ -177,15 +168,6 @@ const T = {
     catInUseConfirm: 'Эта категория используется в {count} записях. Они будут перенесены в другую категорию. Удалить её?',
     chooseFileBtn: 'Выбрать файл',
     exportDataLabel: 'Данные',
-    exportDataDesc: 'Скачает файл со всеми твоими записями, категориями, накоплениями и заметками.',
-    exportDataError: 'Не удалось подготовить экспорт. Попробуй ещё раз.',
-    exportXlsxBtn: 'Экспортировать в Excel (.xlsx)',
-    exportXlsxSheetTx: 'Транзакции', exportXlsxSheetSavings: 'Накопления', exportXlsxSheetGoals: 'Цели накоплений',
-    exportXlsxSheetNotes: 'Заметки', exportXlsxSheetCats: 'Категории',
-    exportXlsxColDate: 'Дата', exportXlsxColType: 'Тип', exportXlsxColCategory: 'Категория', exportXlsxColAmount: 'Сумма',
-    exportXlsxColCurrency: 'Валюта', exportXlsxColNote: 'Заметка', exportXlsxColGoal: 'Цель', exportXlsxColName: 'Название',
-    exportXlsxColCreated: 'Создано', exportXlsxColUpdated: 'Обновлено', exportXlsxColTitle: 'Заголовок', exportXlsxColContent: 'Содержимое',
-    exportXlsxTypeExpense: 'Расход', exportXlsxTypeIncome: 'Доход', exportXlsxTypeDeposit: 'Пополнение', exportXlsxTypeWithdraw: 'Снятие',
     importCsvBtn: 'Импортировать транзакции из CSV', importDataDesc: 'Колонки: дата (ГГГГ-ММ-ДД), тип (доход/расход), категория, сумма, заметка.',
     importConfirm: 'Найдено строк: {total}. Будет добавлено записей: {ok}, новых категорий: {newCats}. Пропущено из-за ошибок: {skipped}. Продолжить?',
     importSuccess: 'Импортировано записей: {count}', importNoValidRows: 'В файле не найдено ни одной корректной строки',
@@ -249,15 +231,6 @@ const T = {
     catInUseConfirm: 'Ta kategoria jest używana w {count} wpisach. Zostaną przeniesione do innej kategorii. Usunąć ją?',
     chooseFileBtn: 'Wybierz plik',
     exportDataLabel: 'Dane',
-    exportDataDesc: 'Pobierze plik ze wszystkimi wpisami, kategoriami, oszczędnościami i notatkami.',
-    exportDataError: 'Nie udało się przygotować eksportu. Spróbuj ponownie.',
-    exportXlsxBtn: 'Eksportuj do Excela (.xlsx)',
-    exportXlsxSheetTx: 'Transakcje', exportXlsxSheetSavings: 'Oszczędności', exportXlsxSheetGoals: 'Cele oszczędnościowe',
-    exportXlsxSheetNotes: 'Notatki', exportXlsxSheetCats: 'Kategorie',
-    exportXlsxColDate: 'Data', exportXlsxColType: 'Typ', exportXlsxColCategory: 'Kategoria', exportXlsxColAmount: 'Kwota',
-    exportXlsxColCurrency: 'Waluta', exportXlsxColNote: 'Notatka', exportXlsxColGoal: 'Cel', exportXlsxColName: 'Nazwa',
-    exportXlsxColCreated: 'Utworzono', exportXlsxColUpdated: 'Zaktualizowano', exportXlsxColTitle: 'Tytuł', exportXlsxColContent: 'Treść',
-    exportXlsxTypeExpense: 'Wydatek', exportXlsxTypeIncome: 'Przychód', exportXlsxTypeDeposit: 'Wpłata', exportXlsxTypeWithdraw: 'Wypłata',
     importCsvBtn: 'Importuj transakcje z CSV', importDataDesc: 'Kolumny: data (RRRR-MM-DD), typ (przychód/wydatek), kategoria, kwota, notatka.',
     importConfirm: 'Znaleziono wierszy: {total}. Zostanie dodanych wpisów: {ok}, nowych kategorii: {newCats}. Pominięto z powodu błędów: {skipped}. Kontynuować?',
     importSuccess: 'Zaimportowano wpisów: {count}', importNoValidRows: 'W pliku nie znaleziono żadnego poprawnego wiersza',
@@ -321,15 +294,6 @@ const T = {
     catInUseConfirm: 'This category is used in {count} entries. They will be moved to another category. Delete it anyway?',
     chooseFileBtn: 'Choose file',
     exportDataLabel: 'Data',
-    exportDataDesc: 'Downloads a file with all your entries, categories, savings, and notes.',
-    exportDataError: 'Could not prepare the export. Please try again.',
-    exportXlsxBtn: 'Export to Excel (.xlsx)',
-    exportXlsxSheetTx: 'Transactions', exportXlsxSheetSavings: 'Savings', exportXlsxSheetGoals: 'Savings goals',
-    exportXlsxSheetNotes: 'Notes', exportXlsxSheetCats: 'Categories',
-    exportXlsxColDate: 'Date', exportXlsxColType: 'Type', exportXlsxColCategory: 'Category', exportXlsxColAmount: 'Amount',
-    exportXlsxColCurrency: 'Currency', exportXlsxColNote: 'Note', exportXlsxColGoal: 'Goal', exportXlsxColName: 'Name',
-    exportXlsxColCreated: 'Created', exportXlsxColUpdated: 'Updated', exportXlsxColTitle: 'Title', exportXlsxColContent: 'Content',
-    exportXlsxTypeExpense: 'Expense', exportXlsxTypeIncome: 'Income', exportXlsxTypeDeposit: 'Deposit', exportXlsxTypeWithdraw: 'Withdrawal',
     importCsvBtn: 'Import transactions from CSV', importDataDesc: 'Columns: date (YYYY-MM-DD), type (income/expense), category, amount, note.',
     importConfirm: 'Found rows: {total}. Will add entries: {ok}, new categories: {newCats}. Skipped due to errors: {skipped}. Continue?',
     importSuccess: 'Imported entries: {count}', importNoValidRows: 'No valid rows found in the file',
@@ -344,14 +308,8 @@ function t(key, vars) {
 }
 
 // ---- Категорії (базові набори + користувацькі, зберігаються в профілі користувача) ----
-const EXPENSE_CATEGORY_IDS = ['food', 'transport', 'housing', 'fun', 'health', 'clothes', 'other'];
-const INCOME_CATEGORY_IDS = ['salary', 'freelance', 'gift', 'other'];
-const CAT_LABELS = {
-  uk: { food: 'Їжа', transport: 'Транспорт', housing: 'Житло', fun: 'Розваги', health: 'Здоров\u2019я', clothes: 'Одяг', other: 'Інше', salary: 'Зарплата', freelance: 'Фріланс', gift: 'Подарунок' },
-  ru: { food: 'Еда', transport: 'Транспорт', housing: 'Жильё', fun: 'Развлечения', health: 'Здоровье', clothes: 'Одежда', other: 'Другое', salary: 'Зарплата', freelance: 'Фриланс', gift: 'Подарок' },
-  pl: { food: 'Jedzenie', transport: 'Transport', housing: 'Mieszkanie', fun: 'Rozrywka', health: 'Zdrowie', clothes: 'Ubrania', other: 'Inne', salary: 'Wypłata', freelance: 'Freelance', gift: 'Prezent' },
-  en: { food: 'Food', transport: 'Transport', housing: 'Housing', fun: 'Fun', health: 'Health', clothes: 'Clothes', other: 'Other', salary: 'Salary', freelance: 'Freelance', gift: 'Gift' },
-};
+// EXPENSE_CATEGORY_IDS / INCOME_CATEGORY_IDS / CAT_LABELS живуть у
+// budget/categories-default.js — їх читає ще й експорт на головному екрані.
 
 const CATEGORY_PALETTE = [
   { text: '#3E7C59', bg: '#EAF5EF' },
@@ -365,8 +323,7 @@ const CATEGORY_PALETTE = [
 ];
 
 function defaultCategories(type) {
-  const ids = type === 'income' ? INCOME_CATEGORY_IDS : EXPENSE_CATEGORY_IDS;
-  return ids.map((id, i) => ({ id, label: (CAT_LABELS[currentLang] && CAT_LABELS[currentLang][id]) || id, colorIndex: i % CATEGORY_PALETTE.length }));
+  return defaultCategoryList(type, currentLang, CATEGORY_PALETTE.length);
 }
 
 function findCategory(type, id) {
@@ -660,19 +617,6 @@ function applyTheme() {
 // поточне значення змінної теми напряму з обчислених стилів документа.
 function themeVar(name) {
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-}
-function setTheme(choice) {
-  if (!THEME_CHOICES.includes(choice)) return;
-  themeChoice = choice;
-  localStorage.setItem('financeAppTheme', choice);
-  if (auth.currentUser) {
-    db.collection('users').doc(auth.currentUser.uid).set({ theme: choice }, { merge: true }).catch(() => {});
-  }
-  applyTheme();
-  renderThemePicker();
-  // Кольори на графіках Chart.js обчислюються на момент побудови, тож при
-  // зміні теми їх треба перемалювати, інакше лишаться кольори старої теми.
-  refreshChartsForTheme();
 }
 // Коли обрано "як в системі" — стежимо за зміною системної теми наживо,
 // без потреби перезавантажувати сторінку.
@@ -1001,12 +945,8 @@ function applyStaticTranslations() {
   document.getElementById('rememberMeLabel').textContent = t('rememberMe');
   document.getElementById('forgotPasswordLink').textContent = t('forgotPassword');
   setAuthMode(authMode);
-  document.getElementById('logoutLabel').textContent = t('logout');
   document.getElementById('incomeLabel').textContent = t('incomeMonthLabel');
   document.getElementById('expenseLabel').textContent = t('expenseMonthLabel');
-  document.getElementById('tabEntriesLabel').textContent = t('tabEntries');
-  document.getElementById('topbarBrandLabel').textContent = t('appTitle');
-  document.getElementById('settingsMenuLabel').textContent = t('settingsTitle');
   document.getElementById('pageTitleLabel').textContent = t('pageTitleLabel');
   document.getElementById('pageContentLabel').textContent = t('pageContentLabel');
   document.getElementById('pageTitleInput').placeholder = t('pageTitlePlaceholder');
@@ -1031,10 +971,9 @@ function applyStaticTranslations() {
   document.getElementById('confirmSub').textContent = t('confirmSub');
   document.getElementById('cancelDelete').textContent = t('cancelBtn');
   document.getElementById('confirmDelete').textContent = t('deleteBtn');
-  document.getElementById('settingsTitle').textContent = t('settingsTitle');
-  document.getElementById('categoriesTitle').textContent = t('categoriesTitle');
+  document.getElementById('categoriesTitle').textContent = t('settingsTitle');
   document.getElementById('bnStats').setAttribute('aria-label', t('tabStats'));
-  document.getElementById('categoriesBtn').setAttribute('aria-label', t('categoriesTitle'));
+  document.getElementById('categoriesBtn').setAttribute('aria-label', t('settingsTitle'));
   document.getElementById('statsSettingsTitle').textContent = t('statsSettingsTitle');
   document.getElementById('statsSettingsChartsLabel').textContent = t('statsSettingsChartsLabel');
   document.getElementById('showChartPieLabel').textContent = t('statsCatTitle');
@@ -1058,12 +997,8 @@ function applyStaticTranslations() {
   document.getElementById('savingsTotalModeLabel').textContent = t('savingsTotalModeLabel');
   renderSavingsTotalModePicker();
   renderSavingsTotalCurrencySelect();
-  document.getElementById('settingsThemeLabel').textContent = t('themeLabel');
-  document.getElementById('settingsLangLabel').textContent = t('langLabel');
   document.getElementById('settingsCurrencyLabel').textContent = t('currencyLabel');
   document.getElementById('exportDataLabel').textContent = t('exportDataLabel');
-  document.getElementById('exportXlsxBtnLabel').textContent = t('exportXlsxBtn');
-  document.getElementById('exportDataDesc').textContent = t('exportDataDesc');
   document.getElementById('importCsvBtnLabel').textContent = t('importCsvBtn');
   document.getElementById('importDataDesc').textContent = t('importDataDesc');
   document.getElementById('searchInput').setAttribute('placeholder', t('searchPlaceholder'));
@@ -1076,7 +1011,6 @@ function applyStaticTranslations() {
   document.getElementById('addIncomeCatBtn').setAttribute('aria-label', t('addCatAria'));
   const cur = CURRENCIES[currentCurrency] || CURRENCIES.UAH;
   document.getElementById('amountLabel').textContent = t('amountLabel', { symbol: cur.symbol });
-  document.getElementById('aiChatMenuLabel').textContent = t('aiChatMenuLabel');
   document.getElementById('aiChatTitle').textContent = t('aiChatTitle');
   document.getElementById('aiChatInput').placeholder = t('aiChatPlaceholder');
   document.getElementById('aiChatSend').setAttribute('aria-label', t('aiChatSendAria'));
@@ -1103,9 +1037,7 @@ function applyStaticTranslations() {
   document.getElementById('savingsAmountLabel').textContent = t('amountLabelPlain');
   document.getElementById('savingsDateLabel').textContent = t('dateLabel');
   document.getElementById('savingsNoteLabel').textContent = t('noteLabel');
-  renderLangPicker();
   renderCurrencyPicker();
-  renderThemePicker();
   renderSavingsTrendCurrencySelect();
   renderCategoryManager();
   renderAuthLangRow();
@@ -1121,28 +1053,7 @@ function renderAuthLangRow() {
   });
 }
 
-function renderLangPicker() {
-  const picker = document.getElementById('langPicker');
-  picker.innerHTML = LANGS.map(l => `<button type="button" class="cat-choice${l === currentLang ? ' selected' : ''}"
-    data-lang="${l}" style="${l === currentLang ? 'background:var(--accent);' : ''}">${LANG_NAMES[l]}</button>`).join('');
-  picker.querySelectorAll('.cat-choice').forEach(btn => {
-    btn.addEventListener('click', () => setLang(btn.dataset.lang));
-  });
-}
 
-function renderThemePicker() {
-  const picker = document.getElementById('themePicker');
-  const options = [
-    { key: 'light', label: t('themeLight') },
-    { key: 'dark', label: t('themeDark') },
-    { key: 'system', label: t('themeSystem') },
-  ];
-  picker.innerHTML = options.map(o => `<button type="button" class="cat-choice${o.key === themeChoice ? ' selected' : ''}"
-    data-theme-choice="${o.key}" style="${o.key === themeChoice ? 'background:var(--accent);' : ''}">${o.label}</button>`).join('');
-  picker.querySelectorAll('.cat-choice').forEach(btn => {
-    btn.addEventListener('click', () => setTheme(btn.dataset.themeChoice));
-  });
-}
 
 function renderCurrencyPicker() {
   const picker = document.getElementById('currencyPicker');
@@ -1368,15 +1279,6 @@ document.getElementById('forgotPasswordLink').addEventListener('click', async ()
   }
 });
 
-document.getElementById('logoutBtn').addEventListener('click', () => {
-  document.getElementById('appMenuOverlay').classList.remove('show');
-  pendingDeleteId = null;
-  pendingDeleteType = 'logout';
-  document.getElementById('confirmTitle').textContent = t('confirmTitleLogout');
-  document.getElementById('confirmSub').textContent = t('confirmSubLogout');
-  document.getElementById('confirmDelete').textContent = t('logout');
-  document.getElementById('confirmOverlay').classList.add('show');
-});
 
 auth.onAuthStateChanged((user) => {
   document.getElementById('authLoading').style.display = 'none';
@@ -1609,90 +1511,12 @@ function deleteCategory(type, id) {
 }
 
 // Перетворює Firestore Timestamp / рядок / Date у людський рядок дати-часу.
-function formatExportTimestamp(value) {
-  if (!value) return '';
-  if (typeof value.toDate === 'function') value = value.toDate();
-  if (typeof value === 'string') {
-    const d = new Date(value);
-    return isNaN(d) ? value : d.toLocaleString();
-  }
-  if (value instanceof Date) return value.toLocaleString();
-  return String(value);
-}
 
 // Прибирає HTML-розмітку нотатки, лишаючи тільки текст (для клітинки Excel).
-function stripHtmlForExport(html) {
-  if (!html) return '';
-  const div = document.createElement('div');
-  div.innerHTML = html;
-  return (div.textContent || div.innerText || '').replace(/\n{3,}/g, '\n\n').trim();
-}
 
 // Формує книгу Excel (.xlsx) з окремими листами для транзакцій, заощаджень,
 // цілей, нотаток і категорій. Використовує SheetJS (window.XLSX),
 // завантажену з cdnjs — того ж CDN, що вже дозволений у CSP.
-function exportAllDataXlsx() {
-  try {
-    if (typeof XLSX === 'undefined') {
-      alert(t('exportDataError'));
-      return;
-    }
-    const wb = XLSX.utils.book_new();
-
-    const txRows = transactions
-      .slice()
-      .sort((a, b) => (a.date || '').localeCompare(b.date || ''))
-      .map(tx => ({
-        [t('exportXlsxColDate')]: tx.date || '',
-        [t('exportXlsxColType')]: tx.type === 'income' ? t('exportXlsxTypeIncome') : t('exportXlsxTypeExpense'),
-        [t('exportXlsxColCategory')]: catLabel(tx.type, tx.category),
-        [t('exportXlsxColAmount')]: typeof tx.amount === 'number' ? tx.amount : Number(tx.amount) || 0,
-        [t('exportXlsxColNote')]: tx.note || '',
-      }));
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(txRows), t('exportXlsxSheetTx'));
-
-    const goalNameById = {};
-    savingsGoals.forEach(g => { goalNameById[g.id] = g.name || t('defaultGoalName'); });
-    const savingsRows = savings
-      .slice()
-      .sort((a, b) => (a.date || '').localeCompare(b.date || ''))
-      .map(sv => ({
-        [t('exportXlsxColDate')]: sv.date || '',
-        [t('exportXlsxColGoal')]: goalNameById[sv.goalId] || '',
-        [t('exportXlsxColType')]: sv.type === 'withdraw' ? t('exportXlsxTypeWithdraw') : t('exportXlsxTypeDeposit'),
-        [t('exportXlsxColAmount')]: typeof sv.amount === 'number' ? sv.amount : Number(sv.amount) || 0,
-        [t('exportXlsxColCurrency')]: sv.currency || '',
-        [t('exportXlsxColNote')]: sv.note || '',
-      }));
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(savingsRows), t('exportXlsxSheetSavings'));
-
-    const goalsRows = savingsGoals.map(g => ({
-      [t('exportXlsxColName')]: g.name || t('defaultGoalName'),
-      [t('exportXlsxColCreated')]: formatExportTimestamp(g.createdAt),
-    }));
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(goalsRows), t('exportXlsxSheetGoals'));
-
-    const notesRows = pages.map(p => ({
-      [t('exportXlsxColTitle')]: p.title || t('pageNoTitle'),
-      [t('exportXlsxColContent')]: stripHtmlForExport(p.content),
-      [t('exportXlsxColCreated')]: formatExportTimestamp(p.createdAt),
-      [t('exportXlsxColUpdated')]: formatExportTimestamp(p.updatedAt),
-    }));
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(notesRows), t('exportXlsxSheetNotes'));
-
-    const catRows = [
-      ...categoriesExpense.map(c => ({ [t('exportXlsxColType')]: t('exportXlsxTypeExpense'), [t('exportXlsxColName')]: c.label })),
-      ...categoriesIncome.map(c => ({ [t('exportXlsxColType')]: t('exportXlsxTypeIncome'), [t('exportXlsxColName')]: c.label })),
-    ];
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(catRows), t('exportXlsxSheetCats'));
-
-    const stamp = new Date().toISOString().slice(0, 10);
-    XLSX.writeFile(wb, `life-backup-${stamp}.xlsx`);
-  } catch (err) {
-    console.error('XLSX export failed', err);
-    alert(t('exportDataError'));
-  }
-}
 
 // ---- Обчислення на основі поточного місяця ----
 function getTargetDate() {
@@ -2706,7 +2530,6 @@ async function submitForm() {
 function selectTab(tabKey) {
   currentTab = tabKey;
   if (!tabKey.startsWith('page:')) pageOriginTab = 'entries';
-  document.querySelectorAll('#tabsList .tab-btn[data-tab]').forEach(b => b.classList.toggle('active', b.dataset.tab === tabKey));
   document.getElementById('bnEntries').classList.toggle('active', tabKey === 'entries');
   document.getElementById('bnStats').classList.toggle('active', tabKey === 'stats');
   document.getElementById('bnSavings').classList.toggle('active', tabKey === 'savings');
@@ -2726,9 +2549,8 @@ function selectTab(tabKey) {
   document.getElementById('categoriesBtn').style.display = isPage ? 'none' : 'flex';
   document.getElementById('monthNavHeader').classList.toggle('show', tabKey === 'entries' || tabKey === 'stats');
   document.getElementById('backToEntriesBtn').classList.toggle('show', isPage);
-  document.getElementById('appMenuOverlay').classList.remove('show');
   document.getElementById('categoriesBtn').setAttribute('aria-label',
-    tabKey === 'stats' ? t('statsSettingsTitle') : tabKey === 'savings' ? t('savingsSettingsTitle') : tabKey === 'notes' ? t('notesSettingsTitle') : t('categoriesTitle'));
+    tabKey === 'stats' ? t('statsSettingsTitle') : tabKey === 'savings' ? t('savingsSettingsTitle') : tabKey === 'notes' ? t('notesSettingsTitle') : t('settingsTitle'));
   updateHeaderSectionTitle();
   if (isSavings) {
     currentSavingsGoalId = null;
@@ -2754,11 +2576,6 @@ function updateHeaderSectionTitle() {
   titleEl.textContent = '';
   titleEl.classList.remove('show');
 }
-document.getElementById('tabsList').addEventListener('click', (e) => {
-  const btn = e.target.closest('.tab-btn[data-tab]');
-  if (!btn) return;
-  selectTab(btn.dataset.tab);
-});
 document.getElementById('editPageBtn').addEventListener('click', () => {
   if (!currentTab.startsWith('page:')) return;
   openPageEditor(currentTab.slice(5));
@@ -2902,10 +2719,7 @@ document.getElementById('openWithdraw').addEventListener('click', () => openSavi
 document.getElementById('closeSavingsForm').addEventListener('click', () => { editingSavingId = null; document.getElementById('savingsFormOverlay').classList.remove('show'); });
 document.getElementById('savingsFormOverlay').addEventListener('click', (e) => { if (e.target.id === 'savingsFormOverlay') { editingSavingId = null; e.currentTarget.classList.remove('show'); } });
 document.getElementById('savingsSubmitBtn').addEventListener('click', submitSavingsForm);
-document.getElementById('menuBtn').addEventListener('click', () => document.getElementById('appMenuOverlay').classList.add('show'));
-document.getElementById('appMenuOverlay').addEventListener('click', (e) => { if (e.target.id === 'appMenuOverlay') e.currentTarget.classList.remove('show'); });
 document.getElementById('aiChatBtn').addEventListener('click', () => {
-  document.getElementById('appMenuOverlay').classList.remove('show');
   document.getElementById('aiChatOverlay').classList.add('show');
   renderAiChat();
   setTimeout(() => document.getElementById('aiChatInput').focus(), 50);
@@ -2918,12 +2732,6 @@ document.getElementById('aiChatInput').addEventListener('keydown', (e) => {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendAiChatMessage(); }
 });
 document.getElementById('aiChatInput').addEventListener('input', autoGrowAiChatInput);
-document.getElementById('settingsBtn').addEventListener('click', () => {
-  document.getElementById('appMenuOverlay').classList.remove('show');
-  document.getElementById('settingsOverlay').classList.add('show');
-});
-document.getElementById('closeSettings').addEventListener('click', () => document.getElementById('settingsOverlay').classList.remove('show'));
-document.getElementById('exportXlsxBtn').addEventListener('click', exportAllDataXlsx);
 document.getElementById('importCsvBtn').addEventListener('click', () => document.getElementById('importCsvInput').click());
 document.getElementById('importCsvInput').addEventListener('change', (e) => {
   const file = e.target.files && e.target.files[0];
@@ -2932,7 +2740,6 @@ document.getElementById('importCsvInput').addEventListener('change', (e) => {
 });
 document.getElementById('closeCategoryTx').addEventListener('click', () => document.getElementById('categoryTxOverlay').classList.remove('show'));
 document.getElementById('categoryTxOverlay').addEventListener('click', (e) => { if (e.target.id === 'categoryTxOverlay') e.currentTarget.classList.remove('show'); });
-document.getElementById('settingsOverlay').addEventListener('click', (e) => { if (e.target.id === 'settingsOverlay') e.currentTarget.classList.remove('show'); });
 document.getElementById('addExpenseCatBtn').addEventListener('click', () => addCategoryFromInput('expense'));
 document.getElementById('addIncomeCatBtn').addEventListener('click', () => addCategoryFromInput('income'));
 document.getElementById('newExpenseCatInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') addCategoryFromInput('expense'); });

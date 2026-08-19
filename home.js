@@ -30,7 +30,8 @@ const LANG_NAMES = { uk: 'UA', ru: 'RU', pl: 'PL', en: 'EN' };
 const STRINGS = {
   uk: {
     themeLabel: 'Тема', themeLight: 'Світла', themeDark: 'Темна', themeSystem: 'Системна',
-    langLabel: 'Мова', logout: 'Вийти',
+    langLabel: 'Мова', logout: 'Вийти', exportLabel: 'Експорт даних',
+    exportBusy: 'Готую файл…', exportError: 'Не вдалося зібрати файл. Спробуй ще раз.',
     budgetTitle: 'Бюджет', budgetSub: 'витрати й доходи',
     goalsTitle: 'Цілі', goalsSub: 'довгострокові',
     tasksTitle: 'Завдання', tasksSub: 'на кожен день',
@@ -53,7 +54,8 @@ const STRINGS = {
   },
   ru: {
     themeLabel: 'Тема', themeLight: 'Светлая', themeDark: 'Тёмная', themeSystem: 'Системная',
-    langLabel: 'Язык', logout: 'Выйти',
+    langLabel: 'Язык', logout: 'Выйти', exportLabel: 'Экспорт данных',
+    exportBusy: 'Готовлю файл…', exportError: 'Не удалось собрать файл. Попробуй ещё раз.',
     budgetTitle: 'Бюджет', budgetSub: 'расходы и доходы',
     goalsTitle: 'Цели', goalsSub: 'долгосрочные',
     tasksTitle: 'Задачи', tasksSub: 'на каждый день',
@@ -76,7 +78,8 @@ const STRINGS = {
   },
   pl: {
     themeLabel: 'Motyw', themeLight: 'Jasny', themeDark: 'Ciemny', themeSystem: 'Systemowy',
-    langLabel: 'Język', logout: 'Wyloguj',
+    langLabel: 'Język', logout: 'Wyloguj', exportLabel: 'Eksport danych',
+    exportBusy: 'Przygotowuję plik…', exportError: 'Nie udało się zebrać pliku. Spróbuj ponownie.',
     budgetTitle: 'Budżet', budgetSub: 'wydatki i dochody',
     goalsTitle: 'Cele', goalsSub: 'długoterminowe',
     tasksTitle: 'Zadania', tasksSub: 'na każdy dzień',
@@ -99,7 +102,8 @@ const STRINGS = {
   },
   en: {
     themeLabel: 'Theme', themeLight: 'Light', themeDark: 'Dark', themeSystem: 'System',
-    langLabel: 'Language', logout: 'Log out',
+    langLabel: 'Language', logout: 'Log out', exportLabel: 'Export data',
+    exportBusy: 'Preparing the file…', exportError: 'Could not build the file. Try again.',
     budgetTitle: 'Budget', budgetSub: 'spending & income',
     goalsTitle: 'Goals', goalsSub: 'long-term',
     tasksTitle: 'Tasks', tasksSub: 'day to day',
@@ -132,6 +136,7 @@ function applyTranslations() {
   document.getElementById('htmlRoot').setAttribute('lang', currentLang);
   document.getElementById('themeMenuLabel').textContent = t('themeLabel');
   document.getElementById('langMenuLabel').textContent = t('langLabel');
+  document.getElementById('exportLabel').textContent = t('exportLabel');
   document.getElementById('logoutLabel').textContent = t('logout');
   document.getElementById('budgetTitle').textContent = t('budgetTitle');
   document.getElementById('budgetSub').textContent = t('budgetSub');
@@ -341,6 +346,76 @@ document.getElementById('forgotPasswordLink').addEventListener('click', async ()
   } finally {
     link.style.pointerEvents = '';
   }
+});
+
+// ---- Експорт даних ----
+// Резервна копія стосується всього застосунку, а не однієї вкладки, тож
+// кнопка живе на головному екрані. Дані читаємо разово запитом, а не
+// підпискою: хаб не тримає їх у пам'яті й не має цього робити заради
+// однієї кнопки.
+const EXPORT_LABELS = {
+  uk: { sheetTx: 'Транзакції', sheetSavings: 'Заощадження', sheetGoals: 'Цілі заощаджень', sheetNotes: 'Нотатки', sheetCats: 'Категорії',
+        colDate: 'Дата', colType: 'Тип', colCategory: 'Категорія', colAmount: 'Сума', colCurrency: 'Валюта', colNote: 'Нотатка',
+        colGoal: 'Ціль', colName: 'Назва', colCreated: 'Створено', colUpdated: 'Оновлено', colTitle: 'Заголовок', colContent: 'Зміст',
+        typeExpense: 'Витрата', typeIncome: 'Дохід', typeDeposit: 'Поповнення', typeWithdraw: 'Зняття',
+        defaultGoalName: 'Заощадження', noTitle: 'Без заголовка' },
+  ru: { sheetTx: 'Транзакции', sheetSavings: 'Накопления', sheetGoals: 'Цели накоплений', sheetNotes: 'Заметки', sheetCats: 'Категории',
+        colDate: 'Дата', colType: 'Тип', colCategory: 'Категория', colAmount: 'Сумма', colCurrency: 'Валюта', colNote: 'Заметка',
+        colGoal: 'Цель', colName: 'Название', colCreated: 'Создано', colUpdated: 'Обновлено', colTitle: 'Заголовок', colContent: 'Содержимое',
+        typeExpense: 'Расход', typeIncome: 'Доход', typeDeposit: 'Пополнение', typeWithdraw: 'Снятие',
+        defaultGoalName: 'Накопления', noTitle: 'Без заголовка' },
+  pl: { sheetTx: 'Transakcje', sheetSavings: 'Oszczędności', sheetGoals: 'Cele oszczędnościowe', sheetNotes: 'Notatki', sheetCats: 'Kategorie',
+        colDate: 'Data', colType: 'Typ', colCategory: 'Kategoria', colAmount: 'Kwota', colCurrency: 'Waluta', colNote: 'Notatka',
+        colGoal: 'Cel', colName: 'Nazwa', colCreated: 'Utworzono', colUpdated: 'Zaktualizowano', colTitle: 'Tytuł', colContent: 'Treść',
+        typeExpense: 'Wydatek', typeIncome: 'Przychód', typeDeposit: 'Wpłata', typeWithdraw: 'Wypłata',
+        defaultGoalName: 'Oszczędności', noTitle: 'Bez tytułu' },
+  en: { sheetTx: 'Transactions', sheetSavings: 'Savings', sheetGoals: 'Savings goals', sheetNotes: 'Notes', sheetCats: 'Categories',
+        colDate: 'Date', colType: 'Type', colCategory: 'Category', colAmount: 'Amount', colCurrency: 'Currency', colNote: 'Note',
+        colGoal: 'Goal', colName: 'Name', colCreated: 'Created', colUpdated: 'Updated', colTitle: 'Title', colContent: 'Content',
+        typeExpense: 'Expense', typeIncome: 'Income', typeDeposit: 'Deposit', typeWithdraw: 'Withdrawal',
+        defaultGoalName: 'Savings', noTitle: 'Untitled' },
+};
+
+async function collectDocs(userRef, name) {
+  const snap = await userRef.collection(name).get();
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+}
+
+document.getElementById('exportBtn').addEventListener('click', async () => {
+  const btn = document.getElementById('exportBtn');
+  const label = document.getElementById('exportLabel');
+  const user = auth.currentUser;
+  if (!user || btn.disabled) return;
+  btn.disabled = true;
+  label.textContent = t('exportBusy');
+  try {
+    const userRef = db.collection('users').doc(user.uid);
+    const [profile, transactions, savings, savingsGoals, notes] = await Promise.all([
+      userRef.get(),
+      collectDocs(userRef, 'transactions'),
+      collectDocs(userRef, 'savings'),
+      collectDocs(userRef, 'savingsGoals'),
+      collectDocs(userRef, 'pages'),
+    ]);
+    const data = profile.exists ? (profile.data() || {}) : {};
+    const ok = exportAllXlsx({
+      transactions, savings, savingsGoals, notes,
+      // Поки людина не редагувала категорії, у профілі їх немає — тоді
+      // беремо стандартні, щоб у файлі були слова, а не службові id.
+      categoriesExpense: data.categoriesExpense || defaultCategoryList('expense', currentLang),
+      categoriesIncome: data.categoriesIncome || defaultCategoryList('income', currentLang),
+    }, EXPORT_LABELS[currentLang] || EXPORT_LABELS.uk);
+    if (!ok) throw new Error('XLSX недоступний');
+    document.getElementById('appMenuOverlay').classList.remove('show');
+  } catch (err) {
+    console.error('export:', err);
+    label.textContent = t('exportError');
+    setTimeout(() => { label.textContent = t('exportLabel'); }, 3000);
+    btn.disabled = false;
+    return;
+  }
+  label.textContent = t('exportLabel');
+  btn.disabled = false;
 });
 
 document.getElementById('logoutBtn').addEventListener('click', () => {

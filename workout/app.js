@@ -267,37 +267,10 @@ function applyTheme() {
   const meta = document.querySelector('meta[name="theme-color"]');
   if (meta) meta.setAttribute('content', resolved === 'dark' ? '#0B0B0E' : '#EDEEF3');
 }
-function renderThemePicker() {
-  const picker = document.getElementById('themePicker');
-  if (!picker) return;
-  const choice = localStorage.getItem('financeAppTheme') || 'system';
-  const opts = [['light', t('themeLight')], ['dark', t('themeDark')], ['system', t('themeSystem')]];
-  picker.innerHTML = opts.map(([v, label]) =>
-    `<button type="button" class="lang-chip${choice === v ? ' selected' : ''}" data-theme-choice="${v}" style="flex:1;">${label}</button>`
-  ).join('');
-  picker.querySelectorAll('[data-theme-choice]').forEach((btn) => {
-    btn.addEventListener('click', () => setTheme(btn.dataset.themeChoice));
-  });
-}
-function setTheme(choice) {
-  localStorage.setItem('financeAppTheme', choice);
-  applyTheme();
-  renderThemePicker();
-}
 darkMediaQuery.addEventListener('change', () => {
   if ((localStorage.getItem('financeAppTheme') || 'system') === 'system') applyTheme();
 });
 
-function renderLangPicker() {
-  const picker = document.getElementById('langPicker');
-  if (!picker) return;
-  picker.innerHTML = LANGS
-    .map((l) => `<button type="button" class="lang-chip${l === currentLang ? ' selected' : ''}" data-lang="${l}">${LANG_NAMES[l]}</button>`)
-    .join('');
-  picker.querySelectorAll('[data-lang]').forEach((btn) => {
-    btn.addEventListener('click', () => setLang(btn.dataset.lang));
-  });
-}
 function renderAuthLangRow() {
   const row = document.getElementById('authLangRow');
   if (!row) return;
@@ -316,7 +289,6 @@ function setLang(lang) {
     db.collection('users').doc(auth.currentUser.uid).set({ lang }, { merge: true }).catch(() => {});
   }
   applyTranslations();
-  renderLangPicker();
   renderAuthLangRow();
   renderCurrentScreen();
 }
@@ -345,10 +317,6 @@ function applyTranslations() {
   document.getElementById('pickerCustomLabel').textContent = t('pickerCustomLabel');
   document.getElementById('pickerCustomInput').placeholder = t('pickerCustomPlaceholder');
   document.getElementById('pickerCustomAdd').textContent = t('pickerCustomAdd');
-  document.getElementById('themeMenuLabel').textContent = t('themeLabel');
-  document.getElementById('langMenuLabel').textContent = t('langLabel');
-  document.getElementById('logoutLabel').textContent = t('logout');
-  document.getElementById('topbarBrandLabel').textContent = 'Life';
   document.getElementById('authSub').textContent = t('authSub');
   document.getElementById('authEmailLabel').textContent = t('emailLabel');
   document.getElementById('authPasswordLabel').textContent = t('passwordLabel');
@@ -441,18 +409,6 @@ document.getElementById('forgotPasswordLink').addEventListener('click', async ()
     errorEl.textContent = err.code === 'auth/user-not-found' ? t('err_userNotFound') : t('err_resetGeneric');
     errorEl.style.display = 'block';
   }
-});
-
-// ---- Гамбургер-меню ----
-document.getElementById('menuBtn').addEventListener('click', () => {
-  document.getElementById('appMenuOverlay').classList.add('show');
-});
-document.getElementById('appMenuOverlay').addEventListener('click', (e) => {
-  if (e.target.id === 'appMenuOverlay') e.currentTarget.classList.remove('show');
-});
-document.getElementById('logoutBtn').addEventListener('click', () => {
-  document.getElementById('appMenuOverlay').classList.remove('show');
-  auth.signOut();
 });
 
 // ---- Утиліти ----
@@ -1246,7 +1202,6 @@ auth.onAuthStateChanged((user) => {
         currentLang = data.lang;
         localStorage.setItem('financeAppLang', currentLang);
         applyTranslations();
-        renderLangPicker();
         renderAuthLangRow();
         renderCurrentScreen();
       }
@@ -1281,8 +1236,6 @@ setTimeout(() => {
 initDatePicker('sessionDateInput');
 applyTheme();
 applyTranslations();
-renderThemePicker();
-renderLangPicker();
 renderAuthLangRow();
 setAuthMode('login');
 switchTab('sessions');

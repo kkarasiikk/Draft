@@ -11,7 +11,7 @@
 -->
 <meta http-equiv="Content-Security-Policy" content="
   default-src 'self';
-  script-src 'self' https://www.gstatic.com https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/;
+  script-src 'self' https://www.gstatic.com https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/ https://cdnjs.cloudflare.com;
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
   font-src 'self' https://fonts.gstatic.com;
   img-src 'self' data:;
@@ -28,6 +28,7 @@
 <link rel="apple-touch-icon" href="budget/icon-192.png">
 <link rel="icon" href="budget/icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -277,7 +278,11 @@
 
           <div class="app-menu-divider"></div>
 
-          <button class="app-menu-item" id="logoutBtn">
+          <button class="app-menu-item" id="exportBtn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 19h16"/></svg>
+        <span id="exportLabel">Експорт даних</span>
+      </button>
+      <button class="app-menu-item" id="logoutBtn">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
             <span id="logoutLabel">Вийти</span>
           </button>
@@ -325,6 +330,8 @@
   </div>
 
   <script src="budget/firebase-config.js"></script>
+  <script src="budget/categories-default.js"></script>
+  <script src="export-xlsx.js"></script>
   <script src="home.js"></script>
 </body>
 </html>

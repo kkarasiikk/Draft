@@ -38,7 +38,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -176,7 +175,10 @@
     padding:6px;border-radius:8px;}
   .header-back-btn:hover{background:var(--bg);color:var(--ink);}
   .header-back-btn.show{display:flex;}
-  .header-icon-btn{background:none;border:none;cursor:pointer;color:var(--ink-muted);padding:6px;border-radius:8px;display:flex;align-items:center;flex-shrink:0;margin-left:auto;}
+  /* Кнопки праворуч живуть у спільній групі: `margin-left:auto` на кожній
+     розкидало б вільний простір між ними, і навігація місяця налізала б зверху. */
+  .header-actions{margin-left:auto;display:flex;align-items:center;gap:2px;flex-shrink:0;}
+  .header-icon-btn{background:none;border:none;cursor:pointer;color:var(--ink-muted);padding:6px;border-radius:8px;display:flex;align-items:center;flex-shrink:0;}
   .header-icon-btn:hover{background:var(--bg);color:var(--ink);}
   .header-icon-btn.active{background:var(--accent-light);color:var(--accent);}
   .header-section-title{display:none;}
@@ -192,8 +194,12 @@
     .balance{text-align:center;}
   }
   .eyebrow{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
-  .app-topbar{display:flex;align-items:center;gap:10px;padding:calc(16px + env(safe-area-inset-top)) 20px 6px;}
-  .app-topbar-brand{display:flex;align-items:center;gap:8px;font-family:'Inter',sans-serif;font-weight:700;font-size:15px;color:var(--ink);}
+  /* ---- Шапка модуля ---- */
+  /* Той самий напис, що й на головній, тільки менший: одна впізнавана
+     позначка «де я» замість іконки з дрібним підписом. */
+  .app-topbar{display:flex;align-items:center;gap:10px;padding:calc(18px + env(safe-area-inset-top)) 20px 10px;}
+  .app-topbar-brand{font-family:'Inter',sans-serif;font-size:30px;font-weight:900;letter-spacing:-0.04em;
+    line-height:1;color:var(--ink);text-decoration:none;}
   .menu-btn{background:none;border:none;cursor:pointer;color:var(--ink);padding:13px;display:flex;border-radius:10px;touch-action:manipulation;}
   .menu-btn:hover{background:var(--border);}
   .app-menu-overlay{position:fixed;inset:0;z-index:55;display:none;}
@@ -610,38 +616,9 @@
 <div id="appScreen">
 <div class="wrap" id="wrap">
   <div class="app-topbar">
-    <button id="menuBtn" class="menu-btn" aria-label="Меню">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
-    </button>
-    <a href="../index.html" class="app-topbar-brand" id="topbarHomeLink" aria-label="На головну" style="text-decoration:none;color:inherit;">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5B7A9D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3.4.5-4.5 2-1.1-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z"/><path d="M3.22 12H9.5l.5-1.5 2 4 1.5-4.5 1.5 2h5.27"/></svg>
-      <span id="topbarBrandLabel">Life</span>
-    </a>
+    <a href="../index.html" class="app-topbar-brand" id="topbarHomeLink" aria-label="На головну">Life</a>
   </div>
 
-  <div class="app-menu-overlay" id="appMenuOverlay">
-    <div class="app-menu" id="appMenu">
-      <div class="tabs" id="tabsList">
-        <button class="tab-btn active tab-btn-with-icon" data-tab="entries" id="tabEntries">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
-          <span id="tabEntriesLabel">Записи</span>
-        </button>
-      </div>
-      <div class="app-menu-divider" id="appMenuDivider"></div>
-      <button class="app-menu-item" id="aiChatBtn">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5Z"/></svg>
-        <span id="aiChatMenuLabel">AI-помічник</span>
-      </button>
-      <button class="app-menu-item" id="settingsBtn">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        <span id="settingsMenuLabel">Налаштування</span>
-      </button>
-      <button class="app-menu-item" id="logoutBtn">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
-        <span id="logoutLabel">Вийти</span>
-      </button>
-    </div>
-  </div>
 
   <div class="header" id="header">
     <div class="header-top-row" id="headerTopRow">
@@ -653,9 +630,14 @@
         <div class="month-label" id="monthLabelHeader">—</div>
         <button id="nextMonthHeader" aria-label="Наступний місяць"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></button>
       </div>
-      <button class="header-icon-btn" id="categoriesBtn" aria-label="Категорії">
+      <div class="header-actions">
+      <button class="header-icon-btn" id="aiChatBtn" aria-label="AI-помічник">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5Z"/></svg>
+      </button>
+      <button class="header-icon-btn" id="categoriesBtn" aria-label="Налаштування">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
       </button>
+      </div>
     </div>
     <div class="header-section-title" id="headerSectionTitle"></div>
     <div id="balanceSummary">
@@ -941,50 +923,19 @@
   </div>
 </div>
 
-<div class="modal-overlay" id="settingsOverlay">
-  <div class="modal">
-    <div class="modal-head">
-      <div class="modal-title" id="settingsTitle">Налаштування</div>
-      <button class="close-btn" id="closeSettings" aria-label="Закрити"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
-    </div>
-    <label class="field-label" id="settingsCurrencyLabel">Валюта</label>
-    <div class="cat-picker" id="currencyPicker"></div>
-    <label class="field-label" id="settingsLangLabel" style="margin-top:6px;">Мова</label>
-    <div class="cat-picker" id="langPicker"></div>
-    <label class="field-label" id="exportDataLabel" style="margin-top:14px;">Дані</label>
-    <div class="data-action-row">
-      <button type="button" class="data-action-btn" id="exportXlsxBtn">
-        <span class="data-action-icon" aria-hidden="true">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 19h16"/></svg>
-        </span>
-        <span class="data-action-text">
-          <span class="data-action-title" id="exportXlsxBtnLabel">Експортувати в Excel (.xlsx)</span>
-          <span class="data-action-sub" id="exportDataDesc">Завантажить файл з усіма твоїми записами, категоріями, заощадженнями й нотатками.</span>
-        </span>
-      </button>
-      <input type="file" id="importCsvInput" accept=".csv,text/csv" style="display:none;">
-      <button type="button" class="data-action-btn" id="importCsvBtn">
-        <span class="data-action-icon" aria-hidden="true">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V9"/><path d="M7 14l5-5 5 5"/><path d="M4 5h16"/></svg>
-        </span>
-        <span class="data-action-text">
-          <span class="data-action-title" id="importCsvBtnLabel">Імпортувати транзакції з CSV</span>
-          <span class="data-action-sub" id="importDataDesc">Колонки: дата (РРРР-ММ-ДД), тип (дохід/витрата), категорія, сума, нотатка.</span>
-        </span>
-      </button>
-    </div>
-    <label class="field-label" id="settingsThemeLabel" style="margin-top:14px;">Тема</label>
-    <div class="cat-picker" id="themePicker"></div>
-  </div>
-</div>
 
 <div class="modal-overlay" id="categoriesOverlay">
   <div class="modal">
     <div class="modal-head">
-      <div class="modal-title" id="categoriesTitle">Категорії</div>
+      <div class="modal-title" id="categoriesTitle">Налаштування</div>
       <button class="close-btn" id="closeCategories" aria-label="Закрити"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
     </div>
-    <label class="field-label" id="expenseCatManageLabel">Категорії витрат</label>
+    <!-- Валюта стосується лише бюджету, тож живе тут, а не в глобальному
+         меню на головному екрані. -->
+    <label class="field-label" id="settingsCurrencyLabel">Валюта</label>
+    <div class="cat-picker" id="currencyPicker"></div>
+
+    <label class="field-label" id="expenseCatManageLabel" style="margin-top:14px;">Категорії витрат</label>
     <div class="cat-manage-list" id="expenseCatManageList"></div>
     <div class="cat-add-row">
       <input type="text" id="newExpenseCatInput" placeholder="Нова категорія">
@@ -999,6 +950,20 @@
       <input type="text" id="newIncomeCatInput" placeholder="Нова категорія">
       <button type="button" id="addIncomeCatBtn" aria-label="Додати категорію">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+      </button>
+    </div>
+
+    <label class="field-label" id="exportDataLabel" style="margin-top:16px;">Дані</label>
+    <div class="data-action-row">
+      <input type="file" id="importCsvInput" accept=".csv,text/csv" style="display:none;">
+      <button type="button" class="data-action-btn" id="importCsvBtn">
+        <span class="data-action-icon" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V9"/><path d="M7 14l5-5 5 5"/><path d="M4 5h16"/></svg>
+        </span>
+        <span class="data-action-text">
+          <span class="data-action-title" id="importCsvBtnLabel">Імпортувати транзакції з CSV</span>
+          <span class="data-action-sub" id="importDataDesc">Колонки: дата (РРРР-ММ-ДД), тип (дохід/витрата), категорія, сума, нотатка.</span>
+        </span>
       </button>
     </div>
   </div>
@@ -1094,6 +1059,7 @@
 </div><!-- /appScreen -->
 
 <script src="firebase-config.js"></script>
+<script src="categories-default.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
