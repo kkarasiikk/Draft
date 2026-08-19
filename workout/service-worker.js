@@ -1,6 +1,6 @@
 // Service Worker модуля «Тренування» (scope /workout/). Кожен модуль має
 // власний SW — для сторінки виграє реєстрація з найдовшим збігом scope.
-const CACHE_NAME = 'life-workout-v11';
+const CACHE_NAME = 'life-workout-v12';
 // Чистимо лише власні (застарілі) кеші: `caches` спільний для всього
 // походження, тож видалення "всього зайвого" стерло б кеші інших модулів.
 const CACHE_PREFIXES = ['life-workout-'];
