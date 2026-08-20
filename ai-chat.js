@@ -316,11 +316,22 @@
   // Розпізнавання робить сам браузер (Web Speech API): нічого не деплоїмо,
   // нічого не платимо, звук нікуди не завантажується нами. Ціна — підтримка
   // нерівна, тож кнопки просто немає там, де API відсутній.
+  //
+  // Момент завершення рушієві не довіряємо. Сам він обриває запис на першій
+  // же паузі — а пауза буває просто тому, що людина думає посеред фрази.
+  // Тому continuous:true, власний відлік тиші, і якщо рушій усе одно
+  // завершився раніше (так поводиться Safari), запис підхоплюється далі,
+  // а вже почуте зберігається.
   const SPEECH_LOCALES = { uk: 'uk-UA', ru: 'ru-RU', pl: 'pl-PL', en: 'en-US' };
+  const SILENCE_MS = 5000;      // скільки тиші чекаємо, перш ніж завершити
+  const MAX_LISTEN_MS = 90000;  // стеля на весь запис — щоб шум не слухався вічно
   let recognition = null;
-  let listening = false;
-  let heard = '';       // накопичений остаточний текст
-  let cancelled = false; // друге натискання під час запису = скасувати, не надсилати
+  let listening = false;   // намір людини, а не стан рушія
+  let finishing = false;   // зупинка навмисна: не підхоплювати
+  let cancelled = false;   // друге натискання під час запису = скасувати, не надсилати
+  let heard = '';          // накопичений остаточний текст, живе між перезапусками
+  let silenceTimer = null;
+  let startedAt = 0;
 
   function SpeechCtor() {
     return window.SpeechRecognition || window.webkitSpeechRecognition || null;
@@ -336,25 +347,36 @@
     btn.setAttribute('aria-label', t(listening ? 'micStop' : 'mic'));
   }
 
-  function toggleListening() {
-    if (listening) { cancelled = true; stopListening(); return; }
-    startListening();
+  function armSilence() {
+    if (silenceTimer) clearTimeout(silenceTimer);
+    silenceTimer = setTimeout(() => { finishing = true; stopRecognition(); finish(); }, SILENCE_MS);
   }
 
-  function startListening() {
-    const Ctor = SpeechCtor();
-    if (!Ctor) return;
-    // Створюємо об'єкт на кожен запис: повторне використання одного інстансу
-    // на iOS після помилки лишає його в неробочому стані.
-    recognition = new Ctor();
-    recognition.lang = SPEECH_LOCALES[lang()] || SPEECH_LOCALES.uk;
-    recognition.interimResults = true;   // видно, що почуто, ще під час мовлення
-    recognition.continuous = false;      // сама зупиниться, коли людина замовкла
-    recognition.maxAlternatives = 1;
-    heard = '';
+  function toggleListening() {
+    if (listening) { cancelled = true; finishing = true; stopRecognition(); finish(); return; }
+    listening = true;
     cancelled = false;
+    finishing = false;
+    heard = '';
+    startedAt = Date.now();
+    renderMic();
+    if (!spawnRecognition()) { listening = false; renderMic(); return; }
+    armSilence();
+  }
 
-    recognition.onresult = (e) => {
+  // Новий об'єкт на кожен запуск, зокрема й на підхоплення: на iOS повторне
+  // використання одного інстансу після завершення лишає його непрацездатним.
+  function spawnRecognition() {
+    const Ctor = SpeechCtor();
+    if (!Ctor) return false;
+    const rec = new Ctor();
+    recognition = rec;
+    rec.lang = SPEECH_LOCALES[lang()] || SPEECH_LOCALES.uk;
+    rec.interimResults = true;  // видно, що почуто, ще під час мовлення
+    rec.continuous = true;      // паузу вирішуємо ми, а не рушій
+    rec.maxAlternatives = 1;
+
+    rec.onresult = (e) => {
       let interim = '';
       for (let i = e.resultIndex; i < e.results.length; i++) {
         const chunk = e.results[i][0].transcript;
@@ -364,42 +386,56 @@
       const input = el('aicInput');
       input.value = (heard + interim).trim();
       autoGrow();
+      armSilence(); // мовлення триває — відлік тиші починається заново
     };
 
-    recognition.onerror = (e) => {
-      // 'no-speech' і 'aborted' — не поломка, а «нічого не сказали»
-      // чи «передумали»: мовчки згортаємось.
-      if (e.error === 'no-speech' || e.error === 'aborted') { cancelled = true; return; }
+    rec.onerror = (e) => {
+      // 'no-speech' і 'aborted' — не поломка: людина мовчить або передумала.
+      // Мовчання не має обривати запис: далі спрацює наш власний відлік.
+      if (e.error === 'no-speech') return;
+      if (e.error === 'aborted') { cancelled = true; return; }
       cancelled = true;
+      finishing = true;
       const key = (e.error === 'not-allowed' || e.error === 'service-not-allowed') ? 'micDenied' : 'micFailed';
       history.push({ role: 'assistant', text: t(key), error: true });
       render();
     };
 
-    recognition.onend = () => {
-      listening = false;
-      renderMic();
-      const text = el('aicInput').value.trim();
-      // Сказане надсилається саме — заради цього все й затівалось. Але текст
-      // спершу з'являється в полі, тож видно, що почуто, ще до відповіді.
-      if (!cancelled && text.length > 1) send();
+    rec.onend = () => {
+      if (rec !== recognition) return; // застарілий інстанс, уже не наш
+      // Рушій міг завершитись сам, хоча тиша ще не набралась — підхоплюємо.
+      if (listening && !finishing && Date.now() - startedAt < MAX_LISTEN_MS) {
+        if (spawnRecognition()) return;
+      }
+      finish();
     };
 
     try {
-      recognition.start();
-      listening = true;
-      renderMic();
+      rec.start();
+      return true;
     } catch (err) {
-      // start() кидає, якщо запис уже триває — стан просто розсинхронився.
+      // start() кидає, якщо попередній запис ще не відпустив мікрофон.
       console.error('speech start:', err);
-      listening = false;
-      renderMic();
+      return false;
     }
   }
 
-  function stopListening() {
+  function stopRecognition() {
     if (!recognition) return;
     try { recognition.stop(); } catch (err) { /* уже зупинено */ }
+  }
+
+  function finish() {
+    if (!listening) return;
+    listening = false;
+    finishing = false;
+    if (silenceTimer) { clearTimeout(silenceTimer); silenceTimer = null; }
+    recognition = null;
+    renderMic();
+    const text = el('aicInput').value.trim();
+    // Сказане надсилається саме — заради цього все й затівалось. Але текст
+    // спершу з'являється в полі, тож видно, що почуто, ще до відповіді.
+    if (!cancelled && text.length > 1) send();
   }
 
   function actionText(a) {
@@ -506,7 +542,7 @@
 
   function close() {
     if (!built) return;
-    if (listening) { cancelled = true; stopListening(); }
+    if (listening) { cancelled = true; finishing = true; stopRecognition(); finish(); }
     el('aicOverlay').classList.remove('show');
   }
 
