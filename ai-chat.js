@@ -21,6 +21,9 @@
       modelLabel: 'Модель:',
       modelHint: 'Дешевша відповідає швидше, дорожча краще розбирає складені запити («запиши три завдання…») і рідше відповідає загальниками замість цифр.',
       settings: 'Налаштування помічника',
+      mic: 'Сказати голосом', micStop: 'Зупинити запис',
+      micDenied: 'Доступ до мікрофона заборонений. Дозволь його в налаштуваннях браузера для цього сайту.',
+      micFailed: 'Не вдалося розпізнати — спробуй ще раз або набери текстом.',
       clear: 'Очистити розмову',
       ageHint: 'Розмова сама зникає через добу — стирати вручну треба лише щоб почати спочатку раніше.',
       added: (a) => `Записано: ${a.categoryLabel} · ${a.amount} ${a.currency || ''}`.trim(),
@@ -48,6 +51,9 @@
       modelLabel: 'Модель:',
       modelHint: 'Дешёвая отвечает быстрее, дорогая лучше разбирает составные запросы («запиши три задачи…») и реже отвечает общими словами вместо цифр.',
       settings: 'Настройки помощника',
+      mic: 'Сказать голосом', micStop: 'Остановить запись',
+      micDenied: 'Доступ к микрофону запрещён. Разреши его в настройках браузера для этого сайта.',
+      micFailed: 'Не удалось распознать — попробуй ещё раз или набери текстом.',
       clear: 'Очистить разговор',
       ageHint: 'Разговор сам исчезает через сутки — стирать вручную нужно лишь чтобы начать заново раньше.',
       added: (a) => `Записано: ${a.categoryLabel} · ${a.amount} ${a.currency || ''}`.trim(),
@@ -75,6 +81,9 @@
       modelLabel: 'Model:',
       modelHint: 'Tańszy jest szybszy, droższy lepiej rozumie złożone polecenia („zapisz trzy zadania…") i rzadziej odpowiada ogólnikami zamiast liczbami.',
       settings: 'Ustawienia asystenta',
+      mic: 'Powiedz głosem', micStop: 'Zatrzymaj nagrywanie',
+      micDenied: 'Brak dostępu do mikrofonu. Zezwól na niego w ustawieniach przeglądarki dla tej strony.',
+      micFailed: 'Nie udało się rozpoznać — spróbuj ponownie albo wpisz tekst.',
       clear: 'Wyczyść rozmowę',
       ageHint: 'Rozmowa znika sama po dobie — ręczne czyszczenie przydaje się tylko, gdy chcesz zacząć od nowa wcześniej.',
       added: (a) => `Zapisano: ${a.categoryLabel} · ${a.amount} ${a.currency || ''}`.trim(),
@@ -102,6 +111,9 @@
       modelLabel: 'Model:',
       modelHint: 'The cheaper one is faster; the pricier one handles compound requests better ("add three tasks…") and less often answers in generalities instead of numbers.',
       settings: 'Assistant settings',
+      mic: 'Speak', micStop: 'Stop recording',
+      micDenied: 'Microphone access is blocked. Allow it in your browser settings for this site.',
+      micFailed: 'Could not make that out — try again or type it instead.',
       clear: 'Clear conversation',
       ageHint: 'The conversation clears itself after a day — wiping it by hand only helps if you want a fresh start sooner.',
       added: (a) => `Logged: ${a.categoryLabel} · ${a.amount} ${a.currency || ''}`.trim(),
@@ -163,6 +175,9 @@
         <div class="aic-settings" id="aicSettings"></div>
         <div class="aic-log" id="aicLog" role="log" aria-live="polite"></div>
         <form class="aic-form" id="aicForm">
+          <button type="button" class="aic-mic" id="aicMic" hidden>
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2.5" width="6" height="11.5" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0"/><path d="M12 18v3.5"/></svg>
+          </button>
           <textarea id="aicInput" rows="1" maxlength="1000"></textarea>
           <button class="aic-send" id="aicSend" type="submit" aria-label="→">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7Z"/></svg>
@@ -179,6 +194,7 @@
       renderSettings();
     });
     el('aicForm').addEventListener('submit', (e) => { e.preventDefault(); send(); });
+    el('aicMic').addEventListener('click', toggleListening);
     el('aicInput').addEventListener('input', autoGrow);
     // Enter надсилає, Shift+Enter — новий рядок (звична поведінка чату).
     el('aicInput').addEventListener('keydown', (e) => {
@@ -296,6 +312,96 @@
     }
   }
 
+// ---- Голос ----
+  // Розпізнавання робить сам браузер (Web Speech API): нічого не деплоїмо,
+  // нічого не платимо, звук нікуди не завантажується нами. Ціна — підтримка
+  // нерівна, тож кнопки просто немає там, де API відсутній.
+  const SPEECH_LOCALES = { uk: 'uk-UA', ru: 'ru-RU', pl: 'pl-PL', en: 'en-US' };
+  let recognition = null;
+  let listening = false;
+  let heard = '';       // накопичений остаточний текст
+  let cancelled = false; // друге натискання під час запису = скасувати, не надсилати
+
+  function SpeechCtor() {
+    return window.SpeechRecognition || window.webkitSpeechRecognition || null;
+  }
+
+  function renderMic() {
+    const btn = el('aicMic');
+    if (!btn) return;
+    const Ctor = SpeechCtor();
+    btn.hidden = !Ctor;
+    if (!Ctor) return;
+    btn.classList.toggle('on', listening);
+    btn.setAttribute('aria-label', t(listening ? 'micStop' : 'mic'));
+  }
+
+  function toggleListening() {
+    if (listening) { cancelled = true; stopListening(); return; }
+    startListening();
+  }
+
+  function startListening() {
+    const Ctor = SpeechCtor();
+    if (!Ctor) return;
+    // Створюємо об'єкт на кожен запис: повторне використання одного інстансу
+    // на iOS після помилки лишає його в неробочому стані.
+    recognition = new Ctor();
+    recognition.lang = SPEECH_LOCALES[lang()] || SPEECH_LOCALES.uk;
+    recognition.interimResults = true;   // видно, що почуто, ще під час мовлення
+    recognition.continuous = false;      // сама зупиниться, коли людина замовкла
+    recognition.maxAlternatives = 1;
+    heard = '';
+    cancelled = false;
+
+    recognition.onresult = (e) => {
+      let interim = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const chunk = e.results[i][0].transcript;
+        if (e.results[i].isFinal) heard += chunk;
+        else interim += chunk;
+      }
+      const input = el('aicInput');
+      input.value = (heard + interim).trim();
+      autoGrow();
+    };
+
+    recognition.onerror = (e) => {
+      // 'no-speech' і 'aborted' — не поломка, а «нічого не сказали»
+      // чи «передумали»: мовчки згортаємось.
+      if (e.error === 'no-speech' || e.error === 'aborted') { cancelled = true; return; }
+      cancelled = true;
+      const key = (e.error === 'not-allowed' || e.error === 'service-not-allowed') ? 'micDenied' : 'micFailed';
+      history.push({ role: 'assistant', text: t(key), error: true });
+      render();
+    };
+
+    recognition.onend = () => {
+      listening = false;
+      renderMic();
+      const text = el('aicInput').value.trim();
+      // Сказане надсилається саме — заради цього все й затівалось. Але текст
+      // спершу з'являється в полі, тож видно, що почуто, ще до відповіді.
+      if (!cancelled && text.length > 1) send();
+    };
+
+    try {
+      recognition.start();
+      listening = true;
+      renderMic();
+    } catch (err) {
+      // start() кидає, якщо запис уже триває — стан просто розсинхронився.
+      console.error('speech start:', err);
+      listening = false;
+      renderMic();
+    }
+  }
+
+  function stopListening() {
+    if (!recognition) return;
+    try { recognition.stop(); } catch (err) { /* уже зупинено */ }
+  }
+
   function actionText(a) {
     if (a.kind === 'transaction_added') return t('added')(a);
     if (a.kind === 'task_added') return t('taskAdded')(a);
@@ -391,6 +497,7 @@
     el('aicTitle').textContent = t('title');
     el('aicInput').placeholder = t('placeholder');
     el('aicSettingsBtn').setAttribute('aria-label', t('settings'));
+    renderMic();
     render();
     el('aicOverlay').classList.add('show');
     load();
@@ -398,7 +505,9 @@
   }
 
   function close() {
-    if (built) el('aicOverlay').classList.remove('show');
+    if (!built) return;
+    if (listening) { cancelled = true; stopListening(); }
+    el('aicOverlay').classList.remove('show');
   }
 
   // Кнопка може бути в шапці будь-якої сторінки — прив'язуємось, якщо вона є.

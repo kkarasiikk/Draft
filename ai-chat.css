@@ -1,3 +1,10 @@
+/* Колір «іде запис» задано тут, а не взято з теми сторінки: змінна --high
+   є лише в завданнях, і мікрофон світився б у різних розділах по-різному.
+   Тема перемикається атрибутом на <html> (див. home.js), тож двох правил
+   досить — системний режим сторінка все одно зводить до явного значення. */
+:root{--aic-rec:#C25A5A; --aic-rec-bg:rgba(194,90,90,.14);}
+[data-theme="dark"]{--aic-rec:#E08585; --aic-rec-bg:rgba(224,133,133,.16);}
+
 /* ---- Кнопка виклику: хмаринка з «AI» над нижнім меню ----
    Стоїть рівно над правим краєм нижнього меню й з того самого скла, що й
    воно, — читається як його продовження, а не як ще один плаваючий елемент.
@@ -79,6 +86,22 @@
 @media (prefers-reduced-motion: reduce){ .aic-typing span{animation:none;opacity:.6;} }
 
 .aic-form{display:flex;gap:8px;align-items:flex-end;}
+/* Мікрофон стоїть ліворуч від поля: праворуч уже є «надіслати», і дві
+   кнопки поруч плуталися б під великим пальцем. Кнопки немає взагалі, якщо
+   браузер не вміє розпізнавати мовлення. */
+.aic-mic{flex-shrink:0;width:44px;height:44px;border-radius:12px;cursor:pointer;
+  border:1px solid var(--border);background:var(--control-bg, rgba(255,255,255,.35));color:var(--ink-soft);
+  display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;
+  transition:transform .15s ease, background .2s ease, color .2s ease;}
+.aic-mic[hidden]{display:none;}
+.aic-mic:active{transform:scale(.94);}
+/* Під час запису кнопка сама себе пояснює: колір і пульс кажуть, що зараз
+   слухають, — без напису, якому в цьому ряду немає місця. */
+.aic-mic.on{background:var(--aic-rec-bg);color:var(--aic-rec);border-color:transparent;
+  animation:aicPulse 1.4s ease-in-out infinite;}
+@keyframes aicPulse{0%,100%{box-shadow:0 0 0 0 var(--aic-rec-bg);}
+  50%{box-shadow:0 0 0 7px transparent;}}
+@media (prefers-reduced-motion: reduce){ .aic-mic.on{animation:none;} }
 .aic-form textarea{flex:1;min-width:0;margin:0;min-height:44px;max-height:120px;resize:none;
   font-family:'Inter',sans-serif;font-size:15.5px;color:var(--ink);
   background:var(--control-bg, rgba(255,255,255,.35));border:1px solid var(--border);border-radius:12px;
