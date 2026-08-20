@@ -213,6 +213,25 @@
   body.no-page-fab .ai-fab{--ai-fab-bottom:86px;}
 
   /* ---- PR / Records tab ---- */
+  /* Картка прогресу. Головне тут — заголовок-висновок: він має читатись
+     першим і без зусиль, тому решта навмисно дрібніша й приглушена. */
+  .pg-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:16px;margin-bottom:20px;}
+  .pg-title{font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-muted);
+    font-weight:600;margin-bottom:8px;}
+  .pg-headline{font-size:19px;font-weight:700;line-height:1.25;color:var(--ink);}
+  .pg-headline.up{color:var(--income);}
+  .pg-headline.down{color:var(--expense);}
+  .pg-sub{font-size:12.5px;color:var(--ink-muted);margin-top:4px;margin-bottom:12px;}
+  .pg-empty{font-size:13.5px;color:var(--ink-muted);line-height:1.5;}
+  .pg-section{font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-muted);
+    font-weight:600;margin:14px 0 6px;}
+  .pg-row{display:flex;align-items:baseline;gap:8px;padding:5px 0;font-size:13.5px;}
+  .pg-name{color:var(--ink);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .pg-nums{color:var(--ink-muted);font-variant-numeric:tabular-nums;white-space:nowrap;}
+  .pg-delta{font-weight:700;font-size:12.5px;font-variant-numeric:tabular-nums;min-width:44px;text-align:right;}
+  .pg-delta.up{color:var(--income);}
+  .pg-delta.down{color:var(--expense);}
+  .pg-delta.flat, .pg-delta.new{color:var(--ink-muted);font-weight:600;}
   .muscle-group{margin-bottom:18px;}
   .muscle-label{font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-muted);
     font-family:'Inter',sans-serif;font-weight:600;margin-bottom:8px;padding-left:2px;}
@@ -540,6 +559,7 @@
 <script src="../budget/firebase-config.js"></script>
 <script src="exercises.js"></script>
 <script src="progression.js"></script>
+<script src="progress.js"></script>
 <script src="app.js"></script>
 <script src="../ai-chat.js"></script>
 </body>

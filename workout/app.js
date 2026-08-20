@@ -56,6 +56,14 @@ const T = {
     nextTryLabel: (w, r) => (w ? `Спробуй: ${w}×${r}` : `Спробуй: ${r} разів`),
     nextTryHold: 'та сама вага', nextTryUp: 'вага росте', nextTryDown: 'вага вниз',
     nextTryMoreReps: 'плюс повторення',
+    progressTitle: 'Прогрес за 4 тижні',
+    progressUp: 'Ти став сильнішим', progressFlat: 'Тримаєш рівень', progressDown: 'Сила просіла',
+    progressStrength: (pct) => `Сила ${pct > 0 ? '+' : ''}${pct}%`,
+    progressSessions: (n, prev) => `${n} ${plural(n, { one: 'тренування', few: 'тренування', many: 'тренувань' })} · місяць тому ${prev}`,
+    progressNotEnough: (n) => `Замало даних — ще ${n} ${plural(n, { one: 'тренування', few: 'тренування', many: 'тренувань' })}, і зʼявиться порівняння з минулим місяцем.`,
+    progressNoCompare: 'Ще немає з чим порівнювати — потрібен місяць історії тих самих вправ.',
+    progressVolumeLabel: 'Обсяг', progressNewMark: 'нове',
+    unitKg: 'кг', unitReps: 'повт.',
     nextTryAddLoad: 'час на обтяження', nextTryFill: 'Підставити',
     prToastText: (name, w, r) => `Новий рекорд: ${name} — ${w}×${r}`,
     emptySessionsTitle: 'Ще немає тренувань', emptySessionsSub: 'Додай перше тренування кнопкою внизу.',
@@ -102,6 +110,14 @@ const T = {
     nextTryLabel: (w, r) => (w ? `Попробуй: ${w}×${r}` : `Попробуй: ${r} раз`),
     nextTryHold: 'тот же вес', nextTryUp: 'вес растёт', nextTryDown: 'вес вниз',
     nextTryMoreReps: 'плюс повторение',
+    progressTitle: 'Прогресс за 4 недели',
+    progressUp: 'Ты стал сильнее', progressFlat: 'Держишь уровень', progressDown: 'Сила просела',
+    progressStrength: (pct) => `Сила ${pct > 0 ? '+' : ''}${pct}%`,
+    progressSessions: (n, prev) => `${n} ${plural(n, { one: 'тренировка', few: 'тренировки', many: 'тренировок' })} · месяц назад ${prev}`,
+    progressNotEnough: (n) => `Мало данных — ещё ${n} ${plural(n, { one: 'тренировка', few: 'тренировки', many: 'тренировок' })}, и появится сравнение с прошлым месяцем.`,
+    progressNoCompare: 'Пока не с чем сравнивать — нужен месяц истории тех же упражнений.',
+    progressVolumeLabel: 'Объём', progressNewMark: 'новое',
+    unitKg: 'кг', unitReps: 'повт.',
     nextTryAddLoad: 'пора на отягощение', nextTryFill: 'Подставить',
     prToastText: (name, w, r) => `Новый рекорд: ${name} — ${w}×${r}`,
     emptySessionsTitle: 'Пока нет тренировок', emptySessionsSub: 'Добавь первую тренировку кнопкой внизу.',
@@ -148,6 +164,14 @@ const T = {
     nextTryLabel: (w, r) => (w ? `Spróbuj: ${w}×${r}` : `Spróbuj: ${r} powtórzeń`),
     nextTryHold: 'ten sam ciężar', nextTryUp: 'ciężar rośnie', nextTryDown: 'ciężar w dół',
     nextTryMoreReps: 'więcej powtórzeń',
+    progressTitle: 'Postęp z 4 tygodni',
+    progressUp: 'Jesteś silniejszy', progressFlat: 'Utrzymujesz poziom', progressDown: 'Siła spadła',
+    progressStrength: (pct) => `Siła ${pct > 0 ? '+' : ''}${pct}%`,
+    progressSessions: (n, prev) => `${n} ${plural(n, { one: 'trening', few: 'treningi', many: 'treningów' })} · miesiąc temu ${prev}`,
+    progressNotEnough: (n) => `Za mało danych — jeszcze ${n} ${plural(n, { one: 'trening', few: 'treningi', many: 'treningów' })} i pojawi się porównanie z poprzednim miesiącem.`,
+    progressNoCompare: 'Nie ma jeszcze do czego porównać — potrzeba miesiąca historii tych samych ćwiczeń.',
+    progressVolumeLabel: 'Objętość', progressNewMark: 'nowe',
+    unitKg: 'kg', unitReps: 'powt.',
     nextTryAddLoad: 'czas na obciążenie', nextTryFill: 'Wstaw',
     prToastText: (name, w, r) => `Nowy rekord: ${name} — ${w}×${r}`,
     emptySessionsTitle: 'Brak treningów', emptySessionsSub: 'Dodaj pierwszy trening przyciskiem poniżej.',
@@ -194,6 +218,14 @@ const T = {
     nextTryLabel: (w, r) => (w ? `Try: ${w}×${r}` : `Try: ${r} reps`),
     nextTryHold: 'same weight', nextTryUp: 'weight goes up', nextTryDown: 'weight goes down',
     nextTryMoreReps: 'more reps',
+    progressTitle: 'Last 4 weeks',
+    progressUp: 'You got stronger', progressFlat: 'Holding steady', progressDown: 'Strength dipped',
+    progressStrength: (pct) => `Strength ${pct > 0 ? '+' : ''}${pct}%`,
+    progressSessions: (n, prev) => `${n} ${plural(n, { one: 'workout', other: 'workouts' })} · ${prev} a month ago`,
+    progressNotEnough: (n) => `Not enough data — ${n} more ${plural(n, { one: 'workout', other: 'workouts' })} and the month-over-month comparison appears.`,
+    progressNoCompare: 'Nothing to compare yet — needs a month of history on the same exercises.',
+    progressVolumeLabel: 'Volume', progressNewMark: 'new',
+    unitKg: 'kg', unitReps: 'reps',
     nextTryAddLoad: 'time to add load', nextTryFill: 'Fill in',
     prToastText: (name, w, r) => `New PR: ${name} — ${w}×${r}`,
     emptySessionsTitle: 'No workouts yet', emptySessionsSub: 'Add your first workout with the button below.',
@@ -228,6 +260,14 @@ function t(key, ...args) {
   return typeof val === 'function' ? val(...args) : val;
 }
 function exerciseLabel(libId) { return libLabel(libId, currentLang); }
+// «3 тренувань» — так не кажуть. Форму слова бере Intl, а не ланцюжок if:
+// правила у чотирьох мовах різні, і вгадувати їх вручну немає потреби.
+function plural(n, forms) {
+  var locale = LOCALE_MAP[currentLang] || 'uk-UA';
+  var cat = 'other';
+  try { cat = new Intl.PluralRules(locale).select(n); } catch (err) { cat = 'other'; }
+  return forms[cat] || forms.other || forms.many || '';
+}
 function muscleLabel(muscle) { return t(`muscle_${muscle}`); }
 
 // ---- Тема ----
@@ -705,9 +745,13 @@ function computeRecords(excludeSessionId) {
       entry.name = exerciseDisplayName(ex); // завжди свіже локалізоване імʼя
       const bestScore = epley1RM(entry.best.weight, entry.best.reps);
       const curScore = epley1RM(best.weight, best.reps);
-      if (curScore > bestScore || (curScore === bestScore && best.weight > entry.best.weight)) {
-        entry.best = { ...best, date: session.date };
-      }
+      // Для вправ із власною вагою обидва «бали» — нулі (Еплі від нульової
+      // ваги дає нуль), тож рекорд стояв на першому ж записі й не рухався
+      // ніколи. Там, де ваги немає, рекорд міряється повтореннями.
+      const better = curScore > bestScore
+        || (curScore === bestScore && best.weight > entry.best.weight)
+        || (curScore === 0 && bestScore === 0 && best.reps > entry.best.reps);
+      if (better) entry.best = { ...best, date: session.date };
     });
   });
   return map;
@@ -781,6 +825,69 @@ function renderSessionCard(session) {
     </div>`;
 }
 
+// ---- Прогрес: одна відповідь замість двадцяти графіків ----
+// Питання, заради якого людина взагалі веде записи, — «я реально став
+// сильнішим?». Відповідь має читатись за секунду, тому спершу одне речення
+// й одне число, і лише під ними — розклад по вправах і мʼязах.
+function fmtInt(n) {
+  // Нерозривний тонкий пробіл між тисячами: «4 200» читається, «4200» — ні.
+  return String(Math.round(Number(n) || 0)).replace(/\B(?=(\d{3})+(?!\d))/g, '\u202F');
+}
+
+// Підхід без ваги — це не «0×8», а вісім разів. Той самий формат
+// використовує підказка у формі.
+function setLabel(weight, reps) {
+  return weight ? `${fmtNum(weight)}\u00D7${reps}` : `${reps}\u00A0${t('unitReps')}`;
+}
+
+function progressExerciseName(entry) {
+  return entry.libId ? exerciseLabel(entry.libId) : (entry.name || '');
+}
+
+function deltaHtml(pct) {
+  if (pct === null || pct === undefined) return `<span class="pg-delta new">${escapeHtml(t('progressNewMark'))}</span>`;
+  const cls = pct > 0 ? 'up' : (pct < 0 ? 'down' : 'flat');
+  return `<span class="pg-delta ${cls}">${pct > 0 ? '+' : ''}${pct}%</span>`;
+}
+
+function renderProgressSummary() {
+  const data = window.WorkoutProgress.analyze(sessions, todayISO());
+  if (!data.enough) {
+    const text = data.needSessions > 0 ? t('progressNotEnough', data.needSessions) : t('progressNoCompare');
+    return `
+      <div class="pg-card">
+        <div class="pg-title">${escapeHtml(t('progressTitle'))}</div>
+        <div class="pg-empty">${escapeHtml(text)}</div>
+      </div>`;
+  }
+
+  const headline = data.verdict === 'up' ? t('progressUp') : (data.verdict === 'down' ? t('progressDown') : t('progressFlat'));
+  // Три вправи зі списку — це вже відповідь; решта видно нижче, у рекордах.
+  const top = data.exercises.filter((e) => e.pct !== null).slice(0, 3);
+  const unit = (m) => (m.unit === 'kg' ? t('unitKg') : t('unitReps'));
+
+  return `
+    <div class="pg-card">
+      <div class="pg-title">${escapeHtml(t('progressTitle'))}</div>
+      <div class="pg-headline ${data.verdict}">${escapeHtml(headline)}</div>
+      <div class="pg-sub">${escapeHtml(t('progressStrength', data.strengthPct))} · ${escapeHtml(t('progressSessions', data.sessionsNow, data.sessionsPrev))}</div>
+      ${top.map((e) => `
+        <div class="pg-row">
+          <span class="pg-name">${escapeHtml(progressExerciseName(e))}</span>
+          <span class="pg-nums">${escapeHtml(fmtNum(Math.round(e.prevE1rm)))} → ${escapeHtml(fmtNum(Math.round(e.e1rm)))}</span>
+          ${deltaHtml(e.pct)}
+        </div>`).join('')}
+      ${data.muscles.length ? `
+      <div class="pg-section">${escapeHtml(t('progressVolumeLabel'))}</div>
+      ${data.muscles.map((m) => `
+        <div class="pg-row">
+          <span class="pg-name">${escapeHtml(muscleLabel(m.muscle))}</span>
+          <span class="pg-nums">${escapeHtml(fmtInt(m.now))}\u00A0${escapeHtml(unit(m))}</span>
+          ${deltaHtml(m.pct)}
+        </div>`).join('')}` : ''}
+    </div>`;
+}
+
 function renderRecordsTab() {
   const root = document.getElementById('recordsTab');
   const map = computeRecords(null);
@@ -800,7 +907,7 @@ function renderRecordsTab() {
     byMuscle.get(m).push(entry);
   });
   const order = [...MUSCLE_ORDER, ...[...byMuscle.keys()].filter((m) => !MUSCLE_ORDER.includes(m))];
-  root.innerHTML = order.filter((m) => byMuscle.has(m)).map((m) => {
+  root.innerHTML = renderProgressSummary() + order.filter((m) => byMuscle.has(m)).map((m) => {
     const entries = byMuscle.get(m).sort((a, b) => a.name.localeCompare(b.name));
     return `
       <div class="muscle-group">
@@ -816,8 +923,11 @@ function renderRecordsTab() {
 }
 
 function renderPrRow(entry) {
-  const firstScore = epley1RM(entry.first.weight, entry.first.reps);
-  const bestScore = epley1RM(entry.best.weight, entry.best.reps);
+  // Там, де ваги немає, зростання міряється повтореннями — інакше
+  // підтягування назавжди лишались би «без змін».
+  const bodyweight = !entry.best.weight && !entry.first.weight;
+  const firstScore = bodyweight ? entry.first.reps : epley1RM(entry.first.weight, entry.first.reps);
+  const bestScore = bodyweight ? entry.best.reps : epley1RM(entry.best.weight, entry.best.reps);
   let trendHtml;
   if (firstScore > 0 && bestScore > firstScore) {
     const pct = Math.round(((bestScore - firstScore) / firstScore) * 100);
@@ -835,7 +945,7 @@ function renderPrRow(entry) {
         <div class="pr-sub">${escapeHtml(shortDate(entry.best.date))} · ${entry.sessionsCount}\u00A0${escapeHtml(t('historySessionsLabel')).toLowerCase()}</div>
       </div>
       <div class="pr-value">
-        <div class="pr-weight">${escapeHtml(fmtNum(entry.best.weight))}×${entry.best.reps}</div>
+        <div class="pr-weight">${escapeHtml(setLabel(entry.best.weight, entry.best.reps))}</div>
         ${trendHtml}
       </div>
     </div>`;
