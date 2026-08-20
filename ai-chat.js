@@ -334,6 +334,7 @@
   let silenceTimer = null;
   let startedAt = 0;
   let micStream = null;    // тримаємо мікрофон відкритим на весь запис
+  let micGranted = false;  // дозвіл уже брали в цьому сеансі сторінки
   let restarts = 0;        // підхоплень поспіль без жодного почутого слова
 
   // Чи вже дозволено мікрофон для цього сайту. Chrome це знає й пам'ятає,
@@ -362,11 +363,18 @@
     if (state === 'denied') return false;
     if (state === 'granted') return true; // рушій відкриє мікрофон сам, мовчки
 
+    // Дозвіл, виданий у цьому сеансі сторінки, діє до її перезавантаження —
+    // навіть там, де браузер не відповідає на питання про стан дозволу
+    // (iOS). Тож удруге мікрофон не беремо: рушій відкриє його сам і мовчки,
+    // а ми не тримаємо потік між записами й не світимо індикатором запису.
+    if (micGranted) return true;
+
     if (micStream) return true;
     const md = navigator.mediaDevices;
     if (!md || !md.getUserMedia) return true; // немає API — не привід не пробувати розпізнавання
     try {
       micStream = await md.getUserMedia({ audio: true });
+      micGranted = true;
       return true;
     } catch (err) {
       console.error('mic:', err);

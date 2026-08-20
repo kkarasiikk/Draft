@@ -1,8 +1,16 @@
 // ---- Стандартні категорії бюджету ----
-// Живуть окремим файлом, бо потрібні двом сторінкам: самому бюджету і
+// Живуть окремим файлом, бо потрібні трьом споживачам: самому бюджету,
 // головному екрану (експорт має підписувати категорії словами, а не
-// службовими id, навіть якщо людина ще жодної категорії не редагувала —
-// доки цього не сталося, у профілі їх просто немає).
+// службовими id) і AI-помічнику на сервері.
+//
+// Спільними вони мусять бути саме тому, що доки людина жодного разу не
+// редагувала категорії, у профілі їх НЕМАЄ — сторінки просто показують цей
+// список. Поки помічник його не знав, він чесно бачив у профілі порожнечу
+// й міг писати витрати лише в «Інше».
+//
+// Лежить у корені, а не в budget/: теку бюджету свідомо не включено в пакет
+// Cloud Functions (див. ignore у firebase.json), тож звідти сервер файл
+// не дістав би.
 (function (root) {
   'use strict';
 
@@ -29,4 +37,12 @@
   root.INCOME_CATEGORY_IDS = INCOME_CATEGORY_IDS;
   root.CAT_LABELS = CAT_LABELS;
   root.defaultCategoryList = defaultCategoryList;
+  if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+      EXPENSE_CATEGORY_IDS: EXPENSE_CATEGORY_IDS,
+      INCOME_CATEGORY_IDS: INCOME_CATEGORY_IDS,
+      CAT_LABELS: CAT_LABELS,
+      defaultCategoryList: defaultCategoryList,
+    };
+  }
 })(typeof window !== 'undefined' ? window : globalThis);

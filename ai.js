@@ -4,6 +4,9 @@ const Anthropic = require("@anthropic-ai/sdk");
 // Той самий список, що й у формі тренувань — див. коментар у файлі про те,
 // чому копія має бути одна.
 const { EXERCISE_LIB, exerciseLabel, exerciseMuscle } = require("./workout/exercises");
+// Ті самі категорії, що показує бюджет, доки людина їх не редагувала —
+// у профілі їх у цей момент ще немає (див. коментар у файлі).
+const { defaultCategoryList } = require("./categories-default");
 
 // admin.initializeApp() уже викликано в index.js — тут просто перевикористовуємо
 // той самий інстанс. У тестах цей рядок працює з jest.mock("firebase-admin", ...)
@@ -1187,13 +1190,17 @@ async function handleAiChat(data, context, deps = {}) {
 
   const profileSnap = await db.collection("users").doc(uid).get();
   const profile = profileSnap.data() || {};
+  const lang = typeof profile.lang === "string" ? profile.lang : "uk";
+  // Порожньо в профілі означає не «категорій немає», а «людина їх ще не
+  // чіпала» — сторінки в цей момент показують стандартний список. Раніше тут
+  // стояла заглушка з єдиним «Інше», і помічник чесно повідомляв, що більше
+  // нічого не має: усі витрати з чату лягали в «Інше».
   const categoriesExpense = Array.isArray(profile.categoriesExpense) && profile.categoriesExpense.length
     ? profile.categoriesExpense
-    : [{ id: "other", label: "Інше" }];
+    : defaultCategoryList("expense", lang);
   const categoriesIncome = Array.isArray(profile.categoriesIncome) && profile.categoriesIncome.length
     ? profile.categoriesIncome
-    : [{ id: "other", label: "Інше" }];
-  const lang = typeof profile.lang === "string" ? profile.lang : "uk";
+    : defaultCategoryList("income", lang);
   const currency = typeof profile.currency === "string" ? profile.currency : "UAH";
 
   const ctx = { today: new Date().toISOString().slice(0, 10), lang, currency, categoriesExpense, categoriesIncome };

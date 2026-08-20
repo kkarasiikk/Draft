@@ -281,7 +281,7 @@ function t(key, vars) {
 
 // ---- Категорії (базові набори + користувацькі, зберігаються в профілі користувача) ----
 // EXPENSE_CATEGORY_IDS / INCOME_CATEGORY_IDS / CAT_LABELS живуть у
-// budget/categories-default.js — їх читає ще й експорт на головному екрані.
+// categories-default.js у корені — їх читає ще й експорт на головному екрані.
 
 const CATEGORY_PALETTE = [
   { text: '#3E7C59', bg: '#EAF5EF' },

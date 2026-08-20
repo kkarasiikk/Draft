@@ -672,6 +672,40 @@ describe("executeTool", () => {
   });
 });
 
+// Доки людина не редагувала категорії, у профілі їх немає — сторінки просто
+// показують стандартний список. Помічник має бачити той самий, інакше все,
+// що він записує з чату, лягає в «Інше».
+describe("категорії за замовчуванням", () => {
+  const defaults = require("./categories-default");
+
+  test("порожній профіль дає той самий список, що й сторінка бюджету", () => {
+    const expected = defaults.defaultCategoryList("expense", "uk").map((c) => c.id);
+    expect(expected).toContain("food");
+    expect(expected.length).toBeGreaterThan(1);
+  });
+
+  test("витрата з чату потрапляє у справжню категорію, а не в «Інше»", async () => {
+    const ctx = {
+      currency: "UAH",
+      categoriesExpense: defaults.defaultCategoryList("expense", "uk"),
+      categoriesIncome: defaults.defaultCategoryList("income", "uk"),
+    };
+    const r = await ai.executeTool("uid1", "add_transaction",
+      { type: "expense", amount: 80, category: "food" }, ctx);
+    expect(r.action).toMatchObject({ category: "food", categoryLabel: "Їжа" });
+  });
+
+  test("список потрапляє в системний промпт назвами, а не id", () => {
+    const prompt = ai.buildSystemPrompt({
+      today: "2026-08-20", lang: "uk", currency: "UAH",
+      categoriesExpense: defaults.defaultCategoryList("expense", "uk"),
+      categoriesIncome: defaults.defaultCategoryList("income", "uk"),
+    });
+    expect(prompt).toContain("food (Їжа)");
+    expect(prompt).toContain("salary (Зарплата)");
+  });
+});
+
 describe("вибір моделі", () => {
   test("за замовчуванням — найдешевша", () => {
     expect(ai.modelIdFor({})).toBe(ai.MODELS.haiku);
