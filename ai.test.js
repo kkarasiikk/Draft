@@ -287,6 +287,89 @@ describe("executeTool", () => {
       const r = await ai.executeTool("uid1", "personal_records", {}, ctx);
       expect(r.output).toEqual({ count: 0, records: [] });
     });
+
+    // Сторінка зберігає назву вже перекладеною, тож після зміни мови
+    // інтерфейсу та сама вправа розʼїжджалась на два різні рекорди.
+    test("рекорд не двоїться, коли ту саму вправу записано різними мовами", async () => {
+      const col = mockCurrent.collection("users").doc("uid1").collection("workouts");
+      await col.add({ date: "2026-08-10", exercises: [
+        { libId: "benchPress", name: "Жим лежачи", muscle: "chest", sets: [{ weight: 60, reps: 8 }] },
+      ] });
+      await col.add({ date: "2026-08-17", exercises: [
+        { libId: "benchPress", name: "Bench Press", muscle: "chest", sets: [{ weight: 70, reps: 5 }] },
+      ] });
+      const r = await ai.executeTool("uid1", "personal_records", {}, ctx);
+      expect(r.output.count).toBe(1);
+      expect(r.output.records[0]).toMatchObject({ exercise: "Жим лежачи", weight: 70, reps: 5 });
+    });
+
+    // ---- Розбір для тренера ----
+    const day = (n) => {
+      const d = new Date(2026, 7, 20);
+      d.setDate(d.getDate() - n);
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    };
+    const coachCtx = { ...ctx, today: "2026-08-20" };
+    async function seedTrend() {
+      const col = mockCurrent.collection("users").doc("uid1").collection("workouts");
+      const bench = (w, r) => ({ libId: "benchPress", name: "Жим лежачи", muscle: "chest", sets: [{ weight: w, reps: r }] });
+      const squat = (w, r) => ({ libId: "squat", name: "Присідання", muscle: "legs", sets: [{ weight: w, reps: r }] });
+      await col.add({ date: day(2), exercises: [bench(90, 8)] });
+      await col.add({ date: day(9), exercises: [bench(88, 8)] });
+      await col.add({ date: day(35), exercises: [bench(80, 8), squat(100, 5)] });
+      await col.add({ date: day(42), exercises: [bench(80, 8)] });
+    }
+
+    test("training_analysis віддає готові тренди, а не сирі підходи", async () => {
+      await seedTrend();
+      const r = await ai.executeTool("uid1", "training_analysis", {}, coachCtx);
+      expect(r.output).toMatchObject({
+        enough: true, verdict: "up", strengthChangePct: 13, comparedExercises: 1,
+        sessions: { last28: 2, previous28: 2 },
+      });
+      expect(r.output.exercises[0]).toMatchObject({
+        exercise: "Жим лежачи", e1rm: 114, e1rmMonthAgo: 101.3, changePct: 13,
+      });
+    });
+
+    // Порада в чаті не має розходитись із кнопкою «Підставити» у формі:
+    // це той самий розрахунок.
+    test("до кожної вправи додається та сама наступна вага, що й у формі", async () => {
+      await seedTrend();
+      const r = await ai.executeTool("uid1", "training_analysis", {}, coachCtx);
+      const bench = r.output.exercises.find((e) => e.exercise === "Жим лежачи");
+      expect(bench.nextSuggestion).toMatchObject({ weight: 92.5, reps: 5, direction: "up", why: "hitTop" });
+    });
+
+    test("показує, скільки днів група мʼязів відпочивала", async () => {
+      await seedTrend();
+      const r = await ai.executeTool("uid1", "training_analysis", {}, coachCtx);
+      const legs = r.output.muscles.find((m) => m.muscle === "legs");
+      const chest = r.output.muscles.find((m) => m.muscle === "chest");
+      expect(legs.daysSinceTrained).toBe(35);
+      expect(chest.daysSinceTrained).toBe(2);
+    });
+
+    // Два записи — це не тренд. Модель має отримати чесне «замало», а не
+    // цифру, з якої вона зробить впевнений висновок.
+    test("на куцій історії чесно каже, що даних мало", async () => {
+      const col = mockCurrent.collection("users").doc("uid1").collection("workouts");
+      await col.add({ date: day(2), exercises: [{ libId: "benchPress", name: "Жим", muscle: "chest", sets: [{ weight: 80, reps: 8 }] }] });
+      const r = await ai.executeTool("uid1", "training_analysis", {}, coachCtx);
+      expect(r.output).toMatchObject({ enough: false, needSessions: 1, strengthChangePct: null });
+    });
+
+    test("порожня історія не ламає розбір", async () => {
+      const r = await ai.executeTool("uid1", "training_analysis", {}, coachCtx);
+      expect(r.output).toMatchObject({ enough: false, exercises: [], muscles: [] });
+    });
+
+    test("промпт веде до training_analysis і забороняє вигадувати сон і калорії", () => {
+      const prompt = ai.buildSystemPrompt(coachCtx);
+      expect(prompt).toContain("training_analysis");
+      expect(prompt).toMatch(/сну, пульсу, калорій/);
+      expect(prompt).toMatch(/схоже, що/);
+    });
   });
 
   // ---- Запис тренувань ----

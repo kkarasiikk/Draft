@@ -4,6 +4,11 @@ const Anthropic = require("@anthropic-ai/sdk");
 // Той самий список, що й у формі тренувань — див. коментар у файлі про те,
 // чому копія має бути одна.
 const { EXERCISE_LIB, exerciseLabel, exerciseMuscle } = require("./workout/exercises");
+// Ті самі підрахунки, що показує вкладка «Рекорди», і те саме правило
+// прогресії, що підказує вагу у формі. Помічник має бачити ті самі числа,
+// що й людина: інакше в чаті звучало б одне, а на екрані стояло інше.
+const workoutProgress = require("./workout/progress");
+const { suggestNext } = require("./workout/progression");
 // Ті самі категорії, що показує бюджет, доки людина їх не редагувала —
 // у профілі їх у цей момент ще немає (див. коментар у файлі).
 const { defaultCategoryList } = require("./categories-default");
@@ -201,6 +206,15 @@ const tools = [
       type: "object",
       properties: { limit: { type: "number", description: "Скільки останніх тренувань, за замовчуванням 8" } },
     },
+  },
+  {
+    name: "training_analysis",
+    description:
+      "Готовий розбір тренувань: чи росте сила (оцінка 1ПМ за Еплі, останні 28 днів проти попередніх 28), " +
+      "обсяг по групах мʼязів, скільки днів кожна група відпочивала і яку вагу правило прогресії пропонує далі. " +
+      "Викликай ЗАМІСТЬ того, щоб рахувати тренди самому з workout_history: тут ті самі числа, що бачить людина на екрані. " +
+      "workout_history потрібен лише тоді, коли треба глянути на конкретні підходи.",
+    input_schema: { type: "object", properties: {} },
   },
   {
     name: "personal_records",
@@ -554,7 +568,8 @@ async function executeTool(uid, name, input, ctx) {
   if (name === "list_tasks") return listTasks(uid, input, ctx);
   if (name === "complete_task") return completeTask(uid, input, ctx);
   if (name === "workout_history") return workoutHistory(uid, input);
-  if (name === "personal_records") return personalRecords(uid);
+  if (name === "training_analysis") return trainingAnalysis(uid, ctx);
+  if (name === "personal_records") return personalRecords(uid, ctx);
   if (name === "goals_progress") return goalsProgress(uid);
   if (name === "add_workout") return addWorkout(uid, input, ctx);
   if (name === "add_goal") return addGoal(uid, input);
@@ -809,25 +824,101 @@ async function workoutHistory(uid, input) {
   };
 }
 
-async function personalRecords(uid) {
+async function personalRecords(uid, ctx) {
   const snap = await userCol(uid, "workouts").get();
   const best = new Map();
   snap.docs.forEach((d) => {
     const w = d.data() || {};
     (w.exercises || []).forEach((ex) => {
+      // Групуємо за стабільним ключем, а не за назвою: сторінка зберігає
+      // назву вже перекладеною, тож після зміни мови інтерфейсу та сама
+      // вправа розʼїжджалась на два різні рекорди.
+      const key = workoutProgress.exerciseKey(ex);
+      if (!key) return;
       (ex.sets || []).forEach((st) => {
         const weight = Number(st.weight) || 0;
         const reps = Number(st.reps) || 0;
         if (!weight && !reps) return;
-        const prev = best.get(ex.name);
+        const prev = best.get(key);
         // Рекорд — за вагою; за однакової ваги виграє більше повторень.
         if (!prev || weight > prev.weight || (weight === prev.weight && reps > prev.reps)) {
-          best.set(ex.name, { exercise: ex.name, weight, reps, date: w.date || null });
+          best.set(key, {
+            exercise: ex.libId ? exerciseLabel(ex.libId, ctx.lang) : (ex.name || ""),
+            weight, reps, date: w.date || null,
+          });
         }
       });
     });
   });
   return { output: { count: best.size, records: [...best.values()] } };
+}
+
+// ---- Розбір тренувань ----
+// Модель погано рахує тренди з сирих підходів: тридцять рядків «вага ×
+// повторення» вона радше перекаже, ніж підсумує. Тому підрахунки робить
+// той самий код, що малює вкладку «Рекорди», а сюди приходять уже готові
+// числа — і в чаті звучить рівно те, що людина бачить на екрані.
+async function trainingAnalysis(uid, ctx) {
+  const snap = await userCol(uid, "workouts").get();
+  const sessions = snap.docs.map((d) => d.data() || {});
+  const data = workoutProgress.analyze(sessions, ctx.today);
+  const rest = workoutProgress.restByMuscle(sessions, ctx.today);
+  const restDays = {};
+  rest.forEach((r) => { restDays[r.muscle] = r.daysAgo; });
+
+  // Історія кожної вправи, найновіше першим — саме в такому вигляді її
+  // читає правило прогресії.
+  const byKey = new Map();
+  sessions
+    .filter((w) => typeof w.date === "string")
+    .sort((a, b) => (a.date < b.date ? 1 : -1))
+    .forEach((w) => {
+      (w.exercises || []).forEach((ex) => {
+        const key = workoutProgress.exerciseKey(ex);
+        if (!key) return;
+        if (!byKey.has(key)) byKey.set(key, []);
+        byKey.get(key).push({ date: w.date, sets: ex.sets || [] });
+      });
+    });
+
+  const exercises = data.exercises.slice(0, 12).map((e) => {
+    const next = suggestNext(byKey.get(e.key) || [], e.libId || "");
+    return {
+      exercise: e.libId ? exerciseLabel(e.libId, ctx.lang) : e.name,
+      muscle: e.muscle,
+      e1rm: e.e1rm,
+      e1rmMonthAgo: e.prevE1rm,
+      changePct: e.pct,
+      tonnage: e.tonnage,
+      reps: e.reps,
+      // Те саме, що показує кнопка «Підставити» у формі, — щоб порада в
+      // чаті не розходилась із підказкою на екрані.
+      nextSuggestion: next
+        ? { weight: next.weight, reps: next.reps, direction: next.verdict, why: next.reason }
+        : null,
+    };
+  });
+
+  return {
+    output: {
+      enough: data.enough,
+      needSessions: data.needSessions,
+      windowDays: data.windowDays,
+      sessions: { last28: data.sessionsNow, previous28: data.sessionsPrev },
+      strengthChangePct: data.strengthPct,
+      comparedExercises: data.comparedCount,
+      verdict: data.verdict,
+      exercises,
+      muscles: data.muscles.map((m) => ({
+        muscle: m.muscle,
+        volumeUnit: m.unit,
+        volume: m.now,
+        volumeMonthAgo: m.prev,
+        changePct: m.pct,
+        daysSinceTrained: restDays[m.muscle] != null ? restDays[m.muscle] : null,
+      })),
+    },
+  };
 }
 
 // ---- Цілі ----
@@ -1309,6 +1400,7 @@ function buildSystemPrompt(ctx) {
     "ЗАПИСУВАТИ. 'кава 80 грн' -> add_transaction (expense, 80, category 'food'). 'запиши подзвонити мамі завтра о 18' -> add_task. 'записав тренування: жим лежачи 4 по 8 на 60' -> add_workout. Не питай уточнень, якщо сенс зрозумілий; якщо в одному повідомленні кілька справ — створи кожну окремим викликом.",
     "",
     "ТРЕНУВАННЯ. '4 по 8 на 60 кг' означає чотири однакові підходи по 8 повторень з вагою 60 — перелічи їх усі, а не один. Вправу з бібліотеки завжди передавай через libId (жим лежачи -> benchPress, присідання -> squat, станова -> deadlift і так далі): рекорди рахуються саме за ним, і без libId запис не склеїться з попередніми тренуваннями тієї ж вправи. Для планки й інших вправ з власною вагою став weight 0. Якщо людина каже 'запиши тренування' без жодної вправи — спитай, які саме вправи були.",
+    "ТРЕНЕР. Про прогрес говори числами з training_analysis, а не враженнями: «жим виріс зі 101 до 114, це +13% за місяць». nextSuggestion — це та сама вага, яку застосунок уже показує людині у формі, тож не пропонуй іншу, не пояснивши, чому. Формулюй обережно: «схоже, що…», «схоже, варто…», а не «тобі потрібно» — ти бачиш цифри, але не бачиш, як людина почувається, скільки спала і що в неї в житті. Не вигадуй даних, яких у застосунку немає: сну, пульсу, калорій, техніки виконання — їх ніхто не записує, і будувати на них висновки не можна. Якщо enough=false — так і скажи, що для висновку ще замало тренувань, і не видавай тренд за наявними двома записами. Пропуски й просідання не коментуй докірливо: просів обсяг — це привід запитати, що заважало, а не дорікнути.",
     "",
     "ЦІЛІ. Вимірювану ціль задавай числом: «пробігти 10 км» -> targetValue 10, unit «км»; тоді відсоток рахується від пройденого, а не від кількості віх, і поповнюється через goal_progress. Невимірювану («вивчити польську») лишай без числа — там працюють віхи. add_goal створює довгострокову ціль — не плутай із завданням: «купити молоко» це add_task, «вивчити польську до літа» це add_goal. goal_checkin відзначає сьогоднішній день у серії, complete_milestone закриває віху. Якщо людина каже, що вчора пропустила, — подивись поле rescue: коли available true, запропонуй rescue_streak (дописує вчорашній день, доступно раз на тиждень). Коли каже, що сьогодні не вийшло, — спитай, що завадило, і запиши через log_blocker її словами. Не докоряй за пропуски: у полі blockers видно, що заважає найчастіше, і корисніше запропонувати, як це обійти. Обидва беруть id, тож спершу виклич goals_progress і візьми id звідти — вгадувати id не можна. Якщо назва цілі збігається з кількома — перепитай, з якою саме. Щоденну дію з цілі («щодня бігати по 3 км») створюй через add_task із goalId — це звичайне завдання, просто привʼязане: коли його виконають, день у серії цілі відмітиться сам, окремий goal_checkin не потрібен.",
     "",
@@ -1318,7 +1410,7 @@ function buildSystemPrompt(ctx) {
     "",
     "РАДИТИ. Це головне правило: спершу подивись у дані, потім говори. Порада без цифр — марна, людина і так знає, що треба менше витрачати й більше рухатись.",
     "- порада про економію -> спершу month_summary за потрібний місяць, і говори про конкретні категорії й суми;",
-    "- порада про тренування -> спершу workout_history, подивись, які групи мʼязів давно не навантажувались і з якими вагами людина працює;",
+    "- порада про тренування -> спершу training_analysis: там уже пораховано, чи росте сила, який обсяг по групах і скільки днів кожна відпочивала;",
     "- питання про прогрес -> personal_records або goals_progress;",
     "- питання про завантаженість -> list_tasks.",
     "Якщо даних мало (наприклад, тренувань ще немає) — так і скажи, і дай загальну пораду, чесно позначивши, що вона не спирається на історію.",

@@ -180,3 +180,30 @@ describe('analyze', () => {
     expect(r.sessionsNow).toBe(2);
   });
 });
+
+describe('restByMuscle', () => {
+  test('рахує, скільки днів група відпочивала', () => {
+    const r = P.restByMuscle([session(1, bench(80, 8)), session(6, squat(100, 5)), session(9, bench(80, 8))], TODAY);
+    expect(r).toEqual([
+      { muscle: 'legs', lastDate: back(6), daysAgo: 6 },
+      { muscle: 'chest', lastDate: back(1), daysAgo: 1 },
+    ]);
+  });
+
+  // Група, якої не було два місяці, — це теж відповідь, і найважливіша,
+  // тож дивимось на всю історію, а не на вікно порівняння.
+  test('давня група зі списку не випадає', () => {
+    const r = P.restByMuscle([session(2, bench(80, 8)), session(90, squat(100, 5))], TODAY);
+    expect(r[0]).toMatchObject({ muscle: 'legs', daysAgo: 90 });
+  });
+
+  test('вправа без жодного повторення тренуванням не рахується', () => {
+    const r = P.restByMuscle([{ date: back(1), exercises: [{ libId: 'squat', muscle: 'legs', sets: [{ weight: 100, reps: 0 }] }] }], TODAY);
+    expect(r).toEqual([]);
+  });
+
+  test('порожня історія — порожній список', () => {
+    expect(P.restByMuscle([], TODAY)).toEqual([]);
+    expect(P.restByMuscle(undefined, TODAY)).toEqual([]);
+  });
+});

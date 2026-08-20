@@ -181,7 +181,33 @@
     };
   }
 
+  function daysBetween(fromIso, toIso) {
+    return Math.round((parseISO(toIso) - parseISO(fromIso)) / 86400000);
+  }
+
+  /** Коли кожну групу мʼязів тренували востаннє й скільки днів тому.
+   *  Дивиться на всю історію, а не на вікно: група, якої не було два
+   *  місяці, — це теж відповідь, і найважливіша. */
+  function restByMuscle(sessions, todayIso) {
+    var last = {};
+    (sessions || []).forEach(function (session) {
+      if (!session || typeof session.date !== 'string') return;
+      (session.exercises || []).forEach(function (ex) {
+        // Вправа без жодного зробленого повторення тренуванням не була.
+        var worked = (ex.sets || []).some(function (set) { return num(set.reps) > 0; });
+        if (!worked) return;
+        var m = ex.muscle || 'other';
+        if (!last[m] || session.date > last[m]) last[m] = session.date;
+      });
+    });
+    return Object.keys(last).map(function (muscle) {
+      return { muscle: muscle, lastDate: last[muscle], daysAgo: daysBetween(last[muscle], todayIso) };
+    }).sort(function (a, b) { return b.daysAgo - a.daysAgo; });
+  }
+
   var api = {
+    daysBetween: daysBetween,
+    restByMuscle: restByMuscle,
     WINDOW_DAYS: WINDOW_DAYS,
     MIN_SESSIONS: MIN_SESSIONS,
     FLAT_PCT: FLAT_PCT,
