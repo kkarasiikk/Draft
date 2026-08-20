@@ -10,8 +10,9 @@
    воно, — читається як його продовження, а не як ще один плаваючий елемент.
    Заповненого акцентом кола тут свідомо немає: у модулях уже є акцентний
    «+», і два однакові кола сперечалися б за увагу.
-   Зсув знизу — висота меню (62px) + його відступ + просвіт; на головному
-   екрані меню немає, тож там сторінка задає свій --ai-fab-bottom.
+   Зсув знизу рахує два поверхи: висоту меню (62px) з його відступом, а над
+   ним кнопку додавання (52px) — помічник стоїть третім. На головному екрані
+   немає ні меню, ні додавання, тож сторінка задає свій --ai-fab-bottom.
 
    Літери всередині значка — контури, а не <text>: сторінка бюджету
    підвантажує Inter лише до 700, тож текст накресленням 800 браузер
@@ -19,7 +20,7 @@
    решті сторінок. Контури ще й не залежать від того, чи шрифт узагалі
    встиг завантажитись. */
 .ai-fab{position:fixed;right:var(--ai-fab-right, 14px);
-  bottom:calc(var(--ai-fab-bottom, 86px) + env(safe-area-inset-bottom));z-index:26;
+  bottom:calc(var(--ai-fab-bottom, 148px) + env(safe-area-inset-bottom));z-index:26;
   width:52px;height:52px;border-radius:50%;cursor:pointer;
   border:1px solid var(--border);background:var(--surface);color:var(--accent);
   backdrop-filter:blur(var(--glass-blur, 22px)) saturate(150%);
@@ -112,7 +113,7 @@
 .aic-send:disabled{opacity:.5;cursor:default;}
 
 @media (min-width:880px){
-  .ai-fab{--ai-fab-right:32px;--ai-fab-bottom:104px;}
+  .ai-fab{--ai-fab-right:32px;--ai-fab-bottom:166px;}
   .aic-overlay{align-items:center;}
   .aic-modal{border-radius:20px;padding-bottom:20px;}
 }

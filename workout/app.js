@@ -864,8 +864,13 @@ function switchTab(tab) {
   });
   document.getElementById('sessionsTab').style.display = tab === 'sessions' ? 'block' : 'none';
   document.getElementById('recordsTab').style.display = tab === 'records' ? 'block' : 'none';
-  // «Рекорди» лише показують історію — додавати там нема чого.
-  document.getElementById('newSessionBtn').style.visibility = tab === 'sessions' ? '' : 'hidden';
+  // «Рекорди» лише показують історію — додавати там нема чого. Ховаємо
+  // кнопку зовсім, а не робимо невидимою: інакше помічник над нею лишався б
+  // висіти з порожнім місцем під собою. Клас на <body> опускає його на
+  // звільнене місце — правило поруч із рештою стилів кнопки.
+  const hasAdd = tab === 'sessions';
+  document.getElementById('newSessionBtn').style.display = hasAdd ? '' : 'none';
+  document.body.classList.toggle('no-page-fab', !hasAdd);
   renderCurrentScreen();
 }
 document.querySelectorAll('#bottomNav [data-tab]').forEach((btn) => {
