@@ -26,12 +26,22 @@ const db = firebase.firestore();
 // вибір мови (і теми) синхронізований між головною сторінкою та бюджетом.
 const LANGS = ['uk', 'ru', 'pl', 'en'];
 const LANG_NAMES = { uk: 'UA', ru: 'RU', pl: 'PL', en: 'EN' };
+const LOCALE_MAP = { uk: 'uk-UA', ru: 'ru-RU', pl: 'pl-PL', en: 'en-US' };
 
 const STRINGS = {
   uk: {
     themeLabel: 'Тема', themeLight: 'Світла', themeDark: 'Темна', themeSystem: 'Системна',
     langLabel: 'Мова', logout: 'Вийти', exportLabel: 'Експорт даних',
     exportBusy: 'Готую файл…', exportError: 'Не вдалося зібрати файл. Спробуй ще раз.',
+    exportModalTitle: 'Експорт даних', exportWhat: 'Що зберегти', exportFormat: 'Формат',
+    exportSave: 'Зберегти', exportNothing: 'Обери хоча б один розділ.',
+    sec_budget: 'Бюджет', sec_goals: 'Цілі', sec_tasks: 'Завдання', sec_workout: 'Тренування',
+    fmt_xlsx: 'Excel (.xlsx)', fmt_csv: 'CSV', fmt_json: 'JSON',
+    hint_xlsx: 'Один файл, кожен розділ окремою вкладкою. Щоб подивитись і порахувати.',
+    hint_csv: (n) => (n > 1
+      ? `Збережеться ${n} ${plural(n, { one: 'файл', few: 'файли', many: 'файлів' })} — CSV не має вкладок, тож на кожну таблицю свій файл.`
+      : 'Проста таблиця — щоб закинути кудись іще.'),
+    hint_json: 'Повна резервна копія: усе як є, без втрат. Для читання очима не призначено.',
     budgetTitle: 'Бюджет', budgetSub: 'витрати й доходи',
     goalsTitle: 'Цілі', goalsSub: 'довгострокові',
     tasksTitle: 'Завдання', tasksSub: 'на кожен день',
@@ -56,6 +66,15 @@ const STRINGS = {
     themeLabel: 'Тема', themeLight: 'Светлая', themeDark: 'Тёмная', themeSystem: 'Системная',
     langLabel: 'Язык', logout: 'Выйти', exportLabel: 'Экспорт данных',
     exportBusy: 'Готовлю файл…', exportError: 'Не удалось собрать файл. Попробуй ещё раз.',
+    exportModalTitle: 'Экспорт данных', exportWhat: 'Что сохранить', exportFormat: 'Формат',
+    exportSave: 'Сохранить', exportNothing: 'Выбери хотя бы один раздел.',
+    sec_budget: 'Бюджет', sec_goals: 'Цели', sec_tasks: 'Задачи', sec_workout: 'Тренировки',
+    fmt_xlsx: 'Excel (.xlsx)', fmt_csv: 'CSV', fmt_json: 'JSON',
+    hint_xlsx: 'Один файл, каждый раздел отдельной вкладкой. Чтобы посмотреть и посчитать.',
+    hint_csv: (n) => (n > 1
+      ? `Сохранится ${n} ${plural(n, { one: 'файл', few: 'файла', many: 'файлов' })} — у CSV нет вкладок, поэтому на каждую таблицу свой файл.`
+      : 'Простая таблица — чтобы закинуть куда-то ещё.'),
+    hint_json: 'Полная резервная копия: всё как есть, без потерь. Для чтения глазами не предназначено.',
     budgetTitle: 'Бюджет', budgetSub: 'расходы и доходы',
     goalsTitle: 'Цели', goalsSub: 'долгосрочные',
     tasksTitle: 'Задачи', tasksSub: 'на каждый день',
@@ -80,6 +99,15 @@ const STRINGS = {
     themeLabel: 'Motyw', themeLight: 'Jasny', themeDark: 'Ciemny', themeSystem: 'Systemowy',
     langLabel: 'Język', logout: 'Wyloguj', exportLabel: 'Eksport danych',
     exportBusy: 'Przygotowuję plik…', exportError: 'Nie udało się zebrać pliku. Spróbuj ponownie.',
+    exportModalTitle: 'Eksport danych', exportWhat: 'Co zapisać', exportFormat: 'Format',
+    exportSave: 'Zapisz', exportNothing: 'Wybierz przynajmniej jedną sekcję.',
+    sec_budget: 'Budżet', sec_goals: 'Cele', sec_tasks: 'Zadania', sec_workout: 'Treningi',
+    fmt_xlsx: 'Excel (.xlsx)', fmt_csv: 'CSV', fmt_json: 'JSON',
+    hint_xlsx: 'Jeden plik, każda sekcja w osobnej zakładce. Do przejrzenia i policzenia.',
+    hint_csv: (n) => (n > 1
+      ? `Zapisze się ${n} ${plural(n, { one: 'plik', few: 'pliki', many: 'plików' })} — CSV nie ma zakładek, więc każda tabela osobno.`
+      : 'Prosta tabela — żeby wrzucić gdzie indziej.'),
+    hint_json: 'Pełna kopia zapasowa: wszystko bez strat. Nie do czytania oczami.',
     budgetTitle: 'Budżet', budgetSub: 'wydatki i dochody',
     goalsTitle: 'Cele', goalsSub: 'długoterminowe',
     tasksTitle: 'Zadania', tasksSub: 'na każdy dzień',
@@ -104,6 +132,15 @@ const STRINGS = {
     themeLabel: 'Theme', themeLight: 'Light', themeDark: 'Dark', themeSystem: 'System',
     langLabel: 'Language', logout: 'Log out', exportLabel: 'Export data',
     exportBusy: 'Preparing the file…', exportError: 'Could not build the file. Try again.',
+    exportModalTitle: 'Export data', exportWhat: 'What to save', exportFormat: 'Format',
+    exportSave: 'Save', exportNothing: 'Pick at least one section.',
+    sec_budget: 'Budget', sec_goals: 'Goals', sec_tasks: 'Tasks', sec_workout: 'Workouts',
+    fmt_xlsx: 'Excel (.xlsx)', fmt_csv: 'CSV', fmt_json: 'JSON',
+    hint_xlsx: 'One file, each section on its own tab. For looking and counting.',
+    hint_csv: (n) => (n > 1
+      ? `${n} ${plural(n, { one: 'file', other: 'files' })} will be saved — CSV has no tabs, so every table gets its own.`
+      : 'A plain table — to load somewhere else.'),
+    hint_json: 'A full backup: everything as-is, nothing lost. Not meant for reading.',
     budgetTitle: 'Budget', budgetSub: 'spending & income',
     goalsTitle: 'Goals', goalsSub: 'long-term',
     tasksTitle: 'Tasks', tasksSub: 'day to day',
@@ -128,8 +165,26 @@ const STRINGS = {
 
 let currentLang = localStorage.getItem('financeAppLang') || 'uk';
 if (!LANGS.includes(currentLang)) currentLang = 'uk';
-function t(key) {
-  return (STRINGS[currentLang] && STRINGS[currentLang][key]) || STRINGS.uk[key] || key;
+// Частина рядків — функції від аргументів («збережеться N файлів»), тож t
+// або підставляє їх, або віддає саму функцію, коли аргументів не передали.
+// Друге лишилось заради `t('resetSent')(email)` у формі входу.
+function t(key, ...args) {
+  const val = (STRINGS[currentLang] && STRINGS[currentLang][key]) || STRINGS.uk[key] || key;
+  return typeof val === 'function' && args.length ? val(...args) : val;
+}
+
+// «2 файлів» — так не кажуть. Форму слова бере Intl, бо правила у чотирьох
+// мовах різні.
+function plural(n, forms) {
+  const locale = LOCALE_MAP[currentLang] || 'uk-UA';
+  let cat = 'other';
+  try { cat = new Intl.PluralRules(locale).select(n); } catch (err) { cat = 'other'; }
+  return forms[cat] || forms.other || forms.many || '';
+}
+
+function escapeHtml(str) {
+  return String(str == null ? '' : str)
+    .replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
 function applyTranslations() {
@@ -354,25 +409,61 @@ document.getElementById('forgotPasswordLink').addEventListener('click', async ()
 // підпискою: хаб не тримає їх у пам'яті й не має цього робити заради
 // однієї кнопки.
 const EXPORT_LABELS = {
-  uk: { sheetTx: 'Транзакції', sheetSavings: 'Заощадження', sheetGoals: 'Цілі заощаджень', sheetNotes: 'Нотатки', sheetCats: 'Категорії',
+  uk: { sheetTx: 'Транзакції', sheetSavings: 'Заощадження', sheetSavingsGoals: 'Цілі заощаджень', sheetNotes: 'Нотатки', sheetCats: 'Категорії',
+        sheetLifeGoals: 'Цілі', sheetJournal: 'Щоденник цілей', sheetTasks: 'Завдання', sheetWorkouts: 'Тренування',
         colDate: 'Дата', colType: 'Тип', colCategory: 'Категорія', colAmount: 'Сума', colCurrency: 'Валюта', colNote: 'Нотатка',
         colGoal: 'Ціль', colName: 'Назва', colCreated: 'Створено', colUpdated: 'Оновлено', colTitle: 'Заголовок', colContent: 'Зміст',
+        colStatus: 'Статус', colDeadline: 'Дедлайн', colTarget: 'Мета', colCurrent: 'Пройдено', colUnit: 'Одиниця',
+        colMilestones: 'Віхи', colCheckins: 'Чекінів', colWhy: 'Навіщо',
+        colDone: 'Виконано', colTime: 'Час', colPriority: 'Пріоритет', colTags: 'Теги', colEstimate: 'Хвилин',
+        colRepeat: 'Повтор', colSubtasks: 'Підзадачі', colCompleted: 'Завершено',
+        colExercise: 'Вправа', colMuscle: 'Група', colSets: 'Підходів', colDetails: 'Підходи', colVolume: 'Обсяг, кг',
         typeExpense: 'Витрата', typeIncome: 'Дохід', typeDeposit: 'Поповнення', typeWithdraw: 'Зняття',
+        status_active: 'Активна', status_done: 'Завершена', status_archived: 'Архів',
+        prio_high: 'Високий', prio_medium: 'Середній', prio_low: 'Низький',
+        yes: 'Так', no: 'Ні',
         defaultGoalName: 'Заощадження', noTitle: 'Без заголовка' },
-  ru: { sheetTx: 'Транзакции', sheetSavings: 'Накопления', sheetGoals: 'Цели накоплений', sheetNotes: 'Заметки', sheetCats: 'Категории',
+  ru: { sheetTx: 'Транзакции', sheetSavings: 'Накопления', sheetSavingsGoals: 'Цели накоплений', sheetNotes: 'Заметки', sheetCats: 'Категории',
+        sheetLifeGoals: 'Цели', sheetJournal: 'Дневник целей', sheetTasks: 'Задачи', sheetWorkouts: 'Тренировки',
         colDate: 'Дата', colType: 'Тип', colCategory: 'Категория', colAmount: 'Сумма', colCurrency: 'Валюта', colNote: 'Заметка',
         colGoal: 'Цель', colName: 'Название', colCreated: 'Создано', colUpdated: 'Обновлено', colTitle: 'Заголовок', colContent: 'Содержимое',
+        colStatus: 'Статус', colDeadline: 'Дедлайн', colTarget: 'Цель', colCurrent: 'Пройдено', colUnit: 'Единица',
+        colMilestones: 'Вехи', colCheckins: 'Чекинов', colWhy: 'Зачем',
+        colDone: 'Выполнено', colTime: 'Время', colPriority: 'Приоритет', colTags: 'Теги', colEstimate: 'Минут',
+        colRepeat: 'Повтор', colSubtasks: 'Подзадачи', colCompleted: 'Завершено',
+        colExercise: 'Упражнение', colMuscle: 'Группа', colSets: 'Подходов', colDetails: 'Подходы', colVolume: 'Объём, кг',
         typeExpense: 'Расход', typeIncome: 'Доход', typeDeposit: 'Пополнение', typeWithdraw: 'Снятие',
+        status_active: 'Активная', status_done: 'Завершена', status_archived: 'Архив',
+        prio_high: 'Высокий', prio_medium: 'Средний', prio_low: 'Низкий',
+        yes: 'Да', no: 'Нет',
         defaultGoalName: 'Накопления', noTitle: 'Без заголовка' },
-  pl: { sheetTx: 'Transakcje', sheetSavings: 'Oszczędności', sheetGoals: 'Cele oszczędnościowe', sheetNotes: 'Notatki', sheetCats: 'Kategorie',
+  pl: { sheetTx: 'Transakcje', sheetSavings: 'Oszczędności', sheetSavingsGoals: 'Cele oszczędnościowe', sheetNotes: 'Notatki', sheetCats: 'Kategorie',
+        sheetLifeGoals: 'Cele', sheetJournal: 'Dziennik celów', sheetTasks: 'Zadania', sheetWorkouts: 'Treningi',
         colDate: 'Data', colType: 'Typ', colCategory: 'Kategoria', colAmount: 'Kwota', colCurrency: 'Waluta', colNote: 'Notatka',
         colGoal: 'Cel', colName: 'Nazwa', colCreated: 'Utworzono', colUpdated: 'Zaktualizowano', colTitle: 'Tytuł', colContent: 'Treść',
+        colStatus: 'Status', colDeadline: 'Termin', colTarget: 'Cel liczbowy', colCurrent: 'Postęp', colUnit: 'Jednostka',
+        colMilestones: 'Kamienie milowe', colCheckins: 'Odhaczeń', colWhy: 'Po co',
+        colDone: 'Zrobione', colTime: 'Godzina', colPriority: 'Priorytet', colTags: 'Tagi', colEstimate: 'Minut',
+        colRepeat: 'Powtarzanie', colSubtasks: 'Podzadania', colCompleted: 'Ukończono',
+        colExercise: 'Ćwiczenie', colMuscle: 'Partia', colSets: 'Serii', colDetails: 'Serie', colVolume: 'Objętość, kg',
         typeExpense: 'Wydatek', typeIncome: 'Przychód', typeDeposit: 'Wpłata', typeWithdraw: 'Wypłata',
+        status_active: 'Aktywny', status_done: 'Ukończony', status_archived: 'Archiwum',
+        prio_high: 'Wysoki', prio_medium: 'Średni', prio_low: 'Niski',
+        yes: 'Tak', no: 'Nie',
         defaultGoalName: 'Oszczędności', noTitle: 'Bez tytułu' },
-  en: { sheetTx: 'Transactions', sheetSavings: 'Savings', sheetGoals: 'Savings goals', sheetNotes: 'Notes', sheetCats: 'Categories',
+  en: { sheetTx: 'Transactions', sheetSavings: 'Savings', sheetSavingsGoals: 'Savings goals', sheetNotes: 'Notes', sheetCats: 'Categories',
+        sheetLifeGoals: 'Goals', sheetJournal: 'Goal journal', sheetTasks: 'Tasks', sheetWorkouts: 'Workouts',
         colDate: 'Date', colType: 'Type', colCategory: 'Category', colAmount: 'Amount', colCurrency: 'Currency', colNote: 'Note',
         colGoal: 'Goal', colName: 'Name', colCreated: 'Created', colUpdated: 'Updated', colTitle: 'Title', colContent: 'Content',
+        colStatus: 'Status', colDeadline: 'Deadline', colTarget: 'Target', colCurrent: 'Progress', colUnit: 'Unit',
+        colMilestones: 'Milestones', colCheckins: 'Check-ins', colWhy: 'Why',
+        colDone: 'Done', colTime: 'Time', colPriority: 'Priority', colTags: 'Tags', colEstimate: 'Minutes',
+        colRepeat: 'Repeat', colSubtasks: 'Subtasks', colCompleted: 'Completed',
+        colExercise: 'Exercise', colMuscle: 'Muscle', colSets: 'Sets', colDetails: 'Set detail', colVolume: 'Volume, kg',
         typeExpense: 'Expense', typeIncome: 'Income', typeDeposit: 'Deposit', typeWithdraw: 'Withdrawal',
+        status_active: 'Active', status_done: 'Done', status_archived: 'Archived',
+        prio_high: 'High', prio_medium: 'Medium', prio_low: 'Low',
+        yes: 'Yes', no: 'No',
         defaultGoalName: 'Savings', noTitle: 'Untitled' },
 };
 
@@ -381,40 +472,113 @@ async function collectDocs(userRef, name) {
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
 }
 
-document.getElementById('exportBtn').addEventListener('click', async () => {
-  const btn = document.getElementById('exportBtn');
-  const label = document.getElementById('exportLabel');
+// ---- Експорт ----
+// Кнопка більше не тягне файл одразу: спершу людина каже, ЩО зберегти й у
+// ЯКОМУ вигляді. За замовчуванням обрано все й xlsx — тобто попередня
+// поведінка лишається за два дотики, а не зникає.
+let exportSections = LifeExport.SECTION_KEYS.slice();
+let exportFormat = 'xlsx';
+
+function renderExportOptions() {
+  document.getElementById('exportSections').innerHTML = LifeExport.SECTION_KEYS.map((key) => `
+    <button type="button" class="export-chip${exportSections.includes(key) ? ' selected' : ''}" data-section="${key}">${escapeHtml(t('sec_' + key))}</button>`).join('');
+  document.getElementById('exportFormats').innerHTML = LifeExport.FORMATS.map((fmt) => `
+    <button type="button" class="export-chip${exportFormat === fmt ? ' selected' : ''}" data-format="${fmt}">${escapeHtml(t('fmt_' + fmt))}</button>`).join('');
+
+  // Скільки файлів вийде — це те, що людині варто знати ДО натискання, а
+  // не побачити потім у теці завантажень.
+  const hintEl = document.getElementById('exportFormatHint');
+  if (exportFormat === 'csv') {
+    hintEl.textContent = t('hint_csv', countCsvFiles());
+  } else {
+    hintEl.textContent = t('hint_' + exportFormat);
+  }
+
+  document.getElementById('exportSections').querySelectorAll('[data-section]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.section;
+      exportSections = exportSections.includes(key)
+        ? exportSections.filter((k) => k !== key)
+        : exportSections.concat([key]);
+      document.getElementById('exportModalError').textContent = '';
+      renderExportOptions();
+    });
+  });
+  document.getElementById('exportFormats').querySelectorAll('[data-format]').forEach((btn) => {
+    btn.addEventListener('click', () => { exportFormat = btn.dataset.format; renderExportOptions(); });
+  });
+}
+
+// Рахуємо на порожніх даних: кількість аркушів залежить тільки від того,
+// які розділи обрано, а не від того, скільки в них записів.
+function countCsvFiles() {
+  return LifeExport.buildSheets(exportSections, {}, EXPORT_LABELS[currentLang] || EXPORT_LABELS.uk).length;
+}
+
+function openExportDialog() {
+  document.getElementById('exportModalTitle').textContent = t('exportModalTitle');
+  document.getElementById('exportWhatLabel').textContent = t('exportWhat');
+  document.getElementById('exportFormatLabel').textContent = t('exportFormat');
+  document.getElementById('exportSaveBtn').textContent = t('exportSave');
+  document.getElementById('exportModalError').textContent = '';
+  document.getElementById('exportSaveBtn').disabled = false;
+  renderExportOptions();
+  document.getElementById('appMenuOverlay').classList.remove('show');
+  document.getElementById('exportOverlay').classList.add('show');
+}
+
+function closeExportDialog() {
+  document.getElementById('exportOverlay').classList.remove('show');
+}
+
+document.getElementById('exportBtn').addEventListener('click', openExportDialog);
+document.getElementById('exportCloseBtn').addEventListener('click', closeExportDialog);
+document.getElementById('exportOverlay').addEventListener('click', (e) => {
+  if (e.target.id === 'exportOverlay') closeExportDialog();
+});
+
+document.getElementById('exportSaveBtn').addEventListener('click', async () => {
+  const btn = document.getElementById('exportSaveBtn');
+  const errorEl = document.getElementById('exportModalError');
   const user = auth.currentUser;
   if (!user || btn.disabled) return;
+  if (!exportSections.length) { errorEl.textContent = t('exportNothing'); return; }
+
   btn.disabled = true;
-  label.textContent = t('exportBusy');
+  btn.textContent = t('exportBusy');
+  errorEl.textContent = '';
   try {
     const userRef = db.collection('users').doc(user.uid);
-    const [profile, transactions, savings, savingsGoals, notes] = await Promise.all([
+    // Читаємо лише те, що обрали: вивантажувати всю базу заради однієї
+    // вкладки — це і час, і чужі читання Firestore.
+    const wants = (key) => exportSections.includes(key);
+    // Цілі потрібні й самі по собі, і як назви для завдань, привʼязаних до них.
+    const needGoals = wants('goals') || wants('tasks');
+    const [profile, transactions, savings, savingsGoals, notes, goals, tasks, workouts] = await Promise.all([
       userRef.get(),
-      collectDocs(userRef, 'transactions'),
-      collectDocs(userRef, 'savings'),
-      collectDocs(userRef, 'savingsGoals'),
-      collectDocs(userRef, 'pages'),
+      wants('budget') ? collectDocs(userRef, 'transactions') : [],
+      wants('budget') ? collectDocs(userRef, 'savings') : [],
+      wants('budget') ? collectDocs(userRef, 'savingsGoals') : [],
+      wants('budget') ? collectDocs(userRef, 'pages') : [],
+      needGoals ? collectDocs(userRef, 'goals') : [],
+      wants('tasks') ? collectDocs(userRef, 'tasks') : [],
+      wants('workout') ? collectDocs(userRef, 'workouts') : [],
     ]);
     const data = profile.exists ? (profile.data() || {}) : {};
-    const ok = exportAllXlsx({
-      transactions, savings, savingsGoals, notes,
+    const result = LifeExport.exportData(exportSections, exportFormat, {
+      transactions, savings, savingsGoals, notes, goals, tasks, workouts,
       // Поки людина не редагувала категорії, у профілі їх немає — тоді
       // беремо стандартні, щоб у файлі були слова, а не службові id.
       categoriesExpense: data.categoriesExpense || defaultCategoryList('expense', currentLang),
       categoriesIncome: data.categoriesIncome || defaultCategoryList('income', currentLang),
     }, EXPORT_LABELS[currentLang] || EXPORT_LABELS.uk);
-    if (!ok) throw new Error('XLSX недоступний');
-    document.getElementById('appMenuOverlay').classList.remove('show');
+    if (!result.files) throw new Error('nothing exported');
+    closeExportDialog();
   } catch (err) {
     console.error('export:', err);
-    label.textContent = t('exportError');
-    setTimeout(() => { label.textContent = t('exportLabel'); }, 3000);
-    btn.disabled = false;
-    return;
+    errorEl.textContent = t('exportError');
   }
-  label.textContent = t('exportLabel');
+  btn.textContent = t('exportSave');
   btn.disabled = false;
 });
 

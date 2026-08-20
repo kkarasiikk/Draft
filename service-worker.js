@@ -2,12 +2,12 @@
 // scope (`/`, `/budget/`, `/tasks/`, `/workout/`) — для сторінки завжди
 // виграє реєстрація з найдовшим збігом scope, тож цей файл фактично
 // обслуговує лише хаб.
-const CACHE_NAME = 'life-home-v25';
+const CACHE_NAME = 'life-home-v26';
 // Чистимо лише власні (застарілі) кеші: `caches` спільний для всього
 // походження, тож видалення "всього зайвого" стерло б кеші інших модулів.
 const CACHE_PREFIXES = ['life-home-'];
-const NETWORK_FIRST = ['./ai-chat.js', './ai-chat.css', './', './index.html', './home.js', './export-xlsx.js'];
-const FILES_TO_CACHE = ['./ai-chat.js', './ai-chat.css', './', './index.html', './home.js', './export-xlsx.js',
+const NETWORK_FIRST = ['./ai-chat.js', './ai-chat.css', './', './index.html', './home.js', './export-data.js'];
+const FILES_TO_CACHE = ['./ai-chat.js', './ai-chat.css', './', './index.html', './home.js', './export-data.js',
   './categories-default.js', './manifest.json',
   './budget/firebase-config.js', './budget/icon-192.png', './budget/icon-512.png',
   './budget/icon-192-maskable.png', './budget/icon-512-maskable.png'];
