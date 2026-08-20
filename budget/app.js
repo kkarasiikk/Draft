@@ -76,7 +76,7 @@ const T = {
     pageError: 'Введи назву нотатки', pageSaveError: 'Не вдалося зберегти. Перевір інтернет-з’єднання',
     confirmTitlePage: 'Видалити сторінку?',
     pageNoTitle: 'Без назви',
-    emptyTitle: 'Тут поки порожньо', recentEntriesLabel: 'Останні операції', emptySub: 'Додай перший запис кнопкою внизу', searchPlaceholder: 'Пошук по нотатках і категоріях', searchEmptyTitle: 'Нічого не знайдено', searchEmptySub: 'Спробуй інше слово для пошуку',
+    emptyTitle: 'Тут поки порожньо', emptySub: 'Додай перший запис кнопкою внизу', searchPlaceholder: 'Пошук по нотатках і категоріях', searchEmptyTitle: 'Нічого не знайдено', searchEmptySub: 'Спробуй інше слово для пошуку',
     deleteAria: 'Видалити запис', entryMenuAria: 'Дії із записом', menuEdit: 'Редагувати', menuDelete: 'Видалити', toggleCatAria: 'Показати/приховати категорію', rateAsOf: 'курс НБУ на', rateUnavailable: 'курс недоступний офлайн', rateStaleSuffix: 'можливо застарів', statsSettingsTitle: 'Налаштування статистики', statsSettingsChartsLabel: 'Видимі діаграми', savingsSettingsTitle: 'Налаштування заощаджень', showSavingsTotalLabel: 'Показувати загальний баланс заощаджень', savingsTotalModeLabel: 'Загальний баланс — валюта', savingsTotalModeMulti: 'Кілька валют', savingsTotalModeSingle: 'Одна валюта', notesSettingsTitle: 'Налаштування нотаток', notesSortLabel: 'Сортування', notesSortUpdated: 'Спочатку нещодавно оновлені', notesSortCreated: 'Спочатку нещодавно створені', notesSortTitle: 'За назвою (А-Я)', showNoteSnippetLabel: 'Показувати текст нотатки в списку', passwordHint: 'Мінімум 6 символів',
     statsCatTitle: 'Витрати за категоріями', statsNoExpenses: 'Немає витрат цього місяця',
     statsTrendTitle: 'Дохід і витрати', statsTrendSub: 'Останні 6 місяців', lastLabel: 'Останні',
@@ -132,7 +132,7 @@ const T = {
     pageError: 'Введи название заметки', pageSaveError: 'Не удалось сохранить. Проверь интернет-соединение',
     confirmTitlePage: 'Удалить страницу?',
     pageNoTitle: 'Без названия',
-    emptyTitle: 'Здесь пока пусто', recentEntriesLabel: 'Последние операции', emptySub: 'Добавь первую запись кнопкой внизу', searchPlaceholder: 'Поиск по заметкам и категориям', searchEmptyTitle: 'Ничего не найдено', searchEmptySub: 'Попробуй другое слово для поиска',
+    emptyTitle: 'Здесь пока пусто', emptySub: 'Добавь первую запись кнопкой внизу', searchPlaceholder: 'Поиск по заметкам и категориям', searchEmptyTitle: 'Ничего не найдено', searchEmptySub: 'Попробуй другое слово для поиска',
     deleteAria: 'Удалить запись', entryMenuAria: 'Действия с записью', menuEdit: 'Редактировать', menuDelete: 'Удалить', toggleCatAria: 'Показать/скрыть категорию', rateAsOf: 'курс НБУ на', rateUnavailable: 'курс недоступен офлайн', rateStaleSuffix: 'возможно устарел', statsSettingsTitle: 'Настройки статистики', statsSettingsChartsLabel: 'Видимые диаграммы', savingsSettingsTitle: 'Настройки сбережений', showSavingsTotalLabel: 'Показывать общий баланс сбережений', savingsTotalModeLabel: 'Общий баланс — валюта', savingsTotalModeMulti: 'Несколько валют', savingsTotalModeSingle: 'Одна валюта', notesSettingsTitle: 'Настройки заметок', notesSortLabel: 'Сортировка', notesSortUpdated: 'Сначала недавно обновлённые', notesSortCreated: 'Сначала недавно созданные', notesSortTitle: 'По названию (А-Я)', showNoteSnippetLabel: 'Показывать текст заметки в списке', passwordHint: 'Минимум 6 символов',
     statsCatTitle: 'Расходы по категориям', statsNoExpenses: 'Нет расходов в этом месяце',
     statsTrendTitle: 'Доход и расходы', statsTrendSub: 'Последние 6 месяцев', lastLabel: 'Последние',
@@ -188,7 +188,7 @@ const T = {
     pageError: 'Wpisz tytuł notatki', pageSaveError: 'Nie udało się zapisać. Sprawdź połączenie z internetem',
     confirmTitlePage: 'Usunąć stronę?',
     pageNoTitle: 'Bez tytułu',
-    emptyTitle: 'Tu jeszcze pusto', recentEntriesLabel: 'Ostatnie operacje', emptySub: 'Dodaj pierwszy wpis przyciskiem poniżej', searchPlaceholder: 'Szukaj w notatkach i kategoriach', searchEmptyTitle: 'Nic nie znaleziono', searchEmptySub: 'Spróbuj innego słowa',
+    emptyTitle: 'Tu jeszcze pusto', emptySub: 'Dodaj pierwszy wpis przyciskiem poniżej', searchPlaceholder: 'Szukaj w notatkach i kategoriach', searchEmptyTitle: 'Nic nie znaleziono', searchEmptySub: 'Spróbuj innego słowa',
     deleteAria: 'Usuń wpis', entryMenuAria: 'Działania na wpisie', menuEdit: 'Edytuj', menuDelete: 'Usuń', toggleCatAria: 'Pokaż/ukryj kategorię', rateAsOf: 'kurs NBU na', rateUnavailable: 'kurs niedostępny offline', rateStaleSuffix: 'może być nieaktualny', statsSettingsTitle: 'Ustawienia statystyk', statsSettingsChartsLabel: 'Widoczne wykresy', savingsSettingsTitle: 'Ustawienia oszczędności', showSavingsTotalLabel: 'Pokazuj łączne saldo oszczędności', savingsTotalModeLabel: 'Łączne saldo — waluta', savingsTotalModeMulti: 'Kilka walut', savingsTotalModeSingle: 'Jedna waluta', notesSettingsTitle: 'Ustawienia notatek', notesSortLabel: 'Sortowanie', notesSortUpdated: 'Najpierw ostatnio zaktualizowane', notesSortCreated: 'Najpierw ostatnio utworzone', notesSortTitle: 'Według nazwy (A-Z)', showNoteSnippetLabel: 'Pokazuj tekst notatki na liście', passwordHint: 'Minimum 6 znaków',
     statsCatTitle: 'Wydatki wg kategorii', statsNoExpenses: 'Brak wydatków w tym miesiącu',
     statsTrendTitle: 'Przychody i wydatki', statsTrendSub: 'Ostatnie 6 miesięcy', lastLabel: 'Ostatnie',
@@ -244,7 +244,7 @@ const T = {
     pageError: 'Enter a note title', pageSaveError: 'Could not save. Check your internet connection',
     confirmTitlePage: 'Delete page?',
     pageNoTitle: 'Untitled',
-    emptyTitle: 'Nothing here yet', recentEntriesLabel: 'Recent activity', emptySub: 'Add your first entry using the button below', searchPlaceholder: 'Search notes and categories', searchEmptyTitle: 'Nothing found', searchEmptySub: 'Try a different search term',
+    emptyTitle: 'Nothing here yet', emptySub: 'Add your first entry using the button below', searchPlaceholder: 'Search notes and categories', searchEmptyTitle: 'Nothing found', searchEmptySub: 'Try a different search term',
     deleteAria: 'Delete entry', entryMenuAria: 'Entry actions', menuEdit: 'Edit', menuDelete: 'Delete', toggleCatAria: 'Show/hide category', rateAsOf: 'NBU rate as of', rateUnavailable: 'rate unavailable offline', rateStaleSuffix: 'may be outdated', statsSettingsTitle: 'Statistics settings', statsSettingsChartsLabel: 'Visible charts', savingsSettingsTitle: 'Savings settings', showSavingsTotalLabel: 'Show total savings balance', savingsTotalModeLabel: 'Total balance currency', savingsTotalModeMulti: 'Multiple currencies', savingsTotalModeSingle: 'Single currency', notesSettingsTitle: 'Notes settings', notesSortLabel: 'Sort by', notesSortUpdated: 'Recently updated first', notesSortCreated: 'Recently created first', notesSortTitle: 'By title (A-Z)', showNoteSnippetLabel: 'Show note text in list', passwordHint: 'At least 6 characters',
     statsCatTitle: 'Expenses by category', statsNoExpenses: 'No expenses this month',
     statsTrendTitle: 'Income & expenses', statsTrendSub: 'Last 6 months', lastLabel: 'Last',
@@ -975,7 +975,6 @@ function applyStaticTranslations() {
   document.getElementById('importCsvBtnLabel').textContent = t('importCsvBtn');
   document.getElementById('importDataDesc').textContent = t('importDataDesc');
   document.getElementById('searchInput').setAttribute('placeholder', t('searchPlaceholder'));
-  document.getElementById('recentHeaderTitle').textContent = t('recentEntriesLabel');
   document.getElementById('expenseCatManageLabel').textContent = t('expenseCatManageLabel');
   document.getElementById('incomeCatManageLabel').textContent = t('incomeCatManageLabel');
   document.getElementById('newExpenseCatInput').placeholder = t('newCatPlaceholder');
@@ -2434,16 +2433,29 @@ function selectTab(tabKey) {
   const isNotes = tabKey === 'notes';
   document.getElementById('balanceSummary').style.display = tabKey === 'entries' ? 'block' : 'none';
   document.getElementById('header').classList.toggle('slim', tabKey !== 'entries');
+  // Відколи місяць і налаштування переїхали, шапці лишилось тільки двоє
+  // мешканців: баланс у записах і кнопка «назад» у перегляді нотатки. Без
+  // жодного з них вона перетворювалась на порожню білу смугу.
+  document.getElementById('header').style.display = (tabKey === 'entries' || isPage) ? '' : 'none';
   document.getElementById('entriesTab').style.display = tabKey === 'entries' ? 'block' : 'none';
-  document.getElementById('recentHeader').style.display = tabKey === 'entries' ? 'flex' : 'none';
+  // Рядок тепер несе не заголовок, а місяць, тож потрібен і в статистиці.
+  // Пошук лишається тільки в записах — шукати в діаграмі нема чого.
+  const showsMonth = tabKey === 'entries' || tabKey === 'stats';
+  const showsSearch = tabKey === 'entries';
+  document.getElementById('recentHeader').style.display = showsMonth ? 'flex' : 'none';
+  document.getElementById('searchToggleBtn').style.display = showsSearch ? 'flex' : 'none';
+  // Компенсація ширини пошуку потрібна, тільки поки він на місці — інакше
+  // місяць з'їжджав би праворуч.
+  document.getElementById('recentHeader').classList.toggle('with-search', showsSearch);
   if (tabKey !== 'entries') closeSearchBar();
   document.getElementById('statsTab').style.display = tabKey === 'stats' ? 'block' : 'none';
   document.getElementById('savingsTab').style.display = isSavings ? 'block' : 'none';
   document.getElementById('notesTab').style.display = isNotes ? 'block' : 'none';
   document.getElementById('pageViewTab').style.display = isPage ? 'block' : 'none';
   document.getElementById('categoriesBtn').style.display = isPage ? 'none' : 'flex';
-  document.getElementById('monthNavHeader').classList.toggle('show', tabKey === 'entries' || tabKey === 'stats');
+  document.getElementById('monthNavHeader').classList.toggle('show', showsMonth);
   document.getElementById('backToEntriesBtn').classList.toggle('show', isPage);
+  document.getElementById('headerTopRow').classList.toggle('show', isPage);
   document.getElementById('categoriesBtn').setAttribute('aria-label',
     tabKey === 'stats' ? t('statsSettingsTitle') : tabKey === 'savings' ? t('savingsSettingsTitle') : tabKey === 'notes' ? t('notesSettingsTitle') : t('settingsTitle'));
   updateHeaderSectionTitle();
