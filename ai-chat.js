@@ -33,6 +33,7 @@
       workout: (a) => `Тренування: ${a.exercises.join(', ')}${a.name ? ' · ' + a.name : ''}`,
       goal: (a) => `Ціль: ${a.title}${a.targetDate ? ' · до ' + a.targetDate : ''}`,
       checkin: (a) => `Відмічено: ${a.title}`,
+      progress: (a) => `Прогрес: ${a.title} — ${a.current} / ${a.target}${a.unit ? ' ' + a.unit : ''}`,
       milestone: (a) => `Віха: ${a.title}${a.goal ? ' · ' + a.goal : ''}`,
       savingsGoal: (a) => `Скарбничка: ${a.name}`,
       savings: (a) => `${a.type === 'withdraw' ? 'Знято' : 'Відкладено'}: ${a.amount} ${a.currency || ''} · ${a.goal}`.trim(),
@@ -64,6 +65,7 @@
       workout: (a) => `Тренировка: ${a.exercises.join(', ')}${a.name ? ' · ' + a.name : ''}`,
       goal: (a) => `Цель: ${a.title}${a.targetDate ? ' · до ' + a.targetDate : ''}`,
       checkin: (a) => `Отмечено: ${a.title}`,
+      progress: (a) => `Прогресс: ${a.title} — ${a.current} / ${a.target}${a.unit ? ' ' + a.unit : ''}`,
       milestone: (a) => `Веха: ${a.title}${a.goal ? ' · ' + a.goal : ''}`,
       savingsGoal: (a) => `Копилка: ${a.name}`,
       savings: (a) => `${a.type === 'withdraw' ? 'Снято' : 'Отложено'}: ${a.amount} ${a.currency || ''} · ${a.goal}`.trim(),
@@ -95,6 +97,7 @@
       workout: (a) => `Trening: ${a.exercises.join(', ')}${a.name ? ' · ' + a.name : ''}`,
       goal: (a) => `Cel: ${a.title}${a.targetDate ? ' · do ' + a.targetDate : ''}`,
       checkin: (a) => `Odhaczono: ${a.title}`,
+      progress: (a) => `Postęp: ${a.title} — ${a.current} / ${a.target}${a.unit ? ' ' + a.unit : ''}`,
       milestone: (a) => `Kamień milowy: ${a.title}${a.goal ? ' · ' + a.goal : ''}`,
       savingsGoal: (a) => `Skarbonka: ${a.name}`,
       savings: (a) => `${a.type === 'withdraw' ? 'Wypłacono' : 'Odłożono'}: ${a.amount} ${a.currency || ''} · ${a.goal}`.trim(),
@@ -126,6 +129,7 @@
       workout: (a) => `Workout: ${a.exercises.join(', ')}${a.name ? ' · ' + a.name : ''}`,
       goal: (a) => `Goal: ${a.title}${a.targetDate ? ' · by ' + a.targetDate : ''}`,
       checkin: (a) => `Checked in: ${a.title}`,
+      progress: (a) => `Progress: ${a.title} — ${a.current} / ${a.target}${a.unit ? ' ' + a.unit : ''}`,
       milestone: (a) => `Milestone: ${a.title}${a.goal ? ' · ' + a.goal : ''}`,
       savingsGoal: (a) => `Savings pot: ${a.name}`,
       savings: (a) => `${a.type === 'withdraw' ? 'Withdrew' : 'Set aside'}: ${a.amount} ${a.currency || ''} · ${a.goal}`.trim(),
@@ -539,6 +543,7 @@
     if (a.kind === 'workout_added') return t('workout')(a);
     if (a.kind === 'goal_added') return t('goal')(a);
     if (a.kind === 'goal_checkin') return t('checkin')(a);
+    if (a.kind === 'goal_progress') return t('progress')(a);
     if (a.kind === 'milestone_done') return t('milestone')(a);
     if (a.kind === 'savings_goal_added') return t('savingsGoal')(a);
     if (a.kind === 'savings_entry') return t('savings')(a);

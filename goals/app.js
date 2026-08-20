@@ -37,7 +37,10 @@ const T = {
     cat_relationships: 'Стосунки', cat_travel: 'Подорожі', cat_creativity: 'Творчість', cat_other: 'Інше',
     whyLabel: 'Навіщо тобі це?', whyPlaceholder: 'Чому ця ціль важлива саме для тебе (необов’язково)',
     targetDateLabel: 'Дедлайн (необов’язково)',
-    milestonesLabel: 'Віхи', milestonePlaceholder: 'Наприклад: пройти перші 5 уроків',
+    milestonesLabel: 'Віхи', targetValueLabel: 'Числова мета (необовʼязково)',
+    targetValueHint: 'Якщо задати — прогрес рахується числом, а не віхами.',
+    targetValuePlaceholder: '10', unitPlaceholder: 'км',
+    addProgressPlaceholder: '+ скільки', addProgressBtn: 'Додати', milestonePlaceholder: 'Наприклад: пройти перші 5 уроків',
     addMilestoneBtn: '+ Додати віху',
     titleRequiredError: 'Введи назву цілі',
     saveBtn: 'Зберегти', deleteBtn: 'Видалити', cancelBtn: 'Скасувати', deleteConfirmBtn: 'Видалити',
@@ -85,7 +88,10 @@ const T = {
     cat_relationships: 'Отношения', cat_travel: 'Путешествия', cat_creativity: 'Творчество', cat_other: 'Другое',
     whyLabel: 'Зачем тебе это?', whyPlaceholder: 'Почему эта цель важна именно для тебя (необязательно)',
     targetDateLabel: 'Дедлайн (необязательно)',
-    milestonesLabel: 'Вехи', milestonePlaceholder: 'Например: пройти первые 5 уроков',
+    milestonesLabel: 'Вехи', targetValueLabel: 'Числовая цель (необязательно)',
+    targetValueHint: 'Если задать — прогресс считается числом, а не вехами.',
+    targetValuePlaceholder: '10', unitPlaceholder: 'км',
+    addProgressPlaceholder: '+ сколько', addProgressBtn: 'Добавить', milestonePlaceholder: 'Например: пройти первые 5 уроков',
     addMilestoneBtn: '+ Добавить веху',
     titleRequiredError: 'Введи название цели',
     saveBtn: 'Сохранить', deleteBtn: 'Удалить', cancelBtn: 'Отмена', deleteConfirmBtn: 'Удалить',
@@ -133,7 +139,10 @@ const T = {
     cat_relationships: 'Relacje', cat_travel: 'Podróże', cat_creativity: 'Kreatywność', cat_other: 'Inne',
     whyLabel: 'Po co ci to?', whyPlaceholder: 'Dlaczego ten cel jest dla ciebie ważny (opcjonalnie)',
     targetDateLabel: 'Termin (opcjonalnie)',
-    milestonesLabel: 'Kamienie milowe', milestonePlaceholder: 'Np.: ukończyć pierwsze 5 lekcji',
+    milestonesLabel: 'Kamienie milowe', targetValueLabel: 'Cel liczbowy (opcjonalnie)',
+    targetValueHint: 'Jeśli podasz — postęp liczy się liczbą, a nie kamieniami milowymi.',
+    targetValuePlaceholder: '10', unitPlaceholder: 'km',
+    addProgressPlaceholder: '+ ile', addProgressBtn: 'Dodaj', milestonePlaceholder: 'Np.: ukończyć pierwsze 5 lekcji',
     addMilestoneBtn: '+ Dodaj kamień milowy',
     titleRequiredError: 'Wpisz nazwę celu',
     saveBtn: 'Zapisz', deleteBtn: 'Usuń', cancelBtn: 'Anuluj', deleteConfirmBtn: 'Usuń',
@@ -181,7 +190,10 @@ const T = {
     cat_relationships: 'Relationships', cat_travel: 'Travel', cat_creativity: 'Creativity', cat_other: 'Other',
     whyLabel: 'Why do you want this?', whyPlaceholder: 'Why this goal matters to you (optional)',
     targetDateLabel: 'Deadline (optional)',
-    milestonesLabel: 'Milestones', milestonePlaceholder: 'E.g.: finish the first 5 lessons',
+    milestonesLabel: 'Milestones', targetValueLabel: 'Numeric target (optional)',
+    targetValueHint: 'Set it and progress is counted by the number, not by milestones.',
+    targetValuePlaceholder: '10', unitPlaceholder: 'km',
+    addProgressPlaceholder: '+ how much', addProgressBtn: 'Add', milestonePlaceholder: 'E.g.: finish the first 5 lessons',
     addMilestoneBtn: '+ Add milestone',
     titleRequiredError: 'Enter a goal title',
     saveBtn: 'Save', deleteBtn: 'Delete', cancelBtn: 'Cancel', deleteConfirmBtn: 'Delete',
@@ -286,6 +298,10 @@ function applyTranslations() {
   document.getElementById('goalWhyInput').placeholder = t('whyPlaceholder');
   document.getElementById('targetDateLabel').textContent = t('targetDateLabel');
   document.getElementById('milestonesLabel').textContent = t('milestonesLabel');
+  document.getElementById('targetValueLabel').textContent = t('targetValueLabel');
+  document.getElementById('targetValueHint').textContent = t('targetValueHint');
+  document.getElementById('goalTargetValue').placeholder = t('targetValuePlaceholder');
+  document.getElementById('goalUnitInput').placeholder = t('unitPlaceholder');
   document.getElementById('addMilestoneBtn').textContent = t('addMilestoneBtn');
   document.getElementById('deleteGoalBtn').textContent = t('deleteBtn');
   document.getElementById('goalSubmitBtn').textContent = t('saveBtn');
@@ -455,11 +471,34 @@ function subscribeToGoals(uid) {
 }
 
 // ---- Обчислення (завжди похідні від живих даних, нічого не кешується) ----
+// Прогрес має два джерела, і числове важливіше: якщо людина задала мету
+// «10 км», відсоток має рахуватись від пройденого, а не від того, скільки
+// віх вона встигла придумати. Віхи лишаються для цілей, які числом не
+// міряються — «вивчити польську».
 function progressOf(goal) {
+  const target = Number(goal.targetValue);
+  if (Number.isFinite(target) && target > 0) {
+    const current = Number(goal.currentValue) || 0;
+    return {
+      kind: 'value',
+      current,
+      target,
+      unit: goal.unit || '',
+      // Понад 100% не показуємо: смужка не вміє бути повнішою за повну,
+      // а сам перебіг видно в числах поруч.
+      pct: Math.min(100, Math.round((current / target) * 100)),
+    };
+  }
   const milestones = goal.milestones || [];
   if (!milestones.length) return null;
   const done = milestones.filter((m) => m.done).length;
-  return { done, total: milestones.length, pct: Math.round((done / milestones.length) * 100) };
+  return { kind: 'milestones', done, total: milestones.length, pct: Math.round((done / milestones.length) * 100) };
+}
+
+// Число без хвоста нулів: 6.4, 10, 0.5 — а не 6.40 і не 10.00.
+function fmtValue(n) {
+  const num = Number(n) || 0;
+  return String(Math.round(num * 100) / 100);
 }
 function computeStreak(checkins) {
   if (!checkins || !checkins.length) return 0;
@@ -500,7 +539,7 @@ function computeBadges(list) {
   if (list.some((g) => computeStreak(g.checkins) >= 7)) badges.push('badge_streak7');
   if (list.filter((g) => g.status === 'done').length >= 1) badges.push('badge_firstDone');
   if (list.some((g) => (g.checkins || []).length >= 1)) badges.push('badge_firstStep');
-  if (list.some((g) => { const p = progressOf(g); return p && p.total > 0 && p.pct === 100; })) badges.push('badge_perfect');
+  if (list.some((g) => { const p = progressOf(g); return p && p.pct === 100; })) badges.push('badge_perfect');
   return badges;
 }
 
@@ -565,7 +604,11 @@ function goalCardHtml(goal) {
     const activeOverdue = overdue && goal.status === 'active';
     metaParts.push(`<span class="goal-card-deadline${activeOverdue ? ' overdue' : ''}">${escapeHtml(overdue ? t('overdueLabel') : t('daysLeftLabel', days))}</span>`);
   }
-  if (prog) metaParts.push(`<span>${prog.done}/${prog.total} ${escapeHtml(t('milestonesCountSuffix'))}</span>`);
+  if (prog && prog.kind === 'value') {
+    metaParts.push(`<span>${escapeHtml(fmtValue(prog.current))} / ${escapeHtml(fmtValue(prog.target))} ${escapeHtml(prog.unit)}</span>`);
+  } else if (prog) {
+    metaParts.push(`<span>${prog.done}/${prog.total} ${escapeHtml(t('milestonesCountSuffix'))}</span>`);
+  }
   const statusBadge = goal.status !== 'active'
     ? `<span class="goal-card-status-badge">${escapeHtml(goal.status === 'done' ? t('statusDone') : t('statusArchived'))}</span>`
     : '';
@@ -631,13 +674,42 @@ function renderGoalDetail(goal) {
     ? `<div class="why-block">“${escapeHtml(goal.why)}”</div>` : '';
 
   const prog = progressOf(goal);
-  document.getElementById('detailProgressBlock').innerHTML = prog ? `
-    <div class="progress-ring" style="--pct:${prog.pct}">
-      <div class="progress-ring-value">
-        <div class="progress-ring-pct">${prog.pct}%</div>
-        <div class="progress-ring-frac">${prog.done}/${prog.total}</div>
-      </div>
-    </div>` : '';
+  const progressEl = document.getElementById('detailProgressBlock');
+  if (prog && prog.kind === 'value') {
+    // Числова мета показується смужкою, а не кільцем: у кільце не влазить
+    // «6.4 / 10 км», а саме ці числа тут головні.
+    progressEl.innerHTML = `
+      <div class="value-progress">
+        <div class="value-progress-head">
+          <span class="value-progress-now">${escapeHtml(fmtValue(prog.current))} / ${escapeHtml(fmtValue(prog.target))} ${escapeHtml(prog.unit)}</span>
+          <span class="value-progress-pct">${prog.pct}%</span>
+        </div>
+        <div class="value-progress-bar"><div class="value-progress-fill" style="width:${prog.pct}%"></div></div>
+        <div class="value-add-row">
+          <input type="number" id="valueAddInput" inputmode="decimal" step="any" placeholder="${escapeHtml(t('addProgressPlaceholder'))}">
+          <button type="button" class="value-add-btn" id="valueAddBtn">${escapeHtml(t('addProgressBtn'))}</button>
+        </div>
+      </div>`;
+    const input = document.getElementById('valueAddInput');
+    const commit = () => {
+      const delta = parseFloat(input.value);
+      if (!Number.isFinite(delta) || delta === 0) return;
+      input.value = '';
+      addGoalProgress(goal.id, delta);
+    };
+    document.getElementById('valueAddBtn').addEventListener('click', commit);
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); commit(); } });
+  } else if (prog) {
+    progressEl.innerHTML = `
+      <div class="progress-ring" style="--pct:${prog.pct}">
+        <div class="progress-ring-value">
+          <div class="progress-ring-pct">${prog.pct}%</div>
+          <div class="progress-ring-frac">${prog.done}/${prog.total}</div>
+        </div>
+      </div>`;
+  } else {
+    progressEl.innerHTML = '';
+  }
 
   document.getElementById('detailJourneyBlock').innerHTML = journeyHtml(goal);
   wireJourneyEvents(goal);
@@ -658,6 +730,11 @@ function renderGoalDetail(goal) {
 function journeyHtml(goal) {
   const milestones = goal.milestones || [];
   if (!milestones.length) {
+    // У числової цілі прогрес уже показує смужка, тож віхи там —
+    // необовʼязковий додаток. Нагадувати про порожній список нема сенсу:
+    // це не прогалина, а свідомий вибір іншого способу міряти шлях.
+    const prog = progressOf(goal);
+    if (prog && prog.kind === 'value') return '';
     return `<div class="empty-state" style="padding:24px 10px;"><div>${escapeHtml(t('noMilestonesYet'))}</div></div>`;
   }
   const nextIdx = milestones.findIndex((m) => !m.done);
@@ -715,6 +792,17 @@ document.getElementById('journalAddBtn').addEventListener('click', () => {
 // ---- Дії над ціллю: усі — повний read-modify-write масиву з живого
 // стану `goals` (Firestore SDK не вміє точково оновити елемент масиву
 // об'єктів), і серверний updatedAt при кожному записі. ----
+// Додаємо, а не задаємо: людина думає «пробіг ще 2 км», а не «тепер у мене
+// 6.4». Нижче нуля не опускаємось — відʼємний пробіг ні про що не каже.
+async function addGoalProgress(goalId, delta) {
+  const goal = goals.find((g) => g.id === goalId);
+  if (!goal || !auth.currentUser) return;
+  const next = Math.max(0, Math.round(((Number(goal.currentValue) || 0) + delta) * 100) / 100);
+  await db.collection('users').doc(auth.currentUser.uid).collection('goals').doc(goalId).update({
+    currentValue: next, updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+  }).catch((err) => console.error('addGoalProgress:', err));
+}
+
 async function toggleMilestone(goalId, milestoneId) {
   const goal = goals.find((g) => g.id === goalId);
   if (!goal || !auth.currentUser) return;
@@ -806,6 +894,9 @@ function openGoalForm(existingGoal) {
   document.getElementById('goalTitleInput').value = existingGoal ? existingGoal.title : '';
   document.getElementById('goalWhyInput').value = existingGoal ? existingGoal.why || '' : '';
   document.getElementById('goalTargetDate').value = existingGoal ? existingGoal.targetDate || '' : '';
+  document.getElementById('goalTargetValue').value =
+    existingGoal && existingGoal.targetValue != null ? existingGoal.targetValue : '';
+  document.getElementById('goalUnitInput').value = existingGoal ? existingGoal.unit || '' : '';
   formCategory = existingGoal ? existingGoal.category || 'other' : 'other';
   formMilestones = existingGoal ? (existingGoal.milestones || []).map((m) => ({ ...m })) : [];
   renderCategoryPicker();
@@ -838,11 +929,17 @@ document.getElementById('goalForm').addEventListener('submit', async (e) => {
     .filter((m) => m.title)
     .slice(0, 50);
 
+  const targetRaw = parseFloat(document.getElementById('goalTargetValue').value);
+  const targetValue = Number.isFinite(targetRaw) && targetRaw > 0 ? targetRaw : null;
+
   const payload = {
     title,
     category: CATEGORIES.includes(formCategory) ? formCategory : 'other',
     why: document.getElementById('goalWhyInput').value.trim(),
     targetDate: document.getElementById('goalTargetDate').value || null,
+    targetValue,
+    // Одиниця без мети ні про що не каже, тож тримаються разом.
+    unit: targetValue ? document.getElementById('goalUnitInput').value.trim().slice(0, 20) : '',
     milestones: cleanMilestones,
     updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
   };
@@ -857,6 +954,7 @@ document.getElementById('goalForm').addEventListener('submit', async (e) => {
       await col.add({
         ...payload,
         status: 'active',
+        currentValue: 0,
         checkins: [],
         journal: [],
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),

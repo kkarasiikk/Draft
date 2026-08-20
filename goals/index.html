@@ -339,6 +339,24 @@
   .milestone-remove-btn{flex-shrink:0;width:34px;height:34px;border-radius:8px;border:1px solid var(--border);
     background:transparent;color:var(--ink-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;}
   .milestone-remove-btn:hover{border-color:var(--expense);color:var(--expense);}
+  .target-row{display:flex;gap:8px;}
+  .target-row input{margin:0;}
+  .target-row input[type=number]{flex:2;min-width:0;}
+  .target-row input[type=text]{flex:1;min-width:0;}
+  .field-hint{font-size:12px;color:var(--ink-muted);margin:6px 0 4px;line-height:1.4;}
+  /* Смужка числового прогресу на екрані цілі: та сама мова, що й у міні-смужці
+     на картці, але більша й з підписом. */
+  .value-progress{margin:4px 0 14px;}
+  .value-progress-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:8px;}
+  .value-progress-now{font-family:'Inter',sans-serif;font-size:22px;font-weight:800;color:var(--ink);letter-spacing:-0.02em;}
+  .value-progress-pct{font-size:14px;font-weight:700;color:var(--accent);}
+  .value-progress-bar{height:10px;border-radius:99px;background:var(--control-bg);overflow:hidden;}
+  .value-progress-fill{height:100%;border-radius:99px;background:var(--accent);transition:width .3s ease;}
+  .value-add-row{display:flex;gap:8px;margin-top:10px;}
+  .value-add-row input{flex:1;min-width:0;margin:0;}
+  .value-add-btn{flex-shrink:0;border:none;border-radius:12px;background:var(--accent);color:#fff;cursor:pointer;
+    font-family:'Inter',sans-serif;font-size:14px;font-weight:700;padding:0 16px;}
+  .value-add-btn:disabled{opacity:.5;cursor:default;}
   .add-milestone-btn{width:100%;border:1px dashed var(--border);background:transparent;color:var(--accent);
     font-family:'Inter',sans-serif;font-size:14px;font-weight:600;padding:10px 0;border-radius:8px;cursor:pointer;margin-bottom:16px;}
   .add-milestone-btn:hover{border-color:var(--accent);}
@@ -524,6 +542,13 @@
 
       <label class="field-label" id="targetDateLabel">Дедлайн (необовʼязково)</label>
       <input type="date" id="goalTargetDate" data-dp-native data-dp-clearable>
+
+      <label class="field-label" id="targetValueLabel">Числова мета (необовʼязково)</label>
+      <div class="target-row">
+        <input type="number" id="goalTargetValue" inputmode="decimal" step="any" min="0" placeholder="10">
+        <input type="text" id="goalUnitInput" maxlength="20" placeholder="км">
+      </div>
+      <div class="field-hint" id="targetValueHint">Якщо задати — прогрес рахується числом, а не віхами.</div>
 
       <label class="field-label" id="milestonesLabel">Віхи</label>
       <div id="milestonesEditor"></div>

@@ -445,6 +445,75 @@ describe("executeTool", () => {
       ]);
     });
 
+    // ---- Числова мета ----
+    test("add_goal записує числову мету й починає з нуля", async () => {
+      const r = await ai.executeTool("uid1", "add_goal",
+        { title: "Пробігти 10 км", targetValue: 10, unit: "км" }, ctx);
+      const g = (await mockCurrent.collection("users").doc("uid1").collection("goals").doc(r.output.id).get()).data();
+      expect(g).toMatchObject({ targetValue: 10, unit: "км", currentValue: 0 });
+    });
+
+    // Одиниця без числа — це підпис ні до чого: смужки прогресу не буде,
+    // а «км» у картці лише збиватиме з пантелику.
+    test("одиниця без числової мети не зберігається", async () => {
+      const r = await ai.executeTool("uid1", "add_goal", { title: "Ціль", unit: "км" }, ctx);
+      const g = (await mockCurrent.collection("users").doc("uid1").collection("goals").doc(r.output.id).get()).data();
+      expect(g).toMatchObject({ targetValue: null, unit: "", currentValue: 0 });
+    });
+
+    test("нуль і відʼємна мета — те саме, що її немає", async () => {
+      const zero = await ai.executeTool("uid1", "add_goal", { title: "А", targetValue: 0 }, ctx);
+      const minus = await ai.executeTool("uid1", "add_goal", { title: "Б", targetValue: -5 }, ctx);
+      const col = mockCurrent.collection("users").doc("uid1").collection("goals");
+      expect((await col.doc(zero.output.id).get()).data().targetValue).toBe(null);
+      expect((await col.doc(minus.output.id).get()).data().targetValue).toBe(null);
+    });
+
+    // «Пробіг ще три кілометри» — це додати три, а не поставити три.
+    test("goal_progress додає до пройденого, а не замінює його", async () => {
+      const add = await ai.executeTool("uid1", "add_goal",
+        { title: "Марафон", targetValue: 10, unit: "км" }, ctx);
+      await ai.executeTool("uid1", "goal_progress", { id: add.output.id, add: 6.4 }, ctx);
+      const r = await ai.executeTool("uid1", "goal_progress", { id: add.output.id, add: 2.1 }, ctx);
+      expect(r.output).toMatchObject({ ok: true, current: 8.5, target: 10, unit: "км", pct: 85 });
+      const g = (await mockCurrent.collection("users").doc("uid1").collection("goals").doc(add.output.id).get()).data();
+      expect(g.currentValue).toBe(8.5);
+    });
+
+    test("відʼємне add зменшує, але нижче нуля не опускає", async () => {
+      const add = await ai.executeTool("uid1", "add_goal", { title: "Марафон", targetValue: 10 }, ctx);
+      await ai.executeTool("uid1", "goal_progress", { id: add.output.id, add: 3 }, ctx);
+      const r = await ai.executeTool("uid1", "goal_progress", { id: add.output.id, add: -8 }, ctx);
+      expect(r.output.current).toBe(0);
+    });
+
+    // Смужка не буває довшою за саму себе, навіть коли мету перевиконано.
+    test("перевиконана мета лишається сотнею відсотків", async () => {
+      const add = await ai.executeTool("uid1", "add_goal", { title: "Марафон", targetValue: 10 }, ctx);
+      const r = await ai.executeTool("uid1", "goal_progress", { id: add.output.id, add: 50 }, ctx);
+      expect(r.output).toMatchObject({ current: 50, pct: 100 });
+    });
+
+    test("goal_progress не працює без числової мети й без числа", async () => {
+      const plain = await ai.executeTool("uid1", "add_goal", { title: "Вивчити польську" }, ctx);
+      expect((await ai.executeTool("uid1", "goal_progress", { id: plain.output.id, add: 3 }, ctx)).isError).toBe(true);
+
+      const num = await ai.executeTool("uid1", "add_goal", { title: "Марафон", targetValue: 10 }, ctx);
+      expect((await ai.executeTool("uid1", "goal_progress", { id: num.output.id, add: 0 }, ctx)).isError).toBe(true);
+      expect((await ai.executeTool("uid1", "goal_progress", { id: num.output.id, add: "трохи" }, ctx)).isError).toBe(true);
+      expect((await ai.executeTool("uid1", "goal_progress", { id: "вигаданий", add: 3 }, ctx)).isError).toBe(true);
+      const g = (await mockCurrent.collection("users").doc("uid1").collection("goals").doc(num.output.id).get()).data();
+      expect(g.currentValue).toBe(0);
+    });
+
+    test("goals_progress віддає числову мету разом із пройденим", async () => {
+      const add = await ai.executeTool("uid1", "add_goal",
+        { title: "Марафон", targetValue: 10, unit: "км" }, ctx);
+      await ai.executeTool("uid1", "goal_progress", { id: add.output.id, add: 6.4 }, ctx);
+      const r = await ai.executeTool("uid1", "goals_progress", {}, ctx);
+      expect(r.output.goals[0]).toMatchObject({ targetValue: 10, currentValue: 6.4, unit: "км" });
+    });
+
     test("неіснуючі id цілі чи віхи повертають помилку, а не мовчазний успіх", async () => {
       const ref = await seedGoal();
       expect((await ai.executeTool("uid1", "goal_checkin", { id: "вигаданий" }, ctx)).isError).toBe(true);
@@ -599,6 +668,31 @@ describe("executeTool", () => {
       expect(g.journal).toEqual([{ id: "j1", text: "перший забіг" }]);
       expect(g.milestones.map((m) => [m.title, m.done]))
         .toEqual([["10 км", true], ["21 км", false], ["30 км", false]]);
+    });
+
+    // Пройдені кілометри — така сама історія, як чекіни: правка формулювання
+    // мети не має її обнуляти.
+    test("edit_goal зберігає пройдене й уміє змінити саму мету", async () => {
+      const add = await ai.executeTool("uid1", "add_goal",
+        { title: "Марафон", targetValue: 10, unit: "км" }, ctx);
+      await ai.executeTool("uid1", "goal_progress", { id: add.output.id, add: 6.4 }, ctx);
+
+      await ai.executeTool("uid1", "edit_goal", { id: add.output.id, title: "Півмарафон" }, ctx);
+      const col = mockCurrent.collection("users").doc("uid1").collection("goals");
+      expect((await col.doc(add.output.id).get()).data())
+        .toMatchObject({ title: "Півмарафон", targetValue: 10, unit: "км", currentValue: 6.4 });
+
+      await ai.executeTool("uid1", "edit_goal", { id: add.output.id, targetValue: 21, unit: "км" }, ctx);
+      expect((await col.doc(add.output.id).get()).data())
+        .toMatchObject({ targetValue: 21, currentValue: 6.4 });
+    });
+
+    test("edit_goal прибирає числову мету разом із одиницею", async () => {
+      const add = await ai.executeTool("uid1", "add_goal",
+        { title: "Марафон", targetValue: 10, unit: "км" }, ctx);
+      await ai.executeTool("uid1", "edit_goal", { id: add.output.id, targetValue: null }, ctx);
+      const g = (await mockCurrent.collection("users").doc("uid1").collection("goals").doc(add.output.id).get()).data();
+      expect(g).toMatchObject({ targetValue: null, unit: "" });
     });
 
     test("edit_goal міняє статус, не чіпаючи решти", async () => {

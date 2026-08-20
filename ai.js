@@ -261,6 +261,8 @@ const tools = [
         },
         why: { type: "string", description: "Навіщо це людині — її ж словами (необов'язково)" },
         targetDate: { type: "string", description: "Дедлайн YYYY-MM-DD (необов'язково)" },
+        targetValue: { type: "number", description: "Числова мета, якщо ціль вимірювана: 10 для «пробігти 10 км»" },
+        unit: { type: "string", description: "Одиниця до targetValue: км, книг, €. Без targetValue не має сенсу" },
         milestones: {
           type: "array",
           description: "Проміжні кроки, по порядку (необов'язково)",
@@ -268,6 +270,20 @@ const tools = [
         },
       },
       required: ["title"],
+    },
+  },
+  {
+    name: "goal_progress",
+    description:
+      "Додати прогрес до вимірюваної цілі: «пробіг ще 3 км» -> add 3. Число ДОДАЄТЬСЯ до вже пройденого, " +
+      "а не замінює його. id бери з goals_progress; працює лише для цілей, у яких задана числова мета.",
+    input_schema: {
+      type: "object",
+      properties: {
+        id: { type: "string", description: "id цілі з goals_progress" },
+        add: { type: "number", description: "Скільки додати; відʼємне число зменшує" },
+      },
+      required: ["id", "add"],
     },
   },
   {
@@ -423,6 +439,8 @@ const tools = [
         category: { type: "string", enum: GOAL_CATEGORIES },
         why: { type: "string" },
         targetDate: { type: "string", description: "YYYY-MM-DD" },
+        targetValue: { type: "number", description: "Числова мета; null прибирає її" },
+        unit: { type: "string", description: "Одиниця до targetValue" },
         status: { type: "string", enum: ["active", "done", "archived"] },
         milestones: { type: "array", items: { type: "string" }, description: "Повний новий список віх" },
       },
@@ -513,6 +531,7 @@ async function executeTool(uid, name, input, ctx) {
   if (name === "edit_task") return editTask(uid, input);
   if (name === "edit_workout") return editWorkout(uid, input, ctx);
   if (name === "edit_goal") return editGoal(uid, input);
+  if (name === "goal_progress") return goalProgress(uid, input);
   if (name === "goal_checkin") return goalCheckin(uid, input);
   if (name === "complete_milestone") return completeMilestone(uid, input);
 
@@ -978,7 +997,7 @@ async function editGoal(uid, input) {
   const found = await loadForEdit(uid, "goals", input.id, "ціль не знайдена");
   if (found.error) return found.error;
 
-  const patch = pickPatch(input, ["title", "category", "why", "targetDate", "status", "milestones"]);
+  const patch = pickPatch(input, ["title", "category", "why", "targetDate", "targetValue", "unit", "status", "milestones"]);
   if (!Object.keys(patch).length) return { output: { ok: false, error: "нічого міняти" }, isError: true };
 
   const merged = { ...found.data, ...patch };
@@ -996,6 +1015,9 @@ async function editGoal(uid, input) {
   const value = {
     ...result.value,
     status: ["active", "done", "archived"].includes(patch.status) ? patch.status : (found.data.status || "active"),
+    // Пройдене — це факт, а не налаштування: правка формулювання чи дедлайну
+    // не має обнуляти те, що людина вже зробила.
+    currentValue: Number(found.data.currentValue) || 0,
     milestones,
     checkins: found.data.checkins || [],
     journal: found.data.journal || [],
@@ -1018,6 +1040,8 @@ function sanitizeGoalInput(input) {
   if (!title) return { error: "title обов'язковий" };
 
   const isDate = (v) => typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v);
+  const rawTarget = Number(input.targetValue);
+  const targetValue = Number.isFinite(rawTarget) && rawTarget > 0 ? Math.round(rawTarget * 100) / 100 : null;
   const milestones = (Array.isArray(input.milestones) ? input.milestones : [])
     .map((m) => (typeof m === "string" ? m : (m && m.title)))
     .map((titleText) => (typeof titleText === "string" ? titleText.trim().slice(0, 200) : ""))
@@ -1031,6 +1055,10 @@ function sanitizeGoalInput(input) {
       category: GOAL_CATEGORIES.includes(input.category) ? input.category : "other",
       why: typeof input.why === "string" ? input.why.trim().slice(0, 1000) : "",
       targetDate: isDate(input.targetDate) ? input.targetDate : null,
+      targetValue: targetValue,
+      // Одиниця без числової мети ні про що не каже, тож живе тільки з нею.
+      unit: targetValue ? (typeof input.unit === "string" ? input.unit.trim().slice(0, 20) : "") : "",
+      currentValue: Number.isFinite(Number(input.currentValue)) ? Math.max(0, Number(input.currentValue)) : 0,
       status: "active",
       milestones,
       checkins: [],
@@ -1063,6 +1091,28 @@ async function addGoal(uid, input) {
 // викликати інструмент двічі (наприклад, не розпізнавши, що вже зробила це
 // в попередньому раунді), і чекін від цього не має задвоїтись чи зникнути —
 // тому тут саме «поставити», а не «перемкнути», як у кнопці на сторінці.
+// Додаємо, а не задаємо: людина каже «пробіг ще три кілометри», а не «тепер
+// у мене 9». Нижче нуля не опускаємось.
+async function goalProgress(uid, input) {
+  const found = await loadForEdit(uid, "goals", input.id, "ціль не знайдена");
+  if (found.error) return found.error;
+
+  const target = Number(found.data.targetValue);
+  if (!Number.isFinite(target) || target <= 0) {
+    return { output: { ok: false, error: "у цієї цілі немає числової мети" }, isError: true };
+  }
+  const delta = Number(input.add);
+  if (!Number.isFinite(delta) || delta === 0) {
+    return { output: { ok: false, error: "add має бути числом, відмінним від нуля" }, isError: true };
+  }
+  const current = Math.max(0, Math.round(((Number(found.data.currentValue) || 0) + delta) * 100) / 100);
+  await found.ref.update({ currentValue: current, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
+  return {
+    output: { ok: true, current, target, unit: found.data.unit || "", pct: Math.min(100, Math.round((current / target) * 100)) },
+    action: { kind: "goal_progress", title: found.data.title || "", current, target, unit: found.data.unit || "" },
+  };
+}
+
 async function goalCheckin(uid, input) {
   const id = typeof input.id === "string" ? input.id : "";
   const ref = userCol(uid, "goals").doc(id);
@@ -1129,6 +1179,9 @@ async function goalsProgress(uid) {
           milestones: milestones.map((m) => ({ id: m.id, title: m.title || "", done: !!m.done })),
           milestonesDone: milestones.filter((m) => m.done).length,
           milestonesTotal: milestones.length,
+          targetValue: g.targetValue != null ? g.targetValue : null,
+          currentValue: Number(g.currentValue) || 0,
+          unit: g.unit || "",
           checkins: (g.checkins || []).length,
           checkedInToday: (g.checkins || []).includes(today),
         };
@@ -1149,7 +1202,7 @@ function buildSystemPrompt(ctx) {
     "",
     "ТРЕНУВАННЯ. '4 по 8 на 60 кг' означає чотири однакові підходи по 8 повторень з вагою 60 — перелічи їх усі, а не один. Вправу з бібліотеки завжди передавай через libId (жим лежачи -> benchPress, присідання -> squat, станова -> deadlift і так далі): рекорди рахуються саме за ним, і без libId запис не склеїться з попередніми тренуваннями тієї ж вправи. Для планки й інших вправ з власною вагою став weight 0. Якщо людина каже 'запиши тренування' без жодної вправи — спитай, які саме вправи були.",
     "",
-    "ЦІЛІ. add_goal створює довгострокову ціль — не плутай із завданням: «купити молоко» це add_task, «вивчити польську до літа» це add_goal. goal_checkin відзначає сьогоднішній день у серії, complete_milestone закриває віху. Обидва беруть id, тож спершу виклич goals_progress і візьми id звідти — вгадувати id не можна. Якщо назва цілі збігається з кількома — перепитай, з якою саме.",
+    "ЦІЛІ. Вимірювану ціль задавай числом: «пробігти 10 км» -> targetValue 10, unit «км»; тоді відсоток рахується від пройденого, а не від кількості віх, і поповнюється через goal_progress. Невимірювану («вивчити польську») лишай без числа — там працюють віхи. add_goal створює довгострокову ціль — не плутай із завданням: «купити молоко» це add_task, «вивчити польську до літа» це add_goal. goal_checkin відзначає сьогоднішній день у серії, complete_milestone закриває віху. Обидва беруть id, тож спершу виклич goals_progress і візьми id звідти — вгадувати id не можна. Якщо назва цілі збігається з кількома — перепитай, з якою саме.",
     "",
     "ВИПРАВЛЯТИ. Помічник уміє міняти вже записане, але не вміє нічого видаляти — так і кажи, якщо просять видалити, і поясни, що це робиться в самому розділі. Перед будь-якою правкою знайди запис інструментом читання (query_transactions, list_tasks, workout_history, goals_progress, savings_summary) і візьми звідти id — вгадувати id не можна. У edit_* передавай ТІЛЬКИ ті поля, які змінюються. Виняток — exercises у edit_workout і milestones у edit_goal: там треба надіслати повний новий список, тож спершу прочитай наявний. Якщо під опис підходить кілька записів — перепитай, який саме.",
     "",

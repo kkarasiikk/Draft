@@ -21,6 +21,7 @@ rules_version = '2';
 //                                         {id, libId, muscle, name, sets: [
 //                                         {weight, reps}]}], createdAt, updatedAt}
 //   users/{uid}/goals/{id}            -- {title, category, why, targetDate,
+//                                         targetValue, currentValue, unit,
 //                                         status, milestones: [{id, title, done}],
 //                                         checkins: [YYYY-MM-DD], journal: [
 //                                         {id, text, createdAt}], createdAt, updatedAt}
@@ -231,12 +232,19 @@ service cloud.firestore {
                    'relationships', 'travel', 'creativity', 'other'] &&
                  d.why is string && d.why.size() <= 1000 &&
                  (d.targetDate == null || (d.targetDate is string && d.targetDate.size() == 10)) &&
+                 // Числова мета: «10» + «км». Її може не бути — тоді прогрес
+                 // рахується за віхами, як і раніше.
+                 (!('targetValue' in d) || d.targetValue == null ||
+                   (d.targetValue is number && d.targetValue > 0 && d.targetValue < 1000000000)) &&
+                 (!('currentValue' in d) || d.currentValue is number) &&
+                 (!('unit' in d) || (d.unit is string && d.unit.size() <= 20)) &&
                  d.status in ['active', 'done', 'archived'] &&
                  d.milestones is list && d.milestones.size() <= 50 &&
                  d.checkins is list && d.checkins.size() <= 400 &&
                  d.journal is list && d.journal.size() <= 200 &&
                  d.createdAt is timestamp && d.updatedAt is timestamp &&
                  d.keys().hasOnly(['title', 'category', 'why', 'targetDate', 'status',
+                   'targetValue', 'currentValue', 'unit',
                    'milestones', 'checkins', 'journal', 'createdAt', 'updatedAt']);
         }
         allow read, delete: if isOwner(uid);
