@@ -52,7 +52,11 @@ const T = {
     pickerTitle: 'Обрати вправу', pickerSearchPlaceholder: 'Пошук вправи…',
     pickerCustomLabel: 'Своя вправа', pickerCustomPlaceholder: 'Назва вправи', pickerCustomAdd: 'Додати',
     setPlaceholderWeight: 'кг', setPlaceholderReps: 'повт.', addSetLabel: '+ Підхід',
-    lastTimeLabel: (w, r) => `Минулого разу: ${w}×${r}`,
+    lastTimeLabel: (w, r) => (w ? `Минулого разу: ${w}×${r}` : `Минулого разу: ${r} разів`),
+    nextTryLabel: (w, r) => (w ? `Спробуй: ${w}×${r}` : `Спробуй: ${r} разів`),
+    nextTryHold: 'та сама вага', nextTryUp: 'вага росте', nextTryDown: 'вага вниз',
+    nextTryMoreReps: 'плюс повторення',
+    nextTryAddLoad: 'час на обтяження', nextTryFill: 'Підставити',
     prToastText: (name, w, r) => `Новий рекорд: ${name} — ${w}×${r}`,
     emptySessionsTitle: 'Ще немає тренувань', emptySessionsSub: 'Додай перше тренування кнопкою внизу.',
     emptyRecordsTitle: 'Ще немає рекордів', emptyRecordsSub: 'Записуй тренування — рекорди зʼявляться тут.',
@@ -94,7 +98,11 @@ const T = {
     pickerTitle: 'Выбрать упражнение', pickerSearchPlaceholder: 'Поиск упражнения…',
     pickerCustomLabel: 'Своё упражнение', pickerCustomPlaceholder: 'Название упражнения', pickerCustomAdd: 'Добавить',
     setPlaceholderWeight: 'кг', setPlaceholderReps: 'повт.', addSetLabel: '+ Подход',
-    lastTimeLabel: (w, r) => `В прошлый раз: ${w}×${r}`,
+    lastTimeLabel: (w, r) => (w ? `В прошлый раз: ${w}×${r}` : `В прошлый раз: ${r} раз`),
+    nextTryLabel: (w, r) => (w ? `Попробуй: ${w}×${r}` : `Попробуй: ${r} раз`),
+    nextTryHold: 'тот же вес', nextTryUp: 'вес растёт', nextTryDown: 'вес вниз',
+    nextTryMoreReps: 'плюс повторение',
+    nextTryAddLoad: 'пора на отягощение', nextTryFill: 'Подставить',
     prToastText: (name, w, r) => `Новый рекорд: ${name} — ${w}×${r}`,
     emptySessionsTitle: 'Пока нет тренировок', emptySessionsSub: 'Добавь первую тренировку кнопкой внизу.',
     emptyRecordsTitle: 'Пока нет рекордов', emptyRecordsSub: 'Записывай тренировки — рекорды появятся здесь.',
@@ -136,7 +144,11 @@ const T = {
     pickerTitle: 'Wybierz ćwiczenie', pickerSearchPlaceholder: 'Szukaj ćwiczenia…',
     pickerCustomLabel: 'Własne ćwiczenie', pickerCustomPlaceholder: 'Nazwa ćwiczenia', pickerCustomAdd: 'Dodaj',
     setPlaceholderWeight: 'kg', setPlaceholderReps: 'powt.', addSetLabel: '+ Seria',
-    lastTimeLabel: (w, r) => `Poprzednio: ${w}×${r}`,
+    lastTimeLabel: (w, r) => (w ? `Poprzednio: ${w}×${r}` : `Poprzednio: ${r} powtórzeń`),
+    nextTryLabel: (w, r) => (w ? `Spróbuj: ${w}×${r}` : `Spróbuj: ${r} powtórzeń`),
+    nextTryHold: 'ten sam ciężar', nextTryUp: 'ciężar rośnie', nextTryDown: 'ciężar w dół',
+    nextTryMoreReps: 'więcej powtórzeń',
+    nextTryAddLoad: 'czas na obciążenie', nextTryFill: 'Wstaw',
     prToastText: (name, w, r) => `Nowy rekord: ${name} — ${w}×${r}`,
     emptySessionsTitle: 'Brak treningów', emptySessionsSub: 'Dodaj pierwszy trening przyciskiem poniżej.',
     emptyRecordsTitle: 'Brak rekordów', emptyRecordsSub: 'Zapisuj treningi — rekordy pojawią się tutaj.',
@@ -178,7 +190,11 @@ const T = {
     pickerTitle: 'Choose exercise', pickerSearchPlaceholder: 'Search exercise…',
     pickerCustomLabel: 'Custom exercise', pickerCustomPlaceholder: 'Exercise name', pickerCustomAdd: 'Add',
     setPlaceholderWeight: 'kg', setPlaceholderReps: 'reps', addSetLabel: '+ Set',
-    lastTimeLabel: (w, r) => `Last time: ${w}×${r}`,
+    lastTimeLabel: (w, r) => (w ? `Last time: ${w}×${r}` : `Last time: ${r} reps`),
+    nextTryLabel: (w, r) => (w ? `Try: ${w}×${r}` : `Try: ${r} reps`),
+    nextTryHold: 'same weight', nextTryUp: 'weight goes up', nextTryDown: 'weight goes down',
+    nextTryMoreReps: 'more reps',
+    nextTryAddLoad: 'time to add load', nextTryFill: 'Fill in',
     prToastText: (name, w, r) => `New PR: ${name} — ${w}×${r}`,
     emptySessionsTitle: 'No workouts yet', emptySessionsSub: 'Add your first workout with the button below.',
     emptyRecordsTitle: 'No records yet', emptyRecordsSub: 'Log workouts — your records will show up here.',
@@ -878,6 +894,30 @@ document.querySelectorAll('#bottomNav [data-tab]').forEach((btn) => {
 });
 
 // ---- Форма тренування ----
+// Історія цієї ж вправи для розрахунку наступного кроку: повні набори
+// підходів, найновіше першим, без сесії, яку зараз редагують.
+function progressionHistory(ex) {
+  const key = exerciseKey(ex);
+  const rows = [];
+  sortedSessions().forEach((session) => {
+    if (session.id === editingSessionId) return;
+    (session.exercises || []).forEach((e) => {
+      if (exerciseKey(e) === key) rows.push({ date: session.date, sets: e.sets || [] });
+    });
+  });
+  return rows;
+}
+
+function verdictLabel(suggestion) {
+  if (suggestion.reason === 'addLoad') return t('nextTryAddLoad');
+  // Власна вага росте повтореннями — казати «вага росте» там, де вага
+  // взагалі не змінюється, було б неправдою.
+  if (suggestion.reason === 'moreReps') return t('nextTryMoreReps');
+  if (suggestion.verdict === 'up') return t('nextTryUp');
+  if (suggestion.verdict === 'down') return t('nextTryDown');
+  return t('nextTryHold');
+}
+
 function findLastPerformance(ex) {
   // Шукає останній (за датою) підхід цієї ж вправи серед ІНШИХ тренувань,
   // ніж те, що зараз редагується — основа для підказки прогресивного навантаження.
@@ -921,13 +961,26 @@ document.getElementById('sessionFormOverlay').addEventListener('click', (e) => {
 function renderExerciseBlocks() {
   const root = document.getElementById('exerciseBlocks');
   root.innerHTML = formExercises.map((ex) => renderExerciseBlock(ex)).join('');
-  // Хінти "минулого разу" — обчислюються один раз при рендері.
+  // Хінти обчислюються один раз при рендері: що було минулого разу і що
+  // робити сьогодні. Друге — не прикраса до першого, а те, заради чого
+  // людина сюди дивиться: рахувати наступну вагу в голові між підходами
+  // ніхто не хоче.
   formExercises.forEach((ex) => {
     const hintEl = root.querySelector(`[data-hint-for="${ex.id}"]`);
     if (!hintEl) return;
     const last = findLastPerformance(ex);
-    hintEl.textContent = last ? t('lastTimeLabel', fmtNum(last.weight), last.reps) : '';
-    hintEl.style.display = last ? 'block' : 'none';
+    if (!last) { hintEl.innerHTML = ''; hintEl.style.display = 'none'; return; }
+
+    const next = window.WorkoutProgression.suggestNext(progressionHistory(ex), ex.libId || '');
+    hintEl.style.display = 'block';
+    hintEl.innerHTML = `
+      <div class="hint-last">${escapeHtml(t('lastTimeLabel', last.weight ? fmtNum(last.weight) : '', last.reps))}</div>
+      ${next ? `
+      <div class="hint-next ${next.verdict}">
+        <span class="hint-next-text">${escapeHtml(t('nextTryLabel', next.weight ? fmtNum(next.weight) : '', next.reps))}</span>
+        <span class="hint-next-why">${escapeHtml(verdictLabel(next))}</span>
+        <button type="button" class="hint-fill-btn" data-fill="${ex.id}">${escapeHtml(t('nextTryFill'))}</button>
+      </div>` : ''}`;
   });
   attachExerciseBlockEvents();
 }
@@ -962,6 +1015,27 @@ function attachExerciseBlockEvents() {
   root.querySelectorAll('[data-remove-block]').forEach((btn) => {
     btn.addEventListener('click', () => {
       formExercises = formExercises.filter((ex) => ex.id !== btn.dataset.removeBlock);
+      renderExerciseBlocks();
+    });
+  });
+  // Підставляємо в порожні рядки — заповнені не чіпаємо: людина могла вже
+  // щось записати, і затерти це підказкою було б гірше, ніж не допомогти.
+  root.querySelectorAll('[data-fill]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const ex = formExercises.find((e) => e.id === btn.dataset.fill);
+      if (!ex) return;
+      const next = window.WorkoutProgression.suggestNext(progressionHistory(ex), ex.libId || '');
+      if (!next) return;
+      let filled = false;
+      ex.sets.forEach((set) => {
+        if (set.weight !== '' && set.weight != null) return;
+        if (set.reps !== '' && set.reps != null) return;
+        set.weight = next.weight;
+        set.reps = next.reps;
+        filled = true;
+      });
+      // Порожніх рядків не лишилось — додаємо новий, інакше кнопка мовчала б.
+      if (!filled) ex.sets.push({ weight: next.weight, reps: next.reps });
       renderExerciseBlocks();
     });
   });
