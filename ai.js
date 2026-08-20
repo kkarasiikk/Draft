@@ -30,6 +30,12 @@ const MAX_HISTORY_MESSAGES = 16; // скільки попередніх репл
 const MAX_TOOL_ROUNDS = 8;
 const MAX_OUTPUT_TOKENS = 2048;
 
+// Той самий перелік, що й у формі цілей (CATEGORIES у goals/app.js). Правила
+// Firestore перевіряють його жорстко, тож ціль із категорією поза списком
+// просто не запишеться.
+const GOAL_CATEGORIES = ["health", "finance", "learning", "career",
+  "relationships", "travel", "creativity", "other"];
+
 function modelIdFor(profile) {
   const key = profile && typeof profile.aiModel === "string" ? profile.aiModel : DEFAULT_MODEL_KEY;
   return MODELS[key] || MODELS[DEFAULT_MODEL_KEY];
@@ -236,6 +242,32 @@ const tools = [
     },
   },
   {
+    name: "add_goal",
+    description:
+      "Створити довгострокову ціль. Віхи (milestones) — це проміжні кроки на шляху до неї; якщо людина їх назвала, " +
+      "перелічи, якщо ні — лиши список порожнім, додати можна й потім. Це саме довгострокова ціль, а не завдання " +
+      "на день: «купити молоко» -> add_task, «пробігти марафон до весни» -> add_goal.",
+    input_schema: {
+      type: "object",
+      properties: {
+        title: { type: "string", description: "Формулювання цілі" },
+        category: {
+          type: "string",
+          enum: GOAL_CATEGORIES,
+          description: "Сфера життя; якщо не зрозуміло — other",
+        },
+        why: { type: "string", description: "Навіщо це людині — її ж словами (необов'язково)" },
+        targetDate: { type: "string", description: "Дедлайн YYYY-MM-DD (необов'язково)" },
+        milestones: {
+          type: "array",
+          description: "Проміжні кроки, по порядку (необов'язково)",
+          items: { type: "string" },
+        },
+      },
+      required: ["title"],
+    },
+  },
+  {
     name: "goal_checkin",
     description:
       "Відзначити сьогоднішній чекін по довгостроковій цілі — це те, що тримає серію (streak). " +
@@ -335,6 +367,7 @@ async function executeTool(uid, name, input, ctx) {
   if (name === "personal_records") return personalRecords(uid);
   if (name === "goals_progress") return goalsProgress(uid);
   if (name === "add_workout") return addWorkout(uid, input, ctx);
+  if (name === "add_goal") return addGoal(uid, input);
   if (name === "goal_checkin") return goalCheckin(uid, input);
   if (name === "complete_milestone") return completeMilestone(uid, input);
 
@@ -633,6 +666,56 @@ async function addWorkout(uid, input, ctx) {
 }
 
 // ---- Запис: цілі ----
+// Порожні поля тут не «необов'язкові дрібниці», а обов'язкова частина
+// документа: правила Firestore вимагають why, milestones, checkins і journal
+// незалежно від того, чи людина щось про них сказала. Форма на сторінці
+// підставляє те саме.
+function sanitizeGoalInput(input) {
+  const title = typeof input.title === "string" ? input.title.trim().slice(0, 200) : "";
+  if (!title) return { error: "title обов'язковий" };
+
+  const isDate = (v) => typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v);
+  const milestones = (Array.isArray(input.milestones) ? input.milestones : [])
+    .map((m) => (typeof m === "string" ? m : (m && m.title)))
+    .map((titleText) => (typeof titleText === "string" ? titleText.trim().slice(0, 200) : ""))
+    .filter(Boolean)
+    .slice(0, 50)
+    .map((titleText, i) => ({ id: `ai${Date.now().toString(36)}${i}`, title: titleText, done: false }));
+
+  return {
+    value: {
+      title,
+      category: GOAL_CATEGORIES.includes(input.category) ? input.category : "other",
+      why: typeof input.why === "string" ? input.why.trim().slice(0, 1000) : "",
+      targetDate: isDate(input.targetDate) ? input.targetDate : null,
+      status: "active",
+      milestones,
+      checkins: [],
+      journal: [],
+    },
+  };
+}
+
+async function addGoal(uid, input) {
+  const result = sanitizeGoalInput(input);
+  if (result.error) return { output: { ok: false, error: result.error }, isError: true };
+
+  const now = admin.firestore.FieldValue.serverTimestamp();
+  const ref = await userCol(uid, "goals").add({ ...result.value, createdAt: now, updatedAt: now });
+  return {
+    // id повертаємо в тому ж раунді: інакше, щоб одразу відзначити чекін по
+    // щойно створеній цілі, моделі довелося б окремо ходити в goals_progress.
+    output: { ok: true, id: ref.id, milestones: result.value.milestones.length },
+    action: {
+      kind: "goal_added",
+      title: result.value.title,
+      targetDate: result.value.targetDate,
+      milestones: result.value.milestones.length,
+    },
+  };
+}
+
+
 // Обидві дії ідемпотентні: повторний виклик нічого не псує. Модель може
 // викликати інструмент двічі (наприклад, не розпізнавши, що вже зробила це
 // в попередньому раунді), і чекін від цього не має задвоїтись чи зникнути —
@@ -723,7 +806,7 @@ function buildSystemPrompt(ctx) {
     "",
     "ТРЕНУВАННЯ. '4 по 8 на 60 кг' означає чотири однакові підходи по 8 повторень з вагою 60 — перелічи їх усі, а не один. Вправу з бібліотеки завжди передавай через libId (жим лежачи -> benchPress, присідання -> squat, станова -> deadlift і так далі): рекорди рахуються саме за ним, і без libId запис не склеїться з попередніми тренуваннями тієї ж вправи. Для планки й інших вправ з власною вагою став weight 0. Якщо людина каже 'запиши тренування' без жодної вправи — спитай, які саме вправи були.",
     "",
-    "ЦІЛІ. goal_checkin відзначає сьогоднішній день у серії, complete_milestone закриває віху. Обидва беруть id, тож спершу виклич goals_progress і візьми id звідти — вгадувати id не можна. Якщо назва цілі збігається з кількома — перепитай, з якою саме.",
+    "ЦІЛІ. add_goal створює довгострокову ціль — не плутай із завданням: «купити молоко» це add_task, «вивчити польську до літа» це add_goal. goal_checkin відзначає сьогоднішній день у серії, complete_milestone закриває віху. Обидва беруть id, тож спершу виклич goals_progress і візьми id звідти — вгадувати id не можна. Якщо назва цілі збігається з кількома — перепитай, з якою саме.",
     "",
     "РАДИТИ. Це головне правило: спершу подивись у дані, потім говори. Порада без цифр — марна, людина і так знає, що треба менше витрачати й більше рухатись.",
     "- порада про економію -> спершу month_summary за потрібний місяць, і говори про конкретні категорії й суми;",
@@ -836,6 +919,7 @@ module.exports.buildSystemPrompt = buildSystemPrompt;
 module.exports.enforceRateLimit = enforceRateLimit;
 module.exports.sanitizeTaskInput = sanitizeTaskInput;
 module.exports.sanitizeWorkoutInput = sanitizeWorkoutInput;
+module.exports.sanitizeGoalInput = sanitizeGoalInput;
 module.exports.modelIdFor = modelIdFor;
 module.exports.MODELS = MODELS;
 module.exports.RATE_LIMIT_MAX_MESSAGES = RATE_LIMIT_MAX_MESSAGES;

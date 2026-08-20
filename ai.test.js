@@ -365,6 +365,57 @@ describe("executeTool", () => {
     }
     const today = () => new Date().toISOString().slice(0, 10);
 
+    test("add_goal створює ціль із віхами й типовими полями", async () => {
+      const r = await ai.executeTool("uid1", "add_goal", {
+        title: "Пробігти марафон", category: "health", why: "хочу дожити до 90",
+        targetDate: "2027-04-18", milestones: ["10 км", "21 км"],
+      }, ctx);
+      expect(r.output).toMatchObject({ ok: true, milestones: 2 });
+
+      const doc = await mockCurrent.collection("users").doc("uid1").collection("goals").doc(r.output.id).get();
+      const g = doc.data();
+      expect(g).toMatchObject({
+        title: "Пробігти марафон", category: "health", why: "хочу дожити до 90",
+        targetDate: "2027-04-18", status: "active", checkins: [], journal: [],
+      });
+      expect(g.milestones.map((m) => [m.title, m.done])).toEqual([["10 км", false], ["21 км", false]]);
+      expect(new Set(g.milestones.map((m) => m.id)).size).toBe(2);
+    });
+
+    // Правила Firestore вимагають ці поля незалежно від того, що сказала
+    // людина, — без них запис просто не пройде.
+    test("ціль без деталей усе одно отримує повний набір полів", async () => {
+      const r = await ai.executeTool("uid1", "add_goal", { title: "Вивчити польську" }, ctx);
+      const doc = await mockCurrent.collection("users").doc("uid1").collection("goals").doc(r.output.id).get();
+      expect(doc.data()).toMatchObject({
+        category: "other", why: "", targetDate: null, status: "active",
+        milestones: [], checkins: [], journal: [],
+      });
+    });
+
+    test("вигадана категорія й крива дата не потрапляють у документ", async () => {
+      const r = await ai.executeTool("uid1", "add_goal",
+        { title: "Ціль", category: "космос", targetDate: "колись навесні" }, ctx);
+      const doc = await mockCurrent.collection("users").doc("uid1").collection("goals").doc(r.output.id).get();
+      expect(doc.data()).toMatchObject({ category: "other", targetDate: null });
+    });
+
+    test("ціль без назви не створюється", async () => {
+      const r = await ai.executeTool("uid1", "add_goal", { title: "   " }, ctx);
+      expect(r.isError).toBe(true);
+      const snap = await mockCurrent.collection("users").doc("uid1").collection("goals").get();
+      expect(snap.docs.length).toBe(0);
+    });
+
+    // id повертається одразу, щоб чекін по щойно створеній цілі не вимагав
+    // окремого походу в goals_progress.
+    test("щойно створену ціль одразу можна відзначити чекіном", async () => {
+      const created = await ai.executeTool("uid1", "add_goal", { title: "Марафон" }, ctx);
+      const r = await ai.executeTool("uid1", "goal_checkin", { id: created.output.id }, ctx);
+      expect(r.output.ok).toBe(true);
+      expect(r.output.totalCheckins).toBe(1);
+    });
+
     test("goal_checkin додає сьогоднішній день", async () => {
       const ref = await seedGoal();
       const r = await ai.executeTool("uid1", "goal_checkin", { id: ref.id }, ctx);

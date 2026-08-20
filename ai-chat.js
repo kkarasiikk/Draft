@@ -27,6 +27,7 @@
       taskAdded: (a) => `Завдання: ${a.title}${a.dueDate ? ' · ' + a.dueDate : ''}`,
       taskDone: (a) => `Виконано: ${a.title}`,
       workout: (a) => `Тренування: ${a.exercises.join(', ')}${a.name ? ' · ' + a.name : ''}`,
+      goal: (a) => `Ціль: ${a.title}${a.targetDate ? ' · до ' + a.targetDate : ''}`,
       checkin: (a) => `Відмічено: ${a.title}`,
       milestone: (a) => `Віха: ${a.title}${a.goal ? ' · ' + a.goal : ''}`,
       error: 'Не вдалося отримати відповідь. Спробуй ще раз.',
@@ -46,6 +47,7 @@
       taskAdded: (a) => `Задача: ${a.title}${a.dueDate ? ' · ' + a.dueDate : ''}`,
       taskDone: (a) => `Выполнено: ${a.title}`,
       workout: (a) => `Тренировка: ${a.exercises.join(', ')}${a.name ? ' · ' + a.name : ''}`,
+      goal: (a) => `Цель: ${a.title}${a.targetDate ? ' · до ' + a.targetDate : ''}`,
       checkin: (a) => `Отмечено: ${a.title}`,
       milestone: (a) => `Веха: ${a.title}${a.goal ? ' · ' + a.goal : ''}`,
       error: 'Не удалось получить ответ. Попробуй ещё раз.',
@@ -65,6 +67,7 @@
       taskAdded: (a) => `Zadanie: ${a.title}${a.dueDate ? ' · ' + a.dueDate : ''}`,
       taskDone: (a) => `Zrobione: ${a.title}`,
       workout: (a) => `Trening: ${a.exercises.join(', ')}${a.name ? ' · ' + a.name : ''}`,
+      goal: (a) => `Cel: ${a.title}${a.targetDate ? ' · do ' + a.targetDate : ''}`,
       checkin: (a) => `Odhaczono: ${a.title}`,
       milestone: (a) => `Kamień milowy: ${a.title}${a.goal ? ' · ' + a.goal : ''}`,
       error: 'Nie udało się uzyskać odpowiedzi. Spróbuj ponownie.',
@@ -84,6 +87,7 @@
       taskAdded: (a) => `Task: ${a.title}${a.dueDate ? ' · ' + a.dueDate : ''}`,
       taskDone: (a) => `Done: ${a.title}`,
       workout: (a) => `Workout: ${a.exercises.join(', ')}${a.name ? ' · ' + a.name : ''}`,
+      goal: (a) => `Goal: ${a.title}${a.targetDate ? ' · by ' + a.targetDate : ''}`,
       checkin: (a) => `Checked in: ${a.title}`,
       milestone: (a) => `Milestone: ${a.title}${a.goal ? ' · ' + a.goal : ''}`,
       error: 'Could not get an answer. Try again.',
@@ -269,6 +273,7 @@
     if (a.kind === 'task_added') return t('taskAdded')(a);
     if (a.kind === 'task_completed') return t('taskDone')(a);
     if (a.kind === 'workout_added') return t('workout')(a);
+    if (a.kind === 'goal_added') return t('goal')(a);
     if (a.kind === 'goal_checkin') return t('checkin')(a);
     if (a.kind === 'milestone_done') return t('milestone')(a);
     return '';
