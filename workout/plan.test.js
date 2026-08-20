@@ -120,3 +120,61 @@ describe('suggestSession', () => {
     r.muscles.forEach((m) => expect(musclesInPlan.has(m.muscle)).toBe(true));
   });
 });
+
+describe('adjustForReadiness', () => {
+  // Жим: закритий верх (5–8), тож прогресія піднімає 80 -> 82.5.
+  const plan = () => Plan.suggestSession([
+    s(5, ex('benchPress', 'chest', 80, 8, 4)),
+    s(12, ex('benchPress', 'chest', 80, 8, 4)),
+  ], TODAY).exercises;
+
+  test('«готовий» нічого не міняє', () => {
+    const e = Plan.adjustForReadiness(plan(), 'ready')[0];
+    expect(e).toMatchObject({ weight: 82.5, reps: 5, sets: 4, direction: 'up' });
+  });
+
+  test('невідомий рівень теж нічого не міняє', () => {
+    expect(Plan.adjustForReadiness(plan(), 'вигаданий')[0]).toMatchObject({ weight: 82.5, sets: 4 });
+    expect(Plan.adjustForReadiness(plan(), null)[0]).toMatchObject({ weight: 82.5, sets: 4 });
+  });
+
+  // Піднімати вагу в день, коли людина сказала «так собі», — це
+  // напрошуватись на провалений підхід.
+  test('«так собі»: мінус підхід і вага не росте', () => {
+    const e = Plan.adjustForReadiness(plan(), 'ok')[0];
+    expect(e).toMatchObject({ weight: 80, reps: 8, sets: 3, direction: 'hold' });
+  });
+
+  test('«так собі» не опускає нижче двох підходів', () => {
+    const one = Plan.suggestSession([s(5, ex('benchPress', 'chest', 80, 6, 1))], TODAY).exercises;
+    expect(Plan.adjustForReadiness(one, 'ok')[0].sets).toBe(2);
+  });
+
+  test('«розбитий»: два підходи, мінус десять відсотків, низ діапазону', () => {
+    const e = Plan.adjustForReadiness(plan(), 'low')[0];
+    expect(e).toMatchObject({ weight: 72.5, reps: 5, sets: 2, direction: 'down' });
+  });
+
+  // Скидання, після якого вага та сама, — це не скидання.
+  test('на дрібній вазі «розбитий» лишає вагу як є', () => {
+    const light = Plan.suggestSession([s(5, ex('lateralRaise', 'shoulders', 2, 13, 3))], TODAY).exercises;
+    const e = Plan.adjustForReadiness(light, 'low')[0];
+    expect(e.weight).toBe(2);
+    expect(e.sets).toBe(2);
+  });
+
+  test('власна вага: «так собі» тримає повторення, «розбитий» зрізає пʼяту частину', () => {
+    const body = Plan.suggestSession([s(5, ex('pullUp', 'back', 0, 10, 3))], TODAY).exercises;
+    expect(body[0]).toMatchObject({ weight: 2.5, reps: 5 });     // прогресія просить обтяження
+    const ok = Plan.adjustForReadiness(body, 'ok')[0];
+    expect(ok).toMatchObject({ reps: 10, sets: 2, direction: 'hold' });
+    const low = Plan.adjustForReadiness(body, 'low')[0];
+    expect(low).toMatchObject({ weight: 0, reps: 8, sets: 2 });
+  });
+
+  test('вихідний план не змінюється', () => {
+    const original = plan();
+    Plan.adjustForReadiness(original, 'low');
+    expect(original[0]).toMatchObject({ weight: 82.5, sets: 4 });
+  });
+});

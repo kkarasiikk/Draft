@@ -20,6 +20,7 @@ rules_version = '2';
 //   users/{uid}/workouts/{id}         -- {date, name, notes, exercises: [
 //                                         {id, libId, muscle, name, sets: [
 //                                         {weight, reps}]}], createdAt, updatedAt}
+//   users/{uid}/readiness/{YYYY-MM-DD}  -- {level: ready|ok|low, date, createdAt}
 //   users/{uid}/goals/{id}            -- {title, category, why, targetDate,
 //                                         targetValue, currentValue, unit,
 //                                         status, milestones: [{id, title, done}],
@@ -222,6 +223,20 @@ service cloud.firestore {
         }
         allow read, delete: if isOwner(uid);
         allow create, update: if isOwner(uid) && isValidWorkout(request.resource.data);
+      }
+
+      // Самопочуття перед тренуванням. Сну й пульсу застосунок не знає —
+      // це веб-сторінка без доступу до годинника, — тож єдине чесне
+      // джерело це сама людина. Id документа — день, тож на добу один запис.
+      match /readiness/{dayId} {
+        function isValidReadiness(d) {
+          return d.level in ['ready', 'ok', 'low'] &&
+                 d.date is string && d.date.size() == 10 &&
+                 d.createdAt is timestamp &&
+                 d.keys().hasOnly(['level', 'date', 'createdAt']);
+        }
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid) && isValidReadiness(request.resource.data);
       }
 
       match /goals/{goalId} {

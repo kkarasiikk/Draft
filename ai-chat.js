@@ -35,6 +35,7 @@
       checkin: (a) => `Відмічено: ${a.title}`,
       progress: (a) => `Прогрес: ${a.title} — ${a.current} / ${a.target}${a.unit ? ' ' + a.unit : ''}`,
       rescued: (a) => `Серію врятовано: ${a.title} — ${a.streak} дн.`,
+      readiness: (a) => `Самопочуття: ${{ ready: 'повний сил', ok: 'так собі', low: 'розбитий' }[a.level] || a.level}`,
       blocker: (a) => `Завадило: ${a.reason} · ${a.title}`,
       milestone: (a) => `Віха: ${a.title}${a.goal ? ' · ' + a.goal : ''}`,
       savingsGoal: (a) => `Скарбничка: ${a.name}`,
@@ -69,6 +70,7 @@
       checkin: (a) => `Отмечено: ${a.title}`,
       progress: (a) => `Прогресс: ${a.title} — ${a.current} / ${a.target}${a.unit ? ' ' + a.unit : ''}`,
       rescued: (a) => `Серия спасена: ${a.title} — ${a.streak} дн.`,
+      readiness: (a) => `Самочувствие: ${{ ready: 'полон сил', ok: 'так себе', low: 'разбит' }[a.level] || a.level}`,
       blocker: (a) => `Помешало: ${a.reason} · ${a.title}`,
       milestone: (a) => `Веха: ${a.title}${a.goal ? ' · ' + a.goal : ''}`,
       savingsGoal: (a) => `Копилка: ${a.name}`,
@@ -103,6 +105,7 @@
       checkin: (a) => `Odhaczono: ${a.title}`,
       progress: (a) => `Postęp: ${a.title} — ${a.current} / ${a.target}${a.unit ? ' ' + a.unit : ''}`,
       rescued: (a) => `Seria uratowana: ${a.title} — ${a.streak} dni`,
+      readiness: (a) => `Samopoczucie: ${{ ready: 'pełen sił', ok: 'tak sobie', low: 'rozbity' }[a.level] || a.level}`,
       blocker: (a) => `Przeszkodziło: ${a.reason} · ${a.title}`,
       milestone: (a) => `Kamień milowy: ${a.title}${a.goal ? ' · ' + a.goal : ''}`,
       savingsGoal: (a) => `Skarbonka: ${a.name}`,
@@ -137,6 +140,7 @@
       checkin: (a) => `Checked in: ${a.title}`,
       progress: (a) => `Progress: ${a.title} — ${a.current} / ${a.target}${a.unit ? ' ' + a.unit : ''}`,
       rescued: (a) => `Streak rescued: ${a.title} — ${a.streak} days`,
+      readiness: (a) => `Readiness: ${{ ready: 'fresh', ok: 'so-so', low: 'wrecked' }[a.level] || a.level}`,
       blocker: (a) => `Got in the way: ${a.reason} · ${a.title}`,
       milestone: (a) => `Milestone: ${a.title}${a.goal ? ' · ' + a.goal : ''}`,
       savingsGoal: (a) => `Savings pot: ${a.name}`,
@@ -553,6 +557,7 @@
     if (a.kind === 'goal_checkin') return t('checkin')(a);
     if (a.kind === 'goal_progress') return t('progress')(a);
     if (a.kind === 'streak_rescued') return t('rescued')(a);
+    if (a.kind === 'readiness_logged') return t('readiness')(a);
     if (a.kind === 'blocker_logged') return t('blocker')(a);
     if (a.kind === 'milestone_done') return t('milestone')(a);
     if (a.kind === 'savings_goal_added') return t('savingsGoal')(a);

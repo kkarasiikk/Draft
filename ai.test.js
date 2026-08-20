@@ -358,6 +358,50 @@ describe("executeTool", () => {
       expect(r.output.todaySuggestion).toBe(null);
     });
 
+    // Сну й пульсу застосунок не знає — єдине джерело про відновлення це
+    // сама людина, і воно має доїжджати до плану.
+    test("log_readiness пише один запис на добу й перезаписує його", async () => {
+      const r = await ai.executeTool("uid1", "log_readiness", { level: "low" }, coachCtx);
+      expect(r.output).toMatchObject({ ok: true, level: "low", date: "2026-08-20" });
+      await ai.executeTool("uid1", "log_readiness", { level: "ok" }, coachCtx);
+      const snap = await mockCurrent.collection("users").doc("uid1").collection("readiness").get();
+      expect(snap.docs.length).toBe(1);
+      expect(snap.docs[0].data()).toMatchObject({ level: "ok", date: "2026-08-20" });
+    });
+
+    test("вигаданий рівень самопочуття не приймається", async () => {
+      const r = await ai.executeTool("uid1", "log_readiness", { level: "мертвий" }, coachCtx);
+      expect(r.isError).toBe(true);
+      const snap = await mockCurrent.collection("users").doc("uid1").collection("readiness").get();
+      expect(snap.docs.length).toBe(0);
+    });
+
+    test("самопочуття зсуває план на сьогодні", async () => {
+      await seedTrend();
+      const full = await ai.executeTool("uid1", "training_analysis", {}, coachCtx);
+      const before = full.output.todaySuggestion.exercises[0];
+
+      await ai.executeTool("uid1", "log_readiness", { level: "low" }, coachCtx);
+      const after = await ai.executeTool("uid1", "training_analysis", {}, coachCtx);
+      expect(after.output.readinessToday).toBe("low");
+      expect(after.output.todaySuggestion.readiness).toBe("low");
+      const eased = after.output.todaySuggestion.exercises[0];
+      expect(eased.sets).toBeLessThanOrEqual(before.sets);
+      expect(eased.weight).toBeLessThan(before.weight);
+      expect(eased.direction).toBe("down");
+    });
+
+    test("без запису самопочуття план лишається повним", async () => {
+      await seedTrend();
+      const r = await ai.executeTool("uid1", "training_analysis", {}, coachCtx);
+      expect(r.output.readinessToday).toBe(null);
+      expect(r.output.todaySuggestion.readiness).toBe(null);
+    });
+
+    test("промпт веде записувати самопочуття, а не вигадувати відновлення", () => {
+      expect(ai.buildSystemPrompt(coachCtx)).toContain("log_readiness");
+    });
+
     test("показує, скільки днів група мʼязів відпочивала", async () => {
       await seedTrend();
       const r = await ai.executeTool("uid1", "training_analysis", {}, coachCtx);

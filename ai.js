@@ -9,7 +9,7 @@ const { EXERCISE_LIB, exerciseLabel, exerciseMuscle } = require("./workout/exerc
 // що й людина: інакше в чаті звучало б одне, а на екрані стояло інше.
 const workoutProgress = require("./workout/progress");
 const { suggestNext } = require("./workout/progression");
-const { suggestSession } = require("./workout/plan");
+const { suggestSession, adjustForReadiness, READINESS } = require("./workout/plan");
 // Ті самі категорії, що показує бюджет, доки людина їх не редагувала —
 // у профілі їх у цей момент ще немає (див. коментар у файлі).
 const { defaultCategoryList } = require("./categories-default");
@@ -226,6 +226,20 @@ const tools = [
     name: "goals_progress",
     description: "Довгострокові цілі: статус, виконані віхи, дата дедлайну.",
     input_schema: { type: "object", properties: {} },
+  },
+  {
+    name: "log_readiness",
+    description:
+      "Записати самопочуття на сьогодні перед тренуванням: «сьогодні розбитий» -> low, «так собі» -> ok, " +
+      "«повний сил» -> ready. Це єдине джерело даних про відновлення — сну й пульсу застосунок не знає. " +
+      "Після цього план на сьогодні (todaySuggestion) враховує відповідь: менший обсяг і менша вага.",
+    input_schema: {
+      type: "object",
+      properties: {
+        level: { type: "string", enum: ["ready", "ok", "low"], description: "ready — сил повно, ok — так собі, low — розбитий" },
+      },
+      required: ["level"],
+    },
   },
   {
     name: "add_workout",
@@ -572,6 +586,7 @@ async function executeTool(uid, name, input, ctx) {
   if (name === "training_analysis") return trainingAnalysis(uid, ctx);
   if (name === "personal_records") return personalRecords(uid, ctx);
   if (name === "goals_progress") return goalsProgress(uid);
+  if (name === "log_readiness") return logReadiness(uid, input, ctx);
   if (name === "add_workout") return addWorkout(uid, input, ctx);
   if (name === "add_goal") return addGoal(uid, input);
   if (name === "add_savings_goal") return addSavingsGoal(uid, input);
@@ -854,6 +869,20 @@ async function personalRecords(uid, ctx) {
   return { output: { count: best.size, records: [...best.values()] } };
 }
 
+// Один документ на добу, id — сама дата: перезапис замість накопичення.
+async function logReadiness(uid, input, ctx) {
+  const level = READINESS.includes(input.level) ? input.level : "";
+  if (!level) return { output: { ok: false, error: "level має бути ready, ok або low" }, isError: true };
+
+  await userCol(uid, "readiness").doc(ctx.today).set({
+    level, date: ctx.today, createdAt: admin.firestore.FieldValue.serverTimestamp(),
+  });
+  return {
+    output: { ok: true, date: ctx.today, level },
+    action: { kind: "readiness_logged", level },
+  };
+}
+
 // ---- Розбір тренувань ----
 // Модель погано рахує тренди з сирих підходів: тридцять рядків «вага ×
 // повторення» вона радше перекаже, ніж підсумує. Тому підрахунки робить
@@ -903,13 +932,17 @@ async function trainingAnalysis(uid, ctx) {
   // Те саме, що показує картка «План на сьогодні» на сторінці: питання
   // «що мені сьогодні робити» приходить і в чат теж, і відповідь має бути
   // однією, а не двома різними.
+  const readySnap = await userCol(uid, "readiness").doc(ctx.today).get();
+  const readiness = readySnap.exists ? (readySnap.data() || {}).level || null : null;
+
   const plan = suggestSession(sessions, ctx.today);
   const todaySuggestion = !plan ? null : (plan.rest
     ? { rest: true, muscle: plan.muscle, daysAgo: plan.daysAgo }
     : {
       rest: false,
+      readiness,
       muscles: plan.muscles.map((m) => ({ muscle: m.muscle, daysAgo: m.daysAgo })),
-      exercises: plan.exercises.map((e) => ({
+      exercises: adjustForReadiness(plan.exercises, readiness).map((e) => ({
         exercise: e.libId ? exerciseLabel(e.libId, ctx.lang) : e.name,
         muscle: e.muscle, sets: e.sets, weight: e.weight, reps: e.reps, direction: e.direction,
       })),
@@ -919,6 +952,7 @@ async function trainingAnalysis(uid, ctx) {
     output: {
       enough: data.enough,
       needSessions: data.needSessions,
+      readinessToday: readiness,
       todaySuggestion,
       windowDays: data.windowDays,
       sessions: { last28: data.sessionsNow, previous28: data.sessionsPrev },
@@ -1417,7 +1451,7 @@ function buildSystemPrompt(ctx) {
     "ЗАПИСУВАТИ. 'кава 80 грн' -> add_transaction (expense, 80, category 'food'). 'запиши подзвонити мамі завтра о 18' -> add_task. 'записав тренування: жим лежачи 4 по 8 на 60' -> add_workout. Не питай уточнень, якщо сенс зрозумілий; якщо в одному повідомленні кілька справ — створи кожну окремим викликом.",
     "",
     "ТРЕНУВАННЯ. '4 по 8 на 60 кг' означає чотири однакові підходи по 8 повторень з вагою 60 — перелічи їх усі, а не один. Вправу з бібліотеки завжди передавай через libId (жим лежачи -> benchPress, присідання -> squat, станова -> deadlift і так далі): рекорди рахуються саме за ним, і без libId запис не склеїться з попередніми тренуваннями тієї ж вправи. Для планки й інших вправ з власною вагою став weight 0. Якщо людина каже 'запиши тренування' без жодної вправи — спитай, які саме вправи були.",
-    "ТРЕНЕР. Про прогрес говори числами з training_analysis, а не враженнями: «жим виріс зі 101 до 114, це +13% за місяць». nextSuggestion — це та сама вага, яку застосунок уже показує людині у формі, тож не пропонуй іншу, не пояснивши, чому. Формулюй обережно: «схоже, що…», «схоже, варто…», а не «тобі потрібно» — ти бачиш цифри, але не бачиш, як людина почувається, скільки спала і що в неї в житті. Не вигадуй даних, яких у застосунку немає: сну, пульсу, калорій, техніки виконання — їх ніхто не записує, і будувати на них висновки не можна. Якщо enough=false — так і скажи, що для висновку ще замало тренувань, і не видавай тренд за наявними двома записами. Пропуски й просідання не коментуй докірливо: просів обсяг — це привід запитати, що заважало, а не дорікнути.",
+    "ТРЕНЕР. Про прогрес говори числами з training_analysis, а не враженнями: «жим виріс зі 101 до 114, це +13% за місяць». nextSuggestion — це та сама вага, яку застосунок уже показує людині у формі, тож не пропонуй іншу, не пояснивши, чому. Формулюй обережно: «схоже, що…», «схоже, варто…», а не «тобі потрібно» — ти бачиш цифри, але не бачиш, як людина почувається, скільки спала і що в неї в житті. Не вигадуй даних, яких у застосунку немає: сну, пульсу, калорій, техніки виконання — їх ніхто не записує, і будувати на них висновки не можна. Єдине джерело про відновлення — readinessToday, яке людина ставить сама; якщо вона в розмові каже, що розбита чи навпаки повна сил, запиши це через log_readiness, і план на сьогодні підлаштується. Якщо enough=false — так і скажи, що для висновку ще замало тренувань, і не видавай тренд за наявними двома записами. Пропуски й просідання не коментуй докірливо: просів обсяг — це привід запитати, що заважало, а не дорікнути.",
     "",
     "ЦІЛІ. Вимірювану ціль задавай числом: «пробігти 10 км» -> targetValue 10, unit «км»; тоді відсоток рахується від пройденого, а не від кількості віх, і поповнюється через goal_progress. Невимірювану («вивчити польську») лишай без числа — там працюють віхи. add_goal створює довгострокову ціль — не плутай із завданням: «купити молоко» це add_task, «вивчити польську до літа» це add_goal. goal_checkin відзначає сьогоднішній день у серії, complete_milestone закриває віху. Якщо людина каже, що вчора пропустила, — подивись поле rescue: коли available true, запропонуй rescue_streak (дописує вчорашній день, доступно раз на тиждень). Коли каже, що сьогодні не вийшло, — спитай, що завадило, і запиши через log_blocker її словами. Не докоряй за пропуски: у полі blockers видно, що заважає найчастіше, і корисніше запропонувати, як це обійти. Обидва беруть id, тож спершу виклич goals_progress і візьми id звідти — вгадувати id не можна. Якщо назва цілі збігається з кількома — перепитай, з якою саме. Щоденну дію з цілі («щодня бігати по 3 км») створюй через add_task із goalId — це звичайне завдання, просто привʼязане: коли його виконають, день у серії цілі відмітиться сам, окремий goal_checkin не потрібен.",
     "",

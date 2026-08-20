@@ -69,6 +69,10 @@ const T = {
     planRested: (m, d) => `${m} — ${d} ${plural(d, { one: 'день', few: 'дні', many: 'днів' })} відпочинку`,
     planRestDay: 'Усі групи тренувались щойно. Дай їм день — і повертайся.',
     planStartBtn: 'Почати тренування',
+    readyLabel: 'Як почуваєшся?',
+    ready_ready: '🟢 Готовий', ready_ok: '🟡 Так собі', ready_low: '🔴 Розбитий',
+    readyNoteOk: 'Обсяг трохи менший, вага не росте — сьогодні без геройства.',
+    readyNoteLow: 'Легка сесія: два підходи й менша вага. Пропустити теж нормально.',
     unitKg: 'кг', unitReps: 'повт.',
     nextTryAddLoad: 'час на обтяження', nextTryFill: 'Підставити',
     prToastText: (name, w, r) => `Новий рекорд: ${name} — ${w}×${r}`,
@@ -127,6 +131,10 @@ const T = {
     planRested: (m, d) => `${m} — ${d} ${plural(d, { one: 'день', few: 'дня', many: 'дней' })} отдыха`,
     planRestDay: 'Все группы тренировались только что. Дай им день — и возвращайся.',
     planStartBtn: 'Начать тренировку',
+    readyLabel: 'Как самочувствие?',
+    ready_ready: '🟢 Готов', ready_ok: '🟡 Так себе', ready_low: '🔴 Разбит',
+    readyNoteOk: 'Объём чуть меньше, вес не растёт — сегодня без геройства.',
+    readyNoteLow: 'Лёгкая сессия: два подхода и меньший вес. Пропустить тоже нормально.',
     unitKg: 'кг', unitReps: 'повт.',
     nextTryAddLoad: 'пора на отягощение', nextTryFill: 'Подставить',
     prToastText: (name, w, r) => `Новый рекорд: ${name} — ${w}×${r}`,
@@ -185,6 +193,10 @@ const T = {
     planRested: (m, d) => `${m} — ${d} ${plural(d, { one: 'dzień', few: 'dni', many: 'dni' })} odpoczynku`,
     planRestDay: 'Wszystkie partie trenowane były przed chwilą. Daj im dzień i wracaj.',
     planStartBtn: 'Zacznij trening',
+    readyLabel: 'Jak się czujesz?',
+    ready_ready: '🟢 Gotowy', ready_ok: '🟡 Tak sobie', ready_low: '🔴 Rozbity',
+    readyNoteOk: 'Objętość nieco mniejsza, ciężar nie rośnie — dziś bez bohaterstwa.',
+    readyNoteLow: 'Lekka sesja: dwie serie i mniejszy ciężar. Odpuścić też jest w porządku.',
     unitKg: 'kg', unitReps: 'powt.',
     nextTryAddLoad: 'czas na obciążenie', nextTryFill: 'Wstaw',
     prToastText: (name, w, r) => `Nowy rekord: ${name} — ${w}×${r}`,
@@ -243,6 +255,10 @@ const T = {
     planRested: (m, d) => `${m} — rested ${d} ${plural(d, { one: 'day', other: 'days' })}`,
     planRestDay: 'Everything was trained just now. Give it a day and come back.',
     planStartBtn: 'Start workout',
+    readyLabel: 'How do you feel?',
+    ready_ready: '🟢 Ready', ready_ok: '🟡 So-so', ready_low: '🔴 Wrecked',
+    readyNoteOk: 'Slightly less volume, no weight increase — no heroics today.',
+    readyNoteLow: 'Light session: two sets and less weight. Skipping is fine too.',
     unitKg: 'kg', unitReps: 'reps',
     nextTryAddLoad: 'time to add load', nextTryFill: 'Fill in',
     prToastText: (name, w, r) => `New PR: ${name} — ${w}×${r}`,
@@ -709,6 +725,9 @@ function refreshDatePickersLang() {
 // ---- Стан ----
 let sessions = [];
 let unsubscribeSessions = null;
+// Самопочуття на сьогодні: 'ready' | 'ok' | 'low' або null, поки не питали.
+let readiness = null;
+let unsubscribeReadiness = null;
 let activeTab = 'sessions';
 let editingSessionId = null;
 let formExercises = []; // [{ id, libId, name, muscle, sets:[{weight, reps}] }]
@@ -723,6 +742,34 @@ function subscribeToSessions(uid) {
     sessions = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
     renderCurrentScreen();
   }, (err) => console.error('subscribeToSessions:', err));
+}
+
+// Один документ на добу, id — сама дата: перезапис замість накопичення
+// й нуль зайвих читань.
+function subscribeToReadiness(uid) {
+  if (unsubscribeReadiness) unsubscribeReadiness();
+  unsubscribeReadiness = db.collection('users').doc(uid).collection('readiness').doc(todayISO())
+    .onSnapshot((doc) => {
+      const data = doc.exists ? (doc.data() || {}) : {};
+      readiness = data.level || null;
+      renderCurrentScreen();
+    }, (err) => console.error('subscribeToReadiness:', err));
+}
+
+async function setReadiness(level) {
+  if (!auth.currentUser) return;
+  // Повторний дотик по тій самій кнопці знімає відповідь: людина могла
+  // промахнутись, і застрягти в «розбитий» до півночі було б безглуздо.
+  const next = readiness === level ? null : level;
+  const ref = db.collection('users').doc(auth.currentUser.uid).collection('readiness').doc(todayISO());
+  readiness = next;   // не чекаємо на сервер: кнопка має відповідати одразу
+  renderCurrentScreen();
+  try {
+    if (!next) await ref.delete();
+    else await ref.set({ level: next, date: todayISO(), createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+  } catch (err) {
+    console.error('setReadiness:', err);
+  }
 }
 
 function sortedSessions() {
@@ -817,13 +864,23 @@ function renderPlanCard() {
   const names = plan.muscles.map((m) => muscleLabel(m.muscle));
   const head = names.join(' + ');
   const why = t('planRested', names[0], plan.muscles[0].daysAgo);
+  // Самопочуття зсуває план, а не замінює його: та сама сесія, менший
+  // обсяг. Сну й пульсу застосунок не знає, тож питаємо навпростець.
+  const shown = window.WorkoutPlan.adjustForReadiness(plan.exercises, readiness);
+  const note = readiness === 'ok' ? t('readyNoteOk') : (readiness === 'low' ? t('readyNoteLow') : '');
 
   return `
     <div class="plan-card">
       <div class="plan-title">${escapeHtml(t('planTitle'))}</div>
       <div class="plan-head">${escapeHtml(head)}</div>
       <div class="plan-why">${escapeHtml(why)}</div>
-      ${plan.exercises.map((e) => `
+      <div class="ready-label">${escapeHtml(t('readyLabel'))}</div>
+      <div class="ready-row">
+        ${window.WorkoutPlan.READINESS.map((lvl) => `
+          <button type="button" class="ready-btn${readiness === lvl ? ' selected ' + lvl : ''}" data-ready="${lvl}">${escapeHtml(t('ready_' + lvl))}</button>`).join('')}
+      </div>
+      ${note ? `<div class="ready-note">${escapeHtml(note)}</div>` : ''}
+      ${shown.map((e) => `
         <div class="plan-row">
           <span class="plan-name">${escapeHtml(e.libId ? exerciseLabel(e.libId) : e.name)}</span>
           <span class="plan-load ${e.direction}">${e.sets}\u00D7\u2009${escapeHtml(setLabel(e.weight, e.reps))}</span>
@@ -838,7 +895,7 @@ function startPlannedSession() {
   const plan = window.WorkoutPlan.suggestSession(sessions, todayISO());
   if (!plan || plan.rest) return;
   openSessionForm(null);
-  formExercises = plan.exercises.map((e) => ({
+  formExercises = window.WorkoutPlan.adjustForReadiness(plan.exercises, readiness).map((e) => ({
     id: uid4(), libId: e.libId || null, name: e.name || '', muscle: e.muscle === 'other' ? null : e.muscle,
     sets: Array.from({ length: e.sets }, () => ({ weight: e.weight, reps: e.reps })),
   }));
@@ -874,6 +931,9 @@ function renderSessionsTab() {
   });
   const startBtn = document.getElementById('planStartBtn');
   if (startBtn) startBtn.addEventListener('click', startPlannedSession);
+  root.querySelectorAll('[data-ready]').forEach((btn) => {
+    btn.addEventListener('click', () => setReadiness(btn.dataset.ready));
+  });
 }
 
 function renderSessionCard(session) {
@@ -1428,8 +1488,11 @@ auth.onAuthStateChanged((user) => {
       }
     }).catch(() => {});
     subscribeToSessions(user.uid);
+    subscribeToReadiness(user.uid);
   } else {
     if (unsubscribeSessions) { unsubscribeSessions(); unsubscribeSessions = null; }
+    if (unsubscribeReadiness) { unsubscribeReadiness(); unsubscribeReadiness = null; }
+    readiness = null;
     sessions = [];
     document.getElementById('appScreen').style.display = 'none';
     document.getElementById('authScreen').style.display = 'flex';

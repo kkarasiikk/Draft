@@ -104,11 +104,17 @@
           var e = stats[key];
           var next = progression.suggestNext(e.history, e.libId || '');
           if (!next) return;
+          // Минулий робочий підхід потрібен, щоб у поганий день можна було
+          // не піднімати вагу, а лишити ту саму — без нього довелось би
+          // вгадувати, від чого відступати.
+          var last = progression.workingSet(e.history[0] && e.history[0].sets) || { weight: 0, reps: 0 };
           exercises.push({
             key: e.key, libId: e.libId, name: e.name, muscle: e.muscle,
             weight: next.weight, reps: next.reps,
             sets: Math.min(MAX_SETS, Math.max(MIN_SETS, e.sets || MIN_SETS)),
             direction: next.verdict, why: next.reason,
+            lastWeight: last.weight, lastReps: last.reps,
+            step: next.profile.step, minReps: next.profile.min,
             lastDate: e.lastDate, timesDone: e.count,
           });
         });
@@ -126,7 +132,54 @@
     };
   }
 
+  // ---- Готовність ----
+  // Сну, пульсу й HRV застосунок не знає й ніколи не знатиме: це
+  // веб-сторінка, доступу до годинника в неї немає. Тому єдине чесне
+  // джерело — сама людина: три кнопки перед тренуванням.
+  var READINESS = ['ready', 'ok', 'low'];
+
+  /** Підганяє план під самопочуття. 'ready' лишає як є; 'ok' знімає один
+   *  підхід і не піднімає вагу; 'low' — легка сесія: два підходи, мінус
+   *  десять відсотків, повторення з низу діапазону. */
+  function adjustForReadiness(exercises, level) {
+    if (READINESS.indexOf(level) < 0 || level === 'ready') return (exercises || []).slice();
+    return (exercises || []).map(function (e) {
+      var out = {};
+      Object.keys(e).forEach(function (k) { out[k] = e[k]; });
+
+      if (level === 'ok') {
+        out.sets = Math.max(MIN_SETS, e.sets - 1);
+        // Піднімати вагу в день, коли людина сказала «так собі», — це
+        // напрошуватись на провалений підхід. Лишаємо минулу.
+        if (e.direction === 'up' && e.lastWeight) {
+          out.weight = e.lastWeight;
+          out.reps = e.lastReps;
+          out.direction = 'hold';
+        } else if (e.direction === 'up' && !e.lastWeight) {
+          out.reps = e.lastReps || e.reps;
+          out.direction = 'hold';
+        }
+        return out;
+      }
+
+      // low
+      out.sets = MIN_SETS;
+      out.direction = 'down';
+      if (e.lastWeight) {
+        var base = progression.roundToStep(e.lastWeight * 0.9, e.step);
+        out.weight = base > 0 && base < e.lastWeight ? base : e.lastWeight;
+        out.reps = e.minReps || e.reps;
+      } else {
+        out.weight = 0;
+        out.reps = Math.max(1, Math.round((e.lastReps || e.reps) * 0.8));
+      }
+      return out;
+    });
+  }
+
   var api = {
+    READINESS: READINESS,
+    adjustForReadiness: adjustForReadiness,
     MIN_REST_DAYS: MIN_REST_DAYS,
     MAX_MUSCLES: MAX_MUSCLES,
     MAX_PER_MUSCLE: MAX_PER_MUSCLE,
