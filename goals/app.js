@@ -53,6 +53,15 @@ const T = {
     markGoalDoneBtn: 'Позначити ціль виконаною',
     nextStopBadge: 'Наступна зупинка',
     checkinBtnLabel: 'Зробив крок сьогодні', checkinBtnLabelDone: 'Зроблено сьогодні',
+    rescueMsg: (n) => `Вчора пропущено. Серія на ${n} дн. ще ціла — врятувати?`,
+    rescueBtn: 'Врятувати серію',
+    rescueWait: (n) => `Серія обірвалась. Наступний рятунок буде доступний через ${n} дн.`,
+    eveningTitle: 'Як пройшов день?',
+    eveningSub: 'Відмічай, що вдалося. Якщо ні — скажи одним словом, що завадило.',
+    eveningYes: '✓ Було', eveningNo: 'Не вийшло', eveningLater: 'Пізніше',
+    eveningRescue: '🛟 Врятувати серію',
+    reason_noTime: 'Не було часу', reason_forgot: 'Забув(ла)', reason_tired: 'Втома',
+    reason_mood: 'Не було настрою', reason_other: 'Інше',
     journalPlaceholder: 'Що сьогодні зробив(ла) для цієї цілі?',
     journalEmpty: 'Ще нема нотаток', journalSectionLabel: 'Щоденник',
     summaryActiveLabel: 'Активні', summaryStreakLabel: 'Серія', summaryDoneMonthLabel: 'За місяць',
@@ -104,6 +113,15 @@ const T = {
     markGoalDoneBtn: 'Отметить цель выполненной',
     nextStopBadge: 'Следующая остановка',
     checkinBtnLabel: 'Сделал шаг сегодня', checkinBtnLabelDone: 'Сделано сегодня',
+    rescueMsg: (n) => `Вчера пропущено. Серия на ${n} дн. ещё цела — спасти?`,
+    rescueBtn: 'Спасти серию',
+    rescueWait: (n) => `Серия оборвалась. Следующее спасение будет доступно через ${n} дн.`,
+    eveningTitle: 'Как прошёл день?',
+    eveningSub: 'Отмечай, что получилось. Если нет — скажи одним словом, что помешало.',
+    eveningYes: '✓ Было', eveningNo: 'Не вышло', eveningLater: 'Позже',
+    eveningRescue: '🛟 Спасти серию',
+    reason_noTime: 'Не было времени', reason_forgot: 'Забыл(а)', reason_tired: 'Усталость',
+    reason_mood: 'Не было настроения', reason_other: 'Другое',
     journalPlaceholder: 'Что сегодня сделал(а) для этой цели?',
     journalEmpty: 'Ещё нет заметок', journalSectionLabel: 'Дневник',
     summaryActiveLabel: 'Активные', summaryStreakLabel: 'Серия', summaryDoneMonthLabel: 'За месяц',
@@ -155,6 +173,15 @@ const T = {
     markGoalDoneBtn: 'Oznacz cel jako ukończony',
     nextStopBadge: 'Następny przystanek',
     checkinBtnLabel: 'Zrobiłem krok dzisiaj', checkinBtnLabelDone: 'Zrobione dzisiaj',
+    rescueMsg: (n) => `Wczoraj wypadło. Seria ${n} dni jest jeszcze cała — uratować?`,
+    rescueBtn: 'Uratuj serię',
+    rescueWait: (n) => `Seria się urwała. Kolejny ratunek będzie dostępny za ${n} dni.`,
+    eveningTitle: 'Jak minął dzień?',
+    eveningSub: 'Zaznacz, co się udało. Jeśli nie — powiedz jednym słowem, co przeszkodziło.',
+    eveningYes: '✓ Udało się', eveningNo: 'Nie wyszło', eveningLater: 'Później',
+    eveningRescue: '🛟 Uratuj serię',
+    reason_noTime: 'Brak czasu', reason_forgot: 'Zapomniałem', reason_tired: 'Zmęczenie',
+    reason_mood: 'Brak nastroju', reason_other: 'Inne',
     journalPlaceholder: 'Co dziś zrobiłeś(aś) dla tego celu?',
     journalEmpty: 'Jeszcze brak notatek', journalSectionLabel: 'Dziennik',
     summaryActiveLabel: 'Aktywne', summaryStreakLabel: 'Seria', summaryDoneMonthLabel: 'W tym mies.',
@@ -206,6 +233,15 @@ const T = {
     markGoalDoneBtn: 'Mark goal as done',
     nextStopBadge: 'Next stop',
     checkinBtnLabel: 'I took a step today', checkinBtnLabelDone: 'Done for today',
+    rescueMsg: (n) => `You missed yesterday. A ${n}-day streak is still savable — rescue it?`,
+    rescueBtn: 'Rescue the streak',
+    rescueWait: (n) => `The streak broke. The next rescue unlocks in ${n} days.`,
+    eveningTitle: 'How did the day go?',
+    eveningSub: 'Tick off what you managed. If not — say in one word what got in the way.',
+    eveningYes: '✓ Did it', eveningNo: 'Didn\u2019t happen', eveningLater: 'Later',
+    eveningRescue: '🛟 Rescue the streak',
+    reason_noTime: 'No time', reason_forgot: 'Forgot', reason_tired: 'Too tired',
+    reason_mood: 'Not in the mood', reason_other: 'Other',
     journalPlaceholder: 'What did you do for this goal today?',
     journalEmpty: 'No notes yet', journalSectionLabel: 'Journal',
     summaryActiveLabel: 'Active', summaryStreakLabel: 'Streak', summaryDoneMonthLabel: 'This month',
@@ -459,6 +495,9 @@ let editingGoalId = null;
 let formCategory = 'other';
 let formMilestones = [];
 let pendingDeleteId = null;
+// Яка ціль у вечірньому підсумку зараз питає «що завадило».
+let eveningReasonForId = null;
+const EVENING_DISMISS_KEY = 'goalsEveningDismissed';
 
 // ---- Дані (Firestore, реалтайм) ----
 function subscribeToGoals(uid) {
@@ -500,19 +539,21 @@ function fmtValue(n) {
   const num = Number(n) || 0;
   return String(Math.round(num * 100) / 100);
 }
+// Серія, рятунок і вечірня черга живуть у goals/streak.js — тим самим
+// модулем користується AI-помічник на сервері. Правило «коли рятунок
+// доступний» мусить бути одне: інакше в чаті пишеться одне, а на сторінці
+// показується інше.
+const Streak = window.GoalStreak;
 function computeStreak(checkins) {
-  if (!checkins || !checkins.length) return 0;
-  const set = new Set(checkins);
-  const today = todayISO();
-  const yesterday = isoDateShift(today, -1);
-  let cursor;
-  if (set.has(today)) cursor = today;
-  else if (set.has(yesterday)) cursor = yesterday; // грація: ще не відмітився сьогодні, але вчора був активний
-  else return 0; // розрив покриває і сьогодні, і вчора — серія мертва, без часткового заліку старої серії
-  let count = 0;
-  let d = cursor;
-  while (set.has(d)) { count++; d = isoDateShift(d, -1); }
-  return count;
+  return Streak.computeStreak(checkins, todayISO());
+}
+
+// Причини зберігаємо ключами, а не перекладеним текстом: людина може
+// перемкнути мову, і тоді «Не було часу» та «No time» рахувалися б як дві
+// різні причини. Вільний текст (з чату) лишається як є.
+const BLOCKER_KEYS = ['noTime', 'forgot', 'tired', 'mood', 'other'];
+function blockerLabel(reason) {
+  return BLOCKER_KEYS.includes(reason) ? t('reason_' + reason) : reason;
 }
 function daysToDeadline(targetDate) {
   const today = parseISODate(todayISO());
@@ -560,8 +601,77 @@ function renderCurrentScreen() {
 function renderDashboard() {
   renderSummaryStrip();
   renderBadgesRow();
+  renderEveningCard();
   renderStatusFilterRow();
   renderGoalsList();
+}
+
+// ---- Вечірній підсумок ----
+// З'являється надвечір і питає рівно про те, на що ще нема відповіді.
+// Відповів «було» чи назвав причину — ціль зникає зі списку; відповів на
+// всі — картка зникає сама. Це не звіт, а два дотики перед сном.
+function renderEveningCard() {
+  const host = document.getElementById('eveningCard');
+  if (!host) return;
+  const today = todayISO();
+  if (!Streak.isEvening(new Date()) || localStorage.getItem(EVENING_DISMISS_KEY) === today) {
+    host.innerHTML = '';
+    return;
+  }
+  // Більше п'яти питань перед сном — це вже допит. Решта дочекається
+  // наступного перерендеру: відповіді прибирають цілі з черги.
+  const queue = Streak.eveningQueue(goals, today).slice(0, 5);
+  if (!queue.length) { host.innerHTML = ''; return; }
+
+  host.innerHTML = `
+    <div class="evening-card">
+      <div class="evening-head">
+        <div class="evening-title">${escapeHtml(t('eveningTitle'))}</div>
+        <button type="button" class="evening-later" id="eveningLaterBtn">${escapeHtml(t('eveningLater'))}</button>
+      </div>
+      <div class="evening-sub">${escapeHtml(t('eveningSub'))}</div>
+      ${queue.map((g) => {
+        const rescue = Streak.rescueState(g, today);
+        const canRescue = rescue && rescue.available;
+        const reasons = eveningReasonForId === g.id
+          ? `<div class="evening-reasons">${BLOCKER_KEYS.map((k) =>
+              `<button type="button" class="evening-reason" data-reason="${k}" data-goal="${g.id}">${escapeHtml(t('reason_' + k))}</button>`).join('')}</div>`
+          : '';
+        return `
+        <div class="evening-goal">
+          <div class="evening-goal-title">${escapeHtml(g.title || '')}</div>
+          <div class="evening-actions">
+            <button type="button" class="evening-btn yes" data-yes="${g.id}">${escapeHtml(t('eveningYes'))}</button>
+            <button type="button" class="evening-btn" data-no="${g.id}">${escapeHtml(t('eveningNo'))}</button>
+            ${canRescue ? `<button type="button" class="evening-btn" data-rescue="${g.id}">${escapeHtml(t('eveningRescue'))}</button>` : ''}
+          </div>
+          ${reasons}
+        </div>`;
+      }).join('')}
+    </div>`;
+
+  document.getElementById('eveningLaterBtn').addEventListener('click', () => {
+    localStorage.setItem(EVENING_DISMISS_KEY, today);
+    eveningReasonForId = null;
+    renderEveningCard();
+  });
+  host.querySelectorAll('[data-yes]').forEach((btn) => {
+    btn.addEventListener('click', () => { eveningReasonForId = null; toggleTodayCheckin(btn.dataset.yes); });
+  });
+  host.querySelectorAll('[data-no]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      // Другий дотик по «не вийшло» згортає причини — щоб натиснуте
+      // помилково можна було закрити, а не тільки чимось відповісти.
+      eveningReasonForId = eveningReasonForId === btn.dataset.no ? null : btn.dataset.no;
+      renderEveningCard();
+    });
+  });
+  host.querySelectorAll('[data-reason]').forEach((btn) => {
+    btn.addEventListener('click', () => { eveningReasonForId = null; logBlocker(btn.dataset.goal, btn.dataset.reason); });
+  });
+  host.querySelectorAll('[data-rescue]').forEach((btn) => {
+    btn.addEventListener('click', () => rescueStreak(btn.dataset.rescue));
+  });
 }
 
 function renderSummaryStrip() {
@@ -714,6 +824,24 @@ function renderGoalDetail(goal) {
   document.getElementById('detailJourneyBlock').innerHTML = journeyHtml(goal);
   wireJourneyEvents(goal);
 
+  // Рятунок серії показуємо тільки тоді, коли є що рятувати: вчора
+  // пропущено, а до того ланцюг тягнувся. Якщо рятунок на паузі — чесно
+  // кажемо, коли він знову буде, а не мовчимо.
+  const rescue = Streak.rescueState(goal, todayISO());
+  const rescueEl = document.getElementById('detailRescueBlock');
+  if (rescue && rescue.available) {
+    rescueEl.innerHTML = `
+      <div class="rescue-banner">
+        <span>${escapeHtml(t('rescueMsg', rescue.lost))}</span>
+        <button type="button" id="rescueBtn">${escapeHtml(t('rescueBtn'))}</button>
+      </div>`;
+    document.getElementById('rescueBtn').addEventListener('click', () => rescueStreak(goal.id));
+  } else if (rescue) {
+    rescueEl.innerHTML = `<div class="rescue-banner waiting"><span>${escapeHtml(t('rescueWait', rescue.cooldownLeft))}</span></div>`;
+  } else {
+    rescueEl.innerHTML = '';
+  }
+
   const streak = computeStreak(goal.checkins);
   const checkedToday = (goal.checkins || []).includes(todayISO());
   document.getElementById('detailStreakRow').innerHTML = `
@@ -794,6 +922,31 @@ document.getElementById('journalAddBtn').addEventListener('click', () => {
 // об'єктів), і серверний updatedAt при кожному записі. ----
 // Додаємо, а не задаємо: людина думає «пробіг ще 2 км», а не «тепер у мене
 // 6.4». Нижче нуля не опускаємось — відʼємний пробіг ні про що не каже.
+// Рятунок дописує вчорашній день у чекіни й лишає слід у rescues — інакше
+// рятувати можна було б щодня, і серія перестала б щось означати.
+async function rescueStreak(goalId) {
+  const goal = goals.find((g) => g.id === goalId);
+  if (!goal || !auth.currentUser) return;
+  const result = Streak.applyRescue(goal, todayISO());
+  if (!result) return;
+  await db.collection('users').doc(auth.currentUser.uid).collection('goals').doc(goalId).update({
+    checkins: result.checkins, rescues: result.rescues,
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+  }).catch((err) => console.error('rescueStreak:', err));
+}
+
+// «Не вийшло» — теж відповідь. Записуємо причину, щоб через місяць було
+// видно, що саме заважає найчастіше, а не самий лише факт пропуску.
+async function logBlocker(goalId, reason) {
+  const goal = goals.find((g) => g.id === goalId);
+  if (!goal || !auth.currentUser) return;
+  const result = Streak.applyBlocker(goal, reason, todayISO());
+  if (!result) return;
+  await db.collection('users').doc(auth.currentUser.uid).collection('goals').doc(goalId).update({
+    blockers: result.blockers, updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+  }).catch((err) => console.error('logBlocker:', err));
+}
+
 async function addGoalProgress(goalId, delta) {
   const goal = goals.find((g) => g.id === goalId);
   if (!goal || !auth.currentUser) return;
@@ -1244,6 +1397,13 @@ setTimeout(() => {
     document.getElementById('authScreen').style.display = 'flex';
   }
 }, 6000);
+
+// Вкладку могли лишити відкритою з обіду — тоді вечірній підсумок нізвідки
+// не з'явиться, бо перерендеру не було. Повернення до вкладки — достатній
+// привід перевірити годинник ще раз.
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && currentScreen === 'dashboard') renderEveningCard();
+});
 
 // ---- Ініціалізація ----
 initDatePicker('goalTargetDate');

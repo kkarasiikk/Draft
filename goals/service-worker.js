@@ -1,11 +1,11 @@
 // Service Worker модуля «Цілі» (scope /goals/). Кожен модуль має власний
 // SW — для сторінки виграє реєстрація з найдовшим збігом scope.
-const CACHE_NAME = 'life-goals-v22';
+const CACHE_NAME = 'life-goals-v23';
 // Чистимо лише власні (застарілі) кеші: `caches` спільний для всього
 // походження, тож видалення "всього зайвого" стерло б кеші інших модулів.
 const CACHE_PREFIXES = ['life-goals-'];
-const NETWORK_FIRST = ['./ai-chat.js', './ai-chat.css', './', './index.html', './app.js'];
-const FILES_TO_CACHE = ['../ai-chat.js', '../ai-chat.css', './', './index.html', './app.js', './manifest.json',
+const NETWORK_FIRST = ['./ai-chat.js', './ai-chat.css', './', './index.html', './app.js', './streak.js'];
+const FILES_TO_CACHE = ['../ai-chat.js', '../ai-chat.css', './', './index.html', './app.js', './streak.js', './manifest.json',
   '../budget/firebase-config.js', '../budget/icon-192.png', '../budget/icon-512.png',
   '../budget/icon-192-maskable.png', '../budget/icon-512-maskable.png'];
 // Сторінка жорстко залежить від Firebase SDK (firebase.initializeApp() —

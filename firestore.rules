@@ -24,7 +24,8 @@ rules_version = '2';
 //                                         targetValue, currentValue, unit,
 //                                         status, milestones: [{id, title, done}],
 //                                         checkins: [YYYY-MM-DD], journal: [
-//                                         {id, text, createdAt}], createdAt, updatedAt}
+//                                         {id, text, createdAt}], rescues: [YYYY-MM-DD],
+//                                         blockers: [{date, reason}], createdAt, updatedAt}
 //
 // Правило: кожен користувач може читати й писати ЛИШЕ власні документи,
 // і лише якщо форма даних відповідає тому, що реально пише застосунок —
@@ -242,9 +243,13 @@ service cloud.firestore {
                  d.milestones is list && d.milestones.size() <= 50 &&
                  d.checkins is list && d.checkins.size() <= 400 &&
                  d.journal is list && d.journal.size() <= 200 &&
+                 // Врятовані дні й причини пропусків. Обидва списки старі
+                 // документи не мають — тому лише перевіряємо форму тих, що є.
+                 (!('rescues' in d) || (d.rescues is list && d.rescues.size() <= 50)) &&
+                 (!('blockers' in d) || (d.blockers is list && d.blockers.size() <= 200)) &&
                  d.createdAt is timestamp && d.updatedAt is timestamp &&
                  d.keys().hasOnly(['title', 'category', 'why', 'targetDate', 'status',
-                   'targetValue', 'currentValue', 'unit',
+                   'targetValue', 'currentValue', 'unit', 'rescues', 'blockers',
                    'milestones', 'checkins', 'journal', 'createdAt', 'updatedAt']);
         }
         allow read, delete: if isOwner(uid);

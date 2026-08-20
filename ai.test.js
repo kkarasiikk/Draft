@@ -86,6 +86,9 @@ describe("sanitizeTransactionInput", () => {
 // ---- executeTool ----
 describe("executeTool", () => {
   const ctx = {
+    // Те саме, що підставляє handleAiChat: інструменти беруть звідси
+    // «сьогодні» — і для дати операції, і для серії по цілі.
+    today: new Date().toISOString().slice(0, 10),
     currency: "UAH",
     categoriesExpense: [{ id: "food", label: "Їжа" }, { id: "other", label: "Інше" }],
     categoriesIncome: [{ id: "salary", label: "Зарплата" }],
@@ -512,6 +515,88 @@ describe("executeTool", () => {
       await ai.executeTool("uid1", "goal_progress", { id: add.output.id, add: 6.4 }, ctx);
       const r = await ai.executeTool("uid1", "goals_progress", {}, ctx);
       expect(r.output.goals[0]).toMatchObject({ targetValue: 10, currentValue: 6.4, unit: "км" });
+    });
+
+    // ---- Серія: рятунок і причини пропусків ----
+    // Правила рятунку перевіряє goals/streak.test.js — тут важливо, що
+    // інструмент справді пише в документ і не пише, коли не можна.
+    const back = (n) => {
+      const d = new Date();
+      d.setDate(d.getDate() - n);
+      return d.toISOString().slice(0, 10);
+    };
+
+    test("rescue_streak дописує вчорашній день і лишає слід", async () => {
+      const ref = await seedGoal({ checkins: [back(4), back(3), back(2)] });
+      const r = await ai.executeTool("uid1", "rescue_streak", { id: ref.id }, ctx);
+      expect(r.output).toMatchObject({ ok: true, day: back(1), streak: 4 });
+      const g = (await mockCurrent.collection("users").doc("uid1").collection("goals").doc(ref.id).get()).data();
+      expect(g.checkins).toContain(back(1));
+      expect(g.rescues).toEqual([back(1)]);
+    });
+
+    test("rescue_streak не рятує, коли вчора й так відмічено", async () => {
+      const ref = await seedGoal({ checkins: [back(2), back(1)] });
+      const r = await ai.executeTool("uid1", "rescue_streak", { id: ref.id }, ctx);
+      expect(r.isError).toBe(true);
+      const g = (await mockCurrent.collection("users").doc("uid1").collection("goals").doc(ref.id).get()).data();
+      expect(g.rescues).toBeUndefined();
+    });
+
+    // Раз на тиждень — інакше «серія» перестає щось означати, і модель має
+    // отримати не мовчазний успіх, а відмову з датою.
+    test("свіжий рятунок повертає, скільки лишилось чекати", async () => {
+      const ref = await seedGoal({ checkins: [back(4), back(3), back(2)], rescues: [back(3)] });
+      const r = await ai.executeTool("uid1", "rescue_streak", { id: ref.id }, ctx);
+      expect(r.isError).toBe(true);
+      expect(r.output.cooldownLeft).toBe(4);
+      const g = (await mockCurrent.collection("users").doc("uid1").collection("goals").doc(ref.id).get()).data();
+      expect(g.checkins).not.toContain(back(1));
+    });
+
+    test("log_blocker пише причину сьогоднішнім днем", async () => {
+      const ref = await seedGoal();
+      const r = await ai.executeTool("uid1", "log_blocker", { id: ref.id, reason: "не було часу" }, ctx);
+      expect(r.output).toMatchObject({ ok: true, date: today(), reason: "не було часу" });
+      const g = (await mockCurrent.collection("users").doc("uid1").collection("goals").doc(ref.id).get()).data();
+      expect(g.blockers).toEqual([{ date: today(), reason: "не було часу" }]);
+    });
+
+    test("повторний log_blocker замінює сьогоднішню причину", async () => {
+      const ref = await seedGoal({ blockers: [{ date: today(), reason: "забув" }] });
+      await ai.executeTool("uid1", "log_blocker", { id: ref.id, reason: "втома" }, ctx);
+      const g = (await mockCurrent.collection("users").doc("uid1").collection("goals").doc(ref.id).get()).data();
+      expect(g.blockers).toEqual([{ date: today(), reason: "втома" }]);
+    });
+
+    test("порожня причина й вигаданий id нічого не пишуть", async () => {
+      const ref = await seedGoal();
+      expect((await ai.executeTool("uid1", "log_blocker", { id: ref.id, reason: "  " }, ctx)).isError).toBe(true);
+      expect((await ai.executeTool("uid1", "log_blocker", { id: "вигаданий", reason: "втома" }, ctx)).isError).toBe(true);
+      expect((await ai.executeTool("uid1", "rescue_streak", { id: "вигаданий" }, ctx)).isError).toBe(true);
+      const g = (await mockCurrent.collection("users").doc("uid1").collection("goals").doc(ref.id).get()).data();
+      expect(g.blockers).toBeUndefined();
+    });
+
+    // Модель має бачити стан серії готовим числом, а не вираховувати його
+    // з чотирьохсот дат — інакше рятунок пропонувався б навмання.
+    test("goals_progress показує серію, рятунок і що заважає найчастіше", async () => {
+      await seedGoal({
+        checkins: [back(4), back(3), back(2)],
+        blockers: [{ date: back(2), reason: "не було часу" }, { date: back(3), reason: "не було часу" },
+          { date: back(5), reason: "втома" }],
+      });
+      const g = (await ai.executeTool("uid1", "goals_progress", {}, ctx)).output.goals[0];
+      expect(g.streak).toBe(0);
+      expect(g.rescue).toMatchObject({ day: back(1), lost: 3, available: true });
+      expect(g.blockers).toEqual([{ reason: "не було часу", count: 2 }, { reason: "втома", count: 1 }]);
+    });
+
+    test("без розриву поле rescue порожнє", async () => {
+      await seedGoal({ checkins: [back(1), today()] });
+      const g = (await ai.executeTool("uid1", "goals_progress", {}, ctx)).output.goals[0];
+      expect(g.streak).toBe(2);
+      expect(g.rescue).toBe(null);
     });
 
     test("неіснуючі id цілі чи віхи повертають помилку, а не мовчазний успіх", async () => {

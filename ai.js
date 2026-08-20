@@ -7,6 +7,9 @@ const { EXERCISE_LIB, exerciseLabel, exerciseMuscle } = require("./workout/exerc
 // Ті самі категорії, що показує бюджет, доки людина їх не редагувала —
 // у профілі їх у цей момент ще немає (див. коментар у файлі).
 const { defaultCategoryList } = require("./categories-default");
+// Серія, рятунок і причини пропусків — той самий модуль, що й на сторінці
+// цілей. Правило «коли рятунок доступний» мусить бути одне.
+const goalStreak = require("./goals/streak");
 
 // admin.initializeApp() уже викликано в index.js — тут просто перевикористовуємо
 // той самий інстанс. У тестах цей рядок працює з jest.mock("firebase-admin", ...)
@@ -298,6 +301,32 @@ const tools = [
     },
   },
   {
+    name: "rescue_streak",
+    description:
+      "Врятувати серію: дописати ВЧОРАШНІЙ пропущений день, щоб ланцюг не обірвався. " +
+      "Працює лише коли пропущено рівно вчора, а до того серія тривала, і лише раз на тиждень — " +
+      "goals_progress показує в полі rescue, чи доступно. Не використовуй, щоб просто відзначити сьогодні: для цього goal_checkin.",
+    input_schema: {
+      type: "object",
+      properties: { id: { type: "string", description: "id цілі зі списку goals_progress" } },
+      required: ["id"],
+    },
+  },
+  {
+    name: "log_blocker",
+    description:
+      "Записати, що завадило сьогодні попрацювати над ціллю: «не встиг, не було часу» -> reason «не було часу». " +
+      "Один запис на день — повторний виклик замінює попередній. Не вигадуй причину сам: пиши те, що сказала людина.",
+    input_schema: {
+      type: "object",
+      properties: {
+        id: { type: "string", description: "id цілі зі списку goals_progress" },
+        reason: { type: "string", description: "Коротко, кількома словами: «не було часу», «втома», «забув»" },
+      },
+      required: ["id", "reason"],
+    },
+  },
+  {
     name: "complete_milestone",
     description:
       "Позначити віху цілі виконаною. id цілі й id віхи бери з goals_progress.",
@@ -533,6 +562,8 @@ async function executeTool(uid, name, input, ctx) {
   if (name === "edit_goal") return editGoal(uid, input);
   if (name === "goal_progress") return goalProgress(uid, input);
   if (name === "goal_checkin") return goalCheckin(uid, input);
+  if (name === "rescue_streak") return rescueStreak(uid, input, ctx);
+  if (name === "log_blocker") return logBlocker(uid, input, ctx);
   if (name === "complete_milestone") return completeMilestone(uid, input);
 
   return { output: { ok: false, error: "unknown tool" }, isError: true };
@@ -1135,6 +1166,47 @@ async function goalCheckin(uid, input) {
   };
 }
 
+// Рятунок і причина пропуску рахуються тим самим модулем, що й на сторінці
+// (goals/streak.js), тож у чаті та в застосунку правила збігаються до дня.
+async function rescueStreak(uid, input, ctx) {
+  const found = await loadForEdit(uid, "goals", input.id, "ціль не знайдена");
+  if (found.error) return found.error;
+
+  const state = goalStreak.rescueState(found.data, ctx.today);
+  if (!state) {
+    return { output: { ok: false, error: "рятувати нічого: вчора або відмічено, або серії до того не було" }, isError: true };
+  }
+  if (!state.available) {
+    return {
+      output: { ok: false, error: `рятунок буде доступний через ${state.cooldownLeft} дн.`, cooldownLeft: state.cooldownLeft },
+      isError: true,
+    };
+  }
+  const result = goalStreak.applyRescue(found.data, ctx.today);
+  await found.ref.update({
+    checkins: result.checkins, rescues: result.rescues,
+    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+  });
+  return {
+    output: { ok: true, day: result.day, streak: result.streak },
+    action: { kind: "streak_rescued", title: found.data.title || "", day: result.day, streak: result.streak },
+  };
+}
+
+async function logBlocker(uid, input, ctx) {
+  const found = await loadForEdit(uid, "goals", input.id, "ціль не знайдена");
+  if (found.error) return found.error;
+
+  const result = goalStreak.applyBlocker(found.data, input.reason, ctx.today);
+  if (!result) return { output: { ok: false, error: "потрібна причина" }, isError: true };
+
+  await found.ref.update({ blockers: result.blockers, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
+  return {
+    output: { ok: true, date: ctx.today, reason: result.reason, top: goalStreak.blockerStats({ blockers: result.blockers }) },
+    action: { kind: "blocker_logged", title: found.data.title || "", reason: result.reason },
+  };
+}
+
 async function completeMilestone(uid, input) {
   const goalId = typeof input.goalId === "string" ? input.goalId : "";
   const milestoneId = typeof input.milestoneId === "string" ? input.milestoneId : "";
@@ -1184,6 +1256,11 @@ async function goalsProgress(uid) {
           unit: g.unit || "",
           checkins: (g.checkins || []).length,
           checkedInToday: (g.checkins || []).includes(today),
+          // Серію рахуємо тут, а не залишаємо моделі рахувати з дат:
+          // від неї залежить, чи взагалі пропонувати рятунок.
+          streak: goalStreak.computeStreak(g.checkins, today),
+          rescue: goalStreak.rescueState(g, today),
+          blockers: goalStreak.blockerStats(g),
         };
       }),
     },
@@ -1202,7 +1279,7 @@ function buildSystemPrompt(ctx) {
     "",
     "ТРЕНУВАННЯ. '4 по 8 на 60 кг' означає чотири однакові підходи по 8 повторень з вагою 60 — перелічи їх усі, а не один. Вправу з бібліотеки завжди передавай через libId (жим лежачи -> benchPress, присідання -> squat, станова -> deadlift і так далі): рекорди рахуються саме за ним, і без libId запис не склеїться з попередніми тренуваннями тієї ж вправи. Для планки й інших вправ з власною вагою став weight 0. Якщо людина каже 'запиши тренування' без жодної вправи — спитай, які саме вправи були.",
     "",
-    "ЦІЛІ. Вимірювану ціль задавай числом: «пробігти 10 км» -> targetValue 10, unit «км»; тоді відсоток рахується від пройденого, а не від кількості віх, і поповнюється через goal_progress. Невимірювану («вивчити польську») лишай без числа — там працюють віхи. add_goal створює довгострокову ціль — не плутай із завданням: «купити молоко» це add_task, «вивчити польську до літа» це add_goal. goal_checkin відзначає сьогоднішній день у серії, complete_milestone закриває віху. Обидва беруть id, тож спершу виклич goals_progress і візьми id звідти — вгадувати id не можна. Якщо назва цілі збігається з кількома — перепитай, з якою саме.",
+    "ЦІЛІ. Вимірювану ціль задавай числом: «пробігти 10 км» -> targetValue 10, unit «км»; тоді відсоток рахується від пройденого, а не від кількості віх, і поповнюється через goal_progress. Невимірювану («вивчити польську») лишай без числа — там працюють віхи. add_goal створює довгострокову ціль — не плутай із завданням: «купити молоко» це add_task, «вивчити польську до літа» це add_goal. goal_checkin відзначає сьогоднішній день у серії, complete_milestone закриває віху. Якщо людина каже, що вчора пропустила, — подивись поле rescue: коли available true, запропонуй rescue_streak (дописує вчорашній день, доступно раз на тиждень). Коли каже, що сьогодні не вийшло, — спитай, що завадило, і запиши через log_blocker її словами. Не докоряй за пропуски: у полі blockers видно, що заважає найчастіше, і корисніше запропонувати, як це обійти. Обидва беруть id, тож спершу виклич goals_progress і візьми id звідти — вгадувати id не можна. Якщо назва цілі збігається з кількома — перепитай, з якою саме.",
     "",
     "ВИПРАВЛЯТИ. Помічник уміє міняти вже записане, але не вміє нічого видаляти — так і кажи, якщо просять видалити, і поясни, що це робиться в самому розділі. Перед будь-якою правкою знайди запис інструментом читання (query_transactions, list_tasks, workout_history, goals_progress, savings_summary) і візьми звідти id — вгадувати id не можна. У edit_* передавай ТІЛЬКИ ті поля, які змінюються. Виняток — exercises у edit_workout і milestones у edit_goal: там треба надіслати повний новий список, тож спершу прочитай наявний. Якщо під опис підходить кілька записів — перепитай, який саме.",
     "",

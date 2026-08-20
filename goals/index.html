@@ -289,6 +289,37 @@
   .all-done-banner button{flex-shrink:0;border:none;background:var(--income);color:#fff;font-family:'Inter',sans-serif;
     font-size:13px;font-weight:600;padding:8px 14px;border-radius:999px;cursor:pointer;}
 
+  /* Рятунок серії: попередження, а не свято, — тому теплий колір
+     видатків, а не зелений. Кнопка поруч, щоб рішення було одним дотиком. */
+  .rescue-banner{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;
+    background:var(--expense-light);color:var(--expense);border-radius:16px;padding:12px 16px;margin-bottom:12px;
+    font-size:13.5px;font-weight:600;line-height:1.45;text-align:center;}
+  .rescue-banner button{flex-shrink:0;border:none;background:var(--expense);color:#fff;font-family:'Inter',sans-serif;
+    font-size:13px;font-weight:600;padding:8px 14px;border-radius:999px;cursor:pointer;}
+  .rescue-banner button:active{transform:scale(.96);}
+  .rescue-banner.waiting{background:var(--surface-flat);color:var(--ink-muted);}
+
+  /* Вечірній підсумок */
+  .evening-card{background:var(--surface);border-radius:20px;padding:16px;margin-bottom:16px;}
+  .evening-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:4px;}
+  .evening-title{font-family:'Inter',sans-serif;font-size:15px;font-weight:700;color:var(--ink);}
+  .evening-later{border:none;background:none;font-family:'Inter',sans-serif;font-size:12.5px;font-weight:600;
+    color:var(--ink-muted);cursor:pointer;padding:4px 2px;}
+  .evening-sub{font-size:12.5px;color:var(--ink-muted);line-height:1.45;margin-bottom:12px;}
+  .evening-goal{padding:12px 0;border-top:1px solid var(--border);}
+  .evening-goal:first-of-type{border-top:none;}
+  .evening-goal-title{font-size:14.5px;font-weight:600;color:var(--ink);margin-bottom:8px;line-height:1.35;}
+  .evening-actions{display:flex;gap:8px;flex-wrap:wrap;}
+  .evening-btn{border:1px solid var(--glass-btn-border);background:var(--glass-btn-bg);border-radius:999px;
+    padding:8px 14px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;}
+  .evening-btn:active{transform:scale(.96);}
+  .evening-btn.yes{background:var(--income-light);color:var(--income);border-color:transparent;}
+  .evening-reasons{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+  .evening-reason{border:1px solid var(--glass-btn-border);background:none;border-radius:999px;padding:6px 12px;
+    font-family:'Inter',sans-serif;font-size:12.5px;color:var(--ink);cursor:pointer;}
+  .evening-reason:active{transform:scale(.96);}
+  .evening-done{font-size:13px;color:var(--income);font-weight:600;}
+
   .streak-row{display:flex;justify-content:center;margin-bottom:22px;}
   .streak-btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--glass-btn-border);background:var(--glass-btn-bg);
     border-radius:999px;padding:11px 20px;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;color:var(--ink);cursor:pointer;
@@ -470,6 +501,7 @@
   <div class="content">
     <div class="summary-strip" id="summaryStrip"></div>
     <div class="badges-row" id="badgesRow"></div>
+    <div id="eveningCard"></div>
     <div class="status-filter-row" id="statusFilterRow"></div>
     <div id="goalsList"></div>
   </div>
@@ -513,6 +545,7 @@
     <div id="detailWhyBlock"></div>
     <div id="detailProgressBlock"></div>
     <div id="detailJourneyBlock"></div>
+    <div id="detailRescueBlock"></div>
     <div class="streak-row" id="detailStreakRow"></div>
     <div class="section-label" id="journalSectionLabel">Щоденник</div>
     <div class="journal-add-row">
@@ -576,6 +609,7 @@
 </div>
 
 <script src="../budget/firebase-config.js"></script>
+<script src="streak.js"></script>
 <script src="app.js"></script>
 <script src="../ai-chat.js"></script>
 </body>
