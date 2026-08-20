@@ -325,6 +325,7 @@
   const SPEECH_LOCALES = { uk: 'uk-UA', ru: 'ru-RU', pl: 'pl-PL', en: 'en-US' };
   const SILENCE_MS = 5000;      // скільки тиші чекаємо, перш ніж завершити
   const MAX_LISTEN_MS = 90000;  // стеля на весь запис — щоб шум не слухався вічно
+  const MAX_RESTARTS = 8;       // підхоплень поспіль без жодного почутого слова
   let recognition = null;
   let listening = false;   // намір людини, а не стан рушія
   let finishing = false;   // зупинка навмисна: не підхоплювати
@@ -332,6 +333,32 @@
   let heard = '';          // накопичений остаточний текст, живе між перезапусками
   let silenceTimer = null;
   let startedAt = 0;
+  let micStream = null;    // тримаємо мікрофон відкритим на весь запис
+  let restarts = 0;        // підхоплень поспіль без жодного почутого слова
+
+  // Один дозвіл на весь запис, а не на кожне підхоплення. Рушій відкриває
+  // мікрофон сам і закриває його, щойно завершиться, — а завершується він
+  // часто (див. коментар вище). Кожне таке відкриття Safari перепитує
+  // окремо. Власний потік тримає мікрофон зайнятим від першого дотику до
+  // кінця запису, тож підхоплення відбуваються мовчки.
+  async function holdMic() {
+    if (micStream) return true;
+    const md = navigator.mediaDevices;
+    if (!md || !md.getUserMedia) return true; // немає API — не привід не пробувати розпізнавання
+    try {
+      micStream = await md.getUserMedia({ audio: true });
+      return true;
+    } catch (err) {
+      console.error('mic:', err);
+      return false;
+    }
+  }
+
+  function releaseMic() {
+    if (!micStream) return;
+    micStream.getTracks().forEach((track) => { try { track.stop(); } catch (e) { /* уже зупинений */ } });
+    micStream = null;
+  }
 
   function SpeechCtor() {
     return window.SpeechRecognition || window.webkitSpeechRecognition || null;
@@ -352,15 +379,27 @@
     silenceTimer = setTimeout(() => { finishing = true; stopRecognition(); finish(); }, SILENCE_MS);
   }
 
-  function toggleListening() {
+  async function toggleListening() {
     if (listening) { cancelled = true; finishing = true; stopRecognition(); finish(); return; }
     listening = true;
     cancelled = false;
     finishing = false;
     heard = '';
+    restarts = 0;
     startedAt = Date.now();
     renderMic();
-    if (!spawnRecognition()) { listening = false; renderMic(); return; }
+
+    if (!(await holdMic())) {
+      listening = false;
+      renderMic();
+      history.push({ role: 'assistant', text: t('micDenied'), error: true });
+      render();
+      return;
+    }
+    // Поки питали дозвіл, людина могла передумати й натиснути ще раз.
+    if (!listening) { releaseMic(); return; }
+
+    if (!spawnRecognition()) { listening = false; releaseMic(); renderMic(); return; }
     armSilence();
   }
 
@@ -377,6 +416,7 @@
     rec.maxAlternatives = 1;
 
     rec.onresult = (e) => {
+      restarts = 0; // почули слово — лічильник порожніх підхоплень скидається
       let interim = '';
       for (let i = e.resultIndex; i < e.results.length; i++) {
         const chunk = e.results[i][0].transcript;
@@ -404,7 +444,11 @@
     rec.onend = () => {
       if (rec !== recognition) return; // застарілий інстанс, уже не наш
       // Рушій міг завершитись сам, хоча тиша ще не набралась — підхоплюємо.
-      if (listening && !finishing && Date.now() - startedAt < MAX_LISTEN_MS) {
+      // Але не безкінечно: якщо він падає одразу й нічого не чує, кожне
+      // підхоплення — це ще одна спроба відкрити мікрофон, і вони мовчки
+      // з'їдали б батарею.
+      if (listening && !finishing && restarts < MAX_RESTARTS && Date.now() - startedAt < MAX_LISTEN_MS) {
+        restarts++;
         if (spawnRecognition()) return;
       }
       finish();
@@ -431,6 +475,7 @@
     finishing = false;
     if (silenceTimer) { clearTimeout(silenceTimer); silenceTimer = null; }
     recognition = null;
+    releaseMic();
     renderMic();
     const text = el('aicInput').value.trim();
     // Сказане надсилається саме — заради цього все й затівалось. Але текст
