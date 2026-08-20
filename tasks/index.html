@@ -74,11 +74,14 @@
   }
   body{transition:background-color .2s ease, color .2s ease;}
   *{box-sizing:border-box;}
-  html{overscroll-behavior-y:none;scrollbar-gutter:stable;overflow-y:scroll;background:var(--bg);}
+  /* scrollbar-gutter лишається — він тримає ширину сторінки незмінною на
+     комп'ютері. А от overflow-y:scroll малював смугу навіть тоді, коли
+     гортати нічого. */
+  html{overscroll-behavior-y:none;scrollbar-gutter:stable;background:var(--bg);}
   body{margin:0;color:var(--ink);font-family:'Inter',sans-serif;
     padding-bottom:calc(100px + env(safe-area-inset-bottom));
     -webkit-tap-highlight-color:transparent;overscroll-behavior-y:none;-webkit-overflow-scrolling:touch;
-    background:var(--bg);min-height:100vh;}
+    background:var(--bg);min-height:100vh; min-height:100svh;}
   .wrap{max-width:480px;margin:0 auto;position:relative;z-index:1;}
 
   .background{position:fixed; inset:0; z-index:-1; overflow:hidden; background: var(--bg-radial); transition: background .2s ease;}
@@ -107,8 +110,8 @@
   @keyframes cardIn{ from{opacity:0; transform:translateY(24px);} to{opacity:1; transform:translateY(0);} }
 
   /* ---- Auth screen ---- */
-  #authScreen{display:none;min-height:100vh;align-items:center;justify-content:center;padding:24px;}
-  #authLoading{display:flex;min-height:100vh;align-items:center;justify-content:center;padding:24px;}
+  #authScreen{display:none;min-height:100vh; min-height:100svh;align-items:center;justify-content:center;padding:24px;}
+  #authLoading{display:flex;min-height:100vh; min-height:100svh;align-items:center;justify-content:center;padding:24px;}
   .spinner{width:32px;height:32px;border-radius:50%;border:3px solid var(--glass-btn-border);border-top-color:var(--accent);animation:spin .8s linear infinite;}
   @keyframes spin{to{transform:rotate(360deg);}}
   @media (prefers-reduced-motion: reduce){.spinner{animation:none;opacity:.55;}}
