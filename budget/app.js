@@ -649,6 +649,7 @@ let editingSavingId = null;
 let savingsGoals = [];
 let unsubscribeSavingsGoals = null;
 let currentSavingsGoalId = null;
+let addButtonMode = 'entry'; // 'entry' | 'savings' | null — що робить «плюс» зараз
 let editingGoalId = null;
 let savingsDataLoaded = false;
 let goalsDataLoaded = false;
@@ -1659,7 +1660,7 @@ function openGoalDetail(goalId) {
   document.getElementById('goalDetailTitle').textContent = goal ? (goal.name || t('defaultGoalName')) : '';
   document.getElementById('savingsGoalsList').style.display = 'none';
   document.getElementById('savingsGoalDetail').style.display = 'block';
-  document.getElementById('savingsFabRow').style.display = 'flex';
+  updateAddButton();
   renderSavings();
 }
 
@@ -1667,7 +1668,7 @@ function backToGoalsList() {
   currentSavingsGoalId = null;
   document.getElementById('savingsGoalDetail').style.display = 'none';
   document.getElementById('savingsGoalsList').style.display = 'block';
-  document.getElementById('savingsFabRow').style.display = 'none';
+  updateAddButton();
   renderSavingsGoalsList();
 }
 
@@ -2450,17 +2451,53 @@ function selectTab(tabKey) {
     currentSavingsGoalId = null;
     document.getElementById('savingsGoalDetail').style.display = 'none';
     document.getElementById('savingsGoalsList').style.display = 'block';
-    document.getElementById('savingsFabRow').style.display = 'none';
     renderSavingsGoalsList();
-  } else {
-    document.getElementById('savingsFabRow').style.display = 'none';
   }
+  updateAddButton();
   if (isNotes) renderNotesTab();
   render();
 }
 
-// ---- Нижнє меню: кнопка "+" одразу відкриває форму нового запису ----
-document.getElementById('bnAddBtn').addEventListener('click', () => openForm('expense'));
+// ---- Кнопка "+" ----
+// Вона доречна не скрізь. У статистиці додавати нічого, а в нотатках і в
+// списку цілей уже є власні кнопки просто в тілі сторінки — другий «плюс»
+// поруч з ними лише плутав би. Лишається два місця: записи, де він одразу
+// відкриває форму витрати, і відкрита ціль заощаджень, де він розкриває
+// вибір «зняти чи поповнити».
+//
+// Коли кнопки немає, помічник опускається на її місце (клас на <body>) —
+// інакше він висів би над порожнечею.
+function updateAddButton() {
+  const inGoal = currentTab === 'savings' && currentSavingsGoalId;
+  const mode = currentTab === 'entries' ? 'entry' : inGoal ? 'savings' : null;
+  addButtonMode = mode;
+
+  document.getElementById('bnAddBtn').style.display = mode ? '' : 'none';
+  document.body.classList.toggle('no-page-fab', !mode);
+  if (mode !== 'savings') closeSavingsActions();
+}
+
+// Вибір «зняти / поповнити» ховається за «плюсом», а не висить постійно:
+// на екрані цілі це дві дії з чотирьох можливих, і тримати їх завжди
+// розкритими означало б закривати ними список операцій.
+function closeSavingsActions() {
+  document.getElementById('savingsFabRow').classList.remove('show');
+  document.getElementById('bnAddBtn').classList.remove('open');
+}
+
+function toggleSavingsActions() {
+  const row = document.getElementById('savingsFabRow');
+  const opened = row.classList.toggle('show');
+  document.getElementById('bnAddBtn').classList.toggle('open', opened);
+}
+
+// Початковий стан: застосунок відкривається на «Кошти».
+updateAddButton();
+
+document.getElementById('bnAddBtn').addEventListener('click', () => {
+  if (addButtonMode === 'savings') toggleSavingsActions();
+  else openForm('expense');
+});
 document.querySelectorAll('.bn-item[data-tab]').forEach((btn) => {
   btn.addEventListener('click', () => selectTab(btn.dataset.tab));
 });
@@ -2608,8 +2645,8 @@ document.getElementById('deleteGoalBtn').addEventListener('click', () => {
   document.getElementById('confirmDelete').textContent = t('deleteBtn');
   document.getElementById('confirmOverlay').classList.add('show');
 });
-document.getElementById('openDeposit').addEventListener('click', () => openSavingsForm('deposit'));
-document.getElementById('openWithdraw').addEventListener('click', () => openSavingsForm('withdraw'));
+document.getElementById('openDeposit').addEventListener('click', () => { closeSavingsActions(); openSavingsForm('deposit'); });
+document.getElementById('openWithdraw').addEventListener('click', () => { closeSavingsActions(); openSavingsForm('withdraw'); });
 document.getElementById('closeSavingsForm').addEventListener('click', () => { editingSavingId = null; document.getElementById('savingsFormOverlay').classList.remove('show'); });
 document.getElementById('savingsFormOverlay').addEventListener('click', (e) => { if (e.target.id === 'savingsFormOverlay') { editingSavingId = null; e.currentTarget.classList.remove('show'); } });
 document.getElementById('savingsSubmitBtn').addEventListener('click', submitSavingsForm);

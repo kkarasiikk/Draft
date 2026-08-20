@@ -376,6 +376,9 @@
     box-shadow:0 6px 18px rgba(92,124,250,.4), 0 2px 8px rgba(20,20,24,.12);transition:transform .15s ease;
     -webkit-tap-highlight-color:transparent;}
   .bn-fab:active{transform:scale(.92);}
+  /* Коли «плюса» на екрані немає, помічник займає його місце — інакше висів
+     би над порожнечею. */
+  body.no-page-fab .ai-fab{--ai-fab-bottom:86px;}
   .bn-fab svg{transition:transform .18s ease;}
   .bn-fab.open svg{transform:rotate(45deg);}
   .modal-overlay{position:fixed;inset:0;background:var(--overlay);display:none;align-items:flex-end;justify-content:center;z-index:50;}
@@ -559,6 +562,7 @@
     .fab-row{left:auto;right:32px;bottom:calc(32px + 84px);justify-content:flex-end;padding:0 62px 0 0;}
     .bottom-nav{left:auto;right:32px;bottom:32px;margin:0;width:350px;}
     .bn-fab{--fab-right:32px;--fab-bottom:104px;}
+    body.no-page-fab .ai-fab{--ai-fab-bottom:104px;}
 
     .modal-overlay{align-items:center;}
     .modal{border-radius:18px;max-height:88vh;}
@@ -770,8 +774,8 @@
   </div>
 </div>
 
-<div class="fab-row" id="savingsFabRow" style="display:none;">
-  <button class="fab exp" id="openWithdraw"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg> <span id="fabWithdrawLabel">Зняти</span></button>
+<div class="fab-row" id="savingsFabRow">
+  <button class="fab exp" id="openWithdraw"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/></svg> <span id="fabWithdrawLabel">Зняти</span></button>
   <button class="fab inc" id="openDeposit"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg> <span id="fabDepositLabel">Поповнити</span></button>
 </div>
 
