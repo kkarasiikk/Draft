@@ -9,6 +9,7 @@ const { EXERCISE_LIB, exerciseLabel, exerciseMuscle } = require("./workout/exerc
 // що й людина: інакше в чаті звучало б одне, а на екрані стояло інше.
 const workoutProgress = require("./workout/progress");
 const { suggestNext } = require("./workout/progression");
+const { suggestSession } = require("./workout/plan");
 // Ті самі категорії, що показує бюджет, доки людина їх не редагувала —
 // у профілі їх у цей момент ще немає (див. коментар у файлі).
 const { defaultCategoryList } = require("./categories-default");
@@ -212,7 +213,7 @@ const tools = [
     description:
       "Готовий розбір тренувань: чи росте сила (оцінка 1ПМ за Еплі, останні 28 днів проти попередніх 28), " +
       "обсяг по групах мʼязів, скільки днів кожна група відпочивала і яку вагу правило прогресії пропонує далі. " +
-      "Викликай ЗАМІСТЬ того, щоб рахувати тренди самому з workout_history: тут ті самі числа, що бачить людина на екрані. " +
+      "Тут же todaySuggestion — готова пропозиція на сьогодні (яку групу тренувати і з якими вагами), та сама, що на екрані. Викликай ЗАМІСТЬ того, щоб рахувати тренди самому з workout_history: тут ті самі числа, що бачить людина. " +
       "workout_history потрібен лише тоді, коли треба глянути на конкретні підходи.",
     input_schema: { type: "object", properties: {} },
   },
@@ -899,10 +900,26 @@ async function trainingAnalysis(uid, ctx) {
     };
   });
 
+  // Те саме, що показує картка «План на сьогодні» на сторінці: питання
+  // «що мені сьогодні робити» приходить і в чат теж, і відповідь має бути
+  // однією, а не двома різними.
+  const plan = suggestSession(sessions, ctx.today);
+  const todaySuggestion = !plan ? null : (plan.rest
+    ? { rest: true, muscle: plan.muscle, daysAgo: plan.daysAgo }
+    : {
+      rest: false,
+      muscles: plan.muscles.map((m) => ({ muscle: m.muscle, daysAgo: m.daysAgo })),
+      exercises: plan.exercises.map((e) => ({
+        exercise: e.libId ? exerciseLabel(e.libId, ctx.lang) : e.name,
+        muscle: e.muscle, sets: e.sets, weight: e.weight, reps: e.reps, direction: e.direction,
+      })),
+    });
+
   return {
     output: {
       enough: data.enough,
       needSessions: data.needSessions,
+      todaySuggestion,
       windowDays: data.windowDays,
       sessions: { last28: data.sessionsNow, previous28: data.sessionsPrev },
       strengthChangePct: data.strengthPct,

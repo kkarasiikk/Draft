@@ -63,6 +63,12 @@ const T = {
     progressNotEnough: (n) => `Замало даних — ще ${n} ${plural(n, { one: 'тренування', few: 'тренування', many: 'тренувань' })}, і зʼявиться порівняння з минулим місяцем.`,
     progressNoCompare: 'Ще немає з чим порівнювати — потрібен місяць історії тих самих вправ.',
     progressVolumeLabel: 'Обсяг', progressNewMark: 'нове',
+    planTitle: 'План на сьогодні',
+    // Без дієслова: «Спина відпочивали» — так не кажуть, а рід і число
+    // назв мʼязів різні.
+    planRested: (m, d) => `${m} — ${d} ${plural(d, { one: 'день', few: 'дні', many: 'днів' })} відпочинку`,
+    planRestDay: 'Усі групи тренувались щойно. Дай їм день — і повертайся.',
+    planStartBtn: 'Почати тренування',
     unitKg: 'кг', unitReps: 'повт.',
     nextTryAddLoad: 'час на обтяження', nextTryFill: 'Підставити',
     prToastText: (name, w, r) => `Новий рекорд: ${name} — ${w}×${r}`,
@@ -117,6 +123,10 @@ const T = {
     progressNotEnough: (n) => `Мало данных — ещё ${n} ${plural(n, { one: 'тренировка', few: 'тренировки', many: 'тренировок' })}, и появится сравнение с прошлым месяцем.`,
     progressNoCompare: 'Пока не с чем сравнивать — нужен месяц истории тех же упражнений.',
     progressVolumeLabel: 'Объём', progressNewMark: 'новое',
+    planTitle: 'План на сегодня',
+    planRested: (m, d) => `${m} — ${d} ${plural(d, { one: 'день', few: 'дня', many: 'дней' })} отдыха`,
+    planRestDay: 'Все группы тренировались только что. Дай им день — и возвращайся.',
+    planStartBtn: 'Начать тренировку',
     unitKg: 'кг', unitReps: 'повт.',
     nextTryAddLoad: 'пора на отягощение', nextTryFill: 'Подставить',
     prToastText: (name, w, r) => `Новый рекорд: ${name} — ${w}×${r}`,
@@ -171,6 +181,10 @@ const T = {
     progressNotEnough: (n) => `Za mało danych — jeszcze ${n} ${plural(n, { one: 'trening', few: 'treningi', many: 'treningów' })} i pojawi się porównanie z poprzednim miesiącem.`,
     progressNoCompare: 'Nie ma jeszcze do czego porównać — potrzeba miesiąca historii tych samych ćwiczeń.',
     progressVolumeLabel: 'Objętość', progressNewMark: 'nowe',
+    planTitle: 'Plan na dziś',
+    planRested: (m, d) => `${m} — ${d} ${plural(d, { one: 'dzień', few: 'dni', many: 'dni' })} odpoczynku`,
+    planRestDay: 'Wszystkie partie trenowane były przed chwilą. Daj im dzień i wracaj.',
+    planStartBtn: 'Zacznij trening',
     unitKg: 'kg', unitReps: 'powt.',
     nextTryAddLoad: 'czas na obciążenie', nextTryFill: 'Wstaw',
     prToastText: (name, w, r) => `Nowy rekord: ${name} — ${w}×${r}`,
@@ -225,6 +239,10 @@ const T = {
     progressNotEnough: (n) => `Not enough data — ${n} more ${plural(n, { one: 'workout', other: 'workouts' })} and the month-over-month comparison appears.`,
     progressNoCompare: 'Nothing to compare yet — needs a month of history on the same exercises.',
     progressVolumeLabel: 'Volume', progressNewMark: 'new',
+    planTitle: 'Today',
+    planRested: (m, d) => `${m} — rested ${d} ${plural(d, { one: 'day', other: 'days' })}`,
+    planRestDay: 'Everything was trained just now. Give it a day and come back.',
+    planStartBtn: 'Start workout',
     unitKg: 'kg', unitReps: 'reps',
     nextTryAddLoad: 'time to add load', nextTryFill: 'Fill in',
     prToastText: (name, w, r) => `New PR: ${name} — ${w}×${r}`,
@@ -775,6 +793,58 @@ function renderCurrentScreen() {
   if (activeTab === 'sessions') renderSessionsTab(); else renderRecordsTab();
 }
 
+// ---- План на сьогодні ----
+// Найперше питання в залі — не «яку вагу», а «що взагалі робити». Тут
+// показуємо групу, яка найдовше відпочивала, і її звичні вправи з уже
+// порахованими вагами. Нічого не вигадується: у плані лише те, що людина
+// вже робила.
+function renderPlanCard() {
+  const list = sortedSessions();
+  // Сьогодні вже тренувався — план більше ні до чого й зникає сам,
+  // без жодних «сховати на сьогодні».
+  if (list.some((s) => s.date === todayISO())) return '';
+
+  const plan = window.WorkoutPlan.suggestSession(sessions, todayISO());
+  if (!plan) return '';
+  if (plan.rest) {
+    return `
+      <div class="plan-card">
+        <div class="plan-title">${escapeHtml(t('planTitle'))}</div>
+        <div class="plan-rest">${escapeHtml(t('planRestDay'))}</div>
+      </div>`;
+  }
+
+  const names = plan.muscles.map((m) => muscleLabel(m.muscle));
+  const head = names.join(' + ');
+  const why = t('planRested', names[0], plan.muscles[0].daysAgo);
+
+  return `
+    <div class="plan-card">
+      <div class="plan-title">${escapeHtml(t('planTitle'))}</div>
+      <div class="plan-head">${escapeHtml(head)}</div>
+      <div class="plan-why">${escapeHtml(why)}</div>
+      ${plan.exercises.map((e) => `
+        <div class="plan-row">
+          <span class="plan-name">${escapeHtml(e.libId ? exerciseLabel(e.libId) : e.name)}</span>
+          <span class="plan-load ${e.direction}">${e.sets}\u00D7\u2009${escapeHtml(setLabel(e.weight, e.reps))}</span>
+        </div>`).join('')}
+      <button type="button" class="plan-start-btn" id="planStartBtn">${escapeHtml(t('planStartBtn'))}</button>
+    </div>`;
+}
+
+// Кнопка не «створює тренування», а відкриває форму вже заповненою:
+// далі людина міняє що завгодно, а зайве прибирає хрестиком.
+function startPlannedSession() {
+  const plan = window.WorkoutPlan.suggestSession(sessions, todayISO());
+  if (!plan || plan.rest) return;
+  openSessionForm(null);
+  formExercises = plan.exercises.map((e) => ({
+    id: uid4(), libId: e.libId || null, name: e.name || '', muscle: e.muscle === 'other' ? null : e.muscle,
+    sets: Array.from({ length: e.sets }, () => ({ weight: e.weight, reps: e.reps })),
+  }));
+  renderExerciseBlocks();
+}
+
 function renderSessionsTab() {
   const root = document.getElementById('sessionsTab');
   const list = sortedSessions();
@@ -793,7 +863,7 @@ function renderSessionsTab() {
     const last = groups[groups.length - 1];
     if (last && last.date === s.date) last.items.push(s); else groups.push({ date: s.date, items: [s] });
   });
-  root.innerHTML = groups.map((g) => `
+  root.innerHTML = renderPlanCard() + groups.map((g) => `
     <div class="day-group">
       <div class="day-label">${escapeHtml(dayLabel(g.date))}</div>
       ${g.items.map((s) => renderSessionCard(s)).join('')}
@@ -802,6 +872,8 @@ function renderSessionsTab() {
   root.querySelectorAll('[data-open-session]').forEach((el) => {
     el.addEventListener('click', () => openSessionForm(sessions.find((s) => s.id === el.dataset.openSession)));
   });
+  const startBtn = document.getElementById('planStartBtn');
+  if (startBtn) startBtn.addEventListener('click', startPlannedSession);
 }
 
 function renderSessionCard(session) {

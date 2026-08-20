@@ -341,6 +341,23 @@ describe("executeTool", () => {
       expect(bench.nextSuggestion).toMatchObject({ weight: 92.5, reps: 5, direction: "up", why: "hitTop" });
     });
 
+    // Питання «що мені сьогодні робити» приходить і в чат, і на екран —
+    // відповідь має бути однією.
+    test("віддає ту саму пропозицію на сьогодні, що й картка на сторінці", async () => {
+      await seedTrend();
+      const r = await ai.executeTool("uid1", "training_analysis", {}, coachCtx);
+      expect(r.output.todaySuggestion).toMatchObject({ rest: false });
+      expect(r.output.todaySuggestion.muscles[0]).toMatchObject({ muscle: "legs", daysAgo: 35 });
+      // Назва береться з бібліотеки мовою користувача, а не з того, що
+      // колись записали в документ.
+      expect(r.output.todaySuggestion.exercises[0]).toMatchObject({ exercise: "Присідання зі штангою", muscle: "legs" });
+    });
+
+    test("порожня історія не дає пропозиції на сьогодні", async () => {
+      const r = await ai.executeTool("uid1", "training_analysis", {}, coachCtx);
+      expect(r.output.todaySuggestion).toBe(null);
+    });
+
     test("показує, скільки днів група мʼязів відпочивала", async () => {
       await seedTrend();
       const r = await ai.executeTool("uid1", "training_analysis", {}, coachCtx);
