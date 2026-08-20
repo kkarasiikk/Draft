@@ -1068,3 +1068,114 @@ describe("handleAiChat", () => {
     expect(res.reply).toMatch(/Забагато кроків/);
   });
 });
+
+// ---- Розбиття цілі на віхи ----
+describe("handleGoalBreakdown", () => {
+  const authedCtx = { auth: { uid: "uid1" } };
+  const reply = (input) => ({
+    messages: {
+      create: jest.fn().mockResolvedValue({
+        content: [{ type: "tool_use", name: "propose_milestones", id: "t1", input }],
+      }),
+    },
+  });
+
+  test("кидає unauthenticated без auth", async () => {
+    await expect(ai.handleGoalBreakdown({ title: "Марафон" }, {})).rejects.toThrow(/вхід/);
+  });
+
+  test("кидає invalid-argument без назви цілі", async () => {
+    await expect(ai.handleGoalBreakdown({ title: "   " }, authedCtx)).rejects.toThrow(/назви/);
+  });
+
+  test("повертає віхи назвами, придатними для форми", async () => {
+    resetDb({ "users/uid1": { lang: "uk" } });
+    const fake = reply({
+      milestones: [{ title: "Пробігти 5 км" }, { title: "Пробігти 10 км" }, { title: "Пробігти 21 км" }],
+      note: "Дистанція росте поступово.",
+    });
+    const res = await ai.handleGoalBreakdown({ title: "Пробігти марафон" }, authedCtx, { anthropicClient: fake });
+    expect(res.milestones).toEqual(["Пробігти 5 км", "Пробігти 10 км", "Пробігти 21 км"]);
+    expect(res.note).toBe("Дистанція росте поступово.");
+  });
+
+  // Форма приймає лише список назв, тож інструмент має бути ПРИМУСОВИЙ:
+  // без цього модель час від часу відповідала б звичайним текстом.
+  test("інструмент викликається примусово й одним запитом", async () => {
+    resetDb({ "users/uid1": { lang: "uk" } });
+    const fake = reply({ milestones: [{ title: "A" }, { title: "Б" }, { title: "В" }] });
+    await ai.handleGoalBreakdown({ title: "Ціль" }, authedCtx, { anthropicClient: fake });
+    expect(fake.messages.create).toHaveBeenCalledTimes(1);
+    const args = fake.messages.create.mock.calls[0][0];
+    expect(args.tool_choice).toEqual({ type: "tool", name: "propose_milestones" });
+    expect(args.tools.map((t) => t.name)).toEqual(["propose_milestones"]);
+  });
+
+  test("контекст цілі потрапляє в запит, а мова — у системний промпт", async () => {
+    resetDb({ "users/uid1": { lang: "pl" } });
+    const fake = reply({ milestones: [{ title: "A" }, { title: "Б" }, { title: "В" }] });
+    await ai.handleGoalBreakdown({
+      title: "Пробігти марафон", category: "health", why: "хочу дожити до 90",
+      targetDate: "2027-04-18", targetValue: 42.2, unit: "км",
+    }, authedCtx, { anthropicClient: fake });
+    const args = fake.messages.create.mock.calls[0][0];
+    const prompt = args.messages[0].content;
+    expect(prompt).toContain("Пробігти марафон");
+    expect(prompt).toContain("хочу дожити до 90");
+    expect(prompt).toContain("2027-04-18");
+    expect(prompt).toContain("42.2 км");
+    expect(args.system).toContain("польською");
+  });
+
+  // Куца відповідь — це не привід підсунути «Крок 1, Крок 2» власного
+  // виробництва: краще сказати, що не вийшло.
+  test("менше трьох віх — чесна помилка, а не вигадані кроки", async () => {
+    resetDb({ "users/uid1": { lang: "uk" } });
+    const fake = reply({ milestones: [{ title: "Єдиний крок" }] });
+    await expect(ai.handleGoalBreakdown({ title: "Ціль" }, authedCtx, { anthropicClient: fake }))
+      .rejects.toThrow(/Не вийшло розбити/);
+  });
+
+  test("відповідь без виклику інструмента теж помилка", async () => {
+    resetDb({ "users/uid1": { lang: "uk" } });
+    const fake = { messages: { create: jest.fn().mockResolvedValue({ content: [{ type: "text", text: "ось план" }] }) } };
+    await expect(ai.handleGoalBreakdown({ title: "Ціль" }, authedCtx, { anthropicClient: fake }))
+      .rejects.toThrow(/Не вийшло розбити/);
+  });
+
+  test("модель береться з профілю", async () => {
+    resetDb({ "users/uid1": { lang: "uk", aiModel: "opus" } });
+    const fake = reply({ milestones: [{ title: "A" }, { title: "Б" }, { title: "В" }] });
+    await ai.handleGoalBreakdown({ title: "Ціль" }, authedCtx, { anthropicClient: fake });
+    expect(fake.messages.create.mock.calls[0][0].model).toBe(ai.MODELS.opus);
+  });
+});
+
+describe("sanitizeBreakdown", () => {
+  test("обрізає нумерацію, пробіли й довгі назви", () => {
+    const r = ai.sanitizeBreakdown({ milestones: [
+      { title: "1. Перший крок" }, { title: "  2) Другий крок  " }, { title: "я".repeat(300) },
+    ] });
+    expect(r.milestones[0]).toBe("Перший крок");
+    expect(r.milestones[1]).toBe("Другий крок");
+    expect(r.milestones[2].length).toBe(200);
+  });
+
+  test("викидає порожні й повторені", () => {
+    const r = ai.sanitizeBreakdown({ milestones: [
+      { title: "Крок" }, { title: "  " }, { title: "КРОК" }, { title: null }, "Крок другий",
+    ] });
+    expect(r.milestones).toEqual(["Крок", "Крок другий"]);
+  });
+
+  test("більше семи віх не пропускає", () => {
+    const many = Array.from({ length: 12 }, (_, i) => ({ title: `Крок ${i + 1}` }));
+    expect(ai.sanitizeBreakdown({ milestones: many }).milestones.length).toBe(7);
+  });
+
+  test("сміття замість відповіді дає порожній список, а не падіння", () => {
+    expect(ai.sanitizeBreakdown(undefined).milestones).toEqual([]);
+    expect(ai.sanitizeBreakdown({ milestones: "ні" }).milestones).toEqual([]);
+    expect(ai.sanitizeBreakdown({ milestones: [] }).note).toBe("");
+  });
+});

@@ -42,6 +42,9 @@ const T = {
     targetValuePlaceholder: '10', unitPlaceholder: 'км',
     addProgressPlaceholder: '+ скільки', addProgressBtn: 'Додати', milestonePlaceholder: 'Наприклад: пройти перші 5 уроків',
     addMilestoneBtn: '+ Додати віху',
+    breakdownBtn: 'Запропонувати віхи', breakdownWorking: 'Думаю…',
+    breakdownError: 'Не вдалося розбити ціль. Спробуй ще раз або сформулюй її конкретніше.',
+    breakdownNoTitle: 'Спершу введи назву цілі.',
     titleRequiredError: 'Введи назву цілі',
     saveBtn: 'Зберегти', deleteBtn: 'Видалити', cancelBtn: 'Скасувати', deleteConfirmBtn: 'Видалити',
     confirmDeleteTitle: 'Видалити ціль?',
@@ -107,6 +110,9 @@ const T = {
     targetValuePlaceholder: '10', unitPlaceholder: 'км',
     addProgressPlaceholder: '+ сколько', addProgressBtn: 'Добавить', milestonePlaceholder: 'Например: пройти первые 5 уроков',
     addMilestoneBtn: '+ Добавить веху',
+    breakdownBtn: 'Предложить вехи', breakdownWorking: 'Думаю…',
+    breakdownError: 'Не удалось разбить цель. Попробуй ещё раз или сформулируй её конкретнее.',
+    breakdownNoTitle: 'Сначала введи название цели.',
     titleRequiredError: 'Введи название цели',
     saveBtn: 'Сохранить', deleteBtn: 'Удалить', cancelBtn: 'Отмена', deleteConfirmBtn: 'Удалить',
     confirmDeleteTitle: 'Удалить цель?',
@@ -172,6 +178,9 @@ const T = {
     targetValuePlaceholder: '10', unitPlaceholder: 'km',
     addProgressPlaceholder: '+ ile', addProgressBtn: 'Dodaj', milestonePlaceholder: 'Np.: ukończyć pierwsze 5 lekcji',
     addMilestoneBtn: '+ Dodaj kamień milowy',
+    breakdownBtn: 'Zaproponuj kamienie milowe', breakdownWorking: 'Myślę…',
+    breakdownError: 'Nie udało się rozbić celu. Spróbuj ponownie albo sformułuj go konkretniej.',
+    breakdownNoTitle: 'Najpierw wpisz nazwę celu.',
     titleRequiredError: 'Wpisz nazwę celu',
     saveBtn: 'Zapisz', deleteBtn: 'Usuń', cancelBtn: 'Anuluj', deleteConfirmBtn: 'Usuń',
     confirmDeleteTitle: 'Usunąć cel?',
@@ -237,6 +246,9 @@ const T = {
     targetValuePlaceholder: '10', unitPlaceholder: 'km',
     addProgressPlaceholder: '+ how much', addProgressBtn: 'Add', milestonePlaceholder: 'E.g.: finish the first 5 lessons',
     addMilestoneBtn: '+ Add milestone',
+    breakdownBtn: 'Suggest milestones', breakdownWorking: 'Thinking…',
+    breakdownError: 'Could not break this goal down. Try again or make it more specific.',
+    breakdownNoTitle: 'Give the goal a name first.',
     titleRequiredError: 'Enter a goal title',
     saveBtn: 'Save', deleteBtn: 'Delete', cancelBtn: 'Cancel', deleteConfirmBtn: 'Delete',
     confirmDeleteTitle: 'Delete goal?',
@@ -359,6 +371,7 @@ function applyTranslations() {
   document.getElementById('goalTargetValue').placeholder = t('targetValuePlaceholder');
   document.getElementById('goalUnitInput').placeholder = t('unitPlaceholder');
   document.getElementById('addMilestoneBtn').textContent = t('addMilestoneBtn');
+  document.getElementById('breakdownBtnLabel').textContent = t('breakdownBtn');
   document.getElementById('deleteGoalBtn').textContent = t('deleteBtn');
   document.getElementById('goalSubmitBtn').textContent = t('saveBtn');
   document.getElementById('goalTitleInput').placeholder = t('titlePlaceholder');
@@ -1189,6 +1202,53 @@ function renderMilestonesEditor() {
     });
   });
 }
+// ---- Розбиття цілі на віхи ----
+// Віхи ДОДАЮТЬСЯ до вже написаних, а не замінюють їх: людина могла почати
+// сама, і стерти її текст підказкою було б грубо. Дублі відсіюємо за назвою.
+document.getElementById('breakdownBtn').addEventListener('click', async () => {
+  const btn = document.getElementById('breakdownBtn');
+  const label = document.getElementById('breakdownBtnLabel');
+  const errorEl = document.getElementById('goalFormError');
+  const noteEl = document.getElementById('breakdownNote');
+  const title = document.getElementById('goalTitleInput').value.trim();
+  if (!title) { errorEl.textContent = t('breakdownNoTitle'); return; }
+
+  const targetRaw = parseFloat(document.getElementById('goalTargetValue').value);
+  btn.disabled = true;
+  label.textContent = t('breakdownWorking');
+  errorEl.textContent = '';
+  noteEl.textContent = '';
+  try {
+    const res = await firebase.functions().httpsCallable('goalBreakdown')({
+      title,
+      category: formCategory,
+      why: document.getElementById('goalWhyInput').value.trim(),
+      targetDate: document.getElementById('goalTargetDate').value || '',
+      targetValue: Number.isFinite(targetRaw) && targetRaw > 0 ? targetRaw : null,
+      unit: document.getElementById('goalUnitInput').value.trim(),
+    });
+    const have = new Set(formMilestones.map((m) => (m.title || '').trim().toLowerCase()));
+    (res.data.milestones || []).forEach((mTitle) => {
+      const clean = (mTitle || '').trim();
+      if (!clean || have.has(clean.toLowerCase())) return;
+      have.add(clean.toLowerCase());
+      formMilestones.push({ id: uid4(), title: clean, done: false });
+    });
+    formMilestones = formMilestones.slice(0, 50);
+    renderMilestonesEditor();
+    noteEl.textContent = res.data.note || '';
+  } catch (err) {
+    console.error('goalBreakdown:', err);
+    // Показуємо текст із сервера лише там, де він написаний для людини.
+    // На мережевій помилці прилетіло б технічне «internal» — краще своє.
+    const spoken = ['invalid-argument', 'resource-exhausted', 'unavailable'];
+    errorEl.textContent = err && spoken.includes(err.code) && err.message ? err.message : t('breakdownError');
+  } finally {
+    btn.disabled = false;
+    label.textContent = t('breakdownBtn');
+  }
+});
+
 document.getElementById('addMilestoneBtn').addEventListener('click', () => {
   formMilestones.push({ id: uid4(), title: '', done: false });
   renderMilestonesEditor();
@@ -1211,6 +1271,7 @@ function openGoalForm(existingGoal) {
   formMilestones = existingGoal ? (existingGoal.milestones || []).map((m) => ({ ...m })) : [];
   renderCategoryPicker();
   renderMilestonesEditor();
+  document.getElementById('breakdownNote').textContent = '';
   document.getElementById('goalFormOverlay').classList.add('show');
   setTimeout(() => document.getElementById('goalTitleInput').focus(), 50);
 }

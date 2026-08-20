@@ -114,4 +114,7 @@ exports.walletSync = functions.https.onRequest(async (req, res) => {
 // AI-помічник (чат + запис транзакцій голосом/текстом) — окремий файл,
 // щоб не роздувати цей модуль. Дивись ai.js.
 exports.aiChat = require("./ai").aiChat;
+// Один прохід «ціль -> віхи» для форми цілі. Живе поруч із чатом, бо ділить
+// з ним і ключ, і обмеження частоти.
+exports.goalBreakdown = require("./ai").goalBreakdown;
 exports.taskReminders = require("./reminders").taskReminders;

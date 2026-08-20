@@ -396,7 +396,7 @@
   .target-row input{margin:0;}
   .target-row input[type=number]{flex:2;min-width:0;}
   .target-row input[type=text]{flex:1;min-width:0;}
-  .field-hint{font-size:12px;color:var(--ink-muted);margin:6px 0 4px;line-height:1.4;}
+  .field-hint{font-size:12px;color:var(--ink-muted);margin:6px 0 14px;line-height:1.4;}
   /* Смужка числового прогресу на екрані цілі: та сама мова, що й у міні-смужці
      на картці, але більша й з підписом. */
   .value-progress{margin:4px 0 14px;}
@@ -413,6 +413,16 @@
   .add-milestone-btn{width:100%;border:1px dashed var(--border);background:transparent;color:var(--accent);
     font-family:'Inter',sans-serif;font-size:14px;font-weight:600;padding:10px 0;border-radius:8px;cursor:pointer;margin-bottom:16px;}
   .add-milestone-btn:hover{border-color:var(--accent);}
+  /* Кнопка розбиття стоїть ПІД «додати віху», а не замість неї: писати
+     самому лишається основним способом, підказка — допоміжним. */
+  .breakdown-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;
+    border:1px solid var(--glass-btn-border);background:var(--glass-btn-bg);color:var(--ink);
+    font-family:'Inter',sans-serif;font-size:14px;font-weight:600;padding:10px 0;border-radius:8px;cursor:pointer;
+    margin-top:-8px;margin-bottom:10px;}
+  .breakdown-btn:disabled{opacity:.55;cursor:default;}
+  .breakdown-btn svg{opacity:.7;}
+  .breakdown-note{font-size:12.5px;color:var(--ink-muted);line-height:1.45;margin-bottom:14px;}
+  .breakdown-note:empty{display:none;}
 
   /* ---- Кастомний datepicker (той самий компонент, що й у tasks/) ---- */
   .dp-field{position:relative;margin-top:6px;margin-bottom:16px;}
@@ -609,6 +619,11 @@
       <label class="field-label" id="milestonesLabel">Віхи</label>
       <div id="milestonesEditor"></div>
       <button type="button" class="add-milestone-btn" id="addMilestoneBtn">+ Додати віху</button>
+      <button type="button" class="breakdown-btn" id="breakdownBtn">
+        <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path fill-rule="evenodd" d="M12.6 4.0C15.52 9.68 15.52 9.68 21.2 12.6C15.52 15.52 15.52 15.52 12.6 21.2C9.68 15.52 9.68 15.52 4.0 12.6C9.68 9.68 9.68 9.68 12.6 4.0ZM5.4 2.40C6.49 4.51 6.49 4.51 8.60 5.6C6.49 6.69 6.49 6.69 5.4 8.8C4.31 6.69 4.31 6.69 2.2 5.6C4.31 4.51 4.31 4.51 5.4 2.40Z"/></svg>
+        <span id="breakdownBtnLabel">Запропонувати віхи</span>
+      </button>
+      <div class="breakdown-note" id="breakdownNote"></div>
 
       <div class="form-error" id="goalFormError"></div>
       <div class="modal-actions">

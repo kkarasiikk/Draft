@@ -1417,6 +1417,128 @@ async function handleAiChat(data, context, deps = {}) {
   return { reply: "Забагато кроків для цього запиту — спробуй сформулювати простіше.", actions };
 }
 
+// ---- Розбиття цілі на віхи ----
+// Окремий виклик, а не інструмент чату: тут не потрібна ні розмова, ні
+// доступ до даних — лише один прохід «текст цілі -> список кроків». Так
+// дешевше (кілька сотень токенів замість усього системного промпта) і
+// відповідь приходить у гарантованій формі.
+//
+// Форму гарантує ПРИМУСОВИЙ виклик інструмента (tool_choice), а не
+// output_config: у версії SDK, на якій живе проєкт (0.32), структурованих
+// відповідей ще немає, а примусовий інструмент працює скрізь однаково.
+const BREAKDOWN_TOOL = {
+  name: "propose_milestones",
+  description: "Повернути віхи — послідовні перевіряються кроки до цілі.",
+  input_schema: {
+    type: "object",
+    properties: {
+      milestones: {
+        type: "array",
+        description: "Від 3 до 7 віх у порядку виконання",
+        items: {
+          type: "object",
+          properties: { title: { type: "string", description: "Один крок, коротко: «Пройти перші 10 уроків»" } },
+          required: ["title"],
+        },
+      },
+      note: { type: "string", description: "Одне речення про логіку розбиття; можна лишити порожнім" },
+    },
+    required: ["milestones"],
+  },
+};
+
+const MIN_MILESTONES = 3;
+const MAX_MILESTONES = 7;
+
+function buildBreakdownPrompt(goal, ctx) {
+  const lines = [`Ціль: ${goal.title}`];
+  if (goal.category) lines.push(`Категорія: ${goal.category}`);
+  if (goal.why) lines.push(`Навіщо це людині: ${goal.why}`);
+  if (goal.targetDate) lines.push(`Дедлайн: ${goal.targetDate} (сьогодні ${ctx.today})`);
+  if (goal.targetValue) lines.push(`Числова мета: ${goal.targetValue}${goal.unit ? " " + goal.unit : ""}`);
+  lines.push("", `Розклади цю ціль на ${MIN_MILESTONES}–${MAX_MILESTONES} віх.`);
+  return lines.join("\n");
+}
+
+const BREAKDOWN_SYSTEM =
+  "Ти допомагаєш розкласти довгострокову ціль на віхи в особистому застосунку.\n" +
+  "Віха — це перевіряний рубіж, про який можна сказати «пройдено» або «ні»: «Пробігти 10 км без зупинки», " +
+  "а не «Більше бігати». Віхи йдуть у порядку виконання, від найближчої до останньої, і разом покривають шлях до цілі.\n" +
+  "Не вигадуй обставин, яких тобі не сказали: ні поточного рівня людини, ні її розкладу, ні бюджету. " +
+  "Якщо ціль сформульована надто загально — все одно дай кроки, але найзагальніші й безпечні.\n" +
+  "Дати став лише тоді, коли названо дедлайн, і лише як орієнтир у назві віхи.\n" +
+  "Пиши мовою, яку задано нижче. Кожна віха — до 80 символів, без нумерації на початку.";
+
+const LANG_NAMES_FOR_MODEL = { uk: "українською", ru: "російською", pl: "польською", en: "англійською" };
+
+/** Витягує віхи з примусового виклику інструмента й доводить їх до того
+ *  вигляду, який приймають правила Firestore і форма цілі. */
+function sanitizeBreakdown(input) {
+  const seen = new Set();
+  const milestones = (Array.isArray(input && input.milestones) ? input.milestones : [])
+    .map((m) => (typeof m === "string" ? m : (m && m.title)))
+    .map((title) => (typeof title === "string" ? title.trim().replace(/^\d+[.)]\s*/, "").slice(0, 200) : ""))
+    .filter((title) => {
+      if (!title) return false;
+      const key = title.toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .slice(0, MAX_MILESTONES);
+  const note = typeof (input && input.note) === "string" ? input.note.trim().slice(0, 300) : "";
+  return { milestones, note };
+}
+
+async function handleGoalBreakdown(data, context, deps = {}) {
+  const uid = context.auth && context.auth.uid;
+  if (!uid) throw new functions.https.HttpsError("unauthenticated", "Потрібен вхід.");
+
+  const title = typeof data.title === "string" ? data.title.trim().slice(0, 200) : "";
+  if (!title) throw new functions.https.HttpsError("invalid-argument", "Спершу назви ціль.");
+
+  await enforceRateLimit(uid);
+
+  const profileSnap = await db.collection("users").doc(uid).get();
+  const profile = profileSnap.data() || {};
+  const lang = typeof profile.lang === "string" ? profile.lang : "uk";
+  const ctx = { today: new Date().toISOString().slice(0, 10) };
+
+  const goal = {
+    title,
+    category: GOAL_CATEGORIES.includes(data.category) ? data.category : "",
+    why: typeof data.why === "string" ? data.why.trim().slice(0, 1000) : "",
+    targetDate: typeof data.targetDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(data.targetDate) ? data.targetDate : "",
+    targetValue: Number.isFinite(Number(data.targetValue)) && Number(data.targetValue) > 0 ? Number(data.targetValue) : 0,
+    unit: typeof data.unit === "string" ? data.unit.trim().slice(0, 20) : "",
+  };
+
+  const anthropic = deps.anthropicClient || new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  const resp = await anthropic.messages.create({
+    // Модель — та сама, яку людина обрала для помічника: платить за неї вона,
+    // тож і вибір її.
+    model: modelIdFor(profile),
+    max_tokens: 1024,
+    system: `${BREAKDOWN_SYSTEM}\nМова відповіді: ${LANG_NAMES_FOR_MODEL[lang] || LANG_NAMES_FOR_MODEL.uk}.`,
+    messages: [{ role: "user", content: buildBreakdownPrompt(goal, ctx) }],
+    tools: [BREAKDOWN_TOOL],
+    tool_choice: { type: "tool", name: BREAKDOWN_TOOL.name },
+  });
+
+  const call = (resp.content || []).find((b) => b.type === "tool_use" && b.name === BREAKDOWN_TOOL.name);
+  const result = sanitizeBreakdown(call && call.input);
+  if (result.milestones.length < MIN_MILESTONES) {
+    // Порожня або куца відповідь — краще чесно сказати, ніж підсунути
+    // «Крок 1, Крок 2» власного виробництва.
+    throw new functions.https.HttpsError("unavailable", "Не вийшло розбити цю ціль. Спробуй сформулювати її конкретніше.");
+  }
+  return result;
+}
+
+exports.goalBreakdown = functions
+  .runWith({ secrets: ["ANTHROPIC_API_KEY"], timeoutSeconds: 60 })
+  .https.onCall((data, context) => handleGoalBreakdown(data, context));
+
 exports.aiChat = functions
   .runWith({ secrets: ["ANTHROPIC_API_KEY"], timeoutSeconds: 60 })
   .https.onCall((data, context) => handleAiChat(data, context));
@@ -1425,6 +1547,9 @@ exports.aiChat = functions
 // На деплой не впливає: Cloud Functions бере на облік тільки те, що визначено
 // як `exports.<name> = onCall(...)` — інші поля module.exports ігноруються.
 module.exports.handleAiChat = handleAiChat;
+module.exports.handleGoalBreakdown = handleGoalBreakdown;
+module.exports.sanitizeBreakdown = sanitizeBreakdown;
+module.exports.buildBreakdownPrompt = buildBreakdownPrompt;
 module.exports.sanitizeTransactionInput = sanitizeTransactionInput;
 module.exports.executeTool = executeTool;
 module.exports.buildSystemPrompt = buildSystemPrompt;
