@@ -30,6 +30,13 @@
       goal: (a) => `Ціль: ${a.title}${a.targetDate ? ' · до ' + a.targetDate : ''}`,
       checkin: (a) => `Відмічено: ${a.title}`,
       milestone: (a) => `Віха: ${a.title}${a.goal ? ' · ' + a.goal : ''}`,
+      savingsGoal: (a) => `Скарбничка: ${a.name}`,
+      savings: (a) => `${a.type === 'withdraw' ? 'Знято' : 'Відкладено'}: ${a.amount} ${a.currency || ''} · ${a.goal}`.trim(),
+      renamed: (a) => `Перейменовано: ${a.from} → ${a.to}`,
+      txEdited: (a) => `Виправлено: ${a.categoryLabel} · ${a.amount} ${a.currency || ''}`.trim(),
+      taskEdited: (a) => `Змінено: ${a.title}${a.dueDate ? ' · ' + a.dueDate : ''}`,
+      workoutEdited: (a) => `Виправлено тренування: ${a.date}${a.name ? ' · ' + a.name : ''}`,
+      goalEdited: (a) => `Змінено ціль: ${a.title}`,
       error: 'Не вдалося отримати відповідь. Спробуй ще раз.',
       limit: 'Забагато повідомлень поспіль. Спробуй трохи пізніше.',
       unavailable: 'Помічник ще не підключений: треба задеплоїти Cloud Functions і додати ключ Anthropic.',
@@ -50,6 +57,13 @@
       goal: (a) => `Цель: ${a.title}${a.targetDate ? ' · до ' + a.targetDate : ''}`,
       checkin: (a) => `Отмечено: ${a.title}`,
       milestone: (a) => `Веха: ${a.title}${a.goal ? ' · ' + a.goal : ''}`,
+      savingsGoal: (a) => `Копилка: ${a.name}`,
+      savings: (a) => `${a.type === 'withdraw' ? 'Снято' : 'Отложено'}: ${a.amount} ${a.currency || ''} · ${a.goal}`.trim(),
+      renamed: (a) => `Переименовано: ${a.from} → ${a.to}`,
+      txEdited: (a) => `Исправлено: ${a.categoryLabel} · ${a.amount} ${a.currency || ''}`.trim(),
+      taskEdited: (a) => `Изменено: ${a.title}${a.dueDate ? ' · ' + a.dueDate : ''}`,
+      workoutEdited: (a) => `Исправлена тренировка: ${a.date}${a.name ? ' · ' + a.name : ''}`,
+      goalEdited: (a) => `Изменена цель: ${a.title}`,
       error: 'Не удалось получить ответ. Попробуй ещё раз.',
       limit: 'Слишком много сообщений подряд. Попробуй чуть позже.',
       unavailable: 'Помощник ещё не подключён: нужно задеплоить Cloud Functions и добавить ключ Anthropic.',
@@ -70,6 +84,13 @@
       goal: (a) => `Cel: ${a.title}${a.targetDate ? ' · do ' + a.targetDate : ''}`,
       checkin: (a) => `Odhaczono: ${a.title}`,
       milestone: (a) => `Kamień milowy: ${a.title}${a.goal ? ' · ' + a.goal : ''}`,
+      savingsGoal: (a) => `Skarbonka: ${a.name}`,
+      savings: (a) => `${a.type === 'withdraw' ? 'Wypłacono' : 'Odłożono'}: ${a.amount} ${a.currency || ''} · ${a.goal}`.trim(),
+      renamed: (a) => `Zmieniono nazwę: ${a.from} → ${a.to}`,
+      txEdited: (a) => `Poprawiono: ${a.categoryLabel} · ${a.amount} ${a.currency || ''}`.trim(),
+      taskEdited: (a) => `Zmieniono: ${a.title}${a.dueDate ? ' · ' + a.dueDate : ''}`,
+      workoutEdited: (a) => `Poprawiono trening: ${a.date}${a.name ? ' · ' + a.name : ''}`,
+      goalEdited: (a) => `Zmieniono cel: ${a.title}`,
       error: 'Nie udało się uzyskać odpowiedzi. Spróbuj ponownie.',
       limit: 'Zbyt wiele wiadomości pod rząd. Spróbuj później.',
       unavailable: 'Asystent nie jest jeszcze podłączony: trzeba wdrożyć Cloud Functions i dodać klucz Anthropic.',
@@ -90,6 +111,13 @@
       goal: (a) => `Goal: ${a.title}${a.targetDate ? ' · by ' + a.targetDate : ''}`,
       checkin: (a) => `Checked in: ${a.title}`,
       milestone: (a) => `Milestone: ${a.title}${a.goal ? ' · ' + a.goal : ''}`,
+      savingsGoal: (a) => `Savings pot: ${a.name}`,
+      savings: (a) => `${a.type === 'withdraw' ? 'Withdrew' : 'Set aside'}: ${a.amount} ${a.currency || ''} · ${a.goal}`.trim(),
+      renamed: (a) => `Renamed: ${a.from} → ${a.to}`,
+      txEdited: (a) => `Corrected: ${a.categoryLabel} · ${a.amount} ${a.currency || ''}`.trim(),
+      taskEdited: (a) => `Updated: ${a.title}${a.dueDate ? ' · ' + a.dueDate : ''}`,
+      workoutEdited: (a) => `Workout fixed: ${a.date}${a.name ? ' · ' + a.name : ''}`,
+      goalEdited: (a) => `Goal updated: ${a.title}`,
       error: 'Could not get an answer. Try again.',
       limit: 'Too many messages in a row. Try again a bit later.',
       unavailable: 'The assistant is not connected yet: deploy Cloud Functions and add an Anthropic key.',
@@ -276,6 +304,13 @@
     if (a.kind === 'goal_added') return t('goal')(a);
     if (a.kind === 'goal_checkin') return t('checkin')(a);
     if (a.kind === 'milestone_done') return t('milestone')(a);
+    if (a.kind === 'savings_goal_added') return t('savingsGoal')(a);
+    if (a.kind === 'savings_entry') return t('savings')(a);
+    if (a.kind === 'renamed') return t('renamed')(a);
+    if (a.kind === 'transaction_edited') return t('txEdited')(a);
+    if (a.kind === 'task_edited') return t('taskEdited')(a);
+    if (a.kind === 'workout_edited') return t('workoutEdited')(a);
+    if (a.kind === 'goal_edited') return t('goalEdited')(a);
     return '';
   }
 

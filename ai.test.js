@@ -453,6 +453,176 @@ describe("executeTool", () => {
     });
   });
 
+  // ---- Заощадження ----
+  describe("заощадження", () => {
+    async function pot(name) {
+      const r = await ai.executeTool("uid1", "add_savings_goal", { name }, ctx);
+      return r.output.id;
+    }
+
+    test("скарбничка створюється й одразу видна в savings_summary", async () => {
+      const id = await pot("На відпустку");
+      const r = await ai.executeTool("uid1", "savings_summary", {}, ctx);
+      expect(r.output.goals).toContainEqual({ id, goal: "На відпустку", saved: 0 });
+    });
+
+    test("поповнення додає, зняття віднімає", async () => {
+      const id = await pot("На ноутбук");
+      await ai.executeTool("uid1", "add_savings_entry", { goalId: id, type: "deposit", amount: 1000 }, ctx);
+      await ai.executeTool("uid1", "add_savings_entry", { goalId: id, type: "withdraw", amount: 250 }, ctx);
+      const r = await ai.executeTool("uid1", "savings_summary", {}, ctx);
+      expect(r.output.goals.find((g) => g.id === id).saved).toBe(750);
+      expect(r.output.total).toBe(750);
+    });
+
+    test("операція записується у форматі сторінки заощаджень", async () => {
+      const id = await pot("Подушка");
+      const r = await ai.executeTool("uid1", "add_savings_entry",
+        { goalId: id, type: "deposit", amount: 500.555, note: "з премії", date: "2026-08-19" }, ctx);
+      const snap = await mockCurrent.collection("users").doc("uid1").collection("savings").get();
+      expect(snap.docs[0].data()).toEqual({
+        type: "deposit", amount: 500.56, currency: "UAH", note: "з премії", date: "2026-08-19", goalId: id,
+      });
+      expect(r.action).toMatchObject({ kind: "savings_entry", type: "deposit", currency: "\u20B4" });
+    });
+
+    // Операція без існуючої цілі осиротіла б: на сторінці все згруповано
+    // за цілями, і такий запис ніде не показався б.
+    test("гроші не кладуться у неіснуючу скарбничку", async () => {
+      const r = await ai.executeTool("uid1", "add_savings_entry",
+        { goalId: "вигаданий", type: "deposit", amount: 100 }, ctx);
+      expect(r.isError).toBe(true);
+      const snap = await mockCurrent.collection("users").doc("uid1").collection("savings").get();
+      expect(snap.docs.length).toBe(0);
+    });
+
+    test("недодатна сума не приймається", async () => {
+      const id = await pot("Подушка");
+      expect((await ai.executeTool("uid1", "add_savings_entry",
+        { goalId: id, type: "deposit", amount: 0 }, ctx)).isError).toBe(true);
+      expect((await ai.executeTool("uid1", "add_savings_entry",
+        { goalId: id, type: "deposit", amount: -50 }, ctx)).isError).toBe(true);
+    });
+
+    test("перейменування зберігає накопичене", async () => {
+      const id = await pot("Стара назва");
+      await ai.executeTool("uid1", "add_savings_entry", { goalId: id, type: "deposit", amount: 300 }, ctx);
+      const r = await ai.executeTool("uid1", "rename_savings_goal", { id, name: "Нова назва" }, ctx);
+      expect(r.output).toMatchObject({ from: "Стара назва", to: "Нова назва" });
+      const sum = await ai.executeTool("uid1", "savings_summary", {}, ctx);
+      expect(sum.output.goals.find((g) => g.id === id)).toMatchObject({ goal: "Нова назва", saved: 300 });
+    });
+  });
+
+  // ---- Правки вже записаного ----
+  describe("правки", () => {
+    test("edit_transaction міняє тільки надіслані поля", async () => {
+      const add = await ai.executeTool("uid1", "add_transaction",
+        { type: "expense", amount: 80, category: "food", note: "кава", date: "2026-08-10" }, ctx);
+      const r = await ai.executeTool("uid1", "edit_transaction", { id: add.output.id, amount: 95 }, ctx);
+      expect(r.output).toMatchObject({ amount: 95, category: "food", note: "кава", date: "2026-08-10" });
+    });
+
+    test("edit_transaction знаходить операцію через query_transactions", async () => {
+      await ai.executeTool("uid1", "add_transaction",
+        { type: "expense", amount: 80, category: "food", date: "2026-08-10" }, ctx);
+      const list = await ai.executeTool("uid1", "query_transactions",
+        { from: "2026-08-01", to: "2026-08-31" }, ctx);
+      const id = list.output.items[0].id;
+      expect(typeof id).toBe("string");
+      const r = await ai.executeTool("uid1", "edit_transaction", { id, category: "other" }, ctx);
+      expect(r.output.category).toBe("other");
+    });
+
+    test("edit_task не скидає виконаність, підзадачі й нагадування", async () => {
+      const ref = await mockCurrent.collection("users").doc("uid1").collection("tasks").add({
+        title: "Стара назва", notes: "", done: true, completedAt: "колись", priority: "high", tags: ["дім"],
+        dueDate: "2026-08-20", dueTime: "18:00", estimateMin: 30, recurrence: { type: "weekly" },
+        reminderAt: "нагадування", notifiedAt: null, subtasks: [{ id: "s1", title: "крок", done: true }],
+      });
+      await ai.executeTool("uid1", "edit_task", { id: ref.id, title: "Нова назва" }, ctx);
+      const doc = await mockCurrent.collection("users").doc("uid1").collection("tasks").doc(ref.id).get();
+      expect(doc.data()).toMatchObject({
+        title: "Нова назва", done: true, completedAt: "колись", priority: "high",
+        dueDate: "2026-08-20", dueTime: "18:00", recurrence: { type: "weekly" }, reminderAt: "нагадування",
+      });
+      expect(doc.data().subtasks).toEqual([{ id: "s1", title: "крок", done: true }]);
+    });
+
+    test("прибрана дата забирає й час — інакше час нікуди приткнути", async () => {
+      const add = await ai.executeTool("uid1", "add_task",
+        { title: "Справа", dueDate: "2026-08-20", dueTime: "18:00" }, ctx);
+      await ai.executeTool("uid1", "edit_task", { id: add.output.id, dueDate: null }, ctx);
+      const doc = await mockCurrent.collection("users").doc("uid1").collection("tasks").doc(add.output.id).get();
+      expect(doc.data()).toMatchObject({ dueDate: null, dueTime: null });
+    });
+
+    test("edit_workout без exercises лишає вправи недоторканими", async () => {
+      const add = await ai.executeTool("uid1", "add_workout",
+        { date: "2026-08-18", exercises: [{ libId: "squat", sets: [{ weight: 80, reps: 5 }] }] }, ctx);
+      const before = (await mockCurrent.collection("users").doc("uid1")
+        .collection("workouts").doc(add.output.id).get()).data().exercises;
+      await ai.executeTool("uid1", "edit_workout", { id: add.output.id, name: "Ноги" }, ctx);
+      const after = (await mockCurrent.collection("users").doc("uid1")
+        .collection("workouts").doc(add.output.id).get()).data();
+      expect(after.name).toBe("Ноги");
+      expect(after.exercises).toEqual(before);
+    });
+
+    test("edit_workout з exercises замінює список цілком", async () => {
+      const add = await ai.executeTool("uid1", "add_workout",
+        { exercises: [{ libId: "squat", sets: [{ weight: 80, reps: 5 }] }] }, ctx);
+      await ai.executeTool("uid1", "edit_workout", {
+        id: add.output.id,
+        exercises: [{ libId: "squat", sets: [{ weight: 85, reps: 5 }] }, { libId: "lunge", sets: [{ weight: 20, reps: 10 }] }],
+      }, ctx);
+      const doc = await mockCurrent.collection("users").doc("uid1").collection("workouts").doc(add.output.id).get();
+      expect(doc.data().exercises.map((e) => e.libId)).toEqual(["squat", "lunge"]);
+      expect(doc.data().exercises[0].sets).toEqual([{ weight: 85, reps: 5 }]);
+    });
+
+    test("edit_goal зберігає чекіни, журнал і пройдені віхи", async () => {
+      const add = await ai.executeTool("uid1", "add_goal",
+        { title: "Марафон", milestones: ["10 км", "21 км"] }, ctx);
+      const col = mockCurrent.collection("users").doc("uid1").collection("goals");
+      const created = (await col.doc(add.output.id).get()).data();
+      await col.doc(add.output.id).update({
+        checkins: ["2026-08-18"], journal: [{ id: "j1", text: "перший забіг" }],
+        milestones: created.milestones.map((m) => (m.title === "10 км" ? { ...m, done: true } : m)),
+      });
+
+      await ai.executeTool("uid1", "edit_goal",
+        { id: add.output.id, title: "Марафон за 4 години", milestones: ["10 км", "21 км", "30 км"] }, ctx);
+      const g = (await col.doc(add.output.id).get()).data();
+      expect(g.title).toBe("Марафон за 4 години");
+      expect(g.checkins).toEqual(["2026-08-18"]);
+      expect(g.journal).toEqual([{ id: "j1", text: "перший забіг" }]);
+      expect(g.milestones.map((m) => [m.title, m.done]))
+        .toEqual([["10 км", true], ["21 км", false], ["30 км", false]]);
+    });
+
+    test("edit_goal міняє статус, не чіпаючи решти", async () => {
+      const add = await ai.executeTool("uid1", "add_goal", { title: "Ціль", category: "career" }, ctx);
+      await ai.executeTool("uid1", "edit_goal", { id: add.output.id, status: "done" }, ctx);
+      const g = (await mockCurrent.collection("users").doc("uid1").collection("goals").doc(add.output.id).get()).data();
+      expect(g).toMatchObject({ status: "done", title: "Ціль", category: "career" });
+    });
+
+    test("порожня правка й неіснуючий id повертають помилку", async () => {
+      const add = await ai.executeTool("uid1", "add_task", { title: "Справа" }, ctx);
+      expect((await ai.executeTool("uid1", "edit_task", { id: add.output.id }, ctx)).isError).toBe(true);
+      expect((await ai.executeTool("uid1", "edit_task", { id: "вигаданий", title: "X" }, ctx)).isError).toBe(true);
+      expect((await ai.executeTool("uid1", "edit_transaction", { id: "вигаданий", amount: 5 }, ctx)).isError).toBe(true);
+      expect((await ai.executeTool("uid1", "edit_goal", { id: "вигаданий", title: "X" }, ctx)).isError).toBe(true);
+      expect((await ai.executeTool("uid1", "edit_workout", { id: "вигаданий", name: "X" }, ctx)).isError).toBe(true);
+    });
+
+    test("видалення немає серед інструментів — це свідомо", () => {
+      const names = ai.toolNames ? ai.toolNames() : [];
+      expect(names.some((n) => /delete|remove/i.test(n))).toBe(false);
+    });
+  });
+
   // ---- Цілі й заощадження ----
   describe("цілі й заощадження", () => {
     test("goals_progress рахує виконані віхи", async () => {
@@ -488,7 +658,16 @@ describe("executeTool", () => {
 
       const r = await ai.executeTool("uid1", "savings_summary", {}, ctx);
       expect(r.output.total).toBe(300);
-      expect(r.output.goals[0]).toEqual({ goal: "На відпустку", saved: 300 });
+      expect(r.output.goals[0]).toMatchObject({ goal: "На відпустку", saved: 300 });
+    });
+
+    // Щойно створена ціль ще порожня. Якби вона не потрапляла в перелік,
+    // покласти в неї гроші не вийшло б — модель не дізналася б її id.
+    test("savings_summary показує й цілі без жодної операції", async () => {
+      const ref = await mockCurrent.collection("users").doc("uid1").collection("savingsGoals")
+        .add({ name: "На ноутбук", createdAt: new Date() });
+      const r = await ai.executeTool("uid1", "savings_summary", {}, ctx);
+      expect(r.output.goals).toContainEqual({ id: ref.id, goal: "На ноутбук", saved: 0 });
     });
   });
 });

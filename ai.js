@@ -292,6 +292,141 @@ const tools = [
     },
   },
   {
+    name: "add_savings_goal",
+    description:
+      "Створити накопичувальну ціль — скарбничку, в яку далі складають гроші (напр. «На відпустку»). " +
+      "Це не витрата й не довгострокова ціль: гроші сюди кладуть і звідси знімають через add_savings_entry.",
+    input_schema: {
+      type: "object",
+      properties: { name: { type: "string", description: "Назва скарбнички" } },
+      required: ["name"],
+    },
+  },
+  {
+    name: "add_savings_entry",
+    description:
+      "Покласти гроші в накопичувальну ціль або зняти звідти. Спершу виклич savings_summary і візьми id потрібної цілі — " +
+      "id вгадувати не можна. Зняття (withdraw) зменшує накопичене.",
+    input_schema: {
+      type: "object",
+      properties: {
+        goalId: { type: "string", description: "id накопичувальної цілі з savings_summary" },
+        type: { type: "string", enum: ["deposit", "withdraw"], description: "Покласти чи зняти" },
+        amount: { type: "number", description: "Сума, більша за нуль" },
+        note: { type: "string", description: "Нотатка (необов'язково)" },
+        date: { type: "string", description: "Дата YYYY-MM-DD; за замовчуванням сьогодні" },
+      },
+      required: ["goalId", "type", "amount"],
+    },
+  },
+  {
+    name: "rename_savings_goal",
+    description: "Перейменувати накопичувальну ціль. id бери з savings_summary.",
+    input_schema: {
+      type: "object",
+      properties: {
+        id: { type: "string", description: "id накопичувальної цілі" },
+        name: { type: "string", description: "Нова назва" },
+      },
+      required: ["id", "name"],
+    },
+  },
+  {
+    name: "edit_transaction",
+    description:
+      "Виправити вже записану операцію: суму, категорію, дату, нотатку чи тип. Передавай ТІЛЬКИ ті поля, які треба " +
+      "змінити — решта лишиться як була. id бери з query_transactions.",
+    input_schema: {
+      type: "object",
+      properties: {
+        id: { type: "string", description: "id операції з query_transactions" },
+        type: { type: "string", enum: ["income", "expense"] },
+        amount: { type: "number" },
+        category: { type: "string", description: "ID категорії зі списку в контексті" },
+        note: { type: "string" },
+        date: { type: "string", description: "YYYY-MM-DD" },
+      },
+      required: ["id"],
+    },
+  },
+  {
+    name: "edit_task",
+    description:
+      "Змінити вже створене завдання: назву, дату, час, пріоритет, оцінку тривалості, теги чи нотатки. " +
+      "Передавай тільки те, що змінюється. Щоб позначити виконаним — complete_task. id бери з list_tasks.",
+    input_schema: {
+      type: "object",
+      properties: {
+        id: { type: "string", description: "id завдання з list_tasks" },
+        title: { type: "string" },
+        notes: { type: "string" },
+        priority: { type: "string", enum: ["low", "medium", "high"] },
+        tags: { type: "array", items: { type: "string" } },
+        dueDate: { type: "string", description: "YYYY-MM-DD; null щоб прибрати дату" },
+        dueTime: { type: "string", description: "HH:MM; тримається лише разом з датою" },
+        estimateMin: { type: "number", description: "Оцінка в хвилинах" },
+      },
+      required: ["id"],
+    },
+  },
+  {
+    name: "edit_workout",
+    description:
+      "Виправити записане тренування: дату, назву, нотатку або склад вправ. Увага: якщо передаєш exercises, вони " +
+      "замінюють увесь список — спершу виклич workout_history, візьми наявні вправи й надішли повний виправлений набір. " +
+      "id бери звідти ж.",
+    input_schema: {
+      type: "object",
+      properties: {
+        id: { type: "string", description: "id тренування з workout_history" },
+        date: { type: "string", description: "YYYY-MM-DD" },
+        name: { type: "string" },
+        notes: { type: "string" },
+        exercises: {
+          type: "array",
+          description: "ПОВНИЙ новий список вправ — не лише змінена",
+          items: {
+            type: "object",
+            properties: {
+              libId: { type: "string", enum: EXERCISE_LIB.map((e) => e.id) },
+              name: { type: "string" },
+              sets: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: { weight: { type: "number" }, reps: { type: "number" } },
+                  required: ["reps"],
+                },
+              },
+            },
+            required: ["sets"],
+          },
+        },
+      },
+      required: ["id"],
+    },
+  },
+  {
+    name: "edit_goal",
+    description:
+      "Змінити довгострокову ціль: формулювання, сферу, дедлайн, статус або список віх. Якщо передаєш milestones — " +
+      "це повний новий список, уже виконані віхи лишаться виконаними за збігом назви. Щоб закрити одну віху, " +
+      "краще complete_milestone. id бери з goals_progress.",
+    input_schema: {
+      type: "object",
+      properties: {
+        id: { type: "string", description: "id цілі з goals_progress" },
+        title: { type: "string" },
+        category: { type: "string", enum: GOAL_CATEGORIES },
+        why: { type: "string" },
+        targetDate: { type: "string", description: "YYYY-MM-DD" },
+        status: { type: "string", enum: ["active", "done", "archived"] },
+        milestones: { type: "array", items: { type: "string" }, description: "Повний новий список віх" },
+      },
+      required: ["id"],
+    },
+  },
+  {
     name: "query_transactions",
     description:
       "Отримати список і суму транзакцій користувача за період/фільтром. Використовуй, щоб відповісти на питання про витрати, доходи чи баланс — не вигадуй цифри.",
@@ -345,14 +480,14 @@ async function executeTool(uid, name, input, ctx) {
       .where("date", "<=", to);
     if (input.type === "income" || input.type === "expense") q = q.where("type", "==", input.type);
     const snap = await q.get();
-    let docs = snap.docs.map((d) => d.data());
+    let docs = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
     if (input.category) docs = docs.filter((d) => d.category === input.category);
     const sumIncome = docs.filter((d) => d.type === "income").reduce((s, d) => s + d.amount, 0);
     const sumExpense = docs.filter((d) => d.type === "expense").reduce((s, d) => s + d.amount, 0);
     const items = docs
       .sort((a, b) => (a.date < b.date ? 1 : -1))
       .slice(0, limit)
-      .map((d) => ({ type: d.type, amount: d.amount, category: d.category, note: d.note, date: d.date }));
+      .map((d) => ({ id: d.id, type: d.type, amount: d.amount, category: d.category, note: d.note, date: d.date }));
     return {
       output: { count: docs.length, sumIncome, sumExpense, currency: ctx.currency, items },
     };
@@ -368,6 +503,13 @@ async function executeTool(uid, name, input, ctx) {
   if (name === "goals_progress") return goalsProgress(uid);
   if (name === "add_workout") return addWorkout(uid, input, ctx);
   if (name === "add_goal") return addGoal(uid, input);
+  if (name === "add_savings_goal") return addSavingsGoal(uid, input);
+  if (name === "add_savings_entry") return addSavingsEntry(uid, input, ctx);
+  if (name === "rename_savings_goal") return renameSavingsGoal(uid, input);
+  if (name === "edit_transaction") return editTransaction(uid, input, ctx);
+  if (name === "edit_task") return editTask(uid, input);
+  if (name === "edit_workout") return editWorkout(uid, input, ctx);
+  if (name === "edit_goal") return editGoal(uid, input);
   if (name === "goal_checkin") return goalCheckin(uid, input);
   if (name === "complete_milestone") return completeMilestone(uid, input);
 
@@ -444,7 +586,6 @@ async function savingsSummary(uid, ctx) {
     userCol(uid, "savings").get(),
     userCol(uid, "savingsGoals").get(),
   ]);
-  const goalName = new Map(goalsSnap.docs.map((d) => [d.id, (d.data() || {}).name || "Заощадження"]));
   const perGoal = new Map();
   savingsSnap.docs.forEach((d) => {
     const sv = d.data() || {};
@@ -454,10 +595,16 @@ async function savingsSummary(uid, ctx) {
     const key = sv.goalId || "";
     perGoal.set(key, (perGoal.get(key) || 0) + delta);
   });
-  const goals = [...perGoal.entries()].map(([id, total]) => ({
-    goal: goalName.get(id) || "Без цілі",
-    saved: Math.round(total * 100) / 100,
+  // Перелік будується з самих цілей, а не з операцій: щойно створена ціль ще
+  // порожня, і якби її тут не було, покласти в неї гроші не вийшло б —
+  // модель не дізналася б її id.
+  const goals = goalsSnap.docs.map((d) => ({
+    id: d.id,
+    goal: (d.data() || {}).name || "Заощадження",
+    saved: Math.round((perGoal.get(d.id) || 0) * 100) / 100,
   }));
+  const orphan = perGoal.get("") || 0;
+  if (orphan) goals.push({ id: null, goal: "Без цілі", saved: Math.round(orphan * 100) / 100 });
   return {
     output: {
       currency: ctx.currency,
@@ -559,13 +706,14 @@ async function workoutHistory(uid, input) {
   const snap = await userCol(uid, "workouts").get();
   const limit = Math.min(Math.max(parseInt(input.limit, 10) || 8, 1), 30);
   const docs = snap.docs
-    .map((d) => d.data() || {})
+    .map((d) => ({ id: d.id, ...(d.data() || {}) }))
     .sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")))
     .slice(0, limit);
   return {
     output: {
       count: docs.length,
       sessions: docs.map((w) => ({
+        id: w.id,
         date: w.date || null,
         name: w.name || "",
         exercises: (w.exercises || []).map((ex) => ({
@@ -662,6 +810,198 @@ async function addWorkout(uid, input, ctx) {
       name: result.value.name,
       exercises: result.value.exercises.map((ex) => ex.name),
     },
+  };
+}
+
+// ---- Заощадження ----
+async function addSavingsGoal(uid, input) {
+  const name = typeof input.name === "string" ? input.name.trim().slice(0, 200) : "";
+  if (!name) return { output: { ok: false, error: "name обов'язковий" }, isError: true };
+  const ref = await userCol(uid, "savingsGoals").add({
+    name,
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+  });
+  return { output: { ok: true, id: ref.id }, action: { kind: "savings_goal_added", name } };
+}
+
+async function addSavingsEntry(uid, input, ctx) {
+  const goalId = typeof input.goalId === "string" ? input.goalId.trim() : "";
+  if (!goalId) return { output: { ok: false, error: "goalId обов'язковий" }, isError: true };
+  // Операція без існуючої цілі осиротіла б: на сторінці заощаджень усе
+  // згруповано за цілями, і такий запис ніде не показався б.
+  const goalDoc = await userCol(uid, "savingsGoals").doc(goalId).get();
+  if (!goalDoc.exists) return { output: { ok: false, error: "накопичувальна ціль не знайдена" }, isError: true };
+
+  const type = input.type === "withdraw" ? "withdraw" : "deposit";
+  const amount = Math.round(parseFloat(input.amount) * 100) / 100;
+  if (!amount || isNaN(amount) || amount <= 0 || amount >= 1000000000) {
+    return { output: { ok: false, error: "amount має бути додатним числом" }, isError: true };
+  }
+  const isDate = (v) => typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v);
+
+  await userCol(uid, "savings").add({
+    type,
+    amount,
+    currency: ctx.currency,
+    note: typeof input.note === "string" ? input.note.slice(0, 2000) : "",
+    date: isDate(input.date) ? input.date : ctx.today,
+    goalId,
+  });
+  const name = (goalDoc.data() || {}).name || "";
+  return {
+    output: { ok: true, type, amount, goal: name },
+    action: { kind: "savings_entry", type, amount, currency: CURRENCY_SYMBOLS[ctx.currency] || ctx.currency, goal: name },
+  };
+}
+
+async function renameSavingsGoal(uid, input) {
+  const id = typeof input.id === "string" ? input.id : "";
+  const name = typeof input.name === "string" ? input.name.trim().slice(0, 200) : "";
+  if (!name) return { output: { ok: false, error: "name обов'язковий" }, isError: true };
+  const ref = userCol(uid, "savingsGoals").doc(id);
+  const doc = await ref.get();
+  if (!doc.exists) return { output: { ok: false, error: "накопичувальна ціль не знайдена" }, isError: true };
+  const before = (doc.data() || {}).name || "";
+  await ref.update({ name });
+  return { output: { ok: true, from: before, to: name }, action: { kind: "renamed", from: before, to: name } };
+}
+
+// ---- Правки вже записаного ----
+// Спільний кістяк для всіх edit_*. Ключове тут — читати документ і
+// перевіряти вже ЗЛИТИЙ результат, а не саму правку: правила Firestore
+// дивляться на документ цілком, тож патч, коректний сам по собі, легко дає
+// на виході неприпустимий документ (скажімо, час без дати в завданні).
+//
+// `patch` бере лише ті ключі, які модель справді надіслала: undefined означає
+// «не чіпати», і відрізнити його від свідомого null тут принципово.
+function pickPatch(input, keys) {
+  const out = {};
+  keys.forEach((k) => {
+    if (Object.prototype.hasOwnProperty.call(input, k) && input[k] !== undefined) out[k] = input[k];
+  });
+  return out;
+}
+
+async function loadForEdit(uid, colName, id, notFound) {
+  const ref = userCol(uid, colName).doc(typeof id === "string" ? id : "");
+  const doc = await ref.get();
+  if (!doc.exists) return { error: { output: { ok: false, error: notFound }, isError: true } };
+  return { ref, data: doc.data() || {} };
+}
+
+async function editTransaction(uid, input, ctx) {
+  const found = await loadForEdit(uid, "transactions", input.id, "операція не знайдена");
+  if (found.error) return found.error;
+
+  const patch = pickPatch(input, ["type", "amount", "category", "note", "date"]);
+  if (!Object.keys(patch).length) return { output: { ok: false, error: "нічого міняти" }, isError: true };
+
+  const merged = { ...found.data, ...patch };
+  const result = sanitizeTransactionInput(merged, ctx.categoriesExpense, ctx.categoriesIncome);
+  if (result.error) return { output: { ok: false, error: result.error }, isError: true };
+
+  // source лишаємо як був: помітка «створено помічником» стосується
+  // походження запису, а не того, хто його потім правив.
+  const value = { ...result.value, source: found.data.source || result.value.source };
+  await found.ref.update(value);
+  const list = value.type === "income" ? ctx.categoriesIncome : ctx.categoriesExpense;
+  const cat = list.find((c) => c.id === value.category);
+  return {
+    output: { ok: true, ...value },
+    action: {
+      kind: "transaction_edited",
+      categoryLabel: cat ? cat.label : value.category,
+      amount: value.amount,
+      currency: CURRENCY_SYMBOLS[ctx.currency] || ctx.currency,
+    },
+  };
+}
+
+async function editTask(uid, input) {
+  const found = await loadForEdit(uid, "tasks", input.id, "завдання не знайдене");
+  if (found.error) return found.error;
+
+  const patch = pickPatch(input, ["title", "notes", "priority", "tags", "dueDate", "dueTime", "estimateMin"]);
+  if (!Object.keys(patch).length) return { output: { ok: false, error: "нічого міняти" }, isError: true };
+
+  const merged = { ...found.data, ...patch };
+  const result = sanitizeTaskInput(merged);
+  if (result.error) return { output: { ok: false, error: result.error }, isError: true };
+
+  // sanitizeTaskInput складає документ як для НОВОГО завдання, тож повертаємо
+  // те, що воно обнуляє: виконаність, повторення й нагадування правкою
+  // тексту зачіпати не можна.
+  const value = {
+    ...result.value,
+    done: !!found.data.done,
+    completedAt: found.data.completedAt || null,
+    recurrence: found.data.recurrence || null,
+    reminderAt: found.data.reminderAt || null,
+    notifiedAt: found.data.notifiedAt || null,
+    subtasks: found.data.subtasks || [],
+    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+  };
+  await found.ref.update(value);
+  return {
+    output: { ok: true, title: value.title, dueDate: value.dueDate, dueTime: value.dueTime, priority: value.priority },
+    action: { kind: "task_edited", title: value.title, dueDate: value.dueDate },
+  };
+}
+
+async function editWorkout(uid, input, ctx) {
+  const found = await loadForEdit(uid, "workouts", input.id, "тренування не знайдене");
+  if (found.error) return found.error;
+
+  const patch = pickPatch(input, ["date", "name", "notes", "exercises"]);
+  if (!Object.keys(patch).length) return { output: { ok: false, error: "нічого міняти" }, isError: true };
+
+  const merged = { ...found.data, ...patch };
+  const result = sanitizeWorkoutInput(merged, ctx);
+  if (result.error) return { output: { ok: false, error: result.error }, isError: true };
+
+  // Якщо вправи не міняли — лишаємо наявні як є, разом з їхніми id: інакше
+  // перепрогін через sanitize перевидав би id і зайво переписав документ.
+  const value = patch.exercises
+    ? result.value
+    : { ...result.value, exercises: found.data.exercises || [] };
+  await found.ref.update({ ...value, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
+  return {
+    output: { ok: true, date: value.date, exercises: value.exercises.length },
+    action: { kind: "workout_edited", date: value.date, name: value.name },
+  };
+}
+
+async function editGoal(uid, input) {
+  const found = await loadForEdit(uid, "goals", input.id, "ціль не знайдена");
+  if (found.error) return found.error;
+
+  const patch = pickPatch(input, ["title", "category", "why", "targetDate", "status", "milestones"]);
+  if (!Object.keys(patch).length) return { output: { ok: false, error: "нічого міняти" }, isError: true };
+
+  const merged = { ...found.data, ...patch };
+  const result = sanitizeGoalInput(merged);
+  if (result.error) return { output: { ok: false, error: result.error }, isError: true };
+
+  // Віхи приходять новим списком, і sanitize позначає їх усі невиконаними.
+  // Повертаємо галочки тим, чия назва збіглася: інакше правка формулювання
+  // цілі мовчки скидала б уже пройдений шлях.
+  const doneTitles = new Set((found.data.milestones || []).filter((m) => m.done).map((m) => m.title));
+  const milestones = patch.milestones
+    ? result.value.milestones.map((m) => (doneTitles.has(m.title) ? { ...m, done: true } : m))
+    : (found.data.milestones || []);
+
+  const value = {
+    ...result.value,
+    status: ["active", "done", "archived"].includes(patch.status) ? patch.status : (found.data.status || "active"),
+    milestones,
+    checkins: found.data.checkins || [],
+    journal: found.data.journal || [],
+    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+  };
+  await found.ref.update(value);
+  return {
+    output: { ok: true, title: value.title, status: value.status, milestones: milestones.length },
+    action: { kind: "goal_edited", title: value.title },
   };
 }
 
@@ -808,6 +1148,10 @@ function buildSystemPrompt(ctx) {
     "",
     "ЦІЛІ. add_goal створює довгострокову ціль — не плутай із завданням: «купити молоко» це add_task, «вивчити польську до літа» це add_goal. goal_checkin відзначає сьогоднішній день у серії, complete_milestone закриває віху. Обидва беруть id, тож спершу виклич goals_progress і візьми id звідти — вгадувати id не можна. Якщо назва цілі збігається з кількома — перепитай, з якою саме.",
     "",
+    "ВИПРАВЛЯТИ. Помічник уміє міняти вже записане, але не вміє нічого видаляти — так і кажи, якщо просять видалити, і поясни, що це робиться в самому розділі. Перед будь-якою правкою знайди запис інструментом читання (query_transactions, list_tasks, workout_history, goals_progress, savings_summary) і візьми звідти id — вгадувати id не можна. У edit_* передавай ТІЛЬКИ ті поля, які змінюються. Виняток — exercises у edit_workout і milestones у edit_goal: там треба надіслати повний новий список, тож спершу прочитай наявний. Якщо під опис підходить кілька записів — перепитай, який саме.",
+    "",
+    "ЗАОЩАДЖЕННЯ. Це скарбнички, окремі від витрат: add_savings_goal створює, add_savings_entry кладе (deposit) або знімає (withdraw). Гроші, відкладені у скарбничку, — не витрата, тож add_transaction тут ні до чого. id цілі бери з savings_summary.",
+    "",
     "РАДИТИ. Це головне правило: спершу подивись у дані, потім говори. Порада без цифр — марна, людина і так знає, що треба менше витрачати й більше рухатись.",
     "- порада про економію -> спершу month_summary за потрібний місяць, і говори про конкретні категорії й суми;",
     "- порада про тренування -> спершу workout_history, подивись, які групи мʼязів давно не навантажувались і з якими вагами людина працює;",
@@ -920,6 +1264,9 @@ module.exports.enforceRateLimit = enforceRateLimit;
 module.exports.sanitizeTaskInput = sanitizeTaskInput;
 module.exports.sanitizeWorkoutInput = sanitizeWorkoutInput;
 module.exports.sanitizeGoalInput = sanitizeGoalInput;
+module.exports.pickPatch = pickPatch;
+// Для тесту, який стежить, щоб серед інструментів не завелося видалення.
+module.exports.toolNames = () => tools.map((t) => t.name);
 module.exports.modelIdFor = modelIdFor;
 module.exports.MODELS = MODELS;
 module.exports.RATE_LIMIT_MAX_MESSAGES = RATE_LIMIT_MAX_MESSAGES;
