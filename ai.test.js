@@ -599,6 +599,73 @@ describe("executeTool", () => {
       expect(g.rescue).toBe(null);
     });
 
+    // ---- Щоденні дії з цілі ----
+    // Завдання й ціль живуть у різних розділах, і людина не має робити одну
+    // й ту саму дію двічі: галочка в завданнях — це й крок до цілі.
+    test("add_goal + add_task з goalId звʼязує завдання з ціллю", async () => {
+      const goal = await seedGoal();
+      const r = await ai.executeTool("uid1", "add_task", { title: "Пробігти 3 км", goalId: goal.id }, ctx);
+      const task = (await mockCurrent.collection("users").doc("uid1").collection("tasks").doc(r.output.id).get()).data();
+      expect(task.goalId).toBe(goal.id);
+    });
+
+    test("завдання без цілі має goalId null, а не порожній рядок", async () => {
+      const plain = await ai.executeTool("uid1", "add_task", { title: "Купити молоко" }, ctx);
+      const blank = await ai.executeTool("uid1", "add_task", { title: "Ще щось", goalId: "  " }, ctx);
+      const col = mockCurrent.collection("users").doc("uid1").collection("tasks");
+      expect((await col.doc(plain.output.id).get()).data().goalId).toBe(null);
+      expect((await col.doc(blank.output.id).get()).data().goalId).toBe(null);
+    });
+
+    test("complete_task відмічає день у серії цілі", async () => {
+      const goal = await seedGoal();
+      const task = await ai.executeTool("uid1", "add_task", { title: "Пробігти 3 км", goalId: goal.id }, ctx);
+      const r = await ai.executeTool("uid1", "complete_task", { id: task.output.id }, ctx);
+      expect(r.output.goalCheckin).toBe("Марафон");
+      const g = (await mockCurrent.collection("users").doc("uid1").collection("goals").doc(goal.id).get()).data();
+      expect(g.checkins).toEqual([today()]);
+    });
+
+    test("день, уже відмічений, не дублюється", async () => {
+      const goal = await seedGoal({ checkins: [today()] });
+      const task = await ai.executeTool("uid1", "add_task", { title: "Пробігти 3 км", goalId: goal.id }, ctx);
+      const r = await ai.executeTool("uid1", "complete_task", { id: task.output.id }, ctx);
+      expect(r.output.goalCheckin).toBe(null);
+      const g = (await mockCurrent.collection("users").doc("uid1").collection("goals").doc(goal.id).get()).data();
+      expect(g.checkins).toEqual([today()]);
+    });
+
+    test("завдання без цілі нічого не відмічає", async () => {
+      const goal = await seedGoal();
+      const task = await ai.executeTool("uid1", "add_task", { title: "Купити молоко" }, ctx);
+      const r = await ai.executeTool("uid1", "complete_task", { id: task.output.id }, ctx);
+      expect(r.output.goalCheckin).toBe(null);
+      const g = (await mockCurrent.collection("users").doc("uid1").collection("goals").doc(goal.id).get()).data();
+      expect(g.checkins).toEqual([]);
+    });
+
+    // Ціль могли видалити, а завдання лишилось: це не привід падати.
+    test("завдання з мертвим goalId просто закривається", async () => {
+      const task = await ai.executeTool("uid1", "add_task", { title: "Крок", goalId: "вигаданий" }, ctx);
+      const r = await ai.executeTool("uid1", "complete_task", { id: task.output.id }, ctx);
+      expect(r.output).toMatchObject({ ok: true, goalCheckin: null });
+    });
+
+    test("правка завдання не рве звʼязок із ціллю", async () => {
+      const goal = await seedGoal();
+      const task = await ai.executeTool("uid1", "add_task", { title: "Пробігти 3 км", goalId: goal.id }, ctx);
+      await ai.executeTool("uid1", "edit_task", { id: task.output.id, title: "Пробігти 5 км" }, ctx);
+      const doc = (await mockCurrent.collection("users").doc("uid1").collection("tasks").doc(task.output.id).get()).data();
+      expect(doc).toMatchObject({ title: "Пробігти 5 км", goalId: goal.id });
+    });
+
+    test("list_tasks показує, з якої цілі завдання", async () => {
+      const goal = await seedGoal();
+      await ai.executeTool("uid1", "add_task", { title: "Пробігти 3 км", goalId: goal.id }, ctx);
+      const r = await ai.executeTool("uid1", "list_tasks", {}, ctx);
+      expect(r.output.items[0].goalId).toBe(goal.id);
+    });
+
     test("неіснуючі id цілі чи віхи повертають помилку, а не мовчазний успіх", async () => {
       const ref = await seedGoal();
       expect((await ai.executeTool("uid1", "goal_checkin", { id: "вигаданий" }, ctx)).isError).toBe(true);

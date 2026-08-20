@@ -55,6 +55,11 @@ const T = {
     checkinBtnLabel: 'Зробив крок сьогодні', checkinBtnLabelDone: 'Зроблено сьогодні',
     rescueMsg: (n) => `Вчора пропущено. Серія на ${n} дн. ще ціла — врятувати?`,
     rescueBtn: 'Врятувати серію',
+    actionsLabel: 'Щоденні дії',
+    actionsHint: 'Дрібні кроки, які ведуть до цілі. Виконав — день у серії відмічається сам.',
+    actionPlaceholder: 'Що зробити для цієї цілі?',
+    actionsEmpty: 'Ще немає щоденних дій — додай перший крок нижче.',
+    actionOverdue: 'прострочено',
     rescueWait: (n) => `Серія обірвалась. Наступний рятунок буде доступний через ${n} дн.`,
     eveningTitle: 'Як пройшов день?',
     eveningSub: 'Відмічай, що вдалося. Якщо ні — скажи одним словом, що завадило.',
@@ -115,6 +120,11 @@ const T = {
     checkinBtnLabel: 'Сделал шаг сегодня', checkinBtnLabelDone: 'Сделано сегодня',
     rescueMsg: (n) => `Вчера пропущено. Серия на ${n} дн. ещё цела — спасти?`,
     rescueBtn: 'Спасти серию',
+    actionsLabel: 'Ежедневные действия',
+    actionsHint: 'Мелкие шаги к цели. Выполнил — день в серии отмечается сам.',
+    actionPlaceholder: 'Что сделать для этой цели?',
+    actionsEmpty: 'Ещё нет ежедневных действий — добавь первый шаг ниже.',
+    actionOverdue: 'просрочено',
     rescueWait: (n) => `Серия оборвалась. Следующее спасение будет доступно через ${n} дн.`,
     eveningTitle: 'Как прошёл день?',
     eveningSub: 'Отмечай, что получилось. Если нет — скажи одним словом, что помешало.',
@@ -175,6 +185,11 @@ const T = {
     checkinBtnLabel: 'Zrobiłem krok dzisiaj', checkinBtnLabelDone: 'Zrobione dzisiaj',
     rescueMsg: (n) => `Wczoraj wypadło. Seria ${n} dni jest jeszcze cała — uratować?`,
     rescueBtn: 'Uratuj serię',
+    actionsLabel: 'Codzienne działania',
+    actionsHint: 'Drobne kroki do celu. Zrobione — dzień w serii zaznacza się sam.',
+    actionPlaceholder: 'Co zrobić dla tego celu?',
+    actionsEmpty: 'Brak codziennych działań — dodaj pierwszy krok poniżej.',
+    actionOverdue: 'po terminie',
     rescueWait: (n) => `Seria się urwała. Kolejny ratunek będzie dostępny za ${n} dni.`,
     eveningTitle: 'Jak minął dzień?',
     eveningSub: 'Zaznacz, co się udało. Jeśli nie — powiedz jednym słowem, co przeszkodziło.',
@@ -235,6 +250,11 @@ const T = {
     checkinBtnLabel: 'I took a step today', checkinBtnLabelDone: 'Done for today',
     rescueMsg: (n) => `You missed yesterday. A ${n}-day streak is still savable — rescue it?`,
     rescueBtn: 'Rescue the streak',
+    actionsLabel: 'Daily actions',
+    actionsHint: 'Small steps toward the goal. Tick one off and the day is checked in for you.',
+    actionPlaceholder: 'What should you do for this goal?',
+    actionsEmpty: 'No daily actions yet — add the first step below.',
+    actionOverdue: 'overdue',
     rescueWait: (n) => `The streak broke. The next rescue unlocks in ${n} days.`,
     eveningTitle: 'How did the day go?',
     eveningSub: 'Tick off what you managed. If not — say in one word what got in the way.',
@@ -497,6 +517,11 @@ let formMilestones = [];
 let pendingDeleteId = null;
 // Яка ціль у вечірньому підсумку зараз питає «що завадило».
 let eveningReasonForId = null;
+// Щоденні дії відкритої цілі — це звичайні завдання з розділу «Завдання»,
+// просто відфільтровані за goalId. Слухаємо їх лише поки ціль відкрита:
+// тримати підписку на весь список заради екрана, якого не видно, ні до чого.
+let goalActions = [];
+let unsubscribeActions = null;
 const EVENING_DISMISS_KEY = 'goalsEveningDismissed';
 
 // ---- Дані (Firestore, реалтайм) ----
@@ -592,6 +617,7 @@ function renderCurrentScreen() {
     // Ціль зникла (видалена з іншого пристрою) — повертаємось на дашборд.
     currentScreen = 'dashboard';
     activeDetailGoalId = null;
+    stopActions();
     document.getElementById('goalDetailScreen').style.display = 'none';
     document.getElementById('dashboardScreen').style.display = '';
   }
@@ -753,6 +779,7 @@ function renderGoalsList() {
 function showGoalDetail(id) {
   activeDetailGoalId = id;
   currentScreen = 'detail';
+  subscribeToActions(id);
   document.getElementById('journalInput').value = '';
   document.getElementById('dashboardScreen').style.display = 'none';
   document.getElementById('goalDetailScreen').style.display = 'block';
@@ -761,6 +788,7 @@ function showGoalDetail(id) {
 function showDashboard() {
   currentScreen = 'dashboard';
   activeDetailGoalId = null;
+  stopActions();
   document.getElementById('goalDetailScreen').style.display = 'none';
   document.getElementById('dashboardScreen').style.display = '';
   renderCurrentScreen();
@@ -823,6 +851,7 @@ function renderGoalDetail(goal) {
 
   document.getElementById('detailJourneyBlock').innerHTML = journeyHtml(goal);
   wireJourneyEvents(goal);
+  renderActionsBlock(goal.id);
 
   // Рятунок серії показуємо тільки тоді, коли є що рятувати: вчора
   // пропущено, а до того ланцюг тягнувся. Якщо рятунок на паузі — чесно
@@ -853,6 +882,134 @@ function renderGoalDetail(goal) {
   document.getElementById('streakToggleBtn').addEventListener('click', () => toggleTodayCheckin(goal.id));
 
   renderJournalList(goal);
+}
+
+// ---- Щоденні дії ----
+function subscribeToActions(goalId) {
+  if (unsubscribeActions) { unsubscribeActions(); unsubscribeActions = null; }
+  goalActions = [];
+  if (!auth.currentUser || !goalId) return;
+  unsubscribeActions = db.collection('users').doc(auth.currentUser.uid).collection('tasks')
+    .where('goalId', '==', goalId)
+    .onSnapshot((snap) => {
+      goalActions = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      if (currentScreen === 'detail' && activeDetailGoalId === goalId) renderActionsBlock(goalId);
+    }, (err) => console.error('actions:', err));
+}
+
+function stopActions() {
+  if (unsubscribeActions) { unsubscribeActions(); unsubscribeActions = null; }
+  goalActions = [];
+}
+
+/** Показуємо невиконані й те, що закрито сьогодні. Учорашні галочки тут
+ *  тільки заважали б: список щоденних дій має лишатись коротким. */
+function visibleActions() {
+  const today = todayISO();
+  return goalActions
+    // Виконане показуємо ще сьогодні — інакше галочка змушувала б рядок
+    // зникнути з-під пальця. Дата виконання приходить із сервера з
+    // затримкою, тож поки її немає, орієнтуємось на день, на який дія
+    // ставилась.
+    .filter((a) => !a.done || a.dueDate === today || completedToday(a))
+    .sort((a, b) => (a.done === b.done ? String(a.dueDate || '').localeCompare(String(b.dueDate || '')) : (a.done ? 1 : -1)));
+}
+
+function completedToday(task) {
+  const at = task.completedAt;
+  if (!at) return false;
+  // Поки запис не долетів до сервера, у знімку лежить не Timestamp, а те,
+  // що поклав клієнт, — приймаємо обидва.
+  const d = typeof at.toDate === 'function' ? at.toDate() : (at instanceof Date ? at : null);
+  if (!d) return false;
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` === todayISO();
+}
+
+function renderActionsBlock(goalId) {
+  const host = document.getElementById('detailActionsBlock');
+  if (!host) return;
+  const list = visibleActions();
+  const today = todayISO();
+  host.innerHTML = `
+    <div class="actions-block">
+      <div class="section-label">${escapeHtml(t('actionsLabel'))}</div>
+      ${list.length
+        ? list.map((a) => {
+            const overdue = !a.done && a.dueDate && a.dueDate < today;
+            return `
+        <div class="action-row${a.done ? ' done' : ''}">
+          <button type="button" class="action-check${a.done ? ' checked' : ''}" data-action-toggle="${a.id}" aria-label="done">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+          </button>
+          <div>
+            <div class="action-title">${escapeHtml(a.title || '')}</div>
+            ${overdue ? `<div class="action-due overdue">${escapeHtml(t('actionOverdue'))}</div>` : ''}
+          </div>
+        </div>`;
+          }).join('')
+        : `<div class="actions-empty">${escapeHtml(t('actionsEmpty'))}</div>`}
+      <div class="action-add-row">
+        <input type="text" id="actionInput" maxlength="200" placeholder="${escapeHtml(t('actionPlaceholder'))}">
+        <button type="button" class="action-add-btn" id="actionAddBtn">+</button>
+      </div>
+      <div class="field-hint">${escapeHtml(t('actionsHint'))}</div>
+    </div>`;
+
+  host.querySelectorAll('[data-action-toggle]').forEach((btn) => {
+    btn.addEventListener('click', () => toggleAction(btn.dataset.actionToggle, goalId));
+  });
+  const input = document.getElementById('actionInput');
+  const commit = () => {
+    const title = input.value.trim();
+    if (!title) return;
+    input.value = '';
+    addAction(goalId, title);
+  };
+  document.getElementById('actionAddBtn').addEventListener('click', commit);
+  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); commit(); } });
+}
+
+// Дія — звичайне завдання, тому поля тут ті самі, що й у формі завдання:
+// інакше правила Firestore відкинули б документ, а сторінка «Завдання»
+// не знала б, що з ним робити.
+async function addAction(goalId, title) {
+  if (!auth.currentUser) return;
+  await db.collection('users').doc(auth.currentUser.uid).collection('tasks').add({
+    title: title.slice(0, 200),
+    notes: '', done: false, completedAt: null,
+    priority: null, tags: [],
+    dueDate: todayISO(), dueTime: null,
+    estimateMin: null, recurrence: null,
+    reminderAt: null, notifiedAt: null,
+    subtasks: [],
+    goalId,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+  }).catch((err) => console.error('addAction:', err));
+}
+
+async function toggleAction(taskId, goalId) {
+  const task = goalActions.find((a) => a.id === taskId);
+  if (!task || !auth.currentUser) return;
+  const done = !task.done;
+  await db.collection('users').doc(auth.currentUser.uid).collection('tasks').doc(taskId).update({
+    done,
+    completedAt: done ? firebase.firestore.FieldValue.serverTimestamp() : null,
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+  }).catch((err) => console.error('toggleAction:', err));
+  if (done) markGoalCheckin(goalId);
+}
+
+// Знята галочка чекін НЕ прибирає: до одного дня могли вести кілька дій,
+// та й мовчки скасовувати вже відзначений день було б несподівано.
+async function markGoalCheckin(goalId) {
+  const goal = goals.find((g) => g.id === goalId);
+  if (!goal || !auth.currentUser) return;
+  const result = Streak.applyCheckin(goal, todayISO());
+  if (!result) return;
+  await db.collection('users').doc(auth.currentUser.uid).collection('goals').doc(goalId).update({
+    checkins: result.checkins, updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+  }).catch((err) => console.error('markGoalCheckin:', err));
 }
 
 function journeyHtml(goal) {

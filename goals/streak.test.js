@@ -102,6 +102,30 @@ describe('applyRescue', () => {
   });
 });
 
+describe('applyCheckin', () => {
+  test('дописує сьогодні й тримає порядок', () => {
+    expect(S.applyCheckin({ checkins: [days(-2)] }, TODAY).checkins).toEqual([days(-2), TODAY]);
+  });
+
+  // Виконане завдання, привʼязане до цілі, теж ставить чекін — тож той
+  // самий день міг би прилетіти двічі за вечір.
+  test('уже відмічений день не дублюється', () => {
+    expect(S.applyCheckin({ checkins: [days(-1), TODAY] }, TODAY)).toBe(null);
+  });
+
+  test('не чіпає вихідний масив', () => {
+    const checkins = [days(-1)];
+    S.applyCheckin({ checkins }, TODAY);
+    expect(checkins).toEqual([days(-1)]);
+  });
+
+  test('історія не росте безмежно', () => {
+    const long = [];
+    for (let i = 500; i >= 1; i--) long.push(days(-i));
+    expect(S.applyCheckin({ checkins: long }, TODAY).checkins.length).toBe(400);
+  });
+});
+
 describe('applyBlocker', () => {
   test('записує причину сьогоднішнім днем', () => {
     const r = S.applyBlocker({}, 'не було часу', TODAY);

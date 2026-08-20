@@ -109,6 +109,18 @@
     return { day: state.day, checkins: checkins, rescues: rescues, streak: computeStreak(checkins, todayIso) };
   }
 
+  /** Дописує сьогоднішній чекін. null — день уже відмічено, писати нема
+   *  чого. Живе тут, бо чекін ставить не лише сторінка цілей: виконане
+   *  завдання, привʼязане до цілі, відмічає день само. */
+  function applyCheckin(goal, todayIso) {
+    var checkins = ((goal && goal.checkins) || []).slice();
+    if (checkins.indexOf(todayIso) >= 0) return null;
+    checkins.push(todayIso);
+    checkins.sort();
+    if (checkins.length > 400) checkins = checkins.slice(checkins.length - 400);
+    return { checkins: checkins };
+  }
+
   /** Записує, що завадило сьогодні. Один запис на день: людина може
    *  передумати щодо причини, але «сьогодні не вийшло» лишається одним
    *  фактом, а не двома. */
@@ -160,6 +172,7 @@
     computeStreak: computeStreak,
     rescueState: rescueState,
     applyRescue: applyRescue,
+    applyCheckin: applyCheckin,
     applyBlocker: applyBlocker,
     blockerStats: blockerStats,
     isEvening: isEvening,

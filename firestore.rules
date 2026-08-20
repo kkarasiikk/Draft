@@ -10,7 +10,7 @@ rules_version = '2';
 //   users/{uid}/tasks/{id}            -- {title, notes, done, completedAt,
 //                                         priority, tags, dueDate, dueTime,
 //                                         estimateMin, recurrence, subtasks,
-//                                         reminderAt, notifiedAt,
+//                                         reminderAt, notifiedAt, goalId,
 //                                         createdAt, updatedAt}
 //   users/{uid}/taskTemplates/{id}    -- {title, notes, priority, tags,
 //                                         estimateMin, subtasks,
@@ -143,11 +143,14 @@ service cloud.firestore {
                  // теж має бути дозволене.
                  (!('reminderAt' in d) || d.reminderAt == null || d.reminderAt is timestamp) &&
                  (!('notifiedAt' in d) || d.notifiedAt == null || d.notifiedAt is timestamp) &&
+                 // Завдання може бути щоденною дією з довгострокової цілі:
+                 // тоді тут лежить id цілі, і виконання відмічає її день.
+                 (!('goalId' in d) || d.goalId == null || (d.goalId is string && d.goalId.size() <= 64)) &&
                  d.subtasks is list && d.subtasks.size() <= 50 &&
                  d.createdAt is timestamp && d.updatedAt is timestamp &&
                  d.keys().hasOnly(['title', 'notes', 'done', 'completedAt', 'priority', 'tags',
                    'dueDate', 'dueTime', 'estimateMin', 'recurrence', 'subtasks',
-                   'reminderAt', 'notifiedAt', 'createdAt', 'updatedAt']);
+                   'reminderAt', 'notifiedAt', 'goalId', 'createdAt', 'updatedAt']);
         }
         allow read, delete: if isOwner(uid);
         allow create, update: if isOwner(uid) && isValidTask(request.resource.data);

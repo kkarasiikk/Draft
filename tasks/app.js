@@ -690,6 +690,11 @@ let tasks = [];
 let templates = [];
 let unsubscribeTasks = null;
 let unsubscribeTemplates = null;
+// Назви цілей — тільки щоб підписати завдання, яке прийшло з довгострокової
+// цілі. Колекція маленька, і читати її разом зі списком дешевше, ніж копіювати
+// назву в кожне завдання й потім ганятися за перейменуваннями.
+let goalTitles = {};
+let unsubscribeGoalTitles = null;
 let selectedTags = new Set();
 let editingTaskId = null;
 let formPriority = null;
@@ -731,6 +736,16 @@ function subscribeToTemplates(uid) {
     renderTemplateRow();
     if (document.getElementById('templatesOverlay').classList.contains('show')) renderTemplateManageList();
   }, (err) => console.error('subscribeToTemplates:', err));
+}
+
+function subscribeToGoalTitles(uid) {
+  if (unsubscribeGoalTitles) unsubscribeGoalTitles();
+  unsubscribeGoalTitles = db.collection('users').doc(uid).collection('goals')
+    .onSnapshot((snap) => {
+      goalTitles = {};
+      snap.docs.forEach((d) => { goalTitles[d.id] = (d.data() || {}).title || ''; });
+      renderCurrentScreen();
+    }, (err) => console.error('subscribeToGoalTitles:', err));
 }
 
 function sortTasks(list) {
@@ -789,6 +804,9 @@ function taskRowHtml(task) {
   if (subtasks.length) metaParts.push(`<span class="task-progress">${subDone}/${subtasks.length}</span>`);
   if (task.estimateMin) metaParts.push(`<span class="task-progress">${escapeHtml(t('estimateShort', task.estimateMin))}</span>`);
   if (task.recurrence) metaParts.push(`<span class="task-progress">\u21BB ${escapeHtml(recurrenceShortLabel(task.recurrence))}</span>`);
+  if (task.goalId && goalTitles[task.goalId]) {
+    metaParts.push(`<span class="goal-chip">\u{1F3AF} ${escapeHtml(goalTitles[task.goalId])}</span>`);
+  }
   (task.tags || []).forEach((tag) => metaParts.push(`<span class="tag-chip">${escapeHtml(tag)}</span>`));
   // Смуги дій під рядком малюємо лише для невиконаних: свайпнути «на завтра»
   // те, що вже зроблене, немає сенсу.
@@ -2315,6 +2333,11 @@ function toggleDone(id) {
     updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
   }).catch((err) => console.error('toggleDone:', err));
 
+  // Завдання, що прийшло з довгострокової цілі, само відмічає її день у
+  // серії — інакше довелось би робити ту саму дію двічі, в двох розділах.
+  // Знята галочка чекін не прибирає: до одного дня могли вести кілька дій.
+  if (done && task.goalId) markGoalCheckin(task.goalId);
+
   // Виконане повторюване завдання лишається в історії як виконане, а наступне
   // створюється окремим документом — інакше статистика бачила б одну задачу
   // замість двадцяти зроблених прибирань. Знята галочка наступне НЕ видаляє:
@@ -2333,6 +2356,8 @@ function toggleDone(id) {
         dueTime: task.dueTime || null,
         estimateMin: task.estimateMin || null,
         recurrence: task.recurrence,
+        // Наступний повтор веде до тієї самої цілі, що й попередній.
+        goalId: task.goalId || null,
         // Наступний повтор ще не нагадували — інакше він мовчав би.
         reminderAt: null,
         notifiedAt: null,
@@ -2342,6 +2367,20 @@ function toggleDone(id) {
         updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
       }).catch((err) => console.error('recurring next:', err));
     }
+  }
+}
+
+async function markGoalCheckin(goalId) {
+  if (!auth.currentUser) return;
+  const ref = db.collection('users').doc(auth.currentUser.uid).collection('goals').doc(goalId);
+  try {
+    const doc = await ref.get();
+    if (!doc.exists) return;
+    const result = window.GoalStreak.applyCheckin(doc.data(), todayISO());
+    if (!result) return;
+    await ref.update({ checkins: result.checkins, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+  } catch (err) {
+    console.error('markGoalCheckin:', err);
   }
 }
 
@@ -2827,6 +2866,7 @@ auth.onAuthStateChanged((user) => {
     }).catch(() => {});
     subscribeToTasks(user.uid);
     subscribeToTemplates(user.uid);
+    subscribeToGoalTitles(user.uid);
     loadReminderSettings(user.uid);
     // Коли вкладка відкрита, системного сповіщення браузер не показує —
     // повідомлення побачив би тільки SW. Показуємо самі.
@@ -2837,6 +2877,8 @@ auth.onAuthStateChanged((user) => {
   } else {
     if (unsubscribeTasks) { unsubscribeTasks(); unsubscribeTasks = null; }
     if (unsubscribeTemplates) { unsubscribeTemplates(); unsubscribeTemplates = null; }
+    if (unsubscribeGoalTitles) { unsubscribeGoalTitles(); unsubscribeGoalTitles = null; }
+    goalTitles = {};
     tasks = [];
     templates = [];
     document.getElementById('appScreen').style.display = 'none';

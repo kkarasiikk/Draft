@@ -161,6 +161,11 @@ const tools = [
         estimateMin: { type: "number", description: "Скільки хвилин займе, якщо сказано" },
         tags: { type: "array", items: { type: "string" }, description: "Теги без решітки" },
         notes: { type: "string", description: "Деталі, якщо є" },
+        goalId: {
+          type: "string",
+          description: "id довгострокової цілі, якщо це щоденна дія з неї (бери з goals_progress). " +
+            "Виконання такого завдання само відмічає день у серії цілі",
+        },
       },
       required: ["title"],
     },
@@ -547,7 +552,7 @@ async function executeTool(uid, name, input, ctx) {
   if (name === "savings_summary") return savingsSummary(uid, ctx);
   if (name === "add_task") return addTask(uid, input, ctx);
   if (name === "list_tasks") return listTasks(uid, input, ctx);
-  if (name === "complete_task") return completeTask(uid, input);
+  if (name === "complete_task") return completeTask(uid, input, ctx);
   if (name === "workout_history") return workoutHistory(uid, input);
   if (name === "personal_records") return personalRecords(uid);
   if (name === "goals_progress") return goalsProgress(uid);
@@ -697,6 +702,9 @@ function sanitizeTaskInput(input) {
       reminderAt: null,
       notifiedAt: null,
       subtasks: [],
+      // Завдання може бути щоденною дією з цілі. Порожній рядок — це «нема
+      // цілі», а не ціль з порожнім id, тож нормалізуємо в null.
+      goalId: typeof input.goalId === "string" && input.goalId.trim() ? input.goalId.trim().slice(0, 64) : null,
     },
   };
 }
@@ -734,12 +742,13 @@ async function listTasks(uid, input) {
       items: docs.slice(0, limit).map((t) => ({
         id: t.id, title: t.title, done: !!t.done, dueDate: t.dueDate || null,
         dueTime: t.dueTime || null, priority: t.priority || null, estimateMin: t.estimateMin || null,
+        goalId: t.goalId || null,
       })),
     },
   };
 }
 
-async function completeTask(uid, input) {
+async function completeTask(uid, input, ctx) {
   const id = typeof input.id === "string" ? input.id : "";
   if (!id) return { output: { ok: false, error: "id обов'язковий" }, isError: true };
   const ref = userCol(uid, "tasks").doc(id);
@@ -750,8 +759,29 @@ async function completeTask(uid, input) {
     completedAt: admin.firestore.FieldValue.serverTimestamp(),
     updatedAt: admin.firestore.FieldValue.serverTimestamp(),
   });
-  const title = (doc.data() || {}).title || "";
-  return { output: { ok: true, id, title }, action: { kind: "task_completed", title } };
+  const task = doc.data() || {};
+  const title = task.title || "";
+  // Завдання з цілі само відмічає її день у серії — так само, як на сторінці.
+  // Інакше людина, що просить «познач, що пробіжку зробив», отримала б
+  // галочку в завданнях і мертву серію в цілях.
+  const checkedIn = task.goalId ? await checkinFromTask(uid, task.goalId, ctx) : null;
+  return {
+    output: { ok: true, id, title, goalCheckin: checkedIn },
+    action: { kind: "task_completed", title, goal: checkedIn || undefined },
+  };
+}
+
+/** Ставить чекін цілі, до якої привʼязане завдання. Повертає назву цілі,
+ *  якщо день справді відмічено, і null, якщо він уже був або цілі немає. */
+async function checkinFromTask(uid, goalId, ctx) {
+  const ref = userCol(uid, "goals").doc(goalId);
+  const doc = await ref.get();
+  if (!doc.exists) return null;
+  const goal = doc.data() || {};
+  const result = goalStreak.applyCheckin(goal, ctx.today);
+  if (!result) return null;
+  await ref.update({ checkins: result.checkins, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
+  return goal.title || "";
 }
 
 // ---- Тренування ----
@@ -974,7 +1004,7 @@ async function editTask(uid, input) {
   const found = await loadForEdit(uid, "tasks", input.id, "завдання не знайдене");
   if (found.error) return found.error;
 
-  const patch = pickPatch(input, ["title", "notes", "priority", "tags", "dueDate", "dueTime", "estimateMin"]);
+  const patch = pickPatch(input, ["title", "notes", "priority", "tags", "dueDate", "dueTime", "estimateMin", "goalId"]);
   if (!Object.keys(patch).length) return { output: { ok: false, error: "нічого міняти" }, isError: true };
 
   const merged = { ...found.data, ...patch };
@@ -992,6 +1022,7 @@ async function editTask(uid, input) {
     reminderAt: found.data.reminderAt || null,
     notifiedAt: found.data.notifiedAt || null,
     subtasks: found.data.subtasks || [],
+    goalId: "goalId" in patch ? result.value.goalId : (found.data.goalId || null),
     updatedAt: admin.firestore.FieldValue.serverTimestamp(),
   };
   await found.ref.update(value);
@@ -1279,7 +1310,7 @@ function buildSystemPrompt(ctx) {
     "",
     "ТРЕНУВАННЯ. '4 по 8 на 60 кг' означає чотири однакові підходи по 8 повторень з вагою 60 — перелічи їх усі, а не один. Вправу з бібліотеки завжди передавай через libId (жим лежачи -> benchPress, присідання -> squat, станова -> deadlift і так далі): рекорди рахуються саме за ним, і без libId запис не склеїться з попередніми тренуваннями тієї ж вправи. Для планки й інших вправ з власною вагою став weight 0. Якщо людина каже 'запиши тренування' без жодної вправи — спитай, які саме вправи були.",
     "",
-    "ЦІЛІ. Вимірювану ціль задавай числом: «пробігти 10 км» -> targetValue 10, unit «км»; тоді відсоток рахується від пройденого, а не від кількості віх, і поповнюється через goal_progress. Невимірювану («вивчити польську») лишай без числа — там працюють віхи. add_goal створює довгострокову ціль — не плутай із завданням: «купити молоко» це add_task, «вивчити польську до літа» це add_goal. goal_checkin відзначає сьогоднішній день у серії, complete_milestone закриває віху. Якщо людина каже, що вчора пропустила, — подивись поле rescue: коли available true, запропонуй rescue_streak (дописує вчорашній день, доступно раз на тиждень). Коли каже, що сьогодні не вийшло, — спитай, що завадило, і запиши через log_blocker її словами. Не докоряй за пропуски: у полі blockers видно, що заважає найчастіше, і корисніше запропонувати, як це обійти. Обидва беруть id, тож спершу виклич goals_progress і візьми id звідти — вгадувати id не можна. Якщо назва цілі збігається з кількома — перепитай, з якою саме.",
+    "ЦІЛІ. Вимірювану ціль задавай числом: «пробігти 10 км» -> targetValue 10, unit «км»; тоді відсоток рахується від пройденого, а не від кількості віх, і поповнюється через goal_progress. Невимірювану («вивчити польську») лишай без числа — там працюють віхи. add_goal створює довгострокову ціль — не плутай із завданням: «купити молоко» це add_task, «вивчити польську до літа» це add_goal. goal_checkin відзначає сьогоднішній день у серії, complete_milestone закриває віху. Якщо людина каже, що вчора пропустила, — подивись поле rescue: коли available true, запропонуй rescue_streak (дописує вчорашній день, доступно раз на тиждень). Коли каже, що сьогодні не вийшло, — спитай, що завадило, і запиши через log_blocker її словами. Не докоряй за пропуски: у полі blockers видно, що заважає найчастіше, і корисніше запропонувати, як це обійти. Обидва беруть id, тож спершу виклич goals_progress і візьми id звідти — вгадувати id не можна. Якщо назва цілі збігається з кількома — перепитай, з якою саме. Щоденну дію з цілі («щодня бігати по 3 км») створюй через add_task із goalId — це звичайне завдання, просто привʼязане: коли його виконають, день у серії цілі відмітиться сам, окремий goal_checkin не потрібен.",
     "",
     "ВИПРАВЛЯТИ. Помічник уміє міняти вже записане, але не вміє нічого видаляти — так і кажи, якщо просять видалити, і поясни, що це робиться в самому розділі. Перед будь-якою правкою знайди запис інструментом читання (query_transactions, list_tasks, workout_history, goals_progress, savings_summary) і візьми звідти id — вгадувати id не можна. У edit_* передавай ТІЛЬКИ ті поля, які змінюються. Виняток — exercises у edit_workout і milestones у edit_goal: там треба надіслати повний новий список, тож спершу прочитай наявний. Якщо під опис підходить кілька записів — перепитай, який саме.",
     "",
