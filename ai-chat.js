@@ -24,6 +24,7 @@
       mic: 'Сказати голосом', micStop: 'Зупинити запис',
       micDenied: 'Доступ до мікрофона заборонений. Дозволь його в налаштуваннях браузера для цього сайту.',
       micFailed: 'Не вдалося розпізнати — спробуй ще раз або набери текстом.',
+      micHint: 'Мікрофон питає дозвіл щоразу, бо застосунок відкритий у браузері. Додай його на екран «Додому» (у Safari: «Поділитись» → «На екран Додому») — тоді дозвіл запам\u2019ятається, і заразом запрацюють нагадування.',
       clear: 'Очистити розмову',
       ageHint: 'Розмова сама зникає через добу — стирати вручну треба лише щоб почати спочатку раніше.',
       added: (a) => `Записано: ${a.categoryLabel} · ${a.amount} ${a.currency || ''}`.trim(),
@@ -54,6 +55,7 @@
       mic: 'Сказать голосом', micStop: 'Остановить запись',
       micDenied: 'Доступ к микрофону запрещён. Разреши его в настройках браузера для этого сайта.',
       micFailed: 'Не удалось распознать — попробуй ещё раз или набери текстом.',
+      micHint: 'Микрофон спрашивает разрешение каждый раз, потому что приложение открыто в браузере. Добавь его на экран «Домой» (в Safari: «Поделиться» → «На экран Домой») — тогда разрешение запомнится, и заодно заработают напоминания.',
       clear: 'Очистить разговор',
       ageHint: 'Разговор сам исчезает через сутки — стирать вручную нужно лишь чтобы начать заново раньше.',
       added: (a) => `Записано: ${a.categoryLabel} · ${a.amount} ${a.currency || ''}`.trim(),
@@ -84,6 +86,7 @@
       mic: 'Powiedz głosem', micStop: 'Zatrzymaj nagrywanie',
       micDenied: 'Brak dostępu do mikrofonu. Zezwól na niego w ustawieniach przeglądarki dla tej strony.',
       micFailed: 'Nie udało się rozpoznać — spróbuj ponownie albo wpisz tekst.',
+      micHint: 'Mikrofon pyta o zgodę za każdym razem, bo aplikacja jest otwarta w przeglądarce. Dodaj ją do ekranu początkowego (w Safari: „Udostępnij" → „Do ekranu początkowego") — wtedy zgoda zostanie zapamiętana, a przy okazji zadziałają przypomnienia.',
       clear: 'Wyczyść rozmowę',
       ageHint: 'Rozmowa znika sama po dobie — ręczne czyszczenie przydaje się tylko, gdy chcesz zacząć od nowa wcześniej.',
       added: (a) => `Zapisano: ${a.categoryLabel} · ${a.amount} ${a.currency || ''}`.trim(),
@@ -114,6 +117,7 @@
       mic: 'Speak', micStop: 'Stop recording',
       micDenied: 'Microphone access is blocked. Allow it in your browser settings for this site.',
       micFailed: 'Could not make that out — try again or type it instead.',
+      micHint: 'The microphone asks for permission every time because the app runs in a browser tab. Add it to your Home Screen (in Safari: Share → Add to Home Screen) — the permission sticks, and reminders start working too.',
       clear: 'Clear conversation',
       ageHint: 'The conversation clears itself after a day — wiping it by hand only helps if you want a fresh start sooner.',
       added: (a) => `Logged: ${a.categoryLabel} · ${a.amount} ${a.currency || ''}`.trim(),
@@ -214,7 +218,8 @@
       ).join('') +
       `<span class="aic-model-hint">${esc(t('modelHint'))}</span>` +
       `<button type="button" class="aic-clear" id="aicClear">${esc(t('clear'))}</button>` +
-      `<span class="aic-model-hint">${esc(t('ageHint'))}</span>`;
+      `<span class="aic-model-hint">${esc(t('ageHint'))}</span>` +
+      (showMicHint ? `<span class="aic-model-hint">${esc(t('micHint'))}</span>` : '');
     box.querySelectorAll('[data-model]').forEach((btn) => {
       btn.addEventListener('click', () => setModel(btn.dataset.model));
     });
@@ -335,6 +340,12 @@
   let startedAt = 0;
   let micStream = null;    // тримаємо мікрофон відкритим на весь запис
   let micGranted = false;  // дозвіл уже брали в цьому сеансі сторінки
+  // Показувати підказку про встановлення на домашній екран має сенс лише
+  // там, де дозвіл справді не переживає перезапуск: браузер не веде обліку
+  // дозволів по сайтах (WebKit) і застосунок відкритий вкладкою, а не
+  // встановлений. Перевіряємо саме поведінку, а не назву браузера —
+  // рядок User-Agent тут нічого не гарантує.
+  let showMicHint = false;
   let restarts = 0;        // підхоплень поспіль без жодного почутого слова
 
   // Чи вже дозволено мікрофон для цього сайту. Chrome це знає й пам'ятає,
@@ -385,6 +396,17 @@
     if (!micStream) return;
     micStream.getTracks().forEach((track) => { try { track.stop(); } catch (e) { /* уже зупинений */ } });
     micStream = null;
+  }
+
+  function isInstalled() {
+    return window.navigator.standalone === true ||
+      (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+  }
+
+  async function refreshMicHint() {
+    const was = showMicHint;
+    showMicHint = !!SpeechCtor() && !isInstalled() && (await micPermission()) === 'unknown';
+    if (showMicHint !== was) renderSettings();
   }
 
   function SpeechCtor() {
@@ -606,6 +628,7 @@
     el('aicInput').placeholder = t('placeholder');
     el('aicSettingsBtn').setAttribute('aria-label', t('settings'));
     renderMic();
+    refreshMicHint();
     render();
     el('aicOverlay').classList.add('show');
     load();
