@@ -272,20 +272,6 @@
   .link-btn{background:none;border:none;color:var(--accent);font-family:'Inter',sans-serif;font-size:13px;
     font-weight:600;cursor:pointer;padding:6px 0;}
 
-  /* ---- Пошук ---- */
-  .search-bar{display:flex;align-items:center;gap:9px;margin-bottom:16px;padding:10px 14px;border-radius:16px;
-    background:var(--surface);border:1px solid var(--border);color:var(--ink-muted);}
-  /* Селектор із типом — інакше загальне правило `input[type=text]` нижче
-     повертає полю рамку й фон, і воно виглядає як «поле в полі». */
-  .search-bar input[type=text]{flex:1;min-width:0;width:auto;margin:0;padding:0;border:none;background:none;
-    outline:none;box-shadow:none;color:var(--ink);font-family:'Inter',sans-serif;font-size:15px;}
-  .search-bar input[type=text]:focus{border:none;}
-  .search-bar button{border:none;background:none;color:var(--ink-muted);cursor:pointer;padding:2px;display:flex;}
-  .search-empty{text-align:center;padding:40px 20px;color:var(--ink-muted);font-size:14px;line-height:1.5;}
-  .tag-filter-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;}
-  .tag-filter-chip{padding:5px 12px;border-radius:20px;font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;
-    border:1px solid var(--border);background:transparent;color:var(--ink-muted);white-space:nowrap;}
-  .tag-filter-chip.selected{background:var(--accent-light);color:var(--accent);border-color:transparent;font-weight:600;}
 
   /* ---- Повторення ---- */
   .recur-weekdays{display:flex;gap:4px;margin-bottom:10px;}
@@ -300,9 +286,12 @@
 
   /* ---- Рядок тижня: головний спосіб пересуватись по днях ---- */
   .topbar-actions{margin-left:auto;display:flex;gap:8px;}
-  .topbar-icon-btn{width:36px;height:36px;flex-shrink:0;border-radius:11px;border:1px solid var(--border);
-    background:var(--control-bg);color:var(--ink-soft);display:flex;align-items:center;justify-content:center;
+  /* Без плашки: у решті розділів налаштування — просто три крапки поруч із
+     назвою, і рамка тут вибивалась із загального вигляду. */
+  .topbar-icon-btn{flex-shrink:0;background:none;border:none;color:var(--ink-muted);
+    padding:6px;border-radius:8px;display:flex;align-items:center;justify-content:center;
     cursor:pointer;-webkit-tap-highlight-color:transparent;}
+  .topbar-icon-btn:hover{color:var(--ink);}
   .topbar-icon-btn:active{transform:scale(.94);}
   /* pan-y лишає браузеру вертикальний скрол, а горизонтальний рух віддає нам —
      без цього браузер міг би перехопити жест і гортання не спрацювало б. */
@@ -657,9 +646,6 @@
   <div class="app-topbar">
     <a href="../index.html" class="app-topbar-brand" id="topbarHomeLink" aria-label="На головну">Life</a>
     <div class="topbar-actions">
-      <button id="searchToggleBtn" class="topbar-icon-btn" aria-label="Пошук">
-        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-      </button>
       <button id="pageMenuBtn" class="topbar-icon-btn" aria-label="Налаштування розділу">
         <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
       </button>
@@ -682,14 +668,6 @@
   <!-- ---- Головний екран: тиждень + завдання обраного дня ---- -->
   <div id="weekScreen">
   <div class="content">
-    <div class="search-bar" id="searchBar" style="display:none;">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-      <input type="text" id="searchInput" autocomplete="off" maxlength="120">
-      <button type="button" id="searchClearBtn" aria-label="Очистити">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
-      </button>
-    </div>
-    <div id="searchResults" style="display:none;"></div>
 
     <div id="weekSwipeArea" class="swipe-area">
     <div class="week-head">

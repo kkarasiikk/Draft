@@ -71,9 +71,6 @@ const T = {
     templateSteps: (n) => `${n} ${plural(n, { one: 'крок', few: 'кроки', many: 'кроків', other: 'кроку' })}`,
     templateEmpty: 'Шаблонів ще немає. Відкрий будь-яке завдання з кроками і натисни «Зберегти як шаблон» — далі його можна буде завести одним тапом.',
     templateLimit: (n) => `Більше ${n} шаблонів — це вже список завдань. Видали зайві в меню «Шаблони».`,
-    searchPlaceholder: 'Знайти завдання',
-    searchFound: (n) => `Знайдено: ${n}`,
-    searchEmpty: (q) => `За запитом «${q}» нічого не знайшлось.`,
     nowNothingShort: (min) => `Нічого коротшого за ${min} хв у списку немає — або візьми щось довше, або познач оцінку часу в завданнях.`,
     nowNothingToday: 'На сьогодні завдань немає. Додай перше — або візьми щось із того, що без дати.',
     nowAllDone: 'Усе на сьогодні зроблено. Можна видихнути 🎉',
@@ -176,9 +173,6 @@ const T = {
     templateSteps: (n) => `${n} ${plural(n, { one: 'шаг', few: 'шага', many: 'шагов', other: 'шага' })}`,
     templateEmpty: 'Шаблонов пока нет. Открой любую задачу с шагами и нажми «Сохранить как шаблон» — дальше её можно будет завести одним тапом.',
     templateLimit: (n) => `Больше ${n} шаблонов — это уже список задач. Удали лишние в меню «Шаблоны».`,
-    searchPlaceholder: 'Найти задачу',
-    searchFound: (n) => `Найдено: ${n}`,
-    searchEmpty: (q) => `По запросу «${q}» ничего не нашлось.`,
     nowNothingShort: (min) => `Ничего короче ${min} мин в списке нет — возьми что-то подлиннее или проставь оценку времени в задачах.`,
     nowNothingToday: 'На сегодня задач нет. Добавь первую — или возьми что-то из того, что без даты.',
     nowAllDone: 'Всё на сегодня сделано. Можно выдохнуть 🎉',
@@ -281,9 +275,6 @@ const T = {
     templateSteps: (n) => `${n} ${plural(n, { one: 'krok', few: 'kroki', many: 'kroków', other: 'kroku' })}`,
     templateEmpty: 'Nie ma jeszcze szablonów. Otwórz dowolne zadanie z krokami i naciśnij „Zapisz jako szablon" — potem założysz je jednym tapnięciem.',
     templateLimit: (n) => `Więcej niż ${n} szablonów to już lista zadań. Usuń zbędne w menu „Szablony".`,
-    searchPlaceholder: 'Znajdź zadanie',
-    searchFound: (n) => `Znaleziono: ${n}`,
-    searchEmpty: (q) => `Nic nie znaleziono dla „${q}".`,
     nowNothingShort: (min) => `Nic krótszego niż ${min} min nie ma — weź coś dłuższego albo dodaj szacowany czas do zadań.`,
     nowNothingToday: 'Na dziś nie ma zadań. Dodaj pierwsze — albo weź coś bez daty.',
     nowAllDone: 'Wszystko na dziś zrobione. Można odetchnąć 🎉',
@@ -386,9 +377,6 @@ const T = {
     templateSteps: (n) => `${n} ${plural(n, { one: 'step', other: 'steps' })}`,
     templateEmpty: 'No templates yet. Open any task with steps and hit "Save as template" — after that you can create it with one tap.',
     templateLimit: (n) => `More than ${n} templates is a task list of its own. Remove some in the "Templates" menu.`,
-    searchPlaceholder: 'Find a task',
-    searchFound: (n) => `Found: ${n}`,
-    searchEmpty: (q) => `Nothing found for "${q}".`,
     nowNothingShort: (min) => `Nothing shorter than ${min} min on the list — take something longer, or add time estimates to your tasks.`,
     nowNothingToday: 'Nothing scheduled for today. Add something — or pick one of the undated tasks.',
     nowAllDone: 'Everything for today is done. Take a breath 🎉',
@@ -547,7 +535,6 @@ function applyTranslations() {
   document.getElementById('templatesTitle').textContent = t('templatesTitle');
   document.getElementById('templatesMenuLabel').textContent = t('templatesMenu');
   document.getElementById('saveAsTemplateBtn').textContent = t('saveAsTemplate');
-  document.getElementById('searchInput').placeholder = t('searchPlaceholder');
   document.getElementById('bnWeekLabel').textContent = t('bnWeek');
   document.getElementById('bnMonthLabel').textContent = t('bnMonth');
   document.getElementById('bnStatsLabel').textContent = t('bnStats');
@@ -711,7 +698,6 @@ let formSubtasks = [];
 let formEstimate = null;
 let formRecurrence = null; // { type, interval, weekdays, day, anchor } або null
 let quickAddDate = null;
-let searchQuery = '';
 let formReminder = null;   // {offsetMin} | {atHour} | null — вибір у формі завдання
 let reminderSettings = { enabled: false, morningHour: 8, eveningHour: 20, tz: null };
 // Причина, з якої не вдалося увімкнути push. Живе в стані, а не просто в
@@ -1635,74 +1621,6 @@ document.getElementById('templatesOverlay').addEventListener('click', (e) => {
   if (e.target.id === 'templatesOverlay') e.currentTarget.classList.remove('show');
 });
 
-// ---- Пошук ----
-// Шукаємо по назві, нотатці й тегах — тобто по всьому, що людина сама
-// написала. Пошук іде по всіх завданнях, а не по обраному дню: сенс саме
-// в тому, щоб знайти те, дату чого вже не памʼятаєш.
-function matchesSearch(task, query) {
-  if (!query) return true;
-  const hay = [task.title, task.notes, ...(task.tags || []), ...((task.subtasks || []).map((sub) => sub.title))]
-    .filter(Boolean).join(' ').toLowerCase();
-  // Кожне слово запиту має знайтись — так «звіт пн» звужує, а не розширює.
-  return query.toLowerCase().split(/\s+/).filter(Boolean).every((word) => hay.indexOf(word) !== -1);
-}
-
-function renderSearchResults() {
-  const el = document.getElementById('searchResults');
-  const found = tasks.filter((task) => matchesSearch(task, searchQuery)).filter(matchesFilters);
-  if (!found.length) {
-    el.innerHTML = `<div class="search-empty">${escapeHtml(t('searchEmpty', searchQuery))}</div>`;
-    return;
-  }
-  // Групуємо за датою: спершу все датоване від найдавнішого, потім «без дати».
-  const byDate = new Map();
-  found.forEach((task) => {
-    const key = task.dueDate || '';
-    if (!byDate.has(key)) byDate.set(key, []);
-    byDate.get(key).push(task);
-  });
-  const keys = [...byDate.keys()].sort((a, b) => (a === '' ? 1 : b === '' ? -1 : a < b ? -1 : 1));
-  el.innerHTML = `<div class="day-heading">${escapeHtml(t('searchFound', found.length))}</div>` +
-    keys.map((key) => dayGroupHtml(
-      key ? dayHeadingText(key) : t('noDateLabel'),
-      byDate.get(key),
-      !!key && key < todayISO()
-    )).join('');
-
-  el.querySelectorAll('[data-toggle]').forEach((btn) => {
-    btn.addEventListener('click', (e) => { e.stopPropagation(); toggleDone(btn.dataset.toggle); });
-  });
-  el.querySelectorAll('[data-open]').forEach((row) => {
-    row.addEventListener('click', () => openTaskForm(tasks.find((tsk) => tsk.id === row.dataset.open)));
-  });
-}
-
-function setSearchQuery(value) {
-  searchQuery = (value || '').trim();
-  renderWeekScreen();
-}
-
-function toggleSearch(open) {
-  const bar = document.getElementById('searchBar');
-  const input = document.getElementById('searchInput');
-  const show = open === undefined ? bar.style.display === 'none' : open;
-  bar.style.display = show ? 'flex' : 'none';
-  if (show) {
-    showWeekScreen();
-    input.focus();
-  } else {
-    input.value = '';
-    setSearchQuery('');
-  }
-}
-
-document.getElementById('searchToggleBtn').addEventListener('click', () => toggleSearch());
-document.getElementById('searchClearBtn').addEventListener('click', () => toggleSearch(false));
-document.getElementById('searchInput').addEventListener('input', (e) => setSearchQuery(e.target.value));
-document.getElementById('searchInput').addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') toggleSearch(false);
-});
-
 // ---- Свайп по завданню ----
 // Вправо — виконано, вліво — на завтра. Дві найчастіші дії зі списком, і
 // обидві раніше вимагали або влучити в маленьке коло, або відкрити форму.
@@ -1805,7 +1723,7 @@ function renderCarryBanner() {
   const list = carryOver(tasks, { today: todayISO() });
   // Банер тільки на сьогоднішньому дні: гортаючи тиждень уперед, людина
   // планує, а не розбирає борги.
-  const show = !searchQuery && list.length > 0 && selectedDate === todayISO() && !carryDismissedToday();
+  const show = list.length > 0 && selectedDate === todayISO() && !carryDismissedToday();
   carryBannerVisible = show;
   banner.style.display = show ? 'flex' : 'none';
   if (!show) return;
@@ -2155,20 +2073,8 @@ function renderWeekScreen() {
   if (!swipeInited) {
     initRowSwipe(document.getElementById('dayList'));
     initRowSwipe(document.getElementById('noDateSection'));
-    initRowSwipe(document.getElementById('searchResults'));
     swipeInited = true;
   }
-  // У режимі пошуку тиждень, «Зараз» і список дня ховаються: людина шукає
-  // конкретну справу, а не планує день, і зайві блоки лише відсувають
-  // результати вниз.
-  const searching = !!searchQuery;
-  ['weekSwipeArea', 'carryBanner', 'nowCard', 'tagFilterRow', 'dayHeading', 'dayList', 'noDateSection'].forEach((id) => {
-    const el = document.getElementById(id);
-    if (el) el.style.display = searching ? 'none' : '';
-  });
-  document.getElementById('searchResults').style.display = searching ? 'block' : 'none';
-  if (searching) { renderSearchResults(); return; }
-
   renderWeekStrip();
   renderCarryBanner();
   renderNowCard();
