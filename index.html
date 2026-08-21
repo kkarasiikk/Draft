@@ -142,6 +142,12 @@
   .export-overlay{position:fixed;inset:0;z-index:60;display:none;align-items:flex-end;justify-content:center;
     background:var(--overlay);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);}
   .export-overlay.show{display:flex;}
+  /* Системна смуга гортання з кнопками-стрілками випадає зі стилю шитів:
+     власна — тонка й напівпрозора, як у чаті помічника. */
+  .export-sheet{scrollbar-width:thin;scrollbar-color:var(--card-border-hover) transparent;}
+  .export-sheet::-webkit-scrollbar{width:5px;}
+  .export-sheet::-webkit-scrollbar-track{background:transparent;}
+  .export-sheet::-webkit-scrollbar-thumb{background:var(--card-border-hover);border-radius:999px;}
   .export-sheet{background:var(--surface);border-radius:26px 26px 0 0;width:100%;max-width:480px;
     padding:20px 20px calc(24px + env(safe-area-inset-bottom));max-height:88vh;overflow-y:auto;
     backdrop-filter:blur(var(--glass-blur)) saturate(150%);-webkit-backdrop-filter:blur(var(--glass-blur)) saturate(150%);

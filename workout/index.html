@@ -297,6 +297,12 @@
   .modal-overlay, .picker-overlay{position:fixed;inset:0;background:var(--overlay);display:none;align-items:flex-end;justify-content:center;z-index:50;}
   .picker-overlay{z-index:65;}
   .modal-overlay.show, .picker-overlay.show{display:flex;}
+  /* Системна смуга гортання з кнопками-стрілками випадає зі стилю шитів:
+     власна — тонка й напівпрозора, як у чаті помічника. */
+  .modal{scrollbar-width:thin;scrollbar-color:var(--card-border-hover) transparent;}
+  .modal::-webkit-scrollbar{width:5px;}
+  .modal::-webkit-scrollbar-track{background:transparent;}
+  .modal::-webkit-scrollbar-thumb{background:var(--card-border-hover);border-radius:999px;}
   .modal{background:var(--surface);border-radius:26px 26px 0 0;padding:20px 20px calc(28px + env(safe-area-inset-bottom));width:100%;max-width:480px;
     max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;}
   .modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
