@@ -1,6 +1,6 @@
 // Service Worker модуля «Тренування» (scope /workout/). Кожен модуль має
 // власний SW — для сторінки виграє реєстрація з найдовшим збігом scope.
-const CACHE_NAME = 'life-workout-v35';
+const CACHE_NAME = 'life-workout-v36';
 // Чистимо лише власні (застарілі) кеші: `caches` спільний для всього
 // походження, тож видалення "всього зайвого" стерло б кеші інших модулів.
 const CACHE_PREFIXES = ['life-workout-'];
@@ -12,6 +12,7 @@ const FILES_TO_CACHE = ['./exercises.js', './progression.js', './progress.js', '
 // перший рядок app.js), тож без цих файлів офлайн-запуск падав би з
 // "firebase is not defined", навіть коли локальні файли є в кеші.
 const EXTERNAL_FILES_TO_CACHE = [
+  'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js',
   'https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js',
   'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js',
   'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js',

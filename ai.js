@@ -511,6 +511,34 @@ const tools = [
     },
   },
   {
+    name: "render_chart",
+    description:
+      "Намалювати діаграму просто в чаті: pie (частки категорій), bar (порівняння сум чи періодів) або line (зміна в часі). " +
+      "Використовуй ТІЛЬКИ реальні числа, які вже отримав в цій-таки розмові іншим інструментом (month_summary, query_transactions, " +
+      "training_analysis, list_tasks, goals_progress) — цифри для діаграми вигадувати так само не можна, як і в тексті.",
+    input_schema: {
+      type: "object",
+      properties: {
+        type: { type: "string", enum: ["pie", "bar", "line"] },
+        title: { type: "string", description: "Короткий підпис над діаграмою" },
+        labels: { type: "array", items: { type: "string" }, description: "Підписи секторів/стовпців/точок" },
+        datasets: {
+          type: "array",
+          description: "Один набір значень для pie; один чи кілька — для bar/line (напр. дохід і витрати окремими рядами)",
+          items: {
+            type: "object",
+            properties: {
+              label: { type: "string", description: "Назва ряду, якщо їх кілька" },
+              values: { type: "array", items: { type: "number" }, description: "По одному числу на кожен label" },
+            },
+            required: ["values"],
+          },
+        },
+      },
+      required: ["type", "labels", "datasets"],
+    },
+  },
+  {
     name: "query_transactions",
     description:
       "Отримати список і суму транзакцій користувача за період/фільтром. Використовуй, щоб відповісти на питання про витрати, доходи чи баланс — не вигадуй цифри.",
@@ -527,6 +555,41 @@ const tools = [
     },
   },
 ];
+
+// ---- Діаграма в чаті ----
+// Просто передаємо клієнту вже підготовлені моделлю числа — тут немає
+// звернень до Firestore, лише санітизація форми. Довіра до самих чисел та
+// сама, що й до тексту відповіді: модель бере їх із результату іншого
+// інструмента цього ж раунду, а не вигадує.
+const CHART_TYPES = ["pie", "bar", "line"];
+const CHART_MAX_POINTS = 24;
+const CHART_MAX_DATASETS = 6;
+
+function renderChart(input) {
+  const type = CHART_TYPES.includes(input.type) ? input.type : null;
+  if (!type) return { output: { ok: false, error: "type має бути pie, bar або line" }, isError: true };
+
+  const labels = (Array.isArray(input.labels) ? input.labels : [])
+    .map((l) => String(l).slice(0, 60))
+    .slice(0, CHART_MAX_POINTS);
+  if (!labels.length) return { output: { ok: false, error: "потрібен хоча б один label" }, isError: true };
+
+  let datasets = (Array.isArray(input.datasets) ? input.datasets : [])
+    .slice(0, CHART_MAX_DATASETS)
+    .map((d) => ({
+      label: typeof (d && d.label) === "string" ? d.label.slice(0, 40) : "",
+      values: (Array.isArray(d && d.values) ? d.values : [])
+        .slice(0, labels.length)
+        .map((v) => (Number.isFinite(Number(v)) ? Math.round(Number(v) * 100) / 100 : 0)),
+    }))
+    .filter((d) => d.values.length);
+  if (!datasets.length) return { output: { ok: false, error: "потрібен хоча б один набір значень" }, isError: true };
+  // Кругова діаграма показує частки одного цілого — другий ряд тут нема куди подіти.
+  if (type === "pie") datasets = datasets.slice(0, 1);
+
+  const title = typeof input.title === "string" ? input.title.slice(0, 100) : "";
+  return { output: { ok: true }, action: { kind: "chart", chart: { type, title, labels, datasets } } };
+}
 
 async function executeTool(uid, name, input, ctx) {
   if (name === "add_transaction") {
@@ -577,6 +640,7 @@ async function executeTool(uid, name, input, ctx) {
     };
   }
 
+  if (name === "render_chart") return renderChart(input);
   if (name === "month_summary") return monthSummary(uid, input, ctx);
   if (name === "savings_summary") return savingsSummary(uid, ctx);
   if (name === "add_task") return addTask(uid, input, ctx);
@@ -1466,7 +1530,7 @@ function buildSystemPrompt(ctx) {
     "- питання про завантаженість -> list_tasks.",
     "Якщо даних мало (наприклад, тренувань ще немає) — так і скажи, і дай загальну пораду, чесно позначивши, що вона не спирається на історію.",
     "",
-    "ГРАФІКИ. Малювати діаграми в чаті ти не вмієш, і НЕ пропонуй натомість зводити цифри в Excel/Google Sheets/chart.js — людина сидить у телефоні, їй нема куди це вставляти, і в застосунку вже є готова візуалізація. Просять графік чи статистику витрат — скажи, що кругова діаграма по категоріях і графік за місяцями вже на вкладці «Статистика» в розділі 'Гроші', і поверх дай суть словами: яка категорія найбільша, на скільки виріс чи впав місяць. Просять графік по завданнях — так само вкладка «Статистика» в розділі 'Завдання' (активність за останні дні). Для цілей і тренувань окремого графіка немає — дай числа з інструмента текстом, чесно без спроби намалювати те, чого не намалюєш.",
+    "ГРАФІКИ. Ти вмієш малювати діаграму просто в чаті інструментом render_chart: pie — частки категорій, bar — порівняти суми чи періоди, line — показати зміну в часі. Спершу візьми реальні числа іншим інструментом (month_summary, query_transactions, training_analysis, goals_progress, list_tasks), тоді передай у render_chart ТІ САМІ значення — цифр для діаграми не вигадуй, як і в тексті. НЕ пропонуй натомість зводити цифри в Excel/Google Sheets/chart.js — це вже не потрібно. Для витрат і завдань у застосунку є ще й готова вкладка «Статистика» (кругова діаграма й графік за місяцями в 'Гроші', активність за дні в 'Завдання') — можеш згадати про неї як про постійне місце для цього ж, але спершу все одно намалюй те, що попросили, прямо в чаті. Поверх діаграми додай суть словами: яка категорія найбільша, на скільки змінилось.",
     "",
     "НІКОЛИ не вигадуй цифри, дати чи id. Якщо потрібне число — візьми його інструментом.",
     "Ти не лікар і не тренер: якщо йдеться про біль, травму чи здоровʼя — порадь звернутись до фахівця, а не став діагноз.",

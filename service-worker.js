@@ -2,7 +2,7 @@
 // scope (`/`, `/budget/`, `/tasks/`, `/workout/`) — для сторінки завжди
 // виграє реєстрація з найдовшим збігом scope, тож цей файл фактично
 // обслуговує лише хаб.
-const CACHE_NAME = 'life-home-v26';
+const CACHE_NAME = 'life-home-v27';
 // Чистимо лише власні (застарілі) кеші: `caches` спільний для всього
 // походження, тож видалення "всього зайвого" стерло б кеші інших модулів.
 const CACHE_PREFIXES = ['life-home-'];
@@ -16,6 +16,7 @@ const FILES_TO_CACHE = ['./ai-chat.js', './ai-chat.css', './', './index.html', '
 // "firebase is not defined", навіть коли локальні файли є в кеші.
 const EXTERNAL_FILES_TO_CACHE = [
   'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',
+  'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js',
   'https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js',
   'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js',
   'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js',

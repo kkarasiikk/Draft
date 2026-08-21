@@ -1013,6 +1013,51 @@ describe("executeTool", () => {
     });
   });
 
+  describe("render_chart", () => {
+    test("кругова діаграма повертає action з даними, без запису в Firestore", async () => {
+      const r = await ai.executeTool("uid1", "render_chart", {
+        type: "pie", title: "Витрати за липень",
+        labels: ["Їжа", "Транспорт"], datasets: [{ values: [1200, 300] }],
+      }, ctx);
+      expect(r.isError).toBeFalsy();
+      expect(r.action).toMatchObject({
+        kind: "chart",
+        chart: { type: "pie", title: "Витрати за липень", labels: ["Їжа", "Транспорт"] },
+      });
+      expect(r.action.chart.datasets).toEqual([{ label: "", values: [1200, 300] }]);
+    });
+
+    test("другий ряд у pie відкидається — частки одного цілого, другому нема куди подітись", async () => {
+      const r = await ai.executeTool("uid1", "render_chart", {
+        type: "pie", labels: ["A", "B"],
+        datasets: [{ values: [1, 2] }, { label: "зайвий", values: [3, 4] }],
+      }, ctx);
+      expect(r.action.chart.datasets).toHaveLength(1);
+    });
+
+    test("bar з кількома рядами (дохід і витрати) лишає обидва", async () => {
+      const r = await ai.executeTool("uid1", "render_chart", {
+        type: "bar", labels: ["Черв", "Лип"],
+        datasets: [{ label: "Дохід", values: [20000, 21000] }, { label: "Витрати", values: [15000, 16000] }],
+      }, ctx);
+      expect(r.action.chart.datasets).toHaveLength(2);
+      expect(r.action.chart.datasets[1].label).toBe("Витрати");
+    });
+
+    test("невідомий тип, без labels чи без значень — чесна помилка, а не порожня діаграма", async () => {
+      expect((await ai.executeTool("uid1", "render_chart", { type: "donut", labels: ["A"], datasets: [{ values: [1] }] }, ctx)).isError).toBe(true);
+      expect((await ai.executeTool("uid1", "render_chart", { type: "bar", labels: [], datasets: [{ values: [1] }] }, ctx)).isError).toBe(true);
+      expect((await ai.executeTool("uid1", "render_chart", { type: "bar", labels: ["A"], datasets: [] }, ctx)).isError).toBe(true);
+    });
+
+    test("нечислові значення в datasets — нуль, а не крах", async () => {
+      const r = await ai.executeTool("uid1", "render_chart", {
+        type: "line", labels: ["A", "B"], datasets: [{ values: ["не число", 5] }],
+      }, ctx);
+      expect(r.action.chart.datasets[0].values).toEqual([0, 5]);
+    });
+  });
+
   // ---- Цілі й заощадження ----
   describe("цілі й заощадження", () => {
     test("goals_progress рахує виконані віхи", async () => {
