@@ -1,10 +1,10 @@
-const CACHE_NAME = 'life-budget-v33';
+const CACHE_NAME = 'life-budget-v34';
 // Чистимо лише власні (застарілі) кеші, включно з іменем із попередніх
 // версій: `caches` спільний для всього походження, тож видалення
 // "всього зайвого" стерло б кеші інших модулів (хаб, завдання, тренування).
 const CACHE_PREFIXES = ['life-budget-', 'moi-finansy-'];
-const NETWORK_FIRST = ['./ai-chat.js', './ai-chat.css', './', './index.html', './app.js', './categories-default.js'];
-const FILES_TO_CACHE = ['../ai-chat.js', '../ai-chat.css', './', './index.html', './app.js', './firebase-config.js', '../categories-default.js', './manifest.json',
+const NETWORK_FIRST = ['./scroll-lock.js', './ai-chat.js', './ai-chat.css', './', './index.html', './app.js', './categories-default.js'];
+const FILES_TO_CACHE = ['../scroll-lock.js', '../ai-chat.js', '../ai-chat.css', './', './index.html', './app.js', './firebase-config.js', '../categories-default.js', './manifest.json',
   './icon-192.png', './icon-512.png', './icon-192-maskable.png', './icon-512-maskable.png'];
 // Застосунок жорстко залежить від цих зовнішніх бібліотек (firebase.initializeApp()
 // викликається у першому рядку app.js) — без них офлайн-запуск падав з
