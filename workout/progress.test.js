@@ -28,8 +28,19 @@ describe('exerciseKey', () => {
     expect(P.exerciseKey({ libId: 'benchPress', name: 'Bench Press' })).toBe('lib:benchPress');
     expect(P.exerciseKey({ libId: 'benchPress', name: 'Жим лежачи' })).toBe('lib:benchPress');
   });
-  test('власна вправа — за нормалізованою назвою', () => {
+  // Стара власна вправа (записана до появи списку своїх вправ) не має
+  // customId — для неї лишається групування за назвою, як і раніше.
+  test('стара власна вправа без customId — за нормалізованою назвою', () => {
     expect(P.exerciseKey({ name: '  Гакк-присід ' })).toBe('c:гакк-присід');
+  });
+  // Своя вправа зі списку групується за id документа: перейменування
+  // (майбутнє) чи однакові назви різними регістрами не розʼїжджають історію.
+  test('своя вправа зі списку групується за customId, а не назвою', () => {
+    expect(P.exerciseKey({ customId: 'x1', name: 'Гакк-присід' })).toBe('custom:x1');
+    expect(P.exerciseKey({ customId: 'x1', name: 'Стара назва' })).toBe('custom:x1');
+  });
+  test('libId переважає над customId, якщо обидва раптом задані', () => {
+    expect(P.exerciseKey({ libId: 'squat', customId: 'x1' })).toBe('lib:squat');
   });
 });
 
@@ -178,6 +189,18 @@ describe('analyze', () => {
   test('тренування без дати не ламає підрахунок', () => {
     const r = P.analyze([{ exercises: [bench(80, 8)] }, session(2, bench(80, 8)), session(9, bench(80, 8))], TODAY);
     expect(r.sessionsNow).toBe(2);
+  });
+
+  // Своя вправа зі списку прив'язана до цілі й тренуванням через стабільний
+  // id, тож прогрес по ній рахується так само надійно, як і по бібліотечній.
+  test('своя вправа зі списку прогресує так само, як бібліотечна', () => {
+    const own = (weight, reps) => ({ customId: 'x1', name: 'Гакк-присід', muscle: 'legs', sets: [{ weight, reps }] });
+    const r = P.analyze([
+      session(2, own(90, 8)), session(9, own(88, 8)),
+      session(35, own(80, 8)), session(42, own(80, 8)),
+    ], TODAY);
+    expect(r.comparedCount).toBe(1);
+    expect(r.exercises[0]).toMatchObject({ key: 'custom:x1', pct: 13 });
   });
 });
 

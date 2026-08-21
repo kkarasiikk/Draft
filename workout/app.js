@@ -51,6 +51,8 @@ const T = {
     cancelBtn: 'Скасувати', deleteConfirmBtn: 'Видалити',
     pickerTitle: 'Обрати вправу', pickerSearchPlaceholder: 'Пошук вправи…',
     pickerCustomLabel: 'Своя вправа', pickerCustomPlaceholder: 'Назва вправи', pickerCustomAdd: 'Додати',
+    pickerCustomMuscleLabel: 'Група мʼязів', pickerCustomNeedMuscle: 'Обери, на яку групу мʼязів ця вправа',
+    pickerCustomExisting: 'Уже є у списку — просто додано',
     setPlaceholderWeight: 'кг', setPlaceholderReps: 'повт.', addSetLabel: '+ Підхід',
     lastTimeLabel: (w, r) => (w ? `Минулого разу: ${w}×${r}` : `Минулого разу: ${r} разів`),
     nextTryLabel: (w, r) => (w ? `Спробуй: ${w}×${r}` : `Спробуй: ${r} разів`),
@@ -115,6 +117,8 @@ const T = {
     cancelBtn: 'Отмена', deleteConfirmBtn: 'Удалить',
     pickerTitle: 'Выбрать упражнение', pickerSearchPlaceholder: 'Поиск упражнения…',
     pickerCustomLabel: 'Своё упражнение', pickerCustomPlaceholder: 'Название упражнения', pickerCustomAdd: 'Добавить',
+    pickerCustomMuscleLabel: 'Группа мышц', pickerCustomNeedMuscle: 'Выбери, на какую группу мышц это упражнение',
+    pickerCustomExisting: 'Уже есть в списке — просто добавлено',
     setPlaceholderWeight: 'кг', setPlaceholderReps: 'повт.', addSetLabel: '+ Подход',
     lastTimeLabel: (w, r) => (w ? `В прошлый раз: ${w}×${r}` : `В прошлый раз: ${r} раз`),
     nextTryLabel: (w, r) => (w ? `Попробуй: ${w}×${r}` : `Попробуй: ${r} раз`),
@@ -177,6 +181,8 @@ const T = {
     cancelBtn: 'Anuluj', deleteConfirmBtn: 'Usuń',
     pickerTitle: 'Wybierz ćwiczenie', pickerSearchPlaceholder: 'Szukaj ćwiczenia…',
     pickerCustomLabel: 'Własne ćwiczenie', pickerCustomPlaceholder: 'Nazwa ćwiczenia', pickerCustomAdd: 'Dodaj',
+    pickerCustomMuscleLabel: 'Partia mięśniowa', pickerCustomNeedMuscle: 'Wybierz, na którą partię jest to ćwiczenie',
+    pickerCustomExisting: 'Już jest na liście — po prostu dodano',
     setPlaceholderWeight: 'kg', setPlaceholderReps: 'powt.', addSetLabel: '+ Seria',
     lastTimeLabel: (w, r) => (w ? `Poprzednio: ${w}×${r}` : `Poprzednio: ${r} powtórzeń`),
     nextTryLabel: (w, r) => (w ? `Spróbuj: ${w}×${r}` : `Spróbuj: ${r} powtórzeń`),
@@ -239,6 +245,8 @@ const T = {
     cancelBtn: 'Cancel', deleteConfirmBtn: 'Delete',
     pickerTitle: 'Choose exercise', pickerSearchPlaceholder: 'Search exercise…',
     pickerCustomLabel: 'Custom exercise', pickerCustomPlaceholder: 'Exercise name', pickerCustomAdd: 'Add',
+    pickerCustomMuscleLabel: 'Muscle group', pickerCustomNeedMuscle: 'Pick which muscle group this exercise targets',
+    pickerCustomExisting: 'Already on the list — just added',
     setPlaceholderWeight: 'kg', setPlaceholderReps: 'reps', addSetLabel: '+ Set',
     lastTimeLabel: (w, r) => (w ? `Last time: ${w}×${r}` : `Last time: ${r} reps`),
     nextTryLabel: (w, r) => (w ? `Try: ${w}×${r}` : `Try: ${r} reps`),
@@ -367,6 +375,8 @@ function applyTranslations() {
   document.getElementById('pickerCustomLabel').textContent = t('pickerCustomLabel');
   document.getElementById('pickerCustomInput').placeholder = t('pickerCustomPlaceholder');
   document.getElementById('pickerCustomAdd').textContent = t('pickerCustomAdd');
+  document.getElementById('pickerCustomMuscleLabel').textContent = t('pickerCustomMuscleLabel');
+  renderPickerCustomMuscleRow();
   document.getElementById('authSub').textContent = t('authSub');
   document.getElementById('authEmailLabel').textContent = t('emailLabel');
   document.getElementById('authPasswordLabel').textContent = t('passwordLabel');
@@ -512,10 +522,15 @@ function epley1RM(weight, reps) {
   if (!weight || !reps) return 0;
   return weight * (1 + reps / 30);
 }
-// Ключ вправи для групування/пошуку історії: бібліотечні вправи group за
-// стабільним id (незалежно від мови), власні — за нормалізованою назвою.
+// Ключ вправи для групування/пошуку історії: бібліотечні вправи — за
+// стабільним id (незалежно від мови), власні зі списку — за стабільним id
+// свого документа (можна перейменувати, ключ не зʼїде), а стара власна
+// вправа без customId (записана до цієї фічі) — за нормалізованою назвою,
+// як і раніше.
 function exerciseKey(ex) {
-  return ex.libId ? `lib:${ex.libId}` : `c:${(ex.name || '').trim().toLowerCase()}`;
+  if (ex.libId) return `lib:${ex.libId}`;
+  if (ex.customId) return `custom:${ex.customId}`;
+  return `c:${(ex.name || '').trim().toLowerCase()}`;
 }
 function exerciseDisplayName(ex) {
   return ex.libId ? exerciseLabel(ex.libId) : (ex.name || '');
@@ -728,11 +743,18 @@ let unsubscribeSessions = null;
 // Самопочуття на сьогодні: 'ready' | 'ok' | 'low' або null, поки не питали.
 let readiness = null;
 let unsubscribeReadiness = null;
+// Власні вправи людини — ті, яких немає в бібліотеці. Зберігаються окремо
+// від тренувань (users/{uid}/customExercises), тож обрана один раз вправа
+// лишається в пікері для наступних тренувань, а не набирається щоразу
+// наново.
+let customExercises = []; // [{ id, name, muscle, createdAt }]
+let unsubscribeCustomExercises = null;
 let activeTab = 'sessions';
 let editingSessionId = null;
-let formExercises = []; // [{ id, libId, name, muscle, sets:[{weight, reps}] }]
+let formExercises = []; // [{ id, libId, customId, name, muscle, sets:[{weight, reps}] }]
 let pendingDeleteId = null;
 let pickerTargetBlockId = null; // якщо задано — заміна вправи в існуючому блоці, інакше — новий блок
+let pickerCustomMuscle = null; // обрана група мʼязів для нової своєї вправи в пікері
 
 // ---- Дані (Firestore, реалтайм) ----
 function subscribeToSessions(uid) {
@@ -754,6 +776,20 @@ function subscribeToReadiness(uid) {
       readiness = data.level || null;
       renderCurrentScreen();
     }, (err) => console.error('subscribeToReadiness:', err));
+}
+
+// Сортуємо за назвою одразу тут — інакше довелось би робити це при
+// кожному рендері пікера.
+function subscribeToCustomExercises(uid) {
+  if (unsubscribeCustomExercises) unsubscribeCustomExercises();
+  const col = db.collection('users').doc(uid).collection('customExercises');
+  unsubscribeCustomExercises = col.onSnapshot((snap) => {
+    customExercises = snap.docs.map((d) => ({ id: d.id, ...d.data() }))
+      .sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+    if (document.getElementById('exercisePickerOverlay').classList.contains('show')) {
+      renderPickerGroups(document.getElementById('pickerSearch').value);
+    }
+  }, (err) => console.error('subscribeToCustomExercises:', err));
 }
 
 async function setReadiness(level) {
@@ -1185,7 +1221,7 @@ function openSessionForm(existingSession) {
   document.getElementById('sessionNotesInput').value = existingSession ? (existingSession.notes || '') : '';
   formExercises = existingSession
     ? (existingSession.exercises || []).map((ex) => ({
-        id: uid4(), libId: ex.libId || null, name: ex.name || '', muscle: ex.muscle || null,
+        id: uid4(), libId: ex.libId || null, customId: ex.customId || null, name: ex.name || '', muscle: ex.muscle || null,
         sets: (ex.sets || []).map((s) => ({ weight: s.weight, reps: s.reps })),
       }))
     : [];
@@ -1322,7 +1358,10 @@ document.getElementById('addExerciseBtn').addEventListener('click', () => {
 function openExercisePicker() {
   document.getElementById('pickerCustomInput').value = '';
   document.getElementById('pickerSearch').value = '';
+  pickerCustomMuscle = null;
+  document.getElementById('pickerCustomHint').textContent = '';
   renderPickerGroups('');
+  renderPickerCustomMuscleRow();
   document.getElementById('exercisePickerOverlay').classList.add('show');
   setTimeout(() => document.getElementById('pickerSearch').focus(), 50);
 }
@@ -1334,23 +1373,79 @@ function renderPickerGroups(query) {
     const label = exerciseLabel(item.id);
     if (q && !label.toLowerCase().includes(q)) return;
     if (!byMuscle.has(item.muscle)) byMuscle.set(item.muscle, []);
-    byMuscle.get(item.muscle).push({ id: item.id, label });
+    byMuscle.get(item.muscle).push({ kind: 'lib', id: item.id, label });
   });
-  root.innerHTML = MUSCLE_ORDER.filter((m) => byMuscle.has(m)).map((m) => `
+  // Власні вправи додаються в ту саму групу мʼязів, що й бібліотечні —
+  // людина шукає «щось на груди», а не окремо «моє» й «з бібліотеки».
+  customExercises.forEach((item) => {
+    if (q && !(item.name || '').toLowerCase().includes(q)) return;
+    const m = item.muscle || 'other';
+    if (!byMuscle.has(m)) byMuscle.set(m, []);
+    byMuscle.get(m).push({ kind: 'custom', id: item.id, label: item.name || '' });
+  });
+  const order = [...MUSCLE_ORDER, ...[...byMuscle.keys()].filter((m) => !MUSCLE_ORDER.includes(m))];
+  root.innerHTML = order.filter((m) => byMuscle.has(m)).map((m) => `
     <div class="picker-group">
-      <div class="picker-group-label">${escapeHtml(muscleLabel(m))}</div>
-      ${byMuscle.get(m).map((item) => `<div class="picker-item" data-pick-lib="${item.id}" data-muscle="${m}">${escapeHtml(item.label)}</div>`).join('')}
+      <div class="picker-group-label">${m === 'other' ? '' : escapeHtml(muscleLabel(m))}</div>
+      ${byMuscle.get(m).map((item) => item.kind === 'lib'
+        ? `<div class="picker-item" data-pick-lib="${item.id}" data-muscle="${m}">${escapeHtml(item.label)}</div>`
+        : `<div class="picker-item" data-pick-custom="${item.id}" data-muscle="${m}">${escapeHtml(item.label)}</div>`
+      ).join('')}
     </div>
   `).join('');
   root.querySelectorAll('[data-pick-lib]').forEach((el) => {
     el.addEventListener('click', () => selectExercise({ libId: el.dataset.pickLib, muscle: el.dataset.muscle, name: exerciseLabel(el.dataset.pickLib) }));
   });
+  root.querySelectorAll('[data-pick-custom]').forEach((el) => {
+    el.addEventListener('click', () => {
+      const item = customExercises.find((c) => c.id === el.dataset.pickCustom);
+      if (!item) return;
+      selectExercise({ customId: item.id, muscle: item.muscle, name: item.name });
+    });
+  });
 }
 document.getElementById('pickerSearch').addEventListener('input', (e) => renderPickerGroups(e.target.value));
-document.getElementById('pickerCustomAdd').addEventListener('click', () => {
+
+function renderPickerCustomMuscleRow() {
+  document.getElementById('pickerCustomMuscleRow').innerHTML = MUSCLE_ORDER.map((m) => `
+    <button type="button" class="picker-muscle-choice${pickerCustomMuscle === m ? ' selected' : ''}" data-muscle="${m}">${escapeHtml(muscleLabel(m))}</button>
+  `).join('');
+  document.querySelectorAll('#pickerCustomMuscleRow [data-muscle]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      pickerCustomMuscle = btn.dataset.muscle;
+      document.getElementById('pickerCustomHint').textContent = '';
+      renderPickerCustomMuscleRow();
+    });
+  });
+}
+
+// Своя вправа зберігається один раз і далі просто обирається зі списку —
+// повторний ввід того самого імені (без урахування регістру) не плодить
+// дублікат, а підхоплює вже наявний запис.
+document.getElementById('pickerCustomAdd').addEventListener('click', async () => {
   const name = document.getElementById('pickerCustomInput').value.trim();
+  const hintEl = document.getElementById('pickerCustomHint');
   if (!name) return;
-  selectExercise({ libId: null, muscle: null, name });
+  if (!pickerCustomMuscle) { hintEl.textContent = t('pickerCustomNeedMuscle'); return; }
+  hintEl.textContent = '';
+
+  const existing = customExercises.find((c) => (c.name || '').trim().toLowerCase() === name.toLowerCase());
+  if (existing) {
+    selectExercise({ customId: existing.id, muscle: existing.muscle, name: existing.name });
+    return;
+  }
+  const uidCur = auth.currentUser && auth.currentUser.uid;
+  if (!uidCur) return;
+  try {
+    const ref = await db.collection('users').doc(uidCur).collection('customExercises').add({
+      name: name.slice(0, 120), muscle: pickerCustomMuscle,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+    selectExercise({ customId: ref.id, muscle: pickerCustomMuscle, name });
+  } catch (err) {
+    console.error('addCustomExercise:', err);
+    hintEl.textContent = t('err_generic');
+  }
 });
 document.getElementById('closePicker').addEventListener('click', () => {
   document.getElementById('exercisePickerOverlay').classList.remove('show');
@@ -1359,12 +1454,12 @@ document.getElementById('exercisePickerOverlay').addEventListener('click', (e) =
   if (e.target.id === 'exercisePickerOverlay') e.currentTarget.classList.remove('show');
 });
 
-function selectExercise({ libId, muscle, name }) {
+function selectExercise({ libId, customId, muscle, name }) {
   if (pickerTargetBlockId) {
     const ex = formExercises.find((e) => e.id === pickerTargetBlockId);
-    if (ex) { ex.libId = libId; ex.muscle = muscle; ex.name = name; }
+    if (ex) { ex.libId = libId || null; ex.customId = customId || null; ex.muscle = muscle; ex.name = name; }
   } else {
-    formExercises.push({ id: uid4(), libId, muscle, name, sets: [{ weight: '', reps: '' }] });
+    formExercises.push({ id: uid4(), libId: libId || null, customId: customId || null, muscle, name, sets: [{ weight: '', reps: '' }] });
   }
   pickerTargetBlockId = null;
   document.getElementById('exercisePickerOverlay').classList.remove('show');
@@ -1380,7 +1475,7 @@ document.getElementById('sessionForm').addEventListener('submit', async (e) => {
 
   const cleanExercises = formExercises
     .map((ex) => ({
-      id: ex.id, libId: ex.libId || null, muscle: ex.muscle || null,
+      id: ex.id, libId: ex.libId || null, customId: ex.libId ? null : (ex.customId || null), muscle: ex.muscle || null,
       name: ex.libId ? exerciseLabel(ex.libId) : (ex.name || '').trim(),
       sets: (ex.sets || [])
         .filter((s) => s.weight !== '' || s.reps !== '')
@@ -1489,10 +1584,13 @@ auth.onAuthStateChanged((user) => {
     }).catch(() => {});
     subscribeToSessions(user.uid);
     subscribeToReadiness(user.uid);
+    subscribeToCustomExercises(user.uid);
   } else {
     if (unsubscribeSessions) { unsubscribeSessions(); unsubscribeSessions = null; }
     if (unsubscribeReadiness) { unsubscribeReadiness(); unsubscribeReadiness = null; }
+    if (unsubscribeCustomExercises) { unsubscribeCustomExercises(); unsubscribeCustomExercises = null; }
     readiness = null;
+    customExercises = [];
     sessions = [];
     document.getElementById('appScreen').style.display = 'none';
     document.getElementById('authScreen').style.display = 'flex';

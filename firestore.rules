@@ -18,8 +18,9 @@ rules_version = '2';
 //   users/{uid}/fcmTokens/{token}     -- {createdAt, ua, tz}
 //   users/{uid}/aiMessages/{id}       -- {role, text, at}
 //   users/{uid}/workouts/{id}         -- {date, name, notes, exercises: [
-//                                         {id, libId, muscle, name, sets: [
+//                                         {id, libId, customId, muscle, name, sets: [
 //                                         {weight, reps}]}], createdAt, updatedAt}
+//   users/{uid}/customExercises/{id}  -- {name, muscle, createdAt}
 //   users/{uid}/readiness/{YYYY-MM-DD}  -- {level: ready|ok|low, date, createdAt}
 //   users/{uid}/goals/{id}            -- {title, category, why, targetDate,
 //                                         targetValue, currentValue, unit,
@@ -237,6 +238,20 @@ service cloud.firestore {
         }
         allow read, delete: if isOwner(uid);
         allow create, update: if isOwner(uid) && isValidReadiness(request.resource.data);
+      }
+
+      // Власні вправи, яких немає в бібліотеці: людина додає одну з
+      // групою мʼязів, і далі вона просто обирається зі списку в пікері,
+      // а не набирається наново щоразу.
+      match /customExercises/{exerciseId} {
+        function isValidCustomExercise(d) {
+          return isNonEmptyString(d.name, 120) &&
+                 d.muscle in ['chest', 'back', 'legs', 'shoulders', 'arms', 'core'] &&
+                 d.createdAt is timestamp &&
+                 d.keys().hasOnly(['name', 'muscle', 'createdAt']);
+        }
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid) && isValidCustomExercise(request.resource.data);
       }
 
       match /goals/{goalId} {
