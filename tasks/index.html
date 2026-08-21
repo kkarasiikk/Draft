@@ -439,6 +439,12 @@
   .priority-choice.selected[data-priority="high"]{background:var(--high-light);color:var(--high);}
   .priority-choice.selected[data-priority="medium"]{background:var(--medium-light);color:var(--medium);}
   .priority-choice.selected[data-priority="low"]{background:var(--low-light);color:var(--low);}
+  /* Нагадування — до пʼяти варіантів із довшими підписами («У час завдання»),
+     а базовий .priority-picker розрахований на чотири рівні клітинки
+     пріоритету: набитий у той самий рядок текст обрізало б до «У час …».
+     Тут кнопки переносяться й сідають по своєму тексту, а не тиснуться. */
+  .priority-picker.wrap{flex-wrap:wrap;}
+  .priority-picker.wrap .priority-choice{flex:0 1 auto;white-space:normal;}
   /* Поле оцінки — вузьке: 4 цифри більше не треба, а повна ширина створює
      враження, що туди мають писати щось довге. */
   #taskEstimateInput{max-width:140px;}
@@ -880,7 +886,7 @@
       <input type="number" id="taskEstimateInput" min="1" max="1440" step="1" inputmode="numeric" placeholder="хв">
 
       <label class="field-label" id="reminderLabel">Нагадати</label>
-      <div class="priority-picker" id="taskReminderPicker"></div>
+      <div class="priority-picker wrap" id="taskReminderPicker"></div>
 
       <label class="field-label" id="recurrenceLabel">Повторювати</label>
       <div class="priority-picker" id="taskRecurrencePicker"></div>
