@@ -50,7 +50,7 @@ const T = {
     confirmDeleteSessionTitle: 'Видалити тренування?', confirmDeleteSessionSub: 'Цю дію не можна скасувати.',
     cancelBtn: 'Скасувати', deleteConfirmBtn: 'Видалити',
     pickerTitle: 'Обрати вправу', pickerSearchPlaceholder: 'Пошук вправи…',
-    pickerCustomLabel: 'Своя вправа', pickerCustomPlaceholder: 'Назва вправи', pickerCustomAdd: 'Додати',
+    pickerCustomLabel: 'Додати свою вправу', pickerCustomPlaceholder: 'Назва вправи', pickerCustomAdd: 'Додати',
     pickerCustomMuscleLabel: 'Група мʼязів', pickerCustomNeedMuscle: 'Обери, на яку групу мʼязів ця вправа',
     pickerCustomExisting: 'Уже є у списку — просто додано',
     setPlaceholderWeight: 'кг', setPlaceholderReps: 'повт.', addSetLabel: '+ Підхід',
@@ -116,7 +116,7 @@ const T = {
     confirmDeleteSessionTitle: 'Удалить тренировку?', confirmDeleteSessionSub: 'Это действие нельзя отменить.',
     cancelBtn: 'Отмена', deleteConfirmBtn: 'Удалить',
     pickerTitle: 'Выбрать упражнение', pickerSearchPlaceholder: 'Поиск упражнения…',
-    pickerCustomLabel: 'Своё упражнение', pickerCustomPlaceholder: 'Название упражнения', pickerCustomAdd: 'Добавить',
+    pickerCustomLabel: 'Добавить своё упражнение', pickerCustomPlaceholder: 'Название упражнения', pickerCustomAdd: 'Добавить',
     pickerCustomMuscleLabel: 'Группа мышц', pickerCustomNeedMuscle: 'Выбери, на какую группу мышц это упражнение',
     pickerCustomExisting: 'Уже есть в списке — просто добавлено',
     setPlaceholderWeight: 'кг', setPlaceholderReps: 'повт.', addSetLabel: '+ Подход',
@@ -180,7 +180,7 @@ const T = {
     confirmDeleteSessionTitle: 'Usunąć trening?', confirmDeleteSessionSub: 'Tej czynności nie można cofnąć.',
     cancelBtn: 'Anuluj', deleteConfirmBtn: 'Usuń',
     pickerTitle: 'Wybierz ćwiczenie', pickerSearchPlaceholder: 'Szukaj ćwiczenia…',
-    pickerCustomLabel: 'Własne ćwiczenie', pickerCustomPlaceholder: 'Nazwa ćwiczenia', pickerCustomAdd: 'Dodaj',
+    pickerCustomLabel: 'Dodaj własne ćwiczenie', pickerCustomPlaceholder: 'Nazwa ćwiczenia', pickerCustomAdd: 'Dodaj',
     pickerCustomMuscleLabel: 'Partia mięśniowa', pickerCustomNeedMuscle: 'Wybierz, na którą partię jest to ćwiczenie',
     pickerCustomExisting: 'Już jest na liście — po prostu dodano',
     setPlaceholderWeight: 'kg', setPlaceholderReps: 'powt.', addSetLabel: '+ Seria',
@@ -244,7 +244,7 @@ const T = {
     confirmDeleteSessionTitle: 'Delete workout?', confirmDeleteSessionSub: 'This action cannot be undone.',
     cancelBtn: 'Cancel', deleteConfirmBtn: 'Delete',
     pickerTitle: 'Choose exercise', pickerSearchPlaceholder: 'Search exercise…',
-    pickerCustomLabel: 'Custom exercise', pickerCustomPlaceholder: 'Exercise name', pickerCustomAdd: 'Add',
+    pickerCustomLabel: 'Add custom exercise', pickerCustomPlaceholder: 'Exercise name', pickerCustomAdd: 'Add',
     pickerCustomMuscleLabel: 'Muscle group', pickerCustomNeedMuscle: 'Pick which muscle group this exercise targets',
     pickerCustomExisting: 'Already on the list — just added',
     setPlaceholderWeight: 'kg', setPlaceholderReps: 'reps', addSetLabel: '+ Set',
@@ -1360,11 +1360,27 @@ function openExercisePicker() {
   document.getElementById('pickerSearch').value = '';
   pickerCustomMuscle = null;
   document.getElementById('pickerCustomHint').textContent = '';
+  // Форма своєї вправи щоразу починається згорнутою: у більшості випадків
+  // потрібна вправа вже є в списку, і розгорнута форма лише з'їдала б висоту.
+  setCustomFormOpen(false);
   renderPickerGroups('');
   renderPickerCustomMuscleRow();
   document.getElementById('exercisePickerOverlay').classList.add('show');
   setTimeout(() => document.getElementById('pickerSearch').focus(), 50);
 }
+
+function setCustomFormOpen(open) {
+  document.getElementById('pickerCustomForm').classList.toggle('show', open);
+  const toggle = document.getElementById('pickerCustomToggle');
+  toggle.classList.toggle('open', open);
+  toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+
+document.getElementById('pickerCustomToggle').addEventListener('click', () => {
+  const open = !document.getElementById('pickerCustomForm').classList.contains('show');
+  setCustomFormOpen(open);
+  if (open) setTimeout(() => document.getElementById('pickerCustomInput').focus(), 50);
+});
 function renderPickerGroups(query) {
   const q = query.trim().toLowerCase();
   const root = document.getElementById('pickerGroups');
@@ -1386,7 +1402,7 @@ function renderPickerGroups(query) {
   const order = [...MUSCLE_ORDER, ...[...byMuscle.keys()].filter((m) => !MUSCLE_ORDER.includes(m))];
   root.innerHTML = order.filter((m) => byMuscle.has(m)).map((m) => `
     <div class="picker-group">
-      <div class="picker-group-label">${m === 'other' ? '' : escapeHtml(muscleLabel(m))}</div>
+      ${m === 'other' ? '' : `<div class="picker-group-label">${escapeHtml(muscleLabel(m))}</div>`}
       ${byMuscle.get(m).map((item) => item.kind === 'lib'
         ? `<div class="picker-item" data-pick-lib="${item.id}" data-muscle="${m}">${escapeHtml(item.label)}</div>`
         : `<div class="picker-item" data-pick-custom="${item.id}" data-muscle="${m}">${escapeHtml(item.label)}</div>`

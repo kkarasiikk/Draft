@@ -89,7 +89,7 @@
   .background::before{content:""; position:absolute; width:550px; height:550px; top:-180px; left:-120px; background:var(--blob1); border-radius:50%; filter:blur(90px);}
   .background::after{content:""; position:absolute; width:500px; height:500px; bottom:-160px; right:-100px; background:var(--blob2); border-radius:50%; filter:blur(110px);}
 
-  .auth-box, .item-menu, .tab-btn.active, .day-card, .card, .modal, .confirm-box, .toast{
+  .auth-box, .item-menu, .tab-btn.active, .day-card, .card, .modal, .picker-modal, .confirm-box, .toast{
     backdrop-filter: blur(var(--glass-blur)) saturate(150%);
     -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(150%);
     box-shadow: var(--glass-shadow);
@@ -398,13 +398,37 @@
   .add-ex-btn:hover{background:var(--glass-btn-bg-hover);}
 
   /* ---- Exercise picker sheet ---- */
-  .picker-modal{background:var(--surface);border-radius:26px 26px 0 0;padding:20px 20px calc(28px + env(safe-area-inset-bottom));
-    width:100%;max-width:480px;max-height:85vh;overflow-y:auto;-webkit-overflow-scrolling:touch;}
-  .picker-group{margin-bottom:14px;}
-  .picker-group-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-muted);margin-bottom:6px;padding-left:2px;}
-  .picker-item{padding:11px 12px;border-radius:10px;cursor:pointer;font-size:14.5px;color:var(--ink);}
-  .picker-item:hover{background:var(--bg);}
-  .picker-custom-row{display:flex;gap:8px;align-items:flex-start;margin-top:4px;}
+  /* Шапка й пошук лишаються на місці, гортається тільки список: інакше,
+     догортавши до «рук», людина втрачала з очей і пошук, і кнопку закриття. */
+  .picker-modal{background:var(--surface);border-radius:26px 26px 0 0;padding:20px 20px calc(20px + env(safe-area-inset-bottom));
+    width:100%;max-width:480px;max-height:85vh;display:flex;flex-direction:column;min-height:0;}
+  #pickerGroups{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;margin:0 -4px;padding:0 4px;}
+  /* Системна смуга гортання з кнопками-стрілками — чужа тут річ: власна
+     тонка й напівпрозора, як решта елементів керування. */
+  #pickerGroups{scrollbar-width:thin;scrollbar-color:var(--card-border-hover) transparent;}
+  #pickerGroups::-webkit-scrollbar{width:5px;}
+  #pickerGroups::-webkit-scrollbar-track{background:transparent;}
+  #pickerGroups::-webkit-scrollbar-thumb{background:var(--card-border-hover);border-radius:999px;}
+  /* Кожна група мʼязів — окрема картка: інакше на довгому списку межа між
+     «грудьми» й «спиною» трималась на самому лише підписі. */
+  .picker-group{background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;
+    padding:10px;margin-bottom:10px;}
+  .picker-group-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-muted);margin-bottom:4px;padding-left:10px;}
+  .picker-item{padding:11px 10px;border-radius:10px;cursor:pointer;font-size:14.5px;color:var(--ink);transition:background .15s;}
+  .picker-item:hover{background:var(--glass-btn-bg-hover);}
+
+  /* Створення власної вправи відділене від вибору наявної: це інша дія, і
+     в потоці списку вона читалась як ще одна група мʼязів. */
+  .picker-foot{flex-shrink:0;border-top:1px solid var(--card-border);margin:0 -20px;padding:12px 20px 0;}
+  .picker-custom-toggle{width:100%;display:flex;align-items:center;justify-content:center;gap:7px;
+    background:var(--glass-btn-bg);border:1px solid var(--glass-btn-border);color:var(--accent);border-radius:12px;
+    padding:12px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:background .2s;}
+  .picker-custom-toggle:hover{background:var(--glass-btn-bg-hover);}
+  .picker-custom-toggle svg{transition:transform .2s;}
+  .picker-custom-toggle.open svg{transform:rotate(45deg);}
+  .picker-custom-form{display:none;padding-top:12px;}
+  .picker-custom-form.show{display:block;}
+  .picker-custom-row{display:flex;gap:8px;align-items:flex-start;}
   .picker-custom-row input{margin-bottom:0;}
   .picker-custom-row button{flex-shrink:0;padding:9px 16px;border-radius:8px;border:none;background:var(--accent);color:#fff;
     font-weight:600;font-size:13.5px;cursor:pointer;font-family:'Inter',sans-serif;}
@@ -558,17 +582,22 @@
       <div class="modal-title" id="pickerTitle">Обрати вправу</div>
       <button class="close-btn" id="closePicker" aria-label="Закрити"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
     </div>
-    <input type="search" id="pickerSearch" placeholder="" style="margin-bottom:14px;">
+    <input type="search" id="pickerSearch" placeholder="" style="margin-bottom:12px;">
     <div id="pickerGroups"></div>
-    <div class="picker-group">
-      <div class="picker-group-label" id="pickerCustomLabel">Своя вправа</div>
-      <div class="picker-custom-row">
-        <input type="text" id="pickerCustomInput" maxlength="120" placeholder="" style="margin:0;">
-        <button type="button" id="pickerCustomAdd"></button>
+    <div class="picker-foot">
+      <button type="button" class="picker-custom-toggle" id="pickerCustomToggle" aria-expanded="false">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        <span id="pickerCustomLabel">Своя вправа</span>
+      </button>
+      <div class="picker-custom-form" id="pickerCustomForm">
+        <div class="picker-custom-row">
+          <input type="text" id="pickerCustomInput" maxlength="120" placeholder="" style="margin:0;">
+          <button type="button" id="pickerCustomAdd"></button>
+        </div>
+        <div class="picker-group-label" id="pickerCustomMuscleLabel" style="margin-top:12px;">Група мʼязів</div>
+        <div class="picker-muscle-row" id="pickerCustomMuscleRow"></div>
+        <div class="picker-custom-hint" id="pickerCustomHint"></div>
       </div>
-      <div class="picker-group-label" id="pickerCustomMuscleLabel" style="margin-top:10px;">Група мʼязів</div>
-      <div class="picker-muscle-row" id="pickerCustomMuscleRow"></div>
-      <div class="picker-custom-hint" id="pickerCustomHint"></div>
     </div>
   </div>
 </div>
