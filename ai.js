@@ -150,8 +150,16 @@ const tools = [
   },
   {
     name: "savings_summary",
-    description: "Скільки відкладено, по яких цілях заощаджень і скільки знято.",
-    input_schema: { type: "object", properties: {} },
+    description:
+      "Скільки відкладено, по яких цілях заощаджень і скільки знято — загальний залишок з початку. " +
+      "Якщо питають про конкретний місяць («скільки я зберіг за липень», «скільки поклав цього місяця») — " +
+      "передай month (YYYY-MM): у відповіді додасться period із приростом чи відтоком САМЕ за той місяць по кожній цілі.",
+    input_schema: {
+      type: "object",
+      properties: {
+        month: { type: "string", description: "Місяць YYYY-MM, якщо питають про конкретний період" },
+      },
+    },
   },
   {
     name: "add_task",
@@ -642,7 +650,7 @@ async function executeTool(uid, name, input, ctx) {
 
   if (name === "render_chart") return renderChart(input);
   if (name === "month_summary") return monthSummary(uid, input, ctx);
-  if (name === "savings_summary") return savingsSummary(uid, ctx);
+  if (name === "savings_summary") return savingsSummary(uid, ctx, input);
   if (name === "add_task") return addTask(uid, input, ctx);
   if (name === "list_tasks") return listTasks(uid, input, ctx);
   if (name === "complete_task") return completeTask(uid, input, ctx);
@@ -734,37 +742,63 @@ async function monthSummary(uid, input, ctx) {
   };
 }
 
-async function savingsSummary(uid, ctx) {
+async function savingsSummary(uid, ctx, input) {
   const [savingsSnap, goalsSnap] = await Promise.all([
     userCol(uid, "savings").get(),
     userCol(uid, "savingsGoals").get(),
   ]);
+  const entries = savingsSnap.docs.map((d) => d.data() || {});
+  // Зняття зменшує накопичене, інакше сума показувала б оборот, а не залишок.
+  const delta = (sv) => (sv.type === "withdraw" ? -1 : 1) * (Number(sv.amount) || 0);
+
   const perGoal = new Map();
-  savingsSnap.docs.forEach((d) => {
-    const sv = d.data() || {};
-    const amount = Number(sv.amount) || 0;
-    // Зняття зменшує накопичене, інакше сума показувала б оборот, а не залишок.
-    const delta = sv.type === "withdraw" ? -amount : amount;
+  entries.forEach((sv) => {
     const key = sv.goalId || "";
-    perGoal.set(key, (perGoal.get(key) || 0) + delta);
+    perGoal.set(key, (perGoal.get(key) || 0) + delta(sv));
   });
+  const goalName = new Map(goalsSnap.docs.map((d) => [d.id, (d.data() || {}).name || "Заощадження"]));
   // Перелік будується з самих цілей, а не з операцій: щойно створена ціль ще
   // порожня, і якби її тут не було, покласти в неї гроші не вийшло б —
   // модель не дізналася б її id.
   const goals = goalsSnap.docs.map((d) => ({
     id: d.id,
-    goal: (d.data() || {}).name || "Заощадження",
+    goal: goalName.get(d.id) || "Заощадження",
     saved: Math.round((perGoal.get(d.id) || 0) * 100) / 100,
   }));
   const orphan = perGoal.get("") || 0;
   if (orphan) goals.push({ id: null, goal: "Без цілі", saved: Math.round(orphan * 100) / 100 });
-  return {
-    output: {
-      currency: ctx.currency,
-      total: Math.round(goals.reduce((a, g) => a + g.saved, 0) * 100) / 100,
-      goals,
-    },
+
+  const output = {
+    currency: ctx.currency,
+    total: Math.round(goals.reduce((a, g) => a + g.saved, 0) * 100) / 100,
+    goals,
   };
+
+  // «Скільки я зберіг за липень» — це не залишок, а приріст/відтік САМЕ за
+  // місяць: без цього блоку модель бачила б лише накопичене з початку і не
+  // мала б чим відповісти на питання про конкретний період.
+  const bounds = monthBounds(input && input.month);
+  if (bounds) {
+    const perGoalPeriod = new Map();
+    entries
+      .filter((sv) => typeof sv.date === "string" && sv.date >= bounds.from && sv.date <= bounds.to)
+      .forEach((sv) => {
+        const key = sv.goalId || "";
+        perGoalPeriod.set(key, (perGoalPeriod.get(key) || 0) + delta(sv));
+      });
+    const periodGoals = [...perGoalPeriod.entries()].map(([id, net]) => ({
+      id: id || null,
+      goal: id ? (goalName.get(id) || "Заощадження") : "Без цілі",
+      net: Math.round(net * 100) / 100,
+    }));
+    output.period = {
+      month: input.month,
+      net: Math.round(periodGoals.reduce((a, g) => a + g.net, 0) * 100) / 100,
+      goals: periodGoals,
+    };
+  }
+
+  return { output };
 }
 
 // ---- Завдання ----
@@ -1521,7 +1555,7 @@ function buildSystemPrompt(ctx) {
     "",
     "ВИПРАВЛЯТИ. Помічник уміє міняти вже записане, але не вміє нічого видаляти — так і кажи, якщо просять видалити, і поясни, що це робиться в самому розділі. Перед будь-якою правкою знайди запис інструментом читання (query_transactions, list_tasks, workout_history, goals_progress, savings_summary) і візьми звідти id — вгадувати id не можна. У edit_* передавай ТІЛЬКИ ті поля, які змінюються. Виняток — exercises у edit_workout і milestones у edit_goal: там треба надіслати повний новий список, тож спершу прочитай наявний. Якщо під опис підходить кілька записів — перепитай, який саме.",
     "",
-    "ЗАОЩАДЖЕННЯ. Це скарбнички, окремі від витрат: add_savings_goal створює, add_savings_entry кладе (deposit) або знімає (withdraw). Гроші, відкладені у скарбничку, — не витрата, тож add_transaction тут ні до чого. id цілі бери з savings_summary.",
+    "ЗАОЩАДЖЕННЯ. Це скарбнички, окремі від витрат: add_savings_goal створює, add_savings_entry кладе (deposit) або знімає (withdraw). Гроші, відкладені у скарбничку, — не витрата, тож add_transaction тут ні до чого. id цілі бери з savings_summary. Питають «скільки я зберіг за липень» чи «скільки поклав цього місяця» — це не загальний залишок (total), а зміна САМЕ за той місяць: передай month у savings_summary і бери число з period, а не з total.",
     "",
     "РАДИТИ. Це головне правило: спершу подивись у дані, потім говори. Порада без цифр — марна, людина і так знає, що треба менше витрачати й більше рухатись.",
     "- порада про економію -> спершу month_summary за потрібний місяць, і говори про конкретні категорії й суми;",

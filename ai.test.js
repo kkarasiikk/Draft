@@ -1104,6 +1104,30 @@ describe("executeTool", () => {
       const r = await ai.executeTool("uid1", "savings_summary", {}, ctx);
       expect(r.output.goals).toContainEqual({ id: ref.id, goal: "На ноутбук", saved: 0 });
     });
+
+    // «Скільки я зберіг за липень» — це приріст САМЕ за місяць, а не
+    // загальний залишок з початку: без цього тесту регресія (знову лише
+    // total) пройшла б непоміченою.
+    test("savings_summary з month рахує приріст за конкретний місяць окремо від total", async () => {
+      const goals = mockCurrent.collection("users").doc("uid1").collection("savingsGoals");
+      const goal = await goals.add({ name: "На відпустку" });
+      const col = mockCurrent.collection("users").doc("uid1").collection("savings");
+      await col.add({ goalId: goal.id, type: "deposit", amount: 1000, date: "2026-07-05" });
+      await col.add({ goalId: goal.id, type: "deposit", amount: 500, date: "2026-08-01" });
+      await col.add({ goalId: goal.id, type: "withdraw", amount: 200, date: "2026-08-10" });
+
+      const r = await ai.executeTool("uid1", "savings_summary", { month: "2026-08" }, ctx);
+      expect(r.output.total).toBe(1300); // весь час: 1000 + 500 - 200
+      expect(r.output.period).toMatchObject({ month: "2026-08", net: 300 }); // лише серпень: 500 - 200
+      expect(r.output.period.goals[0]).toMatchObject({ goal: "На відпустку", net: 300 });
+    });
+
+    test("savings_summary без month period не додає, а невалідний місяць period не ламає", async () => {
+      const noMonth = await ai.executeTool("uid1", "savings_summary", {}, ctx);
+      expect(noMonth.output.period).toBeUndefined();
+      const bad = await ai.executeTool("uid1", "savings_summary", { month: "не дата" }, ctx);
+      expect(bad.output.period).toBeUndefined();
+    });
   });
 });
 
