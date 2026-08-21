@@ -109,7 +109,11 @@
   }
 
   /* ---- Glass surfaces: every panel that sits on --surface gets frosted blur + soft edge ---- */
-  .auth-box, .header, .app-menu, .entry-menu, .tab-btn.active, .search-bar, .day-card, .card,
+  /* .header сюди не входить: на телефоні він на всю ширину й має зливатися з
+     тлом сторінки, а скло з тінню домальовували йому видимий край. На
+     комп'ютері він картка серед карток — там скло повертається окремо, у
+     блоці @media нижче. */
+  .auth-box, .app-menu, .entry-menu, .tab-btn.active, .search-bar, .day-card, .card,
   .period-btn.active, .fab.exp, .modal, .data-action-btn, .confirm-box, .goal-card, .note-card,
   .note-tb-btn, .stat-card{
     backdrop-filter: blur(var(--glass-blur)) saturate(150%);
@@ -173,7 +177,7 @@
 
   /* ---- Main app ---- */
   #appScreen{display:none;}
-  .header{background:var(--surface);border-bottom:1px solid var(--border);padding:calc(14px + env(safe-area-inset-top)) 20px 22px;}
+  .header{padding:calc(14px + env(safe-area-inset-top)) 20px 22px;}
   /* Тут лишилась сама лише кнопка «назад» (місяць і налаштування переїхали),
      тож рядок існує тільки тоді, коли вона потрібна. */
   .header-top-row{display:none;align-items:center;gap:6px;min-height:32px;margin-bottom:16px;}
@@ -560,7 +564,12 @@
     body{padding-bottom:100px;}
     .wrap{max-width:none;margin:0;padding:0 40px;}
     .app-topbar{padding:28px 0 0;}
-    .header{border-bottom:none;border-radius:16px;border:1px solid var(--border);
+    /* На широкому екрані баланс — картка в ряд з рештою карток, тож скло
+       й тінь тут доречні (на телефоні той самий блок іде на всю ширину). */
+    .header{border-radius:16px;border:1px solid var(--border);background:var(--surface);
+      backdrop-filter:blur(var(--glass-blur)) saturate(150%);
+      -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(150%);
+      box-shadow:var(--glass-shadow);
       padding:26px 26px 24px;margin:20px auto 0;max-width:960px;}
     /* Абсолютного центрування більше не треба: місяць переїхав у рядок над
        списком і центрується там звичайним flex — див. .recent-header. */
