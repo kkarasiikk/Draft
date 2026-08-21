@@ -1094,6 +1094,19 @@ describe("категорії за замовчуванням", () => {
     expect(prompt).toContain("food (Їжа)");
     expect(prompt).toContain("salary (Зарплата)");
   });
+
+  // Модель раніше на «зроби діаграму» вибачалась і пропонувала зводити
+  // цифри в Excel/Google Sheets — марна порада в телефоні, коли в
+  // застосунку вже є готова кругова діаграма й графік по місяцях.
+  test("на прохання про графік промпт веде до вкладки «Статистика», а не Excel", () => {
+    const prompt = ai.buildSystemPrompt({
+      today: "2026-08-20", lang: "uk", currency: "UAH",
+      categoriesExpense: defaults.defaultCategoryList("expense", "uk"),
+      categoriesIncome: defaults.defaultCategoryList("income", "uk"),
+    });
+    expect(prompt).toContain("Статистика");
+    expect(prompt).toMatch(/НЕ пропонуй.*Excel/);
+  });
 });
 
 describe("вибір моделі", () => {
