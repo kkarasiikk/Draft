@@ -99,6 +99,7 @@ const T = {
     err_emailInUse: 'Цей email вже зареєстрований.', err_invalidCred: 'Невірний email або пароль.',
     err_userNotFound: 'Користувача з таким email не знайдено.',
     err_tooMany: 'Забагато спроб. Спробуй трохи пізніше.', err_generic: 'Щось пішло не так. Спробуй ще раз.',
+    err_permission: 'Сервер відхилив запис — схоже, правила доступу Firestore ще не опубліковані.',
     err_resetGeneric: 'Не вдалося надіслати лист. Спробуй пізніше.',
   },
   ru: {
@@ -163,6 +164,7 @@ const T = {
     err_emailInUse: 'Этот email уже зарегистрирован.', err_invalidCred: 'Неверный email или пароль.',
     err_userNotFound: 'Аккаунт с таким email не найден.',
     err_tooMany: 'Слишком много попыток. Попробуй позже.', err_generic: 'Что-то пошло не так. Попробуй ещё раз.',
+    err_permission: 'Сервер отклонил запись — похоже, правила доступа Firestore ещё не опубликованы.',
     err_resetGeneric: 'Не удалось отправить письмо. Попробуй позже.',
   },
   pl: {
@@ -227,6 +229,7 @@ const T = {
     err_emailInUse: 'Ten email już zarejestrowano.', err_invalidCred: 'Nieprawidłowy email lub hasło.',
     err_userNotFound: 'Nie znaleziono konta z tym emailem.',
     err_tooMany: 'Zbyt wiele prób. Spróbuj później.', err_generic: 'Coś poszło nie tak. Spróbuj ponownie.',
+    err_permission: 'Serwer odrzucił zapis — wygląda na to, że reguły Firestore nie zostały opublikowane.',
     err_resetGeneric: 'Nie udało się wysłać wiadomości. Spróbuj później.',
   },
   en: {
@@ -291,6 +294,7 @@ const T = {
     err_emailInUse: 'This email is already registered.', err_invalidCred: 'Incorrect email or password.',
     err_userNotFound: 'No account found with this email.',
     err_tooMany: 'Too many attempts. Try again later.', err_generic: 'Something went wrong. Try again.',
+    err_permission: 'The server rejected the write — the Firestore rules seem not to be published yet.',
     err_resetGeneric: 'Could not send the email. Try again later.',
   },
 };
@@ -385,6 +389,13 @@ function applyTranslations() {
   document.getElementById('forgotPasswordLink').textContent = t('forgotPassword');
   setAuthMode(authMode);
   refreshDatePickersLang();
+}
+
+// Firestore відмовляє записом permission-denied, коли правила для колекції
+// ще не опубліковані. Загальне «щось пішло не так» тут лише збиває з
+// пантелику: з нього не видно ні причини, ні що робити далі.
+function writeErrorMessage(err) {
+  return t(err && err.code === 'permission-denied' ? 'err_permission' : 'err_generic');
 }
 
 // ---- Вхід / реєстрація ----
@@ -1460,7 +1471,7 @@ document.getElementById('pickerCustomAdd').addEventListener('click', async () =>
     selectExercise({ customId: ref.id, muscle: pickerCustomMuscle, name });
   } catch (err) {
     console.error('addCustomExercise:', err);
-    hintEl.textContent = t('err_generic');
+    hintEl.textContent = writeErrorMessage(err);
   }
 });
 document.getElementById('closePicker').addEventListener('click', () => {
@@ -1543,7 +1554,7 @@ document.getElementById('sessionForm').addEventListener('submit', async (e) => {
     if (bestPr) showPrToast(bestPr.name, bestPr.weight, bestPr.reps);
   } catch (err) {
     console.error('save session:', err);
-    errorEl.textContent = t('err_generic');
+    errorEl.textContent = writeErrorMessage(err);
   } finally {
     submitBtn.disabled = false;
   }
