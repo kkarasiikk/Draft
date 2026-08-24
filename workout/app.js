@@ -49,6 +49,9 @@ const T = {
     noExerciseError: 'Додай хоча б одну вправу з підходом',
     confirmDeleteSessionTitle: 'Видалити тренування?', confirmDeleteSessionSub: 'Цю дію не можна скасувати.',
     cancelBtn: 'Скасувати', deleteConfirmBtn: 'Видалити',
+    unsavedTitle: 'Зберегти зміни?',
+    unsavedSub: 'У тренуванні є незбережені зміни. Якщо вийти зараз, вони пропадуть.',
+    unsavedSave: 'Зберегти', unsavedDiscard: 'Не зберігати', unsavedKeep: 'Продовжити редагування',
     pickerTitle: 'Обрати вправу', pickerSearchPlaceholder: 'Пошук вправи…',
     pickerCustomLabel: 'Своя вправа', pickerCustomPlaceholder: 'Назва вправи', pickerCustomAdd: 'Додати',
     setPlaceholderWeight: 'кг', setPlaceholderReps: 'повт.', addSetLabel: '+ Підхід',
@@ -113,6 +116,9 @@ const T = {
     noExerciseError: 'Добавь хотя бы одно упражнение с подходом',
     confirmDeleteSessionTitle: 'Удалить тренировку?', confirmDeleteSessionSub: 'Это действие нельзя отменить.',
     cancelBtn: 'Отмена', deleteConfirmBtn: 'Удалить',
+    unsavedTitle: 'Сохранить изменения?',
+    unsavedSub: 'В тренировке есть несохранённые изменения. Если выйти сейчас, они пропадут.',
+    unsavedSave: 'Сохранить', unsavedDiscard: 'Не сохранять', unsavedKeep: 'Продолжить редактирование',
     pickerTitle: 'Выбрать упражнение', pickerSearchPlaceholder: 'Поиск упражнения…',
     pickerCustomLabel: 'Своё упражнение', pickerCustomPlaceholder: 'Название упражнения', pickerCustomAdd: 'Добавить',
     setPlaceholderWeight: 'кг', setPlaceholderReps: 'повт.', addSetLabel: '+ Подход',
@@ -175,6 +181,9 @@ const T = {
     noExerciseError: 'Dodaj przynajmniej jedno ćwiczenie z serią',
     confirmDeleteSessionTitle: 'Usunąć trening?', confirmDeleteSessionSub: 'Tej czynności nie można cofnąć.',
     cancelBtn: 'Anuluj', deleteConfirmBtn: 'Usuń',
+    unsavedTitle: 'Zapisać zmiany?',
+    unsavedSub: 'W treningu są niezapisane zmiany. Jeśli teraz wyjdziesz, przepadną.',
+    unsavedSave: 'Zapisz', unsavedDiscard: 'Nie zapisuj', unsavedKeep: 'Wróć do edycji',
     pickerTitle: 'Wybierz ćwiczenie', pickerSearchPlaceholder: 'Szukaj ćwiczenia…',
     pickerCustomLabel: 'Własne ćwiczenie', pickerCustomPlaceholder: 'Nazwa ćwiczenia', pickerCustomAdd: 'Dodaj',
     setPlaceholderWeight: 'kg', setPlaceholderReps: 'powt.', addSetLabel: '+ Seria',
@@ -237,6 +246,9 @@ const T = {
     noExerciseError: 'Add at least one exercise with a set',
     confirmDeleteSessionTitle: 'Delete workout?', confirmDeleteSessionSub: 'This action cannot be undone.',
     cancelBtn: 'Cancel', deleteConfirmBtn: 'Delete',
+    unsavedTitle: 'Save changes?',
+    unsavedSub: 'This workout has unsaved changes. Leaving now discards them.',
+    unsavedSave: 'Save', unsavedDiscard: "Don't save", unsavedKeep: 'Keep editing',
     pickerTitle: 'Choose exercise', pickerSearchPlaceholder: 'Search exercise…',
     pickerCustomLabel: 'Custom exercise', pickerCustomPlaceholder: 'Exercise name', pickerCustomAdd: 'Add',
     setPlaceholderWeight: 'kg', setPlaceholderReps: 'reps', addSetLabel: '+ Set',
@@ -362,6 +374,11 @@ function applyTranslations() {
   document.getElementById('confirmSub').textContent = t('confirmDeleteSessionSub');
   document.getElementById('confirmCancel').textContent = t('cancelBtn');
   document.getElementById('confirmDelete').textContent = t('deleteConfirmBtn');
+  document.getElementById('unsavedTitle').textContent = t('unsavedTitle');
+  document.getElementById('unsavedSub').textContent = t('unsavedSub');
+  document.getElementById('unsavedSave').textContent = t('unsavedSave');
+  document.getElementById('unsavedDiscard').textContent = t('unsavedDiscard');
+  document.getElementById('unsavedKeep').textContent = t('unsavedKeep');
   document.getElementById('pickerTitle').textContent = t('pickerTitle');
   document.getElementById('pickerSearch').placeholder = t('pickerSearchPlaceholder');
   document.getElementById('pickerCustomLabel').textContent = t('pickerCustomLabel');
@@ -1190,14 +1207,67 @@ function openSessionForm(existingSession) {
       }))
     : [];
   renderExerciseBlocks();
+  sessionFormSnapshot = sessionFormState();
   document.getElementById('sessionFormOverlay').classList.add('show');
 }
-document.getElementById('newSessionBtn').addEventListener('click', () => openSessionForm(null));
-document.getElementById('closeSessionForm').addEventListener('click', () => {
+
+// ---- Незбережені зміни ----
+// Тренування записують довго: назва, вправи, підходи. А закривається форма
+// тапом повз вікно — на телефоні це трапляється випадково, і разом із вікном
+// зникало все набране, без жодного питання. Тому стан форми знімається на
+// відкритті, і вихід із зміненої форми питає, що робити зі змінами.
+let sessionFormSnapshot = null;
+
+// Порівнюємо саме дані, а не HTML: id вправ генеруються заново на кожному
+// відкритті й до змін користувача стосунку не мають.
+function sessionFormState() {
+  return JSON.stringify({
+    name: document.getElementById('sessionNameInput').value.trim(),
+    date: document.getElementById('sessionDateInput').value,
+    notes: document.getElementById('sessionNotesInput').value.trim(),
+    exercises: formExercises.map((ex) => ({
+      libId: ex.libId || null,
+      name: (ex.name || '').trim(),
+      sets: (ex.sets || []).map((s) => [String(s.weight), String(s.reps)]),
+    })),
+  });
+}
+
+function sessionFormDirty() {
+  return sessionFormSnapshot !== null && sessionFormState() !== sessionFormSnapshot;
+}
+
+function closeSessionForm() {
+  sessionFormSnapshot = null;
+  document.getElementById('unsavedOverlay').classList.remove('show');
   document.getElementById('sessionFormOverlay').classList.remove('show');
-});
+}
+
+// Форму лишаємо видимою під діалогом (z-index 75 проти 50): людина бачить,
+// що саме на кону, і після невдалого збереження одразу читає помилку.
+function requestCloseSessionForm() {
+  if (!sessionFormDirty()) { closeSessionForm(); return; }
+  document.getElementById('unsavedOverlay').classList.add('show');
+}
+
+document.getElementById('newSessionBtn').addEventListener('click', () => openSessionForm(null));
+document.getElementById('closeSessionForm').addEventListener('click', requestCloseSessionForm);
 document.getElementById('sessionFormOverlay').addEventListener('click', (e) => {
-  if (e.target.id === 'sessionFormOverlay') e.currentTarget.classList.remove('show');
+  if (e.target.id === 'sessionFormOverlay') requestCloseSessionForm();
+});
+
+document.getElementById('unsavedSave').addEventListener('click', () => {
+  document.getElementById('unsavedOverlay').classList.remove('show');
+  saveSessionForm();
+});
+document.getElementById('unsavedDiscard').addEventListener('click', closeSessionForm);
+document.getElementById('unsavedKeep').addEventListener('click', () => {
+  document.getElementById('unsavedOverlay').classList.remove('show');
+});
+// Тап повз діалог — найобережніше тлумачення: нічого не втрачаємо,
+// вертаємось до редагування.
+document.getElementById('unsavedOverlay').addEventListener('click', (e) => {
+  if (e.target.id === 'unsavedOverlay') e.currentTarget.classList.remove('show');
 });
 
 function renderExerciseBlocks() {
@@ -1372,8 +1442,14 @@ function selectExercise({ libId, muscle, name }) {
 }
 
 // ---- Збереження / видалення тренування ----
-document.getElementById('sessionForm').addEventListener('submit', async (e) => {
+document.getElementById('sessionForm').addEventListener('submit', (e) => {
   e.preventDefault();
+  saveSessionForm();
+});
+
+// Винесено з обробника події, бо збереження запускає ще й діалог
+// «зберегти зміни перед виходом».
+async function saveSessionForm() {
   const errorEl = document.getElementById('sessionFormError');
   const uidCur = auth.currentUser && auth.currentUser.uid;
   if (!uidCur) return;
@@ -1428,7 +1504,7 @@ document.getElementById('sessionForm').addEventListener('submit', async (e) => {
     } else {
       await col.add({ ...payload, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
     }
-    document.getElementById('sessionFormOverlay').classList.remove('show');
+    closeSessionForm();
     if (bestPr) showPrToast(bestPr.name, bestPr.weight, bestPr.reps);
   } catch (err) {
     console.error('save session:', err);
@@ -1436,7 +1512,7 @@ document.getElementById('sessionForm').addEventListener('submit', async (e) => {
   } finally {
     submitBtn.disabled = false;
   }
-});
+}
 
 let prToastTimer = null;
 function showPrToast(name, weight, reps) {
@@ -1450,7 +1526,8 @@ function showPrToast(name, weight, reps) {
 document.getElementById('deleteSessionBtn').addEventListener('click', () => {
   if (!editingSessionId) return;
   pendingDeleteId = editingSessionId;
-  document.getElementById('sessionFormOverlay').classList.remove('show');
+  // Питати «зберегти зміни?» перед видаленням безглуздо — зберігати нема куди.
+  closeSessionForm();
   document.getElementById('confirmOverlay').classList.add('show');
 });
 document.getElementById('confirmCancel').addEventListener('click', () => {
