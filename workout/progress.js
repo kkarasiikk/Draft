@@ -72,7 +72,10 @@
     var count = 0;
 
     sessions.forEach(function (session) {
-      count++;
+      // Тренування, записане наперед планом (усі підходи порожні), ще не
+      // відбулось. Рахувати його зробленим означало б хвалити за намір —
+      // і псувати порівняння «тренувань цього місяця проти минулого».
+      var didWork = false;
       (session.exercises || []).forEach(function (ex) {
         var key = exerciseKey(ex);
         if (!key) return;
@@ -86,6 +89,7 @@
           var w = num(set.weight);
           var r = num(set.reps);
           if (r <= 0) return;
+          didWork = true;
           e.e1rm = Math.max(e.e1rm, epley1RM(w, r));
           e.tonnage += w * r;
           e.reps += r;
@@ -93,6 +97,7 @@
           m.reps += r;
         });
       });
+      if (didWork) count++;
     });
 
     return { sessions: count, byExercise: byExercise, byMuscle: byMuscle };

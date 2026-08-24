@@ -46,7 +46,7 @@ const T = {
     exercisesLabel: 'Вправи', addExerciseLabel: 'Додати вправу',
     sessionNotesLabel: 'Нотатка', sessionNotesPlaceholder: 'Як пройшло тренування? (необовʼязково)',
     saveBtn: 'Зберегти', deleteBtn: 'Видалити',
-    noExerciseError: 'Додай хоча б одну вправу з підходом',
+    noExerciseError: 'Додай хоча б одну вправу',
     confirmDeleteSessionTitle: 'Видалити тренування?', confirmDeleteSessionSub: 'Цю дію не можна скасувати.',
     cancelBtn: 'Скасувати', deleteConfirmBtn: 'Видалити',
     unsavedTitle: 'Зберегти зміни?',
@@ -122,7 +122,7 @@ const T = {
     exercisesLabel: 'Упражнения', addExerciseLabel: 'Добавить упражнение',
     sessionNotesLabel: 'Заметка', sessionNotesPlaceholder: 'Как прошла тренировка? (необязательно)',
     saveBtn: 'Сохранить', deleteBtn: 'Удалить',
-    noExerciseError: 'Добавь хотя бы одно упражнение с подходом',
+    noExerciseError: 'Добавь хотя бы одно упражнение',
     confirmDeleteSessionTitle: 'Удалить тренировку?', confirmDeleteSessionSub: 'Это действие нельзя отменить.',
     cancelBtn: 'Отмена', deleteConfirmBtn: 'Удалить',
     unsavedTitle: 'Сохранить изменения?',
@@ -196,7 +196,7 @@ const T = {
     exercisesLabel: 'Ćwiczenia', addExerciseLabel: 'Dodaj ćwiczenie',
     sessionNotesLabel: 'Notatka', sessionNotesPlaceholder: 'Jak poszedł trening? (opcjonalnie)',
     saveBtn: 'Zapisz', deleteBtn: 'Usuń',
-    noExerciseError: 'Dodaj przynajmniej jedno ćwiczenie z serią',
+    noExerciseError: 'Dodaj przynajmniej jedno ćwiczenie',
     confirmDeleteSessionTitle: 'Usunąć trening?', confirmDeleteSessionSub: 'Tej czynności nie można cofnąć.',
     cancelBtn: 'Anuluj', deleteConfirmBtn: 'Usuń',
     unsavedTitle: 'Zapisać zmiany?',
@@ -270,7 +270,7 @@ const T = {
     exercisesLabel: 'Exercises', addExerciseLabel: 'Add exercise',
     sessionNotesLabel: 'Notes', sessionNotesPlaceholder: 'How did the workout go? (optional)',
     saveBtn: 'Save', deleteBtn: 'Delete',
-    noExerciseError: 'Add at least one exercise with a set',
+    noExerciseError: 'Add at least one exercise',
     confirmDeleteSessionTitle: 'Delete workout?', confirmDeleteSessionSub: 'This action cannot be undone.',
     cancelBtn: 'Cancel', deleteConfirmBtn: 'Delete',
     unsavedTitle: 'Save changes?',
@@ -853,9 +853,14 @@ function sortedSessions() {
 }
 
 // Найкращий підхід вправи (найважча вага, при рівності — більше повторень).
+// Підхід без повторень — це план, а не результат: у тренуванні, записаному
+// наперед, такі стоять порожні. Нуль повторень означає «ще не зроблено» всюди
+// в модулі (див. progress.js, progression.js, plan.js), і рекорди з
+// підказками беруться лише з реально виконаного.
 function bestSet(sets) {
-  if (!sets || !sets.length) return null;
-  return [...sets].sort((a, b) => (b.weight - a.weight) || (b.reps - a.reps))[0];
+  const done = (sets || []).filter((s) => Number(s.reps) > 0);
+  if (!done.length) return null;
+  return done.sort((a, b) => (b.weight - a.weight) || (b.reps - a.reps))[0];
 }
 
 // ---- Обчислення записів (PR) по всій історії ----
@@ -1346,7 +1351,11 @@ function progressionHistory(ex) {
   sortedSessions().forEach((session) => {
     if (session.id === editingSessionId) return;
     (session.exercises || []).forEach((e) => {
-      if (exerciseKey(e) === key) rows.push({ date: session.date, sets: e.sets || [] });
+      if (exerciseKey(e) !== key) return;
+      // Запланована вправа підказку не годує: підказка про те, що ти вже
+      // підняв, а не про те, що збирався.
+      const done = (e.sets || []).filter((set) => Number(set.reps) > 0);
+      if (done.length) rows.push({ date: session.date, sets: done });
     });
   });
   return rows;
@@ -1361,7 +1370,9 @@ function lastSetsFor(ex) {
   for (const session of sortedSessions()) {
     if (session.id === editingSessionId) continue;
     const match = (session.exercises || []).find((e) => exerciseKey(e) === key);
-    if (match && (match.sets || []).length) return match.sets;
+    // Тренування, записане наперед, ваги не підказує — там її ще немає.
+    const done = match ? (match.sets || []).filter((s) => Number(s.reps) > 0) : [];
+    if (done.length) return done;
   }
   return null;
 }
@@ -1465,12 +1476,24 @@ function renderExerciseBlocks() {
   attachExerciseDrag(root);
 }
 
+// Що показати в полях підходу. Запланований підхід (нуль повторень) має
+// виглядати порожнім, а не «0»: інакше відкритий назавтра план читався б як
+// нульовий результат. Нуль ваги при реальних повтореннях — це власна вага,
+// і його якраз показуємо.
+function setInputValue(s) {
+  const done = Number(s.reps) > 0;
+  return {
+    weight: done || Number(s.weight) ? s.weight : '',
+    reps: done ? s.reps : '',
+  };
+}
+
 function renderExerciseBlock(ex) {
   const setsHtml = ex.sets.map((s, i) => `
     <div class="set-row" data-set-idx="${i}">
       <div class="set-num">${i + 1}</div>
-      <input type="number" inputmode="decimal" step="0.5" min="0" max="2000" class="set-weight" placeholder="${escapeHtml(t('setPlaceholderWeight'))}" value="${s.weight || s.weight === 0 ? s.weight : ''}">
-      <input type="number" inputmode="numeric" step="1" min="0" max="999" class="set-reps" placeholder="${escapeHtml(t('setPlaceholderReps'))}" value="${s.reps || s.reps === 0 ? s.reps : ''}">
+      <input type="number" inputmode="decimal" step="0.5" min="0" max="2000" class="set-weight" placeholder="${escapeHtml(t('setPlaceholderWeight'))}" value="${setInputValue(s).weight}">
+      <input type="number" inputmode="numeric" step="1" min="0" max="999" class="set-reps" placeholder="${escapeHtml(t('setPlaceholderReps'))}" value="${setInputValue(s).reps}">
       <button type="button" class="set-remove" data-remove-set="${i}" aria-label="Remove set">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
       </button>
@@ -1820,11 +1843,13 @@ async function saveSessionAsTemplate() {
       name: ex.libId ? exerciseLabel(ex.libId) : (ex.name || '').trim(),
       // Ваги й повторення лишаємо як є — це стартова точка, яку наступного
       // разу правлять, а не порожні поля, які треба заповнювати з нуля.
-      sets: (ex.sets || [])
-        .filter((set) => set.weight !== '' || set.reps !== '')
-        .map((set) => ({ weight: Number(set.weight) || 0, reps: Math.round(Number(set.reps) || 0) })),
+      // Порожні підходи теж лишаються: шаблон плану — це теж шаблон.
+      sets: (ex.sets || []).map((set) => ({
+        weight: Number(set.weight) || 0,
+        reps: Math.round(Number(set.reps) || 0),
+      })),
     }))
-    .filter((ex) => ex.name && ex.sets.length);
+    .filter((ex) => ex.name);
   if (!exercises.length) { errorEl.textContent = t('noExerciseError'); return; }
 
   const btn = document.getElementById('saveAsTemplateBtn');
@@ -1905,11 +1930,16 @@ async function saveSessionForm() {
     .map((ex) => ({
       id: ex.id, libId: ex.libId || null, muscle: ex.muscle || null,
       name: ex.libId ? exerciseLabel(ex.libId) : (ex.name || '').trim(),
-      sets: (ex.sets || [])
-        .filter((s) => s.weight !== '' || s.reps !== '')
-        .map((s) => ({ weight: Number(s.weight) || 0, reps: Math.round(Number(s.reps) || 0) })),
+      // Порожні підходи лишаються, і вправа без жодного заповненого — теж.
+      // Тренування часто записують наперед, планом: три порожні рядки — це
+      // «три підходи, ваги ще не знаю». Викидати їх означало б стирати сам
+      // план на очах у того, хто його щойно набрав.
+      sets: (ex.sets || []).map((s) => ({
+        weight: Number(s.weight) || 0,
+        reps: Math.round(Number(s.reps) || 0),
+      })),
     }))
-    .filter((ex) => ex.name && ex.sets.length);
+    .filter((ex) => ex.name);
 
   if (!cleanExercises.length) {
     errorEl.textContent = t('noExerciseError');

@@ -181,6 +181,33 @@ describe('analyze', () => {
   });
 });
 
+describe('план не рахується зробленим тренуванням', () => {
+  // Тренування можна записати наперед: вправи є, підходи порожні. Поки в
+  // ньому нуль повторень, воно ще не відбулось — інакше «тренувань цього
+  // місяця: 5» рахувало б наміри нарівні з роботою.
+  const planned = (date) => ({
+    date, exercises: [{ libId: 'benchPress', muscle: 'chest', sets: [{ weight: 0, reps: 0 }, { weight: 0, reps: 0 }] }],
+  });
+  const done = (date, weight) => ({
+    date, exercises: [{ libId: 'benchPress', muscle: 'chest', sets: [{ weight, reps: 8 }] }],
+  });
+
+  test('порожнє тренування не додається до лічильника', () => {
+    const withPlan = P.analyze([done('2026-08-20', 80), planned('2026-08-21')], '2026-08-24');
+    const without = P.analyze([done('2026-08-20', 80)], '2026-08-24');
+    expect(withPlan.sessionsNow).toBe(without.sessionsNow);
+  });
+
+  test('план не додає ні тоннажу, ні повторень', () => {
+    const a = P.analyze([
+      done('2026-07-10', 70), done('2026-08-20', 80), planned('2026-08-22'),
+    ], '2026-08-24');
+    const b = P.analyze([done('2026-07-10', 70), done('2026-08-20', 80)], '2026-08-24');
+    expect(a.muscles).toEqual(b.muscles);
+    expect(a.strengthPct).toBe(b.strengthPct);
+  });
+});
+
 describe('restByMuscle', () => {
   test('рахує, скільки днів група відпочивала', () => {
     const r = P.restByMuscle([session(1, bench(80, 8)), session(6, squat(100, 5)), session(9, bench(80, 8))], TODAY);

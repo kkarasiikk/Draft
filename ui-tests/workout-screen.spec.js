@@ -129,3 +129,93 @@ test.describe('Порядок вправ', () => {
     await expect(page.locator('.ex-block')).toHaveCount(1);
   });
 });
+
+test.describe('Тренування наперед (план)', () => {
+  // Привід: людина пише собі план на завтра — вправи є, ваг ще немає. Раніше
+  // такі вправи мовчки зникали при збереженні, і план перетворювався на
+  // порожнечу.
+  async function planWith(page, count) {
+    await page.click('#newSessionBtn');
+    await page.waitForSelector('#sessionFormOverlay.show');
+    for (let i = 0; i < count; i++) {
+      await page.click('#addExerciseBtn');
+      await page.waitForSelector('#exercisePickerOverlay.show');
+      await page.locator('[data-pick-lib]').nth(i).click();
+      await page.waitForSelector(`.ex-block >> nth=${i}`);
+    }
+  }
+
+  test('вправа без жодної цифри зберігається, а не зникає', async ({ page }) => {
+    await openModule(page, 'workout/index.html');
+    await planWith(page, 2);
+    await page.fill('#sessionNameInput', 'План на завтра');
+    await page.click('#sessionSubmitBtn');
+
+    await expect.poll(() => page.evaluate(() => window.__fbCalls.add.length)).toBe(1);
+    const [call] = await page.evaluate(() => window.__fbCalls.add);
+    expect(call.payload.exercises).toHaveLength(2);
+    // Порожні рядки лишились: три порожні підходи — це «три підходи,
+    // ваги ще не знаю», а не «підходів немає».
+    expect(call.payload.exercises[0].sets.length).toBeGreaterThan(0);
+    expect(call.payload.exercises[0].sets.every((s) => s.reps === 0)).toBe(true);
+    expect(await isShown(page, '#sessionFormOverlay')).toBe(false);
+  });
+
+  test('запланований підхід відкривається порожнім, а не нулями', async ({ page }) => {
+    const seed = {
+      workouts: [{
+        id: 'p1', date: '2026-08-25', name: 'План', notes: '',
+        exercises: [{ id: 'a', libId: 'benchPress', muscle: 'chest', name: 'Жим лежачи',
+          sets: [{ weight: 0, reps: 0 }, { weight: 0, reps: 0 }] }],
+      }],
+    };
+    await openModule(page, 'workout/index.html', { seed });
+    await page.click('[data-open-session="p1"]');
+    await page.waitForSelector('#sessionFormOverlay.show');
+    const weights = await page.locator('.set-weight').evaluateAll((els) => els.map((e) => e.value));
+    const reps = await page.locator('.set-reps').evaluateAll((els) => els.map((e) => e.value));
+    expect(weights, 'план — це порожні поля, а не нульовий результат').toEqual(['', '']);
+    expect(reps).toEqual(['', '']);
+  });
+
+  test('власна вага (0 кг, але є повторення) нулем не стирається', async ({ page }) => {
+    const seed = {
+      workouts: [{
+        id: 'b1', date: '2026-08-20', name: 'Турнік', notes: '',
+        exercises: [{ id: 'a', libId: 'pullUp', muscle: 'back', name: 'Підтягування',
+          sets: [{ weight: 0, reps: 12 }] }],
+      }],
+    };
+    await openModule(page, 'workout/index.html', { seed });
+    await page.click('[data-open-session="b1"]');
+    await page.waitForSelector('#sessionFormOverlay.show');
+    expect(await page.locator('.set-weight').first().inputValue()).toBe('0');
+    expect(await page.locator('.set-reps').first().inputValue()).toBe('12');
+  });
+
+  test('план не стає рекордом і не підказує вагу наступного разу', async ({ page }) => {
+    const seed = {
+      workouts: [
+        { id: 'done', date: '2026-08-10', name: 'Робота', notes: '',
+          exercises: [{ id: 'a', libId: 'benchPress', muscle: 'chest', name: 'Жим лежачи',
+            sets: [{ weight: 80, reps: 8 }] }] },
+        { id: 'plan', date: '2026-08-22', name: 'План', notes: '',
+          exercises: [{ id: 'b', libId: 'benchPress', muscle: 'chest', name: 'Жим лежачи',
+            sets: [{ weight: 0, reps: 0 }] }] },
+      ],
+    };
+    await openModule(page, 'workout/index.html', { seed });
+    // У списку планове тренування показує «—», а не «0×0».
+    await page.click('[data-cal-day="2026-08-22"]');
+    await page.waitForSelector('#sessionFormOverlay.show');
+    await page.click('#closeSessionForm');
+
+    // Підказка бере 80×8 із реального тренування, а не нулі з плану.
+    await page.click('#newSessionBtn');
+    await page.waitForSelector('#sessionFormOverlay.show');
+    await page.click('#addExerciseBtn');
+    await page.waitForSelector('#exercisePickerOverlay.show');
+    await page.click('[data-pick-lib="benchPress"]');
+    await expect(page.locator('.hint-last')).toContainText('80');
+  });
+});
