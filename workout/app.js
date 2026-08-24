@@ -48,6 +48,9 @@ const T = {
     saveBtn: 'Зберегти', deleteBtn: 'Видалити',
     noExerciseError: 'Додай хоча б одну вправу з підходом',
     confirmDeleteSessionTitle: 'Видалити тренування?', confirmDeleteSessionSub: 'Цю дію не можна скасувати.',
+    confirmDeleteExerciseTitle: 'Видалити вправу зі списку?',
+    confirmDeleteExerciseSub: 'Вона зникне з вибору. Записані тренування з нею лишаться недоторканими.',
+    deleteExerciseAria: 'Видалити вправу зі списку',
     cancelBtn: 'Скасувати', deleteConfirmBtn: 'Видалити',
     pickerTitle: 'Обрати вправу', pickerSearchPlaceholder: 'Пошук вправи…',
     pickerCustomLabel: 'Додати свою вправу', pickerCustomPlaceholder: 'Назва вправи', pickerCustomAdd: 'Додати',
@@ -115,6 +118,9 @@ const T = {
     saveBtn: 'Сохранить', deleteBtn: 'Удалить',
     noExerciseError: 'Добавь хотя бы одно упражнение с подходом',
     confirmDeleteSessionTitle: 'Удалить тренировку?', confirmDeleteSessionSub: 'Это действие нельзя отменить.',
+    confirmDeleteExerciseTitle: 'Удалить упражнение из списка?',
+    confirmDeleteExerciseSub: 'Оно исчезнет из выбора. Записанные тренировки с ним останутся нетронутыми.',
+    deleteExerciseAria: 'Удалить упражнение из списка',
     cancelBtn: 'Отмена', deleteConfirmBtn: 'Удалить',
     pickerTitle: 'Выбрать упражнение', pickerSearchPlaceholder: 'Поиск упражнения…',
     pickerCustomLabel: 'Добавить своё упражнение', pickerCustomPlaceholder: 'Название упражнения', pickerCustomAdd: 'Добавить',
@@ -180,6 +186,9 @@ const T = {
     saveBtn: 'Zapisz', deleteBtn: 'Usuń',
     noExerciseError: 'Dodaj przynajmniej jedno ćwiczenie z serią',
     confirmDeleteSessionTitle: 'Usunąć trening?', confirmDeleteSessionSub: 'Tej czynności nie można cofnąć.',
+    confirmDeleteExerciseTitle: 'Usunąć ćwiczenie z listy?',
+    confirmDeleteExerciseSub: 'Zniknie z wyboru. Zapisane treningi z nim pozostaną nienaruszone.',
+    deleteExerciseAria: 'Usuń ćwiczenie z listy',
     cancelBtn: 'Anuluj', deleteConfirmBtn: 'Usuń',
     pickerTitle: 'Wybierz ćwiczenie', pickerSearchPlaceholder: 'Szukaj ćwiczenia…',
     pickerCustomLabel: 'Dodaj własne ćwiczenie', pickerCustomPlaceholder: 'Nazwa ćwiczenia', pickerCustomAdd: 'Dodaj',
@@ -245,6 +254,9 @@ const T = {
     saveBtn: 'Save', deleteBtn: 'Delete',
     noExerciseError: 'Add at least one exercise with a set',
     confirmDeleteSessionTitle: 'Delete workout?', confirmDeleteSessionSub: 'This action cannot be undone.',
+    confirmDeleteExerciseTitle: 'Remove exercise from the list?',
+    confirmDeleteExerciseSub: 'It disappears from the picker. Workouts already logged with it stay untouched.',
+    deleteExerciseAria: 'Remove exercise from the list',
     cancelBtn: 'Cancel', deleteConfirmBtn: 'Delete',
     pickerTitle: 'Choose exercise', pickerSearchPlaceholder: 'Search exercise…',
     pickerCustomLabel: 'Add custom exercise', pickerCustomPlaceholder: 'Exercise name', pickerCustomAdd: 'Add',
@@ -370,8 +382,7 @@ function applyTranslations() {
   document.getElementById('sessionNotesInput').placeholder = t('sessionNotesPlaceholder');
   document.getElementById('deleteSessionBtn').textContent = t('deleteBtn');
   document.getElementById('sessionSubmitBtn').textContent = t('saveBtn');
-  document.getElementById('confirmTitle').textContent = t('confirmDeleteSessionTitle');
-  document.getElementById('confirmSub').textContent = t('confirmDeleteSessionSub');
+  applyConfirmTexts();
   document.getElementById('confirmCancel').textContent = t('cancelBtn');
   document.getElementById('confirmDelete').textContent = t('deleteConfirmBtn');
   document.getElementById('pickerTitle').textContent = t('pickerTitle');
@@ -764,6 +775,9 @@ let activeTab = 'sessions';
 let editingSessionId = null;
 let formExercises = []; // [{ id, libId, customId, name, muscle, sets:[{weight, reps}] }]
 let pendingDeleteId = null;
+// Підтвердження одне на два випадки — тренування й власна вправа, — тож
+// саме воно й вирішує, який текст показати і в яку колекцію писати.
+let pendingDeleteKind = 'session'; // 'session' | 'customExercise'
 let pickerTargetBlockId = null; // якщо задано — заміна вправи в існуючому блоці, інакше — новий блок
 let pickerCustomMuscle = null; // обрана група мʼязів для нової своєї вправи в пікері
 
@@ -1415,8 +1429,14 @@ function renderPickerGroups(query) {
     <div class="picker-group">
       ${m === 'other' ? '' : `<div class="picker-group-label">${escapeHtml(muscleLabel(m))}</div>`}
       ${byMuscle.get(m).map((item) => item.kind === 'lib'
-        ? `<div class="picker-item" data-pick-lib="${item.id}" data-muscle="${m}">${escapeHtml(item.label)}</div>`
-        : `<div class="picker-item" data-pick-custom="${item.id}" data-muscle="${m}">${escapeHtml(item.label)}</div>`
+        ? `<div class="picker-item" data-pick-lib="${item.id}" data-muscle="${m}"><span class="picker-item-name">${escapeHtml(item.label)}</span></div>`
+        // Хрестик лише у своїх вправ: бібліотечні вбудовані, їх видаляти нема сенсу.
+        : `<div class="picker-item" data-pick-custom="${item.id}" data-muscle="${m}">
+             <span class="picker-item-name">${escapeHtml(item.label)}</span>
+             <button type="button" class="picker-item-del" data-del-custom="${item.id}" aria-label="${escapeHtml(t('deleteExerciseAria'))}">
+               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+             </button>
+           </div>`
       ).join('')}
     </div>
   `).join('');
@@ -1428,6 +1448,14 @@ function renderPickerGroups(query) {
       const item = customExercises.find((c) => c.id === el.dataset.pickCustom);
       if (!item) return;
       selectExercise({ customId: item.id, muscle: item.muscle, name: item.name });
+    });
+  });
+  // Хрестик живе всередині рядка, тож без зупинки події дотик по ньому
+  // спершу обрав би вправу й закрив пікер.
+  root.querySelectorAll('[data-del-custom]').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      askDelete('customExercise', btn.dataset.delCustom);
     });
   });
 }
@@ -1569,11 +1597,25 @@ function showPrToast(name, weight, reps) {
   prToastTimer = setTimeout(() => toast.classList.remove('show'), 4200);
 }
 
+function applyConfirmTexts() {
+  const isExercise = pendingDeleteKind === 'customExercise';
+  document.getElementById('confirmTitle').textContent =
+    t(isExercise ? 'confirmDeleteExerciseTitle' : 'confirmDeleteSessionTitle');
+  document.getElementById('confirmSub').textContent =
+    t(isExercise ? 'confirmDeleteExerciseSub' : 'confirmDeleteSessionSub');
+}
+
+function askDelete(kind, id) {
+  pendingDeleteKind = kind;
+  pendingDeleteId = id;
+  applyConfirmTexts();
+  document.getElementById('confirmOverlay').classList.add('show');
+}
+
 document.getElementById('deleteSessionBtn').addEventListener('click', () => {
   if (!editingSessionId) return;
-  pendingDeleteId = editingSessionId;
   document.getElementById('sessionFormOverlay').classList.remove('show');
-  document.getElementById('confirmOverlay').classList.add('show');
+  askDelete('session', editingSessionId);
 });
 document.getElementById('confirmCancel').addEventListener('click', () => {
   document.getElementById('confirmOverlay').classList.remove('show');
@@ -1584,10 +1626,11 @@ document.getElementById('confirmOverlay').addEventListener('click', (e) => {
 });
 document.getElementById('confirmDelete').addEventListener('click', async () => {
   if (!pendingDeleteId || !auth.currentUser) return;
+  const colName = pendingDeleteKind === 'customExercise' ? 'customExercises' : 'workouts';
   try {
-    await db.collection('users').doc(auth.currentUser.uid).collection('workouts').doc(pendingDeleteId).delete();
+    await db.collection('users').doc(auth.currentUser.uid).collection(colName).doc(pendingDeleteId).delete();
   } catch (err) {
-    console.error('delete session:', err);
+    console.error('delete ' + colName + ':', err);
   }
   pendingDeleteId = null;
   document.getElementById('confirmOverlay').classList.remove('show');
