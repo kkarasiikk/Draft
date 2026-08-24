@@ -1202,6 +1202,20 @@ function progressionHistory(ex) {
   return rows;
 }
 
+// Останні ФАКТИЧНІ підходи цієї вправи — те, що людина реально зробила
+// минулого разу. На відміну від findLastPerformance, повертає весь набір
+// підходів, а не найважчий з них: для підстановки ваги в шаблон важливо,
+// скільки саме стояло на кожному підході.
+function lastSetsFor(ex) {
+  const key = exerciseKey(ex);
+  for (const session of sortedSessions()) {
+    if (session.id === editingSessionId) continue;
+    const match = (session.exercises || []).find((e) => exerciseKey(e) === key);
+    if (match && (match.sets || []).length) return match.sets;
+  }
+  return null;
+}
+
 function verdictLabel(suggestion) {
   if (suggestion.reason === 'addLoad') return t('nextTryAddLoad');
   // Власна вага росте повтореннями — казати «вага росте» там, де вага
@@ -1483,6 +1497,27 @@ function renderTemplateRow() {
   document.getElementById('manageTemplatesBtn').addEventListener('click', openTemplatesManager);
 }
 
+// Підходи для вправи з шаблону.
+//
+// Шаблон описує ПРОГРАМУ — які вправи, скільки підходів, скільки повторень.
+// Вага в програму не входить: вона змінюється щотижня, і числа, збережені
+// місяць тому, довелось би щоразу перебивати руками. Тому вагу беремо з
+// останнього фактичного виконання цієї вправи, а повторення лишаємо з
+// шаблону — це прескрипція, а не спогад.
+//
+// Історії ще немає (вправа нова) — лишається вага з шаблону: краще стартова
+// точка, ніж порожні поля.
+function templateSets(ex) {
+  const last = lastSetsFor(ex);
+  return (ex.sets || []).map((set, i) => {
+    // Минулого разу підходів могло бути менше, ніж у шаблоні — тоді решта
+    // бере вагу з останнього виконаного.
+    const src = last ? last[Math.min(i, last.length - 1)] : null;
+    const weight = src && src.weight !== undefined && src.weight !== null ? src.weight : set.weight;
+    return { weight, reps: set.reps };
+  });
+}
+
 // Вправи ДОДАЮТЬСЯ, а не заміняють набране: два шаблони поспіль («Груди» +
 // «Прес») дають одне тренування, а повторний тап по тому самому шаблону
 // нічого не дублює.
@@ -1502,7 +1537,7 @@ function applyTemplate(id) {
       libId: ex.libId || null,
       name: ex.name || '',
       muscle: ex.muscle || null,
-      sets: (ex.sets || []).map((set) => ({ weight: set.weight, reps: set.reps })),
+      sets: templateSets(ex),
     });
   });
   renderExerciseBlocks();

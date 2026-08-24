@@ -16,6 +16,52 @@ const SEED = {
   }],
 };
 
+// Те саме, але з історією: минулого тижня жим ішов уже з іншою вагою.
+const SEED_WITH_HISTORY = {
+  ...SEED,
+  workouts: [
+    {
+      id: 'w-old', date: '2026-08-01', name: 'Груди', notes: '',
+      exercises: [{ id: 'x', libId: 'benchPress', muscle: 'chest', name: 'Жим лежачи',
+        sets: [{ weight: 70, reps: 8 }, { weight: 70, reps: 8 }] }],
+    },
+    {
+      id: 'w-last', date: '2026-08-18', name: 'Груди', notes: '',
+      exercises: [{ id: 'y', libId: 'benchPress', muscle: 'chest', name: 'Жим лежачи',
+        sets: [{ weight: 90, reps: 6 }] }],
+    },
+  ],
+};
+
+test('вага береться з останнього виконання, а не з шаблону', async ({ page }) => {
+  await openModule(page, 'workout/index.html', { seed: SEED_WITH_HISTORY });
+  await page.click('#newSessionBtn');
+  await page.waitForSelector('#sessionFormOverlay.show');
+  await page.click('[data-template="tpl-1"]');
+  await page.waitForSelector('.ex-block');
+
+  // У шаблоні збережено 80 кг, але востаннє (18 серпня, не 1-го) жим ішов
+  // з 90 — саме її й підставляємо.
+  const weights = await page.locator('.set-weight').evaluateAll((els) => els.map((e) => e.value));
+  expect(weights).toEqual(['90', '90']);
+
+  // Повторення лишаються з шаблону: це прескрипція програми, а не спогад
+  // про те, скільки вийшло минулого разу (6).
+  const reps = await page.locator('.set-reps').evaluateAll((els) => els.map((e) => e.value));
+  expect(reps).toEqual(['8', '8']);
+});
+
+test('без історії лишається вага з шаблону', async ({ page }) => {
+  await openModule(page, 'workout/index.html', { seed: SEED });
+  await page.click('#newSessionBtn');
+  await page.waitForSelector('#sessionFormOverlay.show');
+  await page.click('[data-template="tpl-1"]');
+  await page.waitForSelector('.ex-block');
+
+  const weights = await page.locator('.set-weight').evaluateAll((els) => els.map((e) => e.value));
+  expect(weights, 'вправа нова — стартова точка краща за порожні поля').toEqual(['80', '80']);
+});
+
 test('шаблон наповнює форму, лишається тільки виправити вагу', async ({ page }) => {
   await openModule(page, 'workout/index.html', { seed: SEED });
   await page.click('#newSessionBtn');
