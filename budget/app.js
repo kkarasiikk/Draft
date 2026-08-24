@@ -89,6 +89,9 @@ const T = {
     saveError: 'Не вдалося зберегти. Перевір інтернет-з’єднання',
     confirmTitle: 'Видалити запис?', confirmSub: 'Цю дію не можна скасувати.', confirmTitleLogout: 'Вийти з акаунту?', confirmSubLogout: 'Доведеться увійти знову, щоб побачити свої дані.',
     cancelBtn: 'Скасувати', deleteBtn: 'Видалити',
+    unsavedTitle: 'Зберегти зміни?',
+    unsavedSub: 'Є незбережені зміни. Якщо вийти зараз, вони пропадуть.',
+    unsavedSave: 'Зберегти', unsavedDiscard: 'Не зберігати', unsavedKeep: 'Продовжити редагування',
     settingsTitle: 'Налаштування', themeLabel: 'Тема', themeLight: 'Світла', themeDark: 'Темна', themeSystem: 'Як в системі',
     langLabel: 'Мова', currencyLabel: 'Валюта', categoriesTitle: 'Категорії',
     expenseCatManageLabel: 'Категорії витрат', incomeCatManageLabel: 'Категорії доходів',
@@ -145,6 +148,9 @@ const T = {
     saveError: 'Не удалось сохранить. Проверь интернет-соединение',
     confirmTitle: 'Удалить запись?', confirmSub: 'Это действие нельзя отменить.', confirmTitleLogout: 'Выйти из аккаунта?', confirmSubLogout: 'Придётся войти снова, чтобы увидеть свои данные.',
     cancelBtn: 'Отмена', deleteBtn: 'Удалить',
+    unsavedTitle: 'Сохранить изменения?',
+    unsavedSub: 'Есть несохранённые изменения. Если выйти сейчас, они пропадут.',
+    unsavedSave: 'Сохранить', unsavedDiscard: 'Не сохранять', unsavedKeep: 'Продолжить редактирование',
     settingsTitle: 'Настройки', themeLabel: 'Тема', themeLight: 'Светлая', themeDark: 'Тёмная', themeSystem: 'Как в системе',
     langLabel: 'Язык', currencyLabel: 'Валюта', categoriesTitle: 'Категории',
     expenseCatManageLabel: 'Категории расходов', incomeCatManageLabel: 'Категории доходов',
@@ -201,6 +207,9 @@ const T = {
     saveError: 'Nie udało się zapisać. Sprawdź połączenie z internetem',
     confirmTitle: 'Usunąć wpis?', confirmSub: 'Tej czynności nie można cofnąć.', confirmTitleLogout: 'Wylogować się?', confirmSubLogout: 'Aby zobaczyć swoje dane, trzeba będzie zalogować się ponownie.',
     cancelBtn: 'Anuluj', deleteBtn: 'Usuń',
+    unsavedTitle: 'Zapisać zmiany?',
+    unsavedSub: 'Są niezapisane zmiany. Jeśli teraz wyjdziesz, przepadną.',
+    unsavedSave: 'Zapisz', unsavedDiscard: 'Nie zapisuj', unsavedKeep: 'Wróć do edycji',
     settingsTitle: 'Ustawienia', themeLabel: 'Motyw', themeLight: 'Jasny', themeDark: 'Ciemny', themeSystem: 'Jak w systemie',
     langLabel: 'Język', currencyLabel: 'Waluta', categoriesTitle: 'Kategorie',
     expenseCatManageLabel: 'Kategorie wydatków', incomeCatManageLabel: 'Kategorie przychodów',
@@ -257,6 +266,9 @@ const T = {
     saveError: 'Could not save. Check your internet connection',
     confirmTitle: 'Delete entry?', confirmSub: 'This action cannot be undone.', confirmTitleLogout: 'Log out?', confirmSubLogout: "You'll need to sign in again to see your data.",
     cancelBtn: 'Cancel', deleteBtn: 'Delete',
+    unsavedTitle: 'Save changes?',
+    unsavedSub: 'There are unsaved changes. Leaving now discards them.',
+    unsavedSave: 'Save', unsavedDiscard: "Don't save", unsavedKeep: 'Keep editing',
     settingsTitle: 'Settings', themeLabel: 'Theme', themeLight: 'Light', themeDark: 'Dark', themeSystem: 'System',
     langLabel: 'Language', currencyLabel: 'Currency', categoriesTitle: 'Categories',
     expenseCatManageLabel: 'Expense categories', incomeCatManageLabel: 'Income categories',
@@ -1763,6 +1775,7 @@ function openSavingsForm(type, existing) {
   document.getElementById('savingsFormError').style.display = 'none';
   savingsFormCurrency = existing ? (existing.currency || currentCurrency) : lastUsedGoalCurrency(currentSavingsGoalId);
   renderSavingsCurrencyPicker();
+  savingsGuard.arm();
   document.getElementById('savingsFormOverlay').classList.add('show');
   setTimeout(() => document.getElementById('savingsAmountInput').focus(), 50);
 }
@@ -1805,7 +1818,7 @@ async function submitSavingsForm() {
       await addSavingRemote(item);
     }
     editingSavingId = null;
-    document.getElementById('savingsFormOverlay').classList.remove('show');
+    savingsGuard.close();
   } catch (e) {
     errEl.textContent = t('saveError');
     errEl.style.display = 'block';
@@ -2008,6 +2021,7 @@ function openPageEditor(id) {
   document.getElementById('pageContentInput').innerHTML = page ? noteContentToHtml(page.content || '') : '';
   document.getElementById('pageError').style.display = 'none';
   document.getElementById('deletePageBtn').style.display = page ? 'block' : 'none';
+  pageGuard.arm();
   document.getElementById('pageOverlay').classList.add('show');
 }
 
@@ -2032,7 +2046,7 @@ async function savePage() {
       const ref = await db.collection('users').doc(uid).collection('pages').add({ title, content, createdAt: now, updatedAt: now });
       selectTab('page:' + ref.id);
     }
-    document.getElementById('pageOverlay').classList.remove('show');
+    pageGuard.close();
   } catch (e) {
     errEl.textContent = t('pageSaveError');
     errEl.style.display = 'block';
@@ -2353,6 +2367,7 @@ function openForm(type, existingTx) {
   document.getElementById('dateInput').max = todayISO();
   document.getElementById('formError').style.display = 'none';
   renderCatPicker();
+  txGuard.arm();
   document.getElementById('formOverlay').classList.add('show');
   setTimeout(() => document.getElementById('amountInput').focus(), 50);
 }
@@ -2410,8 +2425,7 @@ async function submitForm() {
     } else {
       await addTransactionRemote(tx);
     }
-    editingTxId = null;
-    document.getElementById('formOverlay').classList.remove('show');
+    txGuard.close();
   } catch (e) {
     errEl.textContent = t('saveError');
     errEl.style.display = 'block';
@@ -2592,8 +2606,55 @@ document.getElementById('prevMonthHeader').addEventListener('click', () => { mon
 document.getElementById('nextMonthHeader').addEventListener('click', () => { if (monthOffset < 0) { monthOffset++; render(); } });
 document.getElementById('typeToggleExpense').addEventListener('click', () => switchFormType('expense'));
 document.getElementById('typeToggleIncome').addEventListener('click', () => switchFormType('income'));
-document.getElementById('closeForm').addEventListener('click', () => { editingTxId = null; document.getElementById('formOverlay').classList.remove('show'); });
-document.getElementById('formOverlay').addEventListener('click', (e) => { if (e.target.id === 'formOverlay') { editingTxId = null; e.currentTarget.classList.remove('show'); } });
+// ---- Незбережені зміни ----
+// Усі три форми закриваються тапом повз вікно. Найдорожча — нотатка:
+// це повноцінний редактор тексту, і його вміст ніде більше не лишається.
+// Спільна логіка — в ../unsaved-guard.js.
+const unsavedTexts = () => ({
+  title: t('unsavedTitle'), sub: t('unsavedSub'),
+  save: t('unsavedSave'), discard: t('unsavedDiscard'), keep: t('unsavedKeep'),
+});
+const txGuard = UnsavedGuard.create({
+  overlay: 'formOverlay',
+  snapshot: () => JSON.stringify({
+    type: formType,
+    amount: document.getElementById('amountInput').value,
+    note: document.getElementById('noteInput').value.trim(),
+    date: document.getElementById('dateInput').value,
+    category: selectedCategory,
+  }),
+  save: () => submitForm(),
+  onClose: () => { editingTxId = null; },
+  texts: unsavedTexts,
+});
+const savingsGuard = UnsavedGuard.create({
+  overlay: 'savingsFormOverlay',
+  snapshot: () => JSON.stringify({
+    type: savingsFormType,
+    amount: document.getElementById('savingsAmountInput').value,
+    note: document.getElementById('savingsNoteInput').value.trim(),
+    date: document.getElementById('savingsDateInput').value,
+    currency: savingsFormCurrency,
+  }),
+  save: () => submitSavingsForm(),
+  onClose: () => { editingSavingId = null; },
+  texts: unsavedTexts,
+});
+const pageGuard = UnsavedGuard.create({
+  overlay: 'pageOverlay',
+  snapshot: () => JSON.stringify({
+    title: document.getElementById('pageTitleInput').value.trim(),
+    // Порожній contenteditable браузер сам добудовує тегом <br> при фокусі —
+    // без цієї нормалізації нотатка вважалась би зміненою від самого лише
+    // дотику до поля.
+    content: document.getElementById('pageContentInput').innerHTML
+      .replace(/<br\s*\/?>\s*$/i, '').replace(/\s+/g, ' ').trim(),
+  }),
+  save: () => savePage(),
+  texts: unsavedTexts,
+});
+
+document.getElementById('closeForm').addEventListener('click', () => txGuard.requestClose());
 document.getElementById('submitBtn').addEventListener('click', submitForm);
 document.getElementById('cancelDelete').addEventListener('click', () => { pendingDeleteId = null; document.getElementById('confirmOverlay').classList.remove('show'); });
 document.getElementById('confirmOverlay').addEventListener('click', (e) => { if (e.target.id === 'confirmOverlay') e.currentTarget.classList.remove('show'); });
@@ -2605,7 +2666,8 @@ document.getElementById('confirmDelete').addEventListener('click', async () => {
   try {
     if (type === 'page') {
       await deletePageRemote(id);
-      document.getElementById('pageOverlay').classList.remove('show');
+      // Питати «зберегти зміни?» після видалення безглуздо — зберігати нема куди.
+      pageGuard.close();
     } else if (type === 'saving') {
       await deleteSavingRemote(id);
     } else if (type === 'goal') {
@@ -2659,8 +2721,7 @@ document.getElementById('deleteGoalBtn').addEventListener('click', () => {
 });
 document.getElementById('openDeposit').addEventListener('click', () => { closeSavingsActions(); openSavingsForm('deposit'); });
 document.getElementById('openWithdraw').addEventListener('click', () => { closeSavingsActions(); openSavingsForm('withdraw'); });
-document.getElementById('closeSavingsForm').addEventListener('click', () => { editingSavingId = null; document.getElementById('savingsFormOverlay').classList.remove('show'); });
-document.getElementById('savingsFormOverlay').addEventListener('click', (e) => { if (e.target.id === 'savingsFormOverlay') { editingSavingId = null; e.currentTarget.classList.remove('show'); } });
+document.getElementById('closeSavingsForm').addEventListener('click', () => savingsGuard.requestClose());
 document.getElementById('savingsSubmitBtn').addEventListener('click', submitSavingsForm);
 document.getElementById('importCsvBtn').addEventListener('click', () => document.getElementById('importCsvInput').click());
 document.getElementById('importCsvInput').addEventListener('change', (e) => {
@@ -2796,8 +2857,7 @@ document.getElementById('pageContentInput').addEventListener('change', (e) => {
     if (span) span.classList.toggle('checked-text', cb.checked);
   }
 });
-document.getElementById('closePage').addEventListener('click', () => document.getElementById('pageOverlay').classList.remove('show'));
-document.getElementById('pageOverlay').addEventListener('click', (e) => { if (e.target.id === 'pageOverlay') e.currentTarget.classList.remove('show'); });
+document.getElementById('closePage').addEventListener('click', () => pageGuard.requestClose());
 document.getElementById('savePageBtn').addEventListener('click', savePage);
 document.getElementById('deletePageBtn').addEventListener('click', () => {
   if (!currentPageId) return;

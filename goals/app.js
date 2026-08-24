@@ -47,6 +47,9 @@ const T = {
     breakdownNoTitle: 'Спершу введи назву цілі.',
     titleRequiredError: 'Введи назву цілі',
     saveBtn: 'Зберегти', deleteBtn: 'Видалити', cancelBtn: 'Скасувати', deleteConfirmBtn: 'Видалити',
+    unsavedTitle: 'Зберегти зміни?',
+    unsavedSub: 'Є незбережені зміни. Якщо вийти зараз, вони пропадуть.',
+    unsavedSave: 'Зберегти', unsavedDiscard: 'Не зберігати', unsavedKeep: 'Продовжити редагування',
     confirmDeleteTitle: 'Видалити ціль?',
     confirmDeleteSub: 'Цю дію не можна скасувати. Усі віхи, нотатки й серія теж зникнуть.',
     fabNewGoalLabel: 'Нова ціль', bnGoals: 'Цілі', bnHome: 'Головна',
@@ -115,6 +118,9 @@ const T = {
     breakdownNoTitle: 'Сначала введи название цели.',
     titleRequiredError: 'Введи название цели',
     saveBtn: 'Сохранить', deleteBtn: 'Удалить', cancelBtn: 'Отмена', deleteConfirmBtn: 'Удалить',
+    unsavedTitle: 'Сохранить изменения?',
+    unsavedSub: 'Есть несохранённые изменения. Если выйти сейчас, они пропадут.',
+    unsavedSave: 'Сохранить', unsavedDiscard: 'Не сохранять', unsavedKeep: 'Продолжить редактирование',
     confirmDeleteTitle: 'Удалить цель?',
     confirmDeleteSub: 'Это действие нельзя отменить. Все вехи, заметки и серия тоже исчезнут.',
     fabNewGoalLabel: 'Новая цель', bnGoals: 'Цели', bnHome: 'Главная',
@@ -183,6 +189,9 @@ const T = {
     breakdownNoTitle: 'Najpierw wpisz nazwę celu.',
     titleRequiredError: 'Wpisz nazwę celu',
     saveBtn: 'Zapisz', deleteBtn: 'Usuń', cancelBtn: 'Anuluj', deleteConfirmBtn: 'Usuń',
+    unsavedTitle: 'Zapisać zmiany?',
+    unsavedSub: 'Są niezapisane zmiany. Jeśli teraz wyjdziesz, przepadną.',
+    unsavedSave: 'Zapisz', unsavedDiscard: 'Nie zapisuj', unsavedKeep: 'Wróć do edycji',
     confirmDeleteTitle: 'Usunąć cel?',
     confirmDeleteSub: 'Tej czynności nie można cofnąć. Wszystkie kamienie milowe, notatki i seria też znikną.',
     fabNewGoalLabel: 'Nowy cel', bnGoals: 'Cele', bnHome: 'Główna',
@@ -251,6 +260,9 @@ const T = {
     breakdownNoTitle: 'Give the goal a name first.',
     titleRequiredError: 'Enter a goal title',
     saveBtn: 'Save', deleteBtn: 'Delete', cancelBtn: 'Cancel', deleteConfirmBtn: 'Delete',
+    unsavedTitle: 'Save changes?',
+    unsavedSub: 'There are unsaved changes. Leaving now discards them.',
+    unsavedSave: 'Save', unsavedDiscard: "Don't save", unsavedKeep: 'Keep editing',
     confirmDeleteTitle: 'Delete goal?',
     confirmDeleteSub: 'This action cannot be undone. Milestones, notes and streak will be lost too.',
     fabNewGoalLabel: 'New goal', bnGoals: 'Goals', bnHome: 'Home',
@@ -1272,19 +1284,43 @@ function openGoalForm(existingGoal) {
   renderCategoryPicker();
   renderMilestonesEditor();
   document.getElementById('breakdownNote').textContent = '';
+  goalGuard.arm();
   document.getElementById('goalFormOverlay').classList.add('show');
   setTimeout(() => document.getElementById('goalTitleInput').focus(), 50);
 }
-document.getElementById('openNewGoalBtn').addEventListener('click', () => openGoalForm(null));
-document.getElementById('closeGoalForm').addEventListener('click', () => {
-  document.getElementById('goalFormOverlay').classList.remove('show');
-});
-document.getElementById('goalFormOverlay').addEventListener('click', (e) => {
-  if (e.target.id === 'goalFormOverlay') e.currentTarget.classList.remove('show');
+
+// ---- Незбережені зміни ----
+// Ціль описують довго: навіщо вона, дедлайн, числова мета, віхи (а їх ще й
+// AI підказує). Спільна логіка — в ../unsaved-guard.js.
+const goalGuard = UnsavedGuard.create({
+  overlay: 'goalFormOverlay',
+  snapshot: () => JSON.stringify({
+    title: document.getElementById('goalTitleInput').value.trim(),
+    why: document.getElementById('goalWhyInput').value.trim(),
+    targetDate: document.getElementById('goalTargetDate').value,
+    targetValue: document.getElementById('goalTargetValue').value,
+    unit: document.getElementById('goalUnitInput').value.trim(),
+    category: formCategory,
+    milestones: formMilestones.map((m) => [(m.title || '').trim(), !!m.done]),
+  }),
+  save: () => saveGoalForm(),
+  texts: () => ({
+    title: t('unsavedTitle'), sub: t('unsavedSub'),
+    save: t('unsavedSave'), discard: t('unsavedDiscard'), keep: t('unsavedKeep'),
+  }),
 });
 
-document.getElementById('goalForm').addEventListener('submit', async (e) => {
+document.getElementById('openNewGoalBtn').addEventListener('click', () => openGoalForm(null));
+document.getElementById('closeGoalForm').addEventListener('click', () => goalGuard.requestClose());
+
+document.getElementById('goalForm').addEventListener('submit', (e) => {
   e.preventDefault();
+  saveGoalForm();
+});
+
+// Винесено з обробника події, бо збереження запускає ще й діалог
+// «зберегти зміни перед виходом».
+async function saveGoalForm() {
   const title = document.getElementById('goalTitleInput').value.trim();
   const errorEl = document.getElementById('goalFormError');
   if (!title) {
@@ -1331,19 +1367,20 @@ document.getElementById('goalForm').addEventListener('submit', async (e) => {
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       });
     }
-    document.getElementById('goalFormOverlay').classList.remove('show');
+    goalGuard.close();
   } catch (err) {
     console.error('save goal:', err);
     errorEl.textContent = t('err_generic');
   } finally {
     submitBtn.disabled = false;
   }
-});
+}
 
 document.getElementById('deleteGoalBtn').addEventListener('click', () => {
   if (!editingGoalId) return;
   pendingDeleteId = editingGoalId;
-  document.getElementById('goalFormOverlay').classList.remove('show');
+  // Питати «зберегти зміни?» перед видаленням безглуздо — зберігати нема куди.
+  goalGuard.close();
   document.getElementById('confirmOverlay').classList.add('show');
 });
 document.getElementById('confirmCancel').addEventListener('click', () => {

@@ -13,7 +13,11 @@
         ".git",
         "budget",
         "*.test.js",
-        "fakeFirestore.js"
+        "fakeFirestore.js",
+        "ui-tests",
+        "playwright.config.js",
+        "playwright-report",
+        "test-results"
       ]
     }
   ]

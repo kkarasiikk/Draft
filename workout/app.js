@@ -50,7 +50,7 @@ const T = {
     confirmDeleteSessionTitle: 'Видалити тренування?', confirmDeleteSessionSub: 'Цю дію не можна скасувати.',
     cancelBtn: 'Скасувати', deleteConfirmBtn: 'Видалити',
     unsavedTitle: 'Зберегти зміни?',
-    unsavedSub: 'У тренуванні є незбережені зміни. Якщо вийти зараз, вони пропадуть.',
+    unsavedSub: 'Є незбережені зміни. Якщо вийти зараз, вони пропадуть.',
     unsavedSave: 'Зберегти', unsavedDiscard: 'Не зберігати', unsavedKeep: 'Продовжити редагування',
     pickerTitle: 'Обрати вправу', pickerSearchPlaceholder: 'Пошук вправи…',
     pickerCustomLabel: 'Своя вправа', pickerCustomPlaceholder: 'Назва вправи', pickerCustomAdd: 'Додати',
@@ -117,7 +117,7 @@ const T = {
     confirmDeleteSessionTitle: 'Удалить тренировку?', confirmDeleteSessionSub: 'Это действие нельзя отменить.',
     cancelBtn: 'Отмена', deleteConfirmBtn: 'Удалить',
     unsavedTitle: 'Сохранить изменения?',
-    unsavedSub: 'В тренировке есть несохранённые изменения. Если выйти сейчас, они пропадут.',
+    unsavedSub: 'Есть несохранённые изменения. Если выйти сейчас, они пропадут.',
     unsavedSave: 'Сохранить', unsavedDiscard: 'Не сохранять', unsavedKeep: 'Продолжить редактирование',
     pickerTitle: 'Выбрать упражнение', pickerSearchPlaceholder: 'Поиск упражнения…',
     pickerCustomLabel: 'Своё упражнение', pickerCustomPlaceholder: 'Название упражнения', pickerCustomAdd: 'Добавить',
@@ -182,7 +182,7 @@ const T = {
     confirmDeleteSessionTitle: 'Usunąć trening?', confirmDeleteSessionSub: 'Tej czynności nie można cofnąć.',
     cancelBtn: 'Anuluj', deleteConfirmBtn: 'Usuń',
     unsavedTitle: 'Zapisać zmiany?',
-    unsavedSub: 'W treningu są niezapisane zmiany. Jeśli teraz wyjdziesz, przepadną.',
+    unsavedSub: 'Są niezapisane zmiany. Jeśli teraz wyjdziesz, przepadną.',
     unsavedSave: 'Zapisz', unsavedDiscard: 'Nie zapisuj', unsavedKeep: 'Wróć do edycji',
     pickerTitle: 'Wybierz ćwiczenie', pickerSearchPlaceholder: 'Szukaj ćwiczenia…',
     pickerCustomLabel: 'Własne ćwiczenie', pickerCustomPlaceholder: 'Nazwa ćwiczenia', pickerCustomAdd: 'Dodaj',
@@ -247,7 +247,7 @@ const T = {
     confirmDeleteSessionTitle: 'Delete workout?', confirmDeleteSessionSub: 'This action cannot be undone.',
     cancelBtn: 'Cancel', deleteConfirmBtn: 'Delete',
     unsavedTitle: 'Save changes?',
-    unsavedSub: 'This workout has unsaved changes. Leaving now discards them.',
+    unsavedSub: 'There are unsaved changes. Leaving now discards them.',
     unsavedSave: 'Save', unsavedDiscard: "Don't save", unsavedKeep: 'Keep editing',
     pickerTitle: 'Choose exercise', pickerSearchPlaceholder: 'Search exercise…',
     pickerCustomLabel: 'Custom exercise', pickerCustomPlaceholder: 'Exercise name', pickerCustomAdd: 'Add',
@@ -374,11 +374,6 @@ function applyTranslations() {
   document.getElementById('confirmSub').textContent = t('confirmDeleteSessionSub');
   document.getElementById('confirmCancel').textContent = t('cancelBtn');
   document.getElementById('confirmDelete').textContent = t('deleteConfirmBtn');
-  document.getElementById('unsavedTitle').textContent = t('unsavedTitle');
-  document.getElementById('unsavedSub').textContent = t('unsavedSub');
-  document.getElementById('unsavedSave').textContent = t('unsavedSave');
-  document.getElementById('unsavedDiscard').textContent = t('unsavedDiscard');
-  document.getElementById('unsavedKeep').textContent = t('unsavedKeep');
   document.getElementById('pickerTitle').textContent = t('pickerTitle');
   document.getElementById('pickerSearch').placeholder = t('pickerSearchPlaceholder');
   document.getElementById('pickerCustomLabel').textContent = t('pickerCustomLabel');
@@ -1207,21 +1202,16 @@ function openSessionForm(existingSession) {
       }))
     : [];
   renderExerciseBlocks();
-  sessionFormSnapshot = sessionFormState();
+  sessionGuard.arm();
   document.getElementById('sessionFormOverlay').classList.add('show');
 }
 
 // ---- Незбережені зміни ----
-// Тренування записують довго: назва, вправи, підходи. А закривається форма
-// тапом повз вікно — на телефоні це трапляється випадково, і разом із вікном
-// зникало все набране, без жодного питання. Тому стан форми знімається на
-// відкритті, і вихід із зміненої форми питає, що робити зі змінами.
-let sessionFormSnapshot = null;
-
-// Порівнюємо саме дані, а не HTML: id вправ генеруються заново на кожному
-// відкритті й до змін користувача стосунку не мають.
-function sessionFormState() {
-  return JSON.stringify({
+// Тренування записують довго: назва, вправи, підходи. А форма закривається
+// тапом повз вікно. Спільна логіка — в ../unsaved-guard.js.
+const sessionGuard = UnsavedGuard.create({
+  overlay: 'sessionFormOverlay',
+  snapshot: () => JSON.stringify({
     name: document.getElementById('sessionNameInput').value.trim(),
     date: document.getElementById('sessionDateInput').value,
     notes: document.getElementById('sessionNotesInput').value.trim(),
@@ -1230,45 +1220,17 @@ function sessionFormState() {
       name: (ex.name || '').trim(),
       sets: (ex.sets || []).map((s) => [String(s.weight), String(s.reps)]),
     })),
-  });
-}
-
-function sessionFormDirty() {
-  return sessionFormSnapshot !== null && sessionFormState() !== sessionFormSnapshot;
-}
-
-function closeSessionForm() {
-  sessionFormSnapshot = null;
-  document.getElementById('unsavedOverlay').classList.remove('show');
-  document.getElementById('sessionFormOverlay').classList.remove('show');
-}
-
-// Форму лишаємо видимою під діалогом (z-index 75 проти 50): людина бачить,
-// що саме на кону, і після невдалого збереження одразу читає помилку.
-function requestCloseSessionForm() {
-  if (!sessionFormDirty()) { closeSessionForm(); return; }
-  document.getElementById('unsavedOverlay').classList.add('show');
-}
+  }),
+  save: () => saveSessionForm(),
+  texts: () => ({
+    title: t('unsavedTitle'), sub: t('unsavedSub'),
+    save: t('unsavedSave'), discard: t('unsavedDiscard'), keep: t('unsavedKeep'),
+  }),
+});
+const closeSessionForm = () => sessionGuard.close();
 
 document.getElementById('newSessionBtn').addEventListener('click', () => openSessionForm(null));
-document.getElementById('closeSessionForm').addEventListener('click', requestCloseSessionForm);
-document.getElementById('sessionFormOverlay').addEventListener('click', (e) => {
-  if (e.target.id === 'sessionFormOverlay') requestCloseSessionForm();
-});
-
-document.getElementById('unsavedSave').addEventListener('click', () => {
-  document.getElementById('unsavedOverlay').classList.remove('show');
-  saveSessionForm();
-});
-document.getElementById('unsavedDiscard').addEventListener('click', closeSessionForm);
-document.getElementById('unsavedKeep').addEventListener('click', () => {
-  document.getElementById('unsavedOverlay').classList.remove('show');
-});
-// Тап повз діалог — найобережніше тлумачення: нічого не втрачаємо,
-// вертаємось до редагування.
-document.getElementById('unsavedOverlay').addEventListener('click', (e) => {
-  if (e.target.id === 'unsavedOverlay') e.currentTarget.classList.remove('show');
-});
+document.getElementById('closeSessionForm').addEventListener('click', () => sessionGuard.requestClose());
 
 function renderExerciseBlocks() {
   const root = document.getElementById('exerciseBlocks');

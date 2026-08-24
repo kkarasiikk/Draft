@@ -112,6 +112,9 @@ const T = {
     titleRequiredError: 'Введи назву завдання',
     confirmDeleteTitle: 'Видалити завдання?', confirmDeleteSub: 'Цю дію не можна скасувати.',
     cancelBtn: 'Скасувати', deleteConfirmBtn: 'Видалити',
+    unsavedTitle: 'Зберегти зміни?',
+    unsavedSub: 'Є незбережені зміни. Якщо вийти зараз, вони пропадуть.',
+    unsavedSave: 'Зберегти', unsavedDiscard: 'Не зберігати', unsavedKeep: 'Продовжити редагування',
     themeLabel: 'Тема', themeLight: 'Світла', themeDark: 'Темна', themeSystem: 'Системна',
     langLabel: 'Мова', logout: 'Вийти',
     authTitleLogin: 'Вхід', authTitleSignup: 'Реєстрація',
@@ -214,6 +217,9 @@ const T = {
     titleRequiredError: 'Введи название задачи',
     confirmDeleteTitle: 'Удалить задачу?', confirmDeleteSub: 'Это действие нельзя отменить.',
     cancelBtn: 'Отмена', deleteConfirmBtn: 'Удалить',
+    unsavedTitle: 'Сохранить изменения?',
+    unsavedSub: 'Есть несохранённые изменения. Если выйти сейчас, они пропадут.',
+    unsavedSave: 'Сохранить', unsavedDiscard: 'Не сохранять', unsavedKeep: 'Продолжить редактирование',
     themeLabel: 'Тема', themeLight: 'Светлая', themeDark: 'Тёмная', themeSystem: 'Системная',
     langLabel: 'Язык', logout: 'Выйти',
     authTitleLogin: 'Вход', authTitleSignup: 'Регистрация',
@@ -316,6 +322,9 @@ const T = {
     titleRequiredError: 'Wpisz nazwę zadania',
     confirmDeleteTitle: 'Usunąć zadanie?', confirmDeleteSub: 'Tej czynności nie można cofnąć.',
     cancelBtn: 'Anuluj', deleteConfirmBtn: 'Usuń',
+    unsavedTitle: 'Zapisać zmiany?',
+    unsavedSub: 'Są niezapisane zmiany. Jeśli teraz wyjdziesz, przepadną.',
+    unsavedSave: 'Zapisz', unsavedDiscard: 'Nie zapisuj', unsavedKeep: 'Wróć do edycji',
     themeLabel: 'Motyw', themeLight: 'Jasny', themeDark: 'Ciemny', themeSystem: 'Systemowy',
     langLabel: 'Język', logout: 'Wyloguj',
     authTitleLogin: 'Logowanie', authTitleSignup: 'Rejestracja',
@@ -418,6 +427,9 @@ const T = {
     titleRequiredError: 'Enter a task title',
     confirmDeleteTitle: 'Delete task?', confirmDeleteSub: 'This action cannot be undone.',
     cancelBtn: 'Cancel', deleteConfirmBtn: 'Delete',
+    unsavedTitle: 'Save changes?',
+    unsavedSub: 'There are unsaved changes. Leaving now discards them.',
+    unsavedSave: 'Save', unsavedDiscard: "Don't save", unsavedKeep: 'Keep editing',
     themeLabel: 'Theme', themeLight: 'Light', themeDark: 'Dark', themeSystem: 'System',
     langLabel: 'Language', logout: 'Log out',
     authTitleLogin: 'Log in', authTitleSignup: 'Sign up',
@@ -2614,18 +2626,44 @@ function openTaskForm(existingTask, prefillDate) {
   renderRecurrenceOptions();
   renderTagsEditor();
   renderSubtasksEditor();
+  taskGuard.arm();
   document.getElementById('taskFormOverlay').classList.add('show');
   setTimeout(() => document.getElementById('taskTitleInput').focus(), 50);
 }
-document.getElementById('closeTaskForm').addEventListener('click', () => {
-  document.getElementById('taskFormOverlay').classList.remove('show');
-});
-document.getElementById('taskFormOverlay').addEventListener('click', (e) => {
-  if (e.target.id === 'taskFormOverlay') e.currentTarget.classList.remove('show');
+// ---- Незбережені зміни ----
+// Форма закривається тапом повз вікно, а заповнюють її довго: назва, нотатка,
+// теги, підзадачі, оцінка. Спільна логіка — в ../unsaved-guard.js.
+const taskGuard = UnsavedGuard.create({
+  overlay: 'taskFormOverlay',
+  snapshot: () => JSON.stringify({
+    title: document.getElementById('taskTitleInput').value.trim(),
+    notes: document.getElementById('taskNotesInput').value.trim(),
+    dueDate: document.getElementById('taskDueDate').value,
+    dueTime: document.getElementById('taskDueTime').value,
+    priority: formPriority,
+    tags: formTags,
+    estimate: document.getElementById('taskEstimateInput').value,
+    reminder: formReminder,
+    recurrence: formRecurrence,
+    subtasks: formSubtasks.map((st) => [(st.title || '').trim(), !!st.done]),
+  }),
+  save: () => saveTaskForm(),
+  texts: () => ({
+    title: t('unsavedTitle'), sub: t('unsavedSub'),
+    save: t('unsavedSave'), discard: t('unsavedDiscard'), keep: t('unsavedKeep'),
+  }),
 });
 
-document.getElementById('taskForm').addEventListener('submit', async (e) => {
+document.getElementById('closeTaskForm').addEventListener('click', () => taskGuard.requestClose());
+
+document.getElementById('taskForm').addEventListener('submit', (e) => {
   e.preventDefault();
+  saveTaskForm();
+});
+
+// Винесено з обробника події, бо збереження запускає ще й діалог
+// «зберегти зміни перед виходом».
+async function saveTaskForm() {
   const title = document.getElementById('taskTitleInput').value.trim();
   const errorEl = document.getElementById('taskFormError');
   if (!title) {
@@ -2669,19 +2707,20 @@ document.getElementById('taskForm').addEventListener('submit', async (e) => {
     } else {
       await col.add({ ...payload, done: false, completedAt: null, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
     }
-    document.getElementById('taskFormOverlay').classList.remove('show');
+    taskGuard.close();
   } catch (err) {
     console.error('save task:', err);
     errorEl.textContent = writeErrorMessage(err);
   } finally {
     submitBtn.disabled = false;
   }
-});
+}
 
 document.getElementById('deleteTaskBtn').addEventListener('click', () => {
   if (!editingTaskId) return;
   pendingDeleteId = editingTaskId;
-  document.getElementById('taskFormOverlay').classList.remove('show');
+  // Питати «зберегти зміни?» перед видаленням безглуздо — зберігати нема куди.
+  taskGuard.close();
   document.getElementById('confirmOverlay').classList.add('show');
 });
 document.getElementById('confirmCancel').addEventListener('click', () => {

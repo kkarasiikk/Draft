@@ -365,12 +365,6 @@
   .confirm-actions{display:flex;gap:8px;}
   .confirm-actions button{flex:1;padding:10px 0;border-radius:8px;cursor:pointer;font-family:'Inter',sans-serif;font-size:14px;}
   .btn-cancel{border:1px solid var(--border);background:transparent;color:var(--ink-soft);}
-  /* Три дії в рядок не влазять — «Продовжити редагування» саме по собі
-     ширше за половину діалогу. Стовпчиком і читається краще: згори те,
-     що людина майже завжди хоче (зберегти). */
-  .confirm-actions.column{flex-direction:column;}
-  .confirm-actions.column .submit-btn{margin-top:0;font-size:14px;padding:11px 0;}
-  .btn-cancel.danger{color:var(--expense);}
 
   /* ---- Exercise blocks inside the workout form ---- */
   .ex-block{background:var(--surface-flat);border:1px solid var(--border);border-radius:16px;padding:12px 14px;margin-bottom:12px;}
@@ -581,20 +575,6 @@
 </div>
 
 <!-- ---- Підтвердження видалення ---- -->
-<!-- Незбережені зміни. Форма закривається тапом повз вікно — на телефоні
-     це трапляється випадково, і разом із вікном зникало все набране. -->
-<div class="confirm-modal" id="unsavedOverlay">
-  <div class="confirm-box">
-    <div class="confirm-title" id="unsavedTitle">Зберегти зміни?</div>
-    <div class="confirm-sub" id="unsavedSub">У тренуванні є незбережені зміни. Якщо вийти зараз, вони пропадуть.</div>
-    <div class="confirm-actions column">
-      <button class="submit-btn" id="unsavedSave">Зберегти</button>
-      <button class="btn-cancel danger" id="unsavedDiscard">Не зберігати</button>
-      <button class="btn-cancel" id="unsavedKeep">Продовжити редагування</button>
-    </div>
-  </div>
-</div>
-
 <div class="confirm-modal" id="confirmOverlay">
   <div class="confirm-box">
     <div class="confirm-title" id="confirmTitle">Видалити тренування?</div>
@@ -607,6 +587,7 @@
 </div>
 
 <script src="../budget/firebase-config.js"></script>
+<script src="../unsaved-guard.js"></script>
 <script src="exercises.js"></script>
 <script src="progression.js"></script>
 <script src="progress.js"></script>

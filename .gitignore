@@ -3,3 +3,7 @@ node_modules/
 *.log
 .DS_Store
 .env
+
+# Playwright
+playwright-report/
+test-results/

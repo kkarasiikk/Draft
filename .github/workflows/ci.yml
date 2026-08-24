@@ -1,6 +1,6 @@
-# Мінімальний CI: те саме, що досі доводилось пам'ятати прогнати руками —
-# перевірка синтаксису всіх JS-файлів (фронтенд автотестами не покритий)
-# і юніт-тести Cloud Functions.
+# CI: те саме, що досі доводилось пам'ятати прогнати руками — перевірка
+# синтаксису всіх JS-файлів, юніт-тести чистих функцій і UI-тести форм
+# у справжньому браузері.
 name: CI
 
 on:
@@ -25,3 +25,26 @@ jobs:
           done
       - name: Юніт-тести Cloud Functions
         run: npm test
+
+  # Браузерні тести окремою job: їм потрібен Chromium (~150 МБ), і тримати
+  # цю вагу в основній перевірці означало б платити нею за кожну дрібну
+  # правку. Падіння тут так само блокує merge.
+  ui:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Встановити Chromium
+        run: npx playwright install --with-deps chromium
+      - name: UI-тести форм
+        run: npm run test:ui
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
