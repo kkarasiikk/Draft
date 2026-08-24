@@ -57,7 +57,8 @@ const T = {
     calPrevMonth: 'Попередній місяць', calNextMonth: 'Наступний місяць',
     calDayHasWorkout: '— є тренування', calShowAll: 'Усі дні',
     saveAsTemplate: 'Зберегти як шаблон', templateSaved: 'Збережено ✓',
-    templateExercises: (n) => `${n} ${plural(n, { one: 'вправа', few: 'вправи', many: 'вправ', other: 'вправи' })}`,
+    exCount: (n) => `${n} ${plural(n, { one: 'вправа', few: 'вправи', many: 'вправ', other: 'вправи' })}`,
+    setCount: (n) => `${n} ${plural(n, { one: 'підхід', few: 'підходи', many: 'підходів', other: 'підходу' })}`,
     templateNeedsName: 'Дай тренуванню назву — вона буде на кнопці шаблону',
     templateEmpty: 'Шаблонів ще немає. Набери тренування як звичайно й натисни «Зберегти як шаблон» — далі ті самі вправи заводитимуться одним тапом, лишиться тільки виставити вагу.',
     templateLimit: (n) => `Більше ${n} шаблонів — це вже щоденник. Видали зайві у списку шаблонів.`,
@@ -133,7 +134,8 @@ const T = {
     calPrevMonth: 'Предыдущий месяц', calNextMonth: 'Следующий месяц',
     calDayHasWorkout: '— есть тренировка', calShowAll: 'Все дни',
     saveAsTemplate: 'Сохранить как шаблон', templateSaved: 'Сохранено ✓',
-    templateExercises: (n) => `${n} ${plural(n, { one: 'упражнение', few: 'упражнения', many: 'упражнений', other: 'упражнения' })}`,
+    exCount: (n) => `${n} ${plural(n, { one: 'упражнение', few: 'упражнения', many: 'упражнений', other: 'упражнения' })}`,
+    setCount: (n) => `${n} ${plural(n, { one: 'подход', few: 'подхода', many: 'подходов', other: 'подхода' })}`,
     templateNeedsName: 'Дай тренировке название — оно будет на кнопке шаблона',
     templateEmpty: 'Шаблонов пока нет. Набери тренировку как обычно и нажми «Сохранить как шаблон» — дальше те же упражнения будут заводиться одним тапом, останется только выставить вес.',
     templateLimit: (n) => `Больше ${n} шаблонов — это уже дневник. Удали лишние в списке шаблонов.`,
@@ -207,7 +209,8 @@ const T = {
     calPrevMonth: 'Poprzedni miesiąc', calNextMonth: 'Następny miesiąc',
     calDayHasWorkout: '— jest trening', calShowAll: 'Wszystkie dni',
     saveAsTemplate: 'Zapisz jako szablon', templateSaved: 'Zapisano ✓',
-    templateExercises: (n) => `${n} ${plural(n, { one: 'ćwiczenie', few: 'ćwiczenia', many: 'ćwiczeń', other: 'ćwiczenia' })}`,
+    exCount: (n) => `${n} ${plural(n, { one: 'ćwiczenie', few: 'ćwiczenia', many: 'ćwiczeń', other: 'ćwiczenia' })}`,
+    setCount: (n) => `${n} ${plural(n, { one: 'seria', few: 'serie', many: 'serii', other: 'serii' })}`,
     templateNeedsName: 'Nadaj treningowi nazwę — będzie na przycisku szablonu',
     templateEmpty: 'Nie ma jeszcze szablonów. Wpisz trening jak zwykle i naciśnij „Zapisz jako szablon" — potem te same ćwiczenia dodasz jednym tapnięciem, zostanie tylko ustawić ciężar.',
     templateLimit: (n) => `Więcej niż ${n} szablonów to już dziennik. Usuń zbędne na liście szablonów.`,
@@ -281,7 +284,8 @@ const T = {
     calPrevMonth: 'Previous month', calNextMonth: 'Next month',
     calDayHasWorkout: '— has a workout', calShowAll: 'All days',
     saveAsTemplate: 'Save as template', templateSaved: 'Saved ✓',
-    templateExercises: (n) => `${n} ${plural(n, { one: 'exercise', other: 'exercises' })}`,
+    exCount: (n) => `${n} ${plural(n, { one: 'exercise', other: 'exercises' })}`,
+    setCount: (n) => `${n} ${plural(n, { one: 'set', other: 'sets' })}`,
     templateNeedsName: 'Name the workout — that name goes on the template button',
     templateEmpty: 'No templates yet. Enter a workout as usual and hit "Save as template" — after that the same exercises come back with one tap and you only set the weight.',
     templateLimit: (n) => `More than ${n} templates is a diary of its own. Remove some from the template list.`,
@@ -1152,12 +1156,12 @@ function renderSessionCard(session) {
     return `<div class="session-ex-row"><span class="session-ex-name">${escapeHtml(exerciseDisplayName(ex))}</span><span class="session-ex-best">${escapeHtml(bestStr)}</span></div>`;
   }).join('');
   const more = exs.length > shown.length ? `<div class="session-more">${escapeHtml(t('exMore', exs.length - shown.length))}</div>` : '';
-  const setCount = exs.reduce((sum, ex) => sum + (ex.sets ? ex.sets.length : 0), 0);
+  const setTotal = exs.reduce((sum, ex) => sum + (ex.sets ? ex.sets.length : 0), 0);
   return `
     <div class="session-card" data-open-session="${session.id}">
       <div class="session-head">
         <div class="session-name">${escapeHtml(session.name || t('newSessionLabel'))}</div>
-        <div class="session-meta">${exs.length}\u00A0${escapeHtml(t('exercisesLabel')).toLowerCase()} · ${setCount}\u00A0${escapeHtml(t('setPlaceholderReps'))}</div>
+        <div class="session-meta">${escapeHtml(t('exCount', exs.length))} · ${escapeHtml(t('setCount', setTotal))}</div>
       </div>
       <div class="session-ex-list">${rows}</div>
       ${more}
@@ -1753,7 +1757,7 @@ const MAX_TEMPLATES = 12;
 function templateSummary(tpl) {
   const exCount = (tpl.exercises || []).length;
   const names = (tpl.exercises || []).map((ex) => exerciseDisplayName(ex)).filter(Boolean);
-  return [t('templateExercises', exCount), names.join(', ')].filter(Boolean).join(' · ');
+  return [t('exCount', exCount), names.join(', ')].filter(Boolean).join(' · ');
 }
 
 function renderTemplateRow() {

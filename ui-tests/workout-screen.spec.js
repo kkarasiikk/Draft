@@ -219,3 +219,30 @@ test.describe('Тренування наперед (план)', () => {
     await expect(page.locator('.hint-last')).toContainText('80');
   });
 });
+
+test.describe('Підпис у картці тренування', () => {
+  const seed = {
+    workouts: [{
+      id: 's1', date: '2026-08-20', name: 'Ноги', notes: '',
+      exercises: [
+        ex('squat', 'Присідання', 'legs', [{ weight: 100, reps: 5 }, { weight: 100, reps: 5 }]),
+        ex('lunge', 'Випади', 'legs', [{ weight: 20, reps: 10 }]),
+      ],
+    }],
+  };
+
+  test('рахує підходи й називає їх підходами, а не повтореннями', async ({ page }) => {
+    await openModule(page, 'workout/index.html', { seed });
+    // Дві вправи, три підходи. Раніше тут стояло «2 вправи · 3 повт.» —
+    // рахувались підходи, а підписувались повтореннями.
+    await expect(page.locator('.session-meta')).toHaveText('2 вправи · 3 підходи');
+  });
+
+  test('однина не ламається', async ({ page }) => {
+    const one = { workouts: [{ id: 's2', date: '2026-08-20', name: 'Швидке', notes: '',
+      exercises: [ex('plank', 'Планка', 'core', [{ weight: 0, reps: 60 }])] }] };
+    await openModule(page, 'workout/index.html', { seed: one });
+    // Було «1 вправи · 1 повт.».
+    await expect(page.locator('.session-meta')).toHaveText('1 вправа · 1 підхід');
+  });
+});
