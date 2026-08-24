@@ -159,7 +159,11 @@ async function sendDigests(now) {
   return sent;
 }
 
-exports.taskReminders = functions.pubsub
+exports.taskReminders = functions
+  // Планувальник і так запускає функцію раз на кілька хвилин; стеля в 2
+  // інстанси лише страхує від накладання повільного запуску на наступний.
+  .runWith({ maxInstances: 2 })
+  .pubsub
   .schedule(`every ${TICK_MINUTES} minutes`)
   .timeZone("UTC")
   .onRun(async () => {

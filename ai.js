@@ -1678,12 +1678,18 @@ async function handleGoalBreakdown(data, context, deps = {}) {
   return result;
 }
 
+// AI-функції платні за викликом (токени Anthropic), тож стеля інстансів тут
+// важливіша за все. Разом із лімітом 30 повідомлень / 10 хв на юзера й
+// обовʼязковою автентифікацією кількох інстансів вистачає з головою, а
+// зациклений клієнт чи витік токена не зможе розкрутити рахунок на API.
+const AI_MAX_INSTANCES = 5;
+
 exports.goalBreakdown = functions
-  .runWith({ secrets: ["ANTHROPIC_API_KEY"], timeoutSeconds: 60 })
+  .runWith({ secrets: ["ANTHROPIC_API_KEY"], timeoutSeconds: 60, maxInstances: AI_MAX_INSTANCES })
   .https.onCall((data, context) => handleGoalBreakdown(data, context));
 
 exports.aiChat = functions
-  .runWith({ secrets: ["ANTHROPIC_API_KEY"], timeoutSeconds: 60 })
+  .runWith({ secrets: ["ANTHROPIC_API_KEY"], timeoutSeconds: 60, maxInstances: AI_MAX_INSTANCES })
   .https.onCall((data, context) => handleAiChat(data, context));
 
 // Іменовані експорти — лише для unit-тестів (functions/test/ai.test.js).

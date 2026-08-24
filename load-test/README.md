@@ -92,3 +92,52 @@ node load-test/hammer.mjs \
 Тримай `--rps` низьким (одиниці), інакше платиш за кожен виклик і ризикуєш
 автозахистом Google. Порядок надійніше — з Google Cloud Monitoring
 (вкладка проєкту → Cloud Functions → метрики), ніж із зовнішнього обстрілу.
+
+## Запобіжники вартості
+
+Стрес-тест показав: єдиний реальний вектор — не «поломка», а **дренаж
+бюджету** розподіленим ботнетом. Проти нього два кроки.
+
+### 1. Стеля інстансів (уже в коді)
+
+`maxInstances` на функціях — головний запобіжник, бо він не *повідомляє* про
+перевитрату, а *не пускає* її: скільки б запитів не летіло, більше N
+інстансів не підніметься.
+
+| Функція | maxInstances | Чому саме так |
+|---|---|---|
+| `walletSync` | 10 | публічна, але дешева (лише Firestore); 10 — з запасом |
+| `aiChat`, `goalBreakdown` | 5 | платні за токенами; + ліміт 30 повідомлень/10 хв на юзера |
+| `taskReminders` | 2 | планова, страховка від накладання запусків |
+
+Застосовується на `firebase deploy --only functions`. Легітимному
+одному-двом користувачам ці стелі не відчутні.
+
+### 2. Бюджетний алерт (треба зробити в консолі — я не маю доступу)
+
+Алерт живе в Google Cloud Billing, не в репозиторії. Два способи.
+
+**Console (2 хвилини):** Google Cloud Console → Billing → Budgets & alerts →
+Create budget → назва «Life», обери проєкт `me-and-only-me-7f531` → сума,
+напр. **$5/міс** → пороги сповіщень 50% / 90% / 100% → лист приходить на
+Billing-адміна. Це лише сповіщення, витрати воно не ріже — жорстку стелю
+дає `maxInstances` вище.
+
+**gcloud (якщо є CLI):**
+
+```bash
+# id білінг-акаунта
+gcloud billing accounts list
+
+# бюджет $5/міс зі сповіщеннями на 50/90/100%
+gcloud billing budgets create \
+  --billing-account=BILLING_ACCOUNT_ID \
+  --display-name="Life budget" \
+  --budget-amount=5USD \
+  --filter-projects=projects/me-and-only-me-7f531 \
+  --threshold-rule=percent=0.5 \
+  --threshold-rule=percent=0.9 \
+  --threshold-rule=percent=1.0
+```
+
+Заміни `BILLING_ACCOUNT_ID` на свій із першої команди. Це разова дія.

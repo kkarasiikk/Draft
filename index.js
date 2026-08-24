@@ -13,6 +13,14 @@ const MIN_KEY_LENGTH = 20;
 // квоту Firestore-читань від сканера, що перебирає випадкові ключі.
 const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000; // 15 хв
 const RATE_LIMIT_MAX_ATTEMPTS = 20;
+// Стеля інстансів — головний запобіжник вартості. Навантажувальний тест
+// показав: сайт не «ламається» (Cloud Functions масштабуються, статику тримає
+// CDN), але розподілений ботнет із багатьох IP обходить per-IP ліміт і дренує
+// Blaze-бюджет та квоту читань Firestore. maxInstances ставить цьому стелю:
+// скільки б запитів не летіло, більше N інстансів не підніметься, тож і
+// рахунок обмежений зверху. Для особистого застосунку 10 — з величезним
+// запасом (реально вистачає одного-двох).
+const MAX_INSTANCES = 10;
 
 async function isRateLimited(ip) {
   const ref = db.collection("walletSyncRateLimits").doc(ip || "unknown");
@@ -34,7 +42,9 @@ async function isRateLimited(ip) {
 
 // Приймає POST від Shortcut на iPhone (тригер "Транзакція" / Apple Pay)
 // Очікує JSON: { key: "особистий ключ", amount: 123.45, merchant: "назва магазину", date: "YYYY-MM-DD" (необов'язково) }
-exports.walletSync = functions.https.onRequest(async (req, res) => {
+exports.walletSync = functions
+  .runWith({ maxInstances: MAX_INSTANCES })
+  .https.onRequest(async (req, res) => {
   // CORS — про всяк випадок, якщо колись знадобиться викликати не тільки з Shortcuts
   res.set("Access-Control-Allow-Origin", "*");
   if (req.method === "OPTIONS") {
