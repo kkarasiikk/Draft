@@ -97,6 +97,10 @@
     return text.replace(re, ' ');
   }
 
+  // «У цьому шматку рядка є що читати?» — літера або цифра. Порожнє місце
+  // й розділові знаки за текст не рахуються.
+  var ALNUM = /[\p{L}\p{N}]/u;
+
   function parseTags(state) {
     var tags = [];
     // Тег — #слово; дублікати прибираємо, регістр лишаємо як ввели.
@@ -328,27 +332,53 @@
   function parseEstimate(state) {
     // Час доби вже вирізаний раніше, тож «о 14 год» сюди не долетить і
     // «год» лишається однозначною одиницею тривалості.
-    var hoursRe = wordRe('~?\\s*(\\d+(?:[.,]\\d+)?)\\s*(?:' + HOUR_UNITS + ')');
-    var minsRe = wordRe('~?\\s*(\\d+)\\s*(?:' + MIN_UNITS + ')');
+    var hoursBody = '(\\d+(?:[.,]\\d+)?)\\s*(?:' + HOUR_UNITS + ')';
+    var minsBody = '(\\d+)\\s*(?:' + MIN_UNITS + ')';
+    // Одна позначка тривалості: години, хвилини або «1 год 30 хв» разом.
+    // Раніше години й хвилини шукались двома незалежними проходами — і
+    // «Робота 1 год і ще 30 хв» злипалось у 90 хвилин з двох різних місць
+    // речення. Тепер це один суміжний фрагмент.
+    var re = wordRe('(~)?\\s*(?:' + hoursBody + '(?:\\s*' + minsBody + ')?|' + minsBody + ')');
+    var m = state.text.match(re);
+    if (!m) {
+      state.estimateMin = null;
+      return;
+    }
+
+    // Тривалість — це позначка, дописана з краю фрази («Медитація 10 хв»,
+    // «30 хв на розтяжку»), а не будь-яке число з «хвилинами» всередині
+    // речення. У «Виділити 30 хвилин, посидіти в тишині» тривалість є
+    // частиною самої назви: вирізати її означає лишити «Виділити ,
+    // посидіти в тишині» — половину сенсу. Явне «~» знімає це питання
+    // й працює в будь-якому місці рядка.
+    var head = state.text.slice(0, m.index);
+    var tail = state.text.slice(m.index + m[0].length);
+    if (!m[1] && ALNUM.test(head) && ALNUM.test(tail)) {
+      state.estimateMin = null;
+      return;
+    }
+
     var total = 0;
+    if (m[2]) total += Math.round(parseFloat(m[2].replace(',', '.')) * 60);
+    if (m[3]) total += Number(m[3]);
+    if (m[4]) total += Number(m[4]);
 
-    var hm = state.text.match(new RegExp(hoursRe.source, 'iu'));
-    if (hm) {
-      total += Math.round(parseFloat(hm[1].replace(',', '.')) * 60);
-      state.text = cut(state.text, hoursRe);
+    // Понад добу — це вже не оцінка часу на завдання, а помилка розбору;
+    // тоді й з назви нічого не вирізаємо, хай лишається як написали.
+    if (total > 0 && total <= 1440) {
+      state.estimateMin = total;
+      state.text = head + ' ' + tail;
+    } else {
+      state.estimateMin = null;
     }
-    var mm = state.text.match(new RegExp(minsRe.source, 'iu'));
-    if (mm) {
-      total += Number(mm[1]);
-      state.text = cut(state.text, minsRe);
-    }
-
-    // Понад добу — це вже не оцінка часу на завдання, а помилка розбору.
-    state.estimateMin = total > 0 && total <= 1440 ? total : null;
   }
 
   function cleanTitle(text) {
     var title = text.replace(/\s+/g, ' ').trim();
+    // Вирізана позначка лишає по собі пробіл там, де його не було:
+    // «Зустріч завтра, о 18» -> «Зустріч ,». Підтягуємо розділовий знак
+    // назад до слова, щоб назва не виглядала друкарською помилкою.
+    title = title.replace(/\s+([,;:.!?])/g, '$1');
     title = title.replace(/^[-–—,;:.]+|[-–—,;:.]+$/g, '').trim();
     // Прибираємо прийменник, що лишився без свого слова («Зустріч на» -> «Зустріч»),
     // але тільки якщо після нього щось лишається — інакше зникне вся назва.
