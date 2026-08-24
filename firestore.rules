@@ -20,6 +20,9 @@ rules_version = '2';
 //   users/{uid}/workouts/{id}         -- {date, name, notes, exercises: [
 //                                         {id, libId, muscle, name, sets: [
 //                                         {weight, reps}]}], createdAt, updatedAt}
+//   users/{uid}/workoutTemplates/{id} -- {name, exercises: [{id, libId, muscle,
+//                                         name, sets: [{weight, reps}]}],
+//                                         createdAt, updatedAt}
 //   users/{uid}/readiness/{YYYY-MM-DD}  -- {level: ready|ok|low, date, createdAt}
 //   users/{uid}/goals/{id}            -- {title, category, why, targetDate,
 //                                         targetValue, currentValue, unit,
@@ -223,6 +226,22 @@ service cloud.firestore {
         }
         allow read, delete: if isOwner(uid);
         allow create, update: if isOwner(uid) && isValidWorkout(request.resource.data);
+      }
+
+      // Готовий каркас тренування: ті самі вправи й підходи, з яких щоразу
+      // починається однакова сесія. На відміну від workouts тут немає дати
+      // й нотатки — шаблон описує, ЩО робити, а не коли й як пройшло.
+      match /workoutTemplates/{templateId} {
+        // Форму кожного елемента exercises/sets, як і в workouts, гарантує
+        // клієнтський код (saveSessionAsTemplate у workout/app.js).
+        function isValidWorkoutTemplate(d) {
+          return isNonEmptyString(d.name, 120) &&
+                 d.exercises is list && d.exercises.size() >= 1 && d.exercises.size() <= 30 &&
+                 d.createdAt is timestamp && d.updatedAt is timestamp &&
+                 d.keys().hasOnly(['name', 'exercises', 'createdAt', 'updatedAt']);
+        }
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid) && isValidWorkoutTemplate(request.resource.data);
       }
 
       // Самопочуття перед тренуванням. Сну й пульсу застосунок не знає —

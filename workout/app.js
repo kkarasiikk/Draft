@@ -52,6 +52,12 @@ const T = {
     unsavedTitle: 'Зберегти зміни?',
     unsavedSub: 'Є незбережені зміни. Якщо вийти зараз, вони пропадуть.',
     unsavedSave: 'Зберегти', unsavedDiscard: 'Не зберігати', unsavedKeep: 'Продовжити редагування',
+    templatesTitle: 'Шаблони', manageTemplates: 'Керувати шаблонами',
+    saveAsTemplate: 'Зберегти як шаблон', templateSaved: 'Збережено ✓',
+    templateExercises: (n) => `${n} ${plural(n, { one: 'вправа', few: 'вправи', many: 'вправ', other: 'вправи' })}`,
+    templateNeedsName: 'Дай тренуванню назву — вона буде на кнопці шаблону',
+    templateEmpty: 'Шаблонів ще немає. Набери тренування як звичайно й натисни «Зберегти як шаблон» — далі ті самі вправи заводитимуться одним тапом, лишиться тільки виставити вагу.',
+    templateLimit: (n) => `Більше ${n} шаблонів — це вже щоденник. Видали зайві у списку шаблонів.`,
     pickerTitle: 'Обрати вправу', pickerSearchPlaceholder: 'Пошук вправи…',
     pickerCustomLabel: 'Своя вправа', pickerCustomPlaceholder: 'Назва вправи', pickerCustomAdd: 'Додати',
     setPlaceholderWeight: 'кг', setPlaceholderReps: 'повт.', addSetLabel: '+ Підхід',
@@ -119,6 +125,12 @@ const T = {
     unsavedTitle: 'Сохранить изменения?',
     unsavedSub: 'Есть несохранённые изменения. Если выйти сейчас, они пропадут.',
     unsavedSave: 'Сохранить', unsavedDiscard: 'Не сохранять', unsavedKeep: 'Продолжить редактирование',
+    templatesTitle: 'Шаблоны', manageTemplates: 'Управлять шаблонами',
+    saveAsTemplate: 'Сохранить как шаблон', templateSaved: 'Сохранено ✓',
+    templateExercises: (n) => `${n} ${plural(n, { one: 'упражнение', few: 'упражнения', many: 'упражнений', other: 'упражнения' })}`,
+    templateNeedsName: 'Дай тренировке название — оно будет на кнопке шаблона',
+    templateEmpty: 'Шаблонов пока нет. Набери тренировку как обычно и нажми «Сохранить как шаблон» — дальше те же упражнения будут заводиться одним тапом, останется только выставить вес.',
+    templateLimit: (n) => `Больше ${n} шаблонов — это уже дневник. Удали лишние в списке шаблонов.`,
     pickerTitle: 'Выбрать упражнение', pickerSearchPlaceholder: 'Поиск упражнения…',
     pickerCustomLabel: 'Своё упражнение', pickerCustomPlaceholder: 'Название упражнения', pickerCustomAdd: 'Добавить',
     setPlaceholderWeight: 'кг', setPlaceholderReps: 'повт.', addSetLabel: '+ Подход',
@@ -184,6 +196,12 @@ const T = {
     unsavedTitle: 'Zapisać zmiany?',
     unsavedSub: 'Są niezapisane zmiany. Jeśli teraz wyjdziesz, przepadną.',
     unsavedSave: 'Zapisz', unsavedDiscard: 'Nie zapisuj', unsavedKeep: 'Wróć do edycji',
+    templatesTitle: 'Szablony', manageTemplates: 'Zarządzaj szablonami',
+    saveAsTemplate: 'Zapisz jako szablon', templateSaved: 'Zapisano ✓',
+    templateExercises: (n) => `${n} ${plural(n, { one: 'ćwiczenie', few: 'ćwiczenia', many: 'ćwiczeń', other: 'ćwiczenia' })}`,
+    templateNeedsName: 'Nadaj treningowi nazwę — będzie na przycisku szablonu',
+    templateEmpty: 'Nie ma jeszcze szablonów. Wpisz trening jak zwykle i naciśnij „Zapisz jako szablon" — potem te same ćwiczenia dodasz jednym tapnięciem, zostanie tylko ustawić ciężar.',
+    templateLimit: (n) => `Więcej niż ${n} szablonów to już dziennik. Usuń zbędne na liście szablonów.`,
     pickerTitle: 'Wybierz ćwiczenie', pickerSearchPlaceholder: 'Szukaj ćwiczenia…',
     pickerCustomLabel: 'Własne ćwiczenie', pickerCustomPlaceholder: 'Nazwa ćwiczenia', pickerCustomAdd: 'Dodaj',
     setPlaceholderWeight: 'kg', setPlaceholderReps: 'powt.', addSetLabel: '+ Seria',
@@ -249,6 +267,12 @@ const T = {
     unsavedTitle: 'Save changes?',
     unsavedSub: 'There are unsaved changes. Leaving now discards them.',
     unsavedSave: 'Save', unsavedDiscard: "Don't save", unsavedKeep: 'Keep editing',
+    templatesTitle: 'Templates', manageTemplates: 'Manage templates',
+    saveAsTemplate: 'Save as template', templateSaved: 'Saved ✓',
+    templateExercises: (n) => `${n} ${plural(n, { one: 'exercise', other: 'exercises' })}`,
+    templateNeedsName: 'Name the workout — that name goes on the template button',
+    templateEmpty: 'No templates yet. Enter a workout as usual and hit "Save as template" — after that the same exercises come back with one tap and you only set the weight.',
+    templateLimit: (n) => `More than ${n} templates is a diary of its own. Remove some from the template list.`,
     pickerTitle: 'Choose exercise', pickerSearchPlaceholder: 'Search exercise…',
     pickerCustomLabel: 'Custom exercise', pickerCustomPlaceholder: 'Exercise name', pickerCustomAdd: 'Add',
     setPlaceholderWeight: 'kg', setPlaceholderReps: 'reps', addSetLabel: '+ Set',
@@ -374,6 +398,9 @@ function applyTranslations() {
   document.getElementById('confirmSub').textContent = t('confirmDeleteSessionSub');
   document.getElementById('confirmCancel').textContent = t('cancelBtn');
   document.getElementById('confirmDelete').textContent = t('deleteConfirmBtn');
+  document.getElementById('templatesTitle').textContent = t('templatesTitle');
+  document.getElementById('saveAsTemplateBtn').textContent = t('saveAsTemplate');
+  renderTemplateRow();
   document.getElementById('pickerTitle').textContent = t('pickerTitle');
   document.getElementById('pickerSearch').placeholder = t('pickerSearchPlaceholder');
   document.getElementById('pickerCustomLabel').textContent = t('pickerCustomLabel');
@@ -745,6 +772,8 @@ let editingSessionId = null;
 let formExercises = []; // [{ id, libId, name, muscle, sets:[{weight, reps}] }]
 let pendingDeleteId = null;
 let pickerTargetBlockId = null; // якщо задано — заміна вправи в існуючому блоці, інакше — новий блок
+let templates = [];
+let unsubscribeTemplates = null;
 
 // ---- Дані (Firestore, реалтайм) ----
 function subscribeToSessions(uid) {
@@ -754,6 +783,17 @@ function subscribeToSessions(uid) {
     sessions = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
     renderCurrentScreen();
   }, (err) => console.error('subscribeToSessions:', err));
+}
+
+function subscribeToTemplates(uid) {
+  if (unsubscribeTemplates) unsubscribeTemplates();
+  const col = db.collection('users').doc(uid).collection('workoutTemplates');
+  unsubscribeTemplates = col.onSnapshot((snap) => {
+    templates = snap.docs.map((d) => ({ id: d.id, ...d.data() }))
+      .sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+    renderTemplateRow();
+    if (document.getElementById('templatesOverlay').classList.contains('show')) renderTemplateManageList();
+  }, (err) => console.error('subscribeToTemplates:', err));
 }
 
 // Один документ на добу, id — сама дата: перезапис замість накопичення
@@ -1202,6 +1242,7 @@ function openSessionForm(existingSession) {
       }))
     : [];
   renderExerciseBlocks();
+  renderTemplateRow();
   sessionGuard.arm();
   document.getElementById('sessionFormOverlay').classList.add('show');
 }
@@ -1403,6 +1444,157 @@ function selectExercise({ libId, muscle, name }) {
   renderExerciseBlocks();
 }
 
+// ---- Шаблони тренувань ----
+// Одна й та сама програма повторюється тижнями: ті самі вправи, той самий
+// порядок, змінюється тільки вага. Шаблон знімає з людини найнуднішу частину —
+// щоразу набирати той самий каркас.
+//
+// Застосування шаблону НЕ створює тренування одразу (на відміну від шаблонів
+// завдань): воно наповнює відкриту форму, бо вагу все одно треба виставити
+// під сьогодні. Заразом на кожній вправі одразу вмикаються звичні підказки
+// «Минулого разу / Спробуй» — рівно те, чого бракує в цей момент.
+const MAX_TEMPLATES = 12;
+
+function templateSummary(tpl) {
+  const exCount = (tpl.exercises || []).length;
+  const names = (tpl.exercises || []).map((ex) => exerciseDisplayName(ex)).filter(Boolean);
+  return [t('templateExercises', exCount), names.join(', ')].filter(Boolean).join(' · ');
+}
+
+function renderTemplateRow() {
+  const row = document.getElementById('sessionTemplateRow');
+  if (!row) return;
+  // У вже записаному тренуванні шаблон нема куди застосовувати: підмінити
+  // вправи в історії — не те, чого від кнопки чекають.
+  if (editingSessionId || !templates.length) { row.innerHTML = ''; return; }
+  row.innerHTML =
+    `<span class="field-label" style="margin:0;">${escapeHtml(t('templatesTitle'))}:</span>` +
+    templates.map((tpl) => `
+      <button type="button" class="template-chip" data-template="${tpl.id}">
+        <span class="name">${escapeHtml(tpl.name)}</span>
+        <span class="count">${(tpl.exercises || []).length}</span>
+      </button>`).join('') +
+    `<button type="button" class="template-chip manage" id="manageTemplatesBtn" aria-label="${escapeHtml(t('manageTemplates'))}">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+    </button>`;
+  row.querySelectorAll('[data-template]').forEach((btn) => {
+    btn.addEventListener('click', () => applyTemplate(btn.dataset.template));
+  });
+  document.getElementById('manageTemplatesBtn').addEventListener('click', openTemplatesManager);
+}
+
+// Вправи ДОДАЮТЬСЯ, а не заміняють набране: два шаблони поспіль («Груди» +
+// «Прес») дають одне тренування, а повторний тап по тому самому шаблону
+// нічого не дублює.
+function applyTemplate(id) {
+  const tpl = templates.find((x) => x.id === id);
+  if (!tpl) return;
+  const nameInput = document.getElementById('sessionNameInput');
+  if (!nameInput.value.trim()) nameInput.value = tpl.name || '';
+
+  const have = new Set(formExercises.map(exerciseKey));
+  (tpl.exercises || []).forEach((ex) => {
+    const key = exerciseKey(ex);
+    if (have.has(key)) return;
+    have.add(key);
+    formExercises.push({
+      id: uid4(),
+      libId: ex.libId || null,
+      name: ex.name || '',
+      muscle: ex.muscle || null,
+      sets: (ex.sets || []).map((set) => ({ weight: set.weight, reps: set.reps })),
+    });
+  });
+  renderExerciseBlocks();
+}
+
+async function saveSessionAsTemplate() {
+  const uidCur = auth.currentUser && auth.currentUser.uid;
+  const errorEl = document.getElementById('sessionFormError');
+  if (!uidCur) return;
+
+  const name = document.getElementById('sessionNameInput').value.trim();
+  // У тренування назва необовʼязкова, а от у шаблону — обовʼязкова: саме вона
+  // стоїть на кнопці, і «(без назви)» не підкаже, що всередині.
+  if (!name) { errorEl.textContent = t('templateNeedsName'); return; }
+  if (templates.length >= MAX_TEMPLATES) { errorEl.textContent = t('templateLimit', MAX_TEMPLATES); return; }
+
+  const exercises = formExercises
+    .map((ex) => ({
+      id: ex.id,
+      libId: ex.libId || null,
+      muscle: ex.muscle || null,
+      name: ex.libId ? exerciseLabel(ex.libId) : (ex.name || '').trim(),
+      // Ваги й повторення лишаємо як є — це стартова точка, яку наступного
+      // разу правлять, а не порожні поля, які треба заповнювати з нуля.
+      sets: (ex.sets || [])
+        .filter((set) => set.weight !== '' || set.reps !== '')
+        .map((set) => ({ weight: Number(set.weight) || 0, reps: Math.round(Number(set.reps) || 0) })),
+    }))
+    .filter((ex) => ex.name && ex.sets.length);
+  if (!exercises.length) { errorEl.textContent = t('noExerciseError'); return; }
+
+  const btn = document.getElementById('saveAsTemplateBtn');
+  btn.disabled = true;
+  try {
+    await db.collection('users').doc(uidCur).collection('workoutTemplates').add({
+      name,
+      exercises,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+    errorEl.textContent = '';
+    // Підтвердження прямо на кнопці: окремий тост заради одного слова —
+    // зайва конструкція, а без відгуку незрозуміло, чи спрацювало.
+    btn.textContent = t('templateSaved');
+    setTimeout(() => { btn.textContent = t('saveAsTemplate'); }, 2000);
+  } catch (err) {
+    console.error('saveAsTemplate:', err);
+    errorEl.textContent = t('err_generic');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function renderTemplateManageList() {
+  const el = document.getElementById('templateManageList');
+  if (!templates.length) {
+    el.innerHTML = `<div class="template-empty">${escapeHtml(t('templateEmpty'))}</div>`;
+    return;
+  }
+  el.innerHTML = templates.map((tpl) => `
+    <div class="template-item">
+      <div class="template-item-body">
+        <div class="template-item-name">${escapeHtml(tpl.name)}</div>
+        <div class="template-item-meta">${escapeHtml(templateSummary(tpl))}</div>
+      </div>
+      <button type="button" class="template-item-del" data-del-template="${tpl.id}" aria-label="${escapeHtml(t('deleteBtn'))}">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg>
+      </button>
+    </div>`).join('');
+  el.querySelectorAll('[data-del-template]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const uidCur = auth.currentUser && auth.currentUser.uid;
+      if (!uidCur) return;
+      db.collection('users').doc(uidCur).collection('workoutTemplates').doc(btn.dataset.delTemplate).delete()
+        .catch((err) => console.error('deleteTemplate:', err));
+    });
+  });
+}
+
+function openTemplatesManager() {
+  renderTemplateManageList();
+  document.getElementById('templatesOverlay').classList.add('show');
+}
+
+document.getElementById('saveAsTemplateBtn').addEventListener('click', saveSessionAsTemplate);
+document.getElementById('closeTemplates').addEventListener('click', () => {
+  document.getElementById('templatesOverlay').classList.remove('show');
+});
+document.getElementById('templatesOverlay').addEventListener('click', (e) => {
+  if (e.target.id === 'templatesOverlay') e.currentTarget.classList.remove('show');
+});
+
 // ---- Збереження / видалення тренування ----
 document.getElementById('sessionForm').addEventListener('submit', (e) => {
   e.preventDefault();
@@ -1528,11 +1720,14 @@ auth.onAuthStateChanged((user) => {
     }).catch(() => {});
     subscribeToSessions(user.uid);
     subscribeToReadiness(user.uid);
+    subscribeToTemplates(user.uid);
   } else {
     if (unsubscribeSessions) { unsubscribeSessions(); unsubscribeSessions = null; }
     if (unsubscribeReadiness) { unsubscribeReadiness(); unsubscribeReadiness = null; }
+    if (unsubscribeTemplates) { unsubscribeTemplates(); unsubscribeTemplates = null; }
     readiness = null;
     sessions = [];
+    templates = [];
     document.getElementById('appScreen').style.display = 'none';
     document.getElementById('authScreen').style.display = 'flex';
     document.getElementById('authPassword').value = '';

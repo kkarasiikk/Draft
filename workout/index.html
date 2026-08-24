@@ -357,6 +357,28 @@
   .modal-actions .submit-btn{margin-top:0;flex:1;}
   .btn-delete{border:none;background:var(--expense);color:#fff;font-weight:500;border-radius:10px;padding:13px 18px;font-size:15px;cursor:pointer;font-family:'Inter',sans-serif;}
 
+  /* ---- Шаблони тренувань ---- */
+  .template-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-bottom:14px;}
+  .template-row:empty{display:none;}
+  .template-chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);
+    background:var(--control-bg);color:var(--ink);border-radius:999px;padding:7px 12px;
+    font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;max-width:100%;}
+  .template-chip .count{color:var(--ink-muted);font-weight:500;}
+  .template-chip .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .template-chip.manage{padding:7px 9px;color:var(--ink-muted);}
+  .template-manage{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
+  .template-item{display:flex;align-items:center;gap:10px;border:1px solid var(--border);border-radius:14px;padding:10px 12px;}
+  .template-item-body{flex:1;min-width:0;}
+  .template-item-name{font-size:14.5px;font-weight:600;word-break:break-word;}
+  .template-item-meta{font-size:11.5px;color:var(--ink-muted);margin-top:2px;}
+  .template-item-del{flex-shrink:0;border:none;background:none;color:var(--expense);cursor:pointer;padding:6px;display:flex;}
+  .template-empty{font-size:13.5px;line-height:1.5;color:var(--ink-muted);text-align:center;padding:22px 6px;}
+  /* Список шаблонів відкривається поверх форми тренування — як і пікер вправ. */
+  #templatesOverlay{z-index:65;}
+  .save-as-template{display:block;margin:2px 0 14px;border:none;background:none;padding:0;
+    color:var(--accent);font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;}
+  .save-as-template:disabled{opacity:.55;cursor:default;}
+
   .confirm-modal{position:fixed;inset:0;background:rgba(34,38,43,.32);display:none;align-items:center;justify-content:center;z-index:75;padding:20px;}
   .confirm-modal.show{display:flex;}
   .confirm-box{background:var(--surface);border-radius:22px;padding:22px;max-width:340px;width:100%;}
@@ -516,6 +538,10 @@
       <button class="close-btn" id="closeSessionForm" aria-label="Закрити"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
     </div>
     <form id="sessionForm">
+      <!-- Шаблони: почати з готового каркаса замість того, щоб щоразу
+           набирати ті самі вправи. Показуємо лише для нового тренування —
+           у вже записаному замінювати вправи шаблоном нема сенсу. -->
+      <div class="template-row" id="sessionTemplateRow"></div>
       <input type="text" id="sessionNameInput" class="title-input" placeholder="Назва (необовʼязково)" maxlength="120">
       <div class="field-row">
         <div>
@@ -534,6 +560,7 @@
       <label class="field-label" id="sessionNotesLabel" style="margin-top:14px;">Нотатка</label>
       <textarea id="sessionNotesInput" maxlength="3000"></textarea>
 
+      <button type="button" class="save-as-template" id="saveAsTemplateBtn">Зберегти як шаблон</button>
       <div class="form-error" id="sessionFormError"></div>
       <div class="modal-actions">
         <button type="button" class="btn-delete" id="deleteSessionBtn" style="display:none;">Видалити</button>
@@ -575,6 +602,17 @@
 </div>
 
 <!-- ---- Підтвердження видалення ---- -->
+<!-- ---- Шаблони тренувань: перегляд і видалення ---- -->
+<div class="modal-overlay" id="templatesOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="templatesTitle">Шаблони</div>
+      <button class="close-btn" id="closeTemplates" aria-label="Закрити"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="template-manage" id="templateManageList"></div>
+  </div>
+</div>
+
 <div class="confirm-modal" id="confirmOverlay">
   <div class="confirm-box">
     <div class="confirm-title" id="confirmTitle">Видалити тренування?</div>
