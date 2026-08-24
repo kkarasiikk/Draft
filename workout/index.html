@@ -388,10 +388,49 @@
   .confirm-actions button{flex:1;padding:10px 0;border-radius:8px;cursor:pointer;font-family:'Inter',sans-serif;font-size:14px;}
   .btn-cancel{border:1px solid var(--border);background:transparent;color:var(--ink-soft);}
 
+  /* ---- Календар тренувань ---- */
+  .wcal{background:var(--surface-flat);border:1px solid var(--border);border-radius:20px;padding:14px 12px 10px;margin-bottom:18px;}
+  .wcal-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;}
+  .wcal-title{flex:1;text-align:center;background:none;border:none;color:var(--ink);cursor:pointer;
+    font-family:'Inter',sans-serif;font-size:15px;font-weight:700;padding:4px;}
+  .wcal-nav{flex-shrink:0;background:var(--glass-btn-bg);border:1px solid var(--glass-btn-border);color:var(--ink);
+    border-radius:9px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+  .wcal-nav:hover{background:var(--glass-btn-bg-hover);}
+  .wcal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+  .wcal-wd{text-align:center;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;
+    color:var(--ink-muted);padding-bottom:4px;}
+  .wcal-day{position:relative;min-height:40px;border:none;background:none;color:var(--ink-soft);border-radius:10px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+    font-family:'Inter',sans-serif;font-size:13px;font-weight:600;padding:0;}
+  .wcal-day.blank{visibility:hidden;}
+  /* День без тренування нічого не відкриває — калейдоскоп клікабельних
+     порожніх клітинок лише обіцяв би те, чого немає. */
+  .wcal-day.has{cursor:pointer;color:var(--ink);}
+  .wcal-day.has:hover{background:var(--glass-btn-bg);}
+  .wcal-day.today{outline:1px solid var(--accent);}
+  .wcal-day.selected{background:var(--accent);color:#fff;}
+  .wcal-dot{width:5px;height:5px;border-radius:50%;background:var(--accent);}
+  .wcal-day.selected .wcal-dot{background:#fff;}
+  .wcal-day .wcal-dot.ghost{visibility:hidden;}
+  .wcal-filter{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
+  .wcal-filter button{border:1px solid var(--border);background:var(--control-bg);color:var(--ink);border-radius:999px;
+    padding:6px 12px;font-family:'Inter',sans-serif;font-size:12.5px;font-weight:600;cursor:pointer;}
+
   /* ---- Exercise blocks inside the workout form ---- */
   .ex-block{background:var(--surface-flat);border:1px solid var(--border);border-radius:16px;padding:12px 14px;margin-bottom:12px;}
+  /* Перетягування вправ. transition вимикається на час жесту (клас .dragging),
+     інакше картка тягнулась би за пальцем із запізненням. */
+  .ex-block{transition:transform .16s ease, box-shadow .16s ease;}
+  .ex-block.dragging{transition:none;z-index:3;position:relative;box-shadow:var(--card-hover-shadow);opacity:.97;}
+  .ex-block.drag-idle{transition:transform .16s ease;}
+  .ex-drag-handle{flex-shrink:0;background:none;border:none;padding:4px 2px;margin-left:-4px;color:var(--ink-muted);
+    cursor:grab;display:flex;align-items:center;
+    /* Без цього браузер почав би гортати сторінку замість перетягування. */
+    touch-action:none;}
+  .ex-drag-handle:active{cursor:grabbing;}
+  .ex-drag-handle:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px;}
   .ex-block-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:2px;}
-  .ex-block-name{font-family:'Inter',sans-serif;font-size:14.5px;font-weight:700;color:var(--ink);}
+  .ex-block-name{flex:1;min-width:0;font-family:'Inter',sans-serif;font-size:14.5px;font-weight:700;color:var(--ink);}
   .ex-block-muscle{font-size:11px;color:var(--ink-muted);margin-bottom:8px;}
   .ex-remove-btn{background:none;border:none;color:var(--ink-muted);cursor:pointer;padding:4px;flex-shrink:0;}
   .ex-remove-btn:hover{color:var(--expense);}
@@ -454,6 +493,11 @@
     body.no-page-fab .ai-fab{--ai-fab-bottom:104px;}
     .modal-overlay, .picker-overlay{align-items:center;}
     .modal, .picker-modal{border-radius:18px;max-height:88vh;}
+    /* Форма тренування — найщільніший екран застосунку: назва вправи,
+       підказка, і по два поля на кожен підхід. На телефоні ширше нікуди,
+       а на комп'ютері 480px лишали половину екрана порожньою. */
+    .modal{max-width:640px;}
+    .picker-modal{max-width:560px;}
   }
 </style>
 </head>

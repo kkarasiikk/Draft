@@ -53,6 +53,9 @@ const T = {
     unsavedSub: 'Є незбережені зміни. Якщо вийти зараз, вони пропадуть.',
     unsavedSave: 'Зберегти', unsavedDiscard: 'Не зберігати', unsavedKeep: 'Продовжити редагування',
     templatesTitle: 'Шаблони', manageTemplates: 'Керувати шаблонами',
+    reorderExercise: 'Перемістити вправу',
+    calPrevMonth: 'Попередній місяць', calNextMonth: 'Наступний місяць',
+    calDayHasWorkout: '— є тренування', calShowAll: 'Усі дні',
     saveAsTemplate: 'Зберегти як шаблон', templateSaved: 'Збережено ✓',
     templateExercises: (n) => `${n} ${plural(n, { one: 'вправа', few: 'вправи', many: 'вправ', other: 'вправи' })}`,
     templateNeedsName: 'Дай тренуванню назву — вона буде на кнопці шаблону',
@@ -126,6 +129,9 @@ const T = {
     unsavedSub: 'Есть несохранённые изменения. Если выйти сейчас, они пропадут.',
     unsavedSave: 'Сохранить', unsavedDiscard: 'Не сохранять', unsavedKeep: 'Продолжить редактирование',
     templatesTitle: 'Шаблоны', manageTemplates: 'Управлять шаблонами',
+    reorderExercise: 'Переместить упражнение',
+    calPrevMonth: 'Предыдущий месяц', calNextMonth: 'Следующий месяц',
+    calDayHasWorkout: '— есть тренировка', calShowAll: 'Все дни',
     saveAsTemplate: 'Сохранить как шаблон', templateSaved: 'Сохранено ✓',
     templateExercises: (n) => `${n} ${plural(n, { one: 'упражнение', few: 'упражнения', many: 'упражнений', other: 'упражнения' })}`,
     templateNeedsName: 'Дай тренировке название — оно будет на кнопке шаблона',
@@ -197,6 +203,9 @@ const T = {
     unsavedSub: 'Są niezapisane zmiany. Jeśli teraz wyjdziesz, przepadną.',
     unsavedSave: 'Zapisz', unsavedDiscard: 'Nie zapisuj', unsavedKeep: 'Wróć do edycji',
     templatesTitle: 'Szablony', manageTemplates: 'Zarządzaj szablonami',
+    reorderExercise: 'Przenieś ćwiczenie',
+    calPrevMonth: 'Poprzedni miesiąc', calNextMonth: 'Następny miesiąc',
+    calDayHasWorkout: '— jest trening', calShowAll: 'Wszystkie dni',
     saveAsTemplate: 'Zapisz jako szablon', templateSaved: 'Zapisano ✓',
     templateExercises: (n) => `${n} ${plural(n, { one: 'ćwiczenie', few: 'ćwiczenia', many: 'ćwiczeń', other: 'ćwiczenia' })}`,
     templateNeedsName: 'Nadaj treningowi nazwę — będzie na przycisku szablonu',
@@ -268,6 +277,9 @@ const T = {
     unsavedSub: 'There are unsaved changes. Leaving now discards them.',
     unsavedSave: 'Save', unsavedDiscard: "Don't save", unsavedKeep: 'Keep editing',
     templatesTitle: 'Templates', manageTemplates: 'Manage templates',
+    reorderExercise: 'Move exercise',
+    calPrevMonth: 'Previous month', calNextMonth: 'Next month',
+    calDayHasWorkout: '— has a workout', calShowAll: 'All days',
     saveAsTemplate: 'Save as template', templateSaved: 'Saved ✓',
     templateExercises: (n) => `${n} ${plural(n, { one: 'exercise', other: 'exercises' })}`,
     templateNeedsName: 'Name the workout — that name goes on the template button',
@@ -501,9 +513,12 @@ document.getElementById('forgotPasswordLink').addEventListener('click', async ()
 });
 
 // ---- Утиліти ----
+function pad2(n) {
+  return String(n).padStart(2, '0');
+}
 function todayISO() {
   const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
 }
 function escapeHtml(s) {
   return (s || '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -774,6 +789,10 @@ let pendingDeleteId = null;
 let pickerTargetBlockId = null; // якщо задано — заміна вправи в існуючому блоці, інакше — новий блок
 let templates = [];
 let unsubscribeTemplates = null;
+// Календар на екрані тренувань: який місяць показано і чи звужено список
+// до одного дня (null — показані всі).
+let calMonth = todayISO().slice(0, 7); // 'YYYY-MM'
+let calSelectedDate = null;
 
 // ---- Дані (Firestore, реалтайм) ----
 function subscribeToSessions(uid) {
@@ -954,6 +973,129 @@ function startPlannedSession() {
   renderExerciseBlocks();
 }
 
+// ---- Календар тренувань ----
+// Список у зворотному порядку відповідає на «що я робив останнім часом», але
+// не на «а чи тренувався я тієї середи». Календар відповідає на друге за
+// секунду: крапка = того дня було тренування.
+//
+// Клікабельні лише дні з тренуванням — саме вони щось відкривають. Робити
+// клікабельною всю сітку означало б обіцяти те, чого за порожнім днем немає.
+function monthShift(month, delta) {
+  const [y, m] = month.split('-').map(Number);
+  const d = new Date(y, m - 1 + delta, 1);
+  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}`;
+}
+
+function monthTitle(month) {
+  const [y, m] = month.split('-').map(Number);
+  const label = new Date(y, m - 1, 1)
+    .toLocaleDateString(LOCALE_MAP[currentLang] || 'uk-UA', { month: 'long', year: 'numeric' });
+  // Велика літера лише на першій: CSS-capitalize підняв би ще й «р.» у
+  // «серпень 2026 р.».
+  return label.charAt(0).toUpperCase() + label.slice(1);
+}
+
+// Пн…Нд назвами поточної мови — тиждень скрізь у застосунку з понеділка.
+function weekdayShortLabels() {
+  const locale = LOCALE_MAP[currentLang] || 'uk-UA';
+  const fmt = new Intl.DateTimeFormat(locale, { weekday: 'short' });
+  // 2024-01-01 — понеділок; беремо сім поспіль.
+  return [0, 1, 2, 3, 4, 5, 6].map((i) => fmt.format(new Date(2024, 0, 1 + i)));
+}
+
+function sessionsByDate() {
+  const map = new Map();
+  sessions.forEach((s) => {
+    if (!map.has(s.date)) map.set(s.date, []);
+    map.get(s.date).push(s);
+  });
+  return map;
+}
+
+function renderCalendar() {
+  const [y, m] = calMonth.split('-').map(Number);
+  const first = new Date(y, m - 1, 1);
+  const daysInMonth = new Date(y, m, 0).getDate();
+  // getDay(): неділя = 0. Переводимо в «скільки порожніх клітинок до 1 числа»
+  // для тижня, що починається з понеділка.
+  const lead = (first.getDay() + 6) % 7;
+  const byDate = sessionsByDate();
+  const today = todayISO();
+
+  const cells = [];
+  for (let i = 0; i < lead; i++) cells.push('<button type="button" class="wcal-day blank" tabindex="-1"></button>');
+  for (let day = 1; day <= daysInMonth; day++) {
+    const iso = `${calMonth}-${pad2(day)}`;
+    const has = byDate.has(iso);
+    const cls = ['wcal-day'];
+    if (has) cls.push('has');
+    if (iso === today) cls.push('today');
+    if (iso === calSelectedDate) cls.push('selected');
+    const label = has ? ` ${t('calDayHasWorkout')}` : '';
+    cells.push(`<button type="button" class="${cls.join(' ')}"${has ? ` data-cal-day="${iso}"` : ' tabindex="-1"'} aria-label="${day}${escapeHtml(label)}">
+      <span>${day}</span><span class="wcal-dot${has ? '' : ' ghost'}"></span>
+    </button>`);
+  }
+
+  return `
+    <div class="wcal">
+      <div class="wcal-head">
+        <button type="button" class="wcal-nav" data-cal-shift="-1" aria-label="${escapeHtml(t('calPrevMonth'))}">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <button type="button" class="wcal-title" id="wcalTitle">${escapeHtml(monthTitle(calMonth))}</button>
+        <button type="button" class="wcal-nav" data-cal-shift="1" aria-label="${escapeHtml(t('calNextMonth'))}">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
+      </div>
+      <div class="wcal-grid">
+        ${weekdayShortLabels().map((w) => `<div class="wcal-wd">${escapeHtml(w)}</div>`).join('')}
+        ${cells.join('')}
+      </div>
+    </div>`;
+}
+
+// Тап по дню — це «покажи мені той день». Коли тренування одне (а так майже
+// завжди), «той день» і є саме тренування, тож відкриваємо його одразу.
+// Коли їх кілька — звужуємо список, бо вгадувати, яке з них мали на увазі,
+// було б гірше, ніж показати обидва.
+function openCalendarDay(iso) {
+  const items = sessionsByDate().get(iso) || [];
+  if (!items.length) return;
+  if (items.length === 1) {
+    calSelectedDate = null;
+    openSessionForm(items[0]);
+    return;
+  }
+  calSelectedDate = calSelectedDate === iso ? null : iso;
+  renderCurrentScreen();
+}
+
+function attachCalendarEvents(root) {
+  root.querySelectorAll('[data-cal-shift]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      calMonth = monthShift(calMonth, Number(btn.dataset.calShift));
+      calSelectedDate = null;
+      renderCurrentScreen();
+    });
+  });
+  const title = root.querySelector('#wcalTitle');
+  // Заблукав по місяцях — один тап по назві вертає в поточний.
+  if (title) title.addEventListener('click', () => {
+    calMonth = todayISO().slice(0, 7);
+    calSelectedDate = null;
+    renderCurrentScreen();
+  });
+  root.querySelectorAll('[data-cal-day]').forEach((btn) => {
+    btn.addEventListener('click', () => openCalendarDay(btn.dataset.calDay));
+  });
+  const clear = root.querySelector('#wcalClearBtn');
+  if (clear) clear.addEventListener('click', () => {
+    calSelectedDate = null;
+    renderCurrentScreen();
+  });
+}
+
 function renderSessionsTab() {
   const root = document.getElementById('sessionsTab');
   const list = sortedSessions();
@@ -972,12 +1114,20 @@ function renderSessionsTab() {
     const last = groups[groups.length - 1];
     if (last && last.date === s.date) last.items.push(s); else groups.push({ date: s.date, items: [s] });
   });
-  root.innerHTML = renderPlanCard() + groups.map((g) => `
+  const shownGroups = calSelectedDate ? groups.filter((g) => g.date === calSelectedDate) : groups;
+  const filterBar = calSelectedDate ? `
+    <div class="wcal-filter">
+      <span class="day-label" style="margin:0;">${escapeHtml(dayLabel(calSelectedDate))}</span>
+      <button type="button" id="wcalClearBtn">${escapeHtml(t('calShowAll'))}</button>
+    </div>` : '';
+
+  root.innerHTML = renderCalendar() + renderPlanCard() + filterBar + shownGroups.map((g) => `
     <div class="day-group">
       <div class="day-label">${escapeHtml(dayLabel(g.date))}</div>
       ${g.items.map((s) => renderSessionCard(s)).join('')}
     </div>
   `).join('');
+  attachCalendarEvents(root);
   root.querySelectorAll('[data-open-session]').forEach((el) => {
     el.addEventListener('click', () => openSessionForm(sessions.find((s) => s.id === el.dataset.openSession)));
   });
@@ -1312,6 +1462,7 @@ function renderExerciseBlocks() {
       </div>` : ''}`;
   });
   attachExerciseBlockEvents();
+  attachExerciseDrag(root);
 }
 
 function renderExerciseBlock(ex) {
@@ -1327,6 +1478,9 @@ function renderExerciseBlock(ex) {
   return `
     <div class="ex-block" data-block-id="${ex.id}">
       <div class="ex-block-head">
+        <button type="button" class="ex-drag-handle" data-drag-handle="${ex.id}" aria-label="${escapeHtml(t('reorderExercise'))}">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>
+        </button>
         <div class="ex-block-name">${escapeHtml(exerciseDisplayName(ex))}</div>
         <button type="button" class="ex-remove-btn" data-remove-block="${ex.id}" aria-label="Remove exercise">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
@@ -1398,6 +1552,110 @@ function attachExerciseBlockEvents() {
     // Порожній стан всередині форми не потребує окремого блоку — кнопка
     // "Додати вправу" вже достатньо помітна.
   }
+}
+
+// ---- Порядок вправ: перетягування ----
+// Порядок вправ у тренуванні — це порядок, у якому їх реально роблять, і
+// помилитись легко: додав жим після присідань, а треба навпаки. Виправляти
+// це через «видалити й додати заново» означало б набирати підходи вдруге.
+//
+// Реалізовано на pointer events, а не на HTML5 drag-and-drop: останній на
+// тач-екранах просто не працює, а застосунок передусім телефонний.
+//
+// Під час жесту нічого не перемальовується: перетягувану картку ведемо
+// transform'ом, сусідні зсуваємо на її висоту, а масив переставляємо один раз
+// на відпусканні. Перемальовування на кожен рух гасило б фокус у полях і
+// плодило б нові вузли під самим пальцем.
+const EX_BLOCK_GAP = 12; // = margin-bottom .ex-block
+let exDrag = null;
+
+function exerciseBlockEls() {
+  return [...document.getElementById('exerciseBlocks').querySelectorAll('.ex-block')];
+}
+
+function beginExerciseDrag(e, handle) {
+  if (exDrag) return;
+  const blockEl = handle.closest('.ex-block');
+  const blocks = exerciseBlockEls();
+  const from = blocks.indexOf(blockEl);
+  if (from < 0 || blocks.length < 2) return;
+
+  e.preventDefault();
+  exDrag = {
+    pointerId: e.pointerId,
+    blocks,
+    rects: blocks.map((b) => b.getBoundingClientRect()),
+    from,
+    to: from,
+    startY: e.clientY,
+  };
+  blockEl.classList.add('dragging');
+  blocks.forEach((b, i) => { if (i !== from) b.classList.add('drag-idle'); });
+  handle.setPointerCapture(e.pointerId);
+}
+
+function moveExerciseDrag(e) {
+  if (!exDrag || e.pointerId !== exDrag.pointerId) return;
+  const { blocks, rects, from } = exDrag;
+  const dy = e.clientY - exDrag.startY;
+  blocks[from].style.transform = `translateY(${dy}px)`;
+
+  // Куди картка потрапить, якщо відпустити зараз: перетинаємо середину
+  // сусіда — значить, стаємо на його місце.
+  const center = rects[from].top + rects[from].height / 2 + dy;
+  let to = from;
+  rects.forEach((r, i) => {
+    if (i === from) return;
+    const mid = r.top + r.height / 2;
+    if (i > from && center > mid) to = Math.max(to, i);
+    if (i < from && center < mid) to = Math.min(to, i);
+  });
+  exDrag.to = to;
+
+  // Сусіди розступаються рівно на висоту тієї картки, що їде.
+  const shift = rects[from].height + EX_BLOCK_GAP;
+  blocks.forEach((b, i) => {
+    if (i === from) return;
+    let offset = 0;
+    if (from < i && i <= to) offset = -shift;
+    else if (from > i && i >= to) offset = shift;
+    b.style.transform = offset ? `translateY(${offset}px)` : '';
+  });
+}
+
+function endExerciseDrag(e) {
+  if (!exDrag || (e && e.pointerId !== exDrag.pointerId)) return;
+  const { from, to } = exDrag;
+  exDrag = null;
+  if (from !== to) formExercises.splice(to, 0, formExercises.splice(from, 1)[0]);
+  // Перемальовуємо в будь-якому разі: це заразом прибирає transform'и,
+  // класи й перенумеровує підходи.
+  renderExerciseBlocks();
+}
+
+function attachExerciseDrag(root) {
+  root.querySelectorAll('[data-drag-handle]').forEach((handle) => {
+    handle.addEventListener('pointerdown', (e) => beginExerciseDrag(e, handle));
+    handle.addEventListener('pointermove', moveExerciseDrag);
+    handle.addEventListener('pointerup', endExerciseDrag);
+    // Скасований жест (системний свайп, вхідний дзвінок) має лишити список
+    // у тому вигляді, що й був, а не завмерти на півдорозі.
+    handle.addEventListener('pointercancel', endExerciseDrag);
+    // З клавіатури те саме без жестів: на комп'ютері це швидше за мишу,
+    // а для доступності — єдиний спосіб узагалі.
+    handle.addEventListener('keydown', (e) => {
+      if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+      e.preventDefault();
+      const id = handle.dataset.dragHandle;
+      const from = formExercises.findIndex((ex) => ex.id === id);
+      const to = from + (e.key === 'ArrowUp' ? -1 : 1);
+      if (from < 0 || to < 0 || to >= formExercises.length) return;
+      formExercises.splice(to, 0, formExercises.splice(from, 1)[0]);
+      renderExerciseBlocks();
+      const next = document.querySelector(`[data-drag-handle="${id}"]`);
+      if (next) next.focus();
+    });
+  });
 }
 
 document.getElementById('addExerciseBtn').addEventListener('click', () => {
