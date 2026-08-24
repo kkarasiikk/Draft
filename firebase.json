@@ -17,7 +17,8 @@
         "ui-tests",
         "playwright.config.js",
         "playwright-report",
-        "test-results"
+        "test-results",
+        "load-test"
       ]
     }
   ]
