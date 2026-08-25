@@ -143,9 +143,22 @@ firebase deploy --only firestore:rules
 -> Rules -> Publish.
 
 Це задеплоїть `firestore.rules`, `firestore.indexes.json` і Cloud Functions
-(`walletSync`, `aiChat`). Хостинг статичних файлів (GitHub
-Pages чи Firebase Hosting) — окремо, залежно від того, де реально
-розміщений сайт.
+(`walletSync`, `aiChat`). Статику (сам сайт) деплоїть окремий workflow —
+див. нижче.
+
+### Автодеплой статики на GitHub Pages
+
+`.github/workflows/deploy.yml` викладає сайт на GitHub Pages на кожен пуш у
+`main`, який пройшов тести. Більше не треба нічого викладати руками, і
+не буває «у гілці працює, а на телефоні стара версія».
+
+Разова дія при першому налаштуванні: **Settings → Pages → Source: «GitHub
+Actions»**. Секрети не потрібні — деплой іде під вбудованим `GITHUB_TOKEN`.
+
+Workflow бере відстежувані git-ом файли (`git archive`) і викладає лише те,
+що віддається браузеру: джерела Cloud Functions (`index.js`, `ai.js`,
+`reminders.js`), тести, `load-test/` і конфіги деплою на сайт не потрапляють.
+Кнопка «Run workflow» у вкладці Actions перевикладає сайт вручну, без коміту.
 
 Для нагадувань потрібні ще дві речі в консолі, обидві разові:
 **Project Settings -> Cloud Messaging -> Web Push certificates -> Generate key

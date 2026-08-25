@@ -1,0 +1,89 @@
+# Автодеплой статики на GitHub Pages. Кожен пуш у main, який пройшов тести,
+# сам оновлює живий сайт — щоб більше не було «у гілці працює, а на телефоні
+# стара версія».
+#
+# Разова дія на боці репозиторію: Settings → Pages → Source: «GitHub Actions».
+# Жодних секретів не потрібно — деплой іде під вбудованим GITHUB_TOKEN.
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  # Кнопка «Run workflow» — щоб перевикласти сайт вручну, без нового коміту.
+  workflow_dispatch:
+
+# Дозволи рівно для публікації Pages, не більше.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Одночасно — лише один деплой; новий скасовує застарілий у черзі.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  # Спершу гейт: якщо юніт-тести або синтаксис падають, сайт не оновлюється.
+  # Повну браузерну сюїту ганяє окремий CI (ci.yml) на цей самий коміт.
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Синтаксис усіх JS
+        run: |
+          for f in $(git ls-files '*.js'); do
+            node --check "$f" || exit 1
+          done
+      - name: Юніт-тести
+        run: npm test
+
+  build:
+    needs: gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Зібрати статику сайту
+        # Кладемо на сайт лише те, що реально віддається браузеру. Беремо
+        # відстежувані git-ом файли (git archive) — так node_modules і будь-що
+        # незакомічене відпадає само, — а тоді прибираємо те, що браузеру не
+        # потрібне: джерела Cloud Functions, тести, оснастку навантаження й
+        # конфіги деплою.
+        run: |
+          mkdir -p _site
+          git archive HEAD | tar -x -C _site
+
+          # Теки з розробки.
+          rm -rf _site/ui-tests _site/load-test _site/.github
+
+          # Cloud Functions і серверні конфіги. ВАЖЛИВО: тут лише КОРЕНЕВІ
+          # шляхи — фронтендний tasks/reminders.js лишається, бо до Cloud
+          # Function reminders.js стосунку не має.
+          rm -f _site/index.js _site/ai.js _site/reminders.js \
+                _site/fakeFirestore.js _site/firebase.json \
+                _site/firestore.rules _site/firestore.indexes.json \
+                _site/playwright.config.js _site/package.json _site/package-lock.json
+
+          # Усі тести, на будь-якому рівні.
+          find _site -name '*.test.js' -delete
+
+          # Вимикаємо обробку Jekyll — сайт віддається як є, побайтно.
+          touch _site/.nojekyll
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
