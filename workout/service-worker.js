@@ -1,17 +1,18 @@
 // Service Worker модуля «Тренування» (scope /workout/). Кожен модуль має
 // власний SW — для сторінки виграє реєстрація з найдовшим збігом scope.
-const CACHE_NAME = 'life-workout-v35';
+const CACHE_NAME = 'life-workout-v42';
 // Чистимо лише власні (застарілі) кеші: `caches` спільний для всього
 // походження, тож видалення "всього зайвого" стерло б кеші інших модулів.
 const CACHE_PREFIXES = ['life-workout-'];
-const NETWORK_FIRST = ['./unsaved-guard.js', './exercises.js', './progression.js', './progress.js', './plan.js', './ai-chat.js', './ai-chat.css', './', './index.html', './app.js'];
-const FILES_TO_CACHE = ['../unsaved-guard.js', './exercises.js', './progression.js', './progress.js', './plan.js', '../ai-chat.js', '../ai-chat.css', './', './index.html', './app.js', './manifest.json',
+const NETWORK_FIRST = ['./scroll-lock.js', './unsaved-guard.js', './exercises.js', './progression.js', './progress.js', './plan.js', './ai-chat.js', './ai-chat.css', './', './index.html', './app.js'];
+const FILES_TO_CACHE = ['../scroll-lock.js', '../unsaved-guard.js', './exercises.js', './progression.js', './progress.js', './plan.js', '../ai-chat.js', '../ai-chat.css', './', './index.html', './app.js', './manifest.json',
   '../budget/firebase-config.js', '../budget/icon-192.png', '../budget/icon-512.png',
   '../budget/icon-192-maskable.png', '../budget/icon-512-maskable.png'];
 // Сторінка жорстко залежить від Firebase SDK (firebase.initializeApp() —
 // перший рядок app.js), тож без цих файлів офлайн-запуск падав би з
 // "firebase is not defined", навіть коли локальні файли є в кеші.
 const EXTERNAL_FILES_TO_CACHE = [
+  'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js',
   'https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js',
   'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js',
   'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js',

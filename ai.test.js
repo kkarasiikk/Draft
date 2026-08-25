@@ -1013,6 +1013,51 @@ describe("executeTool", () => {
     });
   });
 
+  describe("render_chart", () => {
+    test("кругова діаграма повертає action з даними, без запису в Firestore", async () => {
+      const r = await ai.executeTool("uid1", "render_chart", {
+        type: "pie", title: "Витрати за липень",
+        labels: ["Їжа", "Транспорт"], datasets: [{ values: [1200, 300] }],
+      }, ctx);
+      expect(r.isError).toBeFalsy();
+      expect(r.action).toMatchObject({
+        kind: "chart",
+        chart: { type: "pie", title: "Витрати за липень", labels: ["Їжа", "Транспорт"] },
+      });
+      expect(r.action.chart.datasets).toEqual([{ label: "", values: [1200, 300] }]);
+    });
+
+    test("другий ряд у pie відкидається — частки одного цілого, другому нема куди подітись", async () => {
+      const r = await ai.executeTool("uid1", "render_chart", {
+        type: "pie", labels: ["A", "B"],
+        datasets: [{ values: [1, 2] }, { label: "зайвий", values: [3, 4] }],
+      }, ctx);
+      expect(r.action.chart.datasets).toHaveLength(1);
+    });
+
+    test("bar з кількома рядами (дохід і витрати) лишає обидва", async () => {
+      const r = await ai.executeTool("uid1", "render_chart", {
+        type: "bar", labels: ["Черв", "Лип"],
+        datasets: [{ label: "Дохід", values: [20000, 21000] }, { label: "Витрати", values: [15000, 16000] }],
+      }, ctx);
+      expect(r.action.chart.datasets).toHaveLength(2);
+      expect(r.action.chart.datasets[1].label).toBe("Витрати");
+    });
+
+    test("невідомий тип, без labels чи без значень — чесна помилка, а не порожня діаграма", async () => {
+      expect((await ai.executeTool("uid1", "render_chart", { type: "donut", labels: ["A"], datasets: [{ values: [1] }] }, ctx)).isError).toBe(true);
+      expect((await ai.executeTool("uid1", "render_chart", { type: "bar", labels: [], datasets: [{ values: [1] }] }, ctx)).isError).toBe(true);
+      expect((await ai.executeTool("uid1", "render_chart", { type: "bar", labels: ["A"], datasets: [] }, ctx)).isError).toBe(true);
+    });
+
+    test("нечислові значення в datasets — нуль, а не крах", async () => {
+      const r = await ai.executeTool("uid1", "render_chart", {
+        type: "line", labels: ["A", "B"], datasets: [{ values: ["не число", 5] }],
+      }, ctx);
+      expect(r.action.chart.datasets[0].values).toEqual([0, 5]);
+    });
+  });
+
   // ---- Цілі й заощадження ----
   describe("цілі й заощадження", () => {
     test("goals_progress рахує виконані віхи", async () => {
@@ -1059,6 +1104,30 @@ describe("executeTool", () => {
       const r = await ai.executeTool("uid1", "savings_summary", {}, ctx);
       expect(r.output.goals).toContainEqual({ id: ref.id, goal: "На ноутбук", saved: 0 });
     });
+
+    // «Скільки я зберіг за липень» — це приріст САМЕ за місяць, а не
+    // загальний залишок з початку: без цього тесту регресія (знову лише
+    // total) пройшла б непоміченою.
+    test("savings_summary з month рахує приріст за конкретний місяць окремо від total", async () => {
+      const goals = mockCurrent.collection("users").doc("uid1").collection("savingsGoals");
+      const goal = await goals.add({ name: "На відпустку" });
+      const col = mockCurrent.collection("users").doc("uid1").collection("savings");
+      await col.add({ goalId: goal.id, type: "deposit", amount: 1000, date: "2026-07-05" });
+      await col.add({ goalId: goal.id, type: "deposit", amount: 500, date: "2026-08-01" });
+      await col.add({ goalId: goal.id, type: "withdraw", amount: 200, date: "2026-08-10" });
+
+      const r = await ai.executeTool("uid1", "savings_summary", { month: "2026-08" }, ctx);
+      expect(r.output.total).toBe(1300); // весь час: 1000 + 500 - 200
+      expect(r.output.period).toMatchObject({ month: "2026-08", net: 300 }); // лише серпень: 500 - 200
+      expect(r.output.period.goals[0]).toMatchObject({ goal: "На відпустку", net: 300 });
+    });
+
+    test("savings_summary без month period не додає, а невалідний місяць period не ламає", async () => {
+      const noMonth = await ai.executeTool("uid1", "savings_summary", {}, ctx);
+      expect(noMonth.output.period).toBeUndefined();
+      const bad = await ai.executeTool("uid1", "savings_summary", { month: "не дата" }, ctx);
+      expect(bad.output.period).toBeUndefined();
+    });
   });
 });
 
@@ -1093,6 +1162,19 @@ describe("категорії за замовчуванням", () => {
     });
     expect(prompt).toContain("food (Їжа)");
     expect(prompt).toContain("salary (Зарплата)");
+  });
+
+  // Модель раніше на «зроби діаграму» вибачалась і пропонувала зводити
+  // цифри в Excel/Google Sheets — марна порада в телефоні, коли в
+  // застосунку вже є готова кругова діаграма й графік по місяцях.
+  test("на прохання про графік промпт веде до вкладки «Статистика», а не Excel", () => {
+    const prompt = ai.buildSystemPrompt({
+      today: "2026-08-20", lang: "uk", currency: "UAH",
+      categoriesExpense: defaults.defaultCategoryList("expense", "uk"),
+      categoriesIncome: defaults.defaultCategoryList("income", "uk"),
+    });
+    expect(prompt).toContain("Статистика");
+    expect(prompt).toMatch(/НЕ пропонуй.*Excel/);
   });
 });
 

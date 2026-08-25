@@ -67,8 +67,14 @@
   font-family:'Inter',sans-serif;font-size:12px;padding:5px 11px;border-radius:20px;cursor:pointer;}
 .aic-clear:hover{color:var(--high, #C25A5A);}
 
-.aic-log{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;gap:10px;
-  padding:4px 2px 12px;margin-bottom:10px;}
+.aic-log{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;gap:10px;
+  padding:4px 6px 12px 2px;margin-bottom:10px;}
+/* Системна смуга гортання з кнопками-стрілками — чужа тут річ: власна
+   тонка й напівпрозора, як у пікері вправ. */
+.aic-log{scrollbar-width:thin;scrollbar-color:var(--card-border-hover, rgba(20,25,40,.22)) transparent;}
+.aic-log::-webkit-scrollbar{width:5px;}
+.aic-log::-webkit-scrollbar-track{background:transparent;}
+.aic-log::-webkit-scrollbar-thumb{background:var(--card-border-hover, rgba(20,25,40,.22));border-radius:999px;}
 .aic-empty{text-align:center;color:var(--ink-muted);font-size:13.5px;line-height:1.55;margin:auto 8px;}
 .aic-msg{max-width:86%;padding:9px 13px;border-radius:16px;font-size:14.5px;line-height:1.45;
   white-space:pre-wrap;word-wrap:break-word;}
@@ -78,6 +84,15 @@
 /* Виконана дія — не репліка, а слід у розмові: окремий вузький рядок. */
 .aic-action{align-self:flex-start;display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;
   color:var(--low, #4F9C74);background:var(--low-light, rgba(79,156,116,.14));border-radius:999px;padding:5px 11px;}
+
+.aic-chart{align-self:stretch;background:var(--control-bg, rgba(255,255,255,.35));border:1px solid var(--border);
+  border-radius:14px;padding:10px 12px 12px;}
+.aic-chart-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;
+  font-size:12.5px;font-weight:600;color:var(--ink-soft);}
+.aic-chart-save{flex-shrink:0;background:none;border:none;cursor:pointer;color:var(--ink-muted);padding:3px;
+  display:flex;border-radius:6px;}
+.aic-chart-save:hover{color:var(--accent);}
+.aic-chart-wrap{position:relative;height:190px;}
 
 .aic-typing{align-self:flex-start;display:flex;gap:4px;padding:11px 13px;}
 .aic-typing span{width:6px;height:6px;border-radius:50%;background:var(--ink-muted);animation:aicBlink 1.2s infinite;}

@@ -1490,14 +1490,6 @@ function deleteCategory(type, id) {
   return batch.commit().then(() => saveCategoriesList(type, list));
 }
 
-// Перетворює Firestore Timestamp / рядок / Date у людський рядок дати-часу.
-
-// Прибирає HTML-розмітку нотатки, лишаючи тільки текст (для клітинки Excel).
-
-// Формує книгу Excel (.xlsx) з окремими листами для транзакцій, заощаджень,
-// цілей, нотаток і категорій. Використовує SheetJS (window.XLSX),
-// завантажену з cdnjs — того ж CDN, що вже дозволений у CSP.
-
 // ---- Обчислення на основі поточного місяця ----
 function getTargetDate() {
   const now = new Date();

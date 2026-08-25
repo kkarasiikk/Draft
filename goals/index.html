@@ -11,7 +11,7 @@
 <meta name="description" content="Life — довгострокові цілі: віхи, прогрес і серії.">
 <meta http-equiv="Content-Security-Policy" content="
   default-src 'self';
-  script-src 'self' https://www.gstatic.com https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/;
+  script-src 'self' https://www.gstatic.com https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/ https://cdnjs.cloudflare.com;
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
   font-src 'self' https://fonts.gstatic.com;
   img-src 'self' data:;
@@ -366,6 +366,12 @@
 
   .modal-overlay{position:fixed;inset:0;background:var(--overlay);display:none;align-items:flex-end;justify-content:center;z-index:50;}
   .modal-overlay.show{display:flex;}
+  /* Системна смуга гортання з кнопками-стрілками випадає зі стилю шитів:
+     власна — тонка й напівпрозора, як у чаті помічника. */
+  .modal{scrollbar-width:thin;scrollbar-color:var(--card-border-hover) transparent;}
+  .modal::-webkit-scrollbar{width:5px;}
+  .modal::-webkit-scrollbar-track{background:transparent;}
+  .modal::-webkit-scrollbar-thumb{background:var(--card-border-hover);border-radius:999px;}
   .modal{background:var(--surface);border-radius:26px 26px 0 0;padding:20px 20px calc(28px + env(safe-area-inset-bottom));width:100%;max-width:480px;
     max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;}
   .modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
@@ -651,5 +657,6 @@
 <script src="streak.js"></script>
 <script src="app.js"></script>
 <script src="../ai-chat.js"></script>
+<script src="../scroll-lock.js"></script>
 </body>
 </html>

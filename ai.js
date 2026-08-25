@@ -150,8 +150,16 @@ const tools = [
   },
   {
     name: "savings_summary",
-    description: "Скільки відкладено, по яких цілях заощаджень і скільки знято.",
-    input_schema: { type: "object", properties: {} },
+    description:
+      "Скільки відкладено, по яких цілях заощаджень і скільки знято — загальний залишок з початку. " +
+      "Якщо питають про конкретний місяць («скільки я зберіг за липень», «скільки поклав цього місяця») — " +
+      "передай month (YYYY-MM): у відповіді додасться period із приростом чи відтоком САМЕ за той місяць по кожній цілі.",
+    input_schema: {
+      type: "object",
+      properties: {
+        month: { type: "string", description: "Місяць YYYY-MM, якщо питають про конкретний період" },
+      },
+    },
   },
   {
     name: "add_task",
@@ -511,6 +519,34 @@ const tools = [
     },
   },
   {
+    name: "render_chart",
+    description:
+      "Намалювати діаграму просто в чаті: pie (частки категорій), bar (порівняння сум чи періодів) або line (зміна в часі). " +
+      "Використовуй ТІЛЬКИ реальні числа, які вже отримав в цій-таки розмові іншим інструментом (month_summary, query_transactions, " +
+      "training_analysis, list_tasks, goals_progress) — цифри для діаграми вигадувати так само не можна, як і в тексті.",
+    input_schema: {
+      type: "object",
+      properties: {
+        type: { type: "string", enum: ["pie", "bar", "line"] },
+        title: { type: "string", description: "Короткий підпис над діаграмою" },
+        labels: { type: "array", items: { type: "string" }, description: "Підписи секторів/стовпців/точок" },
+        datasets: {
+          type: "array",
+          description: "Один набір значень для pie; один чи кілька — для bar/line (напр. дохід і витрати окремими рядами)",
+          items: {
+            type: "object",
+            properties: {
+              label: { type: "string", description: "Назва ряду, якщо їх кілька" },
+              values: { type: "array", items: { type: "number" }, description: "По одному числу на кожен label" },
+            },
+            required: ["values"],
+          },
+        },
+      },
+      required: ["type", "labels", "datasets"],
+    },
+  },
+  {
     name: "query_transactions",
     description:
       "Отримати список і суму транзакцій користувача за період/фільтром. Використовуй, щоб відповісти на питання про витрати, доходи чи баланс — не вигадуй цифри.",
@@ -527,6 +563,41 @@ const tools = [
     },
   },
 ];
+
+// ---- Діаграма в чаті ----
+// Просто передаємо клієнту вже підготовлені моделлю числа — тут немає
+// звернень до Firestore, лише санітизація форми. Довіра до самих чисел та
+// сама, що й до тексту відповіді: модель бере їх із результату іншого
+// інструмента цього ж раунду, а не вигадує.
+const CHART_TYPES = ["pie", "bar", "line"];
+const CHART_MAX_POINTS = 24;
+const CHART_MAX_DATASETS = 6;
+
+function renderChart(input) {
+  const type = CHART_TYPES.includes(input.type) ? input.type : null;
+  if (!type) return { output: { ok: false, error: "type має бути pie, bar або line" }, isError: true };
+
+  const labels = (Array.isArray(input.labels) ? input.labels : [])
+    .map((l) => String(l).slice(0, 60))
+    .slice(0, CHART_MAX_POINTS);
+  if (!labels.length) return { output: { ok: false, error: "потрібен хоча б один label" }, isError: true };
+
+  let datasets = (Array.isArray(input.datasets) ? input.datasets : [])
+    .slice(0, CHART_MAX_DATASETS)
+    .map((d) => ({
+      label: typeof (d && d.label) === "string" ? d.label.slice(0, 40) : "",
+      values: (Array.isArray(d && d.values) ? d.values : [])
+        .slice(0, labels.length)
+        .map((v) => (Number.isFinite(Number(v)) ? Math.round(Number(v) * 100) / 100 : 0)),
+    }))
+    .filter((d) => d.values.length);
+  if (!datasets.length) return { output: { ok: false, error: "потрібен хоча б один набір значень" }, isError: true };
+  // Кругова діаграма показує частки одного цілого — другий ряд тут нема куди подіти.
+  if (type === "pie") datasets = datasets.slice(0, 1);
+
+  const title = typeof input.title === "string" ? input.title.slice(0, 100) : "";
+  return { output: { ok: true }, action: { kind: "chart", chart: { type, title, labels, datasets } } };
+}
 
 async function executeTool(uid, name, input, ctx) {
   if (name === "add_transaction") {
@@ -577,8 +648,9 @@ async function executeTool(uid, name, input, ctx) {
     };
   }
 
+  if (name === "render_chart") return renderChart(input);
   if (name === "month_summary") return monthSummary(uid, input, ctx);
-  if (name === "savings_summary") return savingsSummary(uid, ctx);
+  if (name === "savings_summary") return savingsSummary(uid, ctx, input);
   if (name === "add_task") return addTask(uid, input, ctx);
   if (name === "list_tasks") return listTasks(uid, input, ctx);
   if (name === "complete_task") return completeTask(uid, input, ctx);
@@ -670,37 +742,63 @@ async function monthSummary(uid, input, ctx) {
   };
 }
 
-async function savingsSummary(uid, ctx) {
+async function savingsSummary(uid, ctx, input) {
   const [savingsSnap, goalsSnap] = await Promise.all([
     userCol(uid, "savings").get(),
     userCol(uid, "savingsGoals").get(),
   ]);
+  const entries = savingsSnap.docs.map((d) => d.data() || {});
+  // Зняття зменшує накопичене, інакше сума показувала б оборот, а не залишок.
+  const delta = (sv) => (sv.type === "withdraw" ? -1 : 1) * (Number(sv.amount) || 0);
+
   const perGoal = new Map();
-  savingsSnap.docs.forEach((d) => {
-    const sv = d.data() || {};
-    const amount = Number(sv.amount) || 0;
-    // Зняття зменшує накопичене, інакше сума показувала б оборот, а не залишок.
-    const delta = sv.type === "withdraw" ? -amount : amount;
+  entries.forEach((sv) => {
     const key = sv.goalId || "";
-    perGoal.set(key, (perGoal.get(key) || 0) + delta);
+    perGoal.set(key, (perGoal.get(key) || 0) + delta(sv));
   });
+  const goalName = new Map(goalsSnap.docs.map((d) => [d.id, (d.data() || {}).name || "Заощадження"]));
   // Перелік будується з самих цілей, а не з операцій: щойно створена ціль ще
   // порожня, і якби її тут не було, покласти в неї гроші не вийшло б —
   // модель не дізналася б її id.
   const goals = goalsSnap.docs.map((d) => ({
     id: d.id,
-    goal: (d.data() || {}).name || "Заощадження",
+    goal: goalName.get(d.id) || "Заощадження",
     saved: Math.round((perGoal.get(d.id) || 0) * 100) / 100,
   }));
   const orphan = perGoal.get("") || 0;
   if (orphan) goals.push({ id: null, goal: "Без цілі", saved: Math.round(orphan * 100) / 100 });
-  return {
-    output: {
-      currency: ctx.currency,
-      total: Math.round(goals.reduce((a, g) => a + g.saved, 0) * 100) / 100,
-      goals,
-    },
+
+  const output = {
+    currency: ctx.currency,
+    total: Math.round(goals.reduce((a, g) => a + g.saved, 0) * 100) / 100,
+    goals,
   };
+
+  // «Скільки я зберіг за липень» — це не залишок, а приріст/відтік САМЕ за
+  // місяць: без цього блоку модель бачила б лише накопичене з початку і не
+  // мала б чим відповісти на питання про конкретний період.
+  const bounds = monthBounds(input && input.month);
+  if (bounds) {
+    const perGoalPeriod = new Map();
+    entries
+      .filter((sv) => typeof sv.date === "string" && sv.date >= bounds.from && sv.date <= bounds.to)
+      .forEach((sv) => {
+        const key = sv.goalId || "";
+        perGoalPeriod.set(key, (perGoalPeriod.get(key) || 0) + delta(sv));
+      });
+    const periodGoals = [...perGoalPeriod.entries()].map(([id, net]) => ({
+      id: id || null,
+      goal: id ? (goalName.get(id) || "Заощадження") : "Без цілі",
+      net: Math.round(net * 100) / 100,
+    }));
+    output.period = {
+      month: input.month,
+      net: Math.round(periodGoals.reduce((a, g) => a + g.net, 0) * 100) / 100,
+      goals: periodGoals,
+    };
+  }
+
+  return { output };
 }
 
 // ---- Завдання ----
@@ -1457,7 +1555,7 @@ function buildSystemPrompt(ctx) {
     "",
     "ВИПРАВЛЯТИ. Помічник уміє міняти вже записане, але не вміє нічого видаляти — так і кажи, якщо просять видалити, і поясни, що це робиться в самому розділі. Перед будь-якою правкою знайди запис інструментом читання (query_transactions, list_tasks, workout_history, goals_progress, savings_summary) і візьми звідти id — вгадувати id не можна. У edit_* передавай ТІЛЬКИ ті поля, які змінюються. Виняток — exercises у edit_workout і milestones у edit_goal: там треба надіслати повний новий список, тож спершу прочитай наявний. Якщо під опис підходить кілька записів — перепитай, який саме.",
     "",
-    "ЗАОЩАДЖЕННЯ. Це скарбнички, окремі від витрат: add_savings_goal створює, add_savings_entry кладе (deposit) або знімає (withdraw). Гроші, відкладені у скарбничку, — не витрата, тож add_transaction тут ні до чого. id цілі бери з savings_summary.",
+    "ЗАОЩАДЖЕННЯ. Це скарбнички, окремі від витрат: add_savings_goal створює, add_savings_entry кладе (deposit) або знімає (withdraw). Гроші, відкладені у скарбничку, — не витрата, тож add_transaction тут ні до чого. id цілі бери з savings_summary. Питають «скільки я зберіг за липень» чи «скільки поклав цього місяця» — це не загальний залишок (total), а зміна САМЕ за той місяць: передай month у savings_summary і бери число з period, а не з total.",
     "",
     "РАДИТИ. Це головне правило: спершу подивись у дані, потім говори. Порада без цифр — марна, людина і так знає, що треба менше витрачати й більше рухатись.",
     "- порада про економію -> спершу month_summary за потрібний місяць, і говори про конкретні категорії й суми;",
@@ -1465,6 +1563,8 @@ function buildSystemPrompt(ctx) {
     "- питання про прогрес -> personal_records або goals_progress;",
     "- питання про завантаженість -> list_tasks.",
     "Якщо даних мало (наприклад, тренувань ще немає) — так і скажи, і дай загальну пораду, чесно позначивши, що вона не спирається на історію.",
+    "",
+    "ГРАФІКИ. Ти вмієш малювати діаграму просто в чаті інструментом render_chart: pie — частки категорій, bar — порівняти суми чи періоди, line — показати зміну в часі. Спершу візьми реальні числа іншим інструментом (month_summary, query_transactions, training_analysis, goals_progress, list_tasks), тоді передай у render_chart ТІ САМІ значення — цифр для діаграми не вигадуй, як і в тексті. НЕ пропонуй натомість зводити цифри в Excel/Google Sheets/chart.js — це вже не потрібно. Для витрат і завдань у застосунку є ще й готова вкладка «Статистика» (кругова діаграма й графік за місяцями в 'Гроші', активність за дні в 'Завдання') — можеш згадати про неї як про постійне місце для цього ж, але спершу все одно намалюй те, що попросили, прямо в чаті. Поверх діаграми додай суть словами: яка категорія найбільша, на скільки змінилось.",
     "",
     "НІКОЛИ не вигадуй цифри, дати чи id. Якщо потрібне число — візьми його інструментом.",
     "Ти не лікар і не тренер: якщо йдеться про біль, травму чи здоровʼя — порадь звернутись до фахівця, а не став діагноз.",

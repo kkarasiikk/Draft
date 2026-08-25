@@ -48,6 +48,9 @@ const T = {
     saveBtn: 'Зберегти', deleteBtn: 'Видалити',
     noExerciseError: 'Додай хоча б одну вправу',
     confirmDeleteSessionTitle: 'Видалити тренування?', confirmDeleteSessionSub: 'Цю дію не можна скасувати.',
+    confirmDeleteExerciseTitle: 'Видалити вправу зі списку?',
+    confirmDeleteExerciseSub: 'Вона зникне з вибору. Записані тренування з нею лишаться недоторканими.',
+    deleteExerciseAria: 'Видалити вправу зі списку',
     cancelBtn: 'Скасувати', deleteConfirmBtn: 'Видалити',
     unsavedTitle: 'Зберегти зміни?',
     unsavedSub: 'Є незбережені зміни. Якщо вийти зараз, вони пропадуть.',
@@ -63,7 +66,9 @@ const T = {
     templateEmpty: 'Шаблонів ще немає. Набери тренування як звичайно й натисни «Зберегти як шаблон» — далі ті самі вправи заводитимуться одним тапом, лишиться тільки виставити вагу.',
     templateLimit: (n) => `Більше ${n} шаблонів — це вже щоденник. Видали зайві у списку шаблонів.`,
     pickerTitle: 'Обрати вправу', pickerSearchPlaceholder: 'Пошук вправи…',
-    pickerCustomLabel: 'Своя вправа', pickerCustomPlaceholder: 'Назва вправи', pickerCustomAdd: 'Додати',
+    pickerCustomLabel: 'Додати свою вправу', pickerCustomPlaceholder: 'Назва вправи', pickerCustomAdd: 'Додати',
+    pickerCustomMuscleLabel: 'Група мʼязів', pickerCustomNeedMuscle: 'Обери, на яку групу мʼязів ця вправа',
+    pickerCustomExisting: 'Уже є у списку — просто додано',
     setPlaceholderWeight: 'кг', setPlaceholderReps: 'повт.', addSetLabel: '+ Підхід',
     lastTimeLabel: (w, r) => (w ? `Минулого разу: ${w}×${r}` : `Минулого разу: ${r} разів`),
     nextTryLabel: (w, r) => (w ? `Спробуй: ${w}×${r}` : `Спробуй: ${r} разів`),
@@ -110,6 +115,7 @@ const T = {
     err_emailInUse: 'Цей email вже зареєстрований.', err_invalidCred: 'Невірний email або пароль.',
     err_userNotFound: 'Користувача з таким email не знайдено.',
     err_tooMany: 'Забагато спроб. Спробуй трохи пізніше.', err_generic: 'Щось пішло не так. Спробуй ще раз.',
+    err_permission: 'Сервер відхилив запис — схоже, правила доступу Firestore ще не опубліковані.',
     err_resetGeneric: 'Не вдалося надіслати лист. Спробуй пізніше.',
   },
   ru: {
@@ -125,6 +131,9 @@ const T = {
     saveBtn: 'Сохранить', deleteBtn: 'Удалить',
     noExerciseError: 'Добавь хотя бы одно упражнение',
     confirmDeleteSessionTitle: 'Удалить тренировку?', confirmDeleteSessionSub: 'Это действие нельзя отменить.',
+    confirmDeleteExerciseTitle: 'Удалить упражнение из списка?',
+    confirmDeleteExerciseSub: 'Оно исчезнет из выбора. Записанные тренировки с ним останутся нетронутыми.',
+    deleteExerciseAria: 'Удалить упражнение из списка',
     cancelBtn: 'Отмена', deleteConfirmBtn: 'Удалить',
     unsavedTitle: 'Сохранить изменения?',
     unsavedSub: 'Есть несохранённые изменения. Если выйти сейчас, они пропадут.',
@@ -140,7 +149,9 @@ const T = {
     templateEmpty: 'Шаблонов пока нет. Набери тренировку как обычно и нажми «Сохранить как шаблон» — дальше те же упражнения будут заводиться одним тапом, останется только выставить вес.',
     templateLimit: (n) => `Больше ${n} шаблонов — это уже дневник. Удали лишние в списке шаблонов.`,
     pickerTitle: 'Выбрать упражнение', pickerSearchPlaceholder: 'Поиск упражнения…',
-    pickerCustomLabel: 'Своё упражнение', pickerCustomPlaceholder: 'Название упражнения', pickerCustomAdd: 'Добавить',
+    pickerCustomLabel: 'Добавить своё упражнение', pickerCustomPlaceholder: 'Название упражнения', pickerCustomAdd: 'Добавить',
+    pickerCustomMuscleLabel: 'Группа мышц', pickerCustomNeedMuscle: 'Выбери, на какую группу мышц это упражнение',
+    pickerCustomExisting: 'Уже есть в списке — просто добавлено',
     setPlaceholderWeight: 'кг', setPlaceholderReps: 'повт.', addSetLabel: '+ Подход',
     lastTimeLabel: (w, r) => (w ? `В прошлый раз: ${w}×${r}` : `В прошлый раз: ${r} раз`),
     nextTryLabel: (w, r) => (w ? `Попробуй: ${w}×${r}` : `Попробуй: ${r} раз`),
@@ -185,6 +196,7 @@ const T = {
     err_emailInUse: 'Этот email уже зарегистрирован.', err_invalidCred: 'Неверный email или пароль.',
     err_userNotFound: 'Аккаунт с таким email не найден.',
     err_tooMany: 'Слишком много попыток. Попробуй позже.', err_generic: 'Что-то пошло не так. Попробуй ещё раз.',
+    err_permission: 'Сервер отклонил запись — похоже, правила доступа Firestore ещё не опубликованы.',
     err_resetGeneric: 'Не удалось отправить письмо. Попробуй позже.',
   },
   pl: {
@@ -200,6 +212,9 @@ const T = {
     saveBtn: 'Zapisz', deleteBtn: 'Usuń',
     noExerciseError: 'Dodaj przynajmniej jedno ćwiczenie',
     confirmDeleteSessionTitle: 'Usunąć trening?', confirmDeleteSessionSub: 'Tej czynności nie można cofnąć.',
+    confirmDeleteExerciseTitle: 'Usunąć ćwiczenie z listy?',
+    confirmDeleteExerciseSub: 'Zniknie z wyboru. Zapisane treningi z nim pozostaną nienaruszone.',
+    deleteExerciseAria: 'Usuń ćwiczenie z listy',
     cancelBtn: 'Anuluj', deleteConfirmBtn: 'Usuń',
     unsavedTitle: 'Zapisać zmiany?',
     unsavedSub: 'Są niezapisane zmiany. Jeśli teraz wyjdziesz, przepadną.',
@@ -215,7 +230,9 @@ const T = {
     templateEmpty: 'Nie ma jeszcze szablonów. Wpisz trening jak zwykle i naciśnij „Zapisz jako szablon" — potem te same ćwiczenia dodasz jednym tapnięciem, zostanie tylko ustawić ciężar.',
     templateLimit: (n) => `Więcej niż ${n} szablonów to już dziennik. Usuń zbędne na liście szablonów.`,
     pickerTitle: 'Wybierz ćwiczenie', pickerSearchPlaceholder: 'Szukaj ćwiczenia…',
-    pickerCustomLabel: 'Własne ćwiczenie', pickerCustomPlaceholder: 'Nazwa ćwiczenia', pickerCustomAdd: 'Dodaj',
+    pickerCustomLabel: 'Dodaj własne ćwiczenie', pickerCustomPlaceholder: 'Nazwa ćwiczenia', pickerCustomAdd: 'Dodaj',
+    pickerCustomMuscleLabel: 'Partia mięśniowa', pickerCustomNeedMuscle: 'Wybierz, na którą partię jest to ćwiczenie',
+    pickerCustomExisting: 'Już jest na liście — po prostu dodano',
     setPlaceholderWeight: 'kg', setPlaceholderReps: 'powt.', addSetLabel: '+ Seria',
     lastTimeLabel: (w, r) => (w ? `Poprzednio: ${w}×${r}` : `Poprzednio: ${r} powtórzeń`),
     nextTryLabel: (w, r) => (w ? `Spróbuj: ${w}×${r}` : `Spróbuj: ${r} powtórzeń`),
@@ -260,6 +277,7 @@ const T = {
     err_emailInUse: 'Ten email już zarejestrowano.', err_invalidCred: 'Nieprawidłowy email lub hasło.',
     err_userNotFound: 'Nie znaleziono konta z tym emailem.',
     err_tooMany: 'Zbyt wiele prób. Spróbuj później.', err_generic: 'Coś poszło nie tak. Spróbuj ponownie.',
+    err_permission: 'Serwer odrzucił zapis — wygląda na to, że reguły Firestore nie zostały opublikowane.',
     err_resetGeneric: 'Nie udało się wysłać wiadomości. Spróbuj później.',
   },
   en: {
@@ -275,6 +293,9 @@ const T = {
     saveBtn: 'Save', deleteBtn: 'Delete',
     noExerciseError: 'Add at least one exercise',
     confirmDeleteSessionTitle: 'Delete workout?', confirmDeleteSessionSub: 'This action cannot be undone.',
+    confirmDeleteExerciseTitle: 'Remove exercise from the list?',
+    confirmDeleteExerciseSub: 'It disappears from the picker. Workouts already logged with it stay untouched.',
+    deleteExerciseAria: 'Remove exercise from the list',
     cancelBtn: 'Cancel', deleteConfirmBtn: 'Delete',
     unsavedTitle: 'Save changes?',
     unsavedSub: 'There are unsaved changes. Leaving now discards them.',
@@ -290,7 +311,9 @@ const T = {
     templateEmpty: 'No templates yet. Enter a workout as usual and hit "Save as template" — after that the same exercises come back with one tap and you only set the weight.',
     templateLimit: (n) => `More than ${n} templates is a diary of its own. Remove some from the template list.`,
     pickerTitle: 'Choose exercise', pickerSearchPlaceholder: 'Search exercise…',
-    pickerCustomLabel: 'Custom exercise', pickerCustomPlaceholder: 'Exercise name', pickerCustomAdd: 'Add',
+    pickerCustomLabel: 'Add custom exercise', pickerCustomPlaceholder: 'Exercise name', pickerCustomAdd: 'Add',
+    pickerCustomMuscleLabel: 'Muscle group', pickerCustomNeedMuscle: 'Pick which muscle group this exercise targets',
+    pickerCustomExisting: 'Already on the list — just added',
     setPlaceholderWeight: 'kg', setPlaceholderReps: 'reps', addSetLabel: '+ Set',
     lastTimeLabel: (w, r) => (w ? `Last time: ${w}×${r}` : `Last time: ${r} reps`),
     nextTryLabel: (w, r) => (w ? `Try: ${w}×${r}` : `Try: ${r} reps`),
@@ -335,6 +358,7 @@ const T = {
     err_emailInUse: 'This email is already registered.', err_invalidCred: 'Incorrect email or password.',
     err_userNotFound: 'No account found with this email.',
     err_tooMany: 'Too many attempts. Try again later.', err_generic: 'Something went wrong. Try again.',
+    err_permission: 'The server rejected the write — the Firestore rules seem not to be published yet.',
     err_resetGeneric: 'Could not send the email. Try again later.',
   },
 };
@@ -410,8 +434,7 @@ function applyTranslations() {
   document.getElementById('sessionNotesInput').placeholder = t('sessionNotesPlaceholder');
   document.getElementById('deleteSessionBtn').textContent = t('deleteBtn');
   document.getElementById('sessionSubmitBtn').textContent = t('saveBtn');
-  document.getElementById('confirmTitle').textContent = t('confirmDeleteSessionTitle');
-  document.getElementById('confirmSub').textContent = t('confirmDeleteSessionSub');
+  applyConfirmTexts();
   document.getElementById('confirmCancel').textContent = t('cancelBtn');
   document.getElementById('confirmDelete').textContent = t('deleteConfirmBtn');
   document.getElementById('templatesTitle').textContent = t('templatesTitle');
@@ -422,6 +445,8 @@ function applyTranslations() {
   document.getElementById('pickerCustomLabel').textContent = t('pickerCustomLabel');
   document.getElementById('pickerCustomInput').placeholder = t('pickerCustomPlaceholder');
   document.getElementById('pickerCustomAdd').textContent = t('pickerCustomAdd');
+  document.getElementById('pickerCustomMuscleLabel').textContent = t('pickerCustomMuscleLabel');
+  renderPickerCustomMuscleRow();
   document.getElementById('authSub').textContent = t('authSub');
   document.getElementById('authEmailLabel').textContent = t('emailLabel');
   document.getElementById('authPasswordLabel').textContent = t('passwordLabel');
@@ -430,6 +455,13 @@ function applyTranslations() {
   document.getElementById('forgotPasswordLink').textContent = t('forgotPassword');
   setAuthMode(authMode);
   refreshDatePickersLang();
+}
+
+// Firestore відмовляє записом permission-denied, коли правила для колекції
+// ще не опубліковані. Загальне «щось пішло не так» тут лише збиває з
+// пантелику: з нього не видно ні причини, ні що робити далі.
+function writeErrorMessage(err) {
+  return t(err && err.code === 'permission-denied' ? 'err_permission' : 'err_generic');
 }
 
 // ---- Вхід / реєстрація ----
@@ -570,10 +602,15 @@ function epley1RM(weight, reps) {
   if (!weight || !reps) return 0;
   return weight * (1 + reps / 30);
 }
-// Ключ вправи для групування/пошуку історії: бібліотечні вправи group за
-// стабільним id (незалежно від мови), власні — за нормалізованою назвою.
+// Ключ вправи для групування/пошуку історії: бібліотечні вправи — за
+// стабільним id (незалежно від мови), власні зі списку — за стабільним id
+// свого документа (можна перейменувати, ключ не зʼїде), а стара власна
+// вправа без customId (записана до цієї фічі) — за нормалізованою назвою,
+// як і раніше.
 function exerciseKey(ex) {
-  return ex.libId ? `lib:${ex.libId}` : `c:${(ex.name || '').trim().toLowerCase()}`;
+  if (ex.libId) return `lib:${ex.libId}`;
+  if (ex.customId) return `custom:${ex.customId}`;
+  return `c:${(ex.name || '').trim().toLowerCase()}`;
 }
 function exerciseDisplayName(ex) {
   return ex.libId ? exerciseLabel(ex.libId) : (ex.name || '');
@@ -786,10 +823,19 @@ let unsubscribeSessions = null;
 // Самопочуття на сьогодні: 'ready' | 'ok' | 'low' або null, поки не питали.
 let readiness = null;
 let unsubscribeReadiness = null;
+// Власні вправи людини — ті, яких немає в бібліотеці. Зберігаються окремо
+// від тренувань (users/{uid}/customExercises), тож обрана один раз вправа
+// лишається в пікері для наступних тренувань, а не набирається щоразу
+// наново.
+let customExercises = []; // [{ id, name, muscle, createdAt }]
+let unsubscribeCustomExercises = null;
 let activeTab = 'sessions';
 let editingSessionId = null;
-let formExercises = []; // [{ id, libId, name, muscle, sets:[{weight, reps}] }]
+let formExercises = []; // [{ id, libId, customId, name, muscle, sets:[{weight, reps}] }]
 let pendingDeleteId = null;
+// Підтвердження одне на два випадки — тренування й власна вправа, — тож
+// саме воно й вирішує, який текст показати і в яку колекцію писати.
+let pendingDeleteKind = 'session'; // 'session' | 'customExercise'
 let pickerTargetBlockId = null; // якщо задано — заміна вправи в існуючому блоці, інакше — новий блок
 let templates = [];
 let unsubscribeTemplates = null;
@@ -797,6 +843,7 @@ let unsubscribeTemplates = null;
 // до одного дня (null — показані всі).
 let calMonth = todayISO().slice(0, 7); // 'YYYY-MM'
 let calSelectedDate = null;
+let pickerCustomMuscle = null; // обрана група мʼязів для нової своєї вправи в пікері
 
 // ---- Дані (Firestore, реалтайм) ----
 function subscribeToSessions(uid) {
@@ -829,6 +876,20 @@ function subscribeToReadiness(uid) {
       readiness = data.level || null;
       renderCurrentScreen();
     }, (err) => console.error('subscribeToReadiness:', err));
+}
+
+// Сортуємо за назвою одразу тут — інакше довелось би робити це при
+// кожному рендері пікера.
+function subscribeToCustomExercises(uid) {
+  if (unsubscribeCustomExercises) unsubscribeCustomExercises();
+  const col = db.collection('users').doc(uid).collection('customExercises');
+  unsubscribeCustomExercises = col.onSnapshot((snap) => {
+    customExercises = snap.docs.map((d) => ({ id: d.id, ...d.data() }))
+      .sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+    if (document.getElementById('exercisePickerOverlay').classList.contains('show')) {
+      renderPickerGroups(document.getElementById('pickerSearch').value);
+    }
+  }, (err) => console.error('subscribeToCustomExercises:', err));
 }
 
 async function setReadiness(level) {
@@ -1416,7 +1477,7 @@ function openSessionForm(existingSession) {
   document.getElementById('sessionNotesInput').value = existingSession ? (existingSession.notes || '') : '';
   formExercises = existingSession
     ? (existingSession.exercises || []).map((ex) => ({
-        id: uid4(), libId: ex.libId || null, name: ex.name || '', muscle: ex.muscle || null,
+        id: uid4(), libId: ex.libId || null, customId: ex.customId || null, name: ex.name || '', muscle: ex.muscle || null,
         sets: (ex.sets || []).map((s) => ({ weight: s.weight, reps: s.reps })),
       }))
     : [];
@@ -1694,10 +1755,29 @@ document.getElementById('addExerciseBtn').addEventListener('click', () => {
 function openExercisePicker() {
   document.getElementById('pickerCustomInput').value = '';
   document.getElementById('pickerSearch').value = '';
+  pickerCustomMuscle = null;
+  document.getElementById('pickerCustomHint').textContent = '';
+  // Форма своєї вправи щоразу починається згорнутою: у більшості випадків
+  // потрібна вправа вже є в списку, і розгорнута форма лише з'їдала б висоту.
+  setCustomFormOpen(false);
   renderPickerGroups('');
+  renderPickerCustomMuscleRow();
   document.getElementById('exercisePickerOverlay').classList.add('show');
   setTimeout(() => document.getElementById('pickerSearch').focus(), 50);
 }
+
+function setCustomFormOpen(open) {
+  document.getElementById('pickerCustomForm').classList.toggle('show', open);
+  const toggle = document.getElementById('pickerCustomToggle');
+  toggle.classList.toggle('open', open);
+  toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+
+document.getElementById('pickerCustomToggle').addEventListener('click', () => {
+  const open = !document.getElementById('pickerCustomForm').classList.contains('show');
+  setCustomFormOpen(open);
+  if (open) setTimeout(() => document.getElementById('pickerCustomInput').focus(), 50);
+});
 function renderPickerGroups(query) {
   const q = query.trim().toLowerCase();
   const root = document.getElementById('pickerGroups');
@@ -1706,23 +1786,93 @@ function renderPickerGroups(query) {
     const label = exerciseLabel(item.id);
     if (q && !label.toLowerCase().includes(q)) return;
     if (!byMuscle.has(item.muscle)) byMuscle.set(item.muscle, []);
-    byMuscle.get(item.muscle).push({ id: item.id, label });
+    byMuscle.get(item.muscle).push({ kind: 'lib', id: item.id, label });
   });
-  root.innerHTML = MUSCLE_ORDER.filter((m) => byMuscle.has(m)).map((m) => `
+  // Власні вправи додаються в ту саму групу мʼязів, що й бібліотечні —
+  // людина шукає «щось на груди», а не окремо «моє» й «з бібліотеки».
+  customExercises.forEach((item) => {
+    if (q && !(item.name || '').toLowerCase().includes(q)) return;
+    const m = item.muscle || 'other';
+    if (!byMuscle.has(m)) byMuscle.set(m, []);
+    byMuscle.get(m).push({ kind: 'custom', id: item.id, label: item.name || '' });
+  });
+  const order = [...MUSCLE_ORDER, ...[...byMuscle.keys()].filter((m) => !MUSCLE_ORDER.includes(m))];
+  root.innerHTML = order.filter((m) => byMuscle.has(m)).map((m) => `
     <div class="picker-group">
-      <div class="picker-group-label">${escapeHtml(muscleLabel(m))}</div>
-      ${byMuscle.get(m).map((item) => `<div class="picker-item" data-pick-lib="${item.id}" data-muscle="${m}">${escapeHtml(item.label)}</div>`).join('')}
+      ${m === 'other' ? '' : `<div class="picker-group-label">${escapeHtml(muscleLabel(m))}</div>`}
+      ${byMuscle.get(m).map((item) => item.kind === 'lib'
+        ? `<div class="picker-item" data-pick-lib="${item.id}" data-muscle="${m}"><span class="picker-item-name">${escapeHtml(item.label)}</span></div>`
+        // Хрестик лише у своїх вправ: бібліотечні вбудовані, їх видаляти нема сенсу.
+        : `<div class="picker-item" data-pick-custom="${item.id}" data-muscle="${m}">
+             <span class="picker-item-name">${escapeHtml(item.label)}</span>
+             <button type="button" class="picker-item-del" data-del-custom="${item.id}" aria-label="${escapeHtml(t('deleteExerciseAria'))}">
+               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+             </button>
+           </div>`
+      ).join('')}
     </div>
   `).join('');
   root.querySelectorAll('[data-pick-lib]').forEach((el) => {
     el.addEventListener('click', () => selectExercise({ libId: el.dataset.pickLib, muscle: el.dataset.muscle, name: exerciseLabel(el.dataset.pickLib) }));
   });
+  root.querySelectorAll('[data-pick-custom]').forEach((el) => {
+    el.addEventListener('click', () => {
+      const item = customExercises.find((c) => c.id === el.dataset.pickCustom);
+      if (!item) return;
+      selectExercise({ customId: item.id, muscle: item.muscle, name: item.name });
+    });
+  });
+  // Хрестик живе всередині рядка, тож без зупинки події дотик по ньому
+  // спершу обрав би вправу й закрив пікер.
+  root.querySelectorAll('[data-del-custom]').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      askDelete('customExercise', btn.dataset.delCustom);
+    });
+  });
 }
 document.getElementById('pickerSearch').addEventListener('input', (e) => renderPickerGroups(e.target.value));
-document.getElementById('pickerCustomAdd').addEventListener('click', () => {
+
+function renderPickerCustomMuscleRow() {
+  document.getElementById('pickerCustomMuscleRow').innerHTML = MUSCLE_ORDER.map((m) => `
+    <button type="button" class="picker-muscle-choice${pickerCustomMuscle === m ? ' selected' : ''}" data-muscle="${m}">${escapeHtml(muscleLabel(m))}</button>
+  `).join('');
+  document.querySelectorAll('#pickerCustomMuscleRow [data-muscle]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      pickerCustomMuscle = btn.dataset.muscle;
+      document.getElementById('pickerCustomHint').textContent = '';
+      renderPickerCustomMuscleRow();
+    });
+  });
+}
+
+// Своя вправа зберігається один раз і далі просто обирається зі списку —
+// повторний ввід того самого імені (без урахування регістру) не плодить
+// дублікат, а підхоплює вже наявний запис.
+document.getElementById('pickerCustomAdd').addEventListener('click', async () => {
   const name = document.getElementById('pickerCustomInput').value.trim();
+  const hintEl = document.getElementById('pickerCustomHint');
   if (!name) return;
-  selectExercise({ libId: null, muscle: null, name });
+  if (!pickerCustomMuscle) { hintEl.textContent = t('pickerCustomNeedMuscle'); return; }
+  hintEl.textContent = '';
+
+  const existing = customExercises.find((c) => (c.name || '').trim().toLowerCase() === name.toLowerCase());
+  if (existing) {
+    selectExercise({ customId: existing.id, muscle: existing.muscle, name: existing.name });
+    return;
+  }
+  const uidCur = auth.currentUser && auth.currentUser.uid;
+  if (!uidCur) return;
+  try {
+    const ref = await db.collection('users').doc(uidCur).collection('customExercises').add({
+      name: name.slice(0, 120), muscle: pickerCustomMuscle,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+    selectExercise({ customId: ref.id, muscle: pickerCustomMuscle, name });
+  } catch (err) {
+    console.error('addCustomExercise:', err);
+    hintEl.textContent = writeErrorMessage(err);
+  }
 });
 document.getElementById('closePicker').addEventListener('click', () => {
   document.getElementById('exercisePickerOverlay').classList.remove('show');
@@ -1731,12 +1881,12 @@ document.getElementById('exercisePickerOverlay').addEventListener('click', (e) =
   if (e.target.id === 'exercisePickerOverlay') e.currentTarget.classList.remove('show');
 });
 
-function selectExercise({ libId, muscle, name }) {
+function selectExercise({ libId, customId, muscle, name }) {
   if (pickerTargetBlockId) {
     const ex = formExercises.find((e) => e.id === pickerTargetBlockId);
-    if (ex) { ex.libId = libId; ex.muscle = muscle; ex.name = name; }
+    if (ex) { ex.libId = libId || null; ex.customId = customId || null; ex.muscle = muscle; ex.name = name; }
   } else {
-    formExercises.push({ id: uid4(), libId, muscle, name, sets: [{ weight: '', reps: '' }] });
+    formExercises.push({ id: uid4(), libId: libId || null, customId: customId || null, muscle, name, sets: [{ weight: '', reps: '' }] });
   }
   pickerTargetBlockId = null;
   document.getElementById('exercisePickerOverlay').classList.remove('show');
@@ -1932,7 +2082,7 @@ async function saveSessionForm() {
 
   const cleanExercises = formExercises
     .map((ex) => ({
-      id: ex.id, libId: ex.libId || null, muscle: ex.muscle || null,
+      id: ex.id, libId: ex.libId || null, customId: ex.libId ? null : (ex.customId || null), muscle: ex.muscle || null,
       name: ex.libId ? exerciseLabel(ex.libId) : (ex.name || '').trim(),
       // Порожні підходи лишаються, і вправа без жодного заповненого — теж.
       // Тренування часто записують наперед, планом: три порожні рядки — це
@@ -1989,7 +2139,7 @@ async function saveSessionForm() {
     if (bestPr) showPrToast(bestPr.name, bestPr.weight, bestPr.reps);
   } catch (err) {
     console.error('save session:', err);
-    errorEl.textContent = t('err_generic');
+    errorEl.textContent = writeErrorMessage(err);
   } finally {
     submitBtn.disabled = false;
   }
@@ -2004,12 +2154,28 @@ function showPrToast(name, weight, reps) {
   prToastTimer = setTimeout(() => toast.classList.remove('show'), 4200);
 }
 
+function applyConfirmTexts() {
+  const isExercise = pendingDeleteKind === 'customExercise';
+  document.getElementById('confirmTitle').textContent =
+    t(isExercise ? 'confirmDeleteExerciseTitle' : 'confirmDeleteSessionTitle');
+  document.getElementById('confirmSub').textContent =
+    t(isExercise ? 'confirmDeleteExerciseSub' : 'confirmDeleteSessionSub');
+}
+
+function askDelete(kind, id) {
+  pendingDeleteKind = kind;
+  pendingDeleteId = id;
+  applyConfirmTexts();
+  document.getElementById('confirmOverlay').classList.add('show');
+}
+
 document.getElementById('deleteSessionBtn').addEventListener('click', () => {
   if (!editingSessionId) return;
-  pendingDeleteId = editingSessionId;
   // Питати «зберегти зміни?» перед видаленням безглуздо — зберігати нема куди.
+  // closeSessionForm() (а не просто ховання оверлея) скидає ще й знімок
+  // гарда незбереженого; askDelete виставляє тексти й колекцію для видалення.
   closeSessionForm();
-  document.getElementById('confirmOverlay').classList.add('show');
+  askDelete('session', editingSessionId);
 });
 document.getElementById('confirmCancel').addEventListener('click', () => {
   document.getElementById('confirmOverlay').classList.remove('show');
@@ -2020,10 +2186,11 @@ document.getElementById('confirmOverlay').addEventListener('click', (e) => {
 });
 document.getElementById('confirmDelete').addEventListener('click', async () => {
   if (!pendingDeleteId || !auth.currentUser) return;
+  const colName = pendingDeleteKind === 'customExercise' ? 'customExercises' : 'workouts';
   try {
-    await db.collection('users').doc(auth.currentUser.uid).collection('workouts').doc(pendingDeleteId).delete();
+    await db.collection('users').doc(auth.currentUser.uid).collection(colName).doc(pendingDeleteId).delete();
   } catch (err) {
-    console.error('delete session:', err);
+    console.error('delete ' + colName + ':', err);
   }
   pendingDeleteId = null;
   document.getElementById('confirmOverlay').classList.remove('show');
@@ -2048,11 +2215,14 @@ auth.onAuthStateChanged((user) => {
     subscribeToSessions(user.uid);
     subscribeToReadiness(user.uid);
     subscribeToTemplates(user.uid);
+    subscribeToCustomExercises(user.uid);
   } else {
     if (unsubscribeSessions) { unsubscribeSessions(); unsubscribeSessions = null; }
     if (unsubscribeReadiness) { unsubscribeReadiness(); unsubscribeReadiness = null; }
     if (unsubscribeTemplates) { unsubscribeTemplates(); unsubscribeTemplates = null; }
+    if (unsubscribeCustomExercises) { unsubscribeCustomExercises(); unsubscribeCustomExercises = null; }
     readiness = null;
+    customExercises = [];
     sessions = [];
     templates = [];
     document.getElementById('appScreen').style.display = 'none';

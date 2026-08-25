@@ -47,10 +47,14 @@
   }
 
   /** Ключ вправи для групування: бібліотечні — за стабільним id (не
-   *  залежить від мови), власні — за нормалізованою назвою. */
+   *  залежить від мови), власні зі списку — за стабільним id свого
+   *  документа (перейменування не зʼїжджає), старі власні без customId —
+   *  за нормалізованою назвою, як і раніше. */
   function exerciseKey(ex) {
     if (!ex) return '';
-    return ex.libId ? 'lib:' + ex.libId : 'c:' + String(ex.name || '').trim().toLowerCase();
+    if (ex.libId) return 'lib:' + ex.libId;
+    if (ex.customId) return 'custom:' + ex.customId;
+    return 'c:' + String(ex.name || '').trim().toLowerCase();
   }
 
   function bestSet(sets) {

@@ -45,6 +45,7 @@
       taskEdited: (a) => `Змінено: ${a.title}${a.dueDate ? ' · ' + a.dueDate : ''}`,
       workoutEdited: (a) => `Виправлено тренування: ${a.date}${a.name ? ' · ' + a.name : ''}`,
       goalEdited: (a) => `Змінено ціль: ${a.title}`,
+      chartSave: 'Зберегти як зображення', chartDefaultTitle: 'Діаграма',
       error: 'Не вдалося отримати відповідь. Спробуй ще раз.',
       limit: 'Забагато повідомлень поспіль. Спробуй трохи пізніше.',
       unavailable: 'Помічник ще не підключений: треба задеплоїти Cloud Functions і додати ключ Anthropic.',
@@ -80,6 +81,7 @@
       taskEdited: (a) => `Изменено: ${a.title}${a.dueDate ? ' · ' + a.dueDate : ''}`,
       workoutEdited: (a) => `Исправлена тренировка: ${a.date}${a.name ? ' · ' + a.name : ''}`,
       goalEdited: (a) => `Изменена цель: ${a.title}`,
+      chartSave: 'Сохранить как изображение', chartDefaultTitle: 'Диаграмма',
       error: 'Не удалось получить ответ. Попробуй ещё раз.',
       limit: 'Слишком много сообщений подряд. Попробуй чуть позже.',
       unavailable: 'Помощник ещё не подключён: нужно задеплоить Cloud Functions и добавить ключ Anthropic.',
@@ -115,6 +117,7 @@
       taskEdited: (a) => `Zmieniono: ${a.title}${a.dueDate ? ' · ' + a.dueDate : ''}`,
       workoutEdited: (a) => `Poprawiono trening: ${a.date}${a.name ? ' · ' + a.name : ''}`,
       goalEdited: (a) => `Zmieniono cel: ${a.title}`,
+      chartSave: 'Zapisz jako obraz', chartDefaultTitle: 'Wykres',
       error: 'Nie udało się uzyskać odpowiedzi. Spróbuj ponownie.',
       limit: 'Zbyt wiele wiadomości pod rząd. Spróbuj później.',
       unavailable: 'Asystent nie jest jeszcze podłączony: trzeba wdrożyć Cloud Functions i dodać klucz Anthropic.',
@@ -150,6 +153,7 @@
       taskEdited: (a) => `Updated: ${a.title}${a.dueDate ? ' · ' + a.dueDate : ''}`,
       workoutEdited: (a) => `Workout fixed: ${a.date}${a.name ? ' · ' + a.name : ''}`,
       goalEdited: (a) => `Goal updated: ${a.title}`,
+      chartSave: 'Save as image', chartDefaultTitle: 'Chart',
       error: 'Could not get an answer. Try again.',
       limit: 'Too many messages in a row. Try again a bit later.',
       unavailable: 'The assistant is not connected yet: deploy Cloud Functions and add an Anthropic key.',
@@ -168,7 +172,139 @@
       ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   }
 
-  let history = [];   // [{ role: 'user' | 'assistant' | 'action', text, error? }]
+  // ---- Діаграми в чаті ----
+  // Chart.js тягнемо лише тоді, коли модель і справді намалювала щось —
+  // сторінка бюджету підключає його одразу для власної статистики, решта
+  // чотирьох раніше без нього обходились, і вантажити наперед ~200 КБ,
+  // якими скористаються не в кожній розмові, немає сенсу.
+  const CHART_JS_URL = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js';
+  let chartJsPromise = null;
+  function ensureChartJs() {
+    if (window.Chart) return Promise.resolve();
+    if (chartJsPromise) return chartJsPromise;
+    chartJsPromise = new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = CHART_JS_URL;
+      s.onload = resolve;
+      s.onerror = () => { chartJsPromise = null; reject(new Error('chart.js load failed')); };
+      document.head.appendChild(s);
+    });
+    return chartJsPromise;
+  }
+
+  function themeVar(name) {
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  }
+
+  const CHART_PALETTE = ['#6F93D6', '#E39A76', '#7FCB9E', '#C9683F', '#9B7FD6', '#D6B36F', '#5FB8C9', '#D67FA8'];
+
+  function isValidChart(c) {
+    return !!c && ['pie', 'bar', 'line'].includes(c.type) &&
+      Array.isArray(c.labels) && c.labels.length &&
+      Array.isArray(c.datasets) && c.datasets.length &&
+      c.datasets.every((d) => Array.isArray(d.values));
+  }
+
+  // Непрозорий фон під самою діаграмою: інакше «зберегти як зображення»
+  // у темній темі давало б PNG із прозорим тлом, який у месенджері чи
+  // галереї виглядає зламаним.
+  const chartBgPlugin = {
+    id: 'aicBg',
+    beforeDraw(chart) {
+      const { ctx, width, height } = chart;
+      ctx.save();
+      ctx.globalCompositeOperation = 'destination-over';
+      ctx.fillStyle = themeVar('--surface') || '#ffffff';
+      ctx.fillRect(0, 0, width, height);
+      ctx.restore();
+    },
+  };
+
+  function buildChartConfig(spec) {
+    const isPie = spec.type === 'pie';
+    const datasets = spec.datasets.map((d, i) => isPie
+      ? {
+        data: d.values,
+        backgroundColor: spec.labels.map((_, j) => CHART_PALETTE[j % CHART_PALETTE.length]),
+        borderColor: themeVar('--surface'), borderWidth: 2,
+      }
+      : {
+        label: d.label || '', data: d.values,
+        backgroundColor: spec.type === 'bar' ? CHART_PALETTE[i % CHART_PALETTE.length] : 'transparent',
+        borderColor: CHART_PALETTE[i % CHART_PALETTE.length],
+        borderRadius: spec.type === 'bar' ? 3 : 0,
+        tension: spec.type === 'line' ? 0.25 : 0,
+        pointRadius: spec.type === 'line' ? 2 : 0,
+      });
+    return {
+      type: isPie ? 'doughnut' : spec.type,
+      data: { labels: spec.labels, datasets },
+      options: {
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: !isPie && datasets.length > 1, labels: { color: themeVar('--ink-muted'), font: { family: 'Inter', size: 11 } } },
+        },
+        scales: isPie ? undefined : {
+          x: { grid: { display: false }, ticks: { color: themeVar('--ink-muted'), font: { family: 'Inter', size: 11 } } },
+          y: { grid: { color: themeVar('--border') }, ticks: { color: themeVar('--ink-muted'), font: { family: 'Inter', size: 11 } } },
+        },
+      },
+    };
+  }
+
+  const chartInstances = {}; // canvas id -> Chart
+  function destroyCharts() {
+    Object.keys(chartInstances).forEach((id) => {
+      try { chartInstances[id].destroy(); } catch (err) { /* канвас уже прибрано */ }
+      delete chartInstances[id];
+    });
+  }
+
+  function chartMarkup(chart, i) {
+    const id = 'aicChart' + i;
+    const title = chart.title || t('chartDefaultTitle');
+    return `<div class="aic-chart">
+      <div class="aic-chart-head">
+        <span>${esc(title)}</span>
+        <button type="button" class="aic-chart-save" data-canvas="${id}" aria-label="${esc(t('chartSave'))}" title="${esc(t('chartSave'))}">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+        </button>
+      </div>
+      <div class="aic-chart-wrap"><canvas id="${id}"></canvas></div>
+    </div>`;
+  }
+
+  function renderCharts() {
+    history.forEach((m, i) => {
+      if (m.role !== 'chart') return;
+      const canvas = el('aicChart' + i);
+      if (!canvas) return;
+      ensureChartJs().then(() => {
+        // Поки Chart.js вантажився, новий render() міг уже прибрати цей канвас.
+        if (!document.body.contains(canvas)) return;
+        if (chartInstances[canvas.id]) { try { chartInstances[canvas.id].destroy(); } catch (err) { /* уже прибрано */ } }
+        chartInstances[canvas.id] = new window.Chart(canvas, { ...buildChartConfig(m.chart), plugins: [chartBgPlugin] });
+      }).catch((err) => console.error('chart.js load:', err));
+    });
+  }
+
+  function saveChartImage(canvasId) {
+    const inst = chartInstances[canvasId];
+    const canvas = el(canvasId);
+    if (!inst || !canvas) return;
+    try {
+      const a = document.createElement('a');
+      a.href = inst.toBase64Image('image/png', 1);
+      a.download = 'chart.png';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    } catch (err) {
+      console.error('chart save:', err);
+    }
+  }
+
+  let history = [];   // [{ role: 'user' | 'assistant' | 'action' | 'chart', text?, chart?, error? }]
   let pending = false;
   let loaded = false; // історію з Firestore тягнемо один раз за сеанс
   let model = localStorage.getItem('financeAppAiModel') || 'haiku';
@@ -212,6 +348,13 @@
     el('aicSettingsBtn').addEventListener('click', () => {
       el('aicSettings').classList.toggle('show');
       renderSettings();
+    });
+    // Делегування: кнопки збереження живуть у innerHTML, що перебудовується
+    // при кожному render(), тож власні слухачі на них довелось би чіпляти
+    // щоразу заново.
+    el('aicLog').addEventListener('click', (e) => {
+      const btn = e.target.closest('.aic-chart-save');
+      if (btn) saveChartImage(btn.dataset.canvas);
     });
     el('aicForm').addEventListener('submit', (e) => { e.preventDefault(); send(); });
     el('aicMic').addEventListener('click', toggleListening);
@@ -283,7 +426,11 @@
     if (entry.error) return;
     const col = messagesCol();
     if (!col) return;
-    col.add({ role: entry.role, text: entry.text, at: at })
+    // Діаграма — не текст, тож пишемо її специфікацію як JSON у те саме
+    // поле text: окреме поле означало б окрему гілку і в схемі, і в кожному
+    // місці, що читає історію, заради єдиного випадку.
+    const text = entry.role === 'chart' ? JSON.stringify(entry.chart) : entry.text;
+    col.add({ role: entry.role, text, at: at })
       .catch((err) => console.error('aiMessages:', err));
   }
 
@@ -301,8 +448,14 @@
         .orderBy('at', 'desc').limit(STORE_LIMIT).get();
       history = snap.docs.slice().reverse().map((d) => {
         const m = d.data();
-        return { role: m.role, text: m.text };
-      });
+        if (m.role !== 'chart') return { role: m.role, text: m.text };
+        try {
+          const chart = JSON.parse(m.text);
+          return isValidChart(chart) ? { role: 'chart', chart } : null;
+        } catch (err) {
+          return null; // пошкоджений запис — краще пропустити, ніж зламати всю історію
+        }
+      }).filter(Boolean);
       render();
       expire(col, cutoff);
     } catch (err) {
@@ -573,16 +726,21 @@
   function render() {
     const log = el('aicLog');
     if (!log) return;
+    // Канваси ось-ось зникнуть із DOM разом зі старим innerHTML — інстанси
+    // Chart.js, що на них тримались, прибираємо тут-таки, поки посилання ще є.
+    destroyCharts();
     if (!history.length && !pending) {
       log.innerHTML = `<div class="aic-empty">${esc(t('empty'))}</div>`;
       return;
     }
-    log.innerHTML = history.map((m) => {
+    log.innerHTML = history.map((m, i) => {
       if (m.role === 'action') return `<div class="aic-action">✓ ${esc(m.text)}</div>`;
+      if (m.role === 'chart') return chartMarkup(m.chart, i);
       const cls = m.role === 'user' ? 'user' : m.error ? 'error' : 'assistant';
       return `<div class="aic-msg ${cls}">${esc(m.text)}</div>`;
     }).join('') + (pending ? '<div class="aic-typing"><span></span><span></span><span></span></div>' : '');
     log.scrollTop = log.scrollHeight;
+    renderCharts();
   }
 
   function autoGrow() {
@@ -618,6 +776,12 @@
       // мають лишитись перед відповіддю, у якій про них розказано.
       let at = Date.now();
       (data.actions || []).forEach((a) => {
+        if (a.kind === 'chart' && isValidChart(a.chart)) {
+          const done = { role: 'chart', chart: a.chart };
+          history.push(done);
+          persist(done, at++);
+          return;
+        }
         const label = actionText(a);
         if (!label) return;
         const done = { role: 'action', text: label };

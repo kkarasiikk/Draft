@@ -11,7 +11,7 @@
 <meta name="description" content="Life — щоденні завдання: підзадачі, теги, пріоритети.">
 <meta http-equiv="Content-Security-Policy" content="
   default-src 'self';
-  script-src 'self' https://www.gstatic.com https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/;
+  script-src 'self' https://www.gstatic.com https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/ https://cdnjs.cloudflare.com;
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
   font-src 'self' https://fonts.gstatic.com;
   img-src 'self' data:;
@@ -439,6 +439,12 @@
   .priority-choice.selected[data-priority="high"]{background:var(--high-light);color:var(--high);}
   .priority-choice.selected[data-priority="medium"]{background:var(--medium-light);color:var(--medium);}
   .priority-choice.selected[data-priority="low"]{background:var(--low-light);color:var(--low);}
+  /* Нагадування — до пʼяти варіантів із довшими підписами («У час завдання»),
+     а базовий .priority-picker розрахований на чотири рівні клітинки
+     пріоритету: набитий у той самий рядок текст обрізало б до «У час …».
+     Тут кнопки переносяться й сідають по своєму тексту, а не тиснуться. */
+  .priority-picker.wrap{flex-wrap:wrap;}
+  .priority-picker.wrap .priority-choice{flex:0 1 auto;white-space:normal;}
   /* Поле оцінки — вузьке: 4 цифри більше не треба, а повна ширина створює
      враження, що туди мають писати щось довге. */
   #taskEstimateInput{max-width:140px;}
@@ -522,6 +528,12 @@
 
   .modal-overlay{position:fixed;inset:0;background:var(--overlay);display:none;align-items:flex-end;justify-content:center;z-index:50;}
   .modal-overlay.show{display:flex;}
+  /* Системна смуга гортання з кнопками-стрілками випадає зі стилю шитів:
+     власна — тонка й напівпрозора, як у чаті помічника. */
+  .modal{scrollbar-width:thin;scrollbar-color:var(--card-border-hover) transparent;}
+  .modal::-webkit-scrollbar{width:5px;}
+  .modal::-webkit-scrollbar-track{background:transparent;}
+  .modal::-webkit-scrollbar-thumb{background:var(--card-border-hover);border-radius:999px;}
   .modal{background:var(--surface);border-radius:26px 26px 0 0;padding:20px 20px calc(28px + env(safe-area-inset-bottom));width:100%;max-width:480px;
     max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;}
   .modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
@@ -880,7 +892,7 @@
       <input type="number" id="taskEstimateInput" min="1" max="1440" step="1" inputmode="numeric" placeholder="хв">
 
       <label class="field-label" id="reminderLabel">Нагадати</label>
-      <div class="priority-picker" id="taskReminderPicker"></div>
+      <div class="priority-picker wrap" id="taskReminderPicker"></div>
 
       <label class="field-label" id="recurrenceLabel">Повторювати</label>
       <div class="priority-picker" id="taskRecurrencePicker"></div>
@@ -929,5 +941,6 @@
 <script src="push.js"></script>
 <script src="app.js"></script>
 <script src="../ai-chat.js"></script>
+<script src="../scroll-lock.js"></script>
 </body>
 </html>

@@ -1,17 +1,18 @@
 // Service Worker модуля «Завдання» (scope /tasks/). Кожен модуль має власний
 // SW — для сторінки виграє реєстрація з найдовшим збігом scope.
-const CACHE_NAME = 'life-tasks-v32';
+const CACHE_NAME = 'life-tasks-v35';
 // Чистимо лише власні (застарілі) кеші: `caches` спільний для всього
 // походження, тож видалення "всього зайвого" стерло б кеші інших модулів.
 const CACHE_PREFIXES = ['life-tasks-'];
-const NETWORK_FIRST = ['./unsaved-guard.js', './ai-chat.js', './ai-chat.css', './', './index.html', './app.js', './streak.js', './quick-parse.js', './now-queue.js', './recurrence.js', './stats.js', './reminders.js', './push.js'];
-const FILES_TO_CACHE = ['../unsaved-guard.js', '../ai-chat.js', '../ai-chat.css', './', './index.html', './app.js', '../goals/streak.js', './quick-parse.js', './now-queue.js', './recurrence.js', './stats.js', './reminders.js', './push.js', './manifest.json',
+const NETWORK_FIRST = ['./scroll-lock.js', './unsaved-guard.js', './ai-chat.js', './ai-chat.css', './', './index.html', './app.js', './streak.js', './quick-parse.js', './now-queue.js', './recurrence.js', './stats.js', './reminders.js', './push.js'];
+const FILES_TO_CACHE = ['../scroll-lock.js', '../unsaved-guard.js', '../ai-chat.js', '../ai-chat.css', './', './index.html', './app.js', '../goals/streak.js', './quick-parse.js', './now-queue.js', './recurrence.js', './stats.js', './reminders.js', './push.js', './manifest.json',
   '../budget/firebase-config.js', '../budget/icon-192.png', '../budget/icon-512.png',
   '../budget/icon-192-maskable.png', '../budget/icon-512-maskable.png'];
 // Сторінка жорстко залежить від Firebase SDK (firebase.initializeApp() —
 // перший рядок app.js), тож без цих файлів офлайн-запуск падав би з
 // "firebase is not defined", навіть коли локальні файли є в кеші.
 const EXTERNAL_FILES_TO_CACHE = [
+  'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js',
   'https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js',
   'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js',
   'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js',
