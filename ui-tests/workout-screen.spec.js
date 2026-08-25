@@ -246,3 +246,18 @@ test.describe('Підпис у картці тренування', () => {
     await expect(page.locator('.session-meta')).toHaveText('1 вправа · 1 підхід');
   });
 });
+
+test.describe('Форма гортається лише вертикально', () => {
+  test('вікно тренування замкнене на вертикаль (не тягнеться вбік)', async ({ page }) => {
+    await openModule(page, 'workout/index.html');
+    await page.click('#newSessionBtn');
+    await page.waitForSelector('#sessionFormOverlay.show');
+    const modal = page.locator('#sessionFormOverlay .modal');
+    // touch-action:pan-y забороняє браузеру возити вікно пальцем убік.
+    await expect(modal).toHaveCSS('touch-action', 'pan-y');
+    await expect(modal).toHaveCSS('overflow-x', 'hidden');
+    // І горизонтального оверфлоу немає навіть при кількох вправах.
+    const overflows = await modal.evaluate((el) => el.scrollWidth > el.clientWidth);
+    expect(overflows, 'контент не має вилазити вбік').toBe(false);
+  });
+});

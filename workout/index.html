@@ -298,7 +298,11 @@
   .picker-overlay{z-index:65;}
   .modal-overlay.show, .picker-overlay.show{display:flex;}
   .modal{background:var(--surface);border-radius:26px 26px 0 0;padding:20px 20px calc(28px + env(safe-area-inset-bottom));width:100%;max-width:480px;
-    max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;}
+    max-height:88vh;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;
+    /* Вікно гортається лише вгору-вниз. touch-action:pan-y забороняє браузеру
+       возити його вбік пальцем, а overflow-x:hidden — щоб і випадковий
+       ширший вміст (довга назва вправи) не робив горизонтальної прокрутки. */
+    touch-action:pan-y;}
   .modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
   /* ---- Кастомний datepicker (замінює нативний календар браузера) ---- */
   .dp-field{position:relative;margin-top:6px;margin-bottom:16px;}
@@ -460,7 +464,8 @@
 
   /* ---- Exercise picker sheet ---- */
   .picker-modal{background:var(--surface);border-radius:26px 26px 0 0;padding:20px 20px calc(28px + env(safe-area-inset-bottom));
-    width:100%;max-width:480px;max-height:85vh;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+    width:100%;max-width:480px;max-height:85vh;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;
+    touch-action:pan-y;overscroll-behavior:contain;}
   .picker-group{margin-bottom:14px;}
   .picker-group-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-muted);margin-bottom:6px;padding-left:2px;}
   .picker-item{padding:11px 12px;border-radius:10px;cursor:pointer;font-size:14.5px;color:var(--ink);}
