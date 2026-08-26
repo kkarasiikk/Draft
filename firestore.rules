@@ -6,6 +6,9 @@ rules_version = '2';
 //   users/{uid}/transactions/{id}     -- {type, amount, category, note, date}
 //   users/{uid}/savings/{id}          -- {type, amount, currency, note, date, goalId}
 //   users/{uid}/savingsGoals/{id}     -- {name, createdAt}
+//   users/{uid}/recurringTx/{id}      -- {type, amount, category, note,
+//                                         recurrence, nextDate, active,
+//                                         createdAt, updatedAt}
 //   users/{uid}/pages/{id}            -- {title, content, createdAt, updatedAt}
 //   users/{uid}/tasks/{id}            -- {title, notes, done, completedAt,
 //                                         priority, tags, dueDate, dueTime,
@@ -105,6 +108,27 @@ service cloud.firestore {
         }
         allow read, delete: if isOwner(uid);
         allow create, update: if isOwner(uid) && isValidGoal(request.resource.data);
+      }
+
+      // Регулярні операції (оренда, підписки, зарплата) — це ПРАВИЛО, а не
+      // транзакція: сама транзакція створюється лише тоді, коли людина
+      // підтвердила, що операція справді відбулась. Тому тут немає date —
+      // натомість nextDate каже, коли настане наступна.
+      match /recurringTx/{ruleId} {
+        function isValidRecurringTx(d) {
+          return d.type in ['income', 'expense'] &&
+                 d.amount is number && d.amount > 0 && d.amount < 1000000000 &&
+                 isNonEmptyString(d.category, 100) &&
+                 d.note is string && d.note.size() <= 2000 &&
+                 d.nextDate is string && d.nextDate.size() == 10 &&
+                 d.recurrence is map &&
+                 d.active is bool &&
+                 d.createdAt is timestamp && d.updatedAt is timestamp &&
+                 d.keys().hasOnly(['type', 'amount', 'category', 'note', 'recurrence',
+                                   'nextDate', 'active', 'createdAt', 'updatedAt']);
+        }
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid) && isValidRecurringTx(request.resource.data);
       }
 
       match /pages/{pageId} {

@@ -120,6 +120,36 @@
     -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(150%);
     box-shadow: var(--glass-shadow);
   }
+  /* ---- Регулярні операції ---- */
+  /* Банер тієї самої форми, що «розбір минулих днів» у завданнях: настале
+     не осідає мовчки, але й не вирішується за людину. */
+  .rec-banner{display:flex;align-items:center;gap:10px;width:100%;margin-bottom:14px;padding:12px 14px;
+    border-radius:16px;border:1px solid var(--accent-light);background:var(--accent-light);
+    font-family:'Inter',sans-serif;text-align:left;cursor:pointer;}
+  .rec-banner-text{flex:1;min-width:0;font-size:13.5px;font-weight:600;color:var(--accent);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .rec-banner-go{flex-shrink:0;color:var(--accent);opacity:.75;}
+  .rec-hint{font-size:12.5px;line-height:1.45;color:var(--ink-muted);margin-bottom:14px;}
+  .rec-section-label{font-size:12px;color:var(--ink-muted);font-weight:500;display:block;margin:16px 0 8px;}
+  .rec-list{display:flex;flex-direction:column;gap:10px;}
+  .rec-item{border:1px solid var(--border);border-radius:14px;padding:11px 12px;}
+  .rec-item-head{display:flex;align-items:baseline;gap:8px;}
+  .rec-item-name{flex:1;min-width:0;font-size:14.5px;font-weight:600;word-break:break-word;}
+  .rec-item-sum{flex-shrink:0;font-size:14.5px;font-weight:700;font-variant-numeric:tabular-nums;}
+  .rec-item-sum.income{color:var(--income);}
+  .rec-item-sum.expense{color:var(--expense);}
+  .rec-item-meta{font-size:11.5px;color:var(--ink-muted);margin-top:3px;}
+  .rec-item-actions{display:flex;gap:8px;margin-top:10px;}
+  .rec-item-actions button{flex:1;padding:9px 0;border-radius:9px;cursor:pointer;
+    font-family:'Inter',sans-serif;font-size:13.5px;font-weight:600;border:1px solid var(--border);}
+  .rec-post{border:none !important;background:var(--accent);color:#fff;}
+  .rec-skip{background:transparent;color:var(--ink-soft);}
+  .rec-rule-row{display:flex;align-items:center;gap:8px;}
+  .rec-rule-body{flex:1;min-width:0;cursor:pointer;}
+  .rec-rule-del{flex-shrink:0;border:none;background:none;cursor:pointer;color:var(--expense);padding:6px;display:flex;}
+  .rec-off{opacity:.5;}
+  .rec-empty{font-size:13.5px;line-height:1.5;color:var(--ink-muted);text-align:center;padding:22px 6px;}
+
   .modal-overlay, .confirm-modal, .app-menu-overlay, .entry-menu-overlay{
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
@@ -695,6 +725,14 @@
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
       </button>
     </div>
+    <!-- Настали регулярні операції. Тап веде на екран, де кожну треба явно
+         записати або пропустити: бюджет — реальні гроші, і мовчки створена
+         транзакція, якої не було, псує баланс. -->
+    <button type="button" class="rec-banner" id="recBanner" style="display:none;">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v6h-6"/></svg>
+      <span class="rec-banner-text" id="recBannerText"></span>
+      <svg class="rec-banner-go" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+    </button>
     <div id="entriesTab"></div>
     <div id="statsTab" style="display:none;">
       <div class="card" id="pieChartCard">
@@ -960,6 +998,19 @@
       </button>
     </div>
 
+    <label class="field-label" id="recSettingsLabel" style="margin-top:16px;">Регулярні операції</label>
+    <div class="data-action-row">
+      <button type="button" class="data-action-btn" id="openRecurringBtn">
+        <span class="data-action-icon" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v6h-6"/></svg>
+        </span>
+        <span class="data-action-text">
+          <span class="data-action-title" id="openRecurringLabel">Регулярні операції</span>
+          <span class="data-action-sub" id="openRecurringDesc">Оренда, підписки, зарплата — щоб не вбивати їх щомісяця руками.</span>
+        </span>
+      </button>
+    </div>
+
     <label class="field-label" id="exportDataLabel" style="margin-top:16px;">Дані</label>
     <div class="data-action-row">
       <input type="file" id="importCsvInput" accept=".csv,text/csv" style="display:none;">
@@ -973,6 +1024,50 @@
         </span>
       </button>
     </div>
+  </div>
+</div>
+
+<!-- ---- Регулярні операції: настале + правила ---- -->
+<div class="modal-overlay" id="recurringOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="recurringTitle">Регулярні операції</div>
+      <button class="close-btn" id="closeRecurring" aria-label="Закрити"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div id="recDueSection" style="display:none;">
+      <div class="rec-hint" id="recDueHint"></div>
+      <div class="rec-list" id="recDueList"></div>
+    </div>
+    <label class="rec-section-label" id="recRulesLabel">Правила</label>
+    <div class="rec-list" id="recRulesList"></div>
+    <button type="button" class="submit-btn" id="addRecurringBtn" style="margin-top:14px;">Додати регулярну операцію</button>
+  </div>
+</div>
+
+<!-- ---- Форма правила ---- -->
+<div class="modal-overlay" id="recurringFormOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="recFormTitle">Регулярна операція</div>
+      <div class="type-toggle" id="recTypeToggle">
+        <button type="button" class="type-toggle-btn" id="recTypeExpense" data-rec-type="expense">Витрата</button>
+        <button type="button" class="type-toggle-btn" id="recTypeIncome" data-rec-type="income">Дохід</button>
+      </div>
+      <button class="close-btn" id="closeRecurringForm" aria-label="Закрити"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    <label class="field-label" id="recAmountLabel">Сума, ₴</label>
+    <input class="amount-input" id="recAmountInput" type="text" inputmode="decimal" placeholder="0.00">
+    <label class="field-label" id="recCategoryLabel">Категорія</label>
+    <div class="cat-picker" id="recCatPicker"></div>
+    <label class="field-label" id="recEveryLabel">Повторювати</label>
+    <div class="cat-picker" id="recEveryPicker"></div>
+    <label class="field-label" id="recNextLabel">Наступна</label>
+    <input type="date" id="recNextInput" data-dp-native>
+    <label class="field-label" id="recNoteLabel">Нотатка (необовʼязково)</label>
+    <input type="text" id="recNoteInput" maxlength="200" placeholder="">
+    <div class="form-error" id="recFormError" style="display:none;" role="alert" aria-live="assertive"></div>
+    <button type="button" class="btn-delete" id="recDeleteBtn" style="display:none;width:100%;margin-bottom:8px;">Видалити</button>
+    <button class="submit-btn" id="recSubmitBtn" type="button">Зберегти</button>
   </div>
 </div>
 
@@ -1067,6 +1162,8 @@
 
 <script src="firebase-config.js"></script>
 <script src="../unsaved-guard.js"></script>
+<script src="../tasks/recurrence.js"></script>
+<script src="recurring.js"></script>
 <script src="../categories-default.js"></script>
 <script src="app.js"></script>
 <script src="../ai-chat.js"></script>
