@@ -8,14 +8,25 @@ const firebaseConfig = {
 };
 
 // Site key reCAPTCHA v3 для Firebase App Check.
-// Отримати: Firebase Console → Build → App Check → зареєструвати веб-застосунок
-// → провайдер "reCAPTCHA v3" → буде запропоновано створити/вставити site key
-// (можна одразу з консолі Firebase, вона сама заведе його в Google Cloud reCAPTCHA).
-// Це публічний ключ (як і apiKey вище) — його не потрібно приховувати,
-// секретна частина reCAPTCHA лишається на боці Google/Firebase.
-// Поки тут заглушка — App Check просто не активується (initializeAppCheck
-// нижче обгорнутий у try/catch), застосунок працює як раніше.
-const RECAPTCHA_V3_SITE_KEY = "ВСТАВ_СЮДИ_СВІЙ_SITE_KEY";
+//
+// Саме v3, а не v2: сторінки викликають firebase.appCheck().activate() РЯДКОМ,
+// а SDK на рядок ставить ReCaptchaV3Provider. З ключем v2 атестація не пройде,
+// і застосунок втратить доступ до Firestore — при тому що в коді все виглядає
+// правильно. Для Enterprise довелось би передавати обʼєкт провайдера, тобто
+// правити всі пʼять сторінок.
+//
+// Пара ключів створюється в https://www.google.com/recaptcha/admin (тип v3,
+// домени: kkarasiikk.github.io і localhost), у наявному GCP-проєкті, а не
+// новому. Далі ключі розходяться:
+//   site key   -> сюди; він публічний, як і apiKey вище, і однаково їде
+//                 в браузер кожному відвідувачу;
+//   secret key -> Firebase Console → App Check → reCAPTCHA. У репозиторії
+//                 його немає й бути не повинно.
+//
+// Якщо тут колись знову опиниться заглушка, застосунок не зламається:
+// initializeAppCheck на сторінках обгорнутий у try/catch, App Check просто
+// не активується.
+const RECAPTCHA_V3_SITE_KEY = "6LcIYZotAAAAAAltf2rpcLi1dUfVw84XF2345A_l";
 // Публічний ключ Web Push (VAPID) для FCM.
 // Firebase Console -> Project Settings -> Cloud Messaging -> Web Push certificates.
 // Як і apiKey вище, він публічний за задумом: приватна половина пари

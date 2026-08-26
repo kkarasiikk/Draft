@@ -210,12 +210,23 @@ Firebase був на тарифі **Blaze** (pay-as-you-go). Без Blaze фун
 
 1. У `budget/firebase-config.js` вкажи конфіг свого проєкту Firebase
    (`apiKey`, `projectId` тощо — з Firebase Console → Project settings).
-   Цей самий файл підключають і `index.html` (домашній хаб), і `tasks/index.html`.
-2. Там же встав реальний **App Check reCAPTCHA v3 site key**
-   (`RECAPTCHA_V3_SITE_KEY`) — без нього другий рівень захисту Firestore
-   не активний. Отримати ключ: Firebase Console → App Check → reCAPTCHA v3.
+   Цей самий файл підключають усі пʼять сторінок.
+2. Там же — **App Check reCAPTCHA v3 site key** (`RECAPTCHA_V3_SITE_KEY`).
+   Пара ключів створюється на https://www.google.com/recaptcha/admin: тип
+   **v3** (не v2 — див. коментар у файлі, чому саме), домени сайту й
+   `localhost`, і **наявний** GCP-проєкт, а не новий. Site key іде в цей файл,
+   secret key — у Firebase Console → App Check → reCAPTCHA, і в репозиторії
+   його бути не повинно.
 3. Переконайся, що `.firebaserc` вказує на твій `projectId` (створи файл,
    якщо його ще немає — `firebase use --add` зробить це автоматично).
+
+**Enforcement вмикається останнім, а не разом із ключем.** Спершу нехай
+застосунок попрацює день-два з реальних пристроїв і Firebase Console →
+App Check → Metrics покаже, що запити приходять із валідним токеном; аж тоді
+APIs → Cloud Firestore і Cloud Functions → Enforce. У зворотному порядку
+помилка в домені чи типі ключа вимикає застосунок повністю — включно з
+телефоном, де це найважче діагностувати. `taskReminders` App Check не
+зачіпає: її смикає планувальник, а не браузер.
 
 ## Модель даних (Firestore)
 
@@ -648,8 +659,6 @@ job `test` — синтаксис і юніт-тести, job `ui` — брау�
 - `budget/app.js` розрісся до ~3000 рядків одним файлом — просився б поділ
   на модулі, але без кроку збірки це означає кілька `<script>` і спільний
   глобальний scope, тож поки лишається як є.
-- `RECAPTCHA_V3_SITE_KEY` у `budget/firebase-config.js` — усе ще заглушка,
-  тому App Check не активний (код це переживає, див. «Конфігурація»).
 - «Завдання» — один спільний список без вкладених списків/проєктів;
   drag-and-drop немає, сортування автоматичне.
 - «Тренування» — AI-коуч уже є (`training_analysis` + блок «ТРЕНЕР» у
