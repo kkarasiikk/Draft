@@ -43,6 +43,18 @@ const STRINGS = {
       : 'Проста таблиця — щоб закинути кудись іще.'),
     hint_json: 'Повна резервна копія: усе як є, без втрат. Для читання очима не призначено.',
     budgetTitle: 'Бюджет', budgetSub: 'витрати й доходи',
+    sumLoading: '…',
+    sumBudget: (s) => `цього місяця ${s}`,
+    sumTasksOpen: (n) => `${n} ${plural(n, { one: 'справа', few: 'справи', many: 'справ', other: 'справи' })} на сьогодні`,
+    sumTasksFree: 'на сьогодні вільно',
+    sumOverdue: (n) => `+${n} з минулих днів`,
+    sumStreak: (n) => `серія ${n} ${plural(n, { one: 'день', few: 'дні', many: 'днів', other: 'дня' })}`,
+    sumGoalsPending: (n) => `${n} без кроку сьогодні`,
+    sumGoalsDone: 'усе відмічено',
+    sumGoalsNone: 'цілей ще немає',
+    sumWorkoutToday: 'сьогодні тренувався',
+    sumWorkoutAgo: (n) => `востаннє ${n} ${plural(n, { one: 'день', few: 'дні', many: 'днів', other: 'дня' })} тому`,
+    sumWorkoutNever: 'тренувань ще немає',
     goalsTitle: 'Цілі', goalsSub: 'довгострокові',
     tasksTitle: 'Завдання', tasksSub: 'на кожен день',
     workoutTitle: 'Тренування', workoutSub: 'сесії й рекорди',
@@ -76,6 +88,18 @@ const STRINGS = {
       : 'Простая таблица — чтобы закинуть куда-то ещё.'),
     hint_json: 'Полная резервная копия: всё как есть, без потерь. Для чтения глазами не предназначено.',
     budgetTitle: 'Бюджет', budgetSub: 'расходы и доходы',
+    sumLoading: '…',
+    sumBudget: (s) => `в этом месяце ${s}`,
+    sumTasksOpen: (n) => `${n} ${plural(n, { one: 'дело', few: 'дела', many: 'дел', other: 'дела' })} на сегодня`,
+    sumTasksFree: 'на сегодня свободно',
+    sumOverdue: (n) => `+${n} из прошлых дней`,
+    sumStreak: (n) => `серия ${n} ${plural(n, { one: 'день', few: 'дня', many: 'дней', other: 'дня' })}`,
+    sumGoalsPending: (n) => `${n} без шага сегодня`,
+    sumGoalsDone: 'всё отмечено',
+    sumGoalsNone: 'целей пока нет',
+    sumWorkoutToday: 'сегодня тренировался',
+    sumWorkoutAgo: (n) => `последний раз ${n} ${plural(n, { one: 'день', few: 'дня', many: 'дней', other: 'дня' })} назад`,
+    sumWorkoutNever: 'тренировок пока нет',
     goalsTitle: 'Цели', goalsSub: 'долгосрочные',
     tasksTitle: 'Задачи', tasksSub: 'на каждый день',
     workoutTitle: 'Тренировки', workoutSub: 'сессии и рекорды',
@@ -109,6 +133,18 @@ const STRINGS = {
       : 'Prosta tabela — żeby wrzucić gdzie indziej.'),
     hint_json: 'Pełna kopia zapasowa: wszystko bez strat. Nie do czytania oczami.',
     budgetTitle: 'Budżet', budgetSub: 'wydatki i dochody',
+    sumLoading: '…',
+    sumBudget: (s) => `w tym miesiącu ${s}`,
+    sumTasksOpen: (n) => `${n} ${plural(n, { one: 'zadanie', few: 'zadania', many: 'zadań', other: 'zadania' })} na dziś`,
+    sumTasksFree: 'na dziś wolne',
+    sumOverdue: (n) => `+${n} z poprzednich dni`,
+    sumStreak: (n) => `seria ${n} ${plural(n, { one: 'dzień', few: 'dni', many: 'dni', other: 'dnia' })}`,
+    sumGoalsPending: (n) => `${n} bez kroku dziś`,
+    sumGoalsDone: 'wszystko odhaczone',
+    sumGoalsNone: 'nie ma jeszcze celów',
+    sumWorkoutToday: 'dziś trenowałeś',
+    sumWorkoutAgo: (n) => `ostatnio ${n} ${plural(n, { one: 'dzień', few: 'dni', many: 'dni', other: 'dnia' })} temu`,
+    sumWorkoutNever: 'nie ma jeszcze treningów',
     goalsTitle: 'Cele', goalsSub: 'długoterminowe',
     tasksTitle: 'Zadania', tasksSub: 'na każdy dzień',
     workoutTitle: 'Treningi', workoutSub: 'sesje i rekordy',
@@ -142,6 +178,18 @@ const STRINGS = {
       : 'A plain table — to load somewhere else.'),
     hint_json: 'A full backup: everything as-is, nothing lost. Not meant for reading.',
     budgetTitle: 'Budget', budgetSub: 'spending & income',
+    sumLoading: '…',
+    sumBudget: (s) => `this month ${s}`,
+    sumTasksOpen: (n) => `${n} ${plural(n, { one: 'task', other: 'tasks' })} today`,
+    sumTasksFree: 'nothing due today',
+    sumOverdue: (n) => `+${n} carried over`,
+    sumStreak: (n) => `${n}-day streak`,
+    sumGoalsPending: (n) => `${n} with no step today`,
+    sumGoalsDone: 'all checked in',
+    sumGoalsNone: 'no goals yet',
+    sumWorkoutToday: 'trained today',
+    sumWorkoutAgo: (n) => `last ${n} ${plural(n, { one: 'day', other: 'days' })} ago`,
+    sumWorkoutNever: 'no workouts yet',
     goalsTitle: 'Goals', goalsSub: 'long-term',
     tasksTitle: 'Tasks', tasksSub: 'day to day',
     workoutTitle: 'Workouts', workoutSub: 'sessions & records',
@@ -467,6 +515,83 @@ const EXPORT_LABELS = {
         defaultGoalName: 'Savings', noTitle: 'Untitled' },
 };
 
+
+// ---- Живі підсумки на плитках ----
+// Головна — екран, з якого заходять щоразу, а показувала вона лише назви
+// розділів. Тепер кожна плитка відповідає на питання, заради якого в розділ і
+// заходять. Арифметика — у home-summary.js (чисті функції, покриті тестами),
+// тут лише запити й тексти.
+//
+// Кожен запит свідомо звужений: місяць / сьогодні / останній запис. Читати
+// всю базу заради чотирьох чисел на кожне відкриття головної було б платою
+// без причини.
+function todayISO() {
+  return HomeSummary.isoOf(new Date());
+}
+
+function setSub(id, text) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = text;
+}
+
+async function loadHomeSummary(uid) {
+  const userRef = db.collection('users').doc(uid);
+  const today = todayISO();
+  const from = HomeSummary.monthStart(today);
+
+  // Бюджет: лише поточний місяць.
+  userRef.collection('transactions').where('date', '>=', from).where('date', '<=', today).get()
+    .then((snap) => {
+      const sum = HomeSummary.budgetSummary(snap.docs.map((d) => d.data()), today);
+      // Знак ставимо тут, а не в перекладі: у переклад має приходити готовий
+      // рядок, інакше кожна мова мусила б сама вирішувати, як його показати.
+      const sign = sum.balance >= 0 ? '+' : '\u2212';
+      setSub('budgetSub', t('sumBudget', sign + formatAmount(sum.balance)));
+    })
+    .catch((err) => console.error('homeSummary budget:', err));
+
+  // Завдання: від початку місяця до сьогодні — один діапазон по одному полю,
+  // тож складений індекс не потрібен. Борги давніші за місяць сюди не
+  // потраплять: для них у самому модулі є «розбір минулих днів».
+  userRef.collection('tasks').where('dueDate', '>=', from).where('dueDate', '<=', today).get()
+    .then((snap) => {
+      const sum = HomeSummary.tasksSummary(snap.docs.map((d) => d.data()), today);
+      const parts = [sum.open ? t('sumTasksOpen', sum.open) : t('sumTasksFree')];
+      if (sum.overdue) parts.push(t('sumOverdue', sum.overdue));
+      setSub('tasksSub', parts.join(' · '));
+    })
+    .catch((err) => console.error('homeSummary tasks:', err));
+
+  // Цілі: їх завжди небагато, тож читаємо всі.
+  userRef.collection('goals').get()
+    .then((snap) => {
+      const sum = HomeSummary.goalsSummary(snap.docs.map((d) => d.data()), today);
+      if (!sum.active) { setSub('goalsSub', t('sumGoalsNone')); return; }
+      // Серія — найкраща новина, яку тут можна показати; якщо її немає,
+      // кажемо, скільки цілей сьогодні ще чекають кроку.
+      if (sum.streak) setSub('goalsSub', t('sumStreak', sum.streak));
+      else if (sum.pending) setSub('goalsSub', t('sumGoalsPending', sum.pending));
+      else setSub('goalsSub', t('sumGoalsDone'));
+    })
+    .catch((err) => console.error('homeSummary goals:', err));
+
+  // Тренування: досить найсвіжішого запису.
+  userRef.collection('workouts').orderBy('date', 'desc').limit(1).get()
+    .then((snap) => {
+      const sum = HomeSummary.workoutSummary(snap.docs.map((d) => d.data()), today);
+      if (sum.daysAgo === null) setSub('workoutSub', t('sumWorkoutNever'));
+      else if (sum.daysAgo <= 0) setSub('workoutSub', t('sumWorkoutToday'));
+      else setSub('workoutSub', t('sumWorkoutAgo', sum.daysAgo));
+    })
+    .catch((err) => console.error('homeSummary workout:', err));
+}
+
+// Суми на плитці — без копійок: на головній важливий порядок, а не точність
+// до копійки, і «+30 000» читається швидше за «+30 000,00».
+function formatAmount(n) {
+  return Math.round(Math.abs(n)).toLocaleString(LOCALE_MAP[currentLang] || 'uk-UA');
+}
+
 async function collectDocs(userRef, name) {
   const snap = await userRef.collection(name).get();
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
@@ -591,6 +716,7 @@ auth.onAuthStateChanged((user) => {
   if (user) {
     document.getElementById('authScreen').style.display = 'none';
     document.getElementById('homeScreen').style.display = 'block';
+    loadHomeSummary(user.uid);
     // Підтягуємо тему й мову з профілю користувача (якщо їх уже змінювали в
     // budget/ або на іншому пристрої) — щоб сторінки не розходились візуально.
     db.collection('users').doc(user.uid).get().then((doc) => {

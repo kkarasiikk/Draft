@@ -10,7 +10,9 @@ const STUB = fs.readFileSync(path.join(__dirname, 'firebase-stub.js'), 'utf8');
  * Відкриває сторінку модуля так, ніби користувач уже увійшов.
  * @param {import('@playwright/test').Page} page
  * @param {string} modulePath напр. 'workout/index.html'
- * @param {{seed?:object, theme?:string, lang?:string}} [opts]
+ * @param {{seed?:object, theme?:string, lang?:string, ready?:string}} [opts]
+ *   ready — селектор, поява якого означає «сторінка готова». Модулі показують
+ *   #appScreen, домашній хаб — #homeScreen.
  */
 async function openModule(page, modulePath, opts = {}) {
   // Скрипти Firebase із gstatic підміняються заглушкою: перший запит віддає
@@ -36,7 +38,7 @@ async function openModule(page, modulePath, opts = {}) {
   }, [opts.seed || {}, opts.theme || 'light', opts.lang || 'uk']);
 
   await page.goto(`/${modulePath}`);
-  await page.waitForSelector('#appScreen', { state: 'visible' });
+  await page.waitForSelector(opts.ready || '#appScreen', { state: 'visible' });
   // Сервіс-воркер у тестах тільки заважає: він кешує сторінку між прогонами.
   await page.evaluate(() => navigator.serviceWorker &&
     navigator.serviceWorker.getRegistrations().then((rs) => rs.forEach((r) => r.unregister())));

@@ -215,8 +215,11 @@
   .module-title{font-size:21px;font-weight:700;letter-spacing:-0.01em;margin:0;}
   /* Один рядок: підпис не має розсувати картку — інакше на вузькому екрані
      картки стають різної висоти. Якщо не влазить — обрізаємо трикрапкою. */
+  /* Живий підсумок буває довшим за статичний опис («2 справи на сьогодні ·
+     +1 з минулих днів»), тож дозволяємо два рядки замість обрізання: число,
+     заради якого плитка й ожила, не має ховатись за трьома крапками. */
   .module-sub{font-size:12.5px;line-height:1.3;color:var(--ink-muted);margin-top:3px;
-    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
 
   .open-btn{
     flex-shrink:0; display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:600;color:var(--ink);
@@ -403,6 +406,8 @@
   <script src="budget/firebase-config.js"></script>
   <script src="categories-default.js"></script>
   <script src="export-data.js"></script>
+  <script src="goals/streak.js"></script>
+  <script src="home-summary.js"></script>
   <script src="home.js"></script>
   <script src="ai-chat.js"></script>
   <script src="scroll-lock.js"></script>
