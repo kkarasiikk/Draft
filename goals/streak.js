@@ -161,9 +161,63 @@
     });
   }
 
+  /** Скільки днів лишилось до дедлайну цілі (може бути відʼємно). */
+  function daysToDeadline(goal, todayIso) {
+    if (!goal || typeof goal.targetDate !== 'string' || !goal.targetDate) return null;
+    return daysBetween(todayIso, goal.targetDate);
+  }
+
+  /**
+   * Що сказати про цілі у вечірньому дайджесті.
+   *
+   * Серія — єдина механіка в застосунку, яка тримається виключно на тому, що
+   * людина не забула. Рветься вона саме в щільний день, і саме ввечері ще є
+   * час це врятувати — тому нагадування живе не окремим пушем, а всередині
+   * вечірнього підсумку: два сповіщення за вечір читаються як спам.
+   *
+   * @param {Array} goals усі цілі користувача
+   * @param {string} todayIso «сьогодні»
+   * @param {{deadlineDays?: number}} [opts] за скільки днів попереджати про дедлайн
+   * @returns {{pending:number, streak:number, streakTitle:string|null,
+   *            deadline:number|null, deadlineTitle:string|null}}
+   */
+  function goalsDigest(goals, todayIso, opts) {
+    var warnDays = (opts && opts.deadlineDays) || 3;
+    var queue = eveningQueue(goals, todayIso);
+
+    // Найдовша серія, яку сьогоднішня бездіяльність обірве. computeStreak
+    // рахує серію, що тримається включно з учора, — саме її й видно втратити.
+    var streak = 0;
+    var streakTitle = null;
+    queue.forEach(function (g) {
+      var n = computeStreak(g.checkins, todayIso);
+      if (n > streak) { streak = n; streakTitle = g.title || null; }
+    });
+
+    // Найближчий дедлайн серед активних цілей: прострочений або той, що ось-ось.
+    var deadline = null;
+    var deadlineTitle = null;
+    (goals || []).forEach(function (g) {
+      if (!g || g.status !== 'active') return;
+      var left = daysToDeadline(g, todayIso);
+      if (left === null || left > warnDays) return;
+      if (deadline === null || left < deadline) { deadline = left; deadlineTitle = g.title || null; }
+    });
+
+    return {
+      pending: queue.length,
+      streak: streak,
+      streakTitle: streakTitle,
+      deadline: deadline,
+      deadlineTitle: deadlineTitle,
+    };
+  }
+
   var api = {
     RESCUE_COOLDOWN_DAYS: RESCUE_COOLDOWN_DAYS,
     EVENING_HOUR: EVENING_HOUR,
+    daysToDeadline: daysToDeadline,
+    goalsDigest: goalsDigest,
     isoOf: isoOf,
     parseISO: parseISO,
     shift: shift,

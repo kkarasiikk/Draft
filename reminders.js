@@ -11,6 +11,7 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const { digestDue, isoInZone } = require("./tasks/reminders");
+const goalStreak = require("./goals/streak");
 
 const db = admin.firestore();
 
@@ -28,10 +29,33 @@ const TEXTS = {
       title: n ? `Сьогодні ${n} ${plural(n, "справа", "справи", "справ")}` : "Сьогодні вільно",
       body: first ? "Перше: " + first : "На сьогодні нічого не заплановано.",
     }),
-    evening: (left) => ({
-      title: left ? `Не закрито: ${left}` : "День закрито 🎉",
-      body: left ? "Перенести на завтра чи відпустити?" : "Усе заплановане зроблено.",
-    }),
+    // Вечірній підсумок — єдине сповіщення за вечір, тож цілі живуть у ньому,
+    // а не окремим пушем: два повідомлення поспіль читаються як спам.
+    // Серія попереду завдань свідомо: незакрите завдання перенесеться на
+    // завтра, а обірвана серія не відновиться ніколи.
+    evening: (left, goals) => {
+      const g = goals || { pending: 0, streak: 0, deadline: null };
+      let title;
+      if (g.streak > 0) {
+        title = `Серія ${g.streak} ${plural(g.streak, "день", "дні", "днів")} урветься`;
+      } else if (left) {
+        title = `Не закрито: ${left}`;
+      } else if (g.pending) {
+        title = `Цілі: ${g.pending} без кроку`;
+      } else {
+        title = "День закрито 🎉";
+      }
+
+      const parts = [];
+      if (g.streak > 0 && g.streakTitle) parts.push(g.streakTitle);
+      if (left) parts.push(`${left} ${plural(left, "справа", "справи", "справ")} на завтра`);
+      if (g.deadline !== null && g.deadlineTitle) {
+        parts.push(g.deadline < 0
+          ? `«${g.deadlineTitle}» прострочено`
+          : `«${g.deadlineTitle}» через ${g.deadline} ${plural(g.deadline, "день", "дні", "днів")}`);
+      }
+      return { title, body: parts.length ? parts.join(" · ") : "Усе заплановане зроблено." };
+    },
   },
 };
 
@@ -142,7 +166,17 @@ async function sendDigests(now) {
         .sort((a, b) => (a.dueTime || "99:99") < (b.dueTime || "99:99") ? -1 : 1)[0];
       text = TEXTS.uk.morning(open.length, first ? first.title : null);
     } else {
-      text = TEXTS.uk.evening(open.length);
+      // Цілі читаємо лише для вечірнього дайджесту: вранці корисніший план
+      // на день, а не докір за вчорашнє.
+      let goalsPart = null;
+      try {
+        const goalsSnap = await db.collection("users").doc(uid).collection("goals").get();
+        goalsPart = goalStreak.goalsDigest(goalsSnap.docs.map((d) => d.data()), today);
+      } catch (err) {
+        // Цілі не прочитались — підсумок по завданнях однаково має піти.
+        console.error("goalsDigest:", err);
+      }
+      text = TEXTS.uk.evening(open.length, goalsPart);
     }
 
     const result = await sendToUser(uid, { ...text, tag: "digest-" + due.kind });

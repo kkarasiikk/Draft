@@ -3,6 +3,7 @@
 // require, тож стан підмінюється через resetState(), а не re-require.
 const state = {
   tasks: [],          // документи колекційної групи tasks
+  goals: [],          // { uid, ... } — для вечірнього дайджесту
   users: [],          // { id, data }
   tokens: {},         // uid -> [token]
   sent: [],           // виклики sendEachForMulticast
@@ -13,7 +14,7 @@ const state = {
 };
 
 function resetState(patch) {
-  state.tasks = []; state.users = []; state.tokens = {};
+  state.tasks = []; state.goals = []; state.users = []; state.tokens = {};
   state.sent = []; state.updates = []; state.userSets = []; state.deletedTokens = [];
   state.sendResults = null;
   Object.assign(state, patch || {});
@@ -71,7 +72,15 @@ jest.mock("firebase-admin", () => {
         })),
       }),
       doc: (uid) => ({
-        collection: (sub) => (sub === "fcmTokens" ? tokensCol(uid) : userTasksCol(uid)),
+        collection: (sub) => {
+          if (sub === "fcmTokens") return tokensCol(uid);
+          if (sub === "goals") {
+            return { get: async () => ({
+              docs: state.goals.filter((g) => g.uid === uid).map((g) => ({ id: g.id, data: () => g })),
+            }) };
+          }
+          return userTasksCol(uid);
+        },
       }),
     }),
   });
@@ -286,6 +295,60 @@ describe("sendDigests", () => {
     });
     await _internal.sendDigests(evening);
     expect(state.sent[0].data.title).toBe("Не закрито: 1");
+  });
+
+  // Цілі живуть у вечірньому підсумку, а не окремим пушем: два сповіщення
+  // за вечір читаються як спам.
+  const EVENING = new Date(Date.UTC(2026, 7, 18, 17, 30)); // 20:30 у Києві
+  const goal = (over) => ({ id: "g1", uid: "u1", title: "Біг", status: "active",
+    checkins: [], blockers: [], targetDate: null, ...over });
+
+  test("серія під загрозою витісняє завдання із заголовка", async () => {
+    resetState({
+      tokens: { u1: ["tk"] },
+      users: [{ id: "u1", data: { taskReminders: settings } }],
+      tasks: [{ id: "a", uid: "u1", title: "Лишилось", done: false, dueDate: "2026-08-18" }],
+      // Серія тримається включно з учора, сьогодні відмітки ще немає.
+      goals: [goal({ checkins: ["2026-08-16", "2026-08-17"] })],
+    });
+    await _internal.sendDigests(EVENING);
+    // Незакрите завдання перенесеться на завтра, а обірвана серія — ні.
+    expect(state.sent[0].data.title).toBe("Серія 2 дні урветься");
+    expect(state.sent[0].data.body).toContain("Біг");
+    expect(state.sent[0].data.body).toContain("на завтра");
+  });
+
+  test("відмічена сьогодні ціль у підсумок не потрапляє", async () => {
+    resetState({
+      tokens: { u1: ["tk"] },
+      users: [{ id: "u1", data: { taskReminders: settings } }],
+      tasks: [],
+      goals: [goal({ checkins: ["2026-08-17", "2026-08-18"] })],
+    });
+    await _internal.sendDigests(EVENING);
+    expect(state.sent[0].data.title).toBe("День закрито 🎉");
+  });
+
+  test("близький дедлайн згадується в тілі", async () => {
+    resetState({
+      tokens: { u1: ["tk"] },
+      users: [{ id: "u1", data: { taskReminders: settings } }],
+      tasks: [],
+      goals: [goal({ title: "Звіт", targetDate: "2026-08-20" })],
+    });
+    await _internal.sendDigests(EVENING);
+    expect(state.sent[0].data.body).toContain("Звіт");
+  });
+
+  test("цілі без кроку, коли завдань не лишилось", async () => {
+    resetState({
+      tokens: { u1: ["tk"] },
+      users: [{ id: "u1", data: { taskReminders: settings } }],
+      tasks: [],
+      goals: [goal({ checkins: [] })],   // серії ще немає — лише сам факт
+    });
+    await _internal.sendDigests(EVENING);
+    expect(state.sent[0].data.title).toBe("Цілі: 1 без кроку");
   });
 });
 

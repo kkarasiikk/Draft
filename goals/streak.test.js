@@ -216,3 +216,62 @@ describe('дати', () => {
     expect(S.daysBetween('2026-08-13', '2026-08-20')).toBe(7);
   });
 });
+
+describe('goalsDigest: що сказати про цілі ввечері', () => {
+  const goal = (title, checkins, over = {}) => ({
+    title, status: 'active', checkins: checkins || [], blockers: [], ...over,
+  });
+
+  test('серія, що урветься сьогодні, — головне, що треба сказати', () => {
+    const d = S.goalsDigest([
+      goal('Біг', ['2026-08-23', '2026-08-24', '2026-08-25']),
+      goal('Читання', ['2026-08-25']),
+    ], '2026-08-26');
+    expect(d.pending).toBe(2);
+    // Беремо найдовшу з тих, що під загрозою: її втратити найдорожче.
+    expect(d.streak).toBe(3);
+    expect(d.streakTitle).toBe('Біг');
+  });
+
+  test('відмічена сьогодні ціль у чергу не потрапляє', () => {
+    const d = S.goalsDigest([goal('Біг', ['2026-08-25', '2026-08-26'])], '2026-08-26');
+    expect(d.pending).toBe(0);
+    expect(d.streak).toBe(0);
+  });
+
+  test('названа сьогодні причина теж знімає питання', () => {
+    const d = S.goalsDigest([
+      goal('Біг', ['2026-08-25'], { blockers: [{ date: '2026-08-26', reason: 'Хворію' }] }),
+    ], '2026-08-26');
+    expect(d.pending).toBe(0);
+  });
+
+  test('завершена ціль не турбує', () => {
+    const d = S.goalsDigest([goal('Біг', ['2026-08-25'], { status: 'done' })], '2026-08-26');
+    expect(d.pending).toBe(0);
+  });
+
+  test('дедлайн за кілька днів попереджає, далекий — ні', () => {
+    const soon = S.goalsDigest([goal('Звіт', [], { targetDate: '2026-08-28' })], '2026-08-26');
+    expect(soon.deadline).toBe(2);
+    expect(soon.deadlineTitle).toBe('Звіт');
+
+    const far = S.goalsDigest([goal('Звіт', [], { targetDate: '2026-12-01' })], '2026-08-26');
+    expect(far.deadline).toBeNull();
+  });
+
+  test('прострочений дедлайн — відʼємне число, і воно найважливіше', () => {
+    const d = S.goalsDigest([
+      goal('Звіт', [], { targetDate: '2026-08-20' }),
+      goal('Курс', [], { targetDate: '2026-08-28' }),
+    ], '2026-08-26');
+    expect(d.deadline).toBe(-6);
+    expect(d.deadlineTitle).toBe('Звіт');
+  });
+
+  test('порожній список нічого не вигадує', () => {
+    expect(S.goalsDigest([], '2026-08-26')).toEqual({
+      pending: 0, streak: 0, streakTitle: null, deadline: null, deadlineTitle: null,
+    });
+  });
+});
