@@ -1104,8 +1104,8 @@ function applyStaticTranslations() {
   document.getElementById('goalNameLabel').textContent = t('goalNameLabel');
   document.getElementById('goalNameInput').setAttribute('placeholder', t('goalNamePlaceholder'));
   document.getElementById('deleteGoalBtn').textContent = t('deleteGoalLabel');
-  document.getElementById('fabDepositLabel').textContent = t('fabDepositLabel');
-  document.getElementById('fabWithdrawLabel').textContent = t('fabWithdrawLabel');
+  document.getElementById('savingsToggleDeposit').textContent = t('fabDepositLabel');
+  document.getElementById('savingsToggleWithdraw').textContent = t('fabWithdrawLabel');
   document.getElementById('savingsAmountLabel').textContent = t('amountLabelPlain');
   document.getElementById('savingsDateLabel').textContent = t('dateLabel');
   document.getElementById('savingsNoteLabel').textContent = t('noteLabel');
@@ -1853,6 +1853,12 @@ function openSavingsForm(type, existing) {
     ? (type === 'deposit' ? t('editDepositTitle') : t('editWithdrawTitle'))
     : (type === 'deposit' ? t('newDepositTitle') : t('newWithdrawTitle'));
   document.getElementById('savingsModalTitle').style.color = type === 'deposit' ? 'var(--income)' : 'var(--expense)';
+  // Так само, як у формі транзакції: у новому записі тип перемикається прямо
+  // тут, а в уже збереженому — ні. Змінити «поповнення» на «зняття» заднім
+  // числом означає інший запис, а не правку цього.
+  document.getElementById('savingsModalTitle').style.display = isEdit ? 'block' : 'none';
+  document.getElementById('savingsTypeToggle').style.display = isEdit ? 'none' : 'flex';
+  updateSavingsTypeToggleUI();
   document.getElementById('savingsSubmitBtn').style.background = type === 'deposit' ? 'var(--income)' : 'var(--expense)';
   document.getElementById('savingsSubmitBtn').textContent = t('saveBtn');
   document.getElementById('savingsAmountInput').value = existing ? String(existing.amount).replace('.', ',') : '';
@@ -1865,6 +1871,18 @@ function openSavingsForm(type, existing) {
   savingsGuard.arm();
   document.getElementById('savingsFormOverlay').classList.add('show');
   setTimeout(() => document.getElementById('savingsAmountInput').focus(), 50);
+}
+
+function updateSavingsTypeToggleUI() {
+  document.getElementById('savingsToggleWithdraw').classList.toggle('active', savingsFormType === 'withdraw');
+  document.getElementById('savingsToggleDeposit').classList.toggle('active', savingsFormType === 'deposit');
+}
+
+function switchSavingsFormType(type) {
+  if (savingsFormType === type || editingSavingId) return;
+  savingsFormType = type;
+  document.getElementById('savingsSubmitBtn').style.background = type === 'deposit' ? 'var(--income)' : 'var(--expense)';
+  updateSavingsTypeToggleUI();
 }
 
 function renderSavingsCurrencyPicker() {
@@ -2868,9 +2886,15 @@ function selectTab(tabKey) {
 // ---- Кнопка "+" ----
 // Вона доречна не скрізь. У статистиці додавати нічого, а в нотатках і в
 // списку цілей уже є власні кнопки просто в тілі сторінки — другий «плюс»
-// поруч з ними лише плутав би. Лишається два місця: записи, де він одразу
-// відкриває форму витрати, і відкрита ціль заощаджень, де він розкриває
-// вибір «зняти чи поповнити».
+// поруч з ними лише плутав би. Лишається два місця: записи й відкрита ціль
+// заощаджень.
+//
+// В обох «плюс» робить одне й те саме — ВІДКРИВАЄ ФОРМУ, а тип запису
+// обирається вже в ній перемикачем. Раніше на заощадженнях він натомість
+// розгортався у два пелюстки «зняти / поповнити», і той самий жест означав
+// у сусідніх вкладках різні речі: тут одразу форма, а там ще один вибір
+// перед нею. Перемикач у формі коштує тапа рівно стільки ж, але його видно
+// разом із сумою — і передумати можна, вже почавши вводити.
 //
 // Коли кнопки немає, помічник опускається на її місце (клас на <body>) —
 // інакше він висів би над порожнечею.
@@ -2881,28 +2905,15 @@ function updateAddButton() {
 
   document.getElementById('bnAddBtn').style.display = mode ? '' : 'none';
   document.body.classList.toggle('no-page-fab', !mode);
-  if (mode !== 'savings') closeSavingsActions();
-}
-
-// Вибір «зняти / поповнити» ховається за «плюсом», а не висить постійно:
-// на екрані цілі це дві дії з чотирьох можливих, і тримати їх завжди
-// розкритими означало б закривати ними список операцій.
-function closeSavingsActions() {
-  document.getElementById('savingsFabRow').classList.remove('show');
-  document.getElementById('bnAddBtn').classList.remove('open');
-}
-
-function toggleSavingsActions() {
-  const row = document.getElementById('savingsFabRow');
-  const opened = row.classList.toggle('show');
-  document.getElementById('bnAddBtn').classList.toggle('open', opened);
 }
 
 // Початковий стан: застосунок відкривається на «Кошти».
 updateAddButton();
 
+// Тип за замовчуванням — найчастіший у кожній вкладці: у записах частіше
+// витрачають, у скарбничці частіше відкладають.
 document.getElementById('bnAddBtn').addEventListener('click', () => {
-  if (addButtonMode === 'savings') toggleSavingsActions();
+  if (addButtonMode === 'savings') openSavingsForm('deposit');
   else openForm('expense');
 });
 document.querySelectorAll('.bn-item[data-tab]').forEach((btn) => {
@@ -3100,8 +3111,8 @@ document.getElementById('deleteGoalBtn').addEventListener('click', () => {
   document.getElementById('confirmDelete').textContent = t('deleteBtn');
   document.getElementById('confirmOverlay').classList.add('show');
 });
-document.getElementById('openDeposit').addEventListener('click', () => { closeSavingsActions(); openSavingsForm('deposit'); });
-document.getElementById('openWithdraw').addEventListener('click', () => { closeSavingsActions(); openSavingsForm('withdraw'); });
+document.getElementById('savingsToggleWithdraw').addEventListener('click', () => switchSavingsFormType('withdraw'));
+document.getElementById('savingsToggleDeposit').addEventListener('click', () => switchSavingsFormType('deposit'));
 document.getElementById('closeSavingsForm').addEventListener('click', () => savingsGuard.requestClose());
 document.getElementById('savingsSubmitBtn').addEventListener('click', submitSavingsForm);
 document.getElementById('importCsvBtn').addEventListener('click', () => document.getElementById('importCsvInput').click());

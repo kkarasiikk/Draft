@@ -114,7 +114,7 @@
      комп'ютері він картка серед карток — там скло повертається окремо, у
      блоці @media нижче. */
   .auth-box, .app-menu, .entry-menu, .tab-btn.active, .search-bar, .day-card, .card,
-  .period-btn.active, .fab.exp, .modal, .data-action-btn, .confirm-box, .goal-card, .note-card,
+  .period-btn.active, .modal, .data-action-btn, .confirm-box, .goal-card, .note-card,
   .note-tb-btn, .stat-card{
     backdrop-filter: blur(var(--glass-blur)) saturate(150%);
     -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(150%);
@@ -388,17 +388,6 @@
   .legend-toggle svg{display:none;width:13px;height:13px;}
   .legend-toggle.checked{background:var(--accent);border-color:var(--accent);}
   .legend-toggle.checked svg{display:block;}
-  /* Праворуч, на одній висоті з цим рядком, стоїть кружечок AI — відступ
-     тримає для нього місце, щоб «Поповнити» не опинилось під ним. */
-  .fab-row{position:fixed;left:14px;right:14px;bottom:calc(96px + env(safe-area-inset-bottom));z-index:24;
-    max-width:400px;margin:0 auto;display:flex;justify-content:center;gap:10px;padding-right:60px;
-    opacity:0;transform:translateY(10px) scale(.96);pointer-events:none;transition:opacity .16s ease,transform .16s ease;}
-  .fab-row.show{opacity:1;transform:translateY(0) scale(1);pointer-events:auto;}
-  .fab{display:flex;align-items:center;gap:6px;border-radius:24px;padding:11px 18px;font-size:13.5px;font-weight:600;
-    cursor:pointer;font-family:'Inter',sans-serif;flex:1;justify-content:center;}
-  .fab.exp{background:var(--surface);color:var(--expense);border:1px solid var(--border);box-shadow:0 2px 10px rgba(20,20,24,.06);}
-  .fab.inc{background:var(--accent);color:#fff;border:none;box-shadow:0 4px 14px rgba(92,124,250,.28);}
-
   /* ---- Нижнє меню-перемикач розділів ---- */
   .bottom-nav{position:fixed;left:14px;right:14px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:25;
     max-width:400px;margin:0 auto;display:flex;align-items:flex-end;justify-content:space-between;
@@ -429,8 +418,6 @@
   /* Коли «плюса» на екрані немає, помічник займає його місце — інакше висів
      би над порожнечею. */
   body.no-page-fab .ai-fab{--ai-fab-bottom:86px;}
-  .bn-fab svg{transition:transform .18s ease;}
-  .bn-fab.open svg{transform:rotate(45deg);}
   .modal-overlay{position:fixed;inset:0;background:var(--overlay);display:none;align-items:flex-end;justify-content:center;z-index:50;}
   .modal-overlay.show{display:flex;}
   /* Системна смуга гортання з кнопками-стрілками випадає зі стилю шитів:
@@ -449,6 +436,9 @@
     font-family:'Inter',sans-serif;font-size:14px;font-weight:600;color:var(--ink-muted);transition:background .15s ease,color .15s ease;}
   .type-toggle-btn.active[data-type="expense"]{background:var(--expense);color:#fff;}
   .type-toggle-btn.active[data-type="income"]{background:var(--income);color:#fff;}
+  /* Заощадження: зняття читається як витрата, поповнення — як дохід. */
+  .type-toggle-btn.active[data-type="withdraw"]{background:var(--expense);color:#fff;}
+  .type-toggle-btn.active[data-type="deposit"]{background:var(--income);color:#fff;}
   label.field-label{font-size:12px;color:var(--ink-muted);font-weight:500;display:block;margin-top:2px;}
   .amount-input{width:100%;font-family:'Inter',sans-serif;font-size:26px;font-weight:700;border:none;
     border-bottom:2px solid var(--border);padding:8px 0;margin-bottom:16px;outline:none;background:transparent;color:var(--ink);font-variant-numeric:tabular-nums;}
@@ -619,7 +609,6 @@
     #statsTab{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start;max-width:960px;margin:0 auto;}
     #statsTab .card{margin-bottom:0;}
 
-    .fab-row{left:auto;right:32px;bottom:calc(32px + 84px);justify-content:flex-end;padding:0 62px 0 0;}
     .bottom-nav{left:auto;right:32px;bottom:32px;margin:0;width:350px;}
     .bn-fab{--fab-right:32px;--fab-bottom:104px;}
     body.no-page-fab .ai-fab{--ai-fab-bottom:104px;}
@@ -841,11 +830,6 @@
   </div>
 </div>
 
-<div class="fab-row" id="savingsFabRow">
-  <button class="fab exp" id="openWithdraw"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/></svg> <span id="fabWithdrawLabel">Зняти</span></button>
-  <button class="fab inc" id="openDeposit"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg> <span id="fabDepositLabel">Поповнити</span></button>
-</div>
-
 <button class="ai-fab" id="aiChatBtn" aria-label="AI-помічник">
   <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="aiSparkFill" x1="0" y1="0" x2=".55" y2="1"><stop offset="0" stop-color="currentColor" stop-opacity=".92"/><stop offset=".55" stop-color="currentColor" stop-opacity=".62"/><stop offset="1" stop-color="currentColor" stop-opacity=".38"/></linearGradient><linearGradient id="aiSparkRim" x1="0" y1="0" x2=".4" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".9"/><stop offset="1" stop-color="#fff" stop-opacity=".15"/></linearGradient></defs><path fill="url(#aiSparkFill)" fill-rule="evenodd" d="M12.6 4.0C15.52 9.68 15.52 9.68 21.2 12.6C15.52 15.52 15.52 15.52 12.6 21.2C9.68 15.52 9.68 15.52 4.0 12.6C9.68 9.68 9.68 9.68 12.6 4.0ZM5.4 2.40C6.49 4.51 6.49 4.51 8.60 5.6C6.49 6.69 6.49 6.69 5.4 8.8C4.31 6.69 4.31 6.69 2.2 5.6C4.31 4.51 4.31 4.51 5.4 2.40Z"/><path fill="none" stroke="url(#aiSparkRim)" stroke-width=".75" stroke-linejoin="round" d="M12.6 4.0C15.52 9.68 15.52 9.68 21.2 12.6C15.52 15.52 15.52 15.52 12.6 21.2C9.68 15.52 9.68 15.52 4.0 12.6C9.68 9.68 9.68 9.68 12.6 4.0ZM5.4 2.40C6.49 4.51 6.49 4.51 8.60 5.6C6.49 6.69 6.49 6.69 5.4 8.8C4.31 6.69 4.31 6.69 2.2 5.6C4.31 4.51 4.31 4.51 5.4 2.40Z"/></svg>
 </button>
@@ -901,6 +885,10 @@
   <div class="modal">
     <div class="modal-head">
       <div class="modal-title" id="savingsModalTitle">Поповнення</div>
+      <div class="type-toggle" id="savingsTypeToggle" style="display:none;">
+        <button type="button" class="type-toggle-btn" id="savingsToggleWithdraw" data-type="withdraw">Зняти</button>
+        <button type="button" class="type-toggle-btn" id="savingsToggleDeposit" data-type="deposit">Поповнити</button>
+      </div>
       <button class="close-btn" id="closeSavingsForm" aria-label="Закрити"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
     </div>
     <label class="field-label" id="savingsAmountLabel">Сума, ₴</label>
