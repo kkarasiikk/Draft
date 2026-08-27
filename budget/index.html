@@ -77,19 +77,26 @@
     --glass-btn-bg: rgba(255,255,255,.08); --glass-btn-bg-hover: rgba(255,255,255,.16); --glass-btn-border: rgba(255,255,255,.18);
     color-scheme: dark;
   }
-  body{transition:background-color .2s ease, color .2s ease;}
+  body{transition:color .2s ease;}
   *{box-sizing:border-box;}
   /* scrollbar-gutter лишається — він тримає ширину сторінки незмінною на
      комп'ютері. А от overflow-y:scroll малював смугу навіть тоді, коли
      гортати нічого. */
-  html{overscroll-behavior-y:none;scrollbar-gutter:stable;background:var(--bg);}
+  /* Колір тла живе ТІЛЬКИ тут: html малює полотно сторінки (і те, що видно
+     під час overscroll). У body його бути не повинно — див. .background. */
+  html{overscroll-behavior-y:none;scrollbar-gutter:stable;background:var(--bg);
+    transition:background-color .2s ease;}
   body{margin:0;color:var(--ink);font-family:'Inter',sans-serif;
     padding-bottom:calc(100px + env(safe-area-inset-bottom));
     -webkit-tap-highlight-color:transparent;overscroll-behavior-y:none;-webkit-overflow-scrolling:touch;
-    background:var(--bg);min-height:100vh; min-height:100svh;}
+    min-height:100vh; min-height:100svh;}
   .wrap{max-width:480px;margin:0 auto;position:relative;z-index:1;}
 
-  /* ---- Fixed background layer: base radial + two soft light blobs ---- */
+  /* ---- Fixed background layer: base radial + two soft light blobs ----
+     Шар лежить під вмістом (z-index:-1), і саме тому в body НЕ МОЖЕ бути
+     власного тла: body — звичайний потоковий нащадок html, а потокові
+     нащадки малюються ПІСЛЯ відʼємних z-index. Непрозоре тло body
+     зафарбовувало і градієнт, і обидві плями повністю. */
   .background{
     position:fixed; inset:0; z-index:-1; overflow:hidden;
     background: var(--bg-radial);

@@ -33,17 +33,29 @@ for (const theme of ['light', 'dark']) {
   });
 }
 
-test('у body немає власного тла — інакше воно ховає шар зі світлом', async ({ page }) => {
-  await openHome(page, 'dark');
-  const bodyBg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
-  // rgba(0,0,0,0) — прозоре. Колір полотна задає html, і тільки він.
-  expect(bodyBg).toBe('rgba(0, 0, 0, 0)');
-  const htmlBg = await page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor);
-  expect(htmlBg).not.toBe('rgba(0, 0, 0, 0)');
-});
+// Той самий шар — і та сама пастка — на кожній сторінці застосунку.
+const PAGES = [
+  ['головна', 'index.html', '#homeScreen'],
+  ['бюджет', 'budget/index.html', '#appScreen'],
+  ['цілі', 'goals/index.html', '#appScreen'],
+  ['завдання', 'tasks/index.html', '#appScreen'],
+  ['тренування', 'workout/index.html', '#appScreen'],
+];
 
-test('шар зі світлом лежить під вмістом, а не над ним', async ({ page }) => {
-  await openHome(page, 'dark');
-  const z = await page.evaluate(() => getComputedStyle(document.querySelector('.background')).zIndex);
-  expect(Number(z)).toBeLessThan(0);
-});
+for (const [name, path, ready] of PAGES) {
+  test(`${name}: у body немає власного тла — інакше воно ховає шар зі світлом`, async ({ page }) => {
+    await openModule(page, path, { ready, theme: 'dark' });
+    // rgba(0, 0, 0, 0) — прозоре. Колір полотна задає html, і тільки він.
+    expect(await page.evaluate(() => getComputedStyle(document.body).backgroundColor))
+      .toBe('rgba(0, 0, 0, 0)');
+    expect(await page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor))
+      .not.toBe('rgba(0, 0, 0, 0)');
+  });
+
+  test(`${name}: шар зі світлом лежить під вмістом, а не над ним`, async ({ page }) => {
+    await openModule(page, path, { ready, theme: 'dark' });
+    const z = await page.evaluate(() =>
+      getComputedStyle(document.querySelector('.background')).zIndex);
+    expect(Number(z)).toBeLessThan(0);
+  });
+}
