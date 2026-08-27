@@ -44,10 +44,12 @@
   :root{
     --bg:#F4F6FB;
     --bg-radial: radial-gradient(circle at 50% 0%, #ffffff 0%, #f8f9fb 40%, #eef1f5 100%);
-    /* Колір смуги статус-бару в standalone-режимі на iOS. Мусить
-       збігатися з ПОЧАТКОМ --bg-radial над ним: інакше вгорі екрана
-       видно шов між смугою й сторінкою. Тримаємо поруч саме тому,
-       що нарізно вони вже одного разу розійшлися. */
+    /* Колір смуги над сторінкою — області статус-бару в standalone на iOS.
+       Шар із градієнтом (.background) туди НЕ дістає: у встановленому
+       застосунку він розтягується на viewport, а смуга статус-бару лежить
+       поза ним. Малює її тло html, тож воно й мусить дорівнювати ПОЧАТКУ
+       --bg-radial над ним — інакше вгорі видно шов. Знизу градієнт дістає,
+       тому там нічого міняти не треба. */
     --status-bar: #ffffff;
     --surface:linear-gradient(135deg, rgba(255,255,255,.78), rgba(255,255,255,.46));
     --ink:#26262B; --ink-soft:#4E4E58; --ink-muted:#84838F;
@@ -83,7 +85,7 @@
      гортати нічого. */
   /* Колір тла живе ТІЛЬКИ тут: html малює полотно сторінки (і те, що видно
      під час overscroll). У body його бути не повинно — див. нижче. */
-  html{background:var(--bg);overscroll-behavior-y:none;scrollbar-gutter:stable;
+  html{background:var(--status-bar);overscroll-behavior-y:none;scrollbar-gutter:stable;
     transition:background-color .2s ease;}
   body{
     margin:0; color:var(--ink); font-family:'Inter',sans-serif;
