@@ -22,6 +22,8 @@ for (const [name, path] of MODULES) {
     const btn = page.locator('#aiChatBtn');
     await expect(btn).toBeVisible();
     await expect(btn).toHaveClass(/ai-topbar-btn/);
+    // Літери, а не значок: піктограму треба вгадувати, «AI» читається одразу.
+    await expect(btn).toHaveText('AI');
     // Саме всередині верхньої панелі: плаваюча кнопка лежала в <body>.
     await expect(page.locator('.app-topbar #aiChatBtn')).toHaveCount(1);
     // Плаваючої більше немає ніде.
@@ -39,6 +41,14 @@ test('бюджет: помічник стоїть поруч із налашту
   await openModule(page, 'budget/index.html', { ready: '#appScreen' });
   await expect(page.locator('.app-topbar #aiChatBtn')).toBeVisible();
   await expect(page.locator('.app-topbar #categoriesBtn')).toBeVisible();
+});
+
+test('значок не важчий за 700: у бюджеті Inter далі не підвантажується', async ({ page }) => {
+  // 800 браузер підробив би синтетично, і кнопка в бюджеті виглядала б інакше,
+  // ніж у решті розділів.
+  await openModule(page, 'budget/index.html', { ready: '#appScreen' });
+  const weight = await page.$eval('#aiChatBtn', (el) => getComputedStyle(el).fontWeight);
+  expect(Number(weight)).toBeLessThanOrEqual(700);
 });
 
 test('головна: помічника немає, і чат туди не вантажиться', async ({ page }) => {
