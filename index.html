@@ -33,7 +33,6 @@
 <link rel="apple-touch-icon" href="budget/icon-192.png">
 <link rel="icon" href="budget/icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="ai-chat.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -122,10 +121,6 @@
 
   .wrap{max-width:480px;margin:0 auto;padding:20px 20px 48px;}
 
-  /* Тут немає нижнього меню, над яким кружечок стоїть у модулях, —
-     тож він опускається в самий кут. Решта стилів — в ai-chat.css. */
-  #homeScreen .ai-fab{--ai-fab-right:20px;--ai-fab-bottom:24px;}
-
   /* ---- Верхня панель: гамбургер-меню зліва (тема / мова / вихід) ---- */
   .home-topbar{display:flex;align-items:center;justify-content:flex-start;margin-bottom:8px;}
   .menu-btn{background:none;border:none;cursor:pointer;color:var(--ink);padding:13px;display:flex;border-radius:10px;transition:background .2s, transform .15s;touch-action:manipulation;}
@@ -202,7 +197,6 @@
   /* ---- Desktop layout — та сама структура, що й у budget/: .wrap на всю
      ширину (кнопка меню біля справжнього краю), а вміст центрується на 960px ---- */
   @media (min-width:880px){
-    #homeScreen .ai-fab{--ai-fab-right:32px;--ai-fab-bottom:32px;}
     .wrap{max-width:none;margin:0;padding:0 40px 48px;}
     .home-topbar{padding-top:28px;}
     .app-menu{top:74px;left:33px;}
@@ -375,9 +369,6 @@
         </button>
       </div>
 
-      <button class="ai-fab" id="aiChatBtn" aria-label="AI-помічник">
-  <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="aiSparkFill" x1="0" y1="0" x2=".55" y2="1"><stop offset="0" stop-color="currentColor" stop-opacity=".92"/><stop offset=".55" stop-color="currentColor" stop-opacity=".62"/><stop offset="1" stop-color="currentColor" stop-opacity=".38"/></linearGradient><linearGradient id="aiSparkRim" x1="0" y1="0" x2=".4" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".9"/><stop offset="1" stop-color="#fff" stop-opacity=".15"/></linearGradient></defs><path fill="url(#aiSparkFill)" fill-rule="evenodd" d="M12.6 4.0C15.52 9.68 15.52 9.68 21.2 12.6C15.52 15.52 15.52 15.52 12.6 21.2C9.68 15.52 9.68 15.52 4.0 12.6C9.68 9.68 9.68 9.68 12.6 4.0ZM5.4 2.40C6.49 4.51 6.49 4.51 8.60 5.6C6.49 6.69 6.49 6.69 5.4 8.8C4.31 6.69 4.31 6.69 2.2 5.6C4.31 4.51 4.31 4.51 5.4 2.40Z"/><path fill="none" stroke="url(#aiSparkRim)" stroke-width=".75" stroke-linejoin="round" d="M12.6 4.0C15.52 9.68 15.52 9.68 21.2 12.6C15.52 15.52 15.52 15.52 12.6 21.2C9.68 15.52 9.68 15.52 4.0 12.6C9.68 9.68 9.68 9.68 12.6 4.0ZM5.4 2.40C6.49 4.51 6.49 4.51 8.60 5.6C6.49 6.69 6.49 6.69 5.4 8.8C4.31 6.69 4.31 6.69 2.2 5.6C4.31 4.51 4.31 4.51 5.4 2.40Z"/></svg>
-</button>
 
       <div class="app-menu-overlay" id="appMenuOverlay">
         <div class="app-menu" id="appMenu">
@@ -473,7 +464,6 @@
   <script src="goals/streak.js"></script>
   <script src="home-summary.js"></script>
   <script src="home.js"></script>
-  <script src="ai-chat.js"></script>
   <script src="scroll-lock.js"></script>
 </body>
 </html>

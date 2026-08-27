@@ -162,6 +162,7 @@
   /* Той самий напис, що й на головній, тільки менший: одна впізнавана
      позначка «де я» замість іконки з дрібним підписом. */
   .app-topbar{display:flex;align-items:center;gap:10px;padding:calc(18px + env(safe-area-inset-top)) 20px 10px;}
+  .topbar-actions{margin-left:auto;display:flex;gap:8px;align-items:center;}
   .app-topbar-brand{font-family:'Inter',sans-serif;font-size:30px;font-weight:900;letter-spacing:-0.04em;
     line-height:1;color:var(--ink);text-decoration:none;}
   .item-menu-overlay{position:fixed;inset:0;z-index:55;display:none;}
@@ -215,7 +216,7 @@
      Меню від цього стає тим, чим і має бути: рядком сторінок без чужої
      кнопки посередині.
      Відступ знизу — висота меню (62px) плюс його власний відступ і просвіт;
-     помічник стоїть на поверх вище (див. --ai-fab-bottom в ai-chat.css). */
+     (помічник переїхав у шапку — див. .ai-topbar-btn в ai-chat.css). */
   .bn-fab{position:fixed;right:var(--fab-right, 14px);
     bottom:calc(var(--fab-bottom, 86px) + env(safe-area-inset-bottom));z-index:26;
     width:52px;height:52px;border-radius:50%;
@@ -225,7 +226,6 @@
   .bn-fab:active{transform:scale(.92);}
   /* На вкладці рекордів додавати нічого — кнопка зникає, і помічник займає
      її місце, щоб не висіти над порожнечею. */
-  body.no-page-fab .ai-fab{--ai-fab-bottom:86px;}
 
   /* ---- PR / Records tab ---- */
   /* План на сьогодні. Стоїть над списком тренувань і зникає сам, щойно
@@ -556,7 +556,6 @@
     .content{max-width:960px;margin:0 auto;padding:14px 4px 40px;}
     .bottom-nav{left:auto;right:32px;bottom:32px;margin:0;width:350px;}
     .bn-fab{--fab-right:32px;--fab-bottom:104px;}
-    body.no-page-fab .ai-fab{--ai-fab-bottom:104px;}
     .modal-overlay, .picker-overlay{align-items:center;}
     .modal, .picker-modal{border-radius:18px;max-height:88vh;}
     /* Форма тренування — найщільніший екран застосунку: назва вправи,
@@ -606,6 +605,11 @@
 <div class="wrap" id="wrap">
   <div class="app-topbar">
     <a href="../index.html" class="app-topbar-brand" id="topbarHomeLink" aria-label="На головну">Life</a>
+    <div class="topbar-actions">
+      <button class="ai-topbar-btn" id="aiChatBtn" aria-label="AI-помічник">
+        <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="aiSparkFill" x1="0" y1="0" x2=".55" y2="1"><stop offset="0" stop-color="currentColor" stop-opacity=".95"/><stop offset=".55" stop-color="currentColor" stop-opacity=".7"/><stop offset="1" stop-color="currentColor" stop-opacity=".45"/></linearGradient></defs><path fill="url(#aiSparkFill)" fill-rule="evenodd" d="M12.6 4.0C15.52 9.68 15.52 9.68 21.2 12.6C15.52 15.52 15.52 15.52 12.6 21.2C9.68 15.52 9.68 15.52 4.0 12.6C9.68 9.68 9.68 9.68 12.6 4.0ZM5.4 2.40C6.49 4.51 6.49 4.51 8.60 5.6C6.49 6.69 6.49 6.69 5.4 8.8C4.31 6.69 4.31 6.69 2.2 5.6C4.31 4.51 4.31 4.51 5.4 2.40Z"/></svg>
+      </button>
+    </div>
   </div>
 
   <div class="content">
@@ -613,9 +617,7 @@
     <div id="recordsTab" style="display:none;"></div>
   </div>
 
-  <button class="ai-fab" id="aiChatBtn" aria-label="AI-помічник">
-  <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="aiSparkFill" x1="0" y1="0" x2=".55" y2="1"><stop offset="0" stop-color="currentColor" stop-opacity=".92"/><stop offset=".55" stop-color="currentColor" stop-opacity=".62"/><stop offset="1" stop-color="currentColor" stop-opacity=".38"/></linearGradient><linearGradient id="aiSparkRim" x1="0" y1="0" x2=".4" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".9"/><stop offset="1" stop-color="#fff" stop-opacity=".15"/></linearGradient></defs><path fill="url(#aiSparkFill)" fill-rule="evenodd" d="M12.6 4.0C15.52 9.68 15.52 9.68 21.2 12.6C15.52 15.52 15.52 15.52 12.6 21.2C9.68 15.52 9.68 15.52 4.0 12.6C9.68 9.68 9.68 9.68 12.6 4.0ZM5.4 2.40C6.49 4.51 6.49 4.51 8.60 5.6C6.49 6.69 6.49 6.69 5.4 8.8C4.31 6.69 4.31 6.69 2.2 5.6C4.31 4.51 4.31 4.51 5.4 2.40Z"/><path fill="none" stroke="url(#aiSparkRim)" stroke-width=".75" stroke-linejoin="round" d="M12.6 4.0C15.52 9.68 15.52 9.68 21.2 12.6C15.52 15.52 15.52 15.52 12.6 21.2C9.68 15.52 9.68 15.52 4.0 12.6C9.68 9.68 9.68 9.68 12.6 4.0ZM5.4 2.40C6.49 4.51 6.49 4.51 8.60 5.6C6.49 6.69 6.49 6.69 5.4 8.8C4.31 6.69 4.31 6.69 2.2 5.6C4.31 4.51 4.31 4.51 5.4 2.40Z"/></svg>
-</button>
+  
 
 <button type="button" class="bn-fab" id="newSessionBtn" aria-label="Нове тренування">
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>

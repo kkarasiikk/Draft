@@ -422,7 +422,7 @@
      Меню від цього стає тим, чим і має бути: рядком сторінок без чужої
      кнопки посередині.
      Відступ знизу — висота меню (62px) плюс його власний відступ і просвіт;
-     помічник стоїть на поверх вище (див. --ai-fab-bottom в ai-chat.css). */
+     (помічник переїхав у шапку — див. .ai-topbar-btn в ai-chat.css). */
   .bn-fab{position:fixed;right:var(--fab-right, 14px);
     bottom:calc(var(--fab-bottom, 86px) + env(safe-area-inset-bottom));z-index:26;
     width:52px;height:52px;border-radius:50%;
@@ -430,9 +430,6 @@
     box-shadow:0 6px 18px rgba(92,124,250,.4), 0 2px 8px rgba(20,20,24,.12);transition:transform .15s ease;
     -webkit-tap-highlight-color:transparent;}
   .bn-fab:active{transform:scale(.92);}
-  /* Коли «плюса» на екрані немає, помічник займає його місце — інакше висів
-     би над порожнечею. */
-  body.no-page-fab .ai-fab{--ai-fab-bottom:86px;}
   .modal-overlay{position:fixed;inset:0;background:var(--overlay);display:none;align-items:flex-end;justify-content:center;z-index:50;}
   .modal-overlay.show{display:flex;}
   /* Системна смуга гортання з кнопками-стрілками випадає зі стилю шитів:
@@ -630,7 +627,6 @@
 
     .bottom-nav{left:auto;right:32px;bottom:32px;margin:0;width:350px;}
     .bn-fab{--fab-right:32px;--fab-bottom:104px;}
-    body.no-page-fab .ai-fab{--ai-fab-bottom:104px;}
 
     .modal-overlay{align-items:center;}
     .modal{border-radius:18px;max-height:88vh;}
@@ -680,6 +676,9 @@
   <div class="app-topbar">
     <a href="../index.html" class="app-topbar-brand" id="topbarHomeLink" aria-label="На головну">Life</a>
     <div class="topbar-actions">
+      <button class="ai-topbar-btn" id="aiChatBtn" aria-label="AI-помічник">
+        <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="aiSparkFill" x1="0" y1="0" x2=".55" y2="1"><stop offset="0" stop-color="currentColor" stop-opacity=".95"/><stop offset=".55" stop-color="currentColor" stop-opacity=".7"/><stop offset="1" stop-color="currentColor" stop-opacity=".45"/></linearGradient></defs><path fill="url(#aiSparkFill)" fill-rule="evenodd" d="M12.6 4.0C15.52 9.68 15.52 9.68 21.2 12.6C15.52 15.52 15.52 15.52 12.6 21.2C9.68 15.52 9.68 15.52 4.0 12.6C9.68 9.68 9.68 9.68 12.6 4.0ZM5.4 2.40C6.49 4.51 6.49 4.51 8.60 5.6C6.49 6.69 6.49 6.69 5.4 8.8C4.31 6.69 4.31 6.69 2.2 5.6C4.31 4.51 4.31 4.51 5.4 2.40Z"/></svg>
+      </button>
       <button class="header-icon-btn" id="categoriesBtn" aria-label="Налаштування">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
       </button>
@@ -849,9 +848,6 @@
   </div>
 </div>
 
-<button class="ai-fab" id="aiChatBtn" aria-label="AI-помічник">
-  <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="aiSparkFill" x1="0" y1="0" x2=".55" y2="1"><stop offset="0" stop-color="currentColor" stop-opacity=".92"/><stop offset=".55" stop-color="currentColor" stop-opacity=".62"/><stop offset="1" stop-color="currentColor" stop-opacity=".38"/></linearGradient><linearGradient id="aiSparkRim" x1="0" y1="0" x2=".4" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".9"/><stop offset="1" stop-color="#fff" stop-opacity=".15"/></linearGradient></defs><path fill="url(#aiSparkFill)" fill-rule="evenodd" d="M12.6 4.0C15.52 9.68 15.52 9.68 21.2 12.6C15.52 15.52 15.52 15.52 12.6 21.2C9.68 15.52 9.68 15.52 4.0 12.6C9.68 9.68 9.68 9.68 12.6 4.0ZM5.4 2.40C6.49 4.51 6.49 4.51 8.60 5.6C6.49 6.69 6.49 6.69 5.4 8.8C4.31 6.69 4.31 6.69 2.2 5.6C4.31 4.51 4.31 4.51 5.4 2.40Z"/><path fill="none" stroke="url(#aiSparkRim)" stroke-width=".75" stroke-linejoin="round" d="M12.6 4.0C15.52 9.68 15.52 9.68 21.2 12.6C15.52 15.52 15.52 15.52 12.6 21.2C9.68 15.52 9.68 15.52 4.0 12.6C9.68 9.68 9.68 9.68 12.6 4.0ZM5.4 2.40C6.49 4.51 6.49 4.51 8.60 5.6C6.49 6.69 6.49 6.69 5.4 8.8C4.31 6.69 4.31 6.69 2.2 5.6C4.31 4.51 4.31 4.51 5.4 2.40Z"/></svg>
-</button>
 
 <button type="button" class="bn-fab" id="bnAddBtn" aria-label="Додати">
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>

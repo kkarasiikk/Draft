@@ -5,30 +5,26 @@
 :root{--aic-rec:#C25A5A; --aic-rec-bg:rgba(194,90,90,.14);}
 [data-theme="dark"]{--aic-rec:#E08585; --aic-rec-bg:rgba(224,133,133,.16);}
 
-/* ---- Кнопка виклику: хмаринка з «AI» над нижнім меню ----
-   Стоїть рівно над правим краєм нижнього меню й з того самого скла, що й
-   воно, — читається як його продовження, а не як ще один плаваючий елемент.
-   Заповненого акцентом кола тут свідомо немає: у модулях уже є акцентний
-   «+», і два однакові кола сперечалися б за увагу.
-   Зсув знизу рахує два поверхи: висоту меню (62px) з його відступом, а над
-   ним кнопку додавання (52px) — помічник стоїть третім. На головному екрані
-   немає ні меню, ні додавання, тож сторінка задає свій --ai-fab-bottom.
+/* ---- Кнопка виклику: у шапці, поруч із налаштуваннями ----
+   Раніше вона плавала над нижнім меню окремим колом. Але помічник — це не
+   дія над списком, як «+», а інструмент розділу, як налаштування; у шапці
+   він і стоїть поруч із ними. Заразом звільнився правий нижній кут, де
+   кнопка перекривала останній рядок списку.
+
+   Колір — акцентний, на відміну від сірих «трьох крапок» поруч: помічник
+   тут єдиний, чим справді користуються, а не лише налаштовують.
 
    Літери всередині значка — контури, а не <text>: сторінка бюджету
    підвантажує Inter лише до 700, тож текст накресленням 800 браузер
    підробляв би синтетично, і значок виглядав би там інакше, ніж на
    решті сторінок. Контури ще й не залежать від того, чи шрифт узагалі
    встиг завантажитись. */
-.ai-fab{position:fixed;right:var(--ai-fab-right, 14px);
-  bottom:calc(var(--ai-fab-bottom, 148px) + env(safe-area-inset-bottom));z-index:26;
-  width:52px;height:52px;border-radius:50%;cursor:pointer;
-  border:1px solid var(--border);background:var(--surface);color:var(--accent);
-  backdrop-filter:blur(var(--glass-blur, 22px)) saturate(150%);
-  -webkit-backdrop-filter:blur(var(--glass-blur, 22px)) saturate(150%);
-  display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;
-  box-shadow:var(--glass-shadow, 0 8px 32px rgba(40,44,70,.10)), 0 10px 24px rgba(20,20,30,.14);
-  transition:transform .15s ease;}
-.ai-fab:active{transform:scale(.92);}
+.ai-topbar-btn{flex-shrink:0;background:none;border:none;cursor:pointer;
+  color:var(--accent);padding:6px;border-radius:9px;display:flex;
+  align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;
+  transition:transform .15s ease, background .15s ease;}
+.ai-topbar-btn:hover{background:var(--accent-light, rgba(92,124,250,.12));}
+.ai-topbar-btn:active{transform:scale(.92);}
 
 /* ---- AI-помічник: спільний чат для всіх сторінок ----
    Власні класи з префіксом aic- і жодної залежності від CSS конкретної
@@ -128,7 +124,6 @@
 .aic-send:disabled{opacity:.5;cursor:default;}
 
 @media (min-width:880px){
-  .ai-fab{--ai-fab-right:32px;--ai-fab-bottom:166px;}
   .aic-overlay{align-items:center;}
   .aic-modal{border-radius:20px;padding-bottom:20px;}
 }
