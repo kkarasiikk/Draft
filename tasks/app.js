@@ -477,8 +477,16 @@ function resolveTheme() {
 function applyTheme() {
   const resolved = resolveTheme();
   document.documentElement.setAttribute('data-theme', resolved === 'dark' ? 'dark' : 'light');
+  // Колір беремо з --status-bar, а не з власного хардкоду: смуга мусить
+  // повторювати початок --bg-radial, і тримати цю відповідність у двох
+  // різних файлах означає рано чи пізно її загубити — саме так угорі
+  // екрана й зʼявився шов. Атрибут data-theme уже виставлено вище, тож
+  // обчислений стиль повертає значення потрібної теми.
   const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.setAttribute('content', resolved === 'dark' ? '#0B0B0E' : '#EDEEF3');
+  if (meta) {
+    const bar = getComputedStyle(document.documentElement).getPropertyValue('--status-bar').trim();
+    if (bar) meta.setAttribute('content', bar);
+  }
 }
 darkMediaQuery.addEventListener('change', () => {
   if ((localStorage.getItem('financeAppTheme') || 'system') === 'system') applyTheme();

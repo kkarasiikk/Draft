@@ -3,7 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#EDEEF3">
+<meta name="theme-color" content="#ffffff">
+<!-- Ті самі три теги, що й у кожному модулі. Без них головна поводилась
+     на iPhone інакше за решту сторінок, хоч і живе в тому ж застосунку. -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Life">
 <meta name="description" content="Life — особистий простір: бюджет, цілі, щоденні завдання, тренування.">
 <!--
   CSP: дозволяємо лише Firebase Auth/App Check + свої файли. Firestore тут
@@ -39,6 +44,11 @@
   :root{
     --bg:#F4F6FB;
     --bg-radial: radial-gradient(circle at 50% 0%, #ffffff 0%, #f8f9fb 40%, #eef1f5 100%);
+    /* Колір смуги статус-бару в standalone-режимі на iOS. Мусить
+       збігатися з ПОЧАТКОМ --bg-radial над ним: інакше вгорі екрана
+       видно шов між смугою й сторінкою. Тримаємо поруч саме тому,
+       що нарізно вони вже одного разу розійшлися. */
+    --status-bar: #ffffff;
     --surface:linear-gradient(135deg, rgba(255,255,255,.78), rgba(255,255,255,.46));
     --ink:#26262B; --ink-soft:#4E4E58; --ink-muted:#84838F;
     --border:rgba(255,255,255,.85);
@@ -54,6 +64,7 @@
   [data-theme="dark"]{
     --bg:#050506;
     --bg-radial: radial-gradient(circle at 50% 0%, #1a1b1f 0%, #0c0d0f 42%, #050506 100%);
+    --status-bar: #1a1b1f;
     --surface:linear-gradient(135deg, rgba(255,255,255,.085), rgba(255,255,255,.025));
     --ink:#ffffff; --ink-soft:#a9acb4; --ink-muted:#75787f;
     --border:rgba(255,255,255,.12);
