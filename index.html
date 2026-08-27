@@ -70,13 +70,23 @@
   /* scrollbar-gutter лишається — він тримає ширину сторінки незмінною на
      комп'ютері. А от overflow-y:scroll малював смугу навіть тоді, коли
      гортати нічого. */
-  html{background:var(--bg);overscroll-behavior-y:none;scrollbar-gutter:stable;}
+  /* Колір тла живе ТІЛЬКИ тут: html малює полотно сторінки (і те, що видно
+     під час overscroll). У body його бути не повинно — див. нижче. */
+  html{background:var(--bg);overscroll-behavior-y:none;scrollbar-gutter:stable;
+    transition:background-color .2s ease;}
   body{
     margin:0; color:var(--ink); font-family:'Inter',sans-serif;
-    min-height:100vh; min-height:100svh; background:var(--bg);
+    min-height:100vh; min-height:100svh;
     -webkit-tap-highlight-color:transparent;overscroll-behavior-y:none;-webkit-overflow-scrolling:touch;
-    transition:background-color .2s ease, color .2s ease;
+    transition:color .2s ease;
   }
+  /* Шар зі світлом. Він лежить під вмістом (z-index:-1), і саме тому в body
+     НЕ МОЖЕ бути власного тла: body — звичайний потоковий нащадок html, а
+     потокові нащадки малюються ПІСЛЯ відʼємних z-index. Тобто непрозоре тло
+     body зафарбовувало це світло повністю, і воно не було видно ніколи —
+     крім одного випадку: коли відкривалось меню. У .app-menu є
+     backdrop-filter, а він змушує браузер зібрати композицію заново, і шар
+     на мить проступав. Звідси й враження, що світло «вмикає» бургер. */
   .background{
     position:fixed; inset:0; z-index:-1; overflow:hidden;
     background: var(--bg-radial); transition: background .2s ease;
