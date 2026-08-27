@@ -41,6 +41,12 @@ const T = {
     targetValueHint: 'Якщо задати — прогрес рахується числом, а не віхами.',
     targetValuePlaceholder: '10', unitPlaceholder: 'км',
     addProgressPlaceholder: '+ скільки', addProgressBtn: 'Додати', milestonePlaceholder: 'Наприклад: пройти перші 5 уроків',
+    savingsLinkLabel: 'Брати число зі скарбнички', savingsLinkNone: 'Не брати — вестиму руками',
+    savingsLinkHint: 'Прогрес рахуватиметься з реальних операцій у «Бюджеті», вручну вводити не доведеться.',
+    savingsLinkEmpty: 'У «Бюджеті» ще немає жодної скарбнички.',
+    linkedFromSavings: 'Число береться зі скарбнички в «Бюджеті»',
+    milestoneDateLabel: 'Коли планую (необовʼязково)', milestoneReorderAria: 'Перетягнути; ↑/↓ з клавіатури',
+    milestoneOverdue: (n) => `прострочено на ${n} дн.`, milestoneDue: (d) => `до ${d}`,
     addMilestoneBtn: '+ Додати віху',
     breakdownBtn: 'Запропонувати віхи', breakdownWorking: 'Думаю…',
     breakdownError: 'Не вдалося розбити ціль. Спробуй ще раз або сформулюй її конкретніше.',
@@ -54,6 +60,26 @@ const T = {
     confirmDeleteSub: 'Цю дію не можна скасувати. Усі віхи, нотатки й серія теж зникнуть.',
     fabNewGoalLabel: 'Нова ціль', bnGoals: 'Цілі', bnHome: 'Головна',
     statusAll: 'Усі', statusActive: 'Активні', statusDone: 'Завершені', statusArchived: 'Архів',
+    statusPaused: 'На паузі', pauseBtn: 'Поставити на паузу', resumeBtn: 'Повернути в роботу',
+    pausedNote: 'Ціль на паузі: про неї не питають вечорами, і серія не рветься.',
+    paceAhead: 'Випереджаєш графік', paceOnTrack: 'У графіку',
+    paceBehind: 'Не встигаєш таким темпом', paceOverdue: 'Дедлайн минув',
+    paceUnknown: 'Даних для прогнозу ще замало',
+    paceProjected: (d) => `Таким темпом — приблизно ${d}`,
+    paceLate: (n) => `На ${n} дн. пізніше за дедлайн`,
+    paceNeed: (v, u) => `Щоб устигнути: ${v}${u ? ' ' + u : ''} на день`,
+    paceTimeVsWork: (t, p) => `Часу минуло ${t}%, зроблено ${p}%`,
+    paceDaysLeft: (n) => `${n} дн. до дедлайну`,
+    reviewTitle: 'Огляд тижня', reviewOpen: 'Переглянути',
+    reviewBanner: (n) => `${n} ${n === 1 ? 'ціль чекає' : 'цілей чекають'} на огляд`,
+    reviewStalled: (n) => `${n} без руху цього тижня`,
+    reviewSub: 'Раз на тиждень — коротке питання: ти досі цього хочеш?',
+    reviewLater: 'Пізніше', reviewMoved: 'Цього тижня', reviewNoMove: 'Цього тижня нічого не зрушило',
+    reviewCheckins: (n) => `${n} дн. із кроком`, reviewMilestones: (n) => `віх: ${n}`,
+    reviewProgress: (v, u) => `+${v}${u ? ' ' + u : ''}`, reviewJournal: (n) => `записів: ${n}`,
+    reviewKeep: 'Веду далі', reviewShift: 'Зсунути дедлайн', reviewPause: 'На паузу', reviewArchive: 'В архів',
+    reviewShiftHint: 'Новий дедлайн', reviewDone: 'Огляд завершено', reviewEmpty: 'Усе оглянуто',
+    whyReminder: 'Ти писав(ла), навіщо це:',
     noMilestonesYet: 'Ще немає віх — додай перший крок у редагуванні цілі',
     allMilestonesDoneMsg: '🎉 Усі віхи пройдено!',
     markGoalDoneBtn: 'Позначити ціль виконаною',
@@ -112,6 +138,12 @@ const T = {
     targetValueHint: 'Если задать — прогресс считается числом, а не вехами.',
     targetValuePlaceholder: '10', unitPlaceholder: 'км',
     addProgressPlaceholder: '+ сколько', addProgressBtn: 'Добавить', milestonePlaceholder: 'Например: пройти первые 5 уроков',
+    savingsLinkLabel: 'Брать число из копилки', savingsLinkNone: 'Не брать — буду вести вручную',
+    savingsLinkHint: 'Прогресс будет считаться из реальных операций в «Бюджете», вручную вводить не придётся.',
+    savingsLinkEmpty: 'В «Бюджете» ещё нет ни одной копилки.',
+    linkedFromSavings: 'Число берётся из копилки в «Бюджете»',
+    milestoneDateLabel: 'Когда планирую (необязательно)', milestoneReorderAria: 'Перетащить; ↑/↓ с клавиатуры',
+    milestoneOverdue: (n) => `просрочено на ${n} дн.`, milestoneDue: (d) => `до ${d}`,
     addMilestoneBtn: '+ Добавить веху',
     breakdownBtn: 'Предложить вехи', breakdownWorking: 'Думаю…',
     breakdownError: 'Не удалось разбить цель. Попробуй ещё раз или сформулируй её конкретнее.',
@@ -125,6 +157,26 @@ const T = {
     confirmDeleteSub: 'Это действие нельзя отменить. Все вехи, заметки и серия тоже исчезнут.',
     fabNewGoalLabel: 'Новая цель', bnGoals: 'Цели', bnHome: 'Главная',
     statusAll: 'Все', statusActive: 'Активные', statusDone: 'Завершённые', statusArchived: 'Архив',
+    statusPaused: 'На паузе', pauseBtn: 'Поставить на паузу', resumeBtn: 'Вернуть в работу',
+    pausedNote: 'Цель на паузе: о ней не спрашивают вечерами, и серия не рвётся.',
+    paceAhead: 'Опережаешь график', paceOnTrack: 'В графике',
+    paceBehind: 'Не успеваешь таким темпом', paceOverdue: 'Дедлайн прошёл',
+    paceUnknown: 'Данных для прогноза пока мало',
+    paceProjected: (d) => `Таким темпом — примерно ${d}`,
+    paceLate: (n) => `На ${n} дн. позже дедлайна`,
+    paceNeed: (v, u) => `Чтобы успеть: ${v}${u ? ' ' + u : ''} в день`,
+    paceTimeVsWork: (t, p) => `Времени прошло ${t}%, сделано ${p}%`,
+    paceDaysLeft: (n) => `${n} дн. до дедлайна`,
+    reviewTitle: 'Обзор недели', reviewOpen: 'Посмотреть',
+    reviewBanner: (n) => `${n} ${n === 1 ? 'цель ждёт' : 'целей ждут'} обзора`,
+    reviewStalled: (n) => `${n} без движения на этой неделе`,
+    reviewSub: 'Раз в неделю — короткий вопрос: ты всё ещё этого хочешь?',
+    reviewLater: 'Позже', reviewMoved: 'На этой неделе', reviewNoMove: 'На этой неделе ничего не сдвинулось',
+    reviewCheckins: (n) => `${n} дн. с шагом`, reviewMilestones: (n) => `вех: ${n}`,
+    reviewProgress: (v, u) => `+${v}${u ? ' ' + u : ''}`, reviewJournal: (n) => `записей: ${n}`,
+    reviewKeep: 'Веду дальше', reviewShift: 'Сдвинуть дедлайн', reviewPause: 'На паузу', reviewArchive: 'В архив',
+    reviewShiftHint: 'Новый дедлайн', reviewDone: 'Обзор завершён', reviewEmpty: 'Всё просмотрено',
+    whyReminder: 'Ты писал(а), зачем это:',
     noMilestonesYet: 'Ещё нет вех — добавь первый шаг в редактировании цели',
     allMilestonesDoneMsg: '🎉 Все вехи пройдены!',
     markGoalDoneBtn: 'Отметить цель выполненной',
@@ -183,6 +235,12 @@ const T = {
     targetValueHint: 'Jeśli podasz — postęp liczy się liczbą, a nie kamieniami milowymi.',
     targetValuePlaceholder: '10', unitPlaceholder: 'km',
     addProgressPlaceholder: '+ ile', addProgressBtn: 'Dodaj', milestonePlaceholder: 'Np.: ukończyć pierwsze 5 lekcji',
+    savingsLinkLabel: 'Bierz liczbę ze skarbonki', savingsLinkNone: 'Nie bierz — poprowadzę ręcznie',
+    savingsLinkHint: 'Postęp policzy się z rzeczywistych operacji w «Budżecie», bez ręcznego wpisywania.',
+    savingsLinkEmpty: 'W «Budżecie» nie ma jeszcze żadnej skarbonki.',
+    linkedFromSavings: 'Liczba pochodzi ze skarbonki w «Budżecie»',
+    milestoneDateLabel: 'Planowana data (opcjonalnie)', milestoneReorderAria: 'Przeciągnij; ↑/↓ z klawiatury',
+    milestoneOverdue: (n) => `spóźnione o ${n} dni`, milestoneDue: (d) => `do ${d}`,
     addMilestoneBtn: '+ Dodaj kamień milowy',
     breakdownBtn: 'Zaproponuj kamienie milowe', breakdownWorking: 'Myślę…',
     breakdownError: 'Nie udało się rozbić celu. Spróbuj ponownie albo sformułuj go konkretniej.',
@@ -196,6 +254,26 @@ const T = {
     confirmDeleteSub: 'Tej czynności nie można cofnąć. Wszystkie kamienie milowe, notatki i seria też znikną.',
     fabNewGoalLabel: 'Nowy cel', bnGoals: 'Cele', bnHome: 'Główna',
     statusAll: 'Wszystkie', statusActive: 'Aktywne', statusDone: 'Ukończone', statusArchived: 'Archiwum',
+    statusPaused: 'Wstrzymane', pauseBtn: 'Wstrzymaj', resumeBtn: 'Wznów',
+    pausedNote: 'Cel wstrzymany: wieczorem nie pytamy o niego, a seria się nie rwie.',
+    paceAhead: 'Wyprzedzasz plan', paceOnTrack: 'Zgodnie z planem',
+    paceBehind: 'W tym tempie nie zdążysz', paceOverdue: 'Termin minął',
+    paceUnknown: 'Za mało danych na prognozę',
+    paceProjected: (d) => `W tym tempie — około ${d}`,
+    paceLate: (n) => `${n} dni po terminie`,
+    paceNeed: (v, u) => `Aby zdążyć: ${v}${u ? ' ' + u : ''} dziennie`,
+    paceTimeVsWork: (t, p) => `Czasu minęło ${t}%, zrobione ${p}%`,
+    paceDaysLeft: (n) => `${n} dni do terminu`,
+    reviewTitle: 'Przegląd tygodnia', reviewOpen: 'Zobacz',
+    reviewBanner: (n) => `${n} ${n === 1 ? 'cel czeka' : 'celów czeka'} na przegląd`,
+    reviewStalled: (n) => `${n} bez ruchu w tym tygodniu`,
+    reviewSub: 'Raz w tygodniu krótkie pytanie: czy nadal tego chcesz?',
+    reviewLater: 'Później', reviewMoved: 'W tym tygodniu', reviewNoMove: 'W tym tygodniu nic się nie ruszyło',
+    reviewCheckins: (n) => `${n} dni z krokiem`, reviewMilestones: (n) => `kamieni: ${n}`,
+    reviewProgress: (v, u) => `+${v}${u ? ' ' + u : ''}`, reviewJournal: (n) => `wpisów: ${n}`,
+    reviewKeep: 'Prowadzę dalej', reviewShift: 'Przesuń termin', reviewPause: 'Wstrzymaj', reviewArchive: 'Do archiwum',
+    reviewShiftHint: 'Nowy termin', reviewDone: 'Przegląd zakończony', reviewEmpty: 'Wszystko przejrzane',
+    whyReminder: 'Napisałeś(-aś), po co to:',
     noMilestonesYet: 'Jeszcze brak kamieni milowych — dodaj pierwszy krok w edycji celu',
     allMilestonesDoneMsg: '🎉 Wszystkie kamienie milowe osiągnięte!',
     markGoalDoneBtn: 'Oznacz cel jako ukończony',
@@ -254,6 +332,12 @@ const T = {
     targetValueHint: 'Set it and progress is counted by the number, not by milestones.',
     targetValuePlaceholder: '10', unitPlaceholder: 'km',
     addProgressPlaceholder: '+ how much', addProgressBtn: 'Add', milestonePlaceholder: 'E.g.: finish the first 5 lessons',
+    savingsLinkLabel: 'Take the number from a savings pot', savingsLinkNone: 'No — I will track it by hand',
+    savingsLinkHint: 'Progress will be counted from real entries in Budget, no manual typing.',
+    savingsLinkEmpty: 'No savings pots in Budget yet.',
+    linkedFromSavings: 'The number comes from a savings pot in Budget',
+    milestoneDateLabel: 'Planned date (optional)', milestoneReorderAria: 'Drag to reorder; ↑/↓ from the keyboard',
+    milestoneOverdue: (n) => `${n} days overdue`, milestoneDue: (d) => `by ${d}`,
     addMilestoneBtn: '+ Add milestone',
     breakdownBtn: 'Suggest milestones', breakdownWorking: 'Thinking…',
     breakdownError: 'Could not break this goal down. Try again or make it more specific.',
@@ -267,6 +351,26 @@ const T = {
     confirmDeleteSub: 'This action cannot be undone. Milestones, notes and streak will be lost too.',
     fabNewGoalLabel: 'New goal', bnGoals: 'Goals', bnHome: 'Home',
     statusAll: 'All', statusActive: 'Active', statusDone: 'Done', statusArchived: 'Archived',
+    statusPaused: 'Paused', pauseBtn: 'Pause this goal', resumeBtn: 'Resume',
+    pausedNote: 'Paused: no evening questions, and the streak stays intact.',
+    paceAhead: 'Ahead of schedule', paceOnTrack: 'On track',
+    paceBehind: 'Not on pace to finish in time', paceOverdue: 'Deadline has passed',
+    paceUnknown: 'Not enough history to forecast yet',
+    paceProjected: (d) => `At this pace — around ${d}`,
+    paceLate: (n) => `${n} days past the deadline`,
+    paceNeed: (v, u) => `To finish in time: ${v}${u ? ' ' + u : ''} per day`,
+    paceTimeVsWork: (t, p) => `${t}% of the time gone, ${p}% done`,
+    paceDaysLeft: (n) => `${n} days to the deadline`,
+    reviewTitle: 'Weekly review', reviewOpen: 'Review',
+    reviewBanner: (n) => `${n} ${n === 1 ? 'goal is' : 'goals are'} due for review`,
+    reviewStalled: (n) => `${n} with no movement this week`,
+    reviewSub: 'Once a week, one short question: do you still want this?',
+    reviewLater: 'Later', reviewMoved: 'This week', reviewNoMove: 'Nothing moved this week',
+    reviewCheckins: (n) => `${n} days with a step`, reviewMilestones: (n) => `milestones: ${n}`,
+    reviewProgress: (v, u) => `+${v}${u ? ' ' + u : ''}`, reviewJournal: (n) => `entries: ${n}`,
+    reviewKeep: 'Keep going', reviewShift: 'Move the deadline', reviewPause: 'Pause', reviewArchive: 'Archive',
+    reviewShiftHint: 'New deadline', reviewDone: 'Review done', reviewEmpty: 'All reviewed',
+    whyReminder: 'You wrote why this matters:',
     noMilestonesYet: 'No milestones yet — add the first step by editing the goal',
     allMilestonesDoneMsg: '🎉 All milestones reached!',
     markGoalDoneBtn: 'Mark goal as done',
@@ -516,6 +620,17 @@ function escapeHtml(s) {
 function uid4() {
   return (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}_${Math.random().toString(36).slice(2)}`).slice(0, 36);
 }
+// Дата прогнозу словами: «12 березня». Рік не пишемо, поки він поточний —
+// у прогнозі на пів року вперед він тільки заважає читати.
+function formatDateShort(iso) {
+  const d = Streak.parseISO(iso);
+  if (isNaN(d)) return iso;
+  const locale = LOCALE_MAP[currentLang] || 'uk-UA';
+  const sameYear = d.getFullYear() === new Date().getFullYear();
+  const opts = sameYear ? { day: 'numeric', month: 'long' } : { day: 'numeric', month: 'long', year: 'numeric' };
+  return new Intl.DateTimeFormat(locale, opts).format(d);
+}
+
 function weekdayShortLabels() {
   const locale = LOCALE_MAP[currentLang] || 'uk-UA';
   const fmt = new Intl.DateTimeFormat(locale, { weekday: 'short' });
@@ -533,12 +648,13 @@ function weekdayShortLabels() {
 // ---- Стан ----
 let goals = [];
 let unsubscribeGoals = null;
-let currentScreen = 'dashboard'; // 'dashboard' | 'detail'
+let currentScreen = 'dashboard'; // 'dashboard' | 'detail' | 'review'
 let activeDetailGoalId = null;
 let statusFilter = 'active'; // null(all) | 'active' | 'done' | 'archived'
 let editingGoalId = null;
 let formCategory = 'other';
 let formMilestones = [];
+let formSavingsGoalId = null;
 let pendingDeleteId = null;
 // Яка ціль у вечірньому підсумку зараз питає «що завадило».
 let eveningReasonForId = null;
@@ -554,9 +670,101 @@ function subscribeToGoals(uid) {
   if (unsubscribeGoals) unsubscribeGoals();
   const col = db.collection('users').doc(uid).collection('goals');
   unsubscribeGoals = col.onSnapshot((snap) => {
-    goals = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    rawGoals = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    syncSavingsSubscription(uid);
+    applySavingsLink();
     renderCurrentScreen();
   }, (err) => console.error('subscribeToGoals:', err));
+}
+
+// ---- Звʼязок зі скарбничкою бюджету ----
+// «Накопичити 50 тисяч» жило в застосунку двічі: ціллю тут і скарбничкою в
+// бюджеті, — і прогрес довелось би вбивати руками в обох місцях. Тепер число
+// береться з реальних операцій: ціль лише посилається на скарбничку, а сума
+// рахується з savings, як і на сторінці бюджету.
+//
+// Підписку тримаємо ЛИШЕ тоді, коли хоч одна ціль справді звʼязана: платити
+// читаннями за колекцію, яка нікому на цьому екрані не потрібна, — та сама
+// плата без причини, якої уникають плитки на головній.
+let rawGoals = [];
+let savingsEntries = [];
+let savingsGoalsList = [];
+let unsubscribeSavings = null;
+let unsubscribeSavingsGoals = null;
+let savingsUid = null;
+
+function needsSavings() {
+  return rawGoals.some((g) => g && g.savingsGoalId);
+}
+
+function syncSavingsSubscription(uid) {
+  const need = needsSavings();
+  if (need && !unsubscribeSavings) {
+    savingsUid = uid;
+    const base = db.collection('users').doc(uid);
+    unsubscribeSavings = base.collection('savings').onSnapshot((snap) => {
+      savingsEntries = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      applySavingsLink();
+      renderCurrentScreen();
+    }, (err) => console.error('savings:', err));
+    unsubscribeSavingsGoals = base.collection('savingsGoals').onSnapshot((snap) => {
+      savingsGoalsList = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      renderCurrentScreen();
+    }, (err) => console.error('savingsGoals:', err));
+  } else if (!need && unsubscribeSavings) {
+    stopSavings();
+  }
+}
+
+function stopSavings() {
+  if (unsubscribeSavings) { unsubscribeSavings(); unsubscribeSavings = null; }
+  if (unsubscribeSavingsGoals) { unsubscribeSavingsGoals(); unsubscribeSavingsGoals = null; }
+  savingsEntries = [];
+  savingsGoalsList = [];
+  savingsUid = null;
+}
+
+/** Баланс скарбнички по валютах — та сама конвенція знаків, що й у бюджеті. */
+function savingsBalance(savingsGoalId) {
+  const res = {};
+  savingsEntries.filter((sv) => sv.goalId === savingsGoalId).forEach((sv) => {
+    const cur = sv.currency || 'UAH';
+    res[cur] = (res[cur] || 0) + (sv.type === 'deposit' ? Number(sv.amount) || 0 : -(Number(sv.amount) || 0));
+  });
+  return res;
+}
+
+/**
+ * Підставляє в звʼязані цілі число з реальних грошей.
+ *
+ * Валюта: скарбничка може містити операції в кількох валютах, а складати їх
+ * без курсу — брехня. Тому беремо ту, у якій операцій найбільше, і її ж
+ * ставимо одиницею. Це чесніше за суму різних валют і не вимагає тягнути
+ * сюди курси НБУ заради одного рядка.
+ *
+ * progressLog складаємо із самих операцій: у них уже є дати, тож темп
+ * рахується без жодного окремого журналу.
+ */
+function applySavingsLink() {
+  goals = rawGoals.map((g) => {
+    if (!g.savingsGoalId) return g;
+    const entries = savingsEntries.filter((sv) => sv.goalId === g.savingsGoalId);
+    if (!entries.length) return { ...g, currentValue: 0, progressLog: [], linkedSavings: true };
+
+    const counts = {};
+    entries.forEach((sv) => { const c = sv.currency || 'UAH'; counts[c] = (counts[c] || 0) + 1; });
+    const cur = Object.keys(counts).sort((a, b) => counts[b] - counts[a] || a.localeCompare(b))[0];
+
+    const mine = entries.filter((sv) => (sv.currency || 'UAH') === cur);
+    const sum = mine.reduce((acc, sv) =>
+      acc + (sv.type === 'deposit' ? Number(sv.amount) || 0 : -(Number(sv.amount) || 0)), 0);
+    const log = mine
+      .filter((sv) => typeof sv.date === 'string')
+      .map((sv) => ({ date: sv.date, delta: sv.type === 'deposit' ? Number(sv.amount) || 0 : -(Number(sv.amount) || 0) }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+
+    return { ...g, currentValue: Math.max(0, Math.round(sum * 100) / 100), unit: cur, progressLog: log, linkedSavings: true };
+  });
 }
 
 // ---- Обчислення (завжди похідні від живих даних, нічого не кешується) ----
@@ -594,6 +802,9 @@ function fmtValue(n) {
 // доступний» мусить бути одне: інакше в чаті пишеться одне, а на сторінці
 // показується інше.
 const Streak = window.GoalStreak;
+// Темп і черга огляду — goals/review.js. Той самий модуль читає помічник на
+// сервері: інакше в чаті звучала б одна оцінка, а на екрані стояла інша.
+const Review = window.GoalReview;
 function computeStreak(checkins) {
   return Streak.computeStreak(checkins, todayISO());
 }
@@ -636,6 +847,7 @@ function computeBadges(list) {
 
 // ---- Рендер: дашборд ----
 function renderCurrentScreen() {
+  if (currentScreen === 'review') { renderReviewScreen(); return; }
   if (currentScreen === 'detail' && activeDetailGoalId) {
     const goal = goals.find((g) => g.id === activeDetailGoalId);
     if (goal) { renderGoalDetail(goal); return; }
@@ -652,6 +864,7 @@ function renderCurrentScreen() {
 function renderDashboard() {
   renderSummaryStrip();
   renderBadgesRow();
+  renderReviewBanner();
   renderEveningCard();
   renderStatusFilterRow();
   renderGoalsList();
@@ -688,9 +901,18 @@ function renderEveningCard() {
           ? `<div class="evening-reasons">${BLOCKER_KEYS.map((k) =>
               `<button type="button" class="evening-reason" data-reason="${k}" data-goal="${g.id}">${escapeHtml(t('reason_' + k))}</button>`).join('')}</div>`
           : '';
+        // «Навіщо» має сенс рівно тут: поле заповнюють на холодну голову, а
+        // читати його треба тоді, коли не хочеться. Показуємо не завжди —
+        // лише коли є що втрачати: серія, яку обірве саме сьогоднішній
+        // пропуск. Інакше цитата стала б декором і перестала б читатись.
+        const streakAtRisk = Streak.computeStreak(g.checkins, today);
+        const whyBlock = g.why && streakAtRisk >= 3
+          ? `<div class="evening-why">${escapeHtml(t('whyReminder'))} “${escapeHtml(g.why)}”</div>`
+          : '';
         return `
         <div class="evening-goal">
-          <div class="evening-goal-title">${escapeHtml(g.title || '')}</div>
+          <div class="evening-goal-title">${escapeHtml(g.title || '')}${streakAtRisk >= 3 ? ` <span class="evening-streak">🔥 ${streakAtRisk}</span>` : ''}</div>
+          ${whyBlock}
           <div class="evening-actions">
             <button type="button" class="evening-btn yes" data-yes="${g.id}">${escapeHtml(t('eveningYes'))}</button>
             <button type="button" class="evening-btn" data-no="${g.id}">${escapeHtml(t('eveningNo'))}</button>
@@ -740,7 +962,8 @@ function renderBadgesRow() {
 }
 
 function renderStatusFilterRow() {
-  const options = [[null, t('statusAll')], ['active', t('statusActive')], ['done', t('statusDone')], ['archived', t('statusArchived')]];
+  const options = [[null, t('statusAll')], ['active', t('statusActive')], ['paused', t('statusPaused')],
+    ['done', t('statusDone')], ['archived', t('statusArchived')]];
   const row = document.getElementById('statusFilterRow');
   row.innerHTML = options.map(([val, label]) =>
     `<button type="button" class="tag-filter-chip${statusFilter === val ? ' selected' : ''}" data-status="${val === null ? '' : val}">${escapeHtml(label)}</button>`
@@ -815,10 +1038,21 @@ function showDashboard() {
   activeDetailGoalId = null;
   stopActions();
   document.getElementById('goalDetailScreen').style.display = 'none';
+  document.getElementById('reviewScreen').style.display = 'none';
   document.getElementById('dashboardScreen').style.display = '';
   renderCurrentScreen();
 }
+function showReview() {
+  currentScreen = 'review';
+  activeDetailGoalId = null;
+  stopActions();
+  document.getElementById('goalDetailScreen').style.display = 'none';
+  document.getElementById('dashboardScreen').style.display = 'none';
+  document.getElementById('reviewScreen').style.display = 'block';
+  renderReviewScreen();
+}
 document.getElementById('detailBackBtn').addEventListener('click', showDashboard);
+document.getElementById('reviewBackBtn').addEventListener('click', showDashboard);
 // Вкладка «Цілі» — і повернення з екрана деталей, і просто підсвічений стан.
 document.getElementById('bnGoals').addEventListener('click', showDashboard);
 
@@ -848,20 +1082,26 @@ function renderGoalDetail(goal) {
           <span class="value-progress-pct">${prog.pct}%</span>
         </div>
         <div class="value-progress-bar"><div class="value-progress-fill" style="width:${prog.pct}%"></div></div>
-        <div class="value-add-row">
+        ${goal.linkedSavings
+          ? `<div class="linked-note">${escapeHtml(t('linkedFromSavings'))}</div>`
+          : `<div class="value-add-row">
           <input type="number" id="valueAddInput" inputmode="decimal" step="any" placeholder="${escapeHtml(t('addProgressPlaceholder'))}">
           <button type="button" class="value-add-btn" id="valueAddBtn">${escapeHtml(t('addProgressBtn'))}</button>
-        </div>
+        </div>`}
       </div>`;
+    // У звʼязаної зі скарбничкою цілі полів немає — там нема що підключати,
+    // і решта екрана мусить намалюватись однаково.
     const input = document.getElementById('valueAddInput');
-    const commit = () => {
-      const delta = parseFloat(input.value);
-      if (!Number.isFinite(delta) || delta === 0) return;
-      input.value = '';
-      addGoalProgress(goal.id, delta);
-    };
-    document.getElementById('valueAddBtn').addEventListener('click', commit);
-    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); commit(); } });
+    if (input) {
+      const commit = () => {
+        const delta = parseFloat(input.value);
+        if (!Number.isFinite(delta) || delta === 0) return;
+        input.value = '';
+        addGoalProgress(goal.id, delta);
+      };
+      document.getElementById('valueAddBtn').addEventListener('click', commit);
+      input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); commit(); } });
+    }
   } else if (prog) {
     progressEl.innerHTML = `
       <div class="progress-ring" style="--pct:${prog.pct}">
@@ -873,6 +1113,8 @@ function renderGoalDetail(goal) {
   } else {
     progressEl.innerHTML = '';
   }
+
+  renderPaceBlock(goal);
 
   document.getElementById('detailJourneyBlock').innerHTML = journeyHtml(goal);
   wireJourneyEvents(goal);
@@ -906,7 +1148,200 @@ function renderGoalDetail(goal) {
     </button>`;
   document.getElementById('streakToggleBtn').addEventListener('click', () => toggleTodayCheckin(goal.id));
 
+  renderPauseRow(goal);
   renderJournalList(goal);
+}
+
+// ---- Огляд тижня ----
+// Той самий каркас, що й «розбір минулих днів» у завданнях і «регулярні
+// операції» в бюджеті: банер каже, що настало, окремий екран дає вирішити,
+// і НІЧОГО не вирішується само. Довгі цілі гинуть не тому, що важкі, а тому,
+// що про них забувають — і через півроку це вже чуже сміття в списку.
+const REVIEW_DISMISS_KEY = 'goalsReviewDismissed';
+
+function renderReviewBanner() {
+  const host = document.getElementById('reviewBanner');
+  if (!host) return;
+  const today = todayISO();
+  // «Пізніше» ховає банер до кінця дня, а не назавжди: завтра питання
+  // актуальне знову. Так само, як із боргами в завданнях.
+  if (localStorage.getItem(REVIEW_DISMISS_KEY) === today) { host.innerHTML = ''; return; }
+  const digest = Review.reviewDigest(goals, today);
+  if (!digest.pending) { host.innerHTML = ''; return; }
+
+  host.innerHTML = `
+    <div class="review-banner">
+      <div id="reviewBannerBtn" style="flex:1;cursor:pointer;">
+        <div class="review-banner-text">${escapeHtml(t('reviewBanner', digest.pending))}</div>
+        ${digest.stalled ? `<div class="review-banner-sub">${escapeHtml(t('reviewStalled', digest.stalled))}</div>` : ''}
+      </div>
+      <span class="review-banner-go" id="reviewBannerGo">${escapeHtml(t('reviewOpen'))} →</span>
+      <button type="button" class="review-later" id="reviewLaterBtn">${escapeHtml(t('reviewLater'))}</button>
+    </div>`;
+  const open = () => showReview();
+  document.getElementById('reviewBannerBtn').addEventListener('click', open);
+  document.getElementById('reviewBannerGo').addEventListener('click', open);
+  document.getElementById('reviewLaterBtn').addEventListener('click', () => {
+    localStorage.setItem(REVIEW_DISMISS_KEY, todayISO());
+    renderReviewBanner();
+  });
+}
+
+function movementChips(item, goal) {
+  const m = item.movement;
+  if (!m || !m.moved) return `<div class="review-moved">${escapeHtml(t('reviewNoMove'))}</div>`;
+  const chips = [];
+  if (m.checkins) chips.push(t('reviewCheckins', m.checkins));
+  if (m.progressDelta) chips.push(t('reviewProgress', fmtValue(m.progressDelta), goal.unit || ''));
+  if (m.milestonesDone) chips.push(t('reviewMilestones', m.milestonesDone));
+  if (m.journal) chips.push(t('reviewJournal', m.journal));
+  return `
+    <div class="review-moved">${escapeHtml(t('reviewMoved'))}</div>
+    <div class="review-chips">${chips.map((c) => `<span class="review-chip">${escapeHtml(c)}</span>`).join('')}</div>`;
+}
+
+function renderReviewScreen() {
+  document.getElementById('reviewTitleLabel').textContent = t('reviewTitle');
+  document.getElementById('reviewSubLabel').textContent = t('reviewSub');
+  const host = document.getElementById('reviewList');
+  const today = todayISO();
+  const queue = Review.reviewQueue(goals, today);
+
+  if (!queue.length) {
+    host.innerHTML = `<div class="review-empty">${escapeHtml(t('reviewEmpty'))}</div>`;
+    return;
+  }
+
+  host.innerHTML = queue.map((goal) => {
+    const item = Review.reviewItem(goal, today, { startIso: createdIso(goal) });
+    const p = item.pace;
+    const VERDICT = { ahead: 'paceAhead', onTrack: 'paceOnTrack', behind: 'paceBehind',
+      overdue: 'paceOverdue', unknown: 'paceUnknown' };
+    return `
+      <div class="review-item" data-review="${goal.id}">
+        <div class="review-item-title">${escapeHtml(goal.title)}</div>
+        ${p ? `<div class="pace ${p.verdict}" style="margin:10px 0 0;">
+            <div class="pace-head"><span class="pace-dot"></span>${escapeHtml(t(VERDICT[p.verdict] || 'paceUnknown'))}</div>
+          </div>` : ''}
+        ${movementChips(item, goal)}
+        ${goal.why ? `<div class="review-why">${escapeHtml(t('whyReminder'))} “${escapeHtml(goal.why)}”</div>` : ''}
+        <div class="review-actions">
+          <button type="button" class="review-btn primary" data-keep="${goal.id}">${escapeHtml(t('reviewKeep'))}</button>
+          <button type="button" class="review-btn" data-shift="${goal.id}">${escapeHtml(t('reviewShift'))}</button>
+          <button type="button" class="review-btn" data-pause="${goal.id}">${escapeHtml(goal.status === 'paused' ? t('resumeBtn') : t('reviewPause'))}</button>
+          <button type="button" class="review-btn" data-archive="${goal.id}">${escapeHtml(t('reviewArchive'))}</button>
+        </div>
+        <div class="review-shift-row" data-shift-row="${goal.id}" style="display:none;">
+          <input type="date" data-shift-input="${goal.id}" value="${escapeHtml(goal.targetDate || '')}">
+          <button type="button" class="review-btn primary" data-shift-save="${goal.id}">${escapeHtml(t('reviewKeep'))}</button>
+        </div>
+      </div>`;
+  }).join('');
+
+  host.querySelectorAll('[data-keep]').forEach((btn) => {
+    btn.addEventListener('click', () => markReviewed(btn.dataset.keep));
+  });
+  host.querySelectorAll('[data-pause]').forEach((btn) => {
+    const goal = goals.find((g) => g.id === btn.dataset.pause);
+    btn.addEventListener('click', () =>
+      markReviewed(btn.dataset.pause, { status: goal && goal.status === 'paused' ? 'active' : 'paused' }));
+  });
+  host.querySelectorAll('[data-archive]').forEach((btn) => {
+    btn.addEventListener('click', () => markReviewed(btn.dataset.archive, { status: 'archived' }));
+  });
+  // Зсув дедлайну розкриває поле, а не питає в prompt(): дату вводять
+  // календарем, і бачити поточну перед зміною важливо.
+  host.querySelectorAll('[data-shift]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const row = host.querySelector(`[data-shift-row="${btn.dataset.shift}"]`);
+      if (row) row.style.display = row.style.display === 'none' ? 'flex' : 'none';
+    });
+  });
+  host.querySelectorAll('[data-shift-save]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.shiftSave;
+      const input = host.querySelector(`[data-shift-input="${id}"]`);
+      const value = input && input.value;
+      markReviewed(id, value ? { targetDate: value } : {});
+    });
+  });
+}
+
+// Огляд завершено — ціль виходить із черги на тиждень. Патч дописується тим
+// самим записом, тож «на паузу» і «оглянуто» це одна дія, а не дві.
+async function markReviewed(goalId, patch) {
+  if (!auth.currentUser) return;
+  await db.collection('users').doc(auth.currentUser.uid).collection('goals').doc(goalId).update({
+    ...(patch || {}),
+    reviewedAt: todayISO(),
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+  }).catch((err) => console.error('markReviewed:', err));
+  // Черга перерахується з живих даних, коли долетить onSnapshot; але екран
+  // має відреагувати одразу — інакше здається, що тап не спрацював.
+  const goal = goals.find((g) => g.id === goalId);
+  if (goal) Object.assign(goal, patch || {}, { reviewedAt: todayISO() });
+  renderReviewScreen();
+}
+
+// ---- Темп: чи встигаєш до дедлайну ----
+// Рахує goals/review.js — тут лише слова навколо його чисел. Головне рішення
+// модуля видно й тут: поки історії мало, показуємо чесне «даних замало», а не
+// прогноз упевненим тоном. Порада без підстав гірша за мовчання.
+function renderPaceBlock(goal) {
+  const el = document.getElementById('detailPaceBlock');
+  const p = Review.pace(goal, todayISO(), { startIso: createdIso(goal) });
+  if (!p) { el.innerHTML = ''; return; }
+
+  const VERDICT = { ahead: 'paceAhead', onTrack: 'paceOnTrack', behind: 'paceBehind',
+    overdue: 'paceOverdue', unknown: 'paceUnknown' };
+  const lines = [];
+
+  if (p.verdict === 'overdue') {
+    lines.push(t('paceLate', Math.abs(p.daysLeft)));
+  } else {
+    if (p.enough && p.projectedDate) {
+      lines.push(t('paceProjected', formatDateShort(p.projectedDate)));
+      if (p.diffDays > 0) lines.push(t('paceLate', p.diffDays));
+    } else if (p.kind === 'value' && p.requiredPerDay !== null) {
+      lines.push(t('paceNeed', fmtValue(Math.ceil(p.requiredPerDay * 100) / 100), goal.unit || ''));
+    } else {
+      lines.push(t('paceTimeVsWork', p.timePct, p.pct));
+    }
+    if (p.daysLeft >= 0) lines.push(t('paceDaysLeft', p.daysLeft));
+  }
+
+  el.innerHTML = `
+    <div class="pace ${p.verdict}">
+      <div class="pace-head"><span class="pace-dot"></span>${escapeHtml(t(VERDICT[p.verdict] || 'paceUnknown'))}</div>
+      <div class="pace-sub">${escapeHtml(lines.join(' · '))}</div>
+    </div>`;
+}
+
+// createdAt приходить із Firestore як Timestamp; темпу потрібен день, від
+// якого рахувати «скільки часу вже минуло». Якщо поля ще немає (щойно
+// створений документ до підтвердження сервером) — review.js сам візьме
+// найраніший слід у даних.
+function createdIso(goal) {
+  const ts = goal && goal.createdAt;
+  if (ts && typeof ts.toDate === 'function') return Streak.isoOf(ts.toDate());
+  return null;
+}
+
+// ---- Пауза ----
+// Раніше вибір був між «щовечора нагадувати» і «поховати в архів». Пауза —
+// це третє: ціль жива, але про неї свідомо не питають. Серія при цьому не
+// рветься, бо eveningQueue бере лише активні.
+function renderPauseRow(goal) {
+  const el = document.getElementById('detailPauseRow');
+  if (goal.status === 'done' || goal.status === 'archived') { el.innerHTML = ''; return; }
+  const paused = goal.status === 'paused';
+  el.innerHTML = `
+    <div class="pause-row">
+      <button type="button" class="pause-btn" id="pauseToggleBtn">${escapeHtml(paused ? t('resumeBtn') : t('pauseBtn'))}</button>
+    </div>`;
+  document.getElementById('pauseToggleBtn').addEventListener('click', () => {
+    setGoalStatus(goal.id, paused ? 'active' : 'paused');
+  });
 }
 
 // ---- Щоденні дії ----
@@ -1063,11 +1498,23 @@ function journeyHtml(goal) {
         <button type="button" class="journey-node" data-toggle-milestone="${m.id}" aria-label="toggle">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
         </button>
-        <div class="journey-label">${escapeHtml(m.title)}${isNext ? `<span class="journey-next-badge">${escapeHtml(t('nextStopBadge'))}</span>` : ''}</div>
+        <div class="journey-label">${escapeHtml(m.title)}${isNext ? `<span class="journey-next-badge">${escapeHtml(t('nextStopBadge'))}</span>` : ''}${milestoneDueHtml(m)}</div>
       </div>`;
   }).join('') + '</div>';
   return html;
 }
+// Дата віхи, якщо вона є. Прострочену показуємо окремим кольором: це те
+// саме, що застосунок робить із дедлайном цілі, тільки на крок нижче —
+// «мала бути три тижні тому» помітно конкретніше за просто невиконаний пункт.
+// У вже пройденій віхі дата ні до чого: там питання закрите.
+function milestoneDueHtml(m) {
+  if (!m || m.done || !m.date) return '';
+  const left = Streak.daysBetween(todayISO(), m.date);
+  const overdue = left < 0;
+  const text = overdue ? t('milestoneOverdue', Math.abs(left)) : t('milestoneDue', formatDateShort(m.date));
+  return `<span class="journey-due${overdue ? ' overdue' : ''}">${escapeHtml(text)}</span>`;
+}
+
 function wireJourneyEvents(goal) {
   const block = document.getElementById('detailJourneyBlock');
   block.querySelectorAll('[data-toggle-milestone]').forEach((btn) => {
@@ -1133,15 +1580,31 @@ async function addGoalProgress(goalId, delta) {
   const goal = goals.find((g) => g.id === goalId);
   if (!goal || !auth.currentUser) return;
   const next = Math.max(0, Math.round(((Number(goal.currentValue) || 0) + delta) * 100) / 100);
+  // Саме число показує смужка, але одне число не памʼятає, КОЛИ прогрес був —
+  // а без цього не порахувати ні темп, ні рух за тиждень. Тому поруч росте
+  // журнал: currentValue лишається сумою, progressLog — історією.
+  let log = [...(goal.progressLog || []), { date: todayISO(), delta: Math.round(delta * 100) / 100 }];
+  if (log.length > 400) log = log.slice(log.length - 400);
   await db.collection('users').doc(auth.currentUser.uid).collection('goals').doc(goalId).update({
-    currentValue: next, updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    currentValue: next, progressLog: log,
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
   }).catch((err) => console.error('addGoalProgress:', err));
 }
 
 async function toggleMilestone(goalId, milestoneId) {
   const goal = goals.find((g) => g.id === goalId);
   if (!goal || !auth.currentUser) return;
-  const next = (goal.milestones || []).map((m) => (m.id === milestoneId ? { ...m, done: !m.done } : m));
+  // doneAt — день, коли віху реально закрили. Без нього тижневий огляд не
+  // може сказати «цього тижня зроблено дві віхи»: у самій віхі стоїть лише
+  // done, і вчорашня галочка не відрізняється від торішньої.
+  const next = (goal.milestones || []).map((m) => {
+    if (m.id !== milestoneId) return m;
+    const done = !m.done;
+    const updated = { ...m, done };
+    if (done) updated.doneAt = todayISO();
+    else delete updated.doneAt;
+    return updated;
+  });
   await db.collection('users').doc(auth.currentUser.uid).collection('goals').doc(goalId).update({
     milestones: next, updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
   }).catch((err) => console.error('toggleMilestone:', err));
@@ -1194,8 +1657,15 @@ function renderCategoryPicker() {
 function renderMilestonesEditor() {
   const el = document.getElementById('milestonesEditor');
   el.innerHTML = formMilestones.map((m, i) => `
-    <div class="milestone-editor-row" data-idx="${i}">
-      <input type="text" data-milestone-title="${i}" value="${escapeHtml(m.title)}" placeholder="${escapeHtml(t('milestonePlaceholder'))}" maxlength="200">
+    <div class="milestone-editor-row" data-idx="${i}" data-mid="${escapeHtml(m.id)}">
+      <button type="button" class="milestone-drag" data-drag-milestone="${escapeHtml(m.id)}"
+        aria-label="${escapeHtml(t('milestoneReorderAria'))}" title="${escapeHtml(t('milestoneReorderAria'))}">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 8h16M4 16h16"/></svg>
+      </button>
+      <div class="milestone-fields">
+        <input type="text" data-milestone-title="${i}" value="${escapeHtml(m.title)}" placeholder="${escapeHtml(t('milestonePlaceholder'))}" maxlength="200">
+        <input type="date" class="milestone-date" data-milestone-date="${i}" value="${escapeHtml(m.date || '')}" title="${escapeHtml(t('milestoneDateLabel'))}">
+      </div>
       <button type="button" class="milestone-remove-btn" data-remove-milestone="${i}" aria-label="remove">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
       </button>
@@ -1206,11 +1676,110 @@ function renderMilestonesEditor() {
       if (formMilestones[idx]) formMilestones[idx].title = input.value;
     });
   });
+  // Дата віхи необовʼязкова. Коли вона є, віха перестає бути просто галочкою
+  // й починає годувати темп: «мала бути три тижні тому» — це вже відповідь
+  // на «чи встигаю», а не просто невиконаний пункт.
+  el.querySelectorAll('[data-milestone-date]').forEach((input) => {
+    input.addEventListener('change', () => {
+      const idx = Number(input.dataset.milestoneDate);
+      if (formMilestones[idx]) formMilestones[idx].date = input.value || '';
+    });
+  });
   el.querySelectorAll('[data-remove-milestone]').forEach((btn) => {
     btn.addEventListener('click', () => {
       const idx = Number(btn.dataset.removeMilestone);
       formMilestones.splice(idx, 1);
       renderMilestonesEditor();
+    });
+  });
+  attachMilestoneDrag(el);
+}
+
+// ---- Порядок віх: перетягування ----
+// Віхи — це кроки в тому порядку, у якому їх робитимуть, і переставити їх
+// хочеться саме тоді, коли список уже набраний. Підхід той самий, що й із
+// вправами у workout/app.js: pointer events (HTML5 drag-and-drop на тач-екранах
+// не працює), під час жесту нічого не перемальовується — рядок ведемо
+// transform'ом, сусідні зсуваємо, а масив переставляємо один раз на
+// відпусканні. Перемальовування на кожен рух гасило б фокус у полях.
+const MS_ROW_GAP = 8;
+let msDrag = null;
+
+function beginMilestoneDrag(e, handle) {
+  if (msDrag) return;
+  const host = document.getElementById('milestonesEditor');
+  const rows = [...host.querySelectorAll('.milestone-editor-row')];
+  const rowEl = handle.closest('.milestone-editor-row');
+  const from = rows.indexOf(rowEl);
+  if (from < 0 || rows.length < 2) return;
+
+  e.preventDefault();
+  msDrag = {
+    pointerId: e.pointerId, rows,
+    rects: rows.map((r) => r.getBoundingClientRect()),
+    from, to: from, startY: e.clientY,
+  };
+  rowEl.classList.add('dragging');
+  handle.setPointerCapture(e.pointerId);
+}
+
+function moveMilestoneDrag(e) {
+  if (!msDrag || e.pointerId !== msDrag.pointerId) return;
+  const { rows, rects, from } = msDrag;
+  const dy = e.clientY - msDrag.startY;
+  rows[from].style.transform = `translateY(${dy}px)`;
+
+  const center = rects[from].top + rects[from].height / 2 + dy;
+  let to = from;
+  rects.forEach((r, i) => {
+    if (i === from) return;
+    const mid = r.top + r.height / 2;
+    if (i > from && center > mid) to = Math.max(to, i);
+    if (i < from && center < mid) to = Math.min(to, i);
+  });
+  msDrag.to = to;
+
+  const shift = rects[from].height + MS_ROW_GAP;
+  rows.forEach((r, i) => {
+    if (i === from) return;
+    let offset = 0;
+    if (from < i && i <= to) offset = -shift;
+    else if (from > i && i >= to) offset = shift;
+    r.style.transform = offset ? `translateY(${offset}px)` : '';
+  });
+}
+
+function endMilestoneDrag(e) {
+  if (!msDrag || (e && e.pointerId !== msDrag.pointerId)) return;
+  const { from, to } = msDrag;
+  msDrag = null;
+  if (from !== to) formMilestones.splice(to, 0, formMilestones.splice(from, 1)[0]);
+  // Перемальовуємо в будь-якому разі — це заразом прибирає transform'и,
+  // класи й перенумеровує індекси в data-атрибутах.
+  renderMilestonesEditor();
+}
+
+function attachMilestoneDrag(root) {
+  root.querySelectorAll('[data-drag-milestone]').forEach((handle) => {
+    handle.addEventListener('pointerdown', (e) => beginMilestoneDrag(e, handle));
+    handle.addEventListener('pointermove', moveMilestoneDrag);
+    handle.addEventListener('pointerup', endMilestoneDrag);
+    // Скасований жест (системний свайп, вхідний дзвінок) має лишити список
+    // таким, як був, а не завмерти на півдорозі.
+    handle.addEventListener('pointercancel', endMilestoneDrag);
+    // З клавіатури те саме: на компʼютері швидше за мишу, а для доступності —
+    // єдиний спосіб узагалі.
+    handle.addEventListener('keydown', (e) => {
+      if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+      e.preventDefault();
+      const id = handle.dataset.dragMilestone;
+      const from = formMilestones.findIndex((m) => m.id === id);
+      const to = from + (e.key === 'ArrowUp' ? -1 : 1);
+      if (from < 0 || to < 0 || to >= formMilestones.length) return;
+      formMilestones.splice(to, 0, formMilestones.splice(from, 1)[0]);
+      renderMilestonesEditor();
+      const next = document.querySelector(`[data-drag-milestone="${id}"]`);
+      if (next) next.focus();
     });
   });
 }
@@ -1281,12 +1850,65 @@ function openGoalForm(existingGoal) {
   document.getElementById('goalUnitInput').value = existingGoal ? existingGoal.unit || '' : '';
   formCategory = existingGoal ? existingGoal.category || 'other' : 'other';
   formMilestones = existingGoal ? (existingGoal.milestones || []).map((m) => ({ ...m })) : [];
+  formSavingsGoalId = existingGoal ? existingGoal.savingsGoalId || null : null;
   renderCategoryPicker();
   renderMilestonesEditor();
+  renderSavingsLink();
+  loadSavingsGoalsForPicker();
   document.getElementById('breakdownNote').textContent = '';
   goalGuard.arm();
+  document.getElementById('goalTargetValue').removeEventListener('input', renderSavingsLink);
+  document.getElementById('goalTargetValue').addEventListener('input', renderSavingsLink);
   document.getElementById('goalFormOverlay').classList.add('show');
   setTimeout(() => document.getElementById('goalTitleInput').focus(), 50);
+}
+
+// Скарбнички читаємо разовим запитом і лише коли форму відкрито: підписка на
+// цілу колекцію заради списку у вікні, яке буває раз на місяць, — плата без
+// причини. Той самий підхід, що й в експорті на головному екрані.
+let savingsPickerList = null;
+async function loadSavingsGoalsForPicker() {
+  if (!auth.currentUser) return;
+  if (savingsPickerList) { renderSavingsLink(); return; }
+  try {
+    const snap = await db.collection('users').doc(auth.currentUser.uid).collection('savingsGoals').get();
+    savingsPickerList = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  } catch (err) {
+    console.error('savingsGoals picker:', err);
+    savingsPickerList = [];
+  }
+  renderSavingsLink();
+}
+
+function renderSavingsLink() {
+  const block = document.getElementById('savingsLinkBlock');
+  const hasTarget = parseFloat(document.getElementById('goalTargetValue').value) > 0;
+  // Без числової мети підтягувати нема куди: скарбничка дає число, а не віхи.
+  block.style.display = hasTarget ? 'block' : 'none';
+  if (!hasTarget) return;
+
+  document.getElementById('savingsLinkLabel').textContent = t('savingsLinkLabel');
+  const hint = document.getElementById('savingsLinkHint');
+  const picker = document.getElementById('savingsLinkPicker');
+
+  if (savingsPickerList === null) { picker.innerHTML = ''; hint.textContent = ''; return; }
+  if (!savingsPickerList.length) {
+    picker.innerHTML = '';
+    hint.textContent = t('savingsLinkEmpty');
+    return;
+  }
+  hint.textContent = t('savingsLinkHint');
+  const options = [[null, t('savingsLinkNone')]].concat(
+    savingsPickerList.map((sg) => [sg.id, sg.name || t('savingsLinkLabel')]));
+  picker.innerHTML = options.map(([id, label]) =>
+    `<button type="button" class="cat-choice${formSavingsGoalId === id ? ' selected' : ''}" data-savings="${id === null ? '' : escapeHtml(id)}">${escapeHtml(label)}</button>`
+  ).join('');
+  picker.querySelectorAll('[data-savings]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      formSavingsGoalId = btn.dataset.savings || null;
+      renderSavingsLink();
+    });
+  });
 }
 
 // ---- Незбережені зміни ----
@@ -1300,6 +1922,7 @@ const goalGuard = UnsavedGuard.create({
     targetDate: document.getElementById('goalTargetDate').value,
     targetValue: document.getElementById('goalTargetValue').value,
     unit: document.getElementById('goalUnitInput').value.trim(),
+    savingsGoalId: formSavingsGoalId,
     category: formCategory,
     milestones: formMilestones.map((m) => [(m.title || '').trim(), !!m.done]),
   }),
@@ -1332,7 +1955,14 @@ async function saveGoalForm() {
   if (!uidCur) return;
 
   const cleanMilestones = formMilestones
-    .map((m) => ({ id: m.id, title: (m.title || '').trim(), done: !!m.done }))
+    // date (план) і doneAt (факт) переносимо як є: форма їх не редагує
+    // напряму — інакше редагування назви стирало б і те, й те.
+    .map((m) => {
+      const out = { id: m.id, title: (m.title || '').trim(), done: !!m.done };
+      if (m.date) out.date = m.date;
+      if (m.doneAt) out.doneAt = m.doneAt;
+      return out;
+    })
     .filter((m) => m.title)
     .slice(0, 50);
 
@@ -1347,6 +1977,9 @@ async function saveGoalForm() {
     targetValue,
     // Одиниця без мети ні про що не каже, тож тримаються разом.
     unit: targetValue ? document.getElementById('goalUnitInput').value.trim().slice(0, 20) : '',
+    // Звʼязок зі скарбничкою тримається на числовій меті: без неї підтягувати
+    // нема куди, тож і посилання зберігати ні до чого.
+    savingsGoalId: targetValue ? formSavingsGoalId || null : null,
     milestones: cleanMilestones,
     updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
   };
@@ -1629,7 +2262,10 @@ auth.onAuthStateChanged((user) => {
     subscribeToGoals(user.uid);
   } else {
     if (unsubscribeGoals) { unsubscribeGoals(); unsubscribeGoals = null; }
+    stopSavings();
+    savingsPickerList = null;
     goals = [];
+    rawGoals = [];
     showDashboard();
     document.getElementById('appScreen').style.display = 'none';
     document.getElementById('authScreen').style.display = 'flex';

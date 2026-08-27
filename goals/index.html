@@ -306,7 +306,76 @@
   .rescue-banner button:active{transform:scale(.96);}
   .rescue-banner.waiting{background:var(--surface-flat);color:var(--ink-muted);}
 
+  /* Темп: чи встигаєш до дедлайну. Колір несе вердикт, тож він і головний —
+     «не встигаєш» має читатись до того, як людина дочитає речення. */
+  .pace{border-radius:16px;padding:12px 14px;margin-bottom:14px;background:var(--surface-flat);
+    font-size:13.5px;line-height:1.45;}
+  .pace-head{display:flex;align-items:center;gap:8px;font-weight:700;color:var(--ink);}
+  .pace-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;background:var(--ink-muted);}
+  .pace-sub{margin-top:5px;color:var(--ink-muted);font-size:12.5px;}
+  .pace.behind .pace-dot, .pace.overdue .pace-dot{background:var(--expense);}
+  .pace.behind .pace-head, .pace.overdue .pace-head{color:var(--expense);}
+  .pace.ahead .pace-dot, .pace.onTrack .pace-dot{background:var(--income);}
+  .pace.ahead .pace-head, .pace.onTrack .pace-head{color:var(--income);}
+
+  /* Пауза — тиха дія, тож і кнопка тиха: не червона й не на всю ширину. */
+  .pause-row{display:flex;justify-content:center;margin-top:10px;}
+  .pause-btn{border:1px solid var(--border);background:transparent;color:var(--ink-muted);
+    font-family:'Inter',sans-serif;font-size:13px;font-weight:600;padding:9px 16px;
+    border-radius:999px;cursor:pointer;}
+  .pause-btn:active{transform:scale(.97);}
+  .paused-note{background:var(--surface-flat);color:var(--ink-muted);border-radius:14px;
+    padding:10px 14px;margin-bottom:12px;font-size:12.5px;line-height:1.45;text-align:center;}
+
+  /* Огляд тижня. Той самий каркас, що й «розбір минулих днів» у завданнях:
+     банер на дашборді, за ним екран, де кожен пункт треба вирішити. */
+  .review-banner{display:flex;align-items:center;gap:10px;justify-content:space-between;
+    background:var(--surface);border-radius:18px;padding:13px 16px;margin-bottom:14px;cursor:pointer;
+    border:1px solid var(--border);}
+  .review-banner-text{font-size:13.5px;font-weight:600;color:var(--ink);line-height:1.4;}
+  .review-banner-sub{font-size:12px;color:var(--ink-muted);margin-top:2px;}
+  .review-banner-go{flex-shrink:0;font-size:12.5px;font-weight:600;color:var(--accent);cursor:pointer;}
+  #reviewScreen{display:none;padding:16px 20px 40px;}
+  .review-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:2px;}
+  .review-title{font-size:20px;font-weight:800;color:var(--ink);}
+  .review-later{border:none;background:none;color:var(--ink-muted);font-family:'Inter',sans-serif;
+    font-size:13px;cursor:pointer;padding:4px;}
+  .review-sub{font-size:13px;color:var(--ink-muted);margin-bottom:16px;line-height:1.45;}
+  .review-item{background:var(--surface);border-radius:18px;padding:15px 16px;margin-bottom:12px;}
+  .review-item-title{font-size:15px;font-weight:700;color:var(--ink);line-height:1.35;}
+  .review-why{margin-top:8px;padding-left:10px;border-left:2px solid var(--border);
+    font-size:12.5px;color:var(--ink-soft);font-style:italic;line-height:1.45;}
+  .review-moved{margin-top:10px;font-size:12.5px;color:var(--ink-muted);}
+  .review-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+  .review-chip{background:var(--surface-flat);border-radius:999px;padding:4px 10px;font-size:12px;color:var(--ink-soft);}
+  .review-actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:13px;}
+  .review-btn{flex:1 1 45%;border:1px solid var(--border);background:transparent;color:var(--ink-soft);
+    font-family:'Inter',sans-serif;font-size:12.5px;font-weight:600;padding:9px 6px;
+    border-radius:12px;cursor:pointer;}
+  .review-btn.primary{background:var(--accent);color:#fff;border-color:transparent;}
+  .review-btn:active{transform:scale(.97);}
+  .review-shift-row{display:flex;gap:7px;margin-top:9px;}
+  .review-shift-row input{flex:1;}
+  .review-empty{text-align:center;color:var(--ink-muted);font-size:13.5px;padding:30px 0;}
+
+  /* Віхи у формі: ручка, поля, дата. Ручка ліворуч, а не праворуч поруч із
+     хрестиком, — щоб «переставити» не плуталось із «видалити». */
+  .milestone-editor-row.dragging{position:relative;z-index:2;opacity:.92;}
+  .milestone-drag{flex-shrink:0;border:none;background:none;color:var(--ink-muted);
+    cursor:grab;padding:6px 2px;touch-action:none;border-radius:8px;}
+  .milestone-drag:focus-visible{outline:2px solid var(--accent);}
+  .milestone-fields{flex:1;display:flex;gap:6px;min-width:0;}
+  .milestone-fields input[type="text"]{flex:1;min-width:0;}
+  .milestone-date{flex-shrink:0;width:140px;}
+  .journey-due{margin-left:8px;font-size:11.5px;color:var(--ink-muted);white-space:nowrap;}
+  .journey-due.overdue{color:var(--expense);font-weight:600;}
+
+  .linked-note{margin-top:10px;font-size:12px;color:var(--ink-muted);text-align:center;line-height:1.4;}
+
   /* Вечірній підсумок */
+  .evening-why{margin:6px 0 2px;padding-left:9px;border-left:2px solid var(--border);
+    font-size:12.5px;color:var(--ink-soft);font-style:italic;line-height:1.45;}
+  .evening-streak{font-size:12.5px;font-weight:600;color:var(--ink-muted);}
   .evening-card{background:var(--surface);border-radius:20px;padding:16px;margin-bottom:16px;}
   .evening-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:4px;}
   .evening-title{font-family:'Inter',sans-serif;font-size:15px;font-weight:700;color:var(--ink);}
@@ -546,6 +615,7 @@
   <div class="content">
     <div class="summary-strip" id="summaryStrip"></div>
     <div class="badges-row" id="badgesRow"></div>
+    <div id="reviewBanner"></div>
     <div id="eveningCard"></div>
     <div class="status-filter-row" id="statusFilterRow"></div>
     <div id="goalsList"></div>
@@ -576,6 +646,20 @@
     </div>
   </nav>
 
+  <!-- Огляд тижня. Окремий екран, а не ще один блок на дашборді: рішення тут
+       свідомі, і їх не приймають між ділом, гортаючи список. -->
+  <div id="reviewScreen">
+    <div class="detail-header">
+      <button type="button" id="reviewBackBtn" class="cal-nav-btn" aria-label="Назад">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <div class="detail-title" id="reviewTitleLabel">Огляд тижня</div>
+      <span style="width:34px;"></span>
+    </div>
+    <div class="review-sub" id="reviewSubLabel"></div>
+    <div id="reviewList"></div>
+  </div>
+
   <div id="goalDetailScreen">
     <div class="detail-header">
       <button type="button" id="detailBackBtn" class="cal-nav-btn" aria-label="Назад">
@@ -589,10 +673,12 @@
     <div class="detail-badges-row" id="detailBadgesRow"></div>
     <div id="detailWhyBlock"></div>
     <div id="detailProgressBlock"></div>
+    <div id="detailPaceBlock"></div>
     <div id="detailJourneyBlock"></div>
     <div id="detailActionsBlock"></div>
     <div id="detailRescueBlock"></div>
     <div class="streak-row" id="detailStreakRow"></div>
+    <div id="detailPauseRow"></div>
     <div class="section-label" id="journalSectionLabel">Щоденник</div>
     <div class="journal-add-row">
       <textarea id="journalInput" maxlength="2000"></textarea>
@@ -629,6 +715,14 @@
       </div>
       <div class="field-hint" id="targetValueHint">Якщо задати — прогрес рахується числом, а не віхами.</div>
 
+      <!-- Звʼязок зі скарбничкою бюджету. Показується лише тоді, коли задана
+           числова мета: без неї підтягувати нема куди. -->
+      <div id="savingsLinkBlock" style="display:none;">
+        <label class="field-label" id="savingsLinkLabel">Брати число зі скарбнички</label>
+        <div class="cat-picker" id="savingsLinkPicker"></div>
+        <div class="field-hint" id="savingsLinkHint"></div>
+      </div>
+
       <label class="field-label" id="milestonesLabel">Віхи</label>
       <div id="milestonesEditor"></div>
       <button type="button" class="add-milestone-btn" id="addMilestoneBtn">+ Додати віху</button>
@@ -662,6 +756,7 @@
 <script src="../budget/firebase-config.js"></script>
 <script src="../unsaved-guard.js"></script>
 <script src="streak.js"></script>
+<script src="review.js"></script>
 <script src="app.js"></script>
 <script src="../ai-chat.js"></script>
 <script src="../scroll-lock.js"></script>

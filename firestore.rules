@@ -315,7 +315,10 @@ service cloud.firestore {
                    (d.targetValue is number && d.targetValue > 0 && d.targetValue < 1000000000)) &&
                  (!('currentValue' in d) || d.currentValue is number) &&
                  (!('unit' in d) || (d.unit is string && d.unit.size() <= 20)) &&
-                 d.status in ['active', 'done', 'archived'] &&
+                 // 'paused' — ціль жива, але про неї свідомо не питають:
+                 // відпустка, зміна обставин. Без неї лишався вибір між
+                 // «щовечора нагадувати» і «поховати в архів».
+                 d.status in ['active', 'done', 'archived', 'paused'] &&
                  d.milestones is list && d.milestones.size() <= 50 &&
                  d.checkins is list && d.checkins.size() <= 400 &&
                  d.journal is list && d.journal.size() <= 200 &&
@@ -323,9 +326,24 @@ service cloud.firestore {
                  // документи не мають — тому лише перевіряємо форму тих, що є.
                  (!('rescues' in d) || (d.rescues is list && d.rescues.size() <= 50)) &&
                  (!('blockers' in d) || (d.blockers is list && d.blockers.size() <= 200)) &&
+                 // Журнал прогресу: [{date, delta}]. currentValue лишається
+                 // сумою — його показує смужка, — але саме по собі одне число
+                 // не памʼятає, КОЛИ прогрес був, а без цього не порахувати
+                 // ні темп, ні рух за тиждень. Форму елементів, як і всюди
+                 // поруч, гарантує клієнт (addGoalProgress у goals/app.js).
+                 (!('progressLog' in d) || (d.progressLog is list && d.progressLog.size() <= 400)) &&
+                 // Коли ціль звʼязана зі скарбничкою бюджету, число береться
+                 // з реальних операцій, а не вбивається руками.
+                 (!('savingsGoalId' in d) || d.savingsGoalId == null ||
+                   (d.savingsGoalId is string && d.savingsGoalId.size() <= 64)) &&
+                 // Дата останнього огляду — щоб черга тижневого огляду знала,
+                 // про що вже питали.
+                 (!('reviewedAt' in d) || d.reviewedAt == null ||
+                   (d.reviewedAt is string && d.reviewedAt.size() == 10)) &&
                  d.createdAt is timestamp && d.updatedAt is timestamp &&
                  d.keys().hasOnly(['title', 'category', 'why', 'targetDate', 'status',
                    'targetValue', 'currentValue', 'unit', 'rescues', 'blockers',
+                   'progressLog', 'savingsGoalId', 'reviewedAt',
                    'milestones', 'checkins', 'journal', 'createdAt', 'updatedAt']);
         }
         allow read, delete: if isOwner(uid);
