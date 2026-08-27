@@ -109,3 +109,134 @@ describe('monthStart', () => {
     expect(H.monthStart('2026-01-01')).toBe('2026-01-01');
   });
 });
+
+// ---- Кільця на плитках ----
+// Плитка мала показувати число; кільце показує його ще й у частці. Головне,
+// що тут перевіряється, — коли кільця бути НЕ повинно: без знаменника воно
+// показувало б відсоток невідомо від чого.
+
+describe('tasksRing — скільки з сьогоднішнього закрито', () => {
+  const T = '2026-08-27';
+
+  test('рахує частку виконаного за сьогодні', () => {
+    const r = HomeSummary.tasksRing([
+      { dueDate: T, done: true }, { dueDate: T, done: true },
+      { dueDate: T, done: false }, { dueDate: T, done: false },
+    ], T);
+    expect(r).toMatchObject({ done: 2, total: 4, pct: 50 });
+  });
+
+  test('борги з минулого в знаменник не входять — це інший день', () => {
+    const r = HomeSummary.tasksRing([
+      { dueDate: T, done: true },
+      { dueDate: '2026-08-20', done: false },
+    ], T);
+    expect(r.total).toBe(1);
+    expect(r.pct).toBe(100);
+    expect(r.overdue).toBe(1);
+  });
+
+  test('порожній день — нуль, а не ділення на нуль', () => {
+    expect(HomeSummary.tasksRing([], T)).toMatchObject({ done: 0, total: 0, pct: 0 });
+  });
+});
+
+describe('workoutToday — що сьогодні в залі', () => {
+  const T = '2026-08-27';
+  const w = (over = {}) => ({ date: T, name: '', exercises: [], ...over });
+
+  test('запису на сьогодні немає — і це не нуль, а «немає»', () => {
+    expect(HomeSummary.workoutToday([{ date: '2026-08-26', exercises: [] }], T)).toBeNull();
+  });
+
+  test('тренування наперед: вправи є, підходи порожні', () => {
+    const r = HomeSummary.workoutToday([w({
+      exercises: [{ sets: [{ weight: 0, reps: 0 }, { weight: 0, reps: 0 }] }],
+    })], T);
+    expect(r.planned).toBe(true);
+    expect(r).toMatchObject({ setsDone: 0, setsTotal: 2, pct: 0, exercises: 1 });
+  });
+
+  test('половина підходів зроблена', () => {
+    const r = HomeSummary.workoutToday([w({
+      exercises: [{ sets: [{ weight: 60, reps: 8 }, { weight: 0, reps: 0 }] }],
+    })], T);
+    expect(r.planned).toBe(false);
+    expect(r).toMatchObject({ setsDone: 1, setsTotal: 2, pct: 50 });
+  });
+
+  test('власна вага (0 кг, але є повторення) рахується зробленою', () => {
+    const r = HomeSummary.workoutToday([w({
+      exercises: [{ sets: [{ weight: 0, reps: 12 }] }],
+    })], T);
+    expect(r.setsDone).toBe(1);
+  });
+});
+
+describe('featuredGoal — яку ціль показати', () => {
+  const T = '2026-08-27';
+  const g = (over = {}) => ({ title: 'ціль', status: 'active', milestones: [], ...over });
+
+  test('без активних цілей показувати нічого', () => {
+    expect(HomeSummary.featuredGoal([g({ status: 'done' })], T)).toBeNull();
+  });
+
+  test('виграє найближчий дедлайн', () => {
+    const r = HomeSummary.featuredGoal([
+      g({ title: 'далека', targetDate: '2026-12-01' }),
+      g({ title: 'близька', targetDate: '2026-09-01' }),
+    ], T);
+    expect(r.title).toBe('близька');
+    expect(r.daysLeft).toBe(5);
+  });
+
+  test('ціль без дедлайну поступається цілі з дедлайном', () => {
+    const r = HomeSummary.featuredGoal([
+      g({ title: 'без дати' }),
+      g({ title: 'з датою', targetDate: '2026-11-01' }),
+    ], T);
+    expect(r.title).toBe('з датою');
+  });
+
+  test('серед цілей без дедлайну виграє та, де більше пройдено', () => {
+    const r = HomeSummary.featuredGoal([
+      g({ title: 'початок', targetValue: 10, currentValue: 1 }),
+      g({ title: 'майже', targetValue: 10, currentValue: 9 }),
+    ], T);
+    expect(r.title).toBe('майже');
+    expect(r.pct).toBe(90);
+  });
+
+  test('прогрес рахується числом, а без числа — віхами', () => {
+    expect(HomeSummary.goalPct({ targetValue: 4, currentValue: 3 })).toBe(75);
+    expect(HomeSummary.goalPct({ milestones: [{ done: true }, { done: false }] })).toBe(50);
+    expect(HomeSummary.goalPct({ milestones: [] })).toBe(0);
+  });
+});
+
+describe('budgetRing — витрачено з плану', () => {
+  const T = '2026-08-27';
+  const tx = (amount, type = 'expense') => ({ type, amount, date: '2026-08-10' });
+
+  test('без плану кільця немає — знаменник не вигадуємо', () => {
+    expect(HomeSummary.budgetRing([tx(100)], T, null)).toBeNull();
+    expect(HomeSummary.budgetRing([tx(100)], T, 0)).toBeNull();
+  });
+
+  test('рахує частку витраченого', () => {
+    const r = HomeSummary.budgetRing([tx(2500), tx(2500)], T, 10000);
+    expect(r).toMatchObject({ spent: 5000, plan: 10000, left: 5000, pct: 50, over: false });
+  });
+
+  test('доходи в кільце витрат не входять', () => {
+    const r = HomeSummary.budgetRing([tx(1000), tx(9000, 'income')], T, 10000);
+    expect(r.spent).toBe(1000);
+  });
+
+  test('перевитрата видно числом, а кільце не буває понад 100%', () => {
+    const r = HomeSummary.budgetRing([tx(12000)], T, 10000);
+    expect(r.over).toBe(true);
+    expect(r.left).toBe(-2000);
+    expect(r.pct).toBe(100);
+  });
+});

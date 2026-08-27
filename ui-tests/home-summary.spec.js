@@ -69,3 +69,94 @@ test.describe('Живі плитки', () => {
     await expect(page.locator('#goalsSub')).toHaveText('цілей ще немає');
   });
 });
+
+// ---- Кільця на плитках ----
+// Головне, що тут перевіряється, — коли кільця бути НЕ повинно. Порожнє коло
+// читається як «нуль», а нуль і «немає даних» — різні речі.
+test.describe('Кільця', () => {
+  const T = iso(0);
+
+  const pct = (page, id) => page.$eval(`#${id} .tile-ring-arc`, (el) =>
+    Number(getComputedStyle(el).getPropertyValue('--pct')));
+  const mid = (page, id) => page.$eval(`#${id} .tile-ring-mid`, (el) => el.textContent.trim());
+  const shown = (page, id) => page.$eval(`#${id}`, (el) => !el.hidden);
+
+  test('бюджет: без плану кільця немає, з планом — є', async ({ page }) => {
+    const tx = [{ type: 'expense', amount: 5000, date: T, category: 'food' }];
+    await openHub(page, { transactions: tx });
+    await page.waitForTimeout(400);
+    expect(await shown(page, 'budgetRing'), 'без плану кільце малювати нема з чого').toBe(false);
+
+    await openHub(page, { transactions: tx, profile: { monthlyBudget: 10000 } });
+    await expect.poll(() => shown(page, 'budgetRing')).toBe(true);
+    expect(await pct(page, 'budgetRing')).toBe(50);
+    await expect(page.locator('#budgetSub')).toContainText('5 000');
+  });
+
+  test('бюджет: перевитрата видно числом, а кільце не переповнюється', async ({ page }) => {
+    await openHub(page, {
+      transactions: [{ type: 'expense', amount: 12000, date: T, category: 'food' }],
+      profile: { monthlyBudget: 10000 },
+    });
+    await expect.poll(() => pct(page, 'budgetRing')).toBe(100);
+    await expect(page.locator('#budgetSub')).toContainText('2 000');
+  });
+
+  test('завдання: кільце рахує закрите за сьогодні', async ({ page }) => {
+    await openHub(page, { tasks: [
+      { dueDate: T, done: true }, { dueDate: T, done: true },
+      { dueDate: T, done: false }, { dueDate: T, done: false },
+    ] });
+    await expect.poll(() => pct(page, 'tasksRing')).toBe(50);
+    expect(await mid(page, 'tasksRing')).toBe('2');
+  });
+
+  test('завдання: вільний день кільця не отримує', async ({ page }) => {
+    await openHub(page, { tasks: [] });
+    await page.waitForTimeout(400);
+    expect(await shown(page, 'tasksRing')).toBe(false);
+  });
+
+  test('цілі: кільце показує найтерміновішу, підпис її називає', async ({ page }) => {
+    await openHub(page, { goals: [
+      { title: 'Далека', status: 'active', targetDate: iso(300), targetValue: 10, currentValue: 1, milestones: [], checkins: [] },
+      { title: 'Близька', status: 'active', targetDate: iso(10), targetValue: 10, currentValue: 8, milestones: [], checkins: [] },
+    ] });
+    await expect.poll(() => pct(page, 'goalsRing')).toBe(80);
+    await expect(page.locator('#goalsSub')).toContainText('Близька');
+  });
+
+  test('цілі: назва не витісняє того, що стосується сьогодні', async ({ page }) => {
+    // Серія й «сьогодні без кроку» лишаються на плитці поруч із назвою:
+    // дедлайн через місяць нікуди не втече, а невідмічений день — втече.
+    await openHub(page, { goals: [
+      { title: 'Біг', status: 'active', targetDate: iso(30), checkins: [], blockers: [], milestones: [{ done: true }, { done: false }] },
+    ] });
+    await expect(page.locator('#goalsSub')).toContainText('Біг');
+    await expect(page.locator('#goalsSub')).toContainText('без кроку');
+  });
+
+  test('тренування: сьогодні нічого — кільця немає, і так і сказано', async ({ page }) => {
+    await openHub(page, { workouts: [{ date: iso(-3), exercises: [{ sets: [{ weight: 50, reps: 5 }] }] }] });
+    await page.waitForTimeout(400);
+    expect(await shown(page, 'workoutRing')).toBe(false);
+    await expect(page.locator('#workoutSub')).toContainText(/немає/i);
+  });
+
+  test('тренування наперед: кільце порожнє, підпис каже «заплановано»', async ({ page }) => {
+    await openHub(page, { workouts: [{ date: T, name: '', exercises: [
+      { sets: [{ weight: 0, reps: 0 }, { weight: 0, reps: 0 }] },
+    ] }] });
+    await expect.poll(() => shown(page, 'workoutRing')).toBe(true);
+    expect(await pct(page, 'workoutRing')).toBe(0);
+    await expect(page.locator('#workoutSub')).toContainText(/заплановано/i);
+  });
+
+  test('тренування в процесі: кільце рахує зроблені підходи', async ({ page }) => {
+    await openHub(page, { workouts: [{ date: T, name: '', exercises: [
+      { sets: [{ weight: 60, reps: 8 }, { weight: 60, reps: 8 }, { weight: 0, reps: 0 }, { weight: 0, reps: 0 }] },
+    ] }] });
+    await expect.poll(() => pct(page, 'workoutRing')).toBe(50);
+    expect(await mid(page, 'workoutRing')).toBe('2/4');
+  });
+});

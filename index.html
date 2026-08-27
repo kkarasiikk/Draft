@@ -57,6 +57,7 @@
     --card-border-hover: rgba(255,255,255,1);
     --card-hover-shadow: 0 25px 70px rgba(40,50,70,.12), 0 0 50px rgba(170,190,255,.18);
     --card-shine: rgba(255,255,255,.35);
+    --ring-track: rgba(38,38,43,.10);
     --glass-btn-bg: rgba(255,255,255,.55); --glass-btn-bg-hover: rgba(255,255,255,.85); --glass-btn-border: rgba(255,255,255,.9);
     --glass-blur:25px; --glass-shadow:0 15px 50px rgba(40,50,70,.08), inset 0 1px 1px rgba(255,255,255,.9);
     --accent:#4A6FA5; --expense:#C9683F; --income:#4F9C74;
@@ -73,6 +74,7 @@
     --card-border-hover: rgba(255,255,255,.22);
     --card-hover-shadow: 0 30px 80px rgba(0,0,0,.4), 0 0 60px rgba(160,170,255,.10);
     --card-shine: rgba(255,255,255,.08);
+    --ring-track: rgba(255,255,255,.13);
     --glass-btn-bg: rgba(255,255,255,.065); --glass-btn-bg-hover: rgba(255,255,255,.12); --glass-btn-border: rgba(255,255,255,.16);
     --glass-blur:25px; --glass-shadow:0 20px 60px rgba(0,0,0,.25), inset 0 1px 1px rgba(255,255,255,.08);
     --accent:#8FA6E0; --expense:#E39A76; --income:#7FCB9E;
@@ -234,7 +236,34 @@
 
   /* Назва + пояснювальний підпис: коротка назва читається з першого погляду,
      підпис знімає питання «чим цей модуль відрізняється від сусіднього». */
-  .module-text{min-width:0;}
+  /* Кільце на плитці.
+     Дірка всередині — маска, а не другий круг із кольором тла: картка скляна
+     й напівпрозора, тож зафарбований круг проступав би плямою і зʼїдав би
+     розмиття під собою. Маска ж лишає справжню прозорість.
+     Колір — через --ring-colour, бо в бюджету він міняється при перевитраті,
+     а в решти сталий. */
+  .tile-ring{position:relative; flex-shrink:0; width:46px; height:46px;}
+  .tile-ring[hidden]{display:none;}
+  /* Сама дуга. Маска висить на НІЙ, а не на .tile-ring: маска ріже елемент
+     разом із нащадками, тож число всередині вона зрізала б теж. Тому дуга й
+     число — сусіди, а не вкладені. */
+  .tile-ring-arc{
+    position:absolute; inset:0; border-radius:50%;
+    background:conic-gradient(var(--ring-colour, var(--accent)) calc(var(--pct,0) * 1%), var(--ring-track) 0);
+    /* Відсотки в radial-gradient рахуються від РАДІУСА кола, а не від його
+       діаметра: farthest-side тут 23px, тож 100% — це край, а не середина.
+       Через це «50% - 6px» лишало дірку в 5px, тобто майже суцільний диск. */
+    -webkit-mask:radial-gradient(farthest-side, transparent calc(100% - 7px), #000 calc(100% - 6px));
+            mask:radial-gradient(farthest-side, transparent calc(100% - 7px), #000 calc(100% - 6px));
+    transition:background .4s ease;
+  }
+  .tile-ring-mid{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-size:12px; font-weight:700; color:var(--ink); font-variant-numeric:tabular-nums;
+  }
+  /* flex:1 — щоб кільця в чотирьох плитках стояли на одній вертикалі:
+     без нього місце кільця залежить від довжини підпису, і колонка їде. */
+  .module-text{min-width:0; flex:1;}
   .module-title{font-size:21px;font-weight:700;letter-spacing:-0.01em;margin:0;}
   /* Один рядок: підпис не має розсувати картку — інакше на вузькому екрані
      картки стають різної висоти. Якщо не влазить — обрізаємо трикрапкою. */
@@ -253,6 +282,14 @@
   .open-btn svg{width:14px;height:14px;stroke:currentColor;}
   /* Дуже вузькі екрани (320px): слово «Відкрити» з'їдає стільки місця, що
      підпис лишається обрізаним. Лишаємо саму стрілку — вона зрозуміла і без слова. */
+  /* З кільцем на плитці тісно вже на звичайному телефоні, а не лише на
+     найвужчих: підпис починає обриватись на трьох крапках, ховаючи саме те
+     число, заради якого плитка й ожила. Слово «Відкрити» тут коштує найменше
+     — стрілка лишається, і вся картка й так посилання. */
+  @media (max-width:700px){
+    .module-card.has-ring .open-btn > span{display:none;}
+    .module-card.has-ring .open-btn{padding:10px;}
+  }
   @media (max-width:359px){
     .module-card{padding:20px 18px;gap:12px;}
     .open-btn{padding:10px 12px;}
@@ -396,6 +433,7 @@
             <h2 class="module-title" id="budgetTitle">Бюджет</h2>
             <div class="module-sub" id="budgetSub">витрати й доходи</div>
           </div>
+          <div class="tile-ring" id="budgetRing" hidden aria-hidden="true"><span class="tile-ring-arc"></span><span class="tile-ring-mid"></span></div>
           <span class="open-btn"><span id="openBtnLabel">Відкрити</span> <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></span>
         </a>
 
@@ -404,6 +442,7 @@
             <h2 class="module-title" id="goalsTitle">Цілі</h2>
             <div class="module-sub" id="goalsSub">довгострокові</div>
           </div>
+          <div class="tile-ring" id="goalsRing" hidden aria-hidden="true"><span class="tile-ring-arc"></span><span class="tile-ring-mid"></span></div>
           <span class="open-btn"><span id="goalsOpenBtnLabel">Відкрити</span> <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></span>
         </a>
 
@@ -412,6 +451,7 @@
             <h2 class="module-title" id="tasksTitle">Завдання</h2>
             <div class="module-sub" id="tasksSub">на кожен день</div>
           </div>
+          <div class="tile-ring" id="tasksRing" hidden aria-hidden="true"><span class="tile-ring-arc"></span><span class="tile-ring-mid"></span></div>
           <span class="open-btn"><span id="tasksOpenBtnLabel">Відкрити</span> <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></span>
         </a>
 
@@ -420,6 +460,7 @@
             <h2 class="module-title" id="workoutTitle">Тренування</h2>
             <div class="module-sub" id="workoutSub">сесії й рекорди</div>
           </div>
+          <div class="tile-ring" id="workoutRing" hidden aria-hidden="true"><span class="tile-ring-arc"></span><span class="tile-ring-mid"></span></div>
           <span class="open-btn"><span id="workoutOpenBtnLabel">Відкрити</span> <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></span>
         </a>
       </main>

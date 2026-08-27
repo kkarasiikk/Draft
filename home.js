@@ -53,6 +53,14 @@ const STRINGS = {
     sumGoalsDone: 'усе відмічено',
     sumGoalsNone: 'цілей ще немає',
     sumWorkoutToday: 'сьогодні тренувався',
+    sumPlanLeft: (v) => `лишилось ${v} з плану`,
+    sumPlanOver: (v) => `перевитрата ${v}`,
+    sumGoalDays: (days) => days < 0 ? 'дедлайн минув' : `${days} дн. лишилось`,
+    sumWorkoutPlan: (n) => `на сьогодні заплановано ${n} ${plural(n, { one: 'вправу', few: 'вправи', many: 'вправ', other: 'вправи' })}`,
+    sumWorkoutDoing: (a, b) => `сьогодні: ${a} з ${b} підходів`,
+    sumWorkoutNoneToday: (n) => n <= 0
+      ? 'сьогодні тренувань немає'
+      : `сьогодні тренувань немає · востаннє ${n} ${plural(n, { one: 'день', few: 'дні', many: 'днів', other: 'дня' })} тому`,
     sumWorkoutAgo: (n) => `востаннє ${n} ${plural(n, { one: 'день', few: 'дні', many: 'днів', other: 'дня' })} тому`,
     sumWorkoutNever: 'тренувань ще немає',
     goalsTitle: 'Цілі', goalsSub: 'довгострокові',
@@ -98,6 +106,14 @@ const STRINGS = {
     sumGoalsDone: 'всё отмечено',
     sumGoalsNone: 'целей пока нет',
     sumWorkoutToday: 'сегодня тренировался',
+    sumPlanLeft: (v) => `осталось ${v} из плана`,
+    sumPlanOver: (v) => `перерасход ${v}`,
+    sumGoalDays: (days) => days < 0 ? 'дедлайн прошёл' : `${days} дн. осталось`,
+    sumWorkoutPlan: (n) => `на сегодня запланировано ${n} ${plural(n, { one: 'упражнение', few: 'упражнения', many: 'упражнений', other: 'упражнения' })}`,
+    sumWorkoutDoing: (a, b) => `сегодня: ${a} из ${b} подходов`,
+    sumWorkoutNoneToday: (n) => n <= 0
+      ? 'сегодня тренировок нет'
+      : `сегодня тренировок нет · последний раз ${n} ${plural(n, { one: 'день', few: 'дня', many: 'дней', other: 'дня' })} назад`,
     sumWorkoutAgo: (n) => `последний раз ${n} ${plural(n, { one: 'день', few: 'дня', many: 'дней', other: 'дня' })} назад`,
     sumWorkoutNever: 'тренировок пока нет',
     goalsTitle: 'Цели', goalsSub: 'долгосрочные',
@@ -143,6 +159,14 @@ const STRINGS = {
     sumGoalsDone: 'wszystko odhaczone',
     sumGoalsNone: 'nie ma jeszcze celów',
     sumWorkoutToday: 'dziś trenowałeś',
+    sumPlanLeft: (v) => `zostało ${v} z planu`,
+    sumPlanOver: (v) => `przekroczenie o ${v}`,
+    sumGoalDays: (days) => days < 0 ? 'termin minął' : `zostało ${days} dni`,
+    sumWorkoutPlan: (n) => `na dziś zaplanowano ${n} ${plural(n, { one: 'ćwiczenie', few: 'ćwiczenia', many: 'ćwiczeń', other: 'ćwiczenia' })}`,
+    sumWorkoutDoing: (a, b) => `dziś: ${a} z ${b} serii`,
+    sumWorkoutNoneToday: (n) => n <= 0
+      ? 'dziś brak treningu'
+      : `dziś brak treningu · ostatnio ${n} ${plural(n, { one: 'dzień', few: 'dni', many: 'dni', other: 'dnia' })} temu`,
     sumWorkoutAgo: (n) => `ostatnio ${n} ${plural(n, { one: 'dzień', few: 'dni', many: 'dni', other: 'dnia' })} temu`,
     sumWorkoutNever: 'nie ma jeszcze treningów',
     goalsTitle: 'Cele', goalsSub: 'długoterminowe',
@@ -188,6 +212,14 @@ const STRINGS = {
     sumGoalsDone: 'all checked in',
     sumGoalsNone: 'no goals yet',
     sumWorkoutToday: 'trained today',
+    sumPlanLeft: (v) => `${v} left of the plan`,
+    sumPlanOver: (v) => `${v} over the plan`,
+    sumGoalDays: (days) => days < 0 ? 'deadline passed' : `${days} days left`,
+    sumWorkoutPlan: (n) => `${n} ${n === 1 ? 'exercise' : 'exercises'} planned for today`,
+    sumWorkoutDoing: (a, b) => `today: ${a} of ${b} sets`,
+    sumWorkoutNoneToday: (n) => n <= 0
+      ? 'no workout today'
+      : `no workout today · last one ${n} ${n === 1 ? 'day' : 'days'} ago`,
     sumWorkoutAgo: (n) => `last ${n} ${plural(n, { one: 'day', other: 'days' })} ago`,
     sumWorkoutNever: 'no workouts yet',
     goalsTitle: 'Goals', goalsSub: 'long-term',
@@ -542,19 +574,60 @@ function setSub(id, text) {
   if (el) el.textContent = text;
 }
 
+/**
+ * Показати кільце на плитці. pct === null ховає його: кільце без знаменника
+ * малювало б відсоток невідомо від чого, а порожнє коло на плитці читалось би
+ * як «нуль», що неправда.
+ */
+function setRing(id, pct, label, colour) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  // Клас на картці: на вузькому екрані кільце й підпис поруч зі словом
+  // «Відкрити» не влазять, і саме слово там найменш потрібне — кільце вже
+  // несе число, стрілка вже несе дію.
+  const card = el.closest('.module-card');
+  if (pct === null || pct === undefined) {
+    el.hidden = true;
+    if (card) card.classList.remove('has-ring');
+    return;
+  }
+  el.hidden = false;
+  if (card) card.classList.add('has-ring');
+  el.querySelector('.tile-ring-arc').style.setProperty('--pct', Math.max(0, Math.min(100, pct)));
+  el.style.setProperty('--ring-colour', colour || 'var(--accent)');
+  el.querySelector('.tile-ring-mid').textContent = label == null ? '' : String(label);
+}
+
 async function loadHomeSummary(uid) {
   const userRef = db.collection('users').doc(uid);
   const today = todayISO();
   const from = HomeSummary.monthStart(today);
 
   // Бюджет: лише поточний місяць.
-  userRef.collection('transactions').where('date', '>=', from).where('date', '<=', today).get()
-    .then((snap) => {
-      const sum = HomeSummary.budgetSummary(snap.docs.map((d) => d.data()), today);
+  // План витрат читаємо з профілю тим самим запитом, що вже потрібен для мови
+  // й теми, — окремого звернення заради одного числа не робимо.
+  const txPromise = userRef.collection('transactions').where('date', '>=', from).where('date', '<=', today).get();
+  Promise.all([txPromise, userRef.get()])
+    .then(([snap, profileDoc]) => {
+      const txs = snap.docs.map((d) => d.data());
+      const sum = HomeSummary.budgetSummary(txs, today);
       // Знак ставимо тут, а не в перекладі: у переклад має приходити готовий
       // рядок, інакше кожна мова мусила б сама вирішувати, як його показати.
       const sign = sum.balance >= 0 ? '+' : '\u2212';
-      setSub('budgetSub', t('sumBudget', sign + formatAmount(sum.balance)));
+      const plan = (profileDoc.data() || {}).monthlyBudget;
+      const ring = HomeSummary.budgetRing(txs, today, plan);
+      if (!ring) {
+        setSub('budgetSub', t('sumBudget', sign + formatAmount(sum.balance)));
+        setRing('budgetRing', null);
+        return;
+      }
+      // З планом плитка відповідає на інше питання — не «скільки лишилось
+      // у балансі», а «скільки лишилось до межі». Саме заради нього план і
+      // заводять, тож воно й витісняє баланс.
+      setSub('budgetSub', ring.over
+        ? t('sumPlanOver', formatAmount(-ring.left))
+        : t('sumPlanLeft', formatAmount(ring.left)));
+      setRing('budgetRing', ring.pct, ring.pct + '%', ring.over ? 'var(--expense)' : 'var(--accent)');
     })
     .catch((err) => console.error('homeSummary budget:', err));
 
@@ -563,33 +636,66 @@ async function loadHomeSummary(uid) {
   // потраплять: для них у самому модулі є «розбір минулих днів».
   userRef.collection('tasks').where('dueDate', '>=', from).where('dueDate', '<=', today).get()
     .then((snap) => {
-      const sum = HomeSummary.tasksSummary(snap.docs.map((d) => d.data()), today);
+      const docs = snap.docs.map((d) => d.data());
+      const sum = HomeSummary.tasksSummary(docs, today);
       const parts = [sum.open ? t('sumTasksOpen', sum.open) : t('sumTasksFree')];
       if (sum.overdue) parts.push(t('sumOverdue', sum.overdue));
       setSub('tasksSub', parts.join(' · '));
+      const ring = HomeSummary.tasksRing(docs, today);
+      // Порожній день кільця не отримує: нуль із нуля — не досягнення й не
+      // борг, а просто вільний день.
+      setRing('tasksRing', ring.total ? ring.pct : null, ring.done);
     })
     .catch((err) => console.error('homeSummary tasks:', err));
 
   // Цілі: їх завжди небагато, тож читаємо всі.
   userRef.collection('goals').get()
     .then((snap) => {
-      const sum = HomeSummary.goalsSummary(snap.docs.map((d) => d.data()), today);
+      const docs = snap.docs.map((d) => d.data());
+      const sum = HomeSummary.goalsSummary(docs, today);
+      // Кільце показує одну ціль — найтерміновішу. Плитка не список, і
+      // чотири кільця в ряд не сказали б більше за одне.
+      const featured = HomeSummary.featuredGoal(docs, today);
+      setRing('goalsRing', featured ? featured.pct : null, featured ? featured.pct + '%' : '');
       if (!sum.active) { setSub('goalsSub', t('sumGoalsNone')); return; }
-      // Серія — найкраща новина, яку тут можна показати; якщо її немає,
-      // кажемо, скільки цілей сьогодні ще чекають кроку.
-      if (sum.streak) setSub('goalsSub', t('sumStreak', sum.streak));
-      else if (sum.pending) setSub('goalsSub', t('sumGoalsPending', sum.pending));
-      else setSub('goalsSub', t('sumGoalsDone'));
+      // Кільце показує ЯК далеко зайшла найтерміновіша ціль, підпис — ЯКА це
+      // ціль і що з нею сьогодні. Без назви кільце нічого не означало б, а без
+      // другої половини плитка втратила б те, заради чого й ожила: серію й
+      // «сьогодні без кроку».
+      //
+      // Порядок важливий: те, що стосується сьогодні, витісняє те, що
+      // стосується строку. Дедлайн через 40 днів нікуди не втече, а
+      // невідмічений сьогодні день — втече.
+      let note;
+      if (sum.pending) note = t('sumGoalsPending', sum.pending);
+      else if (sum.streak) note = t('sumStreak', sum.streak);
+      else if (featured && featured.daysLeft !== null) note = t('sumGoalDays', featured.daysLeft);
+      else note = t('sumGoalsDone');
+      setSub('goalsSub', featured ? featured.title + ' · ' + note : note);
     })
     .catch((err) => console.error('homeSummary goals:', err));
 
   // Тренування: досить найсвіжішого запису.
+  // Найсвіжішого запису досить і для «скільки днів тому», і для «що сьогодні»:
+  // якщо він датований сьогодні — це і є сьогоднішнє тренування.
   userRef.collection('workouts').orderBy('date', 'desc').limit(1).get()
     .then((snap) => {
-      const sum = HomeSummary.workoutSummary(snap.docs.map((d) => d.data()), today);
+      const docs = snap.docs.map((d) => d.data());
+      const todayWorkout = HomeSummary.workoutToday(docs, today);
+      if (todayWorkout) {
+        // Записане наперед (підходи порожні) — це план, і казати про нього
+        // «зроблено 0%» було б неправдою: його ще тільки роблять.
+        setSub('workoutSub', todayWorkout.planned
+          ? t('sumWorkoutPlan', todayWorkout.exercises)
+          : t('sumWorkoutDoing', todayWorkout.setsDone, todayWorkout.setsTotal));
+        setRing('workoutRing', todayWorkout.pct, todayWorkout.setsDone + '/' + todayWorkout.setsTotal,
+          todayWorkout.pct >= 100 ? 'var(--income)' : 'var(--accent)');
+        return;
+      }
+      setRing('workoutRing', null);
+      const sum = HomeSummary.workoutSummary(docs, today);
       if (sum.daysAgo === null) setSub('workoutSub', t('sumWorkoutNever'));
-      else if (sum.daysAgo <= 0) setSub('workoutSub', t('sumWorkoutToday'));
-      else setSub('workoutSub', t('sumWorkoutAgo', sum.daysAgo));
+      else setSub('workoutSub', t('sumWorkoutNoneToday', sum.daysAgo));
     })
     .catch((err) => console.error('homeSummary workout:', err));
 }

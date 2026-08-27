@@ -593,6 +593,10 @@
   .cat-manage-input:focus{border-color:var(--accent);background:var(--bg);}
   .cat-manage-del{background:none;border:none;cursor:pointer;color:var(--ink-muted);padding:5px;display:flex;flex-shrink:0;}
   .cat-manage-del:hover{color:var(--expense);}
+  .plan-row{display:flex;gap:8px;align-items:center;margin-top:6px;}
+  .plan-row input{flex:1;margin:0;}
+  .plan-clear{flex-shrink:0;border:1px solid var(--border);background:transparent;color:var(--ink-muted);
+    font-family:'Inter',sans-serif;font-size:12.5px;padding:9px 12px;border-radius:10px;cursor:pointer;}
   .cat-add-row{display:flex;gap:8px;margin-top:6px;}
   .cat-add-row input{width:auto;flex:1;font-family:'Inter',sans-serif;font-size:13.5px;border:1px solid var(--border);
     border-radius:8px;padding:8px 11px;margin:0;outline:none;color:var(--ink);background:var(--bg);}
@@ -982,6 +986,17 @@
          меню на головному екрані. -->
     <label class="field-label" id="settingsCurrencyLabel">Валюта</label>
     <div class="cat-picker" id="currencyPicker"></div>
+
+    <!-- План витрат на місяць. Живе в профілі, а не в транзакціях: це не
+         запис про гроші, а межа, з якою вони порівнюються. Порожнє поле —
+         це «плану немає», і тоді на головній кільце не малюється взагалі:
+         відсоток без знаменника не означав би нічого. -->
+    <label class="field-label" id="monthlyPlanLabel" style="margin-top:14px;">План витрат на місяць</label>
+    <div class="plan-row">
+      <input type="number" id="monthlyPlanInput" inputmode="decimal" step="any" min="0" placeholder="0">
+      <button type="button" id="monthlyPlanClear" class="plan-clear">Прибрати</button>
+    </div>
+    <div class="field-hint" id="monthlyPlanHint"></div>
 
     <label class="field-label" id="expenseCatManageLabel" style="margin-top:14px;">Категорії витрат</label>
     <div class="cat-manage-list" id="expenseCatManageList"></div>

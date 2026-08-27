@@ -25,7 +25,11 @@
   function docRef(colName, id) {
     return {
       id,
-      get: () => Promise.resolve({ exists: false, id, data: () => ({}) }),
+      // Профіль користувача теж треба вміти підкласти: від нього залежать, до
+      // прикладу, план витрат на місяць і кільце на плитці бюджету.
+      get: () => Promise.resolve(colName === 'users' && seed.profile
+        ? { exists: true, id, data: () => seed.profile }
+        : { exists: false, id, data: () => ({}) }),
       set: (p) => { calls.set.push({ col: colName, id, payload: p }); return Promise.resolve(); },
       update: (p) => { calls.update.push({ col: colName, id, payload: p }); return Promise.resolve(); },
       delete: () => { calls.delete.push({ col: colName, id }); return Promise.resolve(); },

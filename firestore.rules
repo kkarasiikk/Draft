@@ -63,6 +63,10 @@ service cloud.firestore {
                (!('categoriesExpense' in d) || d.categoriesExpense is list) &&
                // Яку модель питати в AI-помічнику: haiku | sonnet | opus.
                (!('aiModel' in d) || d.aiModel is string) &&
+               // План витрат на місяць: число або null (плану немає). Від нього
+               // залежить кільце «витрачено з плану» на головній.
+               (!('monthlyBudget' in d) || d.monthlyBudget == null ||
+                 (d.monthlyBudget is number && d.monthlyBudget > 0)) &&
                // Налаштування нагадувань: { enabled, morningHour, eveningHour,
                // tz, lastMorning, lastEvening }. Дві останні дати пише Cloud
                // Function (адмінський SDK правила обходить), решту — клієнт.

@@ -101,8 +101,127 @@
     return { pending: digest.pending, streak: best, active: active };
   }
 
+  /**
+   * Кільце завдань: скільки з сьогоднішніх уже закрито.
+   * Знаменник — усе заплановане на сьогодні, а не разом із боргами: борги
+   * живуть окремим числом у підписі й не мають розбавляти сьогоднішній день.
+   */
+  function tasksRing(tasks, todayIso) {
+    var s = tasksSummary(tasks, todayIso);
+    var total = s.done + s.open;
+    return {
+      done: s.done,
+      total: total,
+      overdue: s.overdue,
+      pct: total ? Math.round((s.done / total) * 100) : 0,
+    };
+  }
+
+  /**
+   * Тренування на сьогодні.
+   *
+   * Модуль тренувань дозволяє записати сесію наперед: вправи є, підходи
+   * порожні. Нуль повторень усюди означає «ще не зроблено» — на цій самій
+   * угоді тримається bestSet і progress.js, тож і тут рахуємо так само.
+   *
+   * @returns {{planned:boolean, name:string, exercises:number,
+   *            setsDone:number, setsTotal:number, pct:number}|null}
+   *   null — на сьогодні запису немає взагалі.
+   */
+  function workoutToday(workouts, todayIso) {
+    var today = null;
+    (workouts || []).forEach(function (w) {
+      if (w && w.date === todayIso) today = w;
+    });
+    if (!today) return null;
+
+    var setsDone = 0;
+    var setsTotal = 0;
+    (today.exercises || []).forEach(function (ex) {
+      ((ex && ex.sets) || []).forEach(function (set) {
+        setsTotal += 1;
+        if (num(set && set.reps) > 0) setsDone += 1;
+      });
+    });
+    return {
+      planned: setsDone === 0,
+      name: today.name || '',
+      exercises: (today.exercises || []).length,
+      setsDone: setsDone,
+      setsTotal: setsTotal,
+      pct: setsTotal ? Math.round((setsDone / setsTotal) * 100) : 0,
+    };
+  }
+
+  /**
+   * Яку ціль показати на плитці. Одну — бо плитка не список.
+   *
+   * Беремо найтерміновішу: серед активних ту, до дедлайну якої лишилось
+   * найменше. Без дедлайну ціль не термінова за визначенням, тож такі йдуть
+   * після — і серед них виграє та, у якій більший прогрес: показати майже
+   * пройдений шлях корисніше, ніж щойно початий.
+   */
+  function featuredGoal(goals, todayIso, progressFn) {
+    var active = (goals || []).filter(function (g) { return g && g.status === 'active'; });
+    if (!active.length) return null;
+
+    var pctOf = progressFn || goalPct;
+    var best = null;
+    active.forEach(function (g) {
+      var left = typeof g.targetDate === 'string' && g.targetDate
+        ? Math.round((new Date(g.targetDate + 'T00:00:00') - new Date(todayIso + 'T00:00:00')) / 86400000)
+        : null;
+      var cand = { goal: g, daysLeft: left, pct: pctOf(g) };
+      if (!best) { best = cand; return; }
+      var a = cand.daysLeft, b = best.daysLeft;
+      if (a !== null && b === null) { best = cand; return; }
+      if (a === null && b !== null) return;
+      if (a !== null && b !== null) { if (a < b) best = cand; return; }
+      if (cand.pct > best.pct) best = cand;
+    });
+    return best && { title: best.goal.title || '', pct: best.pct, daysLeft: best.daysLeft };
+  }
+
+  /** Прогрес цілі у відсотках — те саме правило, що й на сторінці цілей:
+   *  числова мета важливіша за віхи. */
+  function goalPct(goal) {
+    var target = num(goal && goal.targetValue);
+    if (target > 0) {
+      return Math.max(0, Math.min(100, Math.round((num(goal.currentValue) / target) * 100)));
+    }
+    var milestones = (goal && goal.milestones) || [];
+    if (!milestones.length) return 0;
+    var done = milestones.filter(function (m) { return m && m.done; }).length;
+    return Math.round((done / milestones.length) * 100);
+  }
+
+  /**
+   * Кільце бюджету: скільки з місячного плану витрат уже витрачено.
+   * null — плану немає, і вигадувати його не можна: кільце без знаменника
+   * показувало б відсоток невідомо від чого.
+   */
+  function budgetRing(transactions, todayIso, plan) {
+    var limit = num(plan);
+    if (!(limit > 0)) return null;
+    var sum = budgetSummary(transactions, todayIso);
+    return {
+      spent: sum.expense,
+      plan: limit,
+      left: limit - sum.expense,
+      over: sum.expense > limit,
+      // Понад 100% кільце не малює — повнішим за повне воно не буває, а
+      // перевитрату видно і числом, і кольором.
+      pct: Math.min(100, Math.round((sum.expense / limit) * 100)),
+    };
+  }
+
   var api = {
     isoOf: isoOf,
+    tasksRing: tasksRing,
+    workoutToday: workoutToday,
+    featuredGoal: featuredGoal,
+    goalPct: goalPct,
+    budgetRing: budgetRing,
     monthStart: monthStart,
     budgetSummary: budgetSummary,
     tasksSummary: tasksSummary,
