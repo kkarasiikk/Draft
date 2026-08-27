@@ -15,16 +15,101 @@ const shift = (days) => {
   return iso(d);
 };
 
+// horizon: 'month' за замовчуванням — це вкладка, на якій розділ
+// відкривається, тож ціль одразу видно. Тести про самі вкладки задають його
+// явно, а тест про старі документи поле прибирає.
 const goal = (over = {}) => ({
   id: 'g1', title: 'Пробігти 100 км', category: 'health', why: '',
-  status: 'active', targetDate: shift(120),
+  status: 'active', targetDate: shift(120), horizon: 'month',
   milestones: [], checkins: [], journal: [],
   ...over,
 });
+/** Ціль без поля horizon — такою її бачить застосунок у старих документах. */
+const legacyGoal = (over = {}) => {
+  const g = goal(over);
+  delete g.horizon;
+  return g;
+};
 
 async function openGoals(page, goals, opts = {}) {
   await openModule(page, 'goals/index.html', { seed: { goals }, ...opts });
 }
+
+test.describe('Дві вкладки: місяць і рік', () => {
+  const monthly = goal({ id: 'gm', title: 'Прочитати дві книжки', horizon: 'month' });
+  const yearly = goal({ id: 'gy', title: 'Вивчити польську', horizon: 'year' });
+
+  test('вкладка «Місяць» показує лише місячні цілі', async ({ page }) => {
+    await openGoals(page, [monthly, yearly]);
+    await expect(page.locator('[data-open-goal="gm"]')).toBeVisible();
+    await expect(page.locator('[data-open-goal="gy"]')).toHaveCount(0);
+  });
+
+  test('вкладка «Рік» показує лише річні', async ({ page }) => {
+    await openGoals(page, [monthly, yearly]);
+    await page.click('#bnYear');
+    await expect(page.locator('[data-open-goal="gy"]')).toBeVisible();
+    await expect(page.locator('[data-open-goal="gm"]')).toHaveCount(0);
+  });
+
+  test('стара ціль без поля horizon вважається річною', async ({ page }) => {
+    await openGoals(page, [legacyGoal({ id: 'old', title: 'Стара ціль' })]);
+    await expect(page.locator('[data-open-goal="old"]')).toHaveCount(0);
+    await page.click('#bnYear');
+    await expect(page.locator('[data-open-goal="old"]')).toBeVisible();
+  });
+
+  test('вкладки «Головна» більше немає, але вихід на хаб лишився в шапці', async ({ page }) => {
+    await openGoals(page, [monthly]);
+    await expect(page.locator('#bnHome')).toHaveCount(0);
+    await expect(page.locator('#topbarHomeLink')).toHaveAttribute('href', '../index.html');
+  });
+
+  test('порожній екран питає різне на різних вкладках', async ({ page }) => {
+    await openGoals(page, [yearly]);
+    await expect(page.locator('.empty-state .title')).toContainText(/місяць/i);
+    await page.click('#bnYear');
+    await expect(page.locator('.empty-state')).toHaveCount(0);
+  });
+
+  test('плитки згори рахують ту вкладку, яку видно', async ({ page }) => {
+    await openGoals(page, [monthly, yearly, goal({ id: 'gy2', title: 'Ще річна', horizon: 'year' })]);
+    await expect(page.locator('.summary-strip').first()).toContainText('1');
+    await page.click('#bnYear');
+    await expect(page.locator('.summary-strip').first()).toContainText('2');
+  });
+
+  test('нова ціль успадковує вкладку, з якої її заводять', async ({ page }) => {
+    await openGoals(page, [yearly]);
+    await page.click('#openNewGoalBtn');
+    await expect(page.locator('#horizonPicker [data-horizon="month"]')).toHaveClass(/selected/);
+    await page.click('#closeGoalForm');
+
+    await page.click('#bnYear');
+    await page.click('#openNewGoalBtn');
+    await expect(page.locator('#horizonPicker [data-horizon="year"]')).toHaveClass(/selected/);
+  });
+
+  test('горизонт зберігається в записі', async ({ page }) => {
+    await openGoals(page, [yearly]);
+    await page.click('#openNewGoalBtn');
+    await page.fill('#goalTitleInput', 'Місячна ціль');
+    await page.click('#goalSubmitBtn');
+
+    await expect.poll(() => page.evaluate(() => window.__fbCalls.add.length)).toBe(1);
+    const [add] = await page.evaluate(() => window.__fbCalls.add);
+    expect(add.col).toBe('goals');
+    expect(add.payload.horizon).toBe('month');
+  });
+
+  test('вечірня картка питає про всі цілі, а не лише про видиму вкладку', async ({ page }) => {
+    // Серія тримається на тому, що людина не забула: рватись мовчки, поки
+    // відкрито інший горизонт, вона не має.
+    await page.clock.install({ time: new Date(new Date().setHours(20, 0, 0, 0)) });
+    await openGoals(page, [monthly, yearly]);
+    await expect(page.locator('.evening-goal')).toHaveCount(2);
+  });
+});
 
 test.describe('Огляд тижня', () => {
   test('банер зʼявляється, коли ціль ще не оглядали', async ({ page }) => {

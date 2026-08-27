@@ -340,10 +340,14 @@ service cloud.firestore {
                  // про що вже питали.
                  (!('reviewedAt' in d) || d.reviewedAt == null ||
                    (d.reviewedAt is string && d.reviewedAt.size() == 10)) &&
+                 // Горизонт планування: місяць чи рік. Старі документи поля не
+                 // мають — вони заводились як довгострокові, тож без нього
+                 // ціль вважається річною.
+                 (!('horizon' in d) || d.horizon in ['month', 'year']) &&
                  d.createdAt is timestamp && d.updatedAt is timestamp &&
                  d.keys().hasOnly(['title', 'category', 'why', 'targetDate', 'status',
                    'targetValue', 'currentValue', 'unit', 'rescues', 'blockers',
-                   'progressLog', 'savingsGoalId', 'reviewedAt',
+                   'progressLog', 'savingsGoalId', 'reviewedAt', 'horizon',
                    'milestones', 'checkins', 'journal', 'createdAt', 'updatedAt']);
         }
         allow read, delete: if isOwner(uid);

@@ -58,7 +58,11 @@ const T = {
     unsavedSave: 'Зберегти', unsavedDiscard: 'Не зберігати', unsavedKeep: 'Продовжити редагування',
     confirmDeleteTitle: 'Видалити ціль?',
     confirmDeleteSub: 'Цю дію не можна скасувати. Усі віхи, нотатки й серія теж зникнуть.',
-    fabNewGoalLabel: 'Нова ціль', bnGoals: 'Цілі', bnHome: 'Головна',
+    fabNewGoalLabel: 'Нова ціль', bnMonth: 'Місяць', bnYear: 'Рік',
+    horizonLabel: 'Горизонт', horizonMonth: 'Місячна', horizonYear: 'Річна',
+    horizonHint: 'Місячна — що робиш цього місяця. Річна — куди йдеш загалом.',
+    emptyMonthTitle: 'Немає цілей на місяць', emptyMonthSub: 'Що хочеш зрушити саме цього місяця?',
+    emptyYearTitle: 'Немає річних цілей', emptyYearSub: 'Куди ти йдеш цього року?',
     statusAll: 'Усі', statusActive: 'Активні', statusDone: 'Завершені', statusArchived: 'Архів',
     statusPaused: 'На паузі', pauseBtn: 'Поставити на паузу', resumeBtn: 'Повернути в роботу',
     pausedNote: 'Ціль на паузі: про неї не питають вечорами, і серія не рветься.',
@@ -155,7 +159,11 @@ const T = {
     unsavedSave: 'Сохранить', unsavedDiscard: 'Не сохранять', unsavedKeep: 'Продолжить редактирование',
     confirmDeleteTitle: 'Удалить цель?',
     confirmDeleteSub: 'Это действие нельзя отменить. Все вехи, заметки и серия тоже исчезнут.',
-    fabNewGoalLabel: 'Новая цель', bnGoals: 'Цели', bnHome: 'Главная',
+    fabNewGoalLabel: 'Новая цель', bnMonth: 'Месяц', bnYear: 'Год',
+    horizonLabel: 'Горизонт', horizonMonth: 'Месячная', horizonYear: 'Годовая',
+    horizonHint: 'Месячная — что делаешь в этом месяце. Годовая — куда идёшь в целом.',
+    emptyMonthTitle: 'Нет целей на месяц', emptyMonthSub: 'Что хочешь сдвинуть именно в этом месяце?',
+    emptyYearTitle: 'Нет годовых целей', emptyYearSub: 'Куда ты идёшь в этом году?',
     statusAll: 'Все', statusActive: 'Активные', statusDone: 'Завершённые', statusArchived: 'Архив',
     statusPaused: 'На паузе', pauseBtn: 'Поставить на паузу', resumeBtn: 'Вернуть в работу',
     pausedNote: 'Цель на паузе: о ней не спрашивают вечерами, и серия не рвётся.',
@@ -252,7 +260,11 @@ const T = {
     unsavedSave: 'Zapisz', unsavedDiscard: 'Nie zapisuj', unsavedKeep: 'Wróć do edycji',
     confirmDeleteTitle: 'Usunąć cel?',
     confirmDeleteSub: 'Tej czynności nie można cofnąć. Wszystkie kamienie milowe, notatki i seria też znikną.',
-    fabNewGoalLabel: 'Nowy cel', bnGoals: 'Cele', bnHome: 'Główna',
+    fabNewGoalLabel: 'Nowy cel', bnMonth: 'Miesiąc', bnYear: 'Rok',
+    horizonLabel: 'Horyzont', horizonMonth: 'Miesięczny', horizonYear: 'Roczny',
+    horizonHint: 'Miesięczny — co robisz w tym miesiącu. Roczny — dokąd zmierzasz ogólnie.',
+    emptyMonthTitle: 'Brak celów na miesiąc', emptyMonthSub: 'Co chcesz ruszyć właśnie w tym miesiącu?',
+    emptyYearTitle: 'Brak celów rocznych', emptyYearSub: 'Dokąd zmierzasz w tym roku?',
     statusAll: 'Wszystkie', statusActive: 'Aktywne', statusDone: 'Ukończone', statusArchived: 'Archiwum',
     statusPaused: 'Wstrzymane', pauseBtn: 'Wstrzymaj', resumeBtn: 'Wznów',
     pausedNote: 'Cel wstrzymany: wieczorem nie pytamy o niego, a seria się nie rwie.',
@@ -349,7 +361,11 @@ const T = {
     unsavedSave: 'Save', unsavedDiscard: "Don't save", unsavedKeep: 'Keep editing',
     confirmDeleteTitle: 'Delete goal?',
     confirmDeleteSub: 'This action cannot be undone. Milestones, notes and streak will be lost too.',
-    fabNewGoalLabel: 'New goal', bnGoals: 'Goals', bnHome: 'Home',
+    fabNewGoalLabel: 'New goal', bnMonth: 'Month', bnYear: 'Year',
+    horizonLabel: 'Horizon', horizonMonth: 'Monthly', horizonYear: 'Yearly',
+    horizonHint: 'Monthly — what you are moving this month. Yearly — where you are heading overall.',
+    emptyMonthTitle: 'No goals for this month', emptyMonthSub: 'What do you want to move this month?',
+    emptyYearTitle: 'No yearly goals', emptyYearSub: 'Where are you heading this year?',
     statusAll: 'All', statusActive: 'Active', statusDone: 'Done', statusArchived: 'Archived',
     statusPaused: 'Paused', pauseBtn: 'Pause this goal', resumeBtn: 'Resume',
     pausedNote: 'Paused: no evening questions, and the streak stays intact.',
@@ -474,8 +490,8 @@ function applyTranslations() {
   document.getElementById('htmlRoot').setAttribute('lang', currentLang);
   document.title = `${t('pageTitle')} · Life`;
   document.getElementById('openNewGoalBtn').setAttribute('aria-label', t('fabNewGoalLabel'));
-  document.getElementById('bnGoalsLabel').textContent = t('bnGoals');
-  document.getElementById('bnHomeLabel').textContent = t('bnHome');
+  document.getElementById('bnMonthLabel').textContent = t('bnMonth');
+  document.getElementById('bnYearLabel').textContent = t('bnYear');
   document.getElementById('goalModalTitle').textContent = editingGoalId ? t('editGoalTitle') : t('newGoalTitle');
   document.getElementById('categoryLabel').textContent = t('categoryLabel');
   document.getElementById('whyLabel').textContent = t('whyLabel');
@@ -650,11 +666,22 @@ let goals = [];
 let unsubscribeGoals = null;
 let currentScreen = 'dashboard'; // 'dashboard' | 'detail' | 'review'
 let activeDetailGoalId = null;
-let statusFilter = 'active'; // null(all) | 'active' | 'done' | 'archived'
+let statusFilter = 'active'; // null(all) | 'active' | 'paused' | 'done' | 'archived'
+// Горизонт планування: дві вкладки внизу — «Місяць» і «Рік». Це не фільтр
+// поверх одного списку, а два різні питання: що я роблю ЦЬОГО МІСЯЦЯ і куди
+// я взагалі йду. Тримати їх в одному списку означало б, що дрібне щоразу
+// ховає велике — його завжди більше.
+const HORIZON_KEY = 'goalsHorizon';
+let horizon = localStorage.getItem(HORIZON_KEY) === 'year' ? 'year' : 'month';
+// Старі цілі поля не мають: вони заводились як довгострокові.
+function horizonOf(goal) {
+  return goal && goal.horizon === 'month' ? 'month' : 'year';
+}
 let editingGoalId = null;
 let formCategory = 'other';
 let formMilestones = [];
 let formSavingsGoalId = null;
+let formHorizon = 'month';
 let pendingDeleteId = null;
 // Яка ціль у вечірньому підсумку зараз питає «що завадило».
 let eveningReasonForId = null;
@@ -884,6 +911,9 @@ function renderEveningCard() {
   }
   // Більше п'яти питань перед сном — це вже допит. Решта дочекається
   // наступного перерендеру: відповіді прибирають цілі з черги.
+  // По ВСІХ цілях, а не лише по видимій вкладці: серія тримається на тому, що
+  // людина не забула, і мовчки рватись, поки відкрито інший горизонт, вона не
+  // має. Те саме з оглядом тижня нижче — це ритуал над усім списком.
   const queue = Streak.eveningQueue(goals, today).slice(0, 5);
   if (!queue.length) { host.innerHTML = ''; return; }
 
@@ -948,7 +978,7 @@ function renderEveningCard() {
 }
 
 function renderSummaryStrip() {
-  const s = computeSummary(goals);
+  const s = computeSummary(goalsOfHorizon());
   document.getElementById('summaryStrip').innerHTML = `
     <div class="summary-tile"><div class="summary-tile-value">${s.activeCount}</div><div class="summary-tile-label">${escapeHtml(t('summaryActiveLabel'))}</div></div>
     <div class="summary-tile"><div class="summary-tile-value">${s.bestStreak}</div><div class="summary-tile-label">${escapeHtml(t('summaryStreakLabel'))}</div></div>
@@ -956,7 +986,7 @@ function renderSummaryStrip() {
 }
 
 function renderBadgesRow() {
-  const badges = computeBadges(goals);
+  const badges = computeBadges(goalsOfHorizon());
   const row = document.getElementById('badgesRow');
   row.innerHTML = badges.map((key) => `<span class="badge-chip">${escapeHtml(t(key))}</span>`).join('');
 }
@@ -1010,11 +1040,20 @@ function goalCardHtml(goal) {
     </div>`;
 }
 
+function goalsOfHorizon() {
+  return goals.filter((g) => horizonOf(g) === horizon);
+}
+
 function renderGoalsList() {
-  const list = statusFilter ? goals.filter((g) => g.status === statusFilter) : goals;
+  const scoped = goalsOfHorizon();
+  const list = statusFilter ? scoped.filter((g) => g.status === statusFilter) : scoped;
   const el = document.getElementById('goalsList');
   if (!list.length) {
-    el.innerHTML = `<div class="empty-state"><div class="title">${escapeHtml(t('dashboardEmptyTitle'))}</div><div>${escapeHtml(t('dashboardEmptySub'))}</div></div>`;
+    // Порожній екран питає рівно те, заради чого сюди зайшли, — а це різні
+    // питання на різних вкладках.
+    const title = horizon === 'month' ? t('emptyMonthTitle') : t('emptyYearTitle');
+    const sub = horizon === 'month' ? t('emptyMonthSub') : t('emptyYearSub');
+    el.innerHTML = `<div class="empty-state"><div class="title">${escapeHtml(title)}</div><div>${escapeHtml(sub)}</div></div>`;
     return;
   }
   el.innerHTML = list.map(goalCardHtml).join('');
@@ -1054,7 +1093,15 @@ function showReview() {
 document.getElementById('detailBackBtn').addEventListener('click', showDashboard);
 document.getElementById('reviewBackBtn').addEventListener('click', showDashboard);
 // Вкладка «Цілі» — і повернення з екрана деталей, і просто підсвічений стан.
-document.getElementById('bnGoals').addEventListener('click', showDashboard);
+function selectHorizon(next) {
+  horizon = next === 'year' ? 'year' : 'month';
+  try { localStorage.setItem(HORIZON_KEY, horizon); } catch (err) { /* приватний режим */ }
+  document.getElementById('bnMonth').classList.toggle('active', horizon === 'month');
+  document.getElementById('bnYear').classList.toggle('active', horizon === 'year');
+  showDashboard();
+}
+document.getElementById('bnMonth').addEventListener('click', () => selectHorizon('month'));
+document.getElementById('bnYear').addEventListener('click', () => selectHorizon('year'));
 
 // ---- Рендер: деталі цілі ----
 function renderGoalDetail(goal) {
@@ -1166,6 +1213,7 @@ function renderReviewBanner() {
   // «Пізніше» ховає банер до кінця дня, а не назавжди: завтра питання
   // актуальне знову. Так само, як із боргами в завданнях.
   if (localStorage.getItem(REVIEW_DISMISS_KEY) === today) { host.innerHTML = ''; return; }
+  // Свідомо по всіх горизонтах — див. коментар у вечірній картці.
   const digest = Review.reviewDigest(goals, today);
   if (!digest.pending) { host.innerHTML = ''; return; }
 
@@ -1644,6 +1692,19 @@ async function setGoalStatus(goalId, status) {
 }
 
 // ---- Форма цілі (створення / редагування) ----
+function renderHorizonPicker() {
+  document.getElementById('horizonLabel').textContent = t('horizonLabel');
+  document.getElementById('horizonHint').textContent = t('horizonHint');
+  const picker = document.getElementById('horizonPicker');
+  const options = [['month', t('horizonMonth')], ['year', t('horizonYear')]];
+  picker.innerHTML = options.map(([val, label]) =>
+    `<button type="button" class="choice${formHorizon === val ? ' selected' : ''}" data-horizon="${val}">${escapeHtml(label)}</button>`
+  ).join('');
+  picker.querySelectorAll('[data-horizon]').forEach((btn) => {
+    btn.addEventListener('click', () => { formHorizon = btn.dataset.horizon; renderHorizonPicker(); });
+  });
+}
+
 function renderCategoryPicker() {
   const picker = document.getElementById('categoryPicker');
   picker.innerHTML = CATEGORIES.map((cat) =>
@@ -1851,6 +1912,10 @@ function openGoalForm(existingGoal) {
   formCategory = existingGoal ? existingGoal.category || 'other' : 'other';
   formMilestones = existingGoal ? (existingGoal.milestones || []).map((m) => ({ ...m })) : [];
   formSavingsGoalId = existingGoal ? existingGoal.savingsGoalId || null : null;
+  // Нова ціль народжується на тій вкладці, з якої її заводять: людина щойно
+  // дивилась на місяць — значить, і думає про місяць.
+  formHorizon = existingGoal ? horizonOf(existingGoal) : horizon;
+  renderHorizonPicker();
   renderCategoryPicker();
   renderMilestonesEditor();
   renderSavingsLink();
@@ -1901,7 +1966,7 @@ function renderSavingsLink() {
   const options = [[null, t('savingsLinkNone')]].concat(
     savingsPickerList.map((sg) => [sg.id, sg.name || t('savingsLinkLabel')]));
   picker.innerHTML = options.map(([id, label]) =>
-    `<button type="button" class="cat-choice${formSavingsGoalId === id ? ' selected' : ''}" data-savings="${id === null ? '' : escapeHtml(id)}">${escapeHtml(label)}</button>`
+    `<button type="button" class="choice${formSavingsGoalId === id ? ' selected' : ''}" data-savings="${id === null ? '' : escapeHtml(id)}">${escapeHtml(label)}</button>`
   ).join('');
   picker.querySelectorAll('[data-savings]').forEach((btn) => {
     btn.addEventListener('click', () => {
@@ -1923,6 +1988,7 @@ const goalGuard = UnsavedGuard.create({
     targetValue: document.getElementById('goalTargetValue').value,
     unit: document.getElementById('goalUnitInput').value.trim(),
     savingsGoalId: formSavingsGoalId,
+    horizon: formHorizon,
     category: formCategory,
     milestones: formMilestones.map((m) => [(m.title || '').trim(), !!m.done]),
   }),
@@ -1980,6 +2046,7 @@ async function saveGoalForm() {
     // Звʼязок зі скарбничкою тримається на числовій меті: без неї підтягувати
     // нема куди, тож і посилання зберігати ні до чого.
     savingsGoalId: targetValue ? formSavingsGoalId || null : null,
+    horizon: formHorizon === 'month' ? 'month' : 'year',
     milestones: cleanMilestones,
     updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
   };
@@ -2001,6 +2068,9 @@ async function saveGoalForm() {
       });
     }
     goalGuard.close();
+    // Ціль зі щойно зміненим горизонтом інакше зникла б із очей: збережеш
+    // річну, стоячи на «Місяці», — і здається, що запис не пройшов.
+    if (payload.horizon !== horizon) selectHorizon(payload.horizon);
   } catch (err) {
     console.error('save goal:', err);
     errorEl.textContent = t('err_generic');
@@ -2297,6 +2367,10 @@ document.addEventListener('visibilitychange', () => {
 });
 
 // ---- Ініціалізація ----
+// Вкладка запамʼятовується: людина, яка живе місячними цілями, не має щоразу
+// перемикатись із «Року» після кожного відкриття.
+document.getElementById('bnMonth').classList.toggle('active', horizon === 'month');
+document.getElementById('bnYear').classList.toggle('active', horizon === 'year');
 initDatePicker('goalTargetDate');
 applyTheme();
 applyTranslations();
