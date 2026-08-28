@@ -684,3 +684,29 @@ describe('needsMeasure — ціль, яку нема чим міряти', () =>
     expect(R.needsMeasure(goal(), TODAY, {})).toBeNull();
   });
 });
+
+describe('planOf — намір «якщо X, то Y»', () => {
+  test('обидві частини — є намір', () => {
+    expect(R.planOf(goal({ plan: { cue: 'щовівторка о 19:00', action: 'біжу 5 км' } })))
+      .toEqual({ cue: 'щовівторка о 19:00', action: 'біжу 5 км' });
+  });
+
+  test('ситуація без дії — це ще не намір', () => {
+    expect(R.planOf(goal({ plan: { cue: 'щовівторка', action: '' } }))).toBeNull();
+  });
+
+  test('дія без ситуації — просто переказ цілі', () => {
+    expect(R.planOf(goal({ plan: { cue: '  ', action: 'біжу 5 км' } }))).toBeNull();
+  });
+
+  test('порожній і відсутній план однаково мовчать', () => {
+    expect(R.planOf(goal())).toBeNull();
+    expect(R.planOf(goal({ plan: null }))).toBeNull();
+    expect(R.planOf(goal({ plan: 'щовівторка' }))).toBeNull();
+  });
+
+  test('пробіли по краях не роблять план існуючим і не лишаються в тексті', () => {
+    expect(R.planOf(goal({ plan: { cue: '  вранці  ', action: '  20 хвилин  ' } })))
+      .toEqual({ cue: 'вранці', action: '20 хвилин' });
+  });
+});

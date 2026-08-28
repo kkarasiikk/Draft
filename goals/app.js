@@ -123,6 +123,10 @@ const T = {
     measureTitle: 'Як ти зрозумієш, що дійшов?',
     measureSub: 'У цілі немає ні числа, ні кроків — виміряти її нічим.',
     measureBtn: 'Додати мірило', measureShort: 'Виміряти нічим',
+    planLabel: 'Коли саме ти це робиш?', planBlockLabel: 'План',
+    planCuePlaceholder: 'Щовівторка й четверга о 19:00, після роботи',
+    planActionPlaceholder: 'Біжу 5 км',
+    planHint: 'Рішення, ухвалене заздалегідь, у момент дії не треба ухвалювати знову.',
     retroYear: 'За рік', retroAll: 'За весь час',
     retroClosed: (n) => `Закрито цілей: ${n}`,
     retroEmptyPeriod: 'За цей період нічого не закрито',
@@ -242,6 +246,10 @@ const T = {
     measureTitle: 'Как ты поймёшь, что дошёл?',
     measureSub: 'В цели нет ни числа, ни шагов — измерить её нечем.',
     measureBtn: 'Добавить мерило', measureShort: 'Измерить нечем',
+    planLabel: 'Когда именно ты это делаешь?', planBlockLabel: 'План',
+    planCuePlaceholder: 'По вторникам и четвергам в 19:00, после работы',
+    planActionPlaceholder: 'Бегу 5 км',
+    planHint: 'Решение, принятое заранее, в момент действия принимать заново не нужно.',
     retroYear: 'За год', retroAll: 'За всё время',
     retroClosed: (n) => `Закрыто целей: ${n}`,
     retroEmptyPeriod: 'За этот период ничего не закрыто',
@@ -361,6 +369,10 @@ const T = {
     measureTitle: 'Po czym poznasz, że doszedłeś?',
     measureSub: 'Cel nie ma ani liczby, ani kroków — nie ma czym go zmierzyć.',
     measureBtn: 'Dodaj miarę', measureShort: 'Brak miary',
+    planLabel: 'Kiedy dokładnie to robisz?', planBlockLabel: 'Plan',
+    planCuePlaceholder: 'We wtorki i czwartki o 19:00, po pracy',
+    planActionPlaceholder: 'Biegnę 5 km',
+    planHint: 'Decyzja podjęta z wyprzedzeniem nie musi być podejmowana ponownie w chwili działania.',
     retroYear: 'Za rok', retroAll: 'Cały czas',
     retroClosed: (n) => `Ukończonych celów: ${n}`,
     retroEmptyPeriod: 'W tym okresie nic nie ukończono',
@@ -480,6 +492,10 @@ const T = {
     measureTitle: 'How will you know you got there?',
     measureSub: 'This goal has no number and no steps — nothing to measure it by.',
     measureBtn: 'Add a measure', measureShort: 'Nothing to measure',
+    planLabel: 'When exactly do you do this?', planBlockLabel: 'Plan',
+    planCuePlaceholder: 'Tuesdays and Thursdays at 19:00, right after work',
+    planActionPlaceholder: 'Run 5 km',
+    planHint: 'A decision made in advance does not have to be made again in the moment.',
     retroYear: 'Past year', retroAll: 'All time',
     retroClosed: (n) => `Goals closed: ${n}`,
     retroEmptyPeriod: 'Nothing closed in this period',
@@ -576,6 +592,10 @@ function applyTranslations() {
   document.getElementById('categoryLabel').textContent = t('categoryLabel');
   document.getElementById('whyLabel').textContent = t('whyLabel');
   document.getElementById('goalWhyInput').placeholder = t('whyPlaceholder');
+  document.getElementById('planLabel').textContent = t('planLabel');
+  document.getElementById('planHint').textContent = t('planHint');
+  document.getElementById('goalPlanCue').placeholder = t('planCuePlaceholder');
+  document.getElementById('goalPlanAction').placeholder = t('planActionPlaceholder');
   document.getElementById('targetDateLabel').textContent = t('targetDateLabel');
   document.getElementById('milestonesLabel').textContent = t('milestonesLabel');
   document.getElementById('targetValueLabel').textContent = t('targetValueLabel');
@@ -1007,9 +1027,15 @@ function renderEveningCard() {
         const whyBlock = g.why && streakAtRisk >= 3
           ? `<div class="evening-why">${escapeHtml(t('whyReminder'))} “${escapeHtml(g.why)}”</div>`
           : '';
+        // Намір показуємо ЗАВЖДИ, коли він є: саме тут він і мусить
+        // спрацювати — питання «чи був крок» і є тією ситуацією.
+        const plan = Review.planOf(g);
+        const planBlock = plan
+          ? `<div class="evening-plan">${escapeHtml(plan.cue)} → ${escapeHtml(plan.action)}</div>` : '';
         return `
         <div class="evening-goal">
           <div class="evening-goal-title">${escapeHtml(g.title || '')}${streakAtRisk >= 3 ? ` <span class="evening-streak">🔥 ${streakAtRisk}</span>` : ''}</div>
+          ${planBlock}
           ${whyBlock}
           <div class="evening-actions">
             <button type="button" class="evening-btn yes" data-yes="${g.id}">${escapeHtml(t('eveningYes'))}</button>
@@ -1277,6 +1303,7 @@ function renderGoalDetail(goal) {
     progressEl.innerHTML = '';
   }
 
+  renderPlanBlock(goal);
   renderPaceBlock(goal);
   renderMeasureBanner(goal);
   renderDriftRow(goal);
@@ -1403,6 +1430,8 @@ function renderReviewScreen() {
           </div>` : ''}
         ${movementChips(item, goal)}
         ${goal.why ? `<div class="review-why">${escapeHtml(t('whyReminder'))} “${escapeHtml(goal.why)}”</div>` : ''}
+        ${(() => { const pl = Review.planOf(goal); return pl
+          ? `<div class="review-plan">${escapeHtml(pl.cue)} → ${escapeHtml(pl.action)}</div>` : ''; })()}
         ${blockersLine(goal)}
         ${Review.needsMeasure(goal, today, { startIso: createdIso(goal) })
           ? `<div class="review-measure">${escapeHtml(t('measureShort'))}</div>` : ''}
@@ -1567,6 +1596,27 @@ function renderMeasureBanner(goal) {
       <button type="button" id="measureFixBtn">${escapeHtml(t('measureBtn'))}</button>
     </div>`;
   document.getElementById('measureFixBtn').addEventListener('click', () => openGoalForm(goal));
+}
+
+// Намір «якщо ситуація — то дія». Порожню половину зберігаємо як є: людина
+// могла набрати лише одну й повернутись пізніше, і стирати набране було б
+// несподівано. Наміром це стає лише тоді, коли є обидві (див. Review.planOf).
+function readPlanFields() {
+  const cue = document.getElementById('goalPlanCue').value.trim().slice(0, 120);
+  const action = document.getElementById('goalPlanAction').value.trim().slice(0, 120);
+  return cue || action ? { cue, action } : null;
+}
+
+function renderPlanBlock(goal) {
+  const el = document.getElementById('detailPlanBlock');
+  if (!el) return;
+  const plan = Review.planOf(goal);
+  if (!plan) { el.innerHTML = ''; return; }
+  el.innerHTML = `
+    <div class="plan">
+      <div class="plan-label">${escapeHtml(t('planBlockLabel'))}</div>
+      <div class="plan-text">${escapeHtml(plan.cue)} → <b>${escapeHtml(plan.action)}</b></div>
+    </div>`;
 }
 
 // Скільки разів дедлайн уже їхав. Показуємо БЕЗ докору — просто факт, який
@@ -2332,6 +2382,9 @@ function openGoalForm(existingGoal) {
   document.getElementById('goalFormError').textContent = '';
   document.getElementById('goalTitleInput').value = existingGoal ? existingGoal.title : '';
   document.getElementById('goalWhyInput').value = existingGoal ? existingGoal.why || '' : '';
+  const existingPlan = (existingGoal && existingGoal.plan) || {};
+  document.getElementById('goalPlanCue').value = existingPlan.cue || '';
+  document.getElementById('goalPlanAction').value = existingPlan.action || '';
   document.getElementById('goalTargetDate').value = existingGoal ? existingGoal.targetDate || '' : '';
   document.getElementById('goalTargetValue').value =
     existingGoal && existingGoal.targetValue != null ? existingGoal.targetValue : '';
@@ -2413,6 +2466,8 @@ const goalGuard = UnsavedGuard.create({
   snapshot: () => JSON.stringify({
     title: document.getElementById('goalTitleInput').value.trim(),
     why: document.getElementById('goalWhyInput').value.trim(),
+    planCue: document.getElementById('goalPlanCue').value.trim(),
+    planAction: document.getElementById('goalPlanAction').value.trim(),
     targetDate: document.getElementById('goalTargetDate').value,
     targetValue: document.getElementById('goalTargetValue').value,
     unit: document.getElementById('goalUnitInput').value.trim(),
@@ -2469,6 +2524,7 @@ async function saveGoalForm() {
     title,
     category: CATEGORIES.includes(formCategory) ? formCategory : 'other',
     why: document.getElementById('goalWhyInput').value.trim(),
+    plan: readPlanFields(),
     targetDate: document.getElementById('goalTargetDate').value || null,
     targetValue,
     // Одиниця без мети ні про що не каже, тож тримаються разом.

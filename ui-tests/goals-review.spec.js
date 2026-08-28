@@ -712,3 +712,58 @@ test.describe('Ціль, яку нема чим міряти', () => {
     await expect(page.locator('.review-measure')).toBeVisible();
   });
 });
+
+test.describe('Намір «якщо — то»', () => {
+  const planned = (over = {}) => goal({
+    plan: { cue: 'щовівторка о 19:00', action: 'біжу 5 км' }, ...over,
+  });
+
+  test('на екрані цілі намір стоїть окремим блоком', async ({ page }) => {
+    await openGoals(page, [planned()]);
+    await page.click('[data-open-goal="g1"]');
+    await expect(page.locator('.plan-text')).toHaveText('щовівторка о 19:00 → біжу 5 км');
+  });
+
+  test('половина плану наміром не є — блока немає', async ({ page }) => {
+    await openGoals(page, [planned({ plan: { cue: 'щовівторка', action: '' } })]);
+    await page.click('[data-open-goal="g1"]');
+    await expect(page.locator('.plan')).toHaveCount(0);
+  });
+
+  test('намір зберігається з форми обома половинами', async ({ page }) => {
+    await openGoals(page, [goal()]);
+    await page.click('[data-open-goal="g1"]');
+    await page.click('#detailEditBtn');
+    await page.fill('#goalPlanCue', 'щоранку після душу');
+    await page.fill('#goalPlanAction', '20 сторінок');
+    await page.click('#goalSubmitBtn');
+
+    await expect.poll(() => page.evaluate(() => window.__fbCalls.update.length)).toBeGreaterThan(0);
+    const upd = await page.evaluate(() => window.__fbCalls.update.at(-1));
+    expect(upd.payload.plan).toEqual({ cue: 'щоранку після душу', action: '20 сторінок' });
+  });
+
+  test('порожні поля не пишуть порожній намір', async ({ page }) => {
+    await openGoals(page, [goal()]);
+    await page.click('[data-open-goal="g1"]');
+    await page.click('#detailEditBtn');
+    await page.click('#goalSubmitBtn');
+    await expect.poll(() => page.evaluate(() => window.__fbCalls.update.length)).toBeGreaterThan(0);
+    const upd = await page.evaluate(() => window.__fbCalls.update.at(-1));
+    expect(upd.payload.plan).toBeNull();
+  });
+
+  test('форма показує вже записаний намір, а не порожні поля', async ({ page }) => {
+    await openGoals(page, [planned()]);
+    await page.click('[data-open-goal="g1"]');
+    await page.click('#detailEditBtn');
+    await expect(page.locator('#goalPlanCue')).toHaveValue('щовівторка о 19:00');
+    await expect(page.locator('#goalPlanAction')).toHaveValue('біжу 5 км');
+  });
+
+  test('в огляді намір теж видно — там про нього і йдеться', async ({ page }) => {
+    await openGoals(page, [planned()]);
+    await page.click('#reviewBannerBtn');
+    await expect(page.locator('.review-plan')).toHaveText('щовівторка о 19:00 → біжу 5 км');
+  });
+});

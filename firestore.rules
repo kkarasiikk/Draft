@@ -357,6 +357,10 @@ service cloud.firestore {
                  // вгадувати тривалість за останнім слідом у даних.
                  (!('completedAt' in d) || d.completedAt == null ||
                    (d.completedAt is string && d.completedAt.size() == 10)) &&
+                 // Намір «якщо ситуація — то дія»: {cue, action}. Довжину
+                 // рядків, як і форму решти вкладених обʼєктів поруч,
+                 // гарантує клієнт (readPlanFields у goals/app.js).
+                 (!('plan' in d) || d.plan == null || d.plan is map) &&
                  // Куди й коли їхав дедлайн. Форму елементів ({from, to, at}),
                  // як і в решті списків поруч, гарантує клієнт.
                  (!('deadlineHistory' in d) ||
@@ -364,7 +368,7 @@ service cloud.firestore {
                  d.createdAt is timestamp && d.updatedAt is timestamp &&
                  d.keys().hasOnly(['title', 'category', 'why', 'targetDate', 'status',
                    'targetValue', 'currentValue', 'unit', 'rescues', 'blockers',
-                   'progressLog', 'savingsGoalId', 'reviewedAt', 'horizon', 'parentGoalId', 'completedAt', 'deadlineHistory',
+                   'progressLog', 'savingsGoalId', 'reviewedAt', 'horizon', 'parentGoalId', 'completedAt', 'deadlineHistory', 'plan',
                    'milestones', 'checkins', 'journal', 'createdAt', 'updatedAt']);
         }
         allow read, delete: if isOwner(uid);
