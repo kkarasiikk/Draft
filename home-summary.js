@@ -215,8 +215,99 @@
     };
   }
 
+  /** Сім днів, що закінчуються сьогоднішнім: від найранішого до сьогодні. */
+  function weekDays(todayIso, count) {
+    var n = count || 7;
+    var end = new Date(todayIso + 'T00:00:00');
+    var out = [];
+    for (var i = n - 1; i >= 0; i--) {
+      var d = new Date(end);
+      d.setDate(d.getDate() - i);
+      out.push(isoOf(d));
+    }
+    return out;
+  }
+
+  /**
+   * Де за тиждень був рух, а де тиша — по всіх чотирьох розділах разом.
+   *
+   * Цього не показує жоден окремий модуль: бюджет знає свої операції, зал —
+   * свої тренування, і ніде не видно життя цілком. А саме там і читається
+   * головне: «гроші й цілі йдуть щодня, зал стоїть із понеділка».
+   *
+   * Рівень навмисно грубий — 0 / 1 / 2+. Це відповідь на «чи був день
+   * живий», а не звіт: тонша шкала змушувала б порівнювати непорівнянне,
+   * три транзакції проти трьох підходів.
+   *
+   * @param {{transactions?: Array, tasks?: Array, goals?: Array, workouts?: Array}} data
+   * @param {string} todayIso
+   * @param {{completedIso?: function}} [deps] як дістати день виконання
+   *   завдання; за замовчуванням — та сама функція з tasks/stats.js, щоб
+   *   другої реалізації «коли це зробили» в проєкті не завелось
+   */
+  function weekActivity(data, todayIso, deps) {
+    var days = weekDays(todayIso, 7);
+    var index = {};
+    days.forEach(function (d, i) { index[d] = i; });
+    var zeros = function () { return days.map(function () { return 0; }); };
+    // Саме число, а не «щось не undefined»: день поза тижнем дає undefined, а
+    // невиконане завдання — null, і обидва мусять просто не рахуватись.
+    var bump = function (arr, iso) {
+      var i = index[iso];
+      if (typeof i === 'number') arr[i] += 1;
+    };
+
+    var budget = zeros();
+    ((data && data.transactions) || []).forEach(function (t) {
+      if (t) bump(budget, t.date);
+    });
+
+    // Ціль «рухалась» — це будь-який слід: відмітка, прогрес, закрита віха.
+    // Рахуємо цілі, а не події: два кілометри й чекін в одній цілі — це один
+    // рух, а не два.
+    var goals = zeros();
+    ((data && data.goals) || []).forEach(function (g) {
+      var seen = {};
+      ((g && g.checkins) || []).forEach(function (d) { seen[d] = true; });
+      ((g && g.progressLog) || []).forEach(function (e) { if (e && e.date) seen[e.date] = true; });
+      ((g && g.milestones) || []).forEach(function (m) {
+        if (m && m.done && m.doneAt) seen[m.doneAt] = true;
+      });
+      Object.keys(seen).forEach(function (d) { bump(goals, d); });
+    });
+
+    var doneIso = (deps && deps.completedIso) || root.completedIso;
+    var tasks = zeros();
+    if (doneIso) {
+      ((data && data.tasks) || []).forEach(function (task) {
+        bump(tasks, doneIso(task));
+      });
+    }
+
+    var workout = zeros();
+    ((data && data.workouts) || []).forEach(function (w) {
+      if (w) bump(workout, w.date);
+    });
+
+    var level = function (n) { return n === 0 ? 0 : (n === 1 ? 1 : 2); };
+    var row = function (key, counts) {
+      return { key: key, counts: counts, levels: counts.map(level) };
+    };
+    var rows = [row('budget', budget), row('goals', goals), row('tasks', tasks), row('workout', workout)];
+
+    return {
+      days: days,
+      rows: rows,
+      // Порожній тиждень — теж відповідь, але сітка з нього нічого не каже,
+      // і сторінці варто знати про це, не перебираючи рядки самій.
+      moved: rows.some(function (r) { return r.counts.some(function (n) { return n > 0; }); }),
+    };
+  }
+
   var api = {
     isoOf: isoOf,
+    weekDays: weekDays,
+    weekActivity: weekActivity,
     tasksRing: tasksRing,
     workoutToday: workoutToday,
     featuredGoal: featuredGoal,

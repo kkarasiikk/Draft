@@ -2,12 +2,12 @@
 // scope (`/`, `/budget/`, `/tasks/`, `/workout/`) — для сторінки завжди
 // виграє реєстрація з найдовшим збігом scope, тож цей файл фактично
 // обслуговує лише хаб.
-const CACHE_NAME = 'life-home-v35';
+const CACHE_NAME = 'life-home-v36';
 // Чистимо лише власні (застарілі) кеші: `caches` спільний для всього
 // походження, тож видалення "всього зайвого" стерло б кеші інших модулів.
 const CACHE_PREFIXES = ['life-home-'];
-const NETWORK_FIRST = ['./home-summary.js', './streak.js', './scroll-lock.js', './', './index.html', './home.js', './export-data.js'];
-const FILES_TO_CACHE = ['./home-summary.js', './goals/streak.js', './scroll-lock.js', './', './index.html', './home.js', './export-data.js',
+const NETWORK_FIRST = ['./home-summary.js', './streak.js', './stats.js', './scroll-lock.js', './', './index.html', './home.js', './export-data.js'];
+const FILES_TO_CACHE = ['./home-summary.js', './goals/streak.js', './tasks/stats.js', './scroll-lock.js', './', './index.html', './home.js', './export-data.js',
   './categories-default.js', './manifest.json',
   './budget/firebase-config.js', './budget/icon-192.png', './budget/icon-512.png',
   './budget/icon-192-maskable.png', './budget/icon-512-maskable.png'];

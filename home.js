@@ -63,6 +63,16 @@ const STRINGS = {
       : `сьогодні тренувань немає · востаннє ${n} ${plural(n, { one: 'день', few: 'дні', many: 'днів', other: 'дня' })} тому`,
     sumWorkoutAgo: (n) => `востаннє ${n} ${plural(n, { one: 'день', few: 'дні', many: 'днів', other: 'дня' })} тому`,
     sumWorkoutNever: 'тренувань ще немає',
+    todayTitle: 'Сьогодні', todayNote: 'усе, що чекає на тебе',
+    weekTitle: 'Тиждень', weekNote: 'де був рух',
+    todayEmpty: 'На сьогодні нічого не чекає.',
+    todayAt: (hhmm) => `до ${hhmm}`,
+    todaySince: (d) => `з ${d}`,
+    todayNoStep: 'сьогодні без кроку',
+    todayStepBtn: 'Крок', todayLogBtn: 'Записати',
+    lineGoals: (n) => `${n} ${plural(n, { one: 'ціль', few: 'цілі', many: 'цілей', other: 'цілі' })} без кроку`,
+    lineWorkout: (n) => `${n} ${plural(n, { one: 'день', few: 'дні', many: 'днів', other: 'дня' })} без залу`,
+    lineFree: 'Сьогодні нічого не чекає.',
     goalsTitle: 'Цілі', goalsSub: 'довгострокові',
     tasksTitle: 'Завдання', tasksSub: 'на кожен день',
     workoutTitle: 'Тренування', workoutSub: 'сесії й рекорди',
@@ -116,6 +126,16 @@ const STRINGS = {
       : `сегодня тренировок нет · последний раз ${n} ${plural(n, { one: 'день', few: 'дня', many: 'дней', other: 'дня' })} назад`,
     sumWorkoutAgo: (n) => `последний раз ${n} ${plural(n, { one: 'день', few: 'дня', many: 'дней', other: 'дня' })} назад`,
     sumWorkoutNever: 'тренировок пока нет',
+    todayTitle: 'Сегодня', todayNote: 'всё, что тебя ждёт',
+    weekTitle: 'Неделя', weekNote: 'где было движение',
+    todayEmpty: 'На сегодня ничего не ждёт.',
+    todayAt: (hhmm) => `до ${hhmm}`,
+    todaySince: (d) => `с ${d}`,
+    todayNoStep: 'сегодня без шага',
+    todayStepBtn: 'Шаг', todayLogBtn: 'Записать',
+    lineGoals: (n) => `${n} ${plural(n, { one: 'цель', few: 'цели', many: 'целей', other: 'цели' })} без шага`,
+    lineWorkout: (n) => `${n} ${plural(n, { one: 'день', few: 'дня', many: 'дней', other: 'дня' })} без зала`,
+    lineFree: 'Сегодня ничего не ждёт.',
     goalsTitle: 'Цели', goalsSub: 'долгосрочные',
     tasksTitle: 'Задачи', tasksSub: 'на каждый день',
     workoutTitle: 'Тренировки', workoutSub: 'сессии и рекорды',
@@ -169,6 +189,16 @@ const STRINGS = {
       : `dziś brak treningu · ostatnio ${n} ${plural(n, { one: 'dzień', few: 'dni', many: 'dni', other: 'dnia' })} temu`,
     sumWorkoutAgo: (n) => `ostatnio ${n} ${plural(n, { one: 'dzień', few: 'dni', many: 'dni', other: 'dnia' })} temu`,
     sumWorkoutNever: 'nie ma jeszcze treningów',
+    todayTitle: 'Dziś', todayNote: 'wszystko, co na ciebie czeka',
+    weekTitle: 'Tydzień', weekNote: 'gdzie był ruch',
+    todayEmpty: 'Na dziś nic nie czeka.',
+    todayAt: (hhmm) => `do ${hhmm}`,
+    todaySince: (d) => `od ${d}`,
+    todayNoStep: 'dziś bez kroku',
+    todayStepBtn: 'Krok', todayLogBtn: 'Zapisz',
+    lineGoals: (n) => `${n} ${plural(n, { one: 'cel', few: 'cele', many: 'celów', other: 'celu' })} bez kroku`,
+    lineWorkout: (n) => `${n} ${plural(n, { one: 'dzień', few: 'dni', many: 'dni', other: 'dnia' })} bez siłowni`,
+    lineFree: 'Na dziś nic nie czeka.',
     goalsTitle: 'Cele', goalsSub: 'długoterminowe',
     tasksTitle: 'Zadania', tasksSub: 'na każdy dzień',
     workoutTitle: 'Treningi', workoutSub: 'sesje i rekordy',
@@ -222,6 +252,16 @@ const STRINGS = {
       : `no workout today · last one ${n} ${n === 1 ? 'day' : 'days'} ago`,
     sumWorkoutAgo: (n) => `last ${n} ${plural(n, { one: 'day', other: 'days' })} ago`,
     sumWorkoutNever: 'no workouts yet',
+    todayTitle: 'Today', todayNote: 'everything waiting for you',
+    weekTitle: 'Week', weekNote: 'where the movement was',
+    todayEmpty: 'Nothing waiting today.',
+    todayAt: (hhmm) => `by ${hhmm}`,
+    todaySince: (d) => `since ${d}`,
+    todayNoStep: 'no step today',
+    todayStepBtn: 'Step', todayLogBtn: 'Log',
+    lineGoals: (n) => `${n} ${plural(n, { one: 'goal', other: 'goals' })} without a step`,
+    lineWorkout: (n) => `${n} ${plural(n, { one: 'day', other: 'days' })} without the gym`,
+    lineFree: 'Nothing waiting today.',
     goalsTitle: 'Goals', goalsSub: 'long-term',
     tasksTitle: 'Tasks', tasksSub: 'day to day',
     workoutTitle: 'Workouts', workoutSub: 'sessions & records',
@@ -273,6 +313,15 @@ function applyTranslations() {
   document.getElementById('langMenuLabel').textContent = t('langLabel');
   document.getElementById('exportLabel').textContent = t('exportLabel');
   document.getElementById('logoutLabel').textContent = t('logout');
+  document.getElementById('todayTitle').textContent = t('todayTitle');
+  document.getElementById('todayNote').textContent = t('todayNote');
+  document.getElementById('weekTitle').textContent = t('weekTitle');
+  document.getElementById('weekNote').textContent = t('weekNote');
+  // Дата й рядок стану залежать від мови так само, як підписи, — і мова
+  // може перемкнутись уже після того, як дані прийшли.
+  renderLine();
+  renderToday();
+  renderWeek();
   document.getElementById('budgetTitle').textContent = t('budgetTitle');
   document.getElementById('budgetSub').textContent = t('budgetSub');
   document.getElementById('openBtnLabel').textContent = t('openBtn');
@@ -318,6 +367,11 @@ function setLang(lang) {
 // ---- Тема (світла / темна / як в системі) ----
 // Той самий ключ localStorage, що й у budget/app.js — вибір тут одразу
 // підхоплюється і на сторінці бюджету, і навпаки.
+// Сирі дані, з яких збираються «Сьогодні», рядок під датою і сітка тижня.
+// Кожен запит домальовує свою частину, щойно долетить: чекати на найповільніший,
+// щоб показати все разом, означало б дивитись на порожній екран довше, ніж треба.
+let homeData = { transactions: null, tasks: null, doneTasks: null, goals: null, workouts: null };
+
 const THEME_CHOICES = ['light', 'dark', 'system'];
 let themeChoice = localStorage.getItem('financeAppTheme') || 'system';
 if (!THEME_CHOICES.includes(themeChoice)) themeChoice = 'system';
@@ -598,10 +652,207 @@ function setRing(id, pct, label, colour) {
   el.querySelector('.tile-ring-mid').textContent = label == null ? '' : String(label);
 }
 
+// ---- «Сьогодні»: один список із трьох розділів ----
+// Щоб відмітити справу й крок до цілі, раніше треба було зайти у два розділи
+// й вийти назад. Тепер типовий день закривається, не виходячи з головної.
+function renderToday() {
+  const panel = document.getElementById('todayPanel');
+  const list = document.getElementById('todayList');
+  if (!panel || !list) return;
+  const today = todayISO();
+  let html = '';
+
+  if (homeData.tasks) {
+    const mine = homeData.tasks.filter((x) => x && x.dueDate === today);
+    // Прострочене показуємо окремо й іншим кольором: це не «ще одна справа
+    // на сьогодні», це борг, і читатись він має інакше.
+    const overdue = homeData.tasks.filter((x) => x && !x.done && x.dueDate && x.dueDate < today);
+    // Невиконане згори: закреслене вже нікуди не поспішає.
+    mine.sort((a, b) => (a.done === b.done ? 0 : (a.done ? 1 : -1)));
+    if (mine.length || overdue.length) {
+      html += `<div class="today-sect">${escapeHtml(t('tasksTitle'))}</div>`;
+      html += mine.map((task) => `
+        <div class="today-row${task.done ? ' checked' : ''}">
+          <button type="button" class="today-box${task.done ? ' checked' : ''}" data-task="${escapeHtml(task.id)}" aria-label="${escapeHtml(task.title || '')}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg>
+          </button>
+          <span class="today-name">${escapeHtml(task.title || '')}</span>
+          ${task.dueTime ? `<span class="today-when">${escapeHtml(t('todayAt', task.dueTime))}</span>` : ''}
+          <span class="today-spacer"></span>
+        </div>`).join('');
+      html += overdue.map((task) => `
+        <div class="today-row overdue">
+          <span class="today-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5"/><path d="M12 16.2v.1"/></svg></span>
+          <span class="today-name">${escapeHtml(task.title || '')}</span>
+          <span class="today-when">${escapeHtml(t('todaySince', formatDay(task.dueDate)))}</span>
+          <span class="today-spacer"></span>
+        </div>`).join('');
+    }
+  }
+
+  // Ціль без сьогоднішнього кроку. Черга та сама, що й у вечірній картці
+  // розділу: друге правило «яку ціль питати» розійшлося б із першим.
+  if (homeData.goals && window.GoalStreak) {
+    const pending = window.GoalStreak.eveningQueue(homeData.goals, today);
+    if (pending.length) {
+      html += `<div class="today-sect">${escapeHtml(t('goalsTitle'))}</div>`;
+      html += pending.slice(0, 3).map((g) => `
+        <div class="today-row">
+          <span class="today-name">${escapeHtml(g.title || '')}</span>
+          <span class="today-when">${escapeHtml(t('todayNoStep'))}</span>
+          <span class="today-spacer"></span>
+          <button type="button" class="today-go" data-goal-step="${escapeHtml(g.id)}">${escapeHtml(t('todayStepBtn'))}</button>
+        </div>`).join('');
+    }
+  }
+
+  if (homeData.workouts) {
+    const wt = HomeSummary.workoutToday(homeData.workouts, today);
+    const sum = HomeSummary.workoutSummary(homeData.workouts, today);
+    if (!wt) {
+      html += `<div class="today-sect">${escapeHtml(t('workoutTitle'))}</div>`;
+      html += `
+        <div class="today-row">
+          <span class="today-name">${escapeHtml(sum.daysAgo === null ? t('sumWorkoutNever') : t('sumWorkoutAgo', sum.daysAgo))}</span>
+          <span class="today-spacer"></span>
+          <a class="today-go" href="workout/index.html">${escapeHtml(t('todayLogBtn'))}</a>
+        </div>`;
+    }
+  }
+
+  // Порожній список — теж відповідь, і ховати панель не треба: «нічого не
+  // чекає» це новина, а не відсутність новин.
+  const ready = homeData.tasks || homeData.goals || homeData.workouts;
+  panel.hidden = !ready;
+  list.innerHTML = html || `<div class="today-empty">${escapeHtml(t('todayEmpty'))}</div>`;
+
+  list.querySelectorAll('[data-task]').forEach((btn) => {
+    btn.addEventListener('click', () => toggleHomeTask(btn.dataset.task));
+  });
+  list.querySelectorAll('[data-goal-step]').forEach((btn) => {
+    btn.addEventListener('click', () => stepHomeGoal(btn.dataset.goalStep));
+  });
+}
+
+// Обидва записи — ті самі поля, що пише сам розділ: інакше документ не
+// пройшов би правила, а сторінка розділу не знала б, що з ним робити.
+async function toggleHomeTask(taskId) {
+  const task = (homeData.tasks || []).find((x) => x.id === taskId);
+  if (!task || !auth.currentUser) return;
+  const done = !task.done;
+  task.done = done;
+  task.completedAt = done ? new Date() : null;
+  renderToday();
+  await db.collection('users').doc(auth.currentUser.uid).collection('tasks').doc(taskId).update({
+    done,
+    completedAt: done ? firebase.firestore.FieldValue.serverTimestamp() : null,
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+  }).catch((err) => console.error('toggleHomeTask:', err));
+  // Виконане завдання, привʼязане до цілі, відмічає її день — так само, як
+  // у самому розділі завдань.
+  if (done && task.goalId) stepHomeGoal(task.goalId);
+}
+
+async function stepHomeGoal(goalId) {
+  const goal = (homeData.goals || []).find((g) => g.id === goalId);
+  if (!goal || !auth.currentUser || !window.GoalStreak) return;
+  const result = window.GoalStreak.applyCheckin(goal, todayISO());
+  if (!result) return;
+  goal.checkins = result.checkins;
+  renderToday();
+  renderWeek();
+  renderLine();
+  await db.collection('users').doc(auth.currentUser.uid).collection('goals').doc(goalId).update({
+    checkins: result.checkins,
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+  }).catch((err) => console.error('stepHomeGoal:', err));
+}
+
+// ---- «Тиждень»: де був рух, а де тиша ----
+// Цього не показує жоден окремий модуль: кожен знає лише себе.
+function renderWeek() {
+  const panel = document.getElementById('weekPanel');
+  const host = document.getElementById('weekGrid');
+  if (!panel || !host) return;
+  if (!homeData.transactions && !homeData.goals && !homeData.workouts) { panel.hidden = true; return; }
+
+  const today = todayISO();
+  const week = HomeSummary.weekActivity({
+    transactions: homeData.transactions || [],
+    tasks: homeData.doneTasks || [],
+    goals: homeData.goals || [],
+    workouts: homeData.workouts || [],
+  }, today);
+  panel.hidden = false;
+
+  const locale = LOCALE_MAP[currentLang] || 'uk-UA';
+  const dow = new Intl.DateTimeFormat(locale, { weekday: 'short' });
+  const NAMES = { budget: 'budgetTitle', goals: 'goalsTitle', tasks: 'tasksTitle', workout: 'workoutTitle' };
+
+  const head = `<div class="week-row"><div></div>${week.days.map((d) =>
+    `<div class="week-dow${d === today ? ' today' : ''}">${escapeHtml(dow.format(new Date(d + 'T00:00:00')))}</div>`
+  ).join('')}</div>`;
+
+  const rows = week.rows.map((row) => `
+    <div class="week-row">
+      <div class="week-name">${escapeHtml(t(NAMES[row.key]))}</div>
+      ${row.levels.map((lvl, i) =>
+        `<div class="week-cell${lvl ? ' l' + lvl : ''}${week.days[i] === today ? ' today' : ''}"></div>`
+      ).join('')}
+    </div>`).join('');
+
+  host.innerHTML = `<div class="week-grid">${head}${rows}</div>`;
+}
+
+// ---- Рядок під датою ----
+// Увесь стан життя за секунду читання, ще до того, як око кудись поїхало.
+function renderLine() {
+  const dateEl = document.getElementById('todayDate');
+  const lineEl = document.getElementById('todayLine');
+  if (!dateEl || !lineEl) return;
+  const today = todayISO();
+  const locale = LOCALE_MAP[currentLang] || 'uk-UA';
+  dateEl.textContent = new Intl.DateTimeFormat(locale, { weekday: 'long', day: 'numeric', month: 'long' })
+    .format(new Date(today + 'T00:00:00'));
+
+  const parts = [];
+  if (homeData.tasks) {
+    const open = homeData.tasks.filter((x) => x && !x.done && x.dueDate === today).length;
+    if (open) parts.push(t('sumTasksOpen', open));
+  }
+  if (homeData.goals && window.GoalStreak) {
+    const pending = window.GoalStreak.eveningQueue(homeData.goals, today).length;
+    if (pending) parts.push(t('lineGoals', pending));
+  }
+  if (homeData.workouts) {
+    const sum = HomeSummary.workoutSummary(homeData.workouts, today);
+    if (sum.daysAgo !== null && sum.daysAgo > 0) parts.push(t('lineWorkout', sum.daysAgo));
+  }
+  // Нічого не чекає — так і кажемо. Порожній рядок виглядав би як помилка
+  // завантаження, а не як вільний день.
+  lineEl.textContent = parts.length ? capitalizeFirst(parts.join(', ')) + '.' : t('lineFree');
+}
+
+function capitalizeFirst(str) {
+  return str ? str.charAt(0).toUpperCase() + str.slice(1) : str;
+}
+
+/** Число й місяць: «22 серпня». */
+function formatDay(iso) {
+  if (!iso) return '';
+  const locale = LOCALE_MAP[currentLang] || 'uk-UA';
+  return new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long' }).format(new Date(iso + 'T00:00:00'));
+}
+
 async function loadHomeSummary(uid) {
   const userRef = db.collection('users').doc(uid);
   const today = todayISO();
-  const from = HomeSummary.monthStart(today);
+  const monthFrom = HomeSummary.monthStart(today);
+  const weekFrom = HomeSummary.weekDays(today, 7)[0];
+  // Сітці тижня потрібні сім днів, плиткам — місяць. На початку місяця тиждень
+  // заїжджає в попередній, тож беремо ранішу з двох меж, а не місяць.
+  const from = monthFrom < weekFrom ? monthFrom : weekFrom;
+  homeData = { transactions: null, tasks: null, doneTasks: null, goals: null, workouts: null };
 
   // Бюджет: лише поточний місяць.
   // План витрат читаємо з профілю тим самим запитом, що вже потрібен для мови
@@ -610,12 +861,17 @@ async function loadHomeSummary(uid) {
   Promise.all([txPromise, userRef.get()])
     .then(([snap, profileDoc]) => {
       const txs = snap.docs.map((d) => d.data());
-      const sum = HomeSummary.budgetSummary(txs, today);
+      homeData.transactions = txs;
+      renderWeek();
+      // Баланс плитки рахується по місяцю, а не по всьому, що прийшло:
+      // ширший запит потрібен сітці тижня й не має міняти число на плитці.
+      const monthTxs = txs.filter((tx) => tx && tx.date >= monthFrom);
+      const sum = HomeSummary.budgetSummary(monthTxs, today);
       // Знак ставимо тут, а не в перекладі: у переклад має приходити готовий
       // рядок, інакше кожна мова мусила б сама вирішувати, як його показати.
       const sign = sum.balance >= 0 ? '+' : '\u2212';
       const plan = (profileDoc.data() || {}).monthlyBudget;
-      const ring = HomeSummary.budgetRing(txs, today, plan);
+      const ring = HomeSummary.budgetRing(monthTxs, today, plan);
       if (!ring) {
         setSub('budgetSub', t('sumBudget', sign + formatAmount(sum.balance)));
         setRing('budgetRing', null);
@@ -636,7 +892,10 @@ async function loadHomeSummary(uid) {
   // потраплять: для них у самому модулі є «розбір минулих днів».
   userRef.collection('tasks').where('dueDate', '>=', from).where('dueDate', '<=', today).get()
     .then((snap) => {
-      const docs = snap.docs.map((d) => d.data());
+      const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      homeData.tasks = docs;
+      renderToday();
+      renderLine();
       const sum = HomeSummary.tasksSummary(docs, today);
       const parts = [sum.open ? t('sumTasksOpen', sum.open) : t('sumTasksFree')];
       if (sum.overdue) parts.push(t('sumOverdue', sum.overdue));
@@ -651,7 +910,11 @@ async function loadHomeSummary(uid) {
   // Цілі: їх завжди небагато, тож читаємо всі.
   userRef.collection('goals').get()
     .then((snap) => {
-      const docs = snap.docs.map((d) => d.data());
+      const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      homeData.goals = docs;
+      renderToday();
+      renderWeek();
+      renderLine();
       const sum = HomeSummary.goalsSummary(docs, today);
       // Кільце показує одну ціль — найтерміновішу. Плитка не список, і
       // чотири кільця в ряд не сказали б більше за одне.
@@ -678,9 +941,27 @@ async function loadHomeSummary(uid) {
   // Тренування: досить найсвіжішого запису.
   // Найсвіжішого запису досить і для «скільки днів тому», і для «що сьогодні»:
   // якщо він датований сьогодні — це і є сьогоднішнє тренування.
-  userRef.collection('workouts').orderBy('date', 'desc').limit(1).get()
+  // Що закрито за тиждень — окремим вузьким запитом по completedAt. Через
+  // dueDate це не дістати: завдання, прострочене з червня й закрите вчора,
+  // у діапазон строків не потрапляє, а в сітці тижня воно саме вчорашнє.
+  userRef.collection('tasks')
+    .where('completedAt', '>=', new Date(weekFrom + 'T00:00:00'))
+    .get()
+    .then((snap) => {
+      homeData.doneTasks = snap.docs.map((d) => d.data());
+      renderWeek();
+    })
+    .catch((err) => console.error('homeSummary doneTasks:', err));
+
+  // Тридцять останніх, а не один: сітці тижня потрібні сім днів, а «скільки
+  // днів тому» однаково відповідає найсвіжіший — він і лежить першим.
+  userRef.collection('workouts').orderBy('date', 'desc').limit(30).get()
     .then((snap) => {
       const docs = snap.docs.map((d) => d.data());
+      homeData.workouts = docs;
+      renderToday();
+      renderWeek();
+      renderLine();
       const todayWorkout = HomeSummary.workoutToday(docs, today);
       if (todayWorkout) {
         // Записане наперед (підходи порожні) — це план, і казати про нього

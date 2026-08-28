@@ -240,3 +240,118 @@ describe('budgetRing — витрачено з плану', () => {
     expect(r.pct).toBe(100);
   });
 });
+
+describe('weekActivity — де за тиждень був рух', () => {
+  const TODAY = '2026-08-26';           // середа
+  const { completedIso } = require('./tasks/stats');
+  const deps = { completedIso };
+  const at = (iso) => ({ toDate: () => new Date(iso + 'T12:00:00') });
+  const rowOf = (w, key) => w.rows.find((r) => r.key === key);
+
+  test('сім днів, останній — сьогодні', () => {
+    const w = H.weekActivity({}, TODAY, deps);
+    expect(w.days).toHaveLength(7);
+    expect(w.days.at(-1)).toBe(TODAY);
+    expect(w.days[0]).toBe('2026-08-20');
+  });
+
+  test('порожній тиждень чесно каже, що руху не було', () => {
+    expect(H.weekActivity({}, TODAY, deps).moved).toBe(false);
+  });
+
+  test('чотири рядки в порядку розділів', () => {
+    expect(H.weekActivity({}, TODAY, deps).rows.map((r) => r.key))
+      .toEqual(['budget', 'goals', 'tasks', 'workout']);
+  });
+
+  test('операції лягають у свої дні', () => {
+    const w = H.weekActivity({
+      transactions: [{ date: '2026-08-24' }, { date: '2026-08-24' }, { date: '2026-08-26' }],
+    }, TODAY, deps);
+    expect(rowOf(w, 'budget').counts).toEqual([0, 0, 0, 0, 2, 0, 1]);
+  });
+
+  test('рівень грубий: нуль, один, багато', () => {
+    const w = H.weekActivity({
+      transactions: [{ date: '2026-08-24' }, { date: '2026-08-24' }, { date: '2026-08-26' }],
+    }, TODAY, deps);
+    expect(rowOf(w, 'budget').levels).toEqual([0, 0, 0, 0, 2, 0, 1]);
+  });
+
+  test('п’ять операцій за день — той самий рівень, що й дві', () => {
+    const many = Array.from({ length: 5 }, () => ({ date: '2026-08-25' }));
+    const w = H.weekActivity({ transactions: many }, TODAY, deps);
+    expect(rowOf(w, 'budget').levels[5]).toBe(2);
+  });
+
+  test('минуле поза тижнем у сітку не потрапляє', () => {
+    const w = H.weekActivity({ transactions: [{ date: '2026-08-01' }] }, TODAY, deps);
+    expect(rowOf(w, 'budget').counts.every((n) => n === 0)).toBe(true);
+    expect(w.moved).toBe(false);
+  });
+
+  test('ціль рухається від будь-якого сліду', () => {
+    const w = H.weekActivity({
+      goals: [
+        { id: 'a', checkins: ['2026-08-21'] },
+        { id: 'b', progressLog: [{ date: '2026-08-22', delta: 3 }] },
+        { id: 'c', milestones: [{ id: 'm', done: true, doneAt: '2026-08-23' }] },
+      ],
+    }, TODAY, deps);
+    expect(rowOf(w, 'goals').counts).toEqual([0, 1, 1, 1, 0, 0, 0]);
+  });
+
+  test('два сліди в одній цілі за день — це один рух, а не два', () => {
+    const w = H.weekActivity({
+      goals: [{ id: 'a', checkins: ['2026-08-25'], progressLog: [{ date: '2026-08-25', delta: 3 }] }],
+    }, TODAY, deps);
+    expect(rowOf(w, 'goals').counts[5]).toBe(1);
+  });
+
+  test('дві різні цілі того самого дня рахуються обидві', () => {
+    const w = H.weekActivity({
+      goals: [{ id: 'a', checkins: ['2026-08-25'] }, { id: 'b', checkins: ['2026-08-25'] }],
+    }, TODAY, deps);
+    expect(rowOf(w, 'goals').counts[5]).toBe(2);
+  });
+
+  test('завдання рахуються за днем ВИКОНАННЯ, а не за строком', () => {
+    const w = H.weekActivity({
+      tasks: [
+        { title: 'a', done: true, dueDate: '2026-07-01', completedAt: at('2026-08-24') },
+        { title: 'b', done: false, dueDate: '2026-08-24' },
+      ],
+    }, TODAY, deps);
+    expect(rowOf(w, 'tasks').counts).toEqual([0, 0, 0, 0, 1, 0, 0]);
+  });
+
+  test('тренування лягають у свої дні', () => {
+    const w = H.weekActivity({
+      workouts: [{ date: '2026-08-20' }, { date: '2026-08-26' }],
+    }, TODAY, deps);
+    expect(rowOf(w, 'workout').counts).toEqual([1, 0, 0, 0, 0, 0, 1]);
+  });
+
+  test('будь-який рух у будь-якому розділі робить тиждень непорожнім', () => {
+    expect(H.weekActivity({ workouts: [{ date: TODAY }] }, TODAY, deps).moved).toBe(true);
+  });
+});
+
+describe('weekActivity: чужі дні не липнуть до сітки', () => {
+  const TODAY = '2026-08-26';
+  const { completedIso } = require('./tasks/stats');
+  const deps = { completedIso };
+
+  test('невиконане завдання не лишає сліду в масиві днів', () => {
+    const w = H.weekActivity({ tasks: [{ title: 'b', done: false, dueDate: TODAY }] }, TODAY, deps);
+    const row = w.rows.find((r) => r.key === 'tasks');
+    // Саме ключі: зайва властивість на масиві не видно в JSON, але вона є.
+    expect(Object.keys(row.counts)).toEqual(['0', '1', '2', '3', '4', '5', '6']);
+    expect(w.moved).toBe(false);
+  });
+
+  test('операція без дати сітку не ламає', () => {
+    const w = H.weekActivity({ transactions: [{ amount: 10 }] }, TODAY, deps);
+    expect(Object.keys(w.rows[0].counts)).toHaveLength(7);
+  });
+});

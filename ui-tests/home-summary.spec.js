@@ -160,3 +160,116 @@ test.describe('Кільця', () => {
     expect(await mid(page, 'workoutRing')).toBe('2/4');
   });
 });
+
+// ---- Головна перестала бути меню ----
+// Раніше це був список із чотирьох кнопок «Відкрити». Перевіряємо не вигляд,
+// а обіцянку: типовий день закривається, не виходячи звідси.
+test.describe('Сьогодні', () => {
+  const task = (id, over = {}) => ({ id, title: 'Забрати документи', done: false, dueDate: iso(), ...over });
+
+  test('справа на сьогодні стоїть у списку, а не лише в лічильнику', async ({ page }) => {
+    await openHub(page, { tasks: [task('t1')] });
+    await expect(page.locator('#todayPanel')).toBeVisible();
+    await expect(page.locator('.today-name').first()).toHaveText('Забрати документи');
+  });
+
+  test('прострочене відділене від сьогоднішнього', async ({ page }) => {
+    await openHub(page, { tasks: [
+      task('t1'),
+      task('old', { title: 'Продовжити страховку', dueDate: iso(-4) }),
+    ] });
+    await expect(page.locator('.today-row.overdue')).toHaveCount(1);
+    await expect(page.locator('.today-row.overdue .today-name')).toHaveText('Продовжити страховку');
+  });
+
+  test('виконане закреслене й лежить нижче невиконаного', async ({ page }) => {
+    // Тренування на сьогодні — щоб у списку лишились самі завдання.
+    await openHub(page, {
+      tasks: [
+        task('done', { title: 'Купити протеїн', done: true }),
+        task('open', { title: 'Відповісти Міші' }),
+      ],
+      workouts: [{ id: 'w', date: iso(), exercises: [] }],
+    });
+    const names = await page.locator('.today-row .today-name').allTextContents();
+    expect(names).toEqual(['Відповісти Міші', 'Купити протеїн']);
+  });
+
+  test('галочка пише в базу, не виходячи з головної', async ({ page }) => {
+    await openHub(page, { tasks: [task('t1')] });
+    await page.click('[data-task="t1"]');
+    await expect.poll(() => page.evaluate(() => window.__fbCalls.update.length)).toBeGreaterThan(0);
+    const upd = await page.evaluate(() => window.__fbCalls.update.at(-1));
+    expect(upd.payload.done).toBe(true);
+  });
+
+  test('ціль без кроку показана з кнопкою, і кнопка відмічає день', async ({ page }) => {
+    await openHub(page, { goals: [
+      { id: 'g1', title: 'Подушка 20 000', status: 'active', category: 'finance', checkins: [], milestones: [] },
+    ] });
+    await expect(page.locator('[data-goal-step="g1"]')).toBeVisible();
+    await page.click('[data-goal-step="g1"]');
+    await expect.poll(() => page.evaluate(() => window.__fbCalls.update.length)).toBeGreaterThan(0);
+    const upd = await page.evaluate(() => window.__fbCalls.update.at(-1));
+    expect(upd.payload.checkins).toEqual([iso()]);
+  });
+
+  test('відмічена сьогодні ціль у списку не висить', async ({ page }) => {
+    await openHub(page, { goals: [
+      { id: 'g1', title: 'Подушка', status: 'active', category: 'finance', checkins: [iso()], milestones: [] },
+    ] });
+    await expect(page.locator('[data-goal-step="g1"]')).toHaveCount(0);
+  });
+
+  test('порожній день — це новина, а не порожній екран', async ({ page }) => {
+    await openHub(page, { tasks: [], goals: [], workouts: [{ id: 'w', date: iso(), exercises: [] }] });
+    await expect(page.locator('.today-empty')).toBeVisible();
+  });
+});
+
+test.describe('Тиждень', () => {
+  test('сітка — чотири розділи на сім днів', async ({ page }) => {
+    await openHub(page, { workouts: [{ id: 'w1', date: iso(-2), exercises: [] }] });
+    await expect(page.locator('#weekPanel')).toBeVisible();
+    await expect(page.locator('.week-cell')).toHaveCount(28);
+  });
+
+  test('день із рухом пофарбований, порожній — ні', async ({ page }) => {
+    await openHub(page, { workouts: [{ id: 'w1', date: iso(), exercises: [] }] });
+    // Сьогодні — остання клітинка рядка тренувань (четвертого).
+    const cells = page.locator('.week-row').nth(4).locator('.week-cell');
+    await expect(cells.nth(6)).toHaveClass(/l1/);
+    await expect(cells.nth(0)).not.toHaveClass(/l1|l2/);
+  });
+
+  test('сьогоднішній стовпчик виділено в кожному рядку', async ({ page }) => {
+    await openHub(page, { workouts: [{ id: 'w1', date: iso(), exercises: [] }] });
+    await expect(page.locator('.week-cell.today')).toHaveCount(4);
+  });
+
+  test('рядки названі, бо колір несе лише кількість руху', async ({ page }) => {
+    await openHub(page, { workouts: [{ id: 'w1', date: iso(), exercises: [] }] });
+    await expect(page.locator('.week-name')).toHaveText(['Бюджет', 'Цілі', 'Завдання', 'Тренування']);
+  });
+});
+
+test.describe('Рядок під датою', () => {
+  test('називає, що чекає, одним реченням', async ({ page }) => {
+    await openHub(page, {
+      tasks: [{ id: 't1', title: 'Справа', done: false, dueDate: iso() }],
+      goals: [{ id: 'g1', title: 'Ціль', status: 'active', category: 'finance', checkins: [], milestones: [] }],
+    });
+    await expect(page.locator('#todayLine')).toContainText('на сьогодні');
+    await expect(page.locator('#todayLine')).toContainText('без кроку');
+  });
+
+  test('коли нічого не чекає — так і каже, а не мовчить', async ({ page }) => {
+    await openHub(page, { tasks: [], goals: [], workouts: [{ id: 'w', date: iso(), exercises: [] }] });
+    await expect(page.locator('#todayLine')).toHaveText('Сьогодні нічого не чекає.');
+  });
+
+  test('дата стоїть над рядком', async ({ page }) => {
+    await openHub(page, { tasks: [] });
+    await expect(page.locator('#todayDate')).not.toHaveText('');
+  });
+});
