@@ -318,6 +318,96 @@
   }
 
   /**
+   * Ряд накопиченого прогресу — щоб шлях було ВИДНО, а не лише названо.
+   *
+   * Темп уже каже «не встигаєш», але не каже, ЯКИЙ шлях був: де ривок, де три
+   * тижні пусто, чи прискорився я саме зараз. Усе це вже лежить у
+   * progressLog і в датах віх — бракувало тільки того, хто складе це в лінію.
+   *
+   * `required` — де прогрес мав би бути, щоб устигнути рівним темпом. Це не
+   * докір, а система координат: без неї сама по собі зростаюча крива нічого
+   * не каже.
+   *
+   * Повертає null, коли малювати нема чого: менше двох різних днів у
+   * історії — це не лінія, а крапка, і графік із неї збрехав би формою.
+   *
+   * @param {Object} goal
+   * @param {string} todayIso
+   * @param {{startIso?: string}} [opts] день заведення цілі (createdAt)
+   */
+  function progressSeries(goal, todayIso, opts) {
+    var S = streak();
+    if (!S) return null;
+    var prog = progressPct(goal);
+    if (!prog) return null;
+
+    var startIso = (opts && opts.startIso) || earliestSignal(goal);
+    var byDay = {};
+
+    if (prog.kind === 'value') {
+      ((goal && goal.progressLog) || []).forEach(function (e) {
+        if (!e || typeof e.date !== 'string' || e.date > todayIso) return;
+        byDay[e.date] = (byDay[e.date] || 0) + num(e.delta);
+      });
+    } else {
+      ((goal && goal.milestones) || []).forEach(function (m) {
+        if (!m || !m.done || typeof m.doneAt !== 'string' || m.doneAt > todayIso) return;
+        byDay[m.doneAt] = (byDay[m.doneAt] || 0) + 1;
+      });
+    }
+
+    var days = Object.keys(byDay).sort();
+    if (!days.length) return null;
+
+    // Прогрес, набраний ДО журналу: у старих цілей currentValue могли просто
+    // вписати числом, і журнал його не памʼятає. Починати лінію з нуля
+    // означало б домалювати ривок, якого не було.
+    var logged = days.reduce(function (sum, d) { return sum + byDay[d]; }, 0);
+    var baseline = prog.kind === 'value'
+      ? Math.max(0, Math.round((prog.current - logged) * 100) / 100)
+      : 0;
+
+    var from = startIso && startIso < days[0] ? startIso : days[0];
+    var points = [{ date: from, value: baseline }];
+    var running = baseline;
+    days.forEach(function (d) {
+      running = Math.round((running + byDay[d]) * 100) / 100;
+      points.push({ date: d, value: running });
+    });
+    // Сьогоднішня крапка, якщо останній рух був раніше: інакше лінія
+    // обривається на минулому тижні й мовчить про паузу, яка триває.
+    if (points[points.length - 1].date < todayIso) {
+      points.push({ date: todayIso, value: running });
+    }
+
+    // Одна крапка — це не лінія. Двічі той самий день теж: форми немає.
+    var distinct = {};
+    points.forEach(function (pt) { distinct[pt.date] = true; });
+    if (Object.keys(distinct).length < 2) return null;
+
+    var max = prog.kind === 'value' ? prog.target : prog.total;
+    var to = goal.targetDate && goal.targetDate > todayIso ? goal.targetDate : todayIso;
+    if (to < points[points.length - 1].date) to = points[points.length - 1].date;
+
+    // Лінія «щоб устигнути» має сенс лише коли є куди встигати: без дедлайну
+    // рівного темпу нізвідки взяти.
+    var required = null;
+    if (goal.targetDate && goal.targetDate > from) {
+      required = [{ date: from, value: baseline }, { date: goal.targetDate, value: max }];
+    }
+
+    return {
+      kind: prog.kind,
+      from: from,
+      to: to,
+      max: max,
+      current: running,
+      points: points,
+      required: required,
+    };
+  }
+
+  /**
    * День, коли ціль закрили. `completedAt` пишеться при переході в 'done'
    * (setGoalStatus у goals/app.js); цілі, закриті до появи поля, дати не
    * мають — для них беремо останній слід у самих даних, і це чесніше за
@@ -435,6 +525,7 @@
     reviewQueue: reviewQueue,
     reviewItem: reviewItem,
     reviewDigest: reviewDigest,
+    progressSeries: progressSeries,
     closedOn: closedOn,
     goalSpan: goalSpan,
     retrospective: retrospective,

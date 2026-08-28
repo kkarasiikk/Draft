@@ -116,6 +116,7 @@ const T = {
     daysLeftLabel: (n) => `${n} дн. до дедлайну`, overdueLabel: 'Прострочено',
     milestonesCountSuffix: 'віх',
     milestoneToTask: 'У завдання', milestoneInTasks: 'У завданнях',
+    chartLabel: 'Шлях', chartRequired: 'щоб устигнути',
     retroYear: 'За рік', retroAll: 'За весь час',
     retroClosed: (n) => `Закрито цілей: ${n}`,
     retroEmptyPeriod: 'За цей період нічого не закрито',
@@ -228,6 +229,7 @@ const T = {
     daysLeftLabel: (n) => `${n} дн. до дедлайна`, overdueLabel: 'Просрочено',
     milestonesCountSuffix: 'вех',
     milestoneToTask: 'В задачи', milestoneInTasks: 'В задачах',
+    chartLabel: 'Путь', chartRequired: 'чтобы успеть',
     retroYear: 'За год', retroAll: 'За всё время',
     retroClosed: (n) => `Закрыто целей: ${n}`,
     retroEmptyPeriod: 'За этот период ничего не закрыто',
@@ -340,6 +342,7 @@ const T = {
     daysLeftLabel: (n) => `${n} dni do terminu`, overdueLabel: 'Po terminie',
     milestonesCountSuffix: 'kam.',
     milestoneToTask: 'Do zadań', milestoneInTasks: 'W zadaniach',
+    chartLabel: 'Droga', chartRequired: 'żeby zdążyć',
     retroYear: 'Za rok', retroAll: 'Cały czas',
     retroClosed: (n) => `Ukończonych celów: ${n}`,
     retroEmptyPeriod: 'W tym okresie nic nie ukończono',
@@ -452,6 +455,7 @@ const T = {
     daysLeftLabel: (n) => `${n}d left`, overdueLabel: 'Overdue',
     milestonesCountSuffix: 'milestones',
     milestoneToTask: 'To tasks', milestoneInTasks: 'In tasks',
+    chartLabel: 'Path', chartRequired: 'to be on time',
     retroYear: 'Past year', retroAll: 'All time',
     retroClosed: (n) => `Goals closed: ${n}`,
     retroEmptyPeriod: 'Nothing closed in this period',
@@ -1250,6 +1254,7 @@ function renderGoalDetail(goal) {
   }
 
   renderPaceBlock(goal);
+  renderChartBlock(goal);
 
   renderJourney(goal);
   renderActionsBlock(goal.id);
@@ -1462,6 +1467,63 @@ function renderPaceBlock(goal) {
     <div class="pace ${p.verdict}">
       <div class="pace-head"><span class="pace-dot"></span>${escapeHtml(t(VERDICT[p.verdict] || 'paceUnknown'))}</div>
       <div class="pace-sub">${escapeHtml(lines.join(' · '))}</div>
+    </div>`;
+}
+
+// ---- Графік прогресу ----
+// Темп КАЖЕ підсумок («не встигаєш»), а лінія ПОКАЗУЄ форму шляху: де був
+// ривок, де три тижні пусто, чи рухаюсь я саме зараз. Дані ті самі —
+// progressLog і дати віх, — просто досі ніхто не складав їх у лінію.
+//
+// Малюємо самі, без бібліотеки: це десяток точок і дві полілінії, а Chart.js
+// заради них тягнув би 200 КБ у модуль, який його більше ніде не використовує.
+const CHART_W = 300;
+const CHART_H = 78;
+
+function renderChartBlock(goal) {
+  const el = document.getElementById('detailChartBlock');
+  if (!el) return;
+  const series = Review.progressSeries(goal, todayISO(), { startIso: createdIso(goal) });
+  if (!series) { el.innerHTML = ''; return; }
+
+  const spanDays = Math.max(1, Streak.daysBetween(series.from, series.to));
+  // Верх шкали — мета, але перебір понад неї не має вилазити за рамку.
+  const top = Math.max(series.max || 0, series.current) || 1;
+  const x = (iso) => (Streak.daysBetween(series.from, iso) / spanDays) * CHART_W;
+  const y = (v) => CHART_H - (Math.max(0, Math.min(top, v)) / top) * CHART_H;
+
+  const pts = series.points.map((pt) => `${x(pt.date).toFixed(1)},${y(pt.value).toFixed(1)}`);
+  const line = pts.join(' ');
+  // Заливка під лінією: та сама ламана, замкнена по низу.
+  const area = `${x(series.from).toFixed(1)},${CHART_H} ${line} ${x(series.points.at(-1).date).toFixed(1)},${CHART_H}`;
+  const required = series.required
+    ? series.required.map((pt) => `${x(pt.date).toFixed(1)},${y(pt.value).toFixed(1)}`).join(' ')
+    : null;
+  const last = series.points.at(-1);
+
+  const nowLabel = series.kind === 'value'
+    ? `${fmtValue(series.current)} / ${fmtValue(series.max)} ${escapeHtml(goal.unit || '')}`.trim()
+    : `${series.current} / ${series.max}`;
+
+  el.innerHTML = `
+    <div class="chart">
+      <div class="chart-head">
+        <span class="chart-label">${escapeHtml(t('chartLabel'))}</span>
+        <span class="chart-now">${nowLabel}</span>
+      </div>
+      <svg viewBox="0 0 ${CHART_W} ${CHART_H}" preserveAspectRatio="none" role="img"
+           aria-label="${escapeHtml(t('chartLabel'))}">
+        <line class="chart-axis" x1="0" y1="${CHART_H}" x2="${CHART_W}" y2="${CHART_H}"/>
+        <polygon class="chart-area" points="${area}"/>
+        ${required ? `<polyline class="chart-required" points="${required}"/>` : ''}
+        <polyline class="chart-line" points="${line}"/>
+        <circle class="chart-dot" cx="${x(last.date).toFixed(1)}" cy="${y(last.value).toFixed(1)}" r="3"/>
+      </svg>
+      <div class="chart-foot">
+        <span>${escapeHtml(formatDateShort(series.from))}</span>
+        ${required ? `<span class="chart-legend"><i></i>${escapeHtml(t('chartRequired'))}</span>` : ''}
+        <span>${escapeHtml(formatDateShort(series.to))}</span>
+      </div>
     </div>`;
 }
 

@@ -450,3 +450,118 @@ describe('retrospective — що закрито за період', () => {
     expect(r.items[0].horizon).toBe('year');
   });
 });
+
+describe('progressSeries — щоб шлях було видно', () => {
+  test('нема чим міряти — нема що малювати', () => {
+    expect(R.progressSeries(goal(), TODAY)).toBeNull();
+  });
+
+  test('порожній журнал не дає графіка', () => {
+    expect(R.progressSeries(goal({ targetValue: 100, progressLog: [] }), TODAY)).toBeNull();
+  });
+
+  test('накопичує прогрес, а не показує окремі внески', () => {
+    const s = R.progressSeries(goal({
+      targetValue: 100, currentValue: 9,
+      progressLog: [
+        { date: '2026-08-10', delta: 2 },
+        { date: '2026-08-12', delta: 3 },
+        { date: '2026-08-20', delta: 4 },
+      ],
+    }), TODAY, { startIso: '2026-08-01' });
+    expect(s.points.map((p) => p.value)).toEqual([0, 2, 5, 9, 9]);
+  });
+
+  test('кілька записів за один день — одна крапка', () => {
+    const s = R.progressSeries(goal({
+      targetValue: 100, currentValue: 5,
+      progressLog: [{ date: '2026-08-10', delta: 2 }, { date: '2026-08-10', delta: 3 }],
+    }), TODAY, { startIso: '2026-08-01' });
+    const tenth = s.points.filter((p) => p.date === '2026-08-10');
+    expect(tenth).toHaveLength(1);
+    expect(tenth[0].value).toBe(5);
+  });
+
+  test('лінія доводиться до сьогодні — пауза має бути видною', () => {
+    const s = R.progressSeries(goal({
+      targetValue: 100, currentValue: 5,
+      progressLog: [{ date: '2026-08-01', delta: 5 }],
+    }), TODAY, { startIso: '2026-07-01' });
+    const last = s.points.at(-1);
+    expect(last.date).toBe(TODAY);
+    expect(last.value).toBe(5);
+  });
+
+  test('прогрес, вписаний до журналу, не малюється ривком із нуля', () => {
+    // currentValue 50, а журнал памʼятає лише 10: 40 було до нього.
+    const s = R.progressSeries(goal({
+      targetValue: 100, currentValue: 50,
+      progressLog: [{ date: '2026-08-10', delta: 10 }],
+    }), TODAY, { startIso: '2026-08-01' });
+    expect(s.points[0].value).toBe(40);
+    expect(s.current).toBe(50);
+  });
+
+  test('віхи теж дають лінію — без жодного числа в цілі', () => {
+    const s = R.progressSeries(goal({
+      milestones: [
+        { id: 'm1', title: 'a', done: true, doneAt: '2026-08-05' },
+        { id: 'm2', title: 'b', done: true, doneAt: '2026-08-19' },
+        { id: 'm3', title: 'c', done: false },
+      ],
+    }), TODAY, { startIso: '2026-08-01' });
+    expect(s.kind).toBe('milestones');
+    expect(s.max).toBe(3);
+    expect(s.points.map((p) => p.value)).toEqual([0, 1, 2, 2]);
+  });
+
+  test('віха без дати виконання в лінію не потрапляє — коли це було, невідомо', () => {
+    expect(R.progressSeries(goal({
+      milestones: [{ id: 'm1', title: 'a', done: true }],
+    }), TODAY)).toBeNull();
+  });
+
+  test('лінія «щоб устигнути» веде від старту до дедлайну', () => {
+    const s = R.progressSeries(goal({
+      targetValue: 100, currentValue: 5, targetDate: '2026-12-31',
+      progressLog: [{ date: '2026-08-10', delta: 5 }],
+    }), TODAY, { startIso: '2026-08-01' });
+    expect(s.required).toEqual([
+      { date: '2026-08-01', value: 0 },
+      { date: '2026-12-31', value: 100 },
+    ]);
+  });
+
+  test('без дедлайну рівного темпу нізвідки взяти', () => {
+    const s = R.progressSeries(goal({
+      targetDate: null, targetValue: 100, currentValue: 5,
+      progressLog: [{ date: '2026-08-10', delta: 5 }],
+    }), TODAY, { startIso: '2026-08-01' });
+    expect(s.required).toBeNull();
+  });
+
+  test('вісь тягнеться до дедлайну, коли той попереду', () => {
+    const s = R.progressSeries(goal({
+      targetValue: 100, currentValue: 5, targetDate: '2026-12-31',
+      progressLog: [{ date: '2026-08-10', delta: 5 }],
+    }), TODAY, { startIso: '2026-08-01' });
+    expect(s.from).toBe('2026-08-01');
+    expect(s.to).toBe('2026-12-31');
+  });
+
+  test('у простроченої цілі вісь не тягнеться назад у минуле', () => {
+    const s = R.progressSeries(goal({
+      targetValue: 100, currentValue: 5, targetDate: '2026-03-01',
+      progressLog: [{ date: '2026-02-10', delta: 5 }],
+    }), TODAY, { startIso: '2026-02-01' });
+    expect(s.to).toBe(TODAY);
+  });
+
+  test('записи з майбутнього в лінію не беруться', () => {
+    const s = R.progressSeries(goal({
+      targetValue: 100, currentValue: 5,
+      progressLog: [{ date: '2026-08-10', delta: 5 }, { date: '2027-01-01', delta: 90 }],
+    }), TODAY, { startIso: '2026-08-01' });
+    expect(s.points.every((p) => p.date <= TODAY)).toBe(true);
+  });
+});

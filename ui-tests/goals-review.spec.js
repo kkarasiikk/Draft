@@ -501,3 +501,67 @@ test.describe('Віха стає завданням', () => {
     await expect(page.locator('[data-milestone-task="m1"]')).toBeVisible();
   });
 });
+
+test.describe('Графік прогресу', () => {
+  const measured = (over = {}) => goal({
+    targetValue: 100, currentValue: 9, unit: 'км',
+    progressLog: [
+      { date: shift(-20), delta: 2 },
+      { date: shift(-12), delta: 3 },
+      { date: shift(-4), delta: 4 },
+    ],
+    ...over,
+  });
+
+  const openDetail = async (page, goals) => {
+    await openGoals(page, goals);
+    await page.click(`[data-open-goal="${goals[0].id}"]`);
+  };
+
+  test('на екрані цілі видно лінію пройденого', async ({ page }) => {
+    await openDetail(page, [measured()]);
+    await expect(page.locator('.chart')).toBeVisible();
+    await expect(page.locator('.chart-line')).toBeVisible();
+  });
+
+  test('поруч стоїть, де ти зараз', async ({ page }) => {
+    await openDetail(page, [measured()]);
+    await expect(page.locator('.chart-now')).toHaveText('9 / 100 км');
+  });
+
+  test('є дедлайн — є пунктир «щоб устигнути»', async ({ page }) => {
+    await openDetail(page, [measured({ targetDate: shift(100) })]);
+    await expect(page.locator('.chart-required')).toBeVisible();
+  });
+
+  test('без дедлайну пунктира немає — рівного темпу нізвідки взяти', async ({ page }) => {
+    await openDetail(page, [measured({ targetDate: null })]);
+    await expect(page.locator('.chart-line')).toBeVisible();
+    await expect(page.locator('.chart-required')).toHaveCount(0);
+  });
+
+  test('без історії графіка немає — одна крапка це не лінія', async ({ page }) => {
+    await openDetail(page, [goal({ targetValue: 100, currentValue: 0, progressLog: [] })]);
+    await expect(page.locator('.chart')).toHaveCount(0);
+  });
+
+  test('лінія росте, а не стрибає: крапки йдуть вгору', async ({ page }) => {
+    await openDetail(page, [measured()]);
+    const pts = await page.locator('.chart-line').getAttribute('points');
+    const ys = pts.trim().split(/\s+/).map((p) => Number(p.split(',')[1]));
+    // Вісь Y у SVG росте вниз, тож накопичений прогрес має спадати за y.
+    for (let i = 1; i < ys.length; i++) expect(ys[i]).toBeLessThanOrEqual(ys[i - 1]);
+  });
+
+  test('ціль на віхах теж отримує лінію — без жодного числа', async ({ page }) => {
+    await openDetail(page, [goal({
+      id: 'gm', targetValue: null,
+      milestones: [
+        { id: 'm1', title: 'a', done: true, doneAt: shift(-20) },
+        { id: 'm2', title: 'b', done: true, doneAt: shift(-5) },
+        { id: 'm3', title: 'c', done: false },
+      ],
+    })]);
+    await expect(page.locator('.chart-now')).toHaveText('2 / 3');
+  });
+});
