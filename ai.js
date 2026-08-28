@@ -313,6 +313,8 @@ const tools = [
         horizon: { type: "string", enum: ["month", "year"],
           description: "Горизонт: month — що людина робить цього місяця, year — куди йде загалом. " +
             "За замовчуванням year" },
+        parentGoalId: { type: "string",
+          description: "id РІЧНОЇ цілі, якій служить ця місячна (з goals_progress). Лише для horizon month" },
         targetValue: { type: "number", description: "Числова мета, якщо ціль вимірювана: 10 для «пробігти 10 км»" },
         unit: { type: "string", description: "Одиниця до targetValue: км, книг, €. Без targetValue не має сенсу" },
         milestones: {
@@ -520,6 +522,7 @@ const tools = [
         targetValue: { type: "number", description: "Числова мета; null прибирає її" },
         unit: { type: "string", description: "Одиниця до targetValue" },
         horizon: { type: "string", enum: ["month", "year"], description: "Перенести ціль між вкладками «Місяць» і «Рік»" },
+        parentGoalId: { type: "string", description: "Привʼязати місячну ціль до річної; null відвʼязує" },
         status: { type: "string", enum: ["active", "done", "archived", "paused"],
           description: "paused — ціль жива, але про неї свідомо не питають (відпустка, зміна обставин): " +
             "вечірні питання вимикаються, серія не рветься" },
@@ -1309,7 +1312,7 @@ async function editGoal(uid, input) {
   const found = await loadForEdit(uid, "goals", input.id, "ціль не знайдена");
   if (found.error) return found.error;
 
-  const patch = pickPatch(input, ["title", "category", "why", "targetDate", "targetValue", "unit", "status", "milestones", "horizon"]);
+  const patch = pickPatch(input, ["title", "category", "why", "targetDate", "targetValue", "unit", "status", "milestones", "horizon", "parentGoalId"]);
   if (!Object.keys(patch).length) return { output: { ok: false, error: "нічого міняти" }, isError: true };
 
   const merged = { ...found.data, ...patch };
@@ -1371,6 +1374,9 @@ function sanitizeGoalInput(input) {
       // замовчуванням річна: розділ і задумувався як довгостроковий, а
       // місячну людина назве місячною явно.
       horizon: input.horizon === "month" ? "month" : "year",
+      // Річна ціль нікому не служить: драбина йде лише знизу вгору.
+      parentGoalId: input.horizon === "month" && typeof input.parentGoalId === "string"
+        ? input.parentGoalId : null,
       targetValue: targetValue,
       // Одиниця без числової мети ні про що не каже, тож живе тільки з нею.
       unit: targetValue ? (typeof input.unit === "string" ? input.unit.trim().slice(0, 20) : "") : "",
@@ -1534,6 +1540,7 @@ async function goalsProgress(uid) {
           status: g.status || "active",
           // Старі цілі поля не мають: вони заводились як довгострокові.
           horizon: g.horizon === "month" ? "month" : "year",
+          parentGoalId: g.parentGoalId || null,
           targetDate: g.targetDate || null,
           milestones: milestones.map((m) => ({ id: m.id, title: m.title || "", done: !!m.done })),
           milestonesDone: milestones.filter((m) => m.done).length,
@@ -1578,6 +1585,7 @@ function buildSystemPrompt(ctx) {
     "",
     "ТЕМП ЦІЛЕЙ. У goals_progress кожна ціль має pace — це вже порахований застосунком прогноз, той самий, що людина бачить на екрані. verdict: onTrack (у графіку), ahead (випереджає), behind (таким темпом не встигне), overdue (дедлайн минув), unknown. Якщо enough=false — історії ще замало, так і скажи, а не вигадуй прогноз; projectedDate й diffDays у цьому разі порожні. Свою арифметику з дат не вигадуй: інакше в чаті прозвучить одне, а на екрані стоятиме інше. Про відставання говори як про факт із числами («за місяць пройдено 12 з 100 км»), а не докором. Якщо ціль явно не встигає, доречно запропонувати одне з двох: зсунути дедлайн (edit_goal targetDate) або поставити на паузу — і те, й те чесніше за мовчазне накопичення провини. weekMovement каже, що зрушило за тиждень; коли moved=false, це привід спитати, що заважає, і записати через log_blocker.",
     "ГОРИЗОНТ ЦІЛЕЙ. Розділ поділений на дві вкладки: «Місяць» (що людина робить саме цього місяця) і «Рік» (куди йде загалом). У add_goal це поле horizon; за замовчуванням year. Якщо з формулювання видно масштаб — «цього місяця прочитати дві книжки» це month, «вивчити польську» це year — став його сам, не перепитуючи. Перенести ціль між вкладками можна через edit_goal horizon.",
+    "ДРАБИНА ЦІЛЕЙ. Місячна ціль може служити річній (parentGoalId): рік — напрямок, місяці — кроки до нього. Коли людина заводить місячну ціль, а серед річних є та, якій ця місячна очевидно служить («цього місяця пробігти 20 км» при річній «пробігти 200 км»), — привʼязуй сам, не перепитуючи; id бери з goals_progress. Річна ціль нікому не служить, тож parentGoalId у неї завжди порожній.",
     "ПАУЗА. Коли людина каже, що зараз не до цілі — їде, хворіє, змінились обставини — це edit_goal зі status 'paused', а НЕ архів. На паузі вечірні питання про ціль вимикаються й серія не рветься, а ціль лишається живою. Архів — це для того, чого людина більше не хоче. daysSinceReview показує, скільки днів ціль не переглядали; порожньо — не переглядали жодного разу.",
     "",
     "ЦІЛІ. Вимірювану ціль задавай числом: «пробігти 10 км» -> targetValue 10, unit «км»; тоді відсоток рахується від пройденого, а не від кількості віх, і поповнюється через goal_progress. Невимірювану («вивчити польську») лишай без числа — там працюють віхи. add_goal створює довгострокову ціль — не плутай із завданням: «купити молоко» це add_task, «вивчити польську до літа» це add_goal. goal_checkin відзначає сьогоднішній день у серії, complete_milestone закриває віху. Якщо людина каже, що вчора пропустила, — подивись поле rescue: коли available true, запропонуй rescue_streak (дописує вчорашній день, доступно раз на тиждень). Коли каже, що сьогодні не вийшло, — спитай, що завадило, і запиши через log_blocker її словами. Не докоряй за пропуски: у полі blockers видно, що заважає найчастіше, і корисніше запропонувати, як це обійти. Обидва беруть id, тож спершу виклич goals_progress і візьми id звідти — вгадувати id не можна. Якщо назва цілі збігається з кількома — перепитай, з якою саме. Щоденну дію з цілі («щодня бігати по 3 км») створюй через add_task із goalId — це звичайне завдання, просто привʼязане: коли його виконають, день у серії цілі відмітиться сам, окремий goal_checkin не потрібен.",

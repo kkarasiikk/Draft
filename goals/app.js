@@ -101,6 +101,11 @@ const T = {
     eveningSub: 'Відмічай, що вдалося. Якщо ні — скажи одним словом, що завадило.',
     eveningYes: '✓ Було', eveningNo: 'Не вийшло', eveningLater: 'Пізніше',
     eveningRescue: '🛟 Врятувати серію',
+    parentLabel: 'Служить річній цілі', parentNone: 'Сама по собі',
+    parentHint: 'Рік — напрямок, місяць — крок до нього. На річній цілі буде видно, що на неї працює.',
+    parentEmpty: 'Річних цілей ще немає — заведи одну на вкладці «Рік».',
+    childrenTitle: (n) => `Цього місяця над цим працюють: ${n}`,
+    blockersTitle: 'Що заважає найчастіше', blockersShort: 'Заважало:',
     reason_noTime: 'Не було часу', reason_forgot: 'Забув(ла)', reason_tired: 'Втома',
     reason_mood: 'Не було настрою', reason_other: 'Інше',
     journalPlaceholder: 'Що сьогодні зробив(ла) для цієї цілі?',
@@ -201,6 +206,11 @@ const T = {
     eveningSub: 'Отмечай, что получилось. Если нет — скажи одним словом, что помешало.',
     eveningYes: '✓ Было', eveningNo: 'Не вышло', eveningLater: 'Позже',
     eveningRescue: '🛟 Спасти серию',
+    parentLabel: 'Служит годовой цели', parentNone: 'Сама по себе',
+    parentHint: 'Год — направление, месяц — шаг к нему. На годовой цели будет видно, что на неё работает.',
+    parentEmpty: 'Годовых целей ещё нет — заведи одну на вкладке «Год».',
+    childrenTitle: (n) => `В этом месяце над этим работают: ${n}`,
+    blockersTitle: 'Что мешает чаще всего', blockersShort: 'Мешало:',
     reason_noTime: 'Не было времени', reason_forgot: 'Забыл(а)', reason_tired: 'Усталость',
     reason_mood: 'Не было настроения', reason_other: 'Другое',
     journalPlaceholder: 'Что сегодня сделал(а) для этой цели?',
@@ -301,6 +311,11 @@ const T = {
     eveningSub: 'Zaznacz, co się udało. Jeśli nie — powiedz jednym słowem, co przeszkodziło.',
     eveningYes: '✓ Udało się', eveningNo: 'Nie wyszło', eveningLater: 'Później',
     eveningRescue: '🛟 Uratuj serię',
+    parentLabel: 'Służy celowi rocznemu', parentNone: 'Sam w sobie',
+    parentHint: 'Rok to kierunek, miesiąc to krok do niego. Na celu rocznym będzie widać, co na niego pracuje.',
+    parentEmpty: 'Nie ma jeszcze celów rocznych — dodaj jeden na zakładce «Rok».',
+    childrenTitle: (n) => `W tym miesiącu pracuje nad tym: ${n}`,
+    blockersTitle: 'Co przeszkadza najczęściej', blockersShort: 'Przeszkadzało:',
     reason_noTime: 'Brak czasu', reason_forgot: 'Zapomniałem', reason_tired: 'Zmęczenie',
     reason_mood: 'Brak nastroju', reason_other: 'Inne',
     journalPlaceholder: 'Co dziś zrobiłeś(aś) dla tego celu?',
@@ -401,6 +416,11 @@ const T = {
     eveningSub: 'Tick off what you managed. If not — say in one word what got in the way.',
     eveningYes: '✓ Did it', eveningNo: 'Didn\u2019t happen', eveningLater: 'Later',
     eveningRescue: '🛟 Rescue the streak',
+    parentLabel: 'Serves a yearly goal', parentNone: 'Stands alone',
+    parentHint: 'The year is the direction, the month is a step toward it. The yearly goal will show what feeds it.',
+    parentEmpty: 'No yearly goals yet — add one on the Year tab.',
+    childrenTitle: (n) => `Working on this: ${n}`,
+    blockersTitle: 'What gets in the way most', blockersShort: 'Blocked by:',
     reason_noTime: 'No time', reason_forgot: 'Forgot', reason_tired: 'Too tired',
     reason_mood: 'Not in the mood', reason_other: 'Other',
     journalPlaceholder: 'What did you do for this goal today?',
@@ -685,6 +705,7 @@ let editingGoalId = null;
 let formCategory = 'other';
 let formMilestones = [];
 let formSavingsGoalId = null;
+let formParentGoalId = null;
 let formHorizon = 'month';
 let pendingDeleteId = null;
 // Яка ціль у вечірньому підсумку зараз питає «що завадило».
@@ -1175,6 +1196,8 @@ function renderGoalDetail(goal) {
     </button>`;
   document.getElementById('streakToggleBtn').addEventListener('click', () => toggleTodayCheckin(goal.id));
 
+  renderLadder(goal);
+  renderBlockers(goal);
   renderPauseRow(goal);
   renderJournalList(goal);
 }
@@ -1228,6 +1251,16 @@ function movementChips(item, goal) {
     <div class="review-chips">${chips.map((c) => `<span class="review-chip">${escapeHtml(c)}</span>`).join('')}</div>`;
 }
 
+// В огляді причини йдуть одним рядком, а не чипами: там і так щільно, а
+// питання тижня — «ти досі цього хочеш», і причини тут лише підказка до
+// відповіді, а не окремий блок.
+function blockersLine(goal) {
+  const top = Streak.blockerStats(goal, 2);
+  if (!top.length) return '';
+  const text = top.map((b) => `${blockerLabel(b.reason)} (${b.count})`).join(', ');
+  return `<div class="review-blockers">${escapeHtml(t('blockersShort'))} ${escapeHtml(text)}</div>`;
+}
+
 function renderReviewScreen() {
   document.getElementById('reviewTitleLabel').textContent = t('reviewTitle');
   document.getElementById('reviewSubLabel').textContent = t('reviewSub');
@@ -1253,6 +1286,7 @@ function renderReviewScreen() {
           </div>` : ''}
         ${movementChips(item, goal)}
         ${goal.why ? `<div class="review-why">${escapeHtml(t('whyReminder'))} “${escapeHtml(goal.why)}”</div>` : ''}
+        ${blockersLine(goal)}
         <div class="review-actions">
           <button type="button" class="review-btn primary" data-keep="${goal.id}">${escapeHtml(t('reviewKeep'))}</button>
           <button type="button" class="review-btn" data-shift="${goal.id}">${escapeHtml(t('reviewShift'))}</button>
@@ -1353,6 +1387,69 @@ function createdIso(goal) {
   const ts = goal && goal.createdAt;
   if (ts && typeof ts.toDate === 'function') return Streak.isoOf(ts.toDate());
   return null;
+}
+
+// ---- Драбина: місяць -> рік ----
+// Річна ціль показує, що на неї працює; місячна — кому вона служить. Обидва
+// боки клікабельні, бо звʼязок без переходу — це напис, а не звʼязок.
+//
+// Прогрес дитини рахуємо тим самим правилом, що й усюди (progressOf), а не
+// власним: два способи міряти той самий шлях розійшлися б.
+function renderLadder(goal) {
+  const parentEl = document.getElementById('detailParentBlock');
+  const childrenEl = document.getElementById('detailChildrenBlock');
+
+  const parent = goal.parentGoalId ? goals.find((g) => g.id === goal.parentGoalId) : null;
+  parentEl.innerHTML = parent
+    ? `<button type="button" class="parent-link" id="parentLinkBtn">
+         <span class="parent-link-arrow">↑</span>${escapeHtml(parent.title || '')}
+       </button>`
+    : '';
+  if (parent) {
+    document.getElementById('parentLinkBtn').addEventListener('click', () => showGoalDetail(parent.id));
+  }
+
+  // Діти є лише в річної цілі, і показуємо їх навіть закритими: закрита
+  // місячна ціль — це якраз доказ, що рік рухається.
+  const children = goals.filter((g) => g.parentGoalId === goal.id);
+  if (!children.length) { childrenEl.innerHTML = ''; return; }
+  childrenEl.innerHTML = `
+    <div class="children-block">
+      <div class="children-title">${escapeHtml(t('childrenTitle', children.length))}</div>
+      ${children.map((c) => {
+        const prog = progressOf(c);
+        const done = c.status === 'done';
+        return `<div class="child-row${done ? ' done' : ''}" data-child="${escapeHtml(c.id)}">
+          <span class="child-title">${escapeHtml(c.title || '')}</span>
+          <span class="child-pct">${done ? '✓' : (prog ? prog.pct + '%' : '')}</span>
+        </div>`;
+      }).join('')}
+    </div>`;
+  childrenEl.querySelectorAll('[data-child]').forEach((row) => {
+    row.addEventListener('click', () => showGoalDetail(row.dataset.child));
+  });
+}
+
+// ---- Що заважає найчастіше ----
+// Щовечора застосунок питає «що завадило» і зберігає відповідь. Рахунок за
+// частотою вже вмів goals/streak.js (blockerStats), але показувати його було
+// ніде: цифри бачив лише помічник у чаті. Виходило, що людина відповідає на
+// питання, відповіді на яке ніколи не отримує.
+//
+// Три найчастіші причини, не більше: список із десяти — це вже не висновок,
+// а сирий журнал. Одна-єдина причина теж показується: коли пропуск був один,
+// це все одно чесна відповідь на «чому не виходить».
+function renderBlockers(goal) {
+  const el = document.getElementById('detailBlockersBlock');
+  const top = Streak.blockerStats(goal, 3);
+  if (!top.length) { el.innerHTML = ''; return; }
+  el.innerHTML = `
+    <div class="blockers">
+      <div class="blockers-title">${escapeHtml(t('blockersTitle'))}</div>
+      <div class="blockers-row">
+        ${top.map((b) => `<span class="blocker-chip">${escapeHtml(blockerLabel(b.reason))}<span class="blocker-count">${b.count}</span></span>`).join('')}
+      </div>
+    </div>`;
 }
 
 // ---- Пауза ----
@@ -1681,7 +1778,50 @@ function renderHorizonPicker() {
     `<button type="button" class="choice${formHorizon === val ? ' selected' : ''}" data-horizon="${val}">${escapeHtml(label)}</button>`
   ).join('');
   picker.querySelectorAll('[data-horizon]').forEach((btn) => {
-    btn.addEventListener('click', () => { formHorizon = btn.dataset.horizon; renderHorizonPicker(); });
+    btn.addEventListener('click', () => {
+      formHorizon = btn.dataset.horizon;
+      // Річна ціль нікому не служить — звʼязок при перемиканні знімається,
+      // інакше він тихо лишився б у записі й спливав при поверненні назад.
+      if (formHorizon !== 'month') formParentGoalId = null;
+      renderHorizonPicker();
+      renderParentPicker();
+    });
+  });
+}
+
+// Драбина: рік — напрямок, місяці — кроки до нього. Без цього поля дві
+// вкладки лишались просто двома списками, які нічого одне про одного не знають.
+//
+// Пікер показуємо тільки на МІСЯЧНІЙ цілі: підпорядковувати річну ціль комусь
+// ні до чого, а вибір «служить самій собі» був би безглуздим.
+function renderParentPicker() {
+  const block = document.getElementById('parentBlock');
+  if (formHorizon !== 'month') { block.style.display = 'none'; return; }
+
+  const candidates = goals.filter((g) =>
+    horizonOf(g) === 'year' && (g.status === 'active' || g.status === 'paused') && g.id !== editingGoalId);
+  if (!candidates.length) {
+    // Річних цілей ще немає — не показуємо порожній вибір, а пояснюємо, чому.
+    block.style.display = 'block';
+    document.getElementById('parentLabel').textContent = t('parentLabel');
+    document.getElementById('parentPicker').innerHTML = '';
+    document.getElementById('parentHint').textContent = t('parentEmpty');
+    return;
+  }
+
+  block.style.display = 'block';
+  document.getElementById('parentLabel').textContent = t('parentLabel');
+  document.getElementById('parentHint').textContent = t('parentHint');
+  const options = [[null, t('parentNone')]].concat(candidates.map((g) => [g.id, g.title || '']));
+  const picker = document.getElementById('parentPicker');
+  picker.innerHTML = options.map(([id, label]) =>
+    `<button type="button" class="choice${formParentGoalId === id ? ' selected' : ''}" data-parent="${id === null ? '' : escapeHtml(id)}">${escapeHtml(label)}</button>`
+  ).join('');
+  picker.querySelectorAll('[data-parent]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      formParentGoalId = btn.dataset.parent || null;
+      renderParentPicker();
+    });
   });
 }
 
@@ -1895,7 +2035,9 @@ function openGoalForm(existingGoal) {
   // Нова ціль народжується на тій вкладці, з якої її заводять: людина щойно
   // дивилась на місяць — значить, і думає про місяць.
   formHorizon = existingGoal ? horizonOf(existingGoal) : horizon;
+  formParentGoalId = existingGoal ? existingGoal.parentGoalId || null : null;
   renderHorizonPicker();
+  renderParentPicker();
   renderCategoryPicker();
   renderMilestonesEditor();
   renderSavingsLink();
@@ -1969,6 +2111,7 @@ const goalGuard = UnsavedGuard.create({
     unit: document.getElementById('goalUnitInput').value.trim(),
     savingsGoalId: formSavingsGoalId,
     horizon: formHorizon,
+    parentGoalId: formParentGoalId,
     category: formCategory,
     milestones: formMilestones.map((m) => [(m.title || '').trim(), !!m.done]),
   }),
@@ -2027,6 +2170,7 @@ async function saveGoalForm() {
     // нема куди, тож і посилання зберігати ні до чого.
     savingsGoalId: targetValue ? formSavingsGoalId || null : null,
     horizon: formHorizon === 'month' ? 'month' : 'year',
+    parentGoalId: formHorizon === 'month' ? formParentGoalId || null : null,
     milestones: cleanMilestones,
     updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
   };

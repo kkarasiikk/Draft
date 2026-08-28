@@ -207,6 +207,113 @@ test.describe('Темп на екрані цілі', () => {
   });
 });
 
+test.describe('Драбина: місяць → рік', () => {
+  const year = goal({ id: 'gy', title: 'Пробігти 200 км', horizon: 'year' });
+  const month = goal({ id: 'gm', title: 'Цього місяця 20 км', horizon: 'month',
+    parentGoalId: 'gy', targetValue: 20, currentValue: 5 });
+
+  test('річна ціль показує, що на неї працює', async ({ page }) => {
+    await openGoals(page, [year, month]);
+    await page.click('#bnYear');
+    await page.click('[data-open-goal="gy"]');
+    await expect(page.locator('#detailChildrenBlock .child-row')).toHaveCount(1);
+    await expect(page.locator('.child-title')).toContainText('20 км');
+    await expect(page.locator('.child-pct')).toContainText('25%');
+  });
+
+  test('місячна показує, кому служить, і веде до неї', async ({ page }) => {
+    await openGoals(page, [year, month]);
+    await page.click('[data-open-goal="gm"]');
+    await expect(page.locator('#parentLinkBtn')).toContainText('Пробігти 200 км');
+    // Звʼязок без переходу — це напис, а не звʼязок.
+    await page.click('#parentLinkBtn');
+    await expect(page.locator('#detailTitleLabel')).toContainText('Пробігти 200 км');
+  });
+
+  test('річній цілі пікера батька не показуємо — рік нікому не служить', async ({ page }) => {
+    await openGoals(page, [year]);
+    await page.click('#bnYear');
+    await page.click('#openNewGoalBtn');
+    await expect(page.locator('#parentBlock')).toBeHidden();
+  });
+
+  test('на місячній пікер є, і в ньому лише річні цілі', async ({ page }) => {
+    await openGoals(page, [year, month]);
+    await page.click('#openNewGoalBtn');
+    await expect(page.locator('#parentBlock')).toBeVisible();
+    // «Сама по собі» + одна річна; місячної в списку бути не може.
+    await expect(page.locator('#parentPicker .choice')).toHaveCount(2);
+    await expect(page.locator('#parentPicker')).toContainText('Пробігти 200 км');
+    await expect(page.locator('#parentPicker')).not.toContainText('Цього місяця');
+  });
+
+  test('звʼязок зберігається в записі', async ({ page }) => {
+    await openGoals(page, [year]);
+    await page.click('#openNewGoalBtn');
+    await page.fill('#goalTitleInput', 'Нова місячна');
+    await page.click('#parentPicker [data-parent="gy"]');
+    await page.click('#goalSubmitBtn');
+
+    await expect.poll(() => page.evaluate(() => window.__fbCalls.add.length)).toBe(1);
+    const [add] = await page.evaluate(() => window.__fbCalls.add);
+    expect(add.payload.parentGoalId).toBe('gy');
+    expect(add.payload.horizon).toBe('month');
+  });
+
+  test('перемикання на «Річна» знімає звʼязок, а не ховає його', async ({ page }) => {
+    await openGoals(page, [year]);
+    await page.click('#openNewGoalBtn');
+    await page.fill('#goalTitleInput', 'Перемикач');
+    await page.click('#parentPicker [data-parent="gy"]');
+    await page.click('#horizonPicker [data-horizon="year"]');
+    await page.click('#goalSubmitBtn');
+
+    await expect.poll(() => page.evaluate(() => window.__fbCalls.add.length)).toBe(1);
+    const [add] = await page.evaluate(() => window.__fbCalls.add);
+    expect(add.payload.parentGoalId).toBeNull();
+  });
+
+  test('без річних цілей пікер пояснює, чому він порожній', async ({ page }) => {
+    await openGoals(page, [month]);
+    await page.click('#openNewGoalBtn');
+    await expect(page.locator('#parentHint')).toContainText(/ще немає/i);
+    await expect(page.locator('#parentPicker .choice')).toHaveCount(0);
+  });
+});
+
+test.describe('Що заважає найчастіше', () => {
+  const withBlockers = goal({
+    id: 'gb', title: 'Біг',
+    blockers: [
+      { date: shift(-1), reason: 'noTime' },
+      { date: shift(-2), reason: 'noTime' },
+      { date: shift(-3), reason: 'tired' },
+    ],
+  });
+
+  test('причини видно на екрані цілі, за спаданням частоти', async ({ page }) => {
+    await openGoals(page, [withBlockers]);
+    await page.click('[data-open-goal="gb"]');
+    const chips = page.locator('#detailBlockersBlock .blocker-chip');
+    await expect(chips).toHaveCount(2);
+    // Найчастіша попереду: людина мусить побачити головну перешкоду першою.
+    await expect(chips.first()).toContainText('Не було часу');
+    await expect(chips.first()).toContainText('2');
+  });
+
+  test('без пропусків блок не показуємо — докоряти нема за що', async ({ page }) => {
+    await openGoals(page, [goal({ id: 'gc', title: 'Чиста' })]);
+    await page.click('[data-open-goal="gc"]');
+    await expect(page.locator('#detailBlockersBlock .blockers')).toHaveCount(0);
+  });
+
+  test('причини підказують відповідь і в огляді тижня', async ({ page }) => {
+    await openGoals(page, [withBlockers]);
+    await page.click('#reviewBannerBtn');
+    await expect(page.locator('.review-blockers')).toContainText('Не було часу');
+  });
+});
+
 test.describe('Пауза', () => {
   test('кнопка ставить ціль на паузу', async ({ page }) => {
     await openGoals(page, [goal()]);

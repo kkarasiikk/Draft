@@ -384,6 +384,33 @@
 
   .linked-note{margin-top:10px;font-size:12px;color:var(--ink-muted);text-align:center;line-height:1.4;}
 
+  /* Що заважає найчастіше. Не докір, а спостереження: список причин, які
+     людина сама назвала, зібраний за частотою. Тон навмисно нейтральний —
+     сірий, дрібний, без червоного: це матеріал для висновку, а не вирок. */
+  .blockers{background:var(--surface-flat);border-radius:14px;padding:11px 14px;margin-bottom:12px;}
+  .blockers-title{font-size:11px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;
+    color:var(--ink-muted);margin-bottom:7px;}
+  .blockers-row{display:flex;flex-wrap:wrap;gap:6px;}
+  .blocker-chip{display:inline-flex;align-items:baseline;gap:5px;background:var(--surface);
+    border:1px solid var(--border);border-radius:999px;padding:4px 10px;font-size:12px;color:var(--ink-soft);}
+  .blocker-count{font-size:11px;font-weight:700;color:var(--ink-muted);font-variant-numeric:tabular-nums;}
+  .review-blockers{margin-top:9px;font-size:12px;color:var(--ink-muted);line-height:1.45;}
+
+  /* Драбина місяць -> рік. На річній цілі — що на неї працює цього місяця;
+     на місячній — кому вона служить. Обидва блоки навмисно тихі: це контекст,
+     а не дія. */
+  .parent-link{display:inline-flex;align-items:center;gap:7px;background:var(--surface-flat);
+    border-radius:999px;padding:6px 13px;margin-bottom:12px;font-size:12.5px;
+    color:var(--ink-soft);cursor:pointer;border:1px solid var(--border);}
+  .parent-link-arrow{color:var(--ink-muted);}
+  .children-block{background:var(--surface-flat);border-radius:14px;padding:11px 14px;margin-bottom:12px;}
+  .children-title{font-size:11px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;
+    color:var(--ink-muted);margin-bottom:8px;}
+  .child-row{display:flex;align-items:center;gap:10px;padding:6px 0;cursor:pointer;}
+  .child-title{flex:1;min-width:0;font-size:13px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .child-pct{font-size:12px;font-weight:700;color:var(--ink-muted);font-variant-numeric:tabular-nums;flex-shrink:0;}
+  .child-row.done .child-title{text-decoration:line-through;color:var(--ink-muted);}
+
   /* Вечірній підсумок */
   .evening-why{margin:6px 0 2px;padding-left:9px;border-left:2px solid var(--border);
     font-size:12.5px;color:var(--ink-soft);font-style:italic;line-height:1.45;}
@@ -694,6 +721,9 @@
     <div id="detailActionsBlock"></div>
     <div id="detailRescueBlock"></div>
     <div class="streak-row" id="detailStreakRow"></div>
+    <div id="detailParentBlock"></div>
+    <div id="detailChildrenBlock"></div>
+    <div id="detailBlockersBlock"></div>
     <div id="detailPauseRow"></div>
     <div class="section-label" id="journalSectionLabel">Щоденник</div>
     <div class="journal-add-row">
@@ -720,6 +750,14 @@
       <label class="field-label" id="horizonLabel">Горизонт</label>
       <div class="choice-row" id="horizonPicker"></div>
       <div class="field-hint" id="horizonHint"></div>
+
+      <!-- Якій річній цілі служить ця місячна. Показується лише на місячній:
+           рік — це напрямок, і підпорядковувати його комусь ні до чого. -->
+      <div id="parentBlock" style="display:none;">
+        <label class="field-label" id="parentLabel">Служить річній цілі</label>
+        <div class="choice-row" id="parentPicker"></div>
+        <div class="field-hint" id="parentHint"></div>
+      </div>
 
       <label class="field-label" id="categoryLabel">Категорія</label>
       <div class="category-picker" id="categoryPicker"></div>

@@ -348,10 +348,15 @@ service cloud.firestore {
                  // мають — вони заводились як довгострокові, тож без нього
                  // ціль вважається річною.
                  (!('horizon' in d) || d.horizon in ['month', 'year']) &&
+                 // Місячна ціль може служити річній: рік — напрямок, місяці —
+                 // кроки до нього. Без цього поля дві вкладки лишались просто
+                 // двома списками, які нічого одне про одного не знають.
+                 (!('parentGoalId' in d) || d.parentGoalId == null ||
+                   (d.parentGoalId is string && d.parentGoalId.size() <= 64)) &&
                  d.createdAt is timestamp && d.updatedAt is timestamp &&
                  d.keys().hasOnly(['title', 'category', 'why', 'targetDate', 'status',
                    'targetValue', 'currentValue', 'unit', 'rescues', 'blockers',
-                   'progressLog', 'savingsGoalId', 'reviewedAt', 'horizon',
+                   'progressLog', 'savingsGoalId', 'reviewedAt', 'horizon', 'parentGoalId',
                    'milestones', 'checkins', 'journal', 'createdAt', 'updatedAt']);
         }
         allow read, delete: if isOwner(uid);
