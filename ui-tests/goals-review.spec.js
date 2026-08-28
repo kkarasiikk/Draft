@@ -612,3 +612,58 @@ test.describe('Дедлайн, який їде', () => {
     await expect(page.locator('.drift')).toHaveCount(0);
   });
 });
+
+test.describe('Крок тижня в огляді', () => {
+  const openReview = async (page, goals = [goal()]) => {
+    await openGoals(page, goals);
+    await page.click('#reviewBannerBtn');
+  };
+
+  test('огляд питає не лише про долю цілі, а й про дію', async ({ page }) => {
+    await openReview(page);
+    await expect(page.locator('[data-step-input="g1"]')).toBeVisible();
+  });
+
+  test('крок стає завданням, привʼязаним до цілі', async ({ page }) => {
+    await openReview(page);
+    await page.fill('[data-step-input="g1"]', 'Скласти маршрут на 10 км');
+    await page.click('[data-step-save="g1"]');
+
+    await expect.poll(() => page.evaluate(() => window.__fbCalls.add.length)).toBeGreaterThan(0);
+    const added = await page.evaluate(() => window.__fbCalls.add.at(-1));
+    expect(added.payload.title).toBe('Скласти маршрут на 10 км');
+    expect(added.payload.goalId).toBe('g1');
+    expect(added.payload.done).toBe(false);
+  });
+
+  test('термін кроку — наступний огляд, а не «колись»', async ({ page }) => {
+    await openReview(page);
+    await page.fill('[data-step-input="g1"]', 'Купити кросівки');
+    await page.click('[data-step-save="g1"]');
+    await expect.poll(() => page.evaluate(() => window.__fbCalls.add.length)).toBeGreaterThan(0);
+    const added = await page.evaluate(() => window.__fbCalls.add.at(-1));
+    expect(added.payload.dueDate).toBe(shift(7));
+  });
+
+  test('записати крок — це і є огляд: ціль іде з черги', async ({ page }) => {
+    await openReview(page);
+    await page.fill('[data-step-input="g1"]', 'Купити кросівки');
+    await page.click('[data-step-save="g1"]');
+
+    await expect.poll(() => page.evaluate(() => window.__fbCalls.update.length)).toBeGreaterThan(0);
+    const upd = await page.evaluate(() => window.__fbCalls.update.at(-1));
+    expect(upd.payload.reviewedAt).toBe(iso(TODAY));
+  });
+
+  test('порожній крок нічого не створює — це не рішення', async ({ page }) => {
+    await openReview(page);
+    await page.click('[data-step-save="g1"]');
+    await page.waitForTimeout(200);
+    expect(await page.evaluate(() => window.__fbCalls.add.length)).toBe(0);
+  });
+
+  test('«веду далі» лишається — крок не обовʼязковий', async ({ page }) => {
+    await openReview(page);
+    await expect(page.locator('[data-keep="g1"]')).toBeVisible();
+  });
+});

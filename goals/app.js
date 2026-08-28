@@ -119,6 +119,7 @@ const T = {
     chartLabel: 'Шлях', chartRequired: 'щоб устигнути',
     driftCount: (n) => `Дедлайн зсувався разів: ${n}`,
     driftFirst: (d) => `спершу ${d}`, driftDays: (n) => `${n} дн.`,
+    reviewStepPlaceholder: 'Один крок до наступного огляду', reviewStepBtn: 'Записати крок',
     retroYear: 'За рік', retroAll: 'За весь час',
     retroClosed: (n) => `Закрито цілей: ${n}`,
     retroEmptyPeriod: 'За цей період нічого не закрито',
@@ -234,6 +235,7 @@ const T = {
     chartLabel: 'Путь', chartRequired: 'чтобы успеть',
     driftCount: (n) => `Дедлайн сдвигался раз: ${n}`,
     driftFirst: (d) => `сначала ${d}`, driftDays: (n) => `${n} дн.`,
+    reviewStepPlaceholder: 'Один шаг до следующего обзора', reviewStepBtn: 'Записать шаг',
     retroYear: 'За год', retroAll: 'За всё время',
     retroClosed: (n) => `Закрыто целей: ${n}`,
     retroEmptyPeriod: 'За этот период ничего не закрыто',
@@ -349,6 +351,7 @@ const T = {
     chartLabel: 'Droga', chartRequired: 'żeby zdążyć',
     driftCount: (n) => `Termin przesuwany razy: ${n}`,
     driftFirst: (d) => `najpierw ${d}`, driftDays: (n) => `${n} dni`,
+    reviewStepPlaceholder: 'Jeden krok do następnego przeglądu', reviewStepBtn: 'Zapisz krok',
     retroYear: 'Za rok', retroAll: 'Cały czas',
     retroClosed: (n) => `Ukończonych celów: ${n}`,
     retroEmptyPeriod: 'W tym okresie nic nie ukończono',
@@ -464,6 +467,7 @@ const T = {
     chartLabel: 'Path', chartRequired: 'to be on time',
     driftCount: (n) => `Deadline moved ${n}×`,
     driftFirst: (d) => `first ${d}`, driftDays: (n) => `${n}d`,
+    reviewStepPlaceholder: 'One step before the next review', reviewStepBtn: 'Save the step',
     retroYear: 'Past year', retroAll: 'All time',
     retroClosed: (n) => `Goals closed: ${n}`,
     retroEmptyPeriod: 'Nothing closed in this period',
@@ -1387,8 +1391,12 @@ function renderReviewScreen() {
         ${movementChips(item, goal)}
         ${goal.why ? `<div class="review-why">${escapeHtml(t('whyReminder'))} “${escapeHtml(goal.why)}”</div>` : ''}
         ${blockersLine(goal)}
+        <div class="review-step">
+          <input type="text" maxlength="200" data-step-input="${goal.id}" placeholder="${escapeHtml(t('reviewStepPlaceholder'))}">
+          <button type="button" class="review-btn primary" data-step-save="${goal.id}">${escapeHtml(t('reviewStepBtn'))}</button>
+        </div>
         <div class="review-actions">
-          <button type="button" class="review-btn primary" data-keep="${goal.id}">${escapeHtml(t('reviewKeep'))}</button>
+          <button type="button" class="review-btn" data-keep="${goal.id}">${escapeHtml(t('reviewKeep'))}</button>
           <button type="button" class="review-btn" data-shift="${goal.id}">${escapeHtml(t('reviewShift'))}</button>
           <button type="button" class="review-btn" data-pause="${goal.id}">${escapeHtml(goal.status === 'paused' ? t('resumeBtn') : t('reviewPause'))}</button>
           <button type="button" class="review-btn" data-archive="${goal.id}">${escapeHtml(t('reviewArchive'))}</button>
@@ -1402,6 +1410,21 @@ function renderReviewScreen() {
 
   host.querySelectorAll('[data-keep]').forEach((btn) => {
     btn.addEventListener('click', () => markReviewed(btn.dataset.keep));
+  });
+  host.querySelectorAll('[data-step-save]').forEach((btn) => {
+    const commit = () => {
+      const id = btn.dataset.stepSave;
+      const input = host.querySelector(`[data-step-input="${id}"]`);
+      const title = (input && input.value.trim()) || '';
+      if (!title) return;
+      input.value = '';
+      commitReviewStep(id, title);
+    };
+    btn.addEventListener('click', commit);
+    const input = host.querySelector(`[data-step-input="${btn.dataset.stepSave}"]`);
+    if (input) input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); commit(); }
+    });
   });
   host.querySelectorAll('[data-pause]').forEach((btn) => {
     const goal = goals.find((g) => g.id === btn.dataset.pause);
@@ -1431,6 +1454,31 @@ function renderReviewScreen() {
 
 // Огляд завершено — ціль виходить із черги на тиждень. Патч дописується тим
 // самим записом, тож «на паузу» і «оглянуто» це одна дія, а не дві.
+// Огляд досі питав тільки про ДОЛЮ цілі — веду далі / зсунути / пауза /
+// архів, — і жодного питання про ДІЮ. Через це він лишався рефлексією без
+// наслідку: тиждень закінчувався рішенням, а не кроком.
+//
+// Крок стає звичайним завданням із датою наступного огляду: не «колись», а
+// «до того, як я спитаю знову». Записати крок — це і є огляд, тож ціль
+// заразом позначається переглянутою й іде з черги.
+async function commitReviewStep(goalId, title) {
+  if (!auth.currentUser) return;
+  const due = Streak.shift(todayISO(), Review.REVIEW_PERIOD_DAYS);
+  await db.collection('users').doc(auth.currentUser.uid).collection('tasks').add({
+    title: title.slice(0, 200),
+    notes: '', done: false, completedAt: null,
+    priority: null, tags: [],
+    dueDate: due, dueTime: null,
+    estimateMin: null, recurrence: null,
+    reminderAt: null, notifiedAt: null,
+    subtasks: [],
+    goalId,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+  }).catch((err) => console.error('commitReviewStep:', err));
+  await markReviewed(goalId);
+}
+
 async function markReviewed(goalId, patch) {
   if (!auth.currentUser) return;
   const goalNow = goals.find((g) => g.id === goalId);
