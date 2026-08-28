@@ -115,6 +115,7 @@ const T = {
     dashboardEmptyTitle: 'Ще немає цілей', dashboardEmptySub: 'Додай першу ціль кнопкою внизу.',
     daysLeftLabel: (n) => `${n} дн. до дедлайну`, overdueLabel: 'Прострочено',
     milestonesCountSuffix: 'віх',
+    milestoneToTask: 'У завдання', milestoneInTasks: 'У завданнях',
     retroYear: 'За рік', retroAll: 'За весь час',
     retroClosed: (n) => `Закрито цілей: ${n}`,
     retroEmptyPeriod: 'За цей період нічого не закрито',
@@ -226,6 +227,7 @@ const T = {
     dashboardEmptyTitle: 'Пока нет целей', dashboardEmptySub: 'Добавь первую цель кнопкой внизу.',
     daysLeftLabel: (n) => `${n} дн. до дедлайна`, overdueLabel: 'Просрочено',
     milestonesCountSuffix: 'вех',
+    milestoneToTask: 'В задачи', milestoneInTasks: 'В задачах',
     retroYear: 'За год', retroAll: 'За всё время',
     retroClosed: (n) => `Закрыто целей: ${n}`,
     retroEmptyPeriod: 'За этот период ничего не закрыто',
@@ -337,6 +339,7 @@ const T = {
     dashboardEmptyTitle: 'Jeszcze brak celów', dashboardEmptySub: 'Dodaj pierwszy cel przyciskiem poniżej.',
     daysLeftLabel: (n) => `${n} dni do terminu`, overdueLabel: 'Po terminie',
     milestonesCountSuffix: 'kam.',
+    milestoneToTask: 'Do zadań', milestoneInTasks: 'W zadaniach',
     retroYear: 'Za rok', retroAll: 'Cały czas',
     retroClosed: (n) => `Ukończonych celów: ${n}`,
     retroEmptyPeriod: 'W tym okresie nic nie ukończono',
@@ -448,6 +451,7 @@ const T = {
     dashboardEmptyTitle: 'No goals yet', dashboardEmptySub: 'Add your first goal with the button below.',
     daysLeftLabel: (n) => `${n}d left`, overdueLabel: 'Overdue',
     milestonesCountSuffix: 'milestones',
+    milestoneToTask: 'To tasks', milestoneInTasks: 'In tasks',
     retroYear: 'Past year', retroAll: 'All time',
     retroClosed: (n) => `Goals closed: ${n}`,
     retroEmptyPeriod: 'Nothing closed in this period',
@@ -1247,8 +1251,7 @@ function renderGoalDetail(goal) {
 
   renderPaceBlock(goal);
 
-  document.getElementById('detailJourneyBlock').innerHTML = journeyHtml(goal);
-  wireJourneyEvents(goal);
+  renderJourney(goal);
   renderActionsBlock(goal.id);
 
   // Рятунок серії показуємо тільки тоді, коли є що рятувати: вчора
@@ -1561,7 +1564,13 @@ function subscribeToActions(goalId) {
     .where('goalId', '==', goalId)
     .onSnapshot((snap) => {
       goalActions = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-      if (currentScreen === 'detail' && activeDetailGoalId === goalId) renderActionsBlock(goalId);
+      if (currentScreen === 'detail' && activeDetailGoalId === goalId) {
+        renderActionsBlock(goalId);
+        // Маршрут теж: кнопка «у завдання» на віхі показує, чи завдання вже
+        // є, а знає про це саме цей список.
+        const goal = goals.find((g) => g.id === goalId);
+        if (goal) renderJourney(goal);
+      }
     }, (err) => console.error('actions:', err));
 }
 
@@ -1640,13 +1649,13 @@ function renderActionsBlock(goalId) {
 // Дія — звичайне завдання, тому поля тут ті самі, що й у формі завдання:
 // інакше правила Firestore відкинули б документ, а сторінка «Завдання»
 // не знала б, що з ним робити.
-async function addAction(goalId, title) {
+async function addAction(goalId, title, dueDate) {
   if (!auth.currentUser) return;
   await db.collection('users').doc(auth.currentUser.uid).collection('tasks').add({
     title: title.slice(0, 200),
     notes: '', done: false, completedAt: null,
     priority: null, tags: [],
-    dueDate: todayISO(), dueTime: null,
+    dueDate: dueDate || todayISO(), dueTime: null,
     estimateMin: null, recurrence: null,
     reminderAt: null, notifiedAt: null,
     subtasks: [],
@@ -1707,6 +1716,7 @@ function journeyHtml(goal) {
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
         </button>
         <div class="journey-label">${escapeHtml(m.title)}${isNext ? `<span class="journey-next-badge">${escapeHtml(t('nextStopBadge'))}</span>` : ''}${milestoneDueHtml(m)}</div>
+        ${milestoneTaskBtnHtml(m)}
       </div>`;
   }).join('') + '</div>';
   return html;
@@ -1723,10 +1733,46 @@ function milestoneDueHtml(m) {
   return `<span class="journey-due${overdue ? ' overdue' : ''}">${escapeHtml(text)}</span>`;
 }
 
+function renderJourney(goal) {
+  document.getElementById('detailJourneyBlock').innerHTML = journeyHtml(goal);
+  wireJourneyEvents(goal);
+}
+
+// Віха — це те, що треба зробити, але зробити її можна тільки «колись»:
+// підсвічена «наступна зупинка» ні до чого не веде. Кнопка переносить її в
+// завдання на дату самої віхи, і крок нарешті потрапляє туди, куди людина
+// дивиться щодня.
+//
+// Завдання вже створене впізнаємо за назвою: у віхи немає власного id
+// всередині завдання, а заводити ще одне поле заради кнопки — забагато.
+// Збіг назв усередині однієї цілі означає, що це та сама справа.
+function milestoneTask(m) {
+  if (!m || !m.title) return null;
+  return goalActions.find((a) => a && !a.done && a.title === m.title) || null;
+}
+
+function milestoneTaskBtnHtml(m) {
+  if (!m || m.done) return '';
+  const existing = milestoneTask(m);
+  if (existing) {
+    return `<span class="journey-task-mark" title="${escapeHtml(t('milestoneInTasks'))}">${escapeHtml(t('milestoneInTasks'))}</span>`;
+  }
+  return `<button type="button" class="journey-task-btn" data-milestone-task="${m.id}">${escapeHtml(t('milestoneToTask'))}</button>`;
+}
+
 function wireJourneyEvents(goal) {
   const block = document.getElementById('detailJourneyBlock');
   block.querySelectorAll('[data-toggle-milestone]').forEach((btn) => {
     btn.addEventListener('click', () => toggleMilestone(goal.id, btn.dataset.toggleMilestone));
+  });
+  block.querySelectorAll('[data-milestone-task]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const m = (goal.milestones || []).find((x) => x.id === btn.dataset.milestoneTask);
+      if (!m || milestoneTask(m)) return;
+      // Дата віхи — це план, і саме на неї завдання й ставимо. Без дати
+      // ставимо на сьогодні: завдання без дати нікуди не спливе.
+      addAction(goal.id, m.title, m.date || todayISO());
+    });
   });
   const markDoneBtn = document.getElementById('markDoneBtn');
   if (markDoneBtn) markDoneBtn.addEventListener('click', () => setGoalStatus(goal.id, 'done'));

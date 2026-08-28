@@ -435,3 +435,69 @@ test.describe('Ретроспектива завершених', () => {
     expect(upd.payload.completedAt).toBeNull();
   });
 });
+
+test.describe('Віха стає завданням', () => {
+  const withMilestones = (over = {}) => goal({
+    milestones: [
+      { id: 'm1', title: 'Пробігти перші 10 км', done: false, date: shift(14) },
+      { id: 'm2', title: 'Пробігти 50 км', done: false },
+      { id: 'm0', title: 'Купити кросівки', done: true, doneAt: shift(-3) },
+    ],
+    ...over,
+  });
+
+  const openDetail = async (page, goals = [withMilestones()], tasks = []) => {
+    await openGoals(page, goals, { seed: { goals, tasks } });
+    await page.click('[data-open-goal="g1"]');
+  };
+
+  test('у невиконаної віхи є кнопка, у пройденої — немає', async ({ page }) => {
+    await openDetail(page);
+    await expect(page.locator('[data-milestone-task="m1"]')).toBeVisible();
+    await expect(page.locator('[data-milestone-task="m0"]')).toHaveCount(0);
+  });
+
+  test('кнопка створює завдання з назвою віхи і привʼязкою до цілі', async ({ page }) => {
+    await openDetail(page);
+    await page.click('[data-milestone-task="m1"]');
+
+    await expect.poll(() => page.evaluate(() => window.__fbCalls.add.length)).toBeGreaterThan(0);
+    const added = await page.evaluate(() => window.__fbCalls.add.at(-1));
+    expect(added.payload.title).toBe('Пробігти перші 10 км');
+    expect(added.payload.goalId).toBe('g1');
+    expect(added.payload.done).toBe(false);
+  });
+
+  test('завдання стає на дату віхи — це її план, а не «колись»', async ({ page }) => {
+    await openDetail(page);
+    await page.click('[data-milestone-task="m1"]');
+    await expect.poll(() => page.evaluate(() => window.__fbCalls.add.length)).toBeGreaterThan(0);
+    const added = await page.evaluate(() => window.__fbCalls.add.at(-1));
+    expect(added.payload.dueDate).toBe(shift(14));
+  });
+
+  test('віха без дати йде на сьогодні — завдання без дати нікуди не спливе', async ({ page }) => {
+    await openDetail(page);
+    await page.click('[data-milestone-task="m2"]');
+    await expect.poll(() => page.evaluate(() => window.__fbCalls.add.length)).toBeGreaterThan(0);
+    const added = await page.evaluate(() => window.__fbCalls.add.at(-1));
+    expect(added.payload.dueDate).toBe(iso(TODAY));
+  });
+
+  test('коли завдання вже є, кнопки немає — другого такого ж не заводимо', async ({ page }) => {
+    await openDetail(page, [withMilestones()], [
+      { id: 't1', title: 'Пробігти перші 10 км', done: false, goalId: 'g1', dueDate: shift(14) },
+    ]);
+    await expect(page.locator('[data-milestone-task="m1"]')).toHaveCount(0);
+    await expect(page.locator('.journey-task-mark')).toBeVisible();
+    // Друга віха свою кнопку зберігає: збіг назв — це про одну справу, не про всі.
+    await expect(page.locator('[data-milestone-task="m2"]')).toBeVisible();
+  });
+
+  test('виконане завдання кнопку повертає — крок можна поставити знову', async ({ page }) => {
+    await openDetail(page, [withMilestones()], [
+      { id: 't1', title: 'Пробігти перші 10 км', done: true, goalId: 'g1', dueDate: shift(-1) },
+    ]);
+    await expect(page.locator('[data-milestone-task="m1"]')).toBeVisible();
+  });
+});

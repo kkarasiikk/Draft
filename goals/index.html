@@ -187,6 +187,14 @@
     border:1px solid var(--border);background:transparent;color:var(--ink-muted);white-space:nowrap;}
   .tag-filter-chip.selected{background:var(--accent-light);color:var(--accent);border-color:transparent;font-weight:600;}
 
+  /* Віха -> завдання: крок нарешті потрапляє туди, куди дивляться щодня. */
+  .journey-task-btn{align-self:center;cursor:pointer;border:1px solid var(--border);
+    background:transparent;color:var(--ink-muted);font-family:'Inter',sans-serif;font-size:11.5px;
+    font-weight:600;padding:4px 10px;border-radius:20px;white-space:nowrap;}
+  .journey-task-btn:hover{color:var(--accent);border-color:var(--accent);}
+  .journey-task-mark{align-self:center;font-size:11.5px;font-weight:600;
+    color:var(--accent);white-space:nowrap;}
+
   /* Ретроспектива: єдине місце, де закрита ціль лишає слід на екрані. */
   .retro{margin-bottom:14px;}
   .retro-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:8px;}
@@ -294,7 +302,7 @@
   .progress-ring-frac{font-size:11px;color:var(--ink-muted);}
 
   .journey{display:flex;flex-direction:column;margin-bottom:20px;}
-  .journey-stop{position:relative;display:grid;grid-template-columns:28px 1fr;column-gap:14px;padding-bottom:20px;cursor:pointer;}
+  .journey-stop{position:relative;display:grid;grid-template-columns:28px 1fr auto;column-gap:14px;padding-bottom:20px;cursor:pointer;}
   .journey-stop:last-child{padding-bottom:0;}
   .journey-stop::before{content:"";position:absolute;left:13px;top:28px;bottom:0;width:2px;background:var(--border);}
   .journey-stop:last-child::before{display:none;}
