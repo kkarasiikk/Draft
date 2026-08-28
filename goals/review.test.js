@@ -791,3 +791,81 @@ describe('lapse: перезапуск — це вже повернення', () 
     expect(R.lapse(goal({ checkins: ['2026-08-25'] }), TODAY, { startIso: '2026-08-01' })).toBeNull();
   });
 });
+
+describe('monthKeyOf — якого місяця ця ціль', () => {
+  test('записаний місяць беремо як є', () => {
+    expect(R.monthKeyOf(goal({ month: '2026-03' }))).toBe('2026-03');
+  });
+
+  test('стара ціль без поля датується місяцем заведення', () => {
+    expect(R.monthKeyOf(goal(), { startIso: '2026-05-14' })).toBe('2026-05');
+  });
+
+  test('зіпсоване значення не приймаємо за місяць', () => {
+    expect(R.monthKeyOf(goal({ month: 'березень' }), {})).toBeNull();
+    expect(R.monthKeyOf(goal({ month: '2026-3' }), {})).toBeNull();
+  });
+
+  test('ні поля, ні дня заведення — місяця немає', () => {
+    expect(R.monthKeyOf(goal(), {})).toBeNull();
+  });
+});
+
+describe('goalsOfMonth — що показує вкладка місяця', () => {
+  const m = (id, month, over = {}) => goal({ id, horizon: 'month', month, ...over });
+  const CUR = '2026-08';
+  const opts = { currentMonth: CUR };
+
+  test('річні цілі сюди не потрапляють', () => {
+    const list = [m('a', CUR), goal({ id: 'y', horizon: 'year' })];
+    expect(R.goalsOfMonth(list, CUR, opts).map((g) => g.id)).toEqual(['a']);
+  });
+
+  test('поточний місяць показує свої цілі', () => {
+    // Червнева тут закрита — перенесення її не стосується (див. тест нижче).
+    const list = [m('a', CUR), m('b', '2026-06', { status: 'done' })];
+    expect(R.goalsOfMonth(list, CUR, opts).map((g) => g.id)).toEqual(['a']);
+  });
+
+  test('незакрита ціль з минулого не зникає першого числа', () => {
+    const list = [m('a', CUR), m('old', '2026-07', { status: 'active' })];
+    expect(R.goalsOfMonth(list, CUR, opts).map((g) => g.id)).toEqual(['a', 'old']);
+  });
+
+  test('закрита й архівна з минулого не переносяться — питання закрите', () => {
+    const list = [
+      m('done', '2026-07', { status: 'done' }),
+      m('arch', '2026-07', { status: 'archived' }),
+    ];
+    expect(R.goalsOfMonth(list, CUR, opts)).toHaveLength(0);
+  });
+
+  test('ціль на паузі переноситься: її ще доведеться зняти з паузи', () => {
+    expect(R.goalsOfMonth([m('p', '2026-07', { status: 'paused' })], CUR, opts)).toHaveLength(1);
+  });
+
+  test('у минулому місяці показуємо, що було саме тоді, без перенесень', () => {
+    const list = [m('jul', '2026-07', { status: 'active' }), m('jun', '2026-06', { status: 'active' })];
+    expect(R.goalsOfMonth(list, '2026-07', opts).map((g) => g.id)).toEqual(['jul']);
+  });
+
+  test('майбутній місяць нічого чужого не збирає', () => {
+    const list = [m('a', CUR, { status: 'active' })];
+    expect(R.goalsOfMonth(list, '2026-09', opts)).toHaveLength(0);
+  });
+
+  test('стара ціль без поля лягає в місяць свого заведення', () => {
+    const old = goal({ id: 'o', horizon: 'month', status: 'done' });
+    delete old.month;
+    const withStart = { ...opts, startIsoOf: () => '2026-06-10' };
+    expect(R.goalsOfMonth([old], '2026-06', withStart).map((g) => g.id)).toEqual(['o']);
+    expect(R.goalsOfMonth([old], CUR, withStart)).toHaveLength(0);
+  });
+
+  test('ціль, місяць якої не визначити, показуємо в поточному, а не ховаємо', () => {
+    const lost = goal({ id: 'l', horizon: 'month' });
+    delete lost.month;
+    expect(R.goalsOfMonth([lost], CUR, opts).map((g) => g.id)).toEqual(['l']);
+    expect(R.goalsOfMonth([lost], '2026-07', opts)).toHaveLength(0);
+  });
+});

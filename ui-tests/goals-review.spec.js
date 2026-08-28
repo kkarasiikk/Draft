@@ -67,7 +67,7 @@ test.describe('Дві вкладки: місяць і рік', () => {
 
   test('порожній екран питає різне на різних вкладках', async ({ page }) => {
     await openGoals(page, [yearly]);
-    await expect(page.locator('.empty-state .title')).toContainText(/місяць/i);
+    await expect(page.locator('.empty-state .title')).toContainText(/немає цілей на/i);
     await page.click('#bnYear');
     await expect(page.locator('.empty-state')).toHaveCount(0);
   });
@@ -940,5 +940,116 @@ test.describe('Сітка відміток', () => {
     const future = await page.locator('.grid-cell.future').count();
     expect(future).toBeGreaterThan(0);
     await expect(page.locator('.grid-cell.future.done')).toHaveCount(0);
+  });
+});
+
+test.describe('Який зараз місяць', () => {
+  const curMonth = iso(TODAY).slice(0, 7);
+  const prevMonthKey = () => {
+    const d = new Date(TODAY);
+    d.setDate(1);
+    d.setMonth(d.getMonth() - 1);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+  };
+  const monthly = (id, month, over = {}) =>
+    goal({ id, horizon: 'month', month, ...over });
+
+  test('вкладка «Місяць» називає місяць, а не просто «місяць»', async ({ page }) => {
+    await openGoals(page, [monthly('a', curMonth)]);
+    await expect(page.locator('.month-name')).toBeVisible();
+    await expect(page.locator('.month-name')).not.toHaveText('');
+  });
+
+  test('на вкладці «Рік» заголовка місяця немає — там він ні до чого', async ({ page }) => {
+    await openGoals(page, [goal({ horizon: 'year' })]);
+    await page.click('#bnYear');
+    await expect(page.locator('.month-header')).toHaveCount(0);
+  });
+
+  test('видно цілі саме цього місяця', async ({ page }) => {
+    await openGoals(page, [
+      monthly('now', curMonth),
+      monthly('old', prevMonthKey(), { status: 'done' }),
+    ]);
+    await expect(page.locator('[data-open-goal="now"]')).toBeVisible();
+    await expect(page.locator('[data-open-goal="old"]')).toHaveCount(0);
+  });
+
+  test('незакрита ціль з минулого місяця не зникає, і видно, звідки вона', async ({ page }) => {
+    await openGoals(page, [monthly('old', prevMonthKey(), { status: 'active' })]);
+    await expect(page.locator('[data-open-goal="old"]')).toBeVisible();
+    await expect(page.locator('.goal-carried')).toBeVisible();
+  });
+
+  test('стрілка гортає місяці', async ({ page }) => {
+    await openGoals(page, [monthly('now', curMonth)]);
+    const start = await page.locator('.month-name').textContent();
+    await page.click('#monthPrev');
+    await expect(page.locator('.month-name')).not.toHaveText(start);
+    await expect(page.locator('[data-open-goal="now"]')).toHaveCount(0);
+  });
+
+  test('тап по назві вертає в поточний місяць', async ({ page }) => {
+    await openGoals(page, [monthly('now', curMonth)]);
+    const start = await page.locator('.month-name').textContent();
+    await page.click('#monthPrev');
+    await page.click('#monthNow');
+    await expect(page.locator('.month-name')).toHaveText(start);
+    await expect(page.locator('[data-open-goal="now"]')).toBeVisible();
+  });
+
+  test('у минулому місяці перенесення немає — там показано, що було тоді', async ({ page }) => {
+    await openGoals(page, [monthly('now', curMonth, { status: 'active' })]);
+    await page.click('#monthPrev');
+    await expect(page.locator('[data-open-goal="now"]')).toHaveCount(0);
+  });
+
+  test('форма каже, в який місяць піде ціль', async ({ page }) => {
+    await openGoals(page, [monthly('now', curMonth)]);
+    await page.click('#openNewGoalBtn');
+    await expect(page.locator('#horizonHint')).toContainText('піде в');
+  });
+
+  test('нова ціль зберігається з видимим місяцем', async ({ page }) => {
+    await openGoals(page, [monthly('now', curMonth)]);
+    await page.click('#monthPrev');
+    await page.click('#openNewGoalBtn');
+    await page.fill('#goalTitleInput', 'Ціль минулого місяця');
+    await page.click('#goalSubmitBtn');
+
+    await expect.poll(() => page.evaluate(() => window.__fbCalls.add.length)).toBeGreaterThan(0);
+    const added = await page.evaluate(() => window.__fbCalls.add.at(-1));
+    expect(added.payload.horizon).toBe('month');
+    expect(added.payload.month).toBe(prevMonthKey());
+  });
+
+  test('річна ціль місяця не отримує', async ({ page }) => {
+    await openGoals(page, [goal({ horizon: 'year' })]);
+    await page.click('#bnYear');
+    await page.click('#openNewGoalBtn');
+    await page.fill('#goalTitleInput', 'Річна');
+    await page.click('#goalSubmitBtn');
+
+    await expect.poll(() => page.evaluate(() => window.__fbCalls.add.length)).toBeGreaterThan(0);
+    const added = await page.evaluate(() => window.__fbCalls.add.at(-1));
+    expect(added.payload.month).toBeNull();
+  });
+
+  test('правка місячної цілі не переносить її в видимий місяць', async ({ page }) => {
+    const own = prevMonthKey();
+    await openGoals(page, [monthly('old', own, { status: 'active' })]);
+    await page.click('[data-open-goal="old"]');
+    await page.click('#detailEditBtn');
+    await page.click('#goalSubmitBtn');
+
+    await expect.poll(() => page.evaluate(() => window.__fbCalls.update.length)).toBeGreaterThan(0);
+    const upd = await page.evaluate(() => window.__fbCalls.update.at(-1));
+    expect(upd.payload.month).toBe(own);
+  });
+
+  test('порожній місяць називає себе на імʼя', async ({ page }) => {
+    await openGoals(page, [monthly('now', curMonth)]);
+    await page.click('#monthPrev');
+    await expect(page.locator('.empty-state .title')).toContainText('Немає цілей на');
   });
 });

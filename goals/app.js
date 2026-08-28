@@ -130,6 +130,10 @@ const T = {
     lapseRestart: 'Почати відлік заново', lapseEdit: 'Змінити ціль', lapsePause: 'На паузу',
     lapseShort: (n) => `Без руху ${n} дн.`,
     gridLabel: 'Останні вісім тижнів', gridDone: 'був крок', gridBlocked: 'сказав, що завадило',
+    monthPrev: 'Попередній місяць', monthNext: 'Наступний місяць',
+    emptyMonthNamed: (m) => `Немає цілей на ${m}`,
+    carriedFrom: (m) => `з ${m}`,
+    horizonHintMonth: (m) => `Ціль піде в ${m}.`,
     planLabel: 'Коли саме ти це робиш?', planBlockLabel: 'План',
     planCuePlaceholder: 'Щовівторка й четверга о 19:00, після роботи',
     planActionPlaceholder: 'Біжу 5 км',
@@ -260,6 +264,10 @@ const T = {
     lapseRestart: 'Начать отсчёт заново', lapseEdit: 'Изменить цель', lapsePause: 'На паузу',
     lapseShort: (n) => `Без движения ${n} дн.`,
     gridLabel: 'Последние восемь недель', gridDone: 'был шаг', gridBlocked: 'сказал, что помешало',
+    monthPrev: 'Предыдущий месяц', monthNext: 'Следующий месяц',
+    emptyMonthNamed: (m) => `Нет целей на ${m}`,
+    carriedFrom: (m) => `с ${m}`,
+    horizonHintMonth: (m) => `Цель пойдёт в ${m}.`,
     planLabel: 'Когда именно ты это делаешь?', planBlockLabel: 'План',
     planCuePlaceholder: 'По вторникам и четвергам в 19:00, после работы',
     planActionPlaceholder: 'Бегу 5 км',
@@ -390,6 +398,10 @@ const T = {
     lapseRestart: 'Zacznij liczyć od nowa', lapseEdit: 'Zmień cel', lapsePause: 'Wstrzymaj',
     lapseShort: (n) => `Bez ruchu ${n} dni`,
     gridLabel: 'Ostatnie osiem tygodni', gridDone: 'był krok', gridBlocked: 'powiedziałeś, co przeszkodziło',
+    monthPrev: 'Poprzedni miesiąc', monthNext: 'Następny miesiąc',
+    emptyMonthNamed: (m) => `Brak celów na ${m}`,
+    carriedFrom: (m) => `z ${m}`,
+    horizonHintMonth: (m) => `Cel trafi do ${m}.`,
     planLabel: 'Kiedy dokładnie to robisz?', planBlockLabel: 'Plan',
     planCuePlaceholder: 'We wtorki i czwartki o 19:00, po pracy',
     planActionPlaceholder: 'Biegnę 5 km',
@@ -520,6 +532,10 @@ const T = {
     lapseRestart: 'Start the count over', lapseEdit: 'Change the goal', lapsePause: 'Pause',
     lapseShort: (n) => `No movement for ${n} days`,
     gridLabel: 'Last eight weeks', gridDone: 'a step happened', gridBlocked: 'said what got in the way',
+    monthPrev: 'Previous month', monthNext: 'Next month',
+    emptyMonthNamed: (m) => `No goals for ${m}`,
+    carriedFrom: (m) => `from ${m}`,
+    horizonHintMonth: (m) => `This goal goes to ${m}.`,
     planLabel: 'When exactly do you do this?', planBlockLabel: 'Plan',
     planCuePlaceholder: 'Tuesdays and Thursdays at 19:00, right after work',
     planActionPlaceholder: 'Run 5 km',
@@ -807,6 +823,9 @@ let horizon = localStorage.getItem(HORIZON_KEY) === 'year' ? 'year' : 'month';
 function horizonOf(goal) {
   return goal && goal.horizon === 'month' ? 'month' : 'year';
 }
+// Місяць, який зараз дивляться, як 'YYYY-MM'. Не памʼятається між
+// відкриттями: розділ має відкриватись на тому місяці, у якому людина живе.
+let viewMonth = todayISO().slice(0, 7);
 let editingGoalId = null;
 let formCategory = 'other';
 let formMilestones = [];
@@ -1008,6 +1027,7 @@ function renderDashboard() {
   renderBadgesRow();
   renderReviewBanner();
   renderEveningCard();
+  renderMonthHeader();
   renderStatusFilterRow();
   renderRetro();
   renderGoalsList();
@@ -1146,6 +1166,7 @@ function renderStatusFilterRow() {
     btn.addEventListener('click', () => {
       statusFilter = btn.dataset.status || null;
       renderStatusFilterRow();
+      renderMonthHeader();
       renderRetro();
       renderGoalsList();
     });
@@ -1223,6 +1244,14 @@ function goalCardHtml(goal) {
   } else if (prog) {
     metaParts.push(`<span>${prog.done}/${prog.total} ${escapeHtml(t('milestonesCountSuffix'))}</span>`);
   }
+  // Ціль, перенесена з минулого місяця, має про це сказати: інакше липнева
+  // серед серпневих виглядала б як щойно заведена.
+  if (horizon === 'month' && statusFilter !== 'done') {
+    const own = Review.monthKeyOf(goal, { startIso: createdIso(goal) });
+    if (own && own !== viewMonth) {
+      metaParts.push(`<span class="goal-carried">${escapeHtml(t('carriedFrom', monthLabel(own)))}</span>`);
+    }
+  }
   const statusBadge = goal.status !== 'active'
     ? `<span class="goal-card-status-badge">${escapeHtml(goal.status === 'done' ? t('statusDone') : t('statusArchived'))}</span>`
     : '';
@@ -1241,7 +1270,55 @@ function goalCardHtml(goal) {
 }
 
 function goalsOfHorizon() {
-  return goals.filter((g) => horizonOf(g) === horizon);
+  if (horizon !== 'month') return goals.filter((g) => horizonOf(g) === 'year');
+  // Ретроспектива дивиться НАЗАД через місяці — у неї свій перемикач періоду
+  // («за рік / за весь час»), і місячна рамка його б душила: на вкладці
+  // лишились би тільки цілі, закриті цього місяця. Тому у фільтрі
+  // «Завершені» місяць не обмежує, і заголовок місяця там теж ховається.
+  if (statusFilter === 'done') return goals.filter((g) => horizonOf(g) === 'month');
+  return Review.goalsOfMonth(goals, viewMonth, {
+    currentMonth: todayISO().slice(0, 7),
+    startIsoOf: createdIso,
+  });
+}
+
+/** Назва місяця словами: «серпень 2026». */
+function monthLabel(monthKey) {
+  const d = new Date(`${monthKey}-01T00:00:00`);
+  const locale = LOCALE_MAP[currentLang] || 'uk-UA';
+  return new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' }).format(d);
+}
+
+function shiftViewMonth(delta) {
+  const d = new Date(`${viewMonth}-01T00:00:00`);
+  d.setMonth(d.getMonth() + delta);
+  viewMonth = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+  renderCurrentScreen();
+}
+
+// Заголовок місяця. Раніше вкладка «Місяць» показувала всі місячні цілі за
+// весь час — горизонт казав, що ціль місячна, але не казав ЯКОГО місяця.
+// Тап по назві вертає в поточний місяць: той самий жест, що в календарі
+// тренувань, тож звідки завгодно є дорога назад одним дотиком.
+function renderMonthHeader() {
+  const el = document.getElementById('monthHeader');
+  if (!el) return;
+  if (horizon !== 'month' || statusFilter === 'done') { el.innerHTML = ''; return; }
+  const current = todayISO().slice(0, 7);
+  el.innerHTML = `
+    <div class="month-header">
+      <button type="button" class="month-arrow" id="monthPrev" aria-label="${escapeHtml(t('monthPrev'))}">‹</button>
+      <button type="button" class="month-name${viewMonth === current ? ' current' : ''}" id="monthNow">
+        ${escapeHtml(monthLabel(viewMonth))}
+      </button>
+      <button type="button" class="month-arrow" id="monthNext" aria-label="${escapeHtml(t('monthNext'))}">›</button>
+    </div>`;
+  document.getElementById('monthPrev').addEventListener('click', () => shiftViewMonth(-1));
+  document.getElementById('monthNext').addEventListener('click', () => shiftViewMonth(1));
+  document.getElementById('monthNow').addEventListener('click', () => {
+    viewMonth = todayISO().slice(0, 7);
+    renderCurrentScreen();
+  });
 }
 
 function renderGoalsList() {
@@ -1251,7 +1328,7 @@ function renderGoalsList() {
   if (!list.length) {
     // Порожній екран питає рівно те, заради чого сюди зайшли, — а це різні
     // питання на різних вкладках.
-    const title = horizon === 'month' ? t('emptyMonthTitle') : t('emptyYearTitle');
+    const title = horizon === 'month' ? t('emptyMonthNamed', monthLabel(viewMonth)) : t('emptyYearTitle');
     const sub = horizon === 'month' ? t('emptyMonthSub') : t('emptyYearSub');
     el.innerHTML = `<div class="empty-state"><div class="title">${escapeHtml(title)}</div><div>${escapeHtml(sub)}</div></div>`;
     return;
@@ -2266,9 +2343,21 @@ async function setGoalStatus(goalId, status) {
 }
 
 // ---- Форма цілі (створення / редагування) ----
+// Місяць уже заведеної цілі. Порожньо для нової й для тієї, що була річною:
+// у неї місяця не було, і братись йому нема звідки, крім видимого.
+function existingMonthKey() {
+  if (!editingGoalId) return null;
+  const g = goals.find((x) => x.id === editingGoalId);
+  if (!g || g.horizon !== 'month') return null;
+  return Review.monthKeyOf(g, { startIso: createdIso(g) });
+}
+
 function renderHorizonPicker() {
   document.getElementById('horizonLabel').textContent = t('horizonLabel');
-  document.getElementById('horizonHint').textContent = t('horizonHint');
+  // Найпряміша відповідь на «а в який місяць це піде»: написати місяць.
+  document.getElementById('horizonHint').textContent = formHorizon === 'month'
+    ? t('horizonHintMonth', monthLabel(existingMonthKey() || viewMonth))
+    : t('horizonHint');
   const picker = document.getElementById('horizonPicker');
   const options = [['month', t('horizonMonth')], ['year', t('horizonYear')]];
   picker.innerHTML = options.map(([val, label]) =>
@@ -2673,6 +2762,9 @@ async function saveGoalForm() {
     // нема куди, тож і посилання зберігати ні до чого.
     savingsGoalId: targetValue ? formSavingsGoalId || null : null,
     horizon: formHorizon === 'month' ? 'month' : 'year',
+    // Місяць ціль отримує той, який зараз дивляться, — це й написано у формі.
+    // Наявній місячній цілі свій місяць лишаємо: правка не має її переносити.
+    month: formHorizon === 'month' ? (existingMonthKey() || viewMonth) : null,
     parentGoalId: formHorizon === 'month' ? formParentGoalId || null : null,
     milestones: cleanMilestones,
     updatedAt: firebase.firestore.FieldValue.serverTimestamp(),

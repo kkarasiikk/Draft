@@ -187,6 +187,18 @@
     border:1px solid var(--border);background:transparent;color:var(--ink-muted);white-space:nowrap;}
   .tag-filter-chip.selected{background:var(--accent-light);color:var(--accent);border-color:transparent;font-weight:600;}
 
+  /* Який зараз місяць і куди підуть нові цілі. Раніше вкладка «Місяць»
+     показувала всі місячні цілі за весь час і про місяць не казала нічого. */
+  .month-header{display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:14px;}
+  .month-arrow{width:32px;height:32px;flex-shrink:0;cursor:pointer;border:none;border-radius:50%;
+    background:var(--control-bg);color:var(--ink-soft);font-size:19px;line-height:1;
+    font-family:'Inter',sans-serif;display:flex;align-items:center;justify-content:center;}
+  .month-name{cursor:pointer;border:none;background:transparent;font-family:'Inter',sans-serif;
+    font-size:15px;font-weight:700;color:var(--ink);padding:6px 10px;border-radius:10px;
+    text-transform:capitalize;white-space:nowrap;}
+  .month-name:not(.current){color:var(--accent);background:var(--accent-light);}
+  .goal-carried{color:var(--gold);font-weight:600;}
+
   /* Сітка відміток: серія каже про поточний ланцюг, сітка — про частоту. */
   .grid-block{margin-bottom:16px;}
   .grid{display:grid;grid-template-columns:repeat(7, 1fr);gap:4px;margin-top:8px;}
@@ -749,6 +761,7 @@
 
   <div id="dashboardScreen">
   <div class="content">
+    <div id="monthHeader"></div>
     <div class="badges-row" id="badgesRow"></div>
     <div id="reviewBanner"></div>
     <div id="eveningCard"></div>

@@ -348,6 +348,10 @@ service cloud.firestore {
                  // мають — вони заводились як довгострокові, тож без нього
                  // ціль вважається річною.
                  (!('horizon' in d) || d.horizon in ['month', 'year']) &&
+                 // Місяць місячної цілі, 'YYYY-MM'. Без нього вкладка
+                 // «Місяць» показувала всі місячні цілі за весь час.
+                 (!('month' in d) || d.month == null ||
+                   (d.month is string && d.month.size() == 7)) &&
                  // Місячна ціль може служити річній: рік — напрямок, місяці —
                  // кроки до нього. Без цього поля дві вкладки лишались просто
                  // двома списками, які нічого одне про одного не знають.
@@ -372,7 +376,7 @@ service cloud.firestore {
                  d.createdAt is timestamp && d.updatedAt is timestamp &&
                  d.keys().hasOnly(['title', 'category', 'why', 'targetDate', 'status',
                    'targetValue', 'currentValue', 'unit', 'rescues', 'blockers',
-                   'progressLog', 'savingsGoalId', 'reviewedAt', 'horizon', 'parentGoalId', 'completedAt', 'deadlineHistory', 'plan', 'restartedAt',
+                   'progressLog', 'savingsGoalId', 'reviewedAt', 'horizon', 'month', 'parentGoalId', 'completedAt', 'deadlineHistory', 'plan', 'restartedAt',
                    'milestones', 'checkins', 'journal', 'createdAt', 'updatedAt']);
         }
         allow read, delete: if isOwner(uid);

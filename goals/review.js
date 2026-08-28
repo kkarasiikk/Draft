@@ -327,6 +327,48 @@
   }
 
   /**
+   * Місяць, до якого належить місячна ціль, як 'YYYY-MM'.
+   *
+   * Вкладка «Місяць» довго була просто другим списком: горизонт казав, що
+   * ціль місячна, але не казав ЯКОГО місяця, тож березнева ціль лежала поруч
+   * із серпневою й «цілі на місяць» означало «цілі на будь-який місяць».
+   *
+   * Старі документи поля не мають — беремо місяць, коли ціль завели. Це не
+   * здогадка: місячну ціль заводять на той місяць, у якому заводять.
+   */
+  function monthKeyOf(goal, opts) {
+    var m = goal && goal.month;
+    if (typeof m === 'string' && /^\d{4}-\d{2}$/.test(m)) return m;
+    var startIso = (opts && opts.startIso) || null;
+    return startIso && startIso.length >= 7 ? startIso.slice(0, 7) : null;
+  }
+
+  /**
+   * Цілі місяця, який зараз дивляться.
+   *
+   * У ПОТОЧНОМУ місяці показуємо ще й незакриті цілі з минулих: інакше
+   * липнева ціль, яку не встигли, першого серпня тихо зникла б з очей — а це
+   * рівно та ціль, про яку треба памʼятати найбільше. У минулих місяцях
+   * такого перенесення немає: там показуємо, що було саме тоді.
+   *
+   * @param {Array} goals
+   * @param {string} monthKey 'YYYY-MM', який дивляться
+   * @param {{currentMonth?: string, startIsoOf?: function}} [opts]
+   */
+  function goalsOfMonth(goals, monthKey, opts) {
+    var isCurrent = !!(opts && opts.currentMonth === monthKey);
+    var startIsoOf = (opts && opts.startIsoOf) || function () { return null; };
+    return (goals || []).filter(function (g) {
+      if (!g || g.horizon !== 'month') return false;
+      var m = monthKeyOf(g, { startIso: startIsoOf(g) });
+      // Місяць невідомий узагалі — краще в поточному, ніж ніде.
+      if (!m) return isCurrent;
+      if (m === monthKey) return true;
+      return isCurrent && m < monthKey && (g.status === 'active' || g.status === 'paused');
+    });
+  }
+
+  /**
    * Довга перерва — і момент повернення.
    *
    * Типовий кінець довгої цілі виглядає так: тиждень руху, пропуск, провина,
@@ -692,6 +734,8 @@
     needsMeasure: needsMeasure,
     planOf: planOf,
     lapse: lapse,
+    monthKeyOf: monthKeyOf,
+    goalsOfMonth: goalsOfMonth,
     recordDeadlineShift: recordDeadlineShift,
     deadlineDrift: deadlineDrift,
     closedOn: closedOn,
