@@ -667,3 +667,48 @@ test.describe('Крок тижня в огляді', () => {
     await expect(page.locator('[data-keep="g1"]')).toBeVisible();
   });
 });
+
+test.describe('Ціль, яку нема чим міряти', () => {
+  // Ціль без числа й без віх, заведена давно (createdAt їде як Timestamp).
+  const vague = (over = {}) => goal({
+    title: 'Вивчити польську', targetValue: null, milestones: [],
+    createdAt: { __ts: shift(-40) }, ...over,
+  });
+
+  test('на екрані цілі стоїть питання «як ти зрозумієш, що дійшов»', async ({ page }) => {
+    await openGoals(page, [vague()]);
+    await page.click('[data-open-goal="g1"]');
+    await expect(page.locator('.measure-banner')).toBeVisible();
+  });
+
+  test('є число — питання зняте', async ({ page }) => {
+    await openGoals(page, [vague({ targetValue: 100, currentValue: 0, unit: 'год' })]);
+    await page.click('[data-open-goal="g1"]');
+    await expect(page.locator('.measure-banner')).toHaveCount(0);
+  });
+
+  test('є віхи — теж є чим міряти', async ({ page }) => {
+    await openGoals(page, [vague({ milestones: [{ id: 'm1', title: 'A1', done: false }] })]);
+    await page.click('[data-open-goal="g1"]');
+    await expect(page.locator('.measure-banner')).toHaveCount(0);
+  });
+
+  test('свіжу ціль не допитують на порозі', async ({ page }) => {
+    await openGoals(page, [vague({ createdAt: { __ts: shift(-2) } })]);
+    await page.click('[data-open-goal="g1"]');
+    await expect(page.locator('.measure-banner')).toHaveCount(0);
+  });
+
+  test('кнопка веде у форму, де мірило й додають', async ({ page }) => {
+    await openGoals(page, [vague()]);
+    await page.click('[data-open-goal="g1"]');
+    await page.click('#measureFixBtn');
+    await expect(page.locator('#goalFormOverlay')).toHaveClass(/show/);
+  });
+
+  test('в огляді ціль без мірила теж помічена', async ({ page }) => {
+    await openGoals(page, [vague()]);
+    await page.click('#reviewBannerBtn');
+    await expect(page.locator('.review-measure')).toBeVisible();
+  });
+});

@@ -638,3 +638,49 @@ describe('deadlineDrift — куди дедлайн приїхав', () => {
     expect(d.days).toBeNull();
   });
 });
+
+describe('needsMeasure — ціль, яку нема чим міряти', () => {
+  const old = { startIso: '2026-01-01' };
+
+  test('ні числа, ні віх — питання є', () => {
+    expect(R.needsMeasure(goal(), TODAY, old)).not.toBeNull();
+  });
+
+  test('є число — питання зняте', () => {
+    expect(R.needsMeasure(goal({ targetValue: 100 }), TODAY, old)).toBeNull();
+  });
+
+  test('є віхи — теж є чим міряти, навіть жодної не закритої', () => {
+    expect(R.needsMeasure(goal({
+      milestones: [{ id: 'm1', title: 'крок', done: false }],
+    }), TODAY, old)).toBeNull();
+  });
+
+  test('сам дедлайн не каже, що ти дійшов — питання лишається', () => {
+    const n = R.needsMeasure(goal({ targetDate: '2026-12-31' }), TODAY, old);
+    expect(n).not.toBeNull();
+    expect(n.hasDeadline).toBe(true);
+  });
+
+  test('свіжу ціль не допитують на порозі', () => {
+    expect(R.needsMeasure(goal(), TODAY, { startIso: TODAY })).toBeNull();
+    expect(R.needsMeasure(goal(), TODAY, { startIso: '2026-08-22' })).toBeNull();
+  });
+
+  test('на сьомий день питання настає', () => {
+    expect(R.needsMeasure(goal(), TODAY, { startIso: '2026-08-20' })).not.toBeNull();
+  });
+
+  test('пауза мовчить: про неї свідомо не питають', () => {
+    expect(R.needsMeasure(goal({ status: 'paused' }), TODAY, old)).toBeNull();
+  });
+
+  test('закриту й архівну не чіпаємо — там нема чого вирішувати', () => {
+    expect(R.needsMeasure(goal({ status: 'done' }), TODAY, old)).toBeNull();
+    expect(R.needsMeasure(goal({ status: 'archived' }), TODAY, old)).toBeNull();
+  });
+
+  test('невідомий день заведення — невідомо й чи настав час питати', () => {
+    expect(R.needsMeasure(goal(), TODAY, {})).toBeNull();
+  });
+});

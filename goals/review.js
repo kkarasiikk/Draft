@@ -26,6 +26,10 @@
   var MIN_HISTORY_DAYS = 7;
   var MIN_PROGRESS_ENTRIES = 2;
 
+  // Скільки днів ціль має право побути безформною. Питати одразу — це
+  // допит на порозі; не питати ніколи — лишити список бажань замість цілей.
+  var MEASURE_GRACE_DAYS = 7;
+
   // Наскільки прогрес може відставати від часу, і це ще «в графіку». Рівно
   // нуль означав би, що будь-який день відпочинку робить людину боржником.
   var BEHIND_GAP_PCT = 15;
@@ -318,6 +322,36 @@
   }
 
   /**
+   * Ціль, у якій немає жодного способу зрозуміти, що ти дійшов.
+   *
+   * «Вивчити польську» без числа, без віх і без дати можна завести — і вона
+   * висітиме роками, бо перевірити її нічим: progressPct поверне null, темп
+   * теж, і застосунок промовчить назавжди. Це рівно та межа, що відділяє
+   * список бажань від цілей.
+   *
+   * Мовчимо перші MEASURE_GRACE_DAYS днів: ціль має право побути безформною,
+   * поки думка не вляглась. Мовчимо й про паузу — пауза саме тим і є, що про
+   * ціль свідомо не питають.
+   *
+   * @param {Object} goal
+   * @param {string} todayIso
+   * @param {{startIso?: string}} [opts] день заведення цілі (createdAt)
+   */
+  function needsMeasure(goal, todayIso, opts) {
+    if (!goal || goal.status !== 'active') return null;
+    // Є число або є віхи — міряти вже є чим, питання зняте.
+    if (progressPct(goal)) return null;
+    var S = streak();
+    if (!S) return null;
+    var startIso = (opts && opts.startIso) || earliestSignal(goal);
+    // Невідомо, коли ціль завели, — тоді невідомо й чи настав час питати.
+    if (!startIso) return null;
+    var age = S.daysBetween(startIso, todayIso);
+    if (age < MEASURE_GRACE_DAYS) return null;
+    return { daysOld: age, hasDeadline: !!goal.targetDate };
+  }
+
+  /**
    * Дописує зсув дедлайну в історію.
    *
    * Дедлайн зсувається одним рухом, і старе значення досі зникало без сліду.
@@ -562,6 +596,7 @@
     REVIEW_PERIOD_DAYS: REVIEW_PERIOD_DAYS,
     MIN_HISTORY_DAYS: MIN_HISTORY_DAYS,
     MIN_PROGRESS_ENTRIES: MIN_PROGRESS_ENTRIES,
+    MEASURE_GRACE_DAYS: MEASURE_GRACE_DAYS,
     progressPct: progressPct,
     progressSince: progressSince,
     pace: pace,
@@ -571,6 +606,7 @@
     reviewItem: reviewItem,
     reviewDigest: reviewDigest,
     progressSeries: progressSeries,
+    needsMeasure: needsMeasure,
     recordDeadlineShift: recordDeadlineShift,
     deadlineDrift: deadlineDrift,
     closedOn: closedOn,

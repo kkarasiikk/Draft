@@ -120,6 +120,9 @@ const T = {
     driftCount: (n) => `Дедлайн зсувався разів: ${n}`,
     driftFirst: (d) => `спершу ${d}`, driftDays: (n) => `${n} дн.`,
     reviewStepPlaceholder: 'Один крок до наступного огляду', reviewStepBtn: 'Записати крок',
+    measureTitle: 'Як ти зрозумієш, що дійшов?',
+    measureSub: 'У цілі немає ні числа, ні кроків — виміряти її нічим.',
+    measureBtn: 'Додати мірило', measureShort: 'Виміряти нічим',
     retroYear: 'За рік', retroAll: 'За весь час',
     retroClosed: (n) => `Закрито цілей: ${n}`,
     retroEmptyPeriod: 'За цей період нічого не закрито',
@@ -236,6 +239,9 @@ const T = {
     driftCount: (n) => `Дедлайн сдвигался раз: ${n}`,
     driftFirst: (d) => `сначала ${d}`, driftDays: (n) => `${n} дн.`,
     reviewStepPlaceholder: 'Один шаг до следующего обзора', reviewStepBtn: 'Записать шаг',
+    measureTitle: 'Как ты поймёшь, что дошёл?',
+    measureSub: 'В цели нет ни числа, ни шагов — измерить её нечем.',
+    measureBtn: 'Добавить мерило', measureShort: 'Измерить нечем',
     retroYear: 'За год', retroAll: 'За всё время',
     retroClosed: (n) => `Закрыто целей: ${n}`,
     retroEmptyPeriod: 'За этот период ничего не закрыто',
@@ -352,6 +358,9 @@ const T = {
     driftCount: (n) => `Termin przesuwany razy: ${n}`,
     driftFirst: (d) => `najpierw ${d}`, driftDays: (n) => `${n} dni`,
     reviewStepPlaceholder: 'Jeden krok do następnego przeglądu', reviewStepBtn: 'Zapisz krok',
+    measureTitle: 'Po czym poznasz, że doszedłeś?',
+    measureSub: 'Cel nie ma ani liczby, ani kroków — nie ma czym go zmierzyć.',
+    measureBtn: 'Dodaj miarę', measureShort: 'Brak miary',
     retroYear: 'Za rok', retroAll: 'Cały czas',
     retroClosed: (n) => `Ukończonych celów: ${n}`,
     retroEmptyPeriod: 'W tym okresie nic nie ukończono',
@@ -468,6 +477,9 @@ const T = {
     driftCount: (n) => `Deadline moved ${n}×`,
     driftFirst: (d) => `first ${d}`, driftDays: (n) => `${n}d`,
     reviewStepPlaceholder: 'One step before the next review', reviewStepBtn: 'Save the step',
+    measureTitle: 'How will you know you got there?',
+    measureSub: 'This goal has no number and no steps — nothing to measure it by.',
+    measureBtn: 'Add a measure', measureShort: 'Nothing to measure',
     retroYear: 'Past year', retroAll: 'All time',
     retroClosed: (n) => `Goals closed: ${n}`,
     retroEmptyPeriod: 'Nothing closed in this period',
@@ -1266,6 +1278,7 @@ function renderGoalDetail(goal) {
   }
 
   renderPaceBlock(goal);
+  renderMeasureBanner(goal);
   renderDriftRow(goal);
   renderChartBlock(goal);
 
@@ -1391,6 +1404,8 @@ function renderReviewScreen() {
         ${movementChips(item, goal)}
         ${goal.why ? `<div class="review-why">${escapeHtml(t('whyReminder'))} “${escapeHtml(goal.why)}”</div>` : ''}
         ${blockersLine(goal)}
+        ${Review.needsMeasure(goal, today, { startIso: createdIso(goal) })
+          ? `<div class="review-measure">${escapeHtml(t('measureShort'))}</div>` : ''}
         <div class="review-step">
           <input type="text" maxlength="200" data-step-input="${goal.id}" placeholder="${escapeHtml(t('reviewStepPlaceholder'))}">
           <button type="button" class="review-btn primary" data-step-save="${goal.id}">${escapeHtml(t('reviewStepBtn'))}</button>
@@ -1534,6 +1549,24 @@ function renderPaceBlock(goal) {
       <div class="pace-head"><span class="pace-dot"></span>${escapeHtml(t(VERDICT[p.verdict] || 'paceUnknown'))}</div>
       <div class="pace-sub">${escapeHtml(lines.join(' · '))}</div>
     </div>`;
+}
+
+// «Вивчити польську» без числа, без віх і без дати можна завести — і вона
+// висітиме роками, бо перевірити її нічим. Питаємо не одразу (ціль має право
+// побути безформною) і питаємо один раз, спокійно: тут не докір, а
+// пропущений крок постановки.
+function renderMeasureBanner(goal) {
+  const el = document.getElementById('detailMeasureBlock');
+  if (!el) return;
+  const need = Review.needsMeasure(goal, todayISO(), { startIso: createdIso(goal) });
+  if (!need) { el.innerHTML = ''; return; }
+  el.innerHTML = `
+    <div class="measure-banner">
+      <div class="measure-title">${escapeHtml(t('measureTitle'))}</div>
+      <div class="measure-sub">${escapeHtml(t('measureSub'))}</div>
+      <button type="button" id="measureFixBtn">${escapeHtml(t('measureBtn'))}</button>
+    </div>`;
+  document.getElementById('measureFixBtn').addEventListener('click', () => openGoalForm(goal));
 }
 
 // Скільки разів дедлайн уже їхав. Показуємо БЕЗ докору — просто факт, який
