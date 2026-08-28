@@ -129,6 +129,7 @@ const T = {
     lapseSub: 'Це буває. Питання не в тому, чому так вийшло, а в тому, куди повертатись.',
     lapseRestart: 'Почати відлік заново', lapseEdit: 'Змінити ціль', lapsePause: 'На паузу',
     lapseShort: (n) => `Без руху ${n} дн.`,
+    gridLabel: 'Останні вісім тижнів', gridDone: 'був крок', gridBlocked: 'сказав, що завадило',
     planLabel: 'Коли саме ти це робиш?', planBlockLabel: 'План',
     planCuePlaceholder: 'Щовівторка й четверга о 19:00, після роботи',
     planActionPlaceholder: 'Біжу 5 км',
@@ -258,6 +259,7 @@ const T = {
     lapseSub: 'Так бывает. Вопрос не в том, почему так вышло, а в том, куда возвращаться.',
     lapseRestart: 'Начать отсчёт заново', lapseEdit: 'Изменить цель', lapsePause: 'На паузу',
     lapseShort: (n) => `Без движения ${n} дн.`,
+    gridLabel: 'Последние восемь недель', gridDone: 'был шаг', gridBlocked: 'сказал, что помешало',
     planLabel: 'Когда именно ты это делаешь?', planBlockLabel: 'План',
     planCuePlaceholder: 'По вторникам и четвергам в 19:00, после работы',
     planActionPlaceholder: 'Бегу 5 км',
@@ -387,6 +389,7 @@ const T = {
     lapseSub: 'Tak bywa. Pytanie nie brzmi dlaczego, tylko dokąd wracasz.',
     lapseRestart: 'Zacznij liczyć od nowa', lapseEdit: 'Zmień cel', lapsePause: 'Wstrzymaj',
     lapseShort: (n) => `Bez ruchu ${n} dni`,
+    gridLabel: 'Ostatnie osiem tygodni', gridDone: 'był krok', gridBlocked: 'powiedziałeś, co przeszkodziło',
     planLabel: 'Kiedy dokładnie to robisz?', planBlockLabel: 'Plan',
     planCuePlaceholder: 'We wtorki i czwartki o 19:00, po pracy',
     planActionPlaceholder: 'Biegnę 5 km',
@@ -516,6 +519,7 @@ const T = {
     lapseSub: 'It happens. The question is not why, but where you come back to.',
     lapseRestart: 'Start the count over', lapseEdit: 'Change the goal', lapsePause: 'Pause',
     lapseShort: (n) => `No movement for ${n} days`,
+    gridLabel: 'Last eight weeks', gridDone: 'a step happened', gridBlocked: 'said what got in the way',
     planLabel: 'When exactly do you do this?', planBlockLabel: 'Plan',
     planCuePlaceholder: 'Tuesdays and Thursdays at 19:00, right after work',
     planActionPlaceholder: 'Run 5 km',
@@ -1395,6 +1399,7 @@ function renderGoalDetail(goal) {
     </button>`;
   document.getElementById('streakToggleBtn').addEventListener('click', () => toggleTodayCheckin(goal.id));
 
+  renderCheckinGrid(goal);
   renderLadder(goal);
   renderBlockers(goal);
   renderPauseRow(goal);
@@ -1653,6 +1658,37 @@ function renderMeasureBanner(goal) {
       <button type="button" id="measureFixBtn">${escapeHtml(t('measureBtn'))}</button>
     </div>`;
   document.getElementById('measureFixBtn').addEventListener('click', () => openGoalForm(goal));
+}
+
+// Сітка відміток. Серія показує лише ПОТОЧНИЙ ланцюг — і однаково виглядає
+// в того, хто відмічався тричі на тиждень пів року, і в того, хто вчора
+// почав. Сітка показує частоту: де густо, де діри, і чи ритм узагалі був.
+const GRID_WEEKS = 8;
+
+function renderCheckinGrid(goal) {
+  const el = document.getElementById('detailGridBlock');
+  if (!el) return;
+  // Порожня сітка нічого не каже, а місце займає: показуємо, коли є хоч
+  // одна відмітка.
+  if (!((goal.checkins || []).length)) { el.innerHTML = ''; return; }
+  const grid = Streak.checkinGrid(goal, todayISO(), GRID_WEEKS);
+  const cells = grid.map((week) => week.map((d) => {
+    const cls = ['grid-cell'];
+    if (d.future) cls.push('future');
+    else if (d.done) cls.push('done');
+    else if (d.blocked) cls.push('blocked');
+    if (d.today) cls.push('today');
+    return `<span class="${cls.join(' ')}" title="${escapeHtml(d.date)}"></span>`;
+  }).join('')).join('');
+  el.innerHTML = `
+    <div class="grid-block">
+      <div class="section-label">${escapeHtml(t('gridLabel'))}</div>
+      <div class="grid">${cells}</div>
+      <div class="grid-legend">
+        <span><i class="grid-key done"></i>${escapeHtml(t('gridDone'))}</span>
+        <span><i class="grid-key blocked"></i>${escapeHtml(t('gridBlocked'))}</span>
+      </div>
+    </div>`;
 }
 
 // Повернення після довгої перерви.

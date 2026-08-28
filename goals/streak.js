@@ -161,6 +161,55 @@
     });
   }
 
+  /**
+   * Сітка відміток: тижні по рядках, дні тижня по колонках.
+   *
+   * Серія показує лише ПОТОЧНИЙ ланцюг — і однаково виглядає в того, хто
+   * відмічався тричі на тиждень пів року, і в того, хто вчора почав. Сітка
+   * показує частоту: де густо, де діри, і чи ритм узагалі був.
+   *
+   * Рядок — тиждень із понеділка, останній рядок містить сьогодні. Дні після
+   * сьогодні позначені `future` — вони ще не пропущені, і фарбувати їх як
+   * пропуск було б неправдою.
+   *
+   * `blocked` — день, коли людина приходила й сказала, що завадило. Це не те
+   * саме, що мовчазний пропуск, і виглядати однаково вони не мають.
+   */
+  function checkinGrid(goal, todayIso, weeks) {
+    var rows = weeks || 8;
+    var done = {};
+    ((goal && goal.checkins) || []).forEach(function (d) {
+      if (typeof d === 'string') done[d] = true;
+    });
+    var blocked = {};
+    ((goal && goal.blockers) || []).forEach(function (b) {
+      if (b && typeof b.date === 'string') blocked[b.date] = true;
+    });
+
+    // Понеділок того тижня, у якому лежить сьогодні. getDay(): 0 — неділя.
+    var today = parseISO(todayIso);
+    var dow = (today.getDay() + 6) % 7;
+    var lastMonday = shift(todayIso, -dow);
+    var firstMonday = shift(lastMonday, -7 * (rows - 1));
+
+    var out = [];
+    for (var w = 0; w < rows; w++) {
+      var week = [];
+      for (var d = 0; d < 7; d++) {
+        var iso = shift(firstMonday, w * 7 + d);
+        week.push({
+          date: iso,
+          done: !!done[iso],
+          blocked: !done[iso] && !!blocked[iso],
+          today: iso === todayIso,
+          future: iso > todayIso,
+        });
+      }
+      out.push(week);
+    }
+    return out;
+  }
+
   /** Записує, що завадило сьогодні. Один запис на день: людина може
    *  передумати щодо причини, але «сьогодні не вийшло» лишається одним
    *  фактом, а не двома. */
@@ -324,6 +373,7 @@
     daysBetween: daysBetween,
     streakEndingAt: streakEndingAt,
     computeStreak: computeStreak,
+    checkinGrid: checkinGrid,
     rescueState: rescueState,
     applyRescue: applyRescue,
     applyCheckin: applyCheckin,

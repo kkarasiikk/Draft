@@ -462,3 +462,65 @@ describe('milestoneAlert — прострочена віха теж момент
     expect(a.title).toBe('Найдавніша');
   });
 });
+
+describe('checkinGrid — сітка відміток', () => {
+  // 2026-08-27 — четвер.
+  const TODAY = '2026-08-27';
+  const flat = (grid) => grid.reduce((a, w) => a.concat(w), []);
+
+  test('тижні по рядках, сім днів у кожному', () => {
+    const g = S.checkinGrid({ checkins: [] }, TODAY, 4);
+    expect(g).toHaveLength(4);
+    g.forEach((week) => expect(week).toHaveLength(7));
+  });
+
+  test('рядок починається з понеділка, останній містить сьогодні', () => {
+    const g = S.checkinGrid({ checkins: [] }, TODAY, 4);
+    expect(g[0][0].date).toBe('2026-08-03');   // понеділок за три тижні до поточного
+    expect(g.at(-1).some((d) => d.today)).toBe(true);
+  });
+
+  test('сьогодні позначене рівно один раз', () => {
+    const cells = flat(S.checkinGrid({ checkins: [] }, TODAY, 8));
+    expect(cells.filter((c) => c.today)).toHaveLength(1);
+    expect(cells.find((c) => c.today).date).toBe(TODAY);
+  });
+
+  test('відмічені дні видно, невідмічені — ні', () => {
+    const cells = flat(S.checkinGrid({ checkins: ['2026-08-25', '2026-08-20'] }, TODAY, 4));
+    expect(cells.find((c) => c.date === '2026-08-25').done).toBe(true);
+    expect(cells.find((c) => c.date === '2026-08-24').done).toBe(false);
+  });
+
+  test('дні після сьогодні — не пропуск, а майбутнє', () => {
+    const cells = flat(S.checkinGrid({ checkins: [] }, TODAY, 4));
+    const sunday = cells.find((c) => c.date === '2026-08-30');
+    expect(sunday.future).toBe(true);
+    expect(sunday.done).toBe(false);
+    // Усе до сьогодні включно майбутнім не є.
+    expect(cells.filter((c) => c.future).every((c) => c.date > TODAY)).toBe(true);
+  });
+
+  test('день із названою причиною — не те саме, що мовчазний пропуск', () => {
+    const cells = flat(S.checkinGrid({
+      checkins: [], blockers: [{ date: '2026-08-24', reason: 'Втома' }],
+    }, TODAY, 4));
+    expect(cells.find((c) => c.date === '2026-08-24').blocked).toBe(true);
+    expect(cells.find((c) => c.date === '2026-08-25').blocked).toBe(false);
+  });
+
+  test('відмітка важливіша за причину: якщо крок був, це не пропуск', () => {
+    const cells = flat(S.checkinGrid({
+      checkins: ['2026-08-24'], blockers: [{ date: '2026-08-24', reason: 'Втома' }],
+    }, TODAY, 4));
+    const cell = cells.find((c) => c.date === '2026-08-24');
+    expect(cell.done).toBe(true);
+    expect(cell.blocked).toBe(false);
+  });
+
+  test('ціль без жодної відмітки дає порожню, але цілу сітку', () => {
+    const cells = flat(S.checkinGrid({}, TODAY, 8));
+    expect(cells).toHaveLength(56);
+    expect(cells.every((c) => !c.done)).toBe(true);
+  });
+});

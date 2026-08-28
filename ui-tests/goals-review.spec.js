@@ -897,3 +897,48 @@ test.describe('Повернення після перерви', () => {
     await expect(page.locator('.review-lapse')).toHaveText('Без руху 30 дн.');
   });
 });
+
+test.describe('Сітка відміток', () => {
+  const withCheckins = (over = {}) => goal({
+    checkins: [shift(-1), shift(-3), shift(-10)], ...over,
+  });
+
+  const openDetail = async (page, goals) => {
+    await openGoals(page, goals);
+    await page.click('[data-open-goal="g1"]');
+  };
+
+  test('вісім тижнів по сім днів', async ({ page }) => {
+    await openDetail(page, [withCheckins()]);
+    await expect(page.locator('.grid-cell')).toHaveCount(56);
+  });
+
+  test('відмічені дні пофарбовані', async ({ page }) => {
+    await openDetail(page, [withCheckins()]);
+    await expect(page.locator('.grid-cell.done')).toHaveCount(3);
+  });
+
+  test('сьогодні виділене рівно один раз', async ({ page }) => {
+    await openDetail(page, [withCheckins()]);
+    await expect(page.locator('.grid-cell.today')).toHaveCount(1);
+  });
+
+  test('день із названою причиною виглядає інакше за мовчазний пропуск', async ({ page }) => {
+    await openDetail(page, [withCheckins({
+      blockers: [{ date: shift(-2), reason: 'Втома' }],
+    })]);
+    await expect(page.locator('.grid-cell.blocked')).toHaveCount(1);
+  });
+
+  test('без жодної відмітки сітки немає — порожня нічого не каже', async ({ page }) => {
+    await openDetail(page, [goal({ checkins: [] })]);
+    await expect(page.locator('.grid')).toHaveCount(0);
+  });
+
+  test('майбутні дні не пофарбовані як пропуск', async ({ page }) => {
+    await openDetail(page, [withCheckins()]);
+    const future = await page.locator('.grid-cell.future').count();
+    expect(future).toBeGreaterThan(0);
+    await expect(page.locator('.grid-cell.future.done')).toHaveCount(0);
+  });
+});

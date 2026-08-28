@@ -187,6 +187,18 @@
     border:1px solid var(--border);background:transparent;color:var(--ink-muted);white-space:nowrap;}
   .tag-filter-chip.selected{background:var(--accent-light);color:var(--accent);border-color:transparent;font-weight:600;}
 
+  /* Сітка відміток: серія каже про поточний ланцюг, сітка — про частоту. */
+  .grid-block{margin-bottom:16px;}
+  .grid{display:grid;grid-template-columns:repeat(7, 1fr);gap:4px;margin-top:8px;}
+  .grid-cell{display:block;aspect-ratio:1;border-radius:4px;background:var(--control-bg);}
+  .grid-cell.done, .grid-key.done{background:var(--income);}
+  .grid-cell.blocked, .grid-key.blocked{background:var(--gold-light);border:1px solid var(--gold);}
+  .grid-cell.future{background:transparent;border:1px dashed var(--border);}
+  .grid-cell.today{outline:2px solid var(--accent);outline-offset:1px;}
+  .grid-legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:9px;font-size:11px;color:var(--ink-muted);}
+  .grid-legend span{display:flex;align-items:center;gap:5px;}
+  .grid-key{width:10px;height:10px;border-radius:3px;flex-shrink:0;display:block;background:var(--control-bg);}
+
   /* Повернення після перерви. Кольори теплі, а не тривожні: це не помилка
      й не борг, це момент, у який людина прийшла назад. */
   .lapse{background:var(--gold-light);border-radius:16px;padding:14px;margin-bottom:14px;}
@@ -811,6 +823,7 @@
     <div class="streak-row" id="detailStreakRow"></div>
     <div id="detailParentBlock"></div>
     <div id="detailChildrenBlock"></div>
+    <div id="detailGridBlock"></div>
     <div id="detailBlockersBlock"></div>
     <div id="detailPauseRow"></div>
     <div class="section-label" id="journalSectionLabel">Щоденник</div>
