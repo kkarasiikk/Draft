@@ -710,3 +710,84 @@ describe('planOf — намір «якщо X, то Y»', () => {
       .toEqual({ cue: 'вранці', action: '20 хвилин' });
   });
 });
+
+describe('lapse — довга перерва і момент повернення', () => {
+  const start = { startIso: '2026-01-01' };
+
+  test('свіжий рух — жодної перерви', () => {
+    expect(R.lapse(goal({ checkins: ['2026-08-25'] }), TODAY, start)).toBeNull();
+  });
+
+  test('тиждень без кроку — це ще не перерва, це живе життя', () => {
+    expect(R.lapse(goal({ checkins: ['2026-08-21'] }), TODAY, start)).toBeNull();
+  });
+
+  test('три тижні мовчання — перерва, і про неї варто сказати', () => {
+    const l = R.lapse(goal({ checkins: ['2026-08-06'] }), TODAY, start);
+    expect(l.days).toBe(21);
+    expect(l.lastIso).toBe('2026-08-06');
+    expect(l.everMoved).toBe(true);
+  });
+
+  test('слідом вважається будь-який рух, не лише відмітка', () => {
+    expect(R.lapse(goal({ progressLog: [{ date: '2026-08-25', delta: 3 }] }), TODAY, start)).toBeNull();
+    expect(R.lapse(goal({
+      milestones: [{ id: 'm1', title: 'a', done: true, doneAt: '2026-08-25' }],
+    }), TODAY, start)).toBeNull();
+  });
+
+  test('«не вийшло» — теж слід: людина приходила й чесно відповіла', () => {
+    expect(R.lapse(goal({
+      blockers: [{ date: '2026-08-24', reason: 'Втома' }],
+    }), TODAY, start)).toBeNull();
+  });
+
+  test('береться найсвіжіший слід, а не перший-ліпший', () => {
+    expect(R.lapse(goal({
+      checkins: ['2026-05-01'],
+      progressLog: [{ date: '2026-08-26', delta: 1 }],
+    }), TODAY, start)).toBeNull();
+  });
+
+  test('ціль без жодного руху рахується від заведення', () => {
+    const l = R.lapse(goal(), TODAY, { startIso: '2026-07-01' });
+    expect(l.days).toBe(57);
+    expect(l.everMoved).toBe(false);
+  });
+
+  test('щойно заведена ціль покинутою не виглядає', () => {
+    expect(R.lapse(goal(), TODAY, { startIso: '2026-08-25' })).toBeNull();
+  });
+
+  test('пауза мовчить: про неї свідомо не питають', () => {
+    expect(R.lapse(goal({ status: 'paused', checkins: ['2026-01-05'] }), TODAY, start)).toBeNull();
+  });
+
+  test('закриту й архівну не турбуємо', () => {
+    expect(R.lapse(goal({ status: 'done' }), TODAY, start)).toBeNull();
+    expect(R.lapse(goal({ status: 'archived' }), TODAY, start)).toBeNull();
+  });
+
+  test('відмітка з майбутнього перерву не скасовує', () => {
+    const l = R.lapse(goal({ checkins: ['2026-08-06', '2027-01-01'] }), TODAY, start);
+    expect(l.days).toBe(21);
+  });
+});
+
+describe('lapse: перезапуск — це вже повернення', () => {
+  test('після перезапуску ціль не лишається покинутою через стару відмітку', () => {
+    // Останній рух був 30 днів тому, але вчора людина натиснула «почати заново».
+    expect(R.lapse(goal({ checkins: ['2026-07-28'] }), TODAY, { startIso: '2026-08-26' })).toBeNull();
+  });
+
+  test('якщо після перезапуску знову тиша — перерва рахується від нього', () => {
+    const l = R.lapse(goal({ checkins: ['2026-01-01'] }), TODAY, { startIso: '2026-08-01' });
+    expect(l.days).toBe(26);
+    // Рух колись усе-таки був — це не та сама ситуація, що ціль без кроків.
+    expect(l.everMoved).toBe(true);
+  });
+
+  test('свіжий рух після перезапуску важливіший за сам перезапуск', () => {
+    expect(R.lapse(goal({ checkins: ['2026-08-25'] }), TODAY, { startIso: '2026-08-01' })).toBeNull();
+  });
+});

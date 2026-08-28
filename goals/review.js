@@ -26,6 +26,11 @@
   var MIN_HISTORY_DAYS = 7;
   var MIN_PROGRESS_ENTRIES = 2;
 
+  // Скільки днів мовчання роблять паузу «перервою», а не звичайним
+  // пропуском. Два тижні: тиждень без кроку буває в кожної живої цілі, а от
+  // три — це вже не збій ритму, це вихід із нього.
+  var LAPSE_DAYS = 14;
+
   // Скільки днів ціль має право побути безформною. Питати одразу — це
   // допит на порозі; не питати ніколи — лишити список бажань замість цілей.
   var MEASURE_GRACE_DAYS = 7;
@@ -319,6 +324,62 @@
       if (m && !m.moved) stalled += 1;
     });
     return { pending: queue.length, stalled: stalled };
+  }
+
+  /**
+   * Довга перерва — і момент повернення.
+   *
+   * Типовий кінець довгої цілі виглядає так: тиждень руху, пропуск, провина,
+   * і застосунок більше не відкривають. Різниця між тимчасовим збоєм і
+   * повним крахом — у тому, чи є куди повернутись. Досі ціль після трьох
+   * тижнів мовчання зустрічала обірваною серією й вердиктом «не встигаєш» —
+   * тобто рівно тим, від чого й тікають.
+   *
+   * Рахуємо від останнього СЛІДУ будь-якого роду: відмітка, прогрес, закрита
+   * віха. Слідом вважається й запис про те, що завадило: людина приходила й
+   * чесно сказала «не вийшло», і це не мовчання.
+   *
+   * Повертає null, коли перерви немає або говорити про неї не час: ціль на
+   * паузі (про неї свідомо не питають), закрита чи архівна.
+   */
+  function lapse(goal, todayIso, opts) {
+    if (!goal || goal.status !== 'active') return null;
+    var S = streak();
+    if (!S) return null;
+
+    var marks = [];
+    (goal.checkins || []).forEach(function (d) {
+      if (typeof d === 'string') marks.push(d);
+    });
+    (goal.progressLog || []).forEach(function (e) {
+      if (e && typeof e.date === 'string') marks.push(e.date);
+    });
+    (goal.milestones || []).forEach(function (m) {
+      if (m && m.done && typeof m.doneAt === 'string') marks.push(m.doneAt);
+    });
+    (goal.blockers || []).forEach(function (b) {
+      if (b && typeof b.date === 'string') marks.push(b.date);
+    });
+
+    var last = null;
+    marks.forEach(function (d) {
+      if (d <= todayIso && (last === null || d > last)) last = d;
+    });
+
+    // Точка відліку — ПІЗНІШЕ з двох: останній слід і початок цілі. Початок
+    // тут не лише «коли завели»: після перезапуску (restartedAt) він
+    // зсувається на день повернення, а сам перезапуск — це вже дія, тож
+    // мовчання від нього й рахується. Брати просто останній слід означало б,
+    // що ціль, до якої людина щойно повернулась, назавжди лишається
+    // покинутою через торішню відмітку.
+    var startIso = (opts && opts.startIso) || null;
+    var from = last;
+    if (!from || (startIso && startIso > from)) from = startIso;
+    if (!from) return null;
+
+    var days = S.daysBetween(from, todayIso);
+    if (days < LAPSE_DAYS) return null;
+    return { days: days, lastIso: last, everMoved: last !== null };
   }
 
   /**
@@ -618,6 +679,7 @@
     MIN_HISTORY_DAYS: MIN_HISTORY_DAYS,
     MIN_PROGRESS_ENTRIES: MIN_PROGRESS_ENTRIES,
     MEASURE_GRACE_DAYS: MEASURE_GRACE_DAYS,
+    LAPSE_DAYS: LAPSE_DAYS,
     progressPct: progressPct,
     progressSince: progressSince,
     pace: pace,
@@ -629,6 +691,7 @@
     progressSeries: progressSeries,
     needsMeasure: needsMeasure,
     planOf: planOf,
+    lapse: lapse,
     recordDeadlineShift: recordDeadlineShift,
     deadlineDrift: deadlineDrift,
     closedOn: closedOn,

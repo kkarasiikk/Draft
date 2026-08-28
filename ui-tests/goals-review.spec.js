@@ -830,3 +830,70 @@ test.describe('Число просто у вечірній картці', () => 
     await expect(page.locator('.evening-card')).toHaveCount(0);
   });
 });
+
+test.describe('Повернення після перерви', () => {
+  const abandoned = (over = {}) => goal({
+    checkins: [shift(-30)], createdAt: { __ts: shift(-90) }, ...over,
+  });
+
+  test('після трьох тижнів мовчання ціль зустрічає поверненням, а не докором', async ({ page }) => {
+    await openGoals(page, [abandoned()]);
+    await page.click('[data-open-goal="g1"]');
+    await expect(page.locator('.lapse-title')).toHaveText('Тебе не було 30 дн.');
+  });
+
+  test('живу ціль ніхто не турбує', async ({ page }) => {
+    await openGoals(page, [abandoned({ checkins: [shift(-2)] })]);
+    await page.click('[data-open-goal="g1"]');
+    await expect(page.locator('.lapse')).toHaveCount(0);
+  });
+
+  test('є три виходи, і жоден не спрацьовує сам', async ({ page }) => {
+    await openGoals(page, [abandoned()]);
+    await page.click('[data-open-goal="g1"]');
+    await expect(page.locator('#lapseRestartBtn')).toBeVisible();
+    await expect(page.locator('#lapseEditBtn')).toBeVisible();
+    await expect(page.locator('#lapsePauseBtn')).toBeVisible();
+    expect(await page.evaluate(() => window.__fbCalls.update.length)).toBe(0);
+  });
+
+  test('«почати заново» ставить нову точку відліку', async ({ page }) => {
+    await openGoals(page, [abandoned()]);
+    await page.click('[data-open-goal="g1"]');
+    await page.click('#lapseRestartBtn');
+
+    await expect.poll(() => page.evaluate(() => window.__fbCalls.update.length)).toBeGreaterThan(0);
+    const upd = await page.evaluate(() => window.__fbCalls.update.at(-1));
+    expect(upd.payload.restartedAt).toBe(iso(TODAY));
+    // Історію не чіпаємо: пройдене лишається пройденим.
+    expect(upd.payload.checkins).toBeUndefined();
+    expect(upd.payload.progressLog).toBeUndefined();
+  });
+
+  test('після перезапуску ціль перестає виглядати покинутою', async ({ page }) => {
+    await openGoals(page, [abandoned({ restartedAt: shift(-1) })]);
+    await page.click('[data-open-goal="g1"]');
+    await expect(page.locator('.lapse')).toHaveCount(0);
+  });
+
+  test('«на паузу» лишається одним із виходів', async ({ page }) => {
+    await openGoals(page, [abandoned()]);
+    await page.click('[data-open-goal="g1"]');
+    await page.click('#lapsePauseBtn');
+    await expect.poll(() => page.evaluate(() => window.__fbCalls.update.length)).toBeGreaterThan(0);
+    const upd = await page.evaluate(() => window.__fbCalls.update.at(-1));
+    expect(upd.payload.status).toBe('paused');
+  });
+
+  test('ціль, у якій не було жодного кроку, говорить про це прямо', async ({ page }) => {
+    await openGoals(page, [goal({ checkins: [], createdAt: { __ts: shift(-40) } })]);
+    await page.click('[data-open-goal="g1"]');
+    await expect(page.locator('.lapse-title')).toContainText('без жодного кроку');
+  });
+
+  test('в огляді перерва теж помічена', async ({ page }) => {
+    await openGoals(page, [abandoned()]);
+    await page.click('#reviewBannerBtn');
+    await expect(page.locator('.review-lapse')).toHaveText('Без руху 30 дн.');
+  });
+});

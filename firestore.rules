@@ -357,6 +357,10 @@ service cloud.firestore {
                  // вгадувати тривалість за останнім слідом у даних.
                  (!('completedAt' in d) || d.completedAt == null ||
                    (d.completedAt is string && d.completedAt.size() == 10)) &&
+                 // День, з якого ціль рахується заново після довгої
+                 // перерви. Історію не стирає — міняє лише точку відліку.
+                 (!('restartedAt' in d) || d.restartedAt == null ||
+                   (d.restartedAt is string && d.restartedAt.size() == 10)) &&
                  // Намір «якщо ситуація — то дія»: {cue, action}. Довжину
                  // рядків, як і форму решти вкладених обʼєктів поруч,
                  // гарантує клієнт (readPlanFields у goals/app.js).
@@ -368,7 +372,7 @@ service cloud.firestore {
                  d.createdAt is timestamp && d.updatedAt is timestamp &&
                  d.keys().hasOnly(['title', 'category', 'why', 'targetDate', 'status',
                    'targetValue', 'currentValue', 'unit', 'rescues', 'blockers',
-                   'progressLog', 'savingsGoalId', 'reviewedAt', 'horizon', 'parentGoalId', 'completedAt', 'deadlineHistory', 'plan',
+                   'progressLog', 'savingsGoalId', 'reviewedAt', 'horizon', 'parentGoalId', 'completedAt', 'deadlineHistory', 'plan', 'restartedAt',
                    'milestones', 'checkins', 'journal', 'createdAt', 'updatedAt']);
         }
         allow read, delete: if isOwner(uid);

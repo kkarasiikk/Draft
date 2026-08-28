@@ -124,6 +124,11 @@ const T = {
     measureSub: 'У цілі немає ні числа, ні кроків — виміряти її нічим.',
     measureBtn: 'Додати мірило', measureShort: 'Виміряти нічим',
     eveningAmount: 'скільки',
+    lapseTitle: (n) => `Тебе не було ${n} дн.`,
+    lapseNeverTitle: (n) => `Ціль стоїть ${n} дн. без жодного кроку`,
+    lapseSub: 'Це буває. Питання не в тому, чому так вийшло, а в тому, куди повертатись.',
+    lapseRestart: 'Почати відлік заново', lapseEdit: 'Змінити ціль', lapsePause: 'На паузу',
+    lapseShort: (n) => `Без руху ${n} дн.`,
     planLabel: 'Коли саме ти це робиш?', planBlockLabel: 'План',
     planCuePlaceholder: 'Щовівторка й четверга о 19:00, після роботи',
     planActionPlaceholder: 'Біжу 5 км',
@@ -248,6 +253,11 @@ const T = {
     measureSub: 'В цели нет ни числа, ни шагов — измерить её нечем.',
     measureBtn: 'Добавить мерило', measureShort: 'Измерить нечем',
     eveningAmount: 'сколько',
+    lapseTitle: (n) => `Тебя не было ${n} дн.`,
+    lapseNeverTitle: (n) => `Цель стоит ${n} дн. без единого шага`,
+    lapseSub: 'Так бывает. Вопрос не в том, почему так вышло, а в том, куда возвращаться.',
+    lapseRestart: 'Начать отсчёт заново', lapseEdit: 'Изменить цель', lapsePause: 'На паузу',
+    lapseShort: (n) => `Без движения ${n} дн.`,
     planLabel: 'Когда именно ты это делаешь?', planBlockLabel: 'План',
     planCuePlaceholder: 'По вторникам и четвергам в 19:00, после работы',
     planActionPlaceholder: 'Бегу 5 км',
@@ -372,6 +382,11 @@ const T = {
     measureSub: 'Cel nie ma ani liczby, ani kroków — nie ma czym go zmierzyć.',
     measureBtn: 'Dodaj miarę', measureShort: 'Brak miary',
     eveningAmount: 'ile',
+    lapseTitle: (n) => `Nie było cię ${n} dni`,
+    lapseNeverTitle: (n) => `Cel stoi ${n} dni bez żadnego kroku`,
+    lapseSub: 'Tak bywa. Pytanie nie brzmi dlaczego, tylko dokąd wracasz.',
+    lapseRestart: 'Zacznij liczyć od nowa', lapseEdit: 'Zmień cel', lapsePause: 'Wstrzymaj',
+    lapseShort: (n) => `Bez ruchu ${n} dni`,
     planLabel: 'Kiedy dokładnie to robisz?', planBlockLabel: 'Plan',
     planCuePlaceholder: 'We wtorki i czwartki o 19:00, po pracy',
     planActionPlaceholder: 'Biegnę 5 km',
@@ -496,6 +511,11 @@ const T = {
     measureSub: 'This goal has no number and no steps — nothing to measure it by.',
     measureBtn: 'Add a measure', measureShort: 'Nothing to measure',
     eveningAmount: 'how much',
+    lapseTitle: (n) => `You were away ${n} days`,
+    lapseNeverTitle: (n) => `This goal has stood ${n} days without a single step`,
+    lapseSub: 'It happens. The question is not why, but where you come back to.',
+    lapseRestart: 'Start the count over', lapseEdit: 'Change the goal', lapsePause: 'Pause',
+    lapseShort: (n) => `No movement for ${n} days`,
     planLabel: 'When exactly do you do this?', planBlockLabel: 'Plan',
     planCuePlaceholder: 'Tuesdays and Thursdays at 19:00, right after work',
     planActionPlaceholder: 'Run 5 km',
@@ -1337,6 +1357,7 @@ function renderGoalDetail(goal) {
     progressEl.innerHTML = '';
   }
 
+  renderLapseBanner(goal);
   renderPlanBlock(goal);
   renderPaceBlock(goal);
   renderMeasureBanner(goal);
@@ -1466,6 +1487,8 @@ function renderReviewScreen() {
         ${goal.why ? `<div class="review-why">${escapeHtml(t('whyReminder'))} “${escapeHtml(goal.why)}”</div>` : ''}
         ${(() => { const pl = Review.planOf(goal); return pl
           ? `<div class="review-plan">${escapeHtml(pl.cue)} → ${escapeHtml(pl.action)}</div>` : ''; })()}
+        ${(() => { const lp = Review.lapse(goal, today, { startIso: createdIso(goal) }); return lp
+          ? `<div class="review-lapse">${escapeHtml(t('lapseShort', lp.days))}</div>` : ''; })()}
         ${blockersLine(goal)}
         ${Review.needsMeasure(goal, today, { startIso: createdIso(goal) })
           ? `<div class="review-measure">${escapeHtml(t('measureShort'))}</div>` : ''}
@@ -1632,6 +1655,47 @@ function renderMeasureBanner(goal) {
   document.getElementById('measureFixBtn').addEventListener('click', () => openGoalForm(goal));
 }
 
+// Повернення після довгої перерви.
+//
+// Так помирає більшість довгих цілей: тиждень руху, пропуск, провина — і
+// застосунок більше не відкривають. Різниця між тимчасовим збоєм і повним
+// крахом у тому, чи є куди повернутись. Досі ціль після трьох тижнів
+// мовчання зустрічала обірваною серією й вердиктом «не встигаєш», тобто
+// рівно тим, від чого й тікають.
+//
+// Тому тут — три виходи й жодного докору. Нічого не робиться само: банер
+// каже, що сталось, а вирішує людина.
+function renderLapseBanner(goal) {
+  const el = document.getElementById('detailLapseBlock');
+  if (!el) return;
+  const l = Review.lapse(goal, todayISO(), { startIso: createdIso(goal) });
+  if (!l) { el.innerHTML = ''; return; }
+  el.innerHTML = `
+    <div class="lapse">
+      <div class="lapse-title">${escapeHtml(l.everMoved ? t('lapseTitle', l.days) : t('lapseNeverTitle', l.days))}</div>
+      <div class="lapse-sub">${escapeHtml(t('lapseSub'))}</div>
+      <div class="lapse-actions">
+        <button type="button" class="lapse-btn primary" id="lapseRestartBtn">${escapeHtml(t('lapseRestart'))}</button>
+        <button type="button" class="lapse-btn" id="lapseEditBtn">${escapeHtml(t('lapseEdit'))}</button>
+        <button type="button" class="lapse-btn" id="lapsePauseBtn">${escapeHtml(t('lapsePause'))}</button>
+      </div>
+    </div>`;
+  document.getElementById('lapseRestartBtn').addEventListener('click', () => restartGoal(goal.id));
+  document.getElementById('lapseEditBtn').addEventListener('click', () => openGoalForm(goal));
+  document.getElementById('lapsePauseBtn').addEventListener('click', () => setGoalStatus(goal.id, 'paused'));
+}
+
+// Перезапуск НЕ стирає історію: пройдені кілометри лишаються пройденими, а
+// журнал — журналом. Міняється лише точка, від якої ведеться відлік, бо
+// рахувати темп від дати, з якої півроку нічого не було, безглуздо.
+async function restartGoal(goalId) {
+  if (!auth.currentUser) return;
+  await db.collection('users').doc(auth.currentUser.uid).collection('goals').doc(goalId).update({
+    restartedAt: todayISO(),
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+  }).catch((err) => console.error('restartGoal:', err));
+}
+
 // Намір «якщо ситуація — то дія». Порожню половину зберігаємо як є: людина
 // могла набрати лише одну й повернутись пізніше, і стирати набране було б
 // несподівано. Наміром це стає лише тоді, коли є обидві (див. Review.planOf).
@@ -1728,6 +1792,12 @@ function renderChartBlock(goal) {
 // створений документ до підтвердження сервером) — review.js сам візьме
 // найраніший слід у даних.
 function createdIso(goal) {
+  // Після перезапуску відлік цілі ведеться від нього, а не від заведення:
+  // саме в цьому й полягає «почати заново». Одна точка — і темп, і графік,
+  // і «нема чим міряти», і сама перерва рахуються від неї.
+  if (goal && typeof goal.restartedAt === 'string' && goal.restartedAt.length === 10) {
+    return goal.restartedAt;
+  }
   const ts = goal && goal.createdAt;
   if (ts && typeof ts.toDate === 'function') return Streak.isoOf(ts.toDate());
   return null;
