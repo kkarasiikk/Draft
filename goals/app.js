@@ -117,6 +117,8 @@ const T = {
     milestonesCountSuffix: 'віх',
     milestoneToTask: 'У завдання', milestoneInTasks: 'У завданнях',
     chartLabel: 'Шлях', chartRequired: 'щоб устигнути',
+    driftCount: (n) => `Дедлайн зсувався разів: ${n}`,
+    driftFirst: (d) => `спершу ${d}`, driftDays: (n) => `${n} дн.`,
     retroYear: 'За рік', retroAll: 'За весь час',
     retroClosed: (n) => `Закрито цілей: ${n}`,
     retroEmptyPeriod: 'За цей період нічого не закрито',
@@ -230,6 +232,8 @@ const T = {
     milestonesCountSuffix: 'вех',
     milestoneToTask: 'В задачи', milestoneInTasks: 'В задачах',
     chartLabel: 'Путь', chartRequired: 'чтобы успеть',
+    driftCount: (n) => `Дедлайн сдвигался раз: ${n}`,
+    driftFirst: (d) => `сначала ${d}`, driftDays: (n) => `${n} дн.`,
     retroYear: 'За год', retroAll: 'За всё время',
     retroClosed: (n) => `Закрыто целей: ${n}`,
     retroEmptyPeriod: 'За этот период ничего не закрыто',
@@ -343,6 +347,8 @@ const T = {
     milestonesCountSuffix: 'kam.',
     milestoneToTask: 'Do zadań', milestoneInTasks: 'W zadaniach',
     chartLabel: 'Droga', chartRequired: 'żeby zdążyć',
+    driftCount: (n) => `Termin przesuwany razy: ${n}`,
+    driftFirst: (d) => `najpierw ${d}`, driftDays: (n) => `${n} dni`,
     retroYear: 'Za rok', retroAll: 'Cały czas',
     retroClosed: (n) => `Ukończonych celów: ${n}`,
     retroEmptyPeriod: 'W tym okresie nic nie ukończono',
@@ -456,6 +462,8 @@ const T = {
     milestonesCountSuffix: 'milestones',
     milestoneToTask: 'To tasks', milestoneInTasks: 'In tasks',
     chartLabel: 'Path', chartRequired: 'to be on time',
+    driftCount: (n) => `Deadline moved ${n}×`,
+    driftFirst: (d) => `first ${d}`, driftDays: (n) => `${n}d`,
     retroYear: 'Past year', retroAll: 'All time',
     retroClosed: (n) => `Goals closed: ${n}`,
     retroEmptyPeriod: 'Nothing closed in this period',
@@ -1254,6 +1262,7 @@ function renderGoalDetail(goal) {
   }
 
   renderPaceBlock(goal);
+  renderDriftRow(goal);
   renderChartBlock(goal);
 
   renderJourney(goal);
@@ -1424,11 +1433,20 @@ function renderReviewScreen() {
 // самим записом, тож «на паузу» і «оглянуто» це одна дія, а не дві.
 async function markReviewed(goalId, patch) {
   if (!auth.currentUser) return;
+  const goalNow = goals.find((g) => g.id === goalId);
+  const next = { ...(patch || {}) };
+  // Зсув дедлайну лишає слід: інакше стара дата зникає, і ціль, яку
+  // переносили чотири рази, виглядає як щойно заведена.
+  if (goalNow && 'targetDate' in next) {
+    const hist = Review.recordDeadlineShift(goalNow, next.targetDate, todayISO());
+    if (hist) next.deadlineHistory = hist;
+  }
   await db.collection('users').doc(auth.currentUser.uid).collection('goals').doc(goalId).update({
-    ...(patch || {}),
+    ...next,
     reviewedAt: todayISO(),
     updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
   }).catch((err) => console.error('markReviewed:', err));
+  patch = next;
   // Черга перерахується з живих даних, коли долетить onSnapshot; але екран
   // має відреагувати одразу — інакше здається, що тап не спрацював.
   const goal = goals.find((g) => g.id === goalId);
@@ -1468,6 +1486,19 @@ function renderPaceBlock(goal) {
       <div class="pace-head"><span class="pace-dot"></span>${escapeHtml(t(VERDICT[p.verdict] || 'paceUnknown'))}</div>
       <div class="pace-sub">${escapeHtml(lines.join(' · '))}</div>
     </div>`;
+}
+
+// Скільки разів дедлайн уже їхав. Показуємо БЕЗ докору — просто факт, який
+// інакше стирається кожним новим перенесенням: людина памʼятає останню дату,
+// а не те, що спершу стояв березень.
+function renderDriftRow(goal) {
+  const el = document.getElementById('detailDriftRow');
+  if (!el) return;
+  const d = Review.deadlineDrift(goal);
+  if (!d) { el.innerHTML = ''; return; }
+  const parts = [t('driftCount', d.count), t('driftFirst', formatDateShort(d.originalDate))];
+  if (d.days !== null && d.days !== 0) parts.push(t('driftDays', d.days > 0 ? `+${d.days}` : d.days));
+  el.innerHTML = `<div class="drift">${escapeHtml(parts.join(' · '))}</div>`;
 }
 
 // ---- Графік прогресу ----
@@ -2369,6 +2400,13 @@ async function saveGoalForm() {
     milestones: cleanMilestones,
     updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
   };
+
+  // Той самий слід і тут: дедлайн правлять не лише на екрані огляду.
+  if (editingGoalId) {
+    const existing = goals.find((g) => g.id === editingGoalId);
+    const hist = existing && Review.recordDeadlineShift(existing, payload.targetDate, todayISO());
+    if (hist) payload.deadlineHistory = hist;
+  }
 
   const submitBtn = document.getElementById('goalSubmitBtn');
   submitBtn.disabled = true;

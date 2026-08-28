@@ -565,3 +565,76 @@ describe('progressSeries — щоб шлях було видно', () => {
     expect(s.points.every((p) => p.date <= TODAY)).toBe(true);
   });
 });
+
+describe('recordDeadlineShift — зсув лишає слід', () => {
+  test('перша постановка дедлайну зсувом не рахується', () => {
+    expect(R.recordDeadlineShift(goal({ targetDate: null }), '2026-12-31', TODAY)).toBeNull();
+  });
+
+  test('та сама дата — нічого не сталось', () => {
+    expect(R.recordDeadlineShift(goal({ targetDate: '2026-12-31' }), '2026-12-31', TODAY)).toBeNull();
+  });
+
+  test('перенесення записується з обома датами й днем, коли це зробили', () => {
+    const h = R.recordDeadlineShift(goal({ targetDate: '2026-10-01' }), '2026-12-31', TODAY);
+    expect(h).toEqual([{ from: '2026-10-01', to: '2026-12-31', at: TODAY }]);
+  });
+
+  test('історія накопичується, а не переписується', () => {
+    const g = goal({
+      targetDate: '2026-10-01',
+      deadlineHistory: [{ from: '2026-06-01', to: '2026-10-01', at: '2026-05-20' }],
+    });
+    expect(R.recordDeadlineShift(g, '2026-12-31', TODAY)).toHaveLength(2);
+  });
+
+  test('знятий дедлайн — теж зсув, і теж записується', () => {
+    const h = R.recordDeadlineShift(goal({ targetDate: '2026-10-01' }), null, TODAY);
+    expect(h[0].to).toBeNull();
+  });
+
+  test('історія не росте вічно — стеля 50', () => {
+    const old = Array.from({ length: 50 }, () => ({ from: '2026-01-01', to: '2026-02-01', at: '2026-01-01' }));
+    const h = R.recordDeadlineShift(goal({ targetDate: '2026-10-01', deadlineHistory: old }), '2026-12-31', TODAY);
+    expect(h).toHaveLength(50);
+    expect(h.at(-1).to).toBe('2026-12-31');
+  });
+});
+
+describe('deadlineDrift — куди дедлайн приїхав', () => {
+  test('цілі, яку не переносили, докоряти нема чим', () => {
+    expect(R.deadlineDrift(goal())).toBeNull();
+  });
+
+  test('рахує від НАЙПЕРШОЇ дати, а не як суму кроків', () => {
+    // Двічі вперед, раз назад: підсумок один, і він від початкової дати.
+    const d = R.deadlineDrift(goal({
+      targetDate: '2026-12-01',
+      deadlineHistory: [
+        { from: '2026-09-01', to: '2026-10-01', at: '2026-08-01' },
+        { from: '2026-10-01', to: '2026-12-15', at: '2026-09-20' },
+        { from: '2026-12-15', to: '2026-12-01', at: '2026-11-01' },
+      ],
+    }));
+    expect(d.count).toBe(3);
+    expect(d.originalDate).toBe('2026-09-01');
+    expect(d.days).toBe(91);
+  });
+
+  test('дедлайн підтягнули ближче — відʼємне теж чесне', () => {
+    const d = R.deadlineDrift(goal({
+      targetDate: '2026-09-01',
+      deadlineHistory: [{ from: '2026-10-01', to: '2026-09-01', at: TODAY }],
+    }));
+    expect(d.days).toBe(-30);
+  });
+
+  test('дедлайн зняли — порівнювати нема з чим, але факт зсуву лишається', () => {
+    const d = R.deadlineDrift(goal({
+      targetDate: null,
+      deadlineHistory: [{ from: '2026-10-01', to: null, at: TODAY }],
+    }));
+    expect(d.count).toBe(1);
+    expect(d.days).toBeNull();
+  });
+});

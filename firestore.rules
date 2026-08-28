@@ -357,10 +357,14 @@ service cloud.firestore {
                  // вгадувати тривалість за останнім слідом у даних.
                  (!('completedAt' in d) || d.completedAt == null ||
                    (d.completedAt is string && d.completedAt.size() == 10)) &&
+                 // Куди й коли їхав дедлайн. Форму елементів ({from, to, at}),
+                 // як і в решті списків поруч, гарантує клієнт.
+                 (!('deadlineHistory' in d) ||
+                   (d.deadlineHistory is list && d.deadlineHistory.size() <= 50)) &&
                  d.createdAt is timestamp && d.updatedAt is timestamp &&
                  d.keys().hasOnly(['title', 'category', 'why', 'targetDate', 'status',
                    'targetValue', 'currentValue', 'unit', 'rescues', 'blockers',
-                   'progressLog', 'savingsGoalId', 'reviewedAt', 'horizon', 'parentGoalId', 'completedAt',
+                   'progressLog', 'savingsGoalId', 'reviewedAt', 'horizon', 'parentGoalId', 'completedAt', 'deadlineHistory',
                    'milestones', 'checkins', 'journal', 'createdAt', 'updatedAt']);
         }
         allow read, delete: if isOwner(uid);

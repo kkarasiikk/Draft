@@ -565,3 +565,50 @@ test.describe('Графік прогресу', () => {
     await expect(page.locator('.chart-now')).toHaveText('2 / 3');
   });
 });
+
+test.describe('Дедлайн, який їде', () => {
+  test('зсув на екрані огляду лишає слід у записі', async ({ page }) => {
+    await openGoals(page, [goal({ targetDate: shift(30) })]);
+    await page.click('#reviewBannerBtn');
+    await page.click('[data-shift="g1"]');
+    await page.fill('[data-shift-input="g1"]', shift(90));
+    await page.click('[data-shift-save="g1"]');
+
+    await expect.poll(() => page.evaluate(() => window.__fbCalls.update.length)).toBeGreaterThan(0);
+    const upd = await page.evaluate(() => window.__fbCalls.update.at(-1));
+    expect(upd.payload.targetDate).toBe(shift(90));
+    expect(upd.payload.deadlineHistory).toHaveLength(1);
+    expect(upd.payload.deadlineHistory[0].from).toBe(shift(30));
+  });
+
+  test('ціль без дедлайну сліду не заводить — зсувати не було чого', async ({ page }) => {
+    await openGoals(page, [goal({ targetDate: null })]);
+    await page.click('#reviewBannerBtn');
+    await page.click('[data-shift="g1"]');
+    await page.fill('[data-shift-input="g1"]', shift(90));
+    await page.click('[data-shift-save="g1"]');
+
+    await expect.poll(() => page.evaluate(() => window.__fbCalls.update.length)).toBeGreaterThan(0);
+    const upd = await page.evaluate(() => window.__fbCalls.update.at(-1));
+    expect(upd.payload.deadlineHistory).toBeUndefined();
+  });
+
+  test('на екрані цілі видно, скільки разів дедлайн їхав і яким був спершу', async ({ page }) => {
+    await openGoals(page, [goal({
+      targetDate: '2026-12-01',
+      deadlineHistory: [
+        { from: '2026-09-01', to: '2026-10-01', at: '2026-08-01' },
+        { from: '2026-10-01', to: '2026-12-01', at: '2026-09-20' },
+      ],
+    })]);
+    await page.click('[data-open-goal="g1"]');
+    await expect(page.locator('.drift')).toContainText('Дедлайн зсувався разів: 2');
+    await expect(page.locator('.drift')).toContainText('+91 дн.');
+  });
+
+  test('цілі, яку не переносили, докоряти нема чим', async ({ page }) => {
+    await openGoals(page, [goal()]);
+    await page.click('[data-open-goal="g1"]');
+    await expect(page.locator('.drift')).toHaveCount(0);
+  });
+});

@@ -318,6 +318,51 @@
   }
 
   /**
+   * Дописує зсув дедлайну в історію.
+   *
+   * Дедлайн зсувається одним рухом, і старе значення досі зникало без сліду.
+   * А ціль, яку переносили чотири рази, — це вже не ціль, це звичка
+   * домовлятися з собою; побачити цю звичку можна лише тоді, коли її
+   * записують.
+   *
+   * Повертає null, коли писати нема чого: дата не змінилась, або дедлайн
+   * ставлять уперше — зсувати ще не було чого.
+   */
+  function recordDeadlineShift(goal, nextDate, todayIso) {
+    var prev = (goal && goal.targetDate) || null;
+    var next = nextDate || null;
+    if (prev === next || !prev) return null;
+    var hist = ((goal && goal.deadlineHistory) || []).slice();
+    hist.push({ from: prev, to: next, at: todayIso });
+    // Стеля така сама, як у решти списків цілі: історія не має рости вічно.
+    if (hist.length > 50) hist = hist.slice(hist.length - 50);
+    return hist;
+  }
+
+  /**
+   * Скільки разів дедлайн їхав і куди він приїхав від початкового.
+   *
+   * `days` рахується від НАЙПЕРШОЇ дати до теперішньої, а не як сума кроків:
+   * два зсуви вперед і один назад — це не три факти, а один підсумок.
+   * Відʼємне значення (дедлайн підтягнули ближче) теж чесне й показується.
+   */
+  function deadlineDrift(goal) {
+    var S = streak();
+    var hist = ((goal && goal.deadlineHistory) || []).filter(function (h) {
+      return h && typeof h.from === 'string';
+    });
+    if (!hist.length) return null;
+    var original = hist[0].from;
+    var current = (goal && goal.targetDate) || null;
+    return {
+      count: hist.length,
+      originalDate: original,
+      // Дедлайн могли й зовсім прибрати — тоді порівнювати нема з чим.
+      days: current && S ? S.daysBetween(original, current) : null,
+    };
+  }
+
+  /**
    * Ряд накопиченого прогресу — щоб шлях було ВИДНО, а не лише названо.
    *
    * Темп уже каже «не встигаєш», але не каже, ЯКИЙ шлях був: де ривок, де три
@@ -526,6 +571,8 @@
     reviewItem: reviewItem,
     reviewDigest: reviewDigest,
     progressSeries: progressSeries,
+    recordDeadlineShift: recordDeadlineShift,
+    deadlineDrift: deadlineDrift,
     closedOn: closedOn,
     goalSpan: goalSpan,
     retrospective: retrospective,
