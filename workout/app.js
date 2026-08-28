@@ -82,6 +82,9 @@ const T = {
     progressNoCompare: 'Ще немає з чим порівнювати — потрібен місяць історії тих самих вправ.',
     progressVolumeLabel: 'Обсяг', progressNewMark: 'нове',
     planTitle: 'План на сьогодні',
+    creditTitle: 'Зарахувати в ціль', creditAdd: 'Додати', creditDay: 'Зарахувати день',
+    creditCounted: 'День зараховано', creditAmount: 'скільки',
+    creditHint: 'Скільки саме було — знаєш лише ти: у тренуванні лежать підходи й ваги, а не кілометри.',
     // Без дієслова: «Спина відпочивали» — так не кажуть, а рід і число
     // назв мʼязів різні.
     planRested: (m, d) => `${m} — ${d} ${plural(d, { one: 'день', few: 'дні', many: 'днів' })} відпочинку`,
@@ -165,6 +168,9 @@ const T = {
     progressNoCompare: 'Пока не с чем сравнивать — нужен месяц истории тех же упражнений.',
     progressVolumeLabel: 'Объём', progressNewMark: 'новое',
     planTitle: 'План на сегодня',
+    creditTitle: 'Засчитать в цель', creditAdd: 'Добавить', creditDay: 'Засчитать день',
+    creditCounted: 'День засчитан', creditAmount: 'сколько',
+    creditHint: 'Сколько именно было — знаешь только ты: в тренировке лежат подходы и веса, а не километры.',
     planRested: (m, d) => `${m} — ${d} ${plural(d, { one: 'день', few: 'дня', many: 'дней' })} отдыха`,
     planRestDay: 'Все группы тренировались только что. Дай им день — и возвращайся.',
     planStartBtn: 'Начать тренировку',
@@ -246,6 +252,9 @@ const T = {
     progressNoCompare: 'Nie ma jeszcze do czego porównać — potrzeba miesiąca historii tych samych ćwiczeń.',
     progressVolumeLabel: 'Objętość', progressNewMark: 'nowe',
     planTitle: 'Plan na dziś',
+    creditTitle: 'Zalicz do celu', creditAdd: 'Dodaj', creditDay: 'Zalicz dzień',
+    creditCounted: 'Dzień zaliczony', creditAmount: 'ile',
+    creditHint: 'Ile dokładnie było — wiesz tylko ty: w treningu są serie i ciężary, a nie kilometry.',
     planRested: (m, d) => `${m} — ${d} ${plural(d, { one: 'dzień', few: 'dni', many: 'dni' })} odpoczynku`,
     planRestDay: 'Wszystkie partie trenowane były przed chwilą. Daj im dzień i wracaj.',
     planStartBtn: 'Zacznij trening',
@@ -327,6 +336,9 @@ const T = {
     progressNoCompare: 'Nothing to compare yet — needs a month of history on the same exercises.',
     progressVolumeLabel: 'Volume', progressNewMark: 'new',
     planTitle: 'Today',
+    creditTitle: 'Count toward a goal', creditAdd: 'Add', creditDay: 'Count the day',
+    creditCounted: 'Day counted', creditAmount: 'how much',
+    creditHint: 'Only you know how much it was: a workout holds sets and weights, not kilometres.',
     planRested: (m, d) => `${m} — rested ${d} ${plural(d, { one: 'day', other: 'days' })}`,
     planRestDay: 'Everything was trained just now. Give it a day and come back.',
     planStartBtn: 'Start workout',
@@ -831,6 +843,10 @@ let unsubscribeSessions = null;
 // Самопочуття на сьогодні: 'ready' | 'ok' | 'low' або null, поки не питали.
 let readiness = null;
 let unsubscribeReadiness = null;
+// Цілі здоровʼя: тренування вміє зарахуватись у них просто тут, не
+// змушуючи йти в інший розділ і повторювати те саме руками.
+let goals = [];
+let unsubscribeGoals = null;
 // Власні вправи людини — ті, яких немає в бібліотеці. Зберігаються окремо
 // від тренувань (users/{uid}/customExercises), тож обрана один раз вправа
 // лишається в пікері для наступних тренувань, а не набирається щоразу
@@ -884,6 +900,15 @@ function subscribeToReadiness(uid) {
       readiness = data.level || null;
       renderCurrentScreen();
     }, (err) => console.error('subscribeToReadiness:', err));
+}
+
+function subscribeToGoals(uid) {
+  if (unsubscribeGoals) unsubscribeGoals();
+  unsubscribeGoals = db.collection('users').doc(uid).collection('goals')
+    .onSnapshot((snap) => {
+      goals = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      renderCurrentScreen();
+    }, (err) => console.error('subscribeToGoals:', err));
 }
 
 // Сортуємо за назвою одразу тут — інакше довелось би робити це при
@@ -1199,7 +1224,7 @@ function renderSessionsTab() {
       <button type="button" id="wcalClearBtn">${escapeHtml(t('calShowAll'))}</button>
     </div>` : '';
 
-  root.innerHTML = renderCalendar() + renderPlanCard() + filterBar + shownGroups.map((g) => `
+  root.innerHTML = renderCalendar() + renderPlanCard() + renderGoalCreditCard() + filterBar + shownGroups.map((g) => `
     <div class="day-group">
       <div class="day-label">${escapeHtml(dayLabel(g.date))}</div>
       ${g.items.map((s) => renderSessionCard(s)).join('')}
@@ -1214,6 +1239,90 @@ function renderSessionsTab() {
   root.querySelectorAll('[data-ready]').forEach((btn) => {
     btn.addEventListener('click', () => setReadiness(btn.dataset.ready));
   });
+  wireGoalCreditCard(root);
+}
+
+// ---- Тренування зараховується в ціль ----
+// Записаний біг нічого не знав про ціль «пробігти 100 км»: два розділи жили
+// поруч і не бачили одне одного, тож те саме доводилось відмічати двічі.
+// Тут — місток, і саме такий, як усюди в застосунку: він КАЖЕ, що можна
+// зарахувати, але сам не вирішує. Скільки кілометрів було, знає лише людина:
+// у тренуванні лежать підходи й ваги, і вигадувати з них дистанцію не можна.
+function renderGoalCreditCard() {
+  // Пропонуємо тільки після сьогоднішнього тренування: без нього це просто
+  // ще один список цілей у чужому розділі.
+  if (!sessions.some((s) => s.date === todayISO())) return '';
+  const list = window.GoalStreak.trainingGoals(goals, todayISO());
+  if (!list.length) return '';
+
+  return `
+    <div class="plan-card goal-credit">
+      <div class="plan-title">${escapeHtml(t('creditTitle'))}</div>
+      ${list.map((g) => {
+        const measurable = Number(g.targetValue) > 0;
+        const checked = (g.checkins || []).includes(todayISO());
+        const unit = (g.unit || '').trim();
+        return `
+        <div class="credit-row">
+          <div class="credit-title">${escapeHtml(g.title || '')}</div>
+          <div class="credit-actions">
+            ${measurable ? `
+              <input type="number" inputmode="decimal" step="any" min="0" class="credit-input"
+                data-credit-input="${g.id}" placeholder="${escapeHtml(unit || t('creditAmount'))}">
+              <button type="button" class="credit-btn primary" data-credit-add="${g.id}">${escapeHtml(t('creditAdd'))}</button>` : ''}
+            ${checked
+              ? `<span class="credit-done">${escapeHtml(t('creditCounted'))}</span>`
+              : `<button type="button" class="credit-btn" data-credit-day="${g.id}">${escapeHtml(t('creditDay'))}</button>`}
+          </div>
+        </div>`;
+      }).join('')}
+      <div class="credit-hint">${escapeHtml(t('creditHint'))}</div>
+    </div>`;
+}
+
+function wireGoalCreditCard(root) {
+  root.querySelectorAll('[data-credit-day]').forEach((btn) => {
+    btn.addEventListener('click', () => creditGoalCheckin(btn.dataset.creditDay));
+  });
+  root.querySelectorAll('[data-credit-add]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.creditAdd;
+      const input = root.querySelector(`[data-credit-input="${id}"]`);
+      const delta = Number(input && input.value);
+      if (!Number.isFinite(delta) || delta <= 0) return;
+      if (input) input.value = '';
+      creditGoalProgress(id, delta);
+    });
+  });
+}
+
+// Обидва записи йдуть через goals/streak.js — тією ж арифметикою, що й на
+// сторінці цілей. Своя копія тут розійшлася б із серією й темпом.
+async function creditGoalCheckin(goalId) {
+  const goal = goals.find((g) => g.id === goalId);
+  if (!goal || !auth.currentUser) return;
+  const result = window.GoalStreak.applyCheckin(goal, todayISO());
+  if (!result) return;
+  await db.collection('users').doc(auth.currentUser.uid).collection('goals').doc(goalId).update({
+    checkins: result.checkins, updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+  }).catch((err) => console.error('creditGoalCheckin:', err));
+}
+
+// Додане число — це і прогрес, і доказ, що сьогодні крок був: відмічаємо
+// день заразом, інакше людині довелось би тиснути дві кнопки поспіль.
+async function creditGoalProgress(goalId, delta) {
+  const goal = goals.find((g) => g.id === goalId);
+  if (!goal || !auth.currentUser) return;
+  const progress = window.GoalStreak.applyProgress(goal, delta, todayISO());
+  if (!progress) return;
+  const patch = {
+    currentValue: progress.currentValue, progressLog: progress.progressLog,
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+  };
+  const checkin = window.GoalStreak.applyCheckin(goal, todayISO());
+  if (checkin) patch.checkins = checkin.checkins;
+  await db.collection('users').doc(auth.currentUser.uid).collection('goals').doc(goalId)
+    .update(patch).catch((err) => console.error('creditGoalProgress:', err));
 }
 
 function renderSessionCard(session) {
@@ -2222,11 +2331,13 @@ auth.onAuthStateChanged((user) => {
     }).catch(() => {});
     subscribeToSessions(user.uid);
     subscribeToReadiness(user.uid);
+    subscribeToGoals(user.uid);
     subscribeToTemplates(user.uid);
     subscribeToCustomExercises(user.uid);
   } else {
     if (unsubscribeSessions) { unsubscribeSessions(); unsubscribeSessions = null; }
     if (unsubscribeReadiness) { unsubscribeReadiness(); unsubscribeReadiness = null; }
+    if (unsubscribeGoals) { unsubscribeGoals(); unsubscribeGoals = null; goals = []; }
     if (unsubscribeTemplates) { unsubscribeTemplates(); unsubscribeTemplates = null; }
     if (unsubscribeCustomExercises) { unsubscribeCustomExercises(); unsubscribeCustomExercises = null; }
     readiness = null;

@@ -1833,14 +1833,12 @@ async function logBlocker(goalId, reason) {
 async function addGoalProgress(goalId, delta) {
   const goal = goals.find((g) => g.id === goalId);
   if (!goal || !auth.currentUser) return;
-  const next = Math.max(0, Math.round(((Number(goal.currentValue) || 0) + delta) * 100) / 100);
-  // Саме число показує смужка, але одне число не памʼятає, КОЛИ прогрес був —
-  // а без цього не порахувати ні темп, ні рух за тиждень. Тому поруч росте
-  // журнал: currentValue лишається сумою, progressLog — історією.
-  let log = [...(goal.progressLog || []), { date: todayISO(), delta: Math.round(delta * 100) / 100 }];
-  if (log.length > 400) log = log.slice(log.length - 400);
+  // Арифметика — у streak.js: прогрес додає не лише ця сторінка, а й
+  // тренування, і дві копії розійшлися б.
+  const result = Streak.applyProgress(goal, delta, todayISO());
+  if (!result) return;
   await db.collection('users').doc(auth.currentUser.uid).collection('goals').doc(goalId).update({
-    currentValue: next, progressLog: log,
+    currentValue: result.currentValue, progressLog: result.progressLog,
     updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
   }).catch((err) => console.error('addGoalProgress:', err));
 }
