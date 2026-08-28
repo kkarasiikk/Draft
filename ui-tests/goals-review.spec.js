@@ -767,3 +767,66 @@ test.describe('Намір «якщо — то»', () => {
     await expect(page.locator('.review-plan')).toHaveText('щовівторка о 19:00 → біжу 5 км');
   });
 });
+
+test.describe('Число просто у вечірній картці', () => {
+  // Картка живе лише ввечері (EVENING_HOUR = 18), тож переводимо годинник.
+  const openEvening = async (page, goals) => {
+    const evening = new Date(TODAY);
+    evening.setHours(20, 0, 0, 0);
+    await page.clock.setFixedTime(evening);
+    await openGoals(page, goals);
+  };
+
+  const measured = (over = {}) => goal({
+    targetValue: 100, currentValue: 20, unit: 'км', ...over,
+  });
+
+  test('у вимірюваної цілі поле числа стоїть прямо в картці', async ({ page }) => {
+    await openEvening(page, [measured()]);
+    await expect(page.locator('[data-amount-input="g1"]')).toBeVisible();
+  });
+
+  test('ціль без числа поля не отримує — там нічого вводити', async ({ page }) => {
+    await openEvening(page, [goal({ targetValue: null })]);
+    await expect(page.locator('.evening-card')).toBeVisible();
+    await expect(page.locator('[data-amount-input="g1"]')).toHaveCount(0);
+  });
+
+  test('«+» додає до цілі, не заходячи в розділ', async ({ page }) => {
+    await openEvening(page, [measured()]);
+    await page.fill('[data-amount-input="g1"]', '3');
+    await page.click('[data-amount-add="g1"]');
+
+    await expect.poll(() => page.evaluate(() => window.__fbCalls.update.length)).toBeGreaterThan(0);
+    const calls = await page.evaluate(() => window.__fbCalls.update);
+    const progress = calls.find((c) => c.payload.currentValue !== undefined);
+    expect(progress.payload.currentValue).toBe(23);
+    expect(progress.payload.progressLog).toEqual([{ date: iso(TODAY), delta: 3 }]);
+  });
+
+  test('записане число саме відмічає день — «так» тиснути не треба', async ({ page }) => {
+    await openEvening(page, [measured()]);
+    await page.fill('[data-amount-input="g1"]', '3');
+    await page.click('[data-amount-add="g1"]');
+
+    await expect.poll(() => page.evaluate(() => window.__fbCalls.update.length)).toBeGreaterThan(1);
+    const calls = await page.evaluate(() => window.__fbCalls.update);
+    const checkin = calls.find((c) => c.payload.checkins !== undefined);
+    expect(checkin.payload.checkins).toEqual([iso(TODAY)]);
+  });
+
+  test('порожнє поле нічого не пише — це не нуль, це «не ввів»', async ({ page }) => {
+    await openEvening(page, [measured()]);
+    await page.click('[data-amount-add="g1"]');
+    await page.waitForTimeout(200);
+    expect(await page.evaluate(() => window.__fbCalls.update.length)).toBe(0);
+  });
+
+  test('вдень картки немає — питання про крок доречне ввечері', async ({ page }) => {
+    const noon = new Date(TODAY);
+    noon.setHours(12, 0, 0, 0);
+    await page.clock.setFixedTime(noon);
+    await openGoals(page, [measured()]);
+    await expect(page.locator('.evening-card')).toHaveCount(0);
+  });
+});

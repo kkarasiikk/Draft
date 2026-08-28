@@ -187,6 +187,13 @@
     border:1px solid var(--border);background:transparent;color:var(--ink-muted);white-space:nowrap;}
   .tag-filter-chip.selected{background:var(--accent-light);color:var(--accent);border-color:transparent;font-weight:600;}
 
+  /* Число просто у вечірній картці: «+3 км» не має вимагати заходу в розділ. */
+  .evening-amount{display:flex;gap:6px;margin-top:8px;}
+  .evening-amount input{flex:1;min-width:0;padding:8px 12px;border-radius:10px;
+    border:1px solid var(--border);background:var(--surface-flat);color:var(--ink);
+    font-family:'Inter',sans-serif;font-size:13.5px;}
+  .evening-amount .evening-btn{flex:0 0 auto;min-width:46px;font-size:16px;font-weight:700;}
+
   /* Намір «якщо ситуація — то дія». Дві половини стоять поруч саме тому,
      що поодинці жодна з них наміром не є. */
   .plan-fields{display:flex;flex-direction:column;gap:6px;}

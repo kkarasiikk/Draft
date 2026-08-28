@@ -123,6 +123,7 @@ const T = {
     measureTitle: 'Як ти зрозумієш, що дійшов?',
     measureSub: 'У цілі немає ні числа, ні кроків — виміряти її нічим.',
     measureBtn: 'Додати мірило', measureShort: 'Виміряти нічим',
+    eveningAmount: 'скільки',
     planLabel: 'Коли саме ти це робиш?', planBlockLabel: 'План',
     planCuePlaceholder: 'Щовівторка й четверга о 19:00, після роботи',
     planActionPlaceholder: 'Біжу 5 км',
@@ -246,6 +247,7 @@ const T = {
     measureTitle: 'Как ты поймёшь, что дошёл?',
     measureSub: 'В цели нет ни числа, ни шагов — измерить её нечем.',
     measureBtn: 'Добавить мерило', measureShort: 'Измерить нечем',
+    eveningAmount: 'сколько',
     planLabel: 'Когда именно ты это делаешь?', planBlockLabel: 'План',
     planCuePlaceholder: 'По вторникам и четвергам в 19:00, после работы',
     planActionPlaceholder: 'Бегу 5 км',
@@ -369,6 +371,7 @@ const T = {
     measureTitle: 'Po czym poznasz, że doszedłeś?',
     measureSub: 'Cel nie ma ani liczby, ani kroków — nie ma czym go zmierzyć.',
     measureBtn: 'Dodaj miarę', measureShort: 'Brak miary',
+    eveningAmount: 'ile',
     planLabel: 'Kiedy dokładnie to robisz?', planBlockLabel: 'Plan',
     planCuePlaceholder: 'We wtorki i czwartki o 19:00, po pracy',
     planActionPlaceholder: 'Biegnę 5 km',
@@ -492,6 +495,7 @@ const T = {
     measureTitle: 'How will you know you got there?',
     measureSub: 'This goal has no number and no steps — nothing to measure it by.',
     measureBtn: 'Add a measure', measureShort: 'Nothing to measure',
+    eveningAmount: 'how much',
     planLabel: 'When exactly do you do this?', planBlockLabel: 'Plan',
     planCuePlaceholder: 'Tuesdays and Thursdays at 19:00, right after work',
     planActionPlaceholder: 'Run 5 km',
@@ -1032,6 +1036,17 @@ function renderEveningCard() {
         const plan = Review.planOf(g);
         const planBlock = plan
           ? `<div class="evening-plan">${escapeHtml(plan.cue)} → ${escapeHtml(plan.action)}</div>` : '';
+        // Головне тертя було саме тут: «так» записати можна було одним тапом,
+        // а «+3 км» — тільки зайшовши в розділ, знайшовши ціль і відкривши її.
+        // Число для вимірюваної цілі важливіше за галочку, тож поле стоїть
+        // просто в картці, і запис заразом відмічає день.
+        const amountRow = Number(g.targetValue) > 0
+          ? `<div class="evening-amount">
+              <input type="number" inputmode="decimal" step="any" min="0" data-amount-input="${g.id}"
+                     placeholder="${escapeHtml(g.unit || t('eveningAmount'))}">
+              <button type="button" class="evening-btn yes" data-amount-add="${g.id}">+</button>
+            </div>`
+          : '';
         return `
         <div class="evening-goal">
           <div class="evening-goal-title">${escapeHtml(g.title || '')}${streakAtRisk >= 3 ? ` <span class="evening-streak">🔥 ${streakAtRisk}</span>` : ''}</div>
@@ -1042,6 +1057,7 @@ function renderEveningCard() {
             <button type="button" class="evening-btn" data-no="${g.id}">${escapeHtml(t('eveningNo'))}</button>
             ${canRescue ? `<button type="button" class="evening-btn" data-rescue="${g.id}">${escapeHtml(t('eveningRescue'))}</button>` : ''}
           </div>
+          ${amountRow}
           ${reasons}
         </div>`;
       }).join('')}
@@ -1068,6 +1084,24 @@ function renderEveningCard() {
   });
   host.querySelectorAll('[data-rescue]').forEach((btn) => {
     btn.addEventListener('click', () => rescueStreak(btn.dataset.rescue));
+  });
+  host.querySelectorAll('[data-amount-add]').forEach((btn) => {
+    const id = btn.dataset.amountAdd;
+    const input = host.querySelector(`[data-amount-input="${id}"]`);
+    const commit = () => {
+      const delta = Number(input && input.value);
+      if (!Number.isFinite(delta) || delta <= 0) return;
+      input.value = '';
+      eveningReasonForId = null;
+      addGoalProgress(id, delta);
+      // Записане число — це і є доказ, що крок сьогодні був. Змушувати
+      // тиснути ще й «так» означало б питати про те, на що вже відповіли.
+      markGoalCheckin(id);
+    };
+    btn.addEventListener('click', commit);
+    if (input) input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); commit(); }
+    });
   });
 }
 
