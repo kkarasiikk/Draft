@@ -221,8 +221,58 @@
    * @returns {{pending:number, streak:number, streakTitle:string|null,
    *            deadline:number|null, deadlineTitle:string|null}}
    */
+  /**
+   * За скільки днів попереджати про дедлайн ЦІЄЇ цілі.
+   *
+   * Три дні — розумно для справи на два тижні й безглуздо для цілі на вісім
+   * місяців: там це вже не попередження, а співчуття, бо зробити нічого не
+   * можна. Тому поріг — частка від довжини самої цілі, з підлогою (коротка
+   * ціль не має мовчати до останнього дня) і стелею (багаторічна не має
+   * гудіти чотири місяці поспіль).
+   */
+  var WARN_SHARE = 0.1;
+  var WARN_MIN_DAYS = 3;
+  var WARN_MAX_DAYS = 30;
+
+  function deadlineWarnDays(goal, todayIso, opts) {
+    if (!goal || !goal.targetDate) return WARN_MIN_DAYS;
+    var startIso = (opts && opts.startIsoOf && opts.startIsoOf(goal)) || earliestCheckin(goal);
+    // Довжину цілі нізвідки взяти — лишається обережна підлога.
+    if (!startIso) return WARN_MIN_DAYS;
+    var span = daysBetween(startIso, goal.targetDate);
+    if (!(span > 0)) return WARN_MIN_DAYS;
+    return Math.max(WARN_MIN_DAYS, Math.min(WARN_MAX_DAYS, Math.round(span * WARN_SHARE)));
+  }
+
+  /** Найраніша відмітка — запасний спосіб дізнатись, коли ціль почалась. */
+  function earliestCheckin(goal) {
+    var min = null;
+    ((goal && goal.checkins) || []).forEach(function (d) {
+      if (typeof d === 'string' && (min === null || d < min)) min = d;
+    });
+    return min;
+  }
+
+  /** Найпростроченіша (або найближча) віха серед активних цілей. */
+  function milestoneAlert(goals, todayIso) {
+    var best = null;
+    (goals || []).forEach(function (g) {
+      if (!g || g.status !== 'active') return;
+      (g.milestones || []).forEach(function (m) {
+        if (!m || m.done || typeof m.date !== 'string') return;
+        var left = daysBetween(todayIso, m.date);
+        // Віха має сенс як сигнал лише коли вона вже прострочена або
+        // настає сьогодні: попереджати про кожну наперед — це шум.
+        if (left > 0) return;
+        if (!best || left < best.days) {
+          best = { days: left, title: m.title || '', goalTitle: g.title || '' };
+        }
+      });
+    });
+    return best;
+  }
+
   function goalsDigest(goals, todayIso, opts) {
-    var warnDays = (opts && opts.deadlineDays) || 3;
     var queue = eveningQueue(goals, todayIso);
 
     // Найдовша серія, яку сьогоднішня бездіяльність обірве. computeStreak
@@ -234,15 +284,20 @@
       if (n > streak) { streak = n; streakTitle = g.title || null; }
     });
 
-    // Найближчий дедлайн серед активних цілей: прострочений або той, що ось-ось.
+    // Найближчий дедлайн серед активних цілей: прострочений або той, що
+    // ось-ось. «Ось-ось» у кожної цілі своє — див. deadlineWarnDays.
     var deadline = null;
     var deadlineTitle = null;
     (goals || []).forEach(function (g) {
       if (!g || g.status !== 'active') return;
       var left = daysToDeadline(g, todayIso);
-      if (left === null || left > warnDays) return;
+      if (left === null) return;
+      var warn = (opts && opts.deadlineDays) || deadlineWarnDays(g, todayIso, opts);
+      if (left > warn) return;
       if (deadline === null || left < deadline) { deadline = left; deadlineTitle = g.title || null; }
     });
+
+    var milestone = milestoneAlert(goals, todayIso);
 
     return {
       pending: queue.length,
@@ -250,6 +305,9 @@
       streakTitle: streakTitle,
       deadline: deadline,
       deadlineTitle: deadlineTitle,
+      // Прострочена віха — теж момент, коли ще можна щось зробити, і досі
+      // вона лишалась видною тільки тому, хто сам відкрив ціль.
+      milestone: milestone,
     };
   }
 
@@ -258,6 +316,8 @@
     EVENING_HOUR: EVENING_HOUR,
     daysToDeadline: daysToDeadline,
     goalsDigest: goalsDigest,
+    deadlineWarnDays: deadlineWarnDays,
+    milestoneAlert: milestoneAlert,
     isoOf: isoOf,
     parseISO: parseISO,
     shift: shift,

@@ -272,6 +272,7 @@ describe('goalsDigest: що сказати про цілі ввечері', () =
   test('порожній список нічого не вигадує', () => {
     expect(S.goalsDigest([], '2026-08-26')).toEqual({
       pending: 0, streak: 0, streakTitle: null, deadline: null, deadlineTitle: null,
+      milestone: null,
     });
   });
 });
@@ -351,5 +352,113 @@ describe('trainingGoals — куди зарахувати тренування',
   test('порожній список нікого не пропонує', () => {
     expect(S.trainingGoals([], TODAY)).toEqual([]);
     expect(S.trainingGoals(null, TODAY)).toEqual([]);
+  });
+});
+
+describe('deadlineWarnDays — «ось-ось» у кожної цілі своє', () => {
+  const TODAY = '2026-08-27';
+  const g = (start, target) => ({
+    status: 'active', targetDate: target, checkins: [], milestones: [],
+    __start: start,
+  });
+  const opts = { startIsoOf: (x) => x.__start };
+
+  test('коротка ціль: підлога в три дні, а не частка від двох тижнів', () => {
+    // 14 днів × 0.1 = 1.4 — попереджати за півтора дня безглуздо.
+    expect(S.deadlineWarnDays(g('2026-08-20', '2026-09-03'), TODAY, opts)).toBe(3);
+  });
+
+  test('ціль на квартал попереджає приблизно за тиждень-півтора', () => {
+    // 92 дні × 0.1 ≈ 9.
+    expect(S.deadlineWarnDays(g('2026-06-01', '2026-09-01'), TODAY, opts)).toBe(9);
+  });
+
+  test('ціль на вісім місяців — не три дні співчуття, а майже місяць', () => {
+    expect(S.deadlineWarnDays(g('2026-01-01', '2026-09-01'), TODAY, opts)).toBe(24);
+  });
+
+  test('багаторічна не гуде чотири місяці — стеля 30 днів', () => {
+    expect(S.deadlineWarnDays(g('2024-01-01', '2027-01-01'), TODAY, opts)).toBe(30);
+  });
+
+  test('без дедлайну попереджати нема про що', () => {
+    expect(S.deadlineWarnDays(g('2026-01-01', null), TODAY, opts)).toBe(3);
+  });
+
+  test('коли початок невідомий, лишається обережна підлога', () => {
+    expect(S.deadlineWarnDays(g(null, '2026-12-31'), TODAY, {})).toBe(3);
+  });
+
+  test('запасний початок — найраніша відмітка', () => {
+    const goal = { status: 'active', targetDate: '2026-09-01', checkins: ['2026-06-01', '2026-07-01'] };
+    expect(S.deadlineWarnDays(goal, TODAY, {})).toBe(9);
+  });
+});
+
+describe('goalsDigest: поріг дедлайну масштабується', () => {
+  const TODAY = '2026-08-27';
+  const opts = { startIsoOf: (x) => x.start };
+
+  test('довга ціль потрапляє у вечірній підсумок за 20 днів до кінця', () => {
+    // Ціль на 8 місяців: поріг 24 дні, до дедлайну 20.
+    const d = S.goalsDigest([{
+      title: 'Вивчити польську', status: 'active', start: '2026-01-01',
+      targetDate: '2026-09-16', checkins: [], milestones: [],
+    }], TODAY, opts);
+    expect(d.deadlineTitle).toBe('Вивчити польську');
+    expect(d.deadline).toBe(20);
+  });
+
+  test('коротка ціль за 20 днів ще мовчить — там це не терміново', () => {
+    const d = S.goalsDigest([{
+      title: 'Здати звіт', status: 'active', start: '2026-08-20',
+      targetDate: '2026-09-16', checkins: [], milestones: [],
+    }], TODAY, opts);
+    expect(d.deadline).toBeNull();
+  });
+});
+
+describe('milestoneAlert — прострочена віха теж момент', () => {
+  const TODAY = '2026-08-27';
+  const goal = (milestones, over = {}) => ({
+    title: 'Пробігти 100 км', status: 'active', checkins: [], milestones, ...over,
+  });
+
+  test('прострочена віха знаходиться, з назвою цілі', () => {
+    const a = S.milestoneAlert([goal([{ id: 'm1', title: 'Перші 10 км', done: false, date: '2026-08-20' }])], TODAY);
+    expect(a.title).toBe('Перші 10 км');
+    expect(a.goalTitle).toBe('Пробігти 100 км');
+    expect(a.days).toBe(-7);
+  });
+
+  test('віха на сьогодні теж сигнал', () => {
+    const a = S.milestoneAlert([goal([{ id: 'm1', title: 'Сьогодні', done: false, date: TODAY }])], TODAY);
+    expect(a.days).toBe(0);
+  });
+
+  test('віха попереду — це ще не сигнал, а шум', () => {
+    expect(S.milestoneAlert([goal([{ id: 'm1', title: 'Потім', done: false, date: '2026-09-10' }])], TODAY)).toBeNull();
+  });
+
+  test('виконану віху не згадуємо', () => {
+    expect(S.milestoneAlert([goal([{ id: 'm1', title: 'a', done: true, date: '2026-08-01' }])], TODAY)).toBeNull();
+  });
+
+  test('віха без дати сигналом бути не може — строку немає', () => {
+    expect(S.milestoneAlert([goal([{ id: 'm1', title: 'a', done: false }])], TODAY)).toBeNull();
+  });
+
+  test('пауза й архів мовчать', () => {
+    const ms = [{ id: 'm1', title: 'a', done: false, date: '2026-08-01' }];
+    expect(S.milestoneAlert([goal(ms, { status: 'paused' })], TODAY)).toBeNull();
+    expect(S.milestoneAlert([goal(ms, { status: 'archived' })], TODAY)).toBeNull();
+  });
+
+  test('з кількох береться найпростроченіша', () => {
+    const a = S.milestoneAlert([goal([
+      { id: 'm1', title: 'Пізніша', done: false, date: '2026-08-25' },
+      { id: 'm2', title: 'Найдавніша', done: false, date: '2026-07-01' },
+    ])], TODAY);
+    expect(a.title).toBe('Найдавніша');
   });
 });

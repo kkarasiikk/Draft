@@ -54,6 +54,13 @@ const TEXTS = {
           ? `«${g.deadlineTitle}» прострочено`
           : `«${g.deadlineTitle}» через ${g.deadline} ${plural(g.deadline, "день", "дні", "днів")}`);
       }
+      // Прострочена віха — теж момент, коли ще можна щось зробити; досі її
+      // бачив лише той, хто сам відкрив ціль.
+      if (g.milestone) {
+        parts.push(g.milestone.days < 0
+          ? `віха «${g.milestone.title}» мала бути ${Math.abs(g.milestone.days)} ${plural(Math.abs(g.milestone.days), "день", "дні", "днів")} тому`
+          : `віха «${g.milestone.title}» — сьогодні`);
+      }
       return { title, body: parts.length ? parts.join(" · ") : "Усе заплановане зроблено." };
     },
   },
@@ -171,7 +178,13 @@ async function sendDigests(now) {
       let goalsPart = null;
       try {
         const goalsSnap = await db.collection("users").doc(uid).collection("goals").get();
-        goalsPart = goalStreak.goalsDigest(goalsSnap.docs.map((d) => d.data()), today);
+        // Довжину цілі бере з createdAt: без неї поріг попередження про
+        // дедлайн лишився б однаковим для справи на два тижні й для цілі на
+        // вісім місяців.
+        goalsPart = goalStreak.goalsDigest(goalsSnap.docs.map((d) => d.data()), today, {
+          startIsoOf: (g) => (g && g.createdAt && typeof g.createdAt.toDate === "function"
+            ? goalStreak.isoOf(g.createdAt.toDate()) : null),
+        });
       } catch (err) {
         // Цілі не прочитались — підсумок по завданнях однаково має піти.
         console.error("goalsDigest:", err);
