@@ -187,6 +187,14 @@
     border:1px solid var(--border);background:transparent;color:var(--ink-muted);white-space:nowrap;}
   .tag-filter-chip.selected{background:var(--accent-light);color:var(--accent);border-color:transparent;font-weight:600;}
 
+  /* Ретроспектива: єдине місце, де закрита ціль лишає слід на екрані. */
+  .retro{margin-bottom:14px;}
+  .retro-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:8px;}
+  .retro-count{font-size:15px;font-weight:700;color:var(--ink);}
+  .retro-span{font-size:12.5px;color:var(--ink-muted);}
+  .retro-periods{display:flex;gap:6px;margin-bottom:12px;}
+  .goal-card-days{color:var(--ink-muted);}
+
   .category-chip{font-size:10.5px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap;display:inline-block;}
   .category-chip.health{background:var(--cat-health-light);color:var(--cat-health);}
   .category-chip.finance{background:var(--cat-finance-light);color:var(--cat-finance);}
@@ -659,6 +667,7 @@
     <div id="reviewBanner"></div>
     <div id="eveningCard"></div>
     <div class="status-filter-row" id="statusFilterRow"></div>
+    <div id="retroBlock"></div>
     <div id="goalsList"></div>
   </div>
   </div>

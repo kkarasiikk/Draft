@@ -337,3 +337,101 @@ test.describe('Пауза', () => {
     await expect(page.locator('.tag-filter-chip:has-text("На паузі")')).toBeVisible();
   });
 });
+
+test.describe('Ретроспектива завершених', () => {
+  // Ціль, закрита `daysAgo` днів тому, що прожила `lived` днів.
+  const closed = (id, title, daysAgo, lived) => goal({
+    id, title, status: 'done',
+    completedAt: shift(-daysAgo),
+    createdAt: { __ts: shift(-(daysAgo + lived)) },
+  });
+
+  const openDone = async (page, goals) => {
+    await openGoals(page, goals);
+    await page.click('.tag-filter-chip:has-text("Завершені")');
+  };
+
+  test('на активному списку ретроспективи немає — вона про озирання назад', async ({ page }) => {
+    await openGoals(page, [goal(), closed('d1', 'Закрита', 10, 40)]);
+    await expect(page.locator('#retroBlock .retro')).toHaveCount(0);
+  });
+
+  test('фільтр «Завершені» показує, скільки цілей закрито', async ({ page }) => {
+    await openDone(page, [closed('d1', 'Перша', 10, 40), closed('d2', 'Друга', 30, 12)]);
+    await expect(page.locator('.retro-count')).toHaveText('Закрито цілей: 2');
+  });
+
+  test('картка завершеної цілі каже, скільки та зайняла', async ({ page }) => {
+    await openDone(page, [closed('d1', 'Перша', 10, 40)]);
+    await expect(page.locator('[data-open-goal="d1"] .goal-card-days')).toHaveText('40 дн.');
+  });
+
+  test('ціль, закрита того ж дня, не показує «0 дн.»', async ({ page }) => {
+    await openDone(page, [closed('d1', 'Швидка', 5, 0)]);
+    await expect(page.locator('[data-open-goal="d1"] .goal-card-days')).toHaveText('того ж дня');
+  });
+
+  test('типова тривалість і розкид стоять поруч із кількістю', async ({ page }) => {
+    await openDone(page, [
+      closed('d1', 'Перша', 10, 40), closed('d2', 'Друга', 30, 12), closed('d3', 'Третя', 50, 20),
+    ]);
+    await expect(page.locator('.retro-span')).toHaveText('типово 20 дн. · від 12 до 40 дн.');
+  });
+
+  test('одна ціль — розкиду немає, і «від 40 до 40» не пишемо', async ({ page }) => {
+    await openDone(page, [closed('d1', 'Перша', 10, 40)]);
+    await expect(page.locator('.retro-span')).toHaveText('типово 40 дн.');
+  });
+
+  test('«За весь час» дістає те, що не влізло в рік', async ({ page }) => {
+    await openDone(page, [closed('d1', 'Свіжа', 10, 40), closed('old', 'Позаторішня', 500, 30)]);
+    await expect(page.locator('.retro-count')).toHaveText('Закрито цілей: 1');
+    await expect(page.locator('[data-open-goal="old"]')).toBeVisible();
+
+    await page.click('[data-retro=""]');
+    await expect(page.locator('.retro-count')).toHaveText('Закрито цілей: 2');
+  });
+
+  test('за рік нічого — блок каже про це, а не зникає разом із перемикачем', async ({ page }) => {
+    await openDone(page, [closed('old', 'Позаторішня', 500, 30)]);
+    await expect(page.locator('.retro-count')).toHaveText('За цей період нічого не закрито');
+    await expect(page.locator('[data-retro=""]')).toBeVisible();
+  });
+
+  test('не закрито жодної цілі — блока немає взагалі', async ({ page }) => {
+    await openDone(page, [goal({ id: 'a1', status: 'active' })]);
+    await expect(page.locator('#retroBlock .retro')).toHaveCount(0);
+  });
+
+  test('ретроспектива рахує лише свою вкладку', async ({ page }) => {
+    await openDone(page, [
+      closed('dm', 'Місячна', 10, 40),
+      goal({ id: 'dy', title: 'Річна', status: 'done', horizon: 'year', completedAt: shift(-20), createdAt: { __ts: shift(-60) } }),
+    ]);
+    await expect(page.locator('.retro-count')).toHaveText('Закрито цілей: 1');
+  });
+
+  test('закриття цілі проставляє дату — інакше тривалість нема з чого рахувати', async ({ page }) => {
+    await openGoals(page, [goal({
+      milestones: [{ id: 'm1', title: 'єдиний крок', done: true, doneAt: shift(-1) }],
+    })]);
+    await page.click('[data-open-goal="g1"]');
+    await page.click('#markDoneBtn');
+
+    await expect.poll(() => page.evaluate(() => window.__fbCalls.update.length)).toBeGreaterThan(0);
+    const upd = await page.evaluate(() => window.__fbCalls.update.at(-1));
+    expect(upd.payload.status).toBe('done');
+    expect(upd.payload.completedAt).toBe(iso(TODAY));
+  });
+
+  test('будь-який інший статус дати закриття по собі не лишає', async ({ page }) => {
+    await openGoals(page, [goal()]);
+    await page.click('[data-open-goal="g1"]');
+    await page.click('#pauseToggleBtn');
+
+    await expect.poll(() => page.evaluate(() => window.__fbCalls.update.length)).toBeGreaterThan(0);
+    const upd = await page.evaluate(() => window.__fbCalls.update.at(-1));
+    expect(upd.payload.status).toBe('paused');
+    expect(upd.payload.completedAt).toBeNull();
+  });
+});

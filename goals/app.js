@@ -115,6 +115,12 @@ const T = {
     dashboardEmptyTitle: 'Ще немає цілей', dashboardEmptySub: 'Додай першу ціль кнопкою внизу.',
     daysLeftLabel: (n) => `${n} дн. до дедлайну`, overdueLabel: 'Прострочено',
     milestonesCountSuffix: 'віх',
+    retroYear: 'За рік', retroAll: 'За весь час',
+    retroClosed: (n) => `Закрито цілей: ${n}`,
+    retroEmptyPeriod: 'За цей період нічого не закрито',
+    retroTypical: (n) => `типово ${n} дн.`,
+    retroRange: (a, b) => `від ${a} до ${b} дн.`,
+    goalSpanDays: (n) => `${n} дн.`, goalSpanSameDay: 'того ж дня',
     dpTodayBtn: 'Сьогодні', noDateLabel: 'Без дати',
     themeLabel: 'Тема', themeLight: 'Світла', themeDark: 'Темна', themeSystem: 'Системна',
     langLabel: 'Мова', logout: 'Вийти',
@@ -220,6 +226,12 @@ const T = {
     dashboardEmptyTitle: 'Пока нет целей', dashboardEmptySub: 'Добавь первую цель кнопкой внизу.',
     daysLeftLabel: (n) => `${n} дн. до дедлайна`, overdueLabel: 'Просрочено',
     milestonesCountSuffix: 'вех',
+    retroYear: 'За год', retroAll: 'За всё время',
+    retroClosed: (n) => `Закрыто целей: ${n}`,
+    retroEmptyPeriod: 'За этот период ничего не закрыто',
+    retroTypical: (n) => `обычно ${n} дн.`,
+    retroRange: (a, b) => `от ${a} до ${b} дн.`,
+    goalSpanDays: (n) => `${n} дн.`, goalSpanSameDay: 'в тот же день',
     dpTodayBtn: 'Сегодня', noDateLabel: 'Без даты',
     themeLabel: 'Тема', themeLight: 'Светлая', themeDark: 'Тёмная', themeSystem: 'Системная',
     langLabel: 'Язык', logout: 'Выйти',
@@ -325,6 +337,12 @@ const T = {
     dashboardEmptyTitle: 'Jeszcze brak celów', dashboardEmptySub: 'Dodaj pierwszy cel przyciskiem poniżej.',
     daysLeftLabel: (n) => `${n} dni do terminu`, overdueLabel: 'Po terminie',
     milestonesCountSuffix: 'kam.',
+    retroYear: 'Za rok', retroAll: 'Cały czas',
+    retroClosed: (n) => `Ukończonych celów: ${n}`,
+    retroEmptyPeriod: 'W tym okresie nic nie ukończono',
+    retroTypical: (n) => `zwykle ${n} dni`,
+    retroRange: (a, b) => `od ${a} do ${b} dni`,
+    goalSpanDays: (n) => `${n} dni`, goalSpanSameDay: 'tego samego dnia',
     dpTodayBtn: 'Dzisiaj', noDateLabel: 'Bez daty',
     themeLabel: 'Motyw', themeLight: 'Jasny', themeDark: 'Ciemny', themeSystem: 'Systemowy',
     langLabel: 'Język', logout: 'Wyloguj',
@@ -430,6 +448,12 @@ const T = {
     dashboardEmptyTitle: 'No goals yet', dashboardEmptySub: 'Add your first goal with the button below.',
     daysLeftLabel: (n) => `${n}d left`, overdueLabel: 'Overdue',
     milestonesCountSuffix: 'milestones',
+    retroYear: 'Past year', retroAll: 'All time',
+    retroClosed: (n) => `Goals closed: ${n}`,
+    retroEmptyPeriod: 'Nothing closed in this period',
+    retroTypical: (n) => `typically ${n}d`,
+    retroRange: (a, b) => `from ${a}d to ${b}d`,
+    goalSpanDays: (n) => `${n}d`, goalSpanSameDay: 'same day',
     dpTodayBtn: 'Today', noDateLabel: 'No date',
     themeLabel: 'Theme', themeLight: 'Light', themeDark: 'Dark', themeSystem: 'System',
     langLabel: 'Language', logout: 'Log out',
@@ -691,6 +715,8 @@ let unsubscribeGoals = null;
 let currentScreen = 'dashboard'; // 'dashboard' | 'detail' | 'review'
 let activeDetailGoalId = null;
 let statusFilter = 'active'; // null(all) | 'active' | 'paused' | 'done' | 'archived'
+// Вікно ретроспективи: 365 днів або null — за весь час.
+let retroWindowDays = 365;
 // Горизонт планування: дві вкладки внизу — «Місяць» і «Рік». Це не фільтр
 // поверх одного списку, а два різні питання: що я роблю ЦЬОГО МІСЯЦЯ і куди
 // я взагалі йду. Тримати їх в одному списку означало б, що дрібне щоразу
@@ -903,6 +929,7 @@ function renderDashboard() {
   renderReviewBanner();
   renderEveningCard();
   renderStatusFilterRow();
+  renderRetro();
   renderGoalsList();
 }
 
@@ -1003,6 +1030,54 @@ function renderStatusFilterRow() {
     btn.addEventListener('click', () => {
       statusFilter = btn.dataset.status || null;
       renderStatusFilterRow();
+      renderRetro();
+      renderGoalsList();
+    });
+  });
+}
+
+// Ретроспектива над списком «Завершені». Закрита ціль досі просто зникала:
+// статус міняється, картка випадає з активного списку — і рік роботи не
+// лишає на екрані жодного сліду. А для довгих цілей винагорода саме в
+// озиранні назад, і всі дані для нього вже лежать у записах.
+function renderRetro() {
+  const el = document.getElementById('retroBlock');
+  if (statusFilter !== 'done') { el.innerHTML = ''; return; }
+
+  const scoped = goalsOfHorizon();
+  const opts = { startIsoOf: createdIso };
+  // Якщо не закрито взагалі нічого — блок мовчить: порожній стан списку вже
+  // сказав усе, що треба, і другий раз цього повторювати не варто.
+  const ever = Review.retrospective(scoped, todayISO(), { ...opts, days: null });
+  if (!ever || !ever.count) { el.innerHTML = ''; return; }
+
+  const r = Review.retrospective(scoped, todayISO(), { ...opts, days: retroWindowDays });
+  const head = r.count
+    ? `<span class="retro-count">${escapeHtml(t('retroClosed', r.count))}</span>`
+    : `<span class="retro-count">${escapeHtml(t('retroEmptyPeriod'))}</span>`;
+  // Розкид показуємо лише тоді, коли він є: «від 40 до 40» — не інформація.
+  const spanParts = [];
+  if (r.medianDays !== null) spanParts.push(t('retroTypical', r.medianDays));
+  if (r.fastestDays !== null && r.fastestDays !== r.slowestDays) {
+    spanParts.push(t('retroRange', r.fastestDays, r.slowestDays));
+  }
+  const span = spanParts.length
+    ? `<span class="retro-span">${escapeHtml(spanParts.join(' · '))}</span>` : '';
+
+  const periods = [[365, t('retroYear')], [null, t('retroAll')]];
+  const chips = periods.map(([val, label]) =>
+    `<button type="button" class="tag-filter-chip${retroWindowDays === val ? ' selected' : ''}" data-retro="${val === null ? '' : val}">${escapeHtml(label)}</button>`
+  ).join('');
+
+  el.innerHTML = `
+    <div class="retro">
+      <div class="retro-periods">${chips}</div>
+      <div class="retro-head">${head}${span}</div>
+    </div>`;
+  el.querySelectorAll('[data-retro]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      retroWindowDays = btn.dataset.retro ? Number(btn.dataset.retro) : null;
+      renderRetro();
       renderGoalsList();
     });
   });
@@ -1018,6 +1093,14 @@ function goalCardHtml(goal) {
     const overdue = days < 0;
     const activeOverdue = overdue && goal.status === 'active';
     metaParts.push(`<span class="goal-card-deadline${activeOverdue ? ' overdue' : ''}">${escapeHtml(overdue ? t('overdueLabel') : t('daysLeftLabel', days))}</span>`);
+  }
+  // Скільки ціль зайняла — головне число ретроспективи, тож стоїть на самій
+  // картці, а не лише в підсумку над списком.
+  if (goal.status === 'done') {
+    const sp = Review.goalSpan(goal, { startIso: createdIso(goal) });
+    if (sp && sp.days !== null) {
+      metaParts.push(`<span class="goal-card-days">${escapeHtml(sp.days === 0 ? t('goalSpanSameDay') : t('goalSpanDays', sp.days))}</span>`);
+    }
   }
   if (prog && prog.kind === 'value') {
     metaParts.push(`<span>${escapeHtml(fmtValue(prog.current))} / ${escapeHtml(fmtValue(prog.target))} ${escapeHtml(prog.unit)}</span>`);
@@ -1763,9 +1846,15 @@ async function addJournalEntry(goalId, text) {
 
 async function setGoalStatus(goalId, status) {
   if (!auth.currentUser) return;
-  await db.collection('users').doc(auth.currentUser.uid).collection('goals').doc(goalId).update({
+  // completedAt — день, коли ціль закрили. Без нього ретроспектива могла б
+  // хіба вгадувати тривалість за останнім слідом у даних; а якщо ціль
+  // відкривають назад, стара дата має піти разом зі статусом.
+  const patch = {
     status, updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-  }).catch((err) => console.error('setGoalStatus:', err));
+    completedAt: status === 'done' ? todayISO() : null,
+  };
+  await db.collection('users').doc(auth.currentUser.uid).collection('goals').doc(goalId)
+    .update(patch).catch((err) => console.error('setGoalStatus:', err));
 }
 
 // ---- Форма цілі (створення / редагування) ----

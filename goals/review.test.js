@@ -297,3 +297,156 @@ describe('reviewItem — один рядок огляду', () => {
     expect(item.pace.enough).toBe(true);
   });
 });
+
+describe('closedOn — коли ціль закрили', () => {
+  test('активну ціль ніхто не закривав', () => {
+    expect(R.closedOn(goal({ completedAt: '2026-08-01' }))).toBeNull();
+  });
+
+  test('архівна — не завершена: ретроспектива про досягнення, не про кинуте', () => {
+    expect(R.closedOn(goal({ status: 'archived', completedAt: '2026-08-01' }))).toBeNull();
+  });
+
+  test('записана дата закриття важливіша за здогадки', () => {
+    const g = goal({
+      status: 'done', completedAt: '2026-08-10',
+      checkins: ['2026-08-20'],
+    });
+    expect(R.closedOn(g)).toBe('2026-08-10');
+  });
+
+  test('ціль, закрита до появи поля, датується останнім слідом у даних', () => {
+    const g = goal({
+      status: 'done',
+      checkins: ['2026-03-01'],
+      progressLog: [{ date: '2026-04-02', delta: 1 }],
+      milestones: [{ id: 'm1', title: 'a', done: true, doneAt: '2026-05-09' }],
+    });
+    expect(R.closedOn(g)).toBe('2026-05-09');
+  });
+
+  test('ні дати, ні слідів — дати закриття немає, і вигадувати її не треба', () => {
+    expect(R.closedOn(goal({ status: 'done' }))).toBeNull();
+  });
+});
+
+describe('goalSpan — скільки ціль прожила', () => {
+  test('рахує від заведення до закриття', () => {
+    const g = goal({ status: 'done', completedAt: '2026-03-11' });
+    expect(R.goalSpan(g, { startIso: '2026-01-01' }).days).toBe(69);
+  });
+
+  test('заведена й закрита того самого дня — нуль днів, а не один', () => {
+    const g = goal({ status: 'done', completedAt: '2026-03-11' });
+    expect(R.goalSpan(g, { startIso: '2026-03-11' }).days).toBe(0);
+  });
+
+  test('закриття раніше за заведення не дає відʼємної тривалості', () => {
+    const g = goal({ status: 'done', completedAt: '2026-01-01' });
+    expect(R.goalSpan(g, { startIso: '2026-03-11' }).days).toBe(0);
+  });
+
+  test('без дня заведення ціль лишається, але тривалості в неї немає', () => {
+    const g = goal({ status: 'done', completedAt: '2026-03-11' });
+    const sp = R.goalSpan(g, {});
+    expect(sp.doneIso).toBe('2026-03-11');
+    expect(sp.days).toBeNull();
+  });
+
+  test('незакрита ціль тривалості не має', () => {
+    expect(R.goalSpan(goal(), { startIso: '2026-01-01' })).toBeNull();
+  });
+});
+
+describe('retrospective — що закрито за період', () => {
+  /** Завершена ціль із датою закриття. */
+  const done = (id, completedAt, over = {}) =>
+    goal({ id, status: 'done', completedAt, ...over });
+
+  const starts = {
+    g1: '2026-01-01', a: '2026-01-01', b: '2026-06-01', c: '2026-08-01',
+    long: '2025-01-01',
+  };
+  const startIsoOf = (g) => starts[g.id] || null;
+
+  test('бере лише завершені й лише за вікном', () => {
+    const r = R.retrospective([
+      done('a', '2026-08-20'),
+      done('b', '2025-02-02'),      // задовго до вікна
+      goal({ id: 'c' }),            // ще активна
+      goal({ id: 'd', status: 'archived' }),
+    ], TODAY, { days: 365, startIsoOf });
+    expect(r.count).toBe(1);
+    expect(r.items[0].id).toBe('a');
+  });
+
+  test('без вікна видно все, що колись закрито', () => {
+    const r = R.retrospective([
+      done('a', '2026-08-20'), done('b', '2021-02-02'),
+    ], TODAY, { days: null, startIsoOf });
+    expect(r.count).toBe(2);
+    expect(r.from).toBeNull();
+  });
+
+  test('найсвіжіше зверху — ретроспективу читають з кінця', () => {
+    const r = R.retrospective([
+      done('a', '2026-03-01'), done('c', '2026-08-15'), done('b', '2026-06-20'),
+    ], TODAY, { days: 365, startIsoOf });
+    expect(r.items.map((i) => i.id)).toEqual(['c', 'b', 'a']);
+  });
+
+  test('дата закриття з майбутнього — це збій годинника, а не досягнення', () => {
+    const r = R.retrospective([done('a', '2027-01-01')], TODAY, { days: 365, startIsoOf });
+    expect(r.count).toBe(0);
+  });
+
+  test('медіана, а не середнє: одна довга ціль не розтягує решту', () => {
+    // 9, 10 і 587 днів. Середнє сказало б «зазвичай пів року» — брехня про
+    // дві цілі з трьох. Медіана каже 10 днів.
+    const r = R.retrospective([
+      done('a', '2026-01-10'),      // старт 2026-01-01 → 9
+      done('b', '2026-06-11'),      // старт 2026-06-01 → 10
+      done('long', '2026-08-11'),   // старт 2025-01-01 → 587
+    ], TODAY, { days: 365, startIsoOf });
+    expect(r.medianDays).toBe(10);
+    expect(r.fastestDays).toBe(9);
+    expect(r.slowestDays).toBe(587);
+  });
+
+  test('парна кількість — медіана між двома середніми', () => {
+    const r = R.retrospective([
+      done('a', '2026-01-10'),      // 9
+      done('b', '2026-06-11'),      // 10
+    ], TODAY, { days: 365, startIsoOf });
+    expect(r.medianDays).toBe(10);   // (9 + 10) / 2, округлено
+  });
+
+  test('ціль без відомого початку рахується в кількості, але не в медіані', () => {
+    const r = R.retrospective([
+      done('a', '2026-01-10'),          // 9 днів
+      done('zz', '2026-08-01'),         // початку немає
+    ], TODAY, { days: 365, startIsoOf });
+    expect(r.count).toBe(2);
+    expect(r.items.find((i) => i.id === 'zz').days).toBeNull();
+    expect(r.medianDays).toBe(9);
+  });
+
+  test('нічого не закрито — порожня ретроспектива без чисел', () => {
+    const r = R.retrospective([goal()], TODAY, { days: 365, startIsoOf });
+    expect(r.count).toBe(0);
+    expect(r.medianDays).toBeNull();
+  });
+
+  test('горизонт і прогрес їдуть разом із ціллю — картці більше нічого рахувати', () => {
+    const r = R.retrospective([
+      done('a', '2026-08-20', { horizon: 'month', targetValue: 100, currentValue: 100 }),
+    ], TODAY, { days: 365, startIsoOf });
+    expect(r.items[0].horizon).toBe('month');
+    expect(r.items[0].progress.pct).toBe(100);
+  });
+
+  test('старі цілі без horizon вважаються річними — як і всюди в модулі', () => {
+    const r = R.retrospective([done('a', '2026-08-20')], TODAY, { days: 365, startIsoOf });
+    expect(r.items[0].horizon).toBe('year');
+  });
+});

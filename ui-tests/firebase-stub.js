@@ -15,9 +15,29 @@
   // ДО завантаження сторінки.
   const seed = window.__fbSeed || {};
 
+  // Firestore віддає дати як Timestamp з .toDate(), а сід їде в сторінку через
+  // серіалізацію — методи в ній не виживають. Тому тест пише {__ts: '2026-01-01'},
+  // а заглушка перетворює це на Timestamp, як і справжня база. Полудень, а не
+  // північ: локальний день не має залежати від зсуву часового поясу.
+  function revive(doc) {
+    if (!doc || typeof doc !== 'object') return doc;
+    const out = {};
+    Object.keys(doc).forEach((k) => {
+      const v = doc[k];
+      if (v && typeof v === 'object' && typeof v.__ts === 'string') {
+        const at = new Date(v.__ts + 'T12:00:00');
+        out[k] = { toDate: () => at };
+      } else out[k] = v;
+    });
+    return out;
+  }
+
   function snapOf(list) {
     return {
-      docs: (list || []).map((d) => ({ id: d.id, data: () => d })),
+      docs: (list || []).map((d) => {
+        const doc = revive(d);
+        return { id: d.id, data: () => doc };
+      }),
       empty: !(list && list.length),
     };
   }

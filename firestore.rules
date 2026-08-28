@@ -353,10 +353,14 @@ service cloud.firestore {
                  // двома списками, які нічого одне про одного не знають.
                  (!('parentGoalId' in d) || d.parentGoalId == null ||
                    (d.parentGoalId is string && d.parentGoalId.size() <= 64)) &&
+                 // День, коли ціль закрили. Ретроспектива без нього вміє хіба
+                 // вгадувати тривалість за останнім слідом у даних.
+                 (!('completedAt' in d) || d.completedAt == null ||
+                   (d.completedAt is string && d.completedAt.size() == 10)) &&
                  d.createdAt is timestamp && d.updatedAt is timestamp &&
                  d.keys().hasOnly(['title', 'category', 'why', 'targetDate', 'status',
                    'targetValue', 'currentValue', 'unit', 'rescues', 'blockers',
-                   'progressLog', 'savingsGoalId', 'reviewedAt', 'horizon', 'parentGoalId',
+                   'progressLog', 'savingsGoalId', 'reviewedAt', 'horizon', 'parentGoalId', 'completedAt',
                    'milestones', 'checkins', 'journal', 'createdAt', 'updatedAt']);
         }
         allow read, delete: if isOwner(uid);
