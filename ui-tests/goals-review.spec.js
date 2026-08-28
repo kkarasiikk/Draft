@@ -72,11 +72,19 @@ test.describe('Дві вкладки: місяць і рік', () => {
     await expect(page.locator('.empty-state')).toHaveCount(0);
   });
 
-  test('плитки згори рахують ту вкладку, яку видно', async ({ page }) => {
+  test('вкладка показує рівно свої цілі, скільки б їх не було', async ({ page }) => {
+    // Плитки з підсумками згори прибрані, але сам рахунок за вкладкою лишився
+    // сенсом: у списку має бути тільки те, що належить видимому горизонту.
     await openGoals(page, [monthly, yearly, goal({ id: 'gy2', title: 'Ще річна', horizon: 'year' })]);
-    await expect(page.locator('.summary-strip').first()).toContainText('1');
+    await expect(page.locator('[data-open-goal]')).toHaveCount(1);
     await page.click('#bnYear');
-    await expect(page.locator('.summary-strip').first()).toContainText('2');
+    await expect(page.locator('[data-open-goal]')).toHaveCount(2);
+  });
+
+  test('смужки з підсумками згори більше немає', async ({ page }) => {
+    await openGoals(page, [monthly]);
+    await expect(page.locator('#summaryStrip')).toHaveCount(0);
+    await expect(page.locator('.summary-tile')).toHaveCount(0);
   });
 
   test('нова ціль успадковує вкладку, з якої її заводять', async ({ page }) => {

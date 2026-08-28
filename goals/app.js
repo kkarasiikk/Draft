@@ -105,7 +105,6 @@ const T = {
     reason_mood: 'Не було настрою', reason_other: 'Інше',
     journalPlaceholder: 'Що сьогодні зробив(ла) для цієї цілі?',
     journalEmpty: 'Ще нема нотаток', journalSectionLabel: 'Щоденник',
-    summaryActiveLabel: 'Активні', summaryStreakLabel: 'Серія', summaryDoneMonthLabel: 'За місяць',
     badge_streak7: '🔥 Серія 7 днів', badge_firstDone: '🏆 Перша ціль завершена',
     badge_firstStep: '🌱 Перший крок', badge_perfect: '💯 Ціль без прогалин',
     dashboardEmptyTitle: 'Ще немає цілей', dashboardEmptySub: 'Додай першу ціль кнопкою внизу.',
@@ -206,7 +205,6 @@ const T = {
     reason_mood: 'Не было настроения', reason_other: 'Другое',
     journalPlaceholder: 'Что сегодня сделал(а) для этой цели?',
     journalEmpty: 'Ещё нет заметок', journalSectionLabel: 'Дневник',
-    summaryActiveLabel: 'Активные', summaryStreakLabel: 'Серия', summaryDoneMonthLabel: 'За месяц',
     badge_streak7: '🔥 Серия 7 дней', badge_firstDone: '🏆 Первая цель завершена',
     badge_firstStep: '🌱 Первый шаг', badge_perfect: '💯 Цель без пропусков',
     dashboardEmptyTitle: 'Пока нет целей', dashboardEmptySub: 'Добавь первую цель кнопкой внизу.',
@@ -307,7 +305,6 @@ const T = {
     reason_mood: 'Brak nastroju', reason_other: 'Inne',
     journalPlaceholder: 'Co dziś zrobiłeś(aś) dla tego celu?',
     journalEmpty: 'Jeszcze brak notatek', journalSectionLabel: 'Dziennik',
-    summaryActiveLabel: 'Aktywne', summaryStreakLabel: 'Seria', summaryDoneMonthLabel: 'W tym mies.',
     badge_streak7: '🔥 Seria 7 dni', badge_firstDone: '🏆 Pierwszy ukończony cel',
     badge_firstStep: '🌱 Pierwszy krok', badge_perfect: '💯 Cel bez przerw',
     dashboardEmptyTitle: 'Jeszcze brak celów', dashboardEmptySub: 'Dodaj pierwszy cel przyciskiem poniżej.',
@@ -408,7 +405,6 @@ const T = {
     reason_mood: 'Not in the mood', reason_other: 'Other',
     journalPlaceholder: 'What did you do for this goal today?',
     journalEmpty: 'No notes yet', journalSectionLabel: 'Journal',
-    summaryActiveLabel: 'Active', summaryStreakLabel: 'Streak', summaryDoneMonthLabel: 'This month',
     badge_streak7: '🔥 7-day streak', badge_firstDone: '🏆 First goal completed',
     badge_firstStep: '🌱 First step', badge_perfect: '💯 Goal with no gaps',
     dashboardEmptyTitle: 'No goals yet', dashboardEmptySub: 'Add your first goal with the button below.',
@@ -856,21 +852,6 @@ function daysToDeadline(targetDate) {
   const target = parseISODate(targetDate);
   return Math.round((target - today) / 86400000);
 }
-function computeSummary(list) {
-  const activeCount = list.filter((g) => g.status === 'active').length;
-  const bestStreak = list.reduce((max, g) => Math.max(max, computeStreak(g.checkins)), 0);
-  const now = new Date();
-  // Наближення: рахуємо по updatedAt, а не окремому полі completedAt (якого
-  // немає в схемі) — якщо вже завершену ціль відредагувати іншого місяця,
-  // вона випаде з підрахунку. Прийнятно для інформативної плашки на
-  // дашборді, не для точної статистики.
-  const completedThisMonth = list.filter((g) => {
-    if (g.status !== 'done' || !g.updatedAt || typeof g.updatedAt.toDate !== 'function') return false;
-    const d = g.updatedAt.toDate();
-    return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
-  }).length;
-  return { activeCount, bestStreak, completedThisMonth };
-}
 function computeBadges(list) {
   const badges = [];
   if (list.some((g) => computeStreak(g.checkins) >= 7)) badges.push('badge_streak7');
@@ -897,7 +878,6 @@ function renderCurrentScreen() {
 }
 
 function renderDashboard() {
-  renderSummaryStrip();
   renderBadgesRow();
   renderReviewBanner();
   renderEveningCard();
@@ -983,14 +963,6 @@ function renderEveningCard() {
   host.querySelectorAll('[data-rescue]').forEach((btn) => {
     btn.addEventListener('click', () => rescueStreak(btn.dataset.rescue));
   });
-}
-
-function renderSummaryStrip() {
-  const s = computeSummary(goalsOfHorizon());
-  document.getElementById('summaryStrip').innerHTML = `
-    <div class="summary-tile"><div class="summary-tile-value">${s.activeCount}</div><div class="summary-tile-label">${escapeHtml(t('summaryActiveLabel'))}</div></div>
-    <div class="summary-tile"><div class="summary-tile-value">${s.bestStreak}</div><div class="summary-tile-label">${escapeHtml(t('summaryStreakLabel'))}</div></div>
-    <div class="summary-tile"><div class="summary-tile-value">${s.completedThisMonth}</div><div class="summary-tile-label">${escapeHtml(t('summaryDoneMonthLabel'))}</div></div>`;
 }
 
 function renderBadgesRow() {
