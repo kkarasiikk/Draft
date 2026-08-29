@@ -41,43 +41,40 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-functions-compat.js"></script>
 <style>
   :root{
-    --bg:#F4F6FB;
-    --bg-radial: radial-gradient(circle at 50% 0%, #ffffff 0%, #f8f9fb 40%, #eef1f5 100%);
+    --bg:#FFFFFF;
     /* Колір смуги над сторінкою — області статус-бару в standalone на iOS.
-       Шар із градієнтом (.background) туди НЕ дістає: у встановленому
-       застосунку він розтягується на viewport, а смуга статус-бару лежить
-       поза ним. Малює її тло html, тож воно й мусить дорівнювати ПОЧАТКУ
-       --bg-radial над ним — інакше вгорі видно шов. Знизу градієнт дістає,
-       тому там нічого міняти не треба. */
-    --status-bar: #ffffff;
-    --surface:linear-gradient(135deg, rgba(255,255,255,.78), rgba(255,255,255,.46));
+       Шар .background туди НЕ дістає: у встановленому застосунку він
+       розтягується на viewport, а смуга статус-бару лежить поза ним. Малює її
+       тло html, тож воно мусить дорівнювати --bg — інакше вгорі видно шов.
+       Відколи тло рівне, це просто той самий колір. */
+    --status-bar: #FFFFFF;
+    --surface:#F5F6F8;
+    --surface-flat:#EFF1F4;
     --ink:#26262B; --ink-soft:#4E4E58; --ink-muted:#84838F;
-    --border:rgba(255,255,255,.85);
-    --card-border-hover: rgba(255,255,255,1);
-    --card-hover-shadow: 0 25px 70px rgba(40,50,70,.12), 0 0 50px rgba(170,190,255,.18);
-    --card-shine: rgba(255,255,255,.35);
-    --ring-track: rgba(38,38,43,.10);
-    --glass-btn-bg: rgba(255,255,255,.55); --glass-btn-bg-hover: rgba(255,255,255,.85); --glass-btn-border: rgba(255,255,255,.9);
-    --glass-blur:25px; --glass-shadow:0 15px 50px rgba(40,50,70,.08), inset 0 1px 1px rgba(255,255,255,.9);
+    --border:#E9EBF0;
+    --card-bg:#F5F6F8; --card-border:#E9EBF0; --card-border-hover:#DDE0E7;
+    --card-hover-shadow: 0 6px 18px rgba(20,25,40,.06);
+    --control-bg:#F0F1F5;
+    --expense-light:rgba(201,104,63,.10); --accent-light:rgba(74,111,165,.10);
+    --glass-btn-bg:#F0F1F5; --glass-btn-bg-hover:#E7E9EF; --glass-btn-border:#E2E4EA;
+    --glass-blur:0px; --glass-shadow:0 1px 2px rgba(20,25,40,.04);
     --accent:#4A6FA5; --expense:#C9683F; --income:#4F9C74;
-    --top-glow-opacity: 1; --beam-opacity: 0;
     color-scheme: light;
   }
   [data-theme="dark"]{
-    --bg:#050506;
-    --bg-radial: radial-gradient(circle at 50% 0%, #1a1b1f 0%, #0c0d0f 42%, #050506 100%);
-    --status-bar: #1a1b1f;
-    --surface:linear-gradient(135deg, rgba(255,255,255,.085), rgba(255,255,255,.025));
+    --bg:#0B0B0E;
+    --status-bar: #0B0B0E;
+    --surface:#17181C;
+    --surface-flat:#1E1F24;
     --ink:#ffffff; --ink-soft:#a9acb4; --ink-muted:#75787f;
-    --border:rgba(255,255,255,.12);
-    --card-border-hover: rgba(255,255,255,.22);
-    --card-hover-shadow: 0 30px 80px rgba(0,0,0,.4), 0 0 60px rgba(160,170,255,.10);
-    --card-shine: rgba(255,255,255,.08);
-    --ring-track: rgba(255,255,255,.13);
-    --glass-btn-bg: rgba(255,255,255,.065); --glass-btn-bg-hover: rgba(255,255,255,.12); --glass-btn-border: rgba(255,255,255,.16);
-    --glass-blur:25px; --glass-shadow:0 20px 60px rgba(0,0,0,.25), inset 0 1px 1px rgba(255,255,255,.08);
+    --border:#26272D;
+    --card-bg:#17181C; --card-border:#26272D; --card-border-hover:#33353C;
+    --card-hover-shadow: 0 6px 18px rgba(0,0,0,.35);
+    --control-bg:#1C1D22;
+    --expense-light:rgba(227,154,118,.14); --accent-light:rgba(143,174,224,.14);
+    --glass-btn-bg:#1C1D22; --glass-btn-bg-hover:#25262C; --glass-btn-border:#2E2F36;
+    --glass-blur:0px; --glass-shadow:0 1px 2px rgba(0,0,0,.35);
     --accent:#8FA6E0; --expense:#E39A76; --income:#7FCB9E;
-    --top-glow-opacity: .1; --beam-opacity: 1;
     color-scheme: dark;
   }
   *{box-sizing:border-box;}
@@ -94,36 +91,24 @@
     -webkit-tap-highlight-color:transparent;overscroll-behavior-y:none;-webkit-overflow-scrolling:touch;
     transition:color .2s ease;
   }
-  /* Шар зі світлом. Він лежить під вмістом (z-index:-1), і саме тому в body
-     НЕ МОЖЕ бути власного тла: body — звичайний потоковий нащадок html, а
-     потокові нащадки малюються ПІСЛЯ відʼємних z-index. Тобто непрозоре тло
-     body зафарбовувало це світло повністю, і воно не було видно ніколи —
-     крім одного випадку: коли відкривалось меню. У .app-menu є
-     backdrop-filter, а він змушує браузер зібрати композицію заново, і шар
-     на мить проступав. Звідси й враження, що світло «вмикає» бургер. */
+  /* Тло сторінки. Лежить під вмістом (z-index:-1), і саме тому в body НЕ МОЖЕ
+     бути власного тла: body — звичайний потоковий нащадок html, а потокові
+     нащадки малюються ПІСЛЯ відʼємних z-index, тож непрозоре тло body
+     зафарбувало б цей шар повністю. Відколи тло рівне, шар малює просто
+     --bg — той самий колір, що й html під смугою статус-бару, тож шва вгорі
+     не буває за побудовою. */
   .background{
-    position:fixed; inset:0; z-index:-1; overflow:hidden;
-    background: var(--bg-radial); transition: background .2s ease;
+    position:fixed; inset:0; z-index:-1;
+    background: var(--bg); transition: background .2s ease;
   }
-  .bg-top-glow{position:absolute; left:50%; top:-420px; width:1300px; height:780px; transform:translateX(-50%);
-    border-radius:50%; background:radial-gradient(circle at 50% 35%, rgba(255,255,255,.95) 0%, rgba(255,255,255,.5) 32%, rgba(255,255,255,0) 66%);
-    filter:blur(30px); opacity:var(--top-glow-opacity); transition:opacity .2s ease;}
-  .bg-top-ring{position:absolute; left:50%; top:-1180px; width:1500px; height:1500px; transform:translateX(-50%);
-    border-radius:50%;
-    background:conic-gradient(from 205deg at 50% 50%, transparent 0deg, rgba(255,255,255,.85) 22deg, rgba(255,255,255,0) 62deg, transparent 360deg);
-    filter:blur(4px); opacity:var(--top-glow-opacity); transition:opacity .2s ease;}
-  .bg-beam-tl{position:absolute; top:-90px; left:-240px; width:720px; height:130px; transform:rotate(35deg); border-radius:999px;
-    background:linear-gradient(90deg, transparent, rgba(255,255,255,.32), transparent); filter:blur(42px);
-    opacity:var(--beam-opacity); transition:opacity .2s ease;}
-  .bg-beam-br{position:absolute; bottom:-140px; right:-220px; width:760px; height:140px; transform:rotate(35deg); border-radius:999px;
-    background:linear-gradient(90deg, transparent, rgba(255,210,225,.20), transparent); filter:blur(46px);
-    opacity:var(--beam-opacity); transition:opacity .2s ease;}
-
   .wrap{max-width:480px;margin:0 auto;padding:20px 20px 48px;}
 
-  /* ---- Верхня панель: гамбургер-меню зліва (тема / мова / вихід) ---- */
+  /* ---- Верхня панель: логотип зліва, гамбургер справа (тема / мова / вихід) ---- */
   .home-topbar{display:flex;align-items:center;justify-content:flex-start;margin-bottom:8px;}
-  .home-brand{font-size:23px;font-weight:800;letter-spacing:-0.03em;color:var(--ink);padding-left:4px;}
+  /* Ті самі значення, що в .app-topbar-brand решти сторінок: логотип має
+     виглядати однаково скрізь, а не дрібнішати на головній. */
+  .home-brand{font-family:'Inter',sans-serif;font-size:30px;font-weight:900;letter-spacing:-0.04em;
+    line-height:1;color:var(--ink);}
   .topbar-spacer{flex-grow:1;}
   .menu-btn{background:none;border:none;cursor:pointer;color:var(--ink);padding:13px;display:flex;border-radius:10px;transition:background .2s, transform .15s;touch-action:manipulation;}
   .menu-btn:hover{background:var(--glass-btn-bg-hover);}
@@ -139,9 +124,8 @@
   .menu-btn.open .menu-btn-lines span:nth-child(3){top:7px; transform:rotate(-45deg);}
   .app-menu-overlay{position:fixed;inset:0;z-index:55;display:none;}
   .app-menu-overlay.show{display:block;}
-  .app-menu{position:absolute;top:calc(62px + env(safe-area-inset-top));left:13px;background:var(--surface);
+  .app-menu{position:absolute;top:calc(62px + env(safe-area-inset-top));right:13px;background:var(--surface);
     border:1px solid var(--border);border-radius:16px;box-shadow:var(--glass-shadow);
-    backdrop-filter: blur(var(--glass-blur)) saturate(150%);-webkit-backdrop-filter: blur(var(--glass-blur)) saturate(150%);
     padding:14px;min-width:220px;max-width:min(280px, calc(100vw - 32px));}
   .app-menu-label{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-muted);margin:0 0 6px;padding:0 2px;}
   .app-menu-divider{height:1px;background:var(--border);margin:12px 0;}
@@ -162,7 +146,7 @@
 
   /* ---- Діалог експорту ---- */
   .export-overlay{position:fixed;inset:0;z-index:60;display:none;align-items:flex-end;justify-content:center;
-    background:var(--overlay);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);}
+    background:var(--overlay);}
   .export-overlay.show{display:flex;}
   /* Системна смуга гортання з кнопками-стрілками випадає зі стилю шитів:
      власна — тонка й напівпрозора, як у чаті помічника. */
@@ -172,7 +156,6 @@
   .export-sheet::-webkit-scrollbar-thumb{background:var(--card-border-hover);border-radius:999px;}
   .export-sheet{background:var(--surface);border-radius:26px 26px 0 0;width:100%;max-width:480px;
     padding:20px 20px calc(24px + env(safe-area-inset-bottom));max-height:88vh;overflow-y:auto;
-    backdrop-filter:blur(var(--glass-blur)) saturate(150%);-webkit-backdrop-filter:blur(var(--glass-blur)) saturate(150%);
     box-shadow:var(--glass-shadow);}
   .export-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;}
   .export-title{font-family:'Inter',sans-serif;font-size:18px;font-weight:700;color:var(--ink);}
@@ -201,7 +184,7 @@
   @media (min-width:880px){
     .wrap{max-width:none;margin:0;padding:0 40px 48px;}
     .home-topbar{padding-top:28px;}
-    .app-menu{top:74px;left:33px;}
+    .app-menu{top:74px;right:33px;}
     .sections, .today-head, .panel, .cal{max-width:720px;margin-left:auto;margin-right:auto;}
   }
 
@@ -306,7 +289,6 @@
   .spinner{width:32px;height:32px;border-radius:50%;border:3px solid var(--glass-btn-border);border-top-color:var(--accent);animation:spin .8s linear infinite;}
   @keyframes spin{to{transform:rotate(360deg);}}
   .auth-box{max-width:360px;width:100%;background:var(--surface);border:1px solid var(--border);border-radius:26px;padding:32px 26px;
-    backdrop-filter: blur(var(--glass-blur)) saturate(150%);-webkit-backdrop-filter: blur(var(--glass-blur)) saturate(150%);
     box-shadow: var(--glass-shadow);}
   .auth-logo{font-size:26px;font-weight:800;letter-spacing:-0.02em;margin-bottom:2px;}
   .auth-title{font-size:20px;font-weight:700;margin-bottom:6px;letter-spacing:-0.01em;}
@@ -336,12 +318,7 @@
 </style>
 </head>
 <body>
-  <div class="background" aria-hidden="true">
-    <div class="bg-top-glow"></div>
-    <div class="bg-top-ring"></div>
-    <div class="bg-beam-tl"></div>
-    <div class="bg-beam-br"></div>
-  </div>
+  <div class="background" aria-hidden="true"></div>
 
   <!-- ---- Нейтральний екран, поки Firebase перевіряє збережену сесію ---- -->
   <div id="authLoading" aria-hidden="true"><div class="spinner"></div></div>

@@ -37,22 +37,19 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
 <style>
   :root{
-    --bg:#EDEEF3;
-    --bg-radial: radial-gradient(circle at top, #ffffff 0%, #eceef4 45%, #dfe1ea 100%);
+    --bg:#FFFFFF;
     /* Колір смуги над сторінкою — області статус-бару в standalone на iOS.
-       Шар із градієнтом (.background) туди НЕ дістає: у встановленому
-       застосунку він розтягується на viewport, а смуга статус-бару лежить
-       поза ним. Малює її тло html, тож воно й мусить дорівнювати ПОЧАТКУ
-       --bg-radial над ним — інакше вгорі видно шов. Знизу градієнт дістає,
-       тому там нічого міняти не треба. */
-    --status-bar: #ffffff;
-    --blob1:#ffffffb0; --blob2:#8fa6e070;
-    --surface:linear-gradient(155deg, rgba(255,255,255,.72), rgba(255,255,255,.38));
-    --surface-flat: rgba(255,255,255,.5);
+       Шар .background туди НЕ дістає: у встановленому застосунку він
+       розтягується на viewport, а смуга статус-бару лежить поза ним. Малює її
+       тло html, тож воно мусить дорівнювати --bg — інакше вгорі видно шов.
+       Відколи тло рівне, це просто той самий колір. */
+    --status-bar: #FFFFFF;
+    --surface:#F5F6F8;
+    --surface-flat:#EFF1F4;
     --ink:#26262B; --ink-soft:#4E4E58; --ink-muted:#84838F;
-    --border:rgba(255,255,255,.55); --income:#4F9C74; --income-light:rgba(79,156,116,.14); --expense:#C9683F; --expense-light:rgba(201,104,63,.13); --accent:#4A6FA5; --accent-light:rgba(74,111,165,.13);
-    --control-bg:rgba(255,255,255,.35); --overlay:rgba(30,32,40,.28);
-    --glass-blur:22px; --glass-shadow:0 8px 32px rgba(40,44,70,.10), inset 0 1px 0 rgba(255,255,255,.6);
+    --border:#E9EBF0; --income:#4F9C74; --income-light:rgba(79,156,116,.14); --expense:#C9683F; --expense-light:rgba(201,104,63,.13); --accent:#4A6FA5; --accent-light:rgba(74,111,165,.13);
+    --control-bg:#F0F1F5; --overlay:rgba(30,32,40,.28);
+    --glass-blur:0px; --glass-shadow:0 1px 2px rgba(20,25,40,.04);
     --card-bg: rgba(20,25,40,.035); --card-border: rgba(20,25,40,.10); --card-border-hover: rgba(20,25,40,.22);
     --card-glare: linear-gradient(135deg, rgba(255,255,255,.55), rgba(255,255,255,0));
     --card-hover-shadow: 0 20px 80px rgba(20,25,40,.10), 0 0 60px rgba(20,25,40,.05);
@@ -63,15 +60,13 @@
   }
   [data-theme="dark"]{
     --bg:#0B0B0E;
-    --bg-radial: radial-gradient(circle at top, #353535 0%, #181818 45%, #0d0d0d 100%);
-    --status-bar: #353535;
-    --blob1:#ffffff15; --blob2:#c48fe040;
-    --surface:linear-gradient(155deg, rgba(255,255,255,.10), rgba(255,255,255,.02));
-    --surface-flat: rgba(255,255,255,.06);
+    --status-bar: #0B0B0E;
+    --surface:#17181C;
+    --surface-flat:#1E1F24;
     --ink:#EFEEF3; --ink-soft:#C4C2CE; --ink-muted:#8E8C99;
-    --border:rgba(255,255,255,.12); --income:#7FCB9E; --income-light:rgba(127,203,158,.14); --expense:#E39A76; --expense-light:rgba(227,154,118,.14);
-    --accent:#6F93D6; --accent-light:rgba(143,174,224,.16); --control-bg:rgba(255,255,255,.05); --overlay:rgba(0,0,0,.55);
-    --glass-blur:22px; --glass-shadow:0 8px 32px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.06);
+    --border:#26272D; --income:#7FCB9E; --income-light:rgba(127,203,158,.14); --expense:#E39A76; --expense-light:rgba(227,154,118,.14);
+    --accent:#6F93D6; --accent-light:rgba(143,174,224,.16); --control-bg:#1C1D22; --overlay:rgba(0,0,0,.55);
+    --glass-blur:0px; --glass-shadow:0 1px 2px rgba(0,0,0,.35);
     --card-bg: rgba(255,255,255,.06); --card-border: rgba(255,255,255,.12); --card-border-hover: rgba(255,255,255,.25);
     --card-glare: linear-gradient(135deg, rgba(255,255,255,.12), rgba(255,255,255,0));
     --card-hover-shadow: 0 20px 80px rgba(255,255,255,.08), 0 0 60px rgba(255,255,255,.04);
@@ -99,24 +94,14 @@
      власного тла: body — звичайний потоковий нащадок html, а потокові
      нащадки малюються ПІСЛЯ відʼємних z-index. Непрозоре тло body
      зафарбовувало і градієнт, і обидві плями повністю. */
-  .background{position:fixed; inset:0; z-index:-1; overflow:hidden; background: var(--bg-radial); transition: background .2s ease;}
-  .background::before{content:""; position:absolute; width:550px; height:550px; top:-180px; left:-120px; background:var(--blob1); border-radius:50%; filter:blur(90px);}
-  .background::after{content:""; position:absolute; width:500px; height:500px; bottom:-160px; right:-100px; background:var(--blob2); border-radius:50%; filter:blur(110px);}
+  .background{position:fixed; inset:0; z-index:-1; background: var(--bg); transition: background .2s ease;}
 
   .auth-box, .app-menu, .task-menu, .tab-btn.active, .day-card, .card, .modal, .confirm-box{
-    backdrop-filter: blur(var(--glass-blur)) saturate(150%);
-    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(150%);
     box-shadow: var(--glass-shadow);
-  }
-  .modal-overlay, .confirm-modal, .app-menu-overlay, .task-menu-overlay{
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
   }
 
   .btn-cancel{
     background:var(--glass-btn-bg) !important;
-    backdrop-filter:blur(15px);
-    -webkit-backdrop-filter:blur(15px);
     border:1px solid var(--glass-btn-border) !important;
     transition:background .35s, transform .35s, border-color .35s;
   }
@@ -238,7 +223,6 @@
   .bottom-nav{position:fixed;left:14px;right:14px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:25;
     max-width:400px;margin:0 auto;display:flex;align-items:flex-end;justify-content:space-between;
     padding:7px 4px;background:var(--surface);
-    backdrop-filter:blur(var(--glass-blur)) saturate(150%);-webkit-backdrop-filter:blur(var(--glass-blur)) saturate(150%);
     border:1px solid var(--border);border-radius:26px;box-shadow:var(--glass-shadow), 0 12px 34px rgba(20,20,30,.16);}
   .bn-side{flex:1;min-width:0;display:flex;justify-content:space-around;}
   .bn-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
@@ -535,8 +519,7 @@
   .priority-chip.medium{background:var(--medium-light);color:var(--medium);}
   .priority-chip.low{background:var(--low-light);color:var(--low);}
 
-  .card{position:relative;background:var(--card-bg);backdrop-filter:blur(18px) saturate(150%);-webkit-backdrop-filter:blur(18px) saturate(150%);
-    border:1px solid var(--card-border);border-radius:24px;padding:22px;margin-bottom:16px;overflow:hidden;
+  .card{position:relative;background:var(--card-bg);    border:1px solid var(--card-border);border-radius:24px;padding:22px;margin-bottom:16px;overflow:hidden;
     transition:transform .35s, border-color .35s, box-shadow .35s;animation:cardIn .6s ease forwards;}
   .card::before{content:""; position:absolute; inset:0; background:var(--card-glare); pointer-events:none;}
   .card-title{font-family:'Inter',sans-serif;font-size:15.5px;font-weight:600;margin-bottom:4px;position:relative;}
@@ -583,8 +566,7 @@
   .dp-trigger-text.dp-placeholder{color:var(--ink-muted);}
   .dp-trigger-icon{flex-shrink:0;color:var(--ink-muted);display:flex;}
   .dp-panel{position:fixed;z-index:55;width:280px;max-width:calc(100vw - 32px);
-    background:var(--surface);backdrop-filter:blur(var(--glass-blur)) saturate(150%);-webkit-backdrop-filter:blur(var(--glass-blur)) saturate(150%);
-    border:1px solid var(--border);border-radius:18px;box-shadow:var(--glass-shadow), 0 12px 34px rgba(20,20,30,.18);
+    background:var(--surface);    border:1px solid var(--border);border-radius:18px;box-shadow:var(--glass-shadow), 0 12px 34px rgba(20,20,30,.18);
     padding:14px;opacity:0;transform:translateY(-6px) scale(.98);pointer-events:none;transition:opacity .14s ease,transform .14s ease;}
   .dp-panel.show{opacity:1;transform:translateY(0) scale(1);pointer-events:auto;}
   .dp-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
