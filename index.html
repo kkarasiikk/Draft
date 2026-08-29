@@ -191,38 +191,44 @@
 
   /* «+» і шторка швидкого запису. Одна кнопка на всі чотири розділи: щоб
      записати витрату, більше не треба спершу знайти потрібний розділ. */
-  .add-fab{position:fixed;right:20px;bottom:calc(20px + env(safe-area-inset-bottom));z-index:40;
+  .add-fab{position:fixed;right:20px;bottom:calc(20px + env(safe-area-inset-bottom));z-index:70;
     width:56px;height:56px;border-radius:50%;border:none;cursor:pointer;
     background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;
     box-shadow:0 6px 18px rgba(20,25,40,.18);transition:transform .15s;}
   .add-fab:active{transform:scale(.94);}
-  .add-fab svg{width:24px;height:24px;}
+  .add-fab svg{width:24px;height:24px;transition:transform .18s ease;}
+  /* Кнопка лишається над меню й другим дотиком закриває його — «+» стає «×»,
+     щоб це було видно, а не лише вгадувалось. */
+  .add-fab.open svg{transform:rotate(45deg);}
 
-  .add-overlay{position:fixed;inset:0;z-index:60;display:none;background:var(--overlay);
-    align-items:flex-end;justify-content:center;}
-  .add-overlay.show{display:flex;}
-  .add-sheet{width:100%;max-width:460px;background:var(--surface);border:1px solid var(--border);
-    border-radius:22px 22px 0 0;padding:10px 16px calc(20px + env(safe-area-inset-bottom));
-    max-height:88vh;overflow-y:auto;}
-  @media (min-width:700px){
-    .add-overlay{align-items:center;}
-    .add-sheet{border-radius:22px;padding-bottom:18px;}
+  .add-overlay{position:fixed;inset:0;z-index:60;display:none;background:var(--overlay);}
+  .add-overlay.show{display:block;}
+
+  /* Виїжджають самі плитки вибору — без шапки й заголовка. Це не аркуш із
+     вмістом, а короткий список дій: усе, що він мав би пояснити, уже
+     написано в самих рядках. Стоїть над «+», щоб кнопка лишалась видимою й
+     працювала другим дотиком як «закрити». */
+  .add-menu{position:fixed;left:16px;right:16px;bottom:calc(88px + env(safe-area-inset-bottom));
+    max-width:460px;margin:0 auto;
+    transform:translateY(14px);opacity:0;transition:transform .18s ease, opacity .18s ease;}
+  .add-overlay.show .add-menu{transform:translateY(0);opacity:1;}
+  @media (prefers-reduced-motion: reduce){
+    .add-menu{transition:none;}
   }
-  .add-grip{display:block;width:40px;height:4px;border-radius:2px;background:var(--card-border-hover);
-    margin:0 auto 14px;}
-  .add-title{font-size:19px;font-weight:700;letter-spacing:-0.01em;color:var(--ink);}
-  .add-sub{font-size:13px;color:var(--ink-muted);line-height:1.45;margin:5px 0 14px;}
+
   .add-row{display:flex;align-items:center;gap:12px;width:100%;text-align:left;cursor:pointer;
-    border:none;background:var(--bg);border-radius:16px;padding:13px 14px;margin-bottom:8px;
+    border:1px solid var(--border);background:var(--surface);border-radius:16px;
+    padding:13px 14px;margin-bottom:8px;box-shadow:0 4px 14px rgba(20,25,40,.08);
     text-decoration:none;color:inherit;font-family:'Inter',sans-serif;}
+  .add-row:last-child{margin-bottom:0;}
   .add-row:active{transform:scale(.99);}
-  .add-row[disabled]{opacity:.5;cursor:default;}
+  .add-row[disabled]{opacity:.55;cursor:default;box-shadow:none;}
   .add-ico{width:40px;height:40px;flex-shrink:0;border-radius:12px;background:var(--accent-light);
     color:var(--accent);display:flex;align-items:center;justify-content:center;}
   .add-ico svg{width:20px;height:20px;}
-  .add-text{min-width:0;flex:1;}
-  .add-name{font-size:15px;font-weight:600;color:var(--ink);}
-  .add-hint{font-size:12.5px;color:var(--ink-muted);margin-top:2px;
+  .add-text{min-width:0;flex:1;display:flex;align-items:baseline;gap:7px;flex-wrap:wrap;}
+  .add-name{font-size:15px;font-weight:700;color:var(--ink);}
+  .add-hint{font-size:13px;color:var(--ink-muted);min-width:0;
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .add-arrow{flex-shrink:0;color:var(--ink-muted);display:flex;}
   .add-arrow svg{width:18px;height:18px;}
@@ -505,10 +511,7 @@
       </button>
 
       <div class="add-overlay" id="addOverlay">
-        <div class="add-sheet" role="dialog" aria-modal="true" aria-labelledby="addSheetTitle">
-          <span class="add-grip" aria-hidden="true"></span>
-          <div class="add-title" id="addSheetTitle">Що записати?</div>
-          <div class="add-sub" id="addSheetSub"></div>
+        <div class="add-menu" id="addMenu" role="dialog" aria-modal="true" aria-label="Що записати?">
           <div id="addChoices"></div>
         </div>
       </div>

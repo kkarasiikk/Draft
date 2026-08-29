@@ -63,13 +63,11 @@ const STRINGS = {
       : `сьогодні тренувань немає · востаннє ${n} ${plural(n, { one: 'день', few: 'дні', many: 'днів', other: 'дня' })} тому`,
     sumWorkoutAgo: (n) => `востаннє ${n} ${plural(n, { one: 'день', few: 'дні', many: 'днів', other: 'дня' })} тому`,
     sumWorkoutNever: 'тренувань ще немає',
-    addTitle: 'Що записати?',
-    addSub: 'Одна кнопка на всі чотири розділи — не треба спершу заходити в потрібний.',
     addExpense: 'Витрата', addExpenseHint: 'сума, категорія, опис',
     addTask: 'Завдання', addTaskHint: 'на сьогодні або з датою',
     addGoalStep: 'Крок до цілі',
     addGoalStepHint: (n) => `${n} ${plural(n, { one: 'ціль', few: 'цілі', many: 'цілей', other: 'цілі' })} без кроку`,
-    addGoalStepNone: 'сьогодні всі відмічені', addGoalPick: 'У яку ціль зарахувати крок?',
+    addGoalStepNone: 'сьогодні всі відмічені', addGoalPickHint: 'зарахувати крок',
     addWorkout: 'Тренування', addWorkoutHint: 'вправи й підходи',
     todayTitle: 'Сьогодні',
     todayCount: (n) => `${n} ${plural(n, { one: 'пункт', few: 'пункти', many: 'пунктів', other: 'пункту' })}`,
@@ -141,13 +139,11 @@ const STRINGS = {
       : `сегодня тренировок нет · последний раз ${n} ${plural(n, { one: 'день', few: 'дня', many: 'дней', other: 'дня' })} назад`,
     sumWorkoutAgo: (n) => `последний раз ${n} ${plural(n, { one: 'день', few: 'дня', many: 'дней', other: 'дня' })} назад`,
     sumWorkoutNever: 'тренировок пока нет',
-    addTitle: 'Что записать?',
-    addSub: 'Одна кнопка на все четыре раздела — не нужно сначала заходить в нужный.',
     addExpense: 'Расход', addExpenseHint: 'сумма, категория, описание',
     addTask: 'Задача', addTaskHint: 'на сегодня или с датой',
     addGoalStep: 'Шаг к цели',
     addGoalStepHint: (n) => `${n} ${plural(n, { one: 'цель', few: 'цели', many: 'целей', other: 'цели' })} без шага`,
-    addGoalStepNone: 'сегодня все отмечены', addGoalPick: 'В какую цель засчитать шаг?',
+    addGoalStepNone: 'сегодня все отмечены', addGoalPickHint: 'засчитать шаг',
     addWorkout: 'Тренировка', addWorkoutHint: 'упражнения и подходы',
     todayTitle: 'Сегодня',
     todayCount: (n) => `${n} ${plural(n, { one: 'пункт', few: 'пункта', many: 'пунктов', other: 'пункта' })}`,
@@ -219,13 +215,11 @@ const STRINGS = {
       : `dziś brak treningu · ostatnio ${n} ${plural(n, { one: 'dzień', few: 'dni', many: 'dni', other: 'dnia' })} temu`,
     sumWorkoutAgo: (n) => `ostatnio ${n} ${plural(n, { one: 'dzień', few: 'dni', many: 'dni', other: 'dnia' })} temu`,
     sumWorkoutNever: 'nie ma jeszcze treningów',
-    addTitle: 'Co zapisać?',
-    addSub: 'Jeden przycisk na wszystkie cztery sekcje — nie trzeba najpierw wchodzić do właściwej.',
     addExpense: 'Wydatek', addExpenseHint: 'kwota, kategoria, opis',
     addTask: 'Zadanie', addTaskHint: 'na dziś lub z datą',
     addGoalStep: 'Krok do celu',
     addGoalStepHint: (n) => `${n} ${plural(n, { one: 'cel', few: 'cele', many: 'celów', other: 'celu' })} bez kroku`,
-    addGoalStepNone: 'dziś wszystkie odhaczone', addGoalPick: 'Do którego celu zaliczyć krok?',
+    addGoalStepNone: 'dziś wszystkie odhaczone', addGoalPickHint: 'zalicz krok',
     addWorkout: 'Trening', addWorkoutHint: 'ćwiczenia i serie',
     todayTitle: 'Dziś',
     todayCount: (n) => `${n} ${plural(n, { one: 'pozycja', few: 'pozycje', many: 'pozycji', other: 'pozycji' })}`,
@@ -297,13 +291,11 @@ const STRINGS = {
       : `no workout today · last one ${n} ${n === 1 ? 'day' : 'days'} ago`,
     sumWorkoutAgo: (n) => `last ${n} ${plural(n, { one: 'day', other: 'days' })} ago`,
     sumWorkoutNever: 'no workouts yet',
-    addTitle: 'What to record?',
-    addSub: 'One button for all four sections — no need to find the right one first.',
     addExpense: 'Expense', addExpenseHint: 'amount, category, note',
     addTask: 'Task', addTaskHint: 'for today or with a date',
     addGoalStep: 'Step toward a goal',
     addGoalStepHint: (n) => `${n} ${plural(n, { one: 'goal', other: 'goals' })} without a step`,
-    addGoalStepNone: 'all marked today', addGoalPick: 'Which goal does the step count toward?',
+    addGoalStepNone: 'all marked today', addGoalPickHint: 'count the step',
     addWorkout: 'Workout', addWorkoutHint: 'exercises and sets',
     todayTitle: 'Today',
     todayCount: (n) => `${n} ${plural(n, { one: 'item', other: 'items' })}`,
@@ -845,23 +837,19 @@ const ADD_ICONS = {
 };
 const ARROW = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>';
 
-function addRow(kind, name, hint, href) {
+function addRow(kind, name, hint, href, attr) {
   const inner = `
     <span class="add-ico">${ADD_ICONS[kind]}</span>
     <span class="add-text"><span class="add-name">${escapeHtml(name)}</span>
       <span class="add-hint">${escapeHtml(hint)}</span></span>
-    <span class="add-arrow">${ARROW}</span>`;
-  return href
-    ? `<a class="add-row" href="${href}">${inner}</a>`
-    : `<button type="button" class="add-row" data-add-goal>${inner}</button>`;
+    ${href || attr ? `<span class="add-arrow">${ARROW}</span>` : ''}`;
+  if (href) return `<a class="add-row" href="${href}">${inner}</a>`;
+  return `<button type="button" class="add-row"${attr ? ' ' + attr : ' disabled'}>${inner}</button>`;
 }
 
 function renderAddSheet() {
   const host = document.getElementById('addChoices');
-  const sub = document.getElementById('addSheetSub');
   if (!host) return;
-  document.getElementById('addSheetTitle').textContent = t('addTitle');
-  if (sub) sub.textContent = t('addSub');
 
   // Крок можна зарахувати лише в ціль, яку сьогодні ще не відмічали, — та
   // сама черга, що й у списку «Сьогодні».
@@ -872,12 +860,8 @@ function renderAddSheet() {
     addRow('expense', t('addExpense'), t('addExpenseHint'), 'budget/index.html#new'),
     addRow('task', t('addTask'), t('addTaskHint'), 'tasks/index.html#new'),
     pending.length
-      ? addRow('goal', t('addGoalStep'), t('addGoalStepHint', pending.length))
-      : `<button type="button" class="add-row" disabled>
-           <span class="add-ico">${ADD_ICONS.goal}</span>
-           <span class="add-text"><span class="add-name">${escapeHtml(t('addGoalStep'))}</span>
-             <span class="add-hint">${escapeHtml(t('addGoalStepNone'))}</span></span>
-         </button>`,
+      ? addRow('goal', t('addGoalStep'), t('addGoalStepHint', pending.length), null, 'data-add-goal')
+      : addRow('goal', t('addGoalStep'), t('addGoalStepNone')),
     addRow('workout', t('addWorkout'), t('addWorkoutHint'), 'workout/index.html#new'),
   ].join('');
 
@@ -885,16 +869,14 @@ function renderAddSheet() {
   if (goalBtn) goalBtn.addEventListener('click', () => renderAddGoalList(pending));
 }
 
-/** Другий крок: яку саме ціль відмітити. */
+/** Другий крок: яку саме ціль відмітити. Заголовка немає — рядки з тим самим
+ *  значком і назвами цілей самі кажуть, що обирають; підпис «крок» лишається
+ *  на кожному, щоб дія не загубилась. */
 function renderAddGoalList(pending) {
   const host = document.getElementById('addChoices');
-  document.getElementById('addSheetTitle').textContent = t('addGoalStep');
-  document.getElementById('addSheetSub').textContent = t('addGoalPick');
-  host.innerHTML = pending.map((g) => `
-    <button type="button" class="add-row" data-step="${escapeHtml(g.id)}">
-      <span class="add-ico">${ADD_ICONS.goal}</span>
-      <span class="add-text"><span class="add-name">${escapeHtml(g.title || '')}</span></span>
-    </button>`).join('');
+  host.innerHTML = pending
+    .map((g) => addRow('goal', g.title || '', t('addGoalPickHint'), null, `data-step="${escapeHtml(g.id)}"`))
+    .join('');
   host.querySelectorAll('[data-step]').forEach((btn) => {
     btn.addEventListener('click', () => {
       stepHomeGoal(btn.dataset.step);
@@ -909,13 +891,18 @@ function renderAddGoalList(pending) {
 function openAddSheet() {
   renderAddSheet();
   document.getElementById('addOverlay').classList.add('show');
+  document.getElementById('addFab').classList.add('open');
 }
 
 function closeAddSheet() {
   document.getElementById('addOverlay').classList.remove('show');
+  document.getElementById('addFab').classList.remove('open');
 }
 
-document.getElementById('addFab').addEventListener('click', openAddSheet);
+document.getElementById('addFab').addEventListener('click', () => {
+  const open = document.getElementById('addOverlay').classList.contains('show');
+  if (open) closeAddSheet(); else openAddSheet();
+});
 document.getElementById('addOverlay').addEventListener('click', (e) => {
   // Тап повз аркуш закриває: усередині нього клік не має нічого закривати.
   if (e.target.id === 'addOverlay') closeAddSheet();

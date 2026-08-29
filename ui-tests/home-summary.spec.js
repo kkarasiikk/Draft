@@ -355,6 +355,7 @@ test.describe('Швидкий запис', () => {
     await page.click('#addFab');
     await page.click('[data-add-goal]');
     await expect(page.locator('[data-step]')).toHaveCount(2);
+    await expect(page.locator('[data-step="g1"] .add-name')).toHaveText('Біг');
 
     await page.click('[data-step="g2"]');
     await expect.poll(() => page.evaluate(() => window.__fbCalls.update.length)).toBeGreaterThan(0);
@@ -371,14 +372,43 @@ test.describe('Швидкий запис', () => {
     await expect(page.locator('.add-row[disabled]')).toBeVisible();
   });
 
-  test('тап повз аркуш закриває, а всередині — ні', async ({ page }) => {
+  test('тап повз меню закриває, а по самому меню — ні', async ({ page }) => {
     await openHub(page, {});
     await page.click('#addFab');
-    await page.click('.add-title');
+    await page.click('#addMenu', { position: { x: 5, y: 5 } });
     await expect(page.locator('#addOverlay')).toHaveClass(/show/);
 
     await page.click('#addOverlay', { position: { x: 5, y: 5 } });
     await expect(page.locator('#addOverlay')).not.toHaveClass(/show/);
+  });
+
+  test('виїжджають самі плитки — без шапки й заголовка', async ({ page }) => {
+    await openHub(page, {});
+    await page.click('#addFab');
+    // У меню немає нічого, крім рядків вибору.
+    const kinds = await page.locator('#addMenu > div > *').evaluateAll((els) =>
+      [...new Set(els.map((e) => e.className))]);
+    expect(kinds).toEqual(['add-row']);
+  });
+
+  test('«+» другим дотиком закриває і сам показує це', async ({ page }) => {
+    await openHub(page, {});
+    await page.click('#addFab');
+    await expect(page.locator('#addFab')).toHaveClass(/open/);
+
+    await page.click('#addFab');
+    await expect(page.locator('#addOverlay')).not.toHaveClass(/show/);
+    await expect(page.locator('#addFab')).not.toHaveClass(/open/);
+  });
+
+  test('кнопка лишається над меню, а не ховається під ним', async ({ page }) => {
+    await openHub(page, {});
+    await page.click('#addFab');
+    const [fab, overlay] = await page.evaluate(() => [
+      Number(getComputedStyle(document.getElementById('addFab')).zIndex),
+      Number(getComputedStyle(document.getElementById('addOverlay')).zIndex),
+    ]);
+    expect(fab).toBeGreaterThan(overlay);
   });
 });
 
