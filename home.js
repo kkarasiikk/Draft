@@ -63,6 +63,14 @@ const STRINGS = {
       : `сьогодні тренувань немає · востаннє ${n} ${plural(n, { one: 'день', few: 'дні', many: 'днів', other: 'дня' })} тому`,
     sumWorkoutAgo: (n) => `востаннє ${n} ${plural(n, { one: 'день', few: 'дні', many: 'днів', other: 'дня' })} тому`,
     sumWorkoutNever: 'тренувань ще немає',
+    addTitle: 'Що записати?',
+    addSub: 'Одна кнопка на всі чотири розділи — не треба спершу заходити в потрібний.',
+    addExpense: 'Витрата', addExpenseHint: 'сума, категорія, опис',
+    addTask: 'Завдання', addTaskHint: 'на сьогодні або з датою',
+    addGoalStep: 'Крок до цілі',
+    addGoalStepHint: (n) => `${n} ${plural(n, { one: 'ціль', few: 'цілі', many: 'цілей', other: 'цілі' })} без кроку`,
+    addGoalStepNone: 'сьогодні всі відмічені', addGoalPick: 'У яку ціль зарахувати крок?',
+    addWorkout: 'Тренування', addWorkoutHint: 'вправи й підходи',
     todayTitle: 'Сьогодні',
     todayCount: (n) => `${n} ${plural(n, { one: 'пункт', few: 'пункти', many: 'пунктів', other: 'пункту' })}`,
     todayMore: (n) => `Побачити ще ${n}`,
@@ -133,6 +141,14 @@ const STRINGS = {
       : `сегодня тренировок нет · последний раз ${n} ${plural(n, { one: 'день', few: 'дня', many: 'дней', other: 'дня' })} назад`,
     sumWorkoutAgo: (n) => `последний раз ${n} ${plural(n, { one: 'день', few: 'дня', many: 'дней', other: 'дня' })} назад`,
     sumWorkoutNever: 'тренировок пока нет',
+    addTitle: 'Что записать?',
+    addSub: 'Одна кнопка на все четыре раздела — не нужно сначала заходить в нужный.',
+    addExpense: 'Расход', addExpenseHint: 'сумма, категория, описание',
+    addTask: 'Задача', addTaskHint: 'на сегодня или с датой',
+    addGoalStep: 'Шаг к цели',
+    addGoalStepHint: (n) => `${n} ${plural(n, { one: 'цель', few: 'цели', many: 'целей', other: 'цели' })} без шага`,
+    addGoalStepNone: 'сегодня все отмечены', addGoalPick: 'В какую цель засчитать шаг?',
+    addWorkout: 'Тренировка', addWorkoutHint: 'упражнения и подходы',
     todayTitle: 'Сегодня',
     todayCount: (n) => `${n} ${plural(n, { one: 'пункт', few: 'пункта', many: 'пунктов', other: 'пункта' })}`,
     todayMore: (n) => `Посмотреть ещё ${n}`,
@@ -203,6 +219,14 @@ const STRINGS = {
       : `dziś brak treningu · ostatnio ${n} ${plural(n, { one: 'dzień', few: 'dni', many: 'dni', other: 'dnia' })} temu`,
     sumWorkoutAgo: (n) => `ostatnio ${n} ${plural(n, { one: 'dzień', few: 'dni', many: 'dni', other: 'dnia' })} temu`,
     sumWorkoutNever: 'nie ma jeszcze treningów',
+    addTitle: 'Co zapisać?',
+    addSub: 'Jeden przycisk na wszystkie cztery sekcje — nie trzeba najpierw wchodzić do właściwej.',
+    addExpense: 'Wydatek', addExpenseHint: 'kwota, kategoria, opis',
+    addTask: 'Zadanie', addTaskHint: 'na dziś lub z datą',
+    addGoalStep: 'Krok do celu',
+    addGoalStepHint: (n) => `${n} ${plural(n, { one: 'cel', few: 'cele', many: 'celów', other: 'celu' })} bez kroku`,
+    addGoalStepNone: 'dziś wszystkie odhaczone', addGoalPick: 'Do którego celu zaliczyć krok?',
+    addWorkout: 'Trening', addWorkoutHint: 'ćwiczenia i serie',
     todayTitle: 'Dziś',
     todayCount: (n) => `${n} ${plural(n, { one: 'pozycja', few: 'pozycje', many: 'pozycji', other: 'pozycji' })}`,
     todayMore: (n) => `Zobacz jeszcze ${n}`,
@@ -273,6 +297,14 @@ const STRINGS = {
       : `no workout today · last one ${n} ${n === 1 ? 'day' : 'days'} ago`,
     sumWorkoutAgo: (n) => `last ${n} ${plural(n, { one: 'day', other: 'days' })} ago`,
     sumWorkoutNever: 'no workouts yet',
+    addTitle: 'What to record?',
+    addSub: 'One button for all four sections — no need to find the right one first.',
+    addExpense: 'Expense', addExpenseHint: 'amount, category, note',
+    addTask: 'Task', addTaskHint: 'for today or with a date',
+    addGoalStep: 'Step toward a goal',
+    addGoalStepHint: (n) => `${n} ${plural(n, { one: 'goal', other: 'goals' })} without a step`,
+    addGoalStepNone: 'all marked today', addGoalPick: 'Which goal does the step count toward?',
+    addWorkout: 'Workout', addWorkoutHint: 'exercises and sets',
     todayTitle: 'Today',
     todayCount: (n) => `${n} ${plural(n, { one: 'item', other: 'items' })}`,
     todayMore: (n) => `See ${n} more`,
@@ -796,6 +828,98 @@ async function stepHomeGoal(goalId) {
     updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
   }).catch((err) => console.error('stepHomeGoal:', err));
 }
+
+// ---- «+»: одна кнопка на всі чотири розділи ----
+// Щоб записати витрату, треба було спершу зайти в Бюджет, знайти кнопку й
+// лише тоді відкрити форму. Тепер шторка веде одразу у потрібну форму —
+// модулі відкривають її за #new у адресі.
+//
+// «Крок до цілі» — виняток: це не форма, а один тап, і код для нього на
+// головній уже є. Тому рядок не веде нікуди, а розкриває список активних
+// цілей просто тут.
+const ADD_ICONS = {
+  expense: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5.5" width="19" height="13" rx="2.5"/><path d="M2.5 10h19"/></svg>',
+  task: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6.5l2 2 3.5-3.5"/><path d="M3 17.5l2 2 3.5-3.5"/><path d="M12 7h9"/><path d="M12 18h9"/></svg>',
+  goal: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg>',
+  workout: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M6.5 8v8"/><path d="M17.5 8v8"/><path d="M3.5 10.5v3"/><path d="M20.5 10.5v3"/><path d="M6.5 12h11"/></svg>',
+};
+const ARROW = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>';
+
+function addRow(kind, name, hint, href) {
+  const inner = `
+    <span class="add-ico">${ADD_ICONS[kind]}</span>
+    <span class="add-text"><span class="add-name">${escapeHtml(name)}</span>
+      <span class="add-hint">${escapeHtml(hint)}</span></span>
+    <span class="add-arrow">${ARROW}</span>`;
+  return href
+    ? `<a class="add-row" href="${href}">${inner}</a>`
+    : `<button type="button" class="add-row" data-add-goal>${inner}</button>`;
+}
+
+function renderAddSheet() {
+  const host = document.getElementById('addChoices');
+  const sub = document.getElementById('addSheetSub');
+  if (!host) return;
+  document.getElementById('addSheetTitle').textContent = t('addTitle');
+  if (sub) sub.textContent = t('addSub');
+
+  // Крок можна зарахувати лише в ціль, яку сьогодні ще не відмічали, — та
+  // сама черга, що й у списку «Сьогодні».
+  const pending = (homeData.goals && window.GoalStreak)
+    ? window.GoalStreak.eveningQueue(homeData.goals, todayISO()) : [];
+
+  host.innerHTML = [
+    addRow('expense', t('addExpense'), t('addExpenseHint'), 'budget/index.html#new'),
+    addRow('task', t('addTask'), t('addTaskHint'), 'tasks/index.html#new'),
+    pending.length
+      ? addRow('goal', t('addGoalStep'), t('addGoalStepHint', pending.length))
+      : `<button type="button" class="add-row" disabled>
+           <span class="add-ico">${ADD_ICONS.goal}</span>
+           <span class="add-text"><span class="add-name">${escapeHtml(t('addGoalStep'))}</span>
+             <span class="add-hint">${escapeHtml(t('addGoalStepNone'))}</span></span>
+         </button>`,
+    addRow('workout', t('addWorkout'), t('addWorkoutHint'), 'workout/index.html#new'),
+  ].join('');
+
+  const goalBtn = host.querySelector('[data-add-goal]');
+  if (goalBtn) goalBtn.addEventListener('click', () => renderAddGoalList(pending));
+}
+
+/** Другий крок: яку саме ціль відмітити. */
+function renderAddGoalList(pending) {
+  const host = document.getElementById('addChoices');
+  document.getElementById('addSheetTitle').textContent = t('addGoalStep');
+  document.getElementById('addSheetSub').textContent = t('addGoalPick');
+  host.innerHTML = pending.map((g) => `
+    <button type="button" class="add-row" data-step="${escapeHtml(g.id)}">
+      <span class="add-ico">${ADD_ICONS.goal}</span>
+      <span class="add-text"><span class="add-name">${escapeHtml(g.title || '')}</span></span>
+    </button>`).join('');
+  host.querySelectorAll('[data-step]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      stepHomeGoal(btn.dataset.step);
+      closeAddSheet();
+    });
+  });
+}
+
+// Прокрутку під шторкою тримає scroll-lock.js: він стежить за класом `show`
+// на відомих йому оверлеях, тож смикати замок звідси не треба — досить, що
+// `.add-overlay.show` є в його списку.
+function openAddSheet() {
+  renderAddSheet();
+  document.getElementById('addOverlay').classList.add('show');
+}
+
+function closeAddSheet() {
+  document.getElementById('addOverlay').classList.remove('show');
+}
+
+document.getElementById('addFab').addEventListener('click', openAddSheet);
+document.getElementById('addOverlay').addEventListener('click', (e) => {
+  // Тап повз аркуш закриває: усередині нього клік не має нічого закривати.
+  if (e.target.id === 'addOverlay') closeAddSheet();
+});
 
 // ---- Календар тижня ----
 // Показує саме календарний тиждень (пн—нд), а не останні сім днів: день має

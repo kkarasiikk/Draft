@@ -738,8 +738,12 @@ test.describe('Намір «якщо — то»', () => {
     await page.fill('#goalPlanAction', '20 сторінок');
     await page.click('#goalSubmitBtn');
 
-    await expect.poll(() => page.evaluate(() => window.__fbCalls.update.length)).toBeGreaterThan(0);
-    const upd = await page.evaluate(() => window.__fbCalls.update.at(-1));
+    // Саме запис із наміром, а не останній за часом: після збереження форми
+    // може прилетіти ще один (огляд, снапшот), і .at(-1) читав би чужий.
+    await expect.poll(() => page.evaluate(() =>
+      window.__fbCalls.update.filter((c) => c.payload.plan !== undefined).length)).toBeGreaterThan(0);
+    const upd = await page.evaluate(() =>
+      window.__fbCalls.update.filter((c) => c.payload.plan !== undefined).at(-1));
     expect(upd.payload.plan).toEqual({ cue: 'щоранку після душу', action: '20 сторінок' });
   });
 
@@ -748,8 +752,10 @@ test.describe('Намір «якщо — то»', () => {
     await page.click('[data-open-goal="g1"]');
     await page.click('#detailEditBtn');
     await page.click('#goalSubmitBtn');
-    await expect.poll(() => page.evaluate(() => window.__fbCalls.update.length)).toBeGreaterThan(0);
-    const upd = await page.evaluate(() => window.__fbCalls.update.at(-1));
+    await expect.poll(() => page.evaluate(() =>
+      window.__fbCalls.update.filter((c) => 'plan' in c.payload).length)).toBeGreaterThan(0);
+    const upd = await page.evaluate(() =>
+      window.__fbCalls.update.filter((c) => 'plan' in c.payload).at(-1));
     expect(upd.payload.plan).toBeNull();
   });
 

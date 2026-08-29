@@ -315,3 +315,100 @@ test.describe('Рядок під датою', () => {
   });
 
 });
+
+// ---- «+»: одна кнопка на всі чотири розділи ----
+// Щоб записати витрату, треба було спершу зайти в Бюджет, знайти кнопку й
+// лише тоді відкрити форму. Перевіряємо, що шторка веде одразу у форму.
+test.describe('Швидкий запис', () => {
+  const goal = (id, title) => ({
+    id, title, status: 'active', category: 'health', checkins: [], milestones: [], blockers: [],
+  });
+
+  test('кнопка стоїть завжди, ще до того як дані приїхали', async ({ page }) => {
+    await openHub(page, {});
+    await expect(page.locator('#addFab')).toBeVisible();
+  });
+
+  test('шторка відкривається й показує чотири шляхи', async ({ page }) => {
+    await openHub(page, { goals: [goal('g1', 'Біг')] });
+    await page.click('#addFab');
+    await expect(page.locator('#addOverlay')).toHaveClass(/show/);
+    await expect(page.locator('.add-row')).toHaveCount(4);
+  });
+
+  test('три рядки ведуть одразу у форму створення', async ({ page }) => {
+    await openHub(page, {});
+    await page.click('#addFab');
+    const hrefs = await page.locator('.add-row[href]').evaluateAll((els) => els.map((e) => e.getAttribute('href')));
+    expect(hrefs).toEqual(['budget/index.html#new', 'tasks/index.html#new', 'workout/index.html#new']);
+  });
+
+  test('крок до цілі нікуди не веде — це один тап, а не форма', async ({ page }) => {
+    await openHub(page, { goals: [goal('g1', 'Біг')] });
+    await page.click('#addFab');
+    await expect(page.locator('[data-add-goal]')).toBeVisible();
+    await expect(page.locator('[data-add-goal]')).not.toHaveAttribute('href', /./);
+  });
+
+  test('крок питає, у яку саме ціль, і зараховує його', async ({ page }) => {
+    await openHub(page, { goals: [goal('g1', 'Біг'), goal('g2', 'Книжки')] });
+    await page.click('#addFab');
+    await page.click('[data-add-goal]');
+    await expect(page.locator('[data-step]')).toHaveCount(2);
+
+    await page.click('[data-step="g2"]');
+    await expect.poll(() => page.evaluate(() => window.__fbCalls.update.length)).toBeGreaterThan(0);
+    const upd = await page.evaluate(() => window.__fbCalls.update.at(-1));
+    expect(upd.payload.checkins).toEqual([iso()]);
+    // Обрана ціль — і шторка закривається сама.
+    await expect(page.locator('#addOverlay')).not.toHaveClass(/show/);
+  });
+
+  test('коли всі цілі відмічені, крок пропонувати нема чого', async ({ page }) => {
+    await openHub(page, { goals: [{ ...goal('g1', 'Біг'), checkins: [iso()] }] });
+    await page.click('#addFab');
+    await expect(page.locator('[data-add-goal]')).toHaveCount(0);
+    await expect(page.locator('.add-row[disabled]')).toBeVisible();
+  });
+
+  test('тап повз аркуш закриває, а всередині — ні', async ({ page }) => {
+    await openHub(page, {});
+    await page.click('#addFab');
+    await page.click('.add-title');
+    await expect(page.locator('#addOverlay')).toHaveClass(/show/);
+
+    await page.click('#addOverlay', { position: { x: 5, y: 5 } });
+    await expect(page.locator('#addOverlay')).not.toHaveClass(/show/);
+  });
+});
+
+// ---- Що робить #new у модулях ----
+// Обіцянка «+» тримається лише тоді, коли модуль справді відкриє форму, а не
+// просто покаже свій список. Перевіряємо кожен, а заразом і те, що хеш після
+// цього зникає: оновлення сторінки не має відкривати форму вдруге.
+const NEW_FORM = [
+  ['бюджет', 'budget/index.html', '#formOverlay'],
+  ['завдання', 'tasks/index.html', '#taskFormOverlay'],
+  ['тренування', 'workout/index.html', '#sessionFormOverlay'],
+];
+
+// Заглушка Firebase віддається лише на перший запит SDK, тож переходити між
+// сторінками в одному тесті не можна — відкриваємо модуль одразу з хешем.
+for (const [name, path, overlay] of NEW_FORM) {
+  test(`${name}: #new відкриває форму створення`, async ({ page }) => {
+    await openModule(page, `${path}#new`, { ready: '#appScreen' });
+    await expect(page.locator(overlay)).toHaveClass(/show/);
+  });
+
+  test(`${name}: без #new форма не відкривається сама`, async ({ page }) => {
+    await openModule(page, path, { ready: '#appScreen' });
+    await page.waitForTimeout(200);
+    await expect(page.locator(overlay)).not.toHaveClass(/show/);
+  });
+
+  test(`${name}: хеш зникає, щоб оновлення не відкрило форму вдруге`, async ({ page }) => {
+    await openModule(page, `${path}#new`, { ready: '#appScreen' });
+    await expect(page.locator(overlay)).toHaveClass(/show/);
+    expect(new URL(page.url()).hash).toBe('');
+  });
+}

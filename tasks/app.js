@@ -2897,6 +2897,18 @@ document.getElementById('taskDueTime').addEventListener('change', renderReminder
 document.getElementById('addSubtaskBtn').addEventListener('click', addEmptySubtask);
 
 // ---- Автентифікація: стан ----
+// Головна вміє привести одразу у форму створення: «+» на ній відкриває
+// список, а не змушує спершу знайти потрібний розділ. Хеш прибираємо, щоб
+// оновлення сторінки не відкривало форму вдруге, а «назад» вело туди,
+// звідки прийшли.
+function openFromHash(open) {
+  if (location.hash !== '#new') return;
+  try { history.replaceState(null, '', location.pathname + location.search); } catch (err) { /* file:// */ }
+  // Даємо підписці домалювати перший кадр: форма читає категорії, шаблони
+  // й решту того, що приїжджає першим снапшотом.
+  setTimeout(open, 0);
+}
+
 auth.onAuthStateChanged((user) => {
   document.getElementById('authLoading').style.display = 'none';
   if (user) {
@@ -2914,6 +2926,7 @@ auth.onAuthStateChanged((user) => {
     subscribeToTasks(user.uid);
     subscribeToTemplates(user.uid);
     subscribeToGoalTitles(user.uid);
+    openFromHash(() => openTaskForm(null));
     loadReminderSettings(user.uid);
     // Коли вкладка відкрита, системного сповіщення браузер не показує —
     // повідомлення побачив би тільки SW. Показуємо самі.

@@ -1372,6 +1372,18 @@ document.getElementById('forgotPasswordLink').addEventListener('click', async ()
 });
 
 
+// Головна вміє привести одразу у форму створення: «+» на ній відкриває
+// список, а не змушує спершу знайти потрібний розділ. Хеш прибираємо, щоб
+// оновлення сторінки не відкривало форму вдруге, а «назад» вело туди,
+// звідки прийшли.
+function openFromHash(open) {
+  if (location.hash !== '#new') return;
+  try { history.replaceState(null, '', location.pathname + location.search); } catch (err) { /* file:// */ }
+  // Даємо підписці домалювати перший кадр: форма читає категорії, шаблони
+  // й решту того, що приїжджає першим снапшотом.
+  setTimeout(open, 0);
+}
+
 auth.onAuthStateChanged((user) => {
   document.getElementById('authLoading').style.display = 'none';
   if (user) {
@@ -1384,6 +1396,7 @@ auth.onAuthStateChanged((user) => {
     subscribeToSavingsGoals(user.uid);
     subscribeToRecurring(user.uid);
     loadExchangeRates();
+    openFromHash(() => openForm('expense'));
   } else {
     if (unsubscribeSnapshot) { unsubscribeSnapshot(); unsubscribeSnapshot = null; }
     if (unsubscribeProfile) { unsubscribeProfile(); unsubscribeProfile = null; }

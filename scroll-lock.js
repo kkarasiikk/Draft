@@ -16,6 +16,7 @@
     '.modal-overlay.show',
     '.confirm-modal.show',
     '.app-menu-overlay.show',
+    '.add-overlay.show',
     '.entry-menu-overlay.show',
     '.item-menu-overlay.show',
     '.task-menu-overlay.show',
