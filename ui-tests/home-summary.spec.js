@@ -5,6 +5,10 @@
 const { test, expect } = require('@playwright/test');
 const { openModule } = require('./helpers');
 
+// Тут перевіряється телефонна розкладка — та, з якою головну відкривають
+// щодня. Комп'ютерна переставляє ті самі блоки й має власний файл.
+test.use({ viewport: { width: 390, height: 844 } });
+
 // «Сьогодні» береться з реального годинника, тож дати рахуємо від нього —
 // інакше тест протух би наступного дня.
 const iso = (shift = 0) => {
@@ -424,7 +428,15 @@ test.describe('Швидкий запис', () => {
   test('тап повз меню закриває, а по самому меню — ні', async ({ page }) => {
     await openHub(page, {});
     await page.click('#addFab');
-    await page.click('#addMenu', { position: { x: 5, y: 5 } });
+
+    // Ціль — проміжок МІЖ рядками: це меню, але не дія. Кут першого рядка
+    // сюди не годиться: у нього скруглення 16px, і потрапляння в нього
+    // залежить від півпікселя, на який меню зсунулось по горизонталі.
+    const menu = await page.locator('#addMenu').boundingBox();
+    const row = await page.locator('.add-row').first().boundingBox();
+    await page.click('#addMenu', {
+      position: { x: menu.width / 2, y: (row.y + row.height + 4) - menu.y },
+    });
     await expect(page.locator('#addOverlay')).toHaveClass(/show/);
 
     await page.click('#addOverlay', { position: { x: 5, y: 5 } });

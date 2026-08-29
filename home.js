@@ -32,6 +32,7 @@ const STRINGS = {
   uk: {
     themeLabel: 'Тема', themeLight: 'Світла', themeDark: 'Темна', themeSystem: 'Системна',
     langLabel: 'Мова', logout: 'Вийти', exportLabel: 'Експорт даних',
+    settingsLabel: 'Налаштування', navHome: 'Головна', recordBtn: 'Записати',
     exportBusy: 'Готую файл…', exportError: 'Не вдалося зібрати файл. Спробуй ще раз.',
     exportModalTitle: 'Експорт даних', exportWhat: 'Що зберегти', exportFormat: 'Формат',
     exportSave: 'Зберегти', exportNothing: 'Обери хоча б один розділ.',
@@ -110,6 +111,7 @@ const STRINGS = {
   ru: {
     themeLabel: 'Тема', themeLight: 'Светлая', themeDark: 'Тёмная', themeSystem: 'Системная',
     langLabel: 'Язык', logout: 'Выйти', exportLabel: 'Экспорт данных',
+    settingsLabel: 'Настройки', navHome: 'Главная', recordBtn: 'Записать',
     exportBusy: 'Готовлю файл…', exportError: 'Не удалось собрать файл. Попробуй ещё раз.',
     exportModalTitle: 'Экспорт данных', exportWhat: 'Что сохранить', exportFormat: 'Формат',
     exportSave: 'Сохранить', exportNothing: 'Выбери хотя бы один раздел.',
@@ -188,6 +190,7 @@ const STRINGS = {
   pl: {
     themeLabel: 'Motyw', themeLight: 'Jasny', themeDark: 'Ciemny', themeSystem: 'Systemowy',
     langLabel: 'Język', logout: 'Wyloguj', exportLabel: 'Eksport danych',
+    settingsLabel: 'Ustawienia', navHome: 'Główna', recordBtn: 'Zapisz',
     exportBusy: 'Przygotowuję plik…', exportError: 'Nie udało się zebrać pliku. Spróbuj ponownie.',
     exportModalTitle: 'Eksport danych', exportWhat: 'Co zapisać', exportFormat: 'Format',
     exportSave: 'Zapisz', exportNothing: 'Wybierz przynajmniej jedną sekcję.',
@@ -266,6 +269,7 @@ const STRINGS = {
   en: {
     themeLabel: 'Theme', themeLight: 'Light', themeDark: 'Dark', themeSystem: 'System',
     langLabel: 'Language', logout: 'Log out', exportLabel: 'Export data',
+    settingsLabel: 'Settings', navHome: 'Home', recordBtn: 'Add',
     exportBusy: 'Preparing the file…', exportError: 'Could not build the file. Try again.',
     exportModalTitle: 'Export data', exportWhat: 'What to save', exportFormat: 'Format',
     exportSave: 'Save', exportNothing: 'Pick at least one section.',
@@ -373,6 +377,17 @@ function applyTranslations() {
   document.getElementById('langMenuLabel').textContent = t('langLabel');
   document.getElementById('exportLabel').textContent = t('exportLabel');
   document.getElementById('logoutLabel').textContent = t('logout');
+  // Бічне меню бере назви розділів із тих самих ключів, що й плитки: два
+  // різні слова для одного розділу — це вже дві різні назви.
+  document.getElementById('navHomeLabel').textContent = t('navHome');
+  document.getElementById('navBudgetLabel').textContent = t('budgetTitle');
+  document.getElementById('navGoalsLabel').textContent = t('goalsTitle');
+  document.getElementById('navTasksLabel').textContent = t('tasksTitle');
+  document.getElementById('navWorkoutLabel').textContent = t('workoutTitle');
+  document.getElementById('sideExportLabel').textContent = t('exportLabel');
+  document.getElementById('sideSettingsLabel').textContent = t('settingsLabel');
+  document.getElementById('recordBtnLabel').textContent = t('recordBtn');
+  document.getElementById('recordBtn').setAttribute('aria-label', t('recordBtn'));
   document.getElementById('todayTitle').textContent = t('todayTitle');
   // Дата й рядок стану залежать від мови так само, як підписи, — і мова
   // може перемкнутись уже після того, як дані прийшли.
@@ -485,12 +500,15 @@ darkMediaQuery.addEventListener('change', () => {
 });
 
 // ---- Гамбургер-меню (тема / мова / вихід) ----
-document.getElementById('menuBtn').addEventListener('click', () => {
+// На телефоні меню відкриває гамбургер, на комп'ютері — «Налаштування» в
+// бічній колонці. Кнопки різні, меню одне.
+function toggleAppMenu() {
   const overlay = document.getElementById('appMenuOverlay');
-  const btn = document.getElementById('menuBtn');
   const isOpen = overlay.classList.toggle('show');
-  btn.classList.toggle('open', isOpen);
-});
+  document.getElementById('menuBtn').classList.toggle('open', isOpen);
+}
+document.getElementById('menuBtn').addEventListener('click', toggleAppMenu);
+document.getElementById('sideSettingsBtn').addEventListener('click', toggleAppMenu);
 document.getElementById('appMenuOverlay').addEventListener('click', (e) => {
   if (e.target.id === 'appMenuOverlay') {
     e.currentTarget.classList.remove('show');
@@ -908,17 +926,22 @@ function openAddSheet() {
   renderAddSheet();
   document.getElementById('addOverlay').classList.add('show');
   document.getElementById('addFab').classList.add('open');
+  document.getElementById('recordBtn').classList.add('open');
 }
 
 function closeAddSheet() {
   document.getElementById('addOverlay').classList.remove('show');
   document.getElementById('addFab').classList.remove('open');
+  document.getElementById('recordBtn').classList.remove('open');
 }
 
-document.getElementById('addFab').addEventListener('click', () => {
+// Обидві кнопки — одна дія: на телефоні видно «+», на комп'ютері «Записати».
+function toggleAddSheet() {
   const open = document.getElementById('addOverlay').classList.contains('show');
   if (open) closeAddSheet(); else openAddSheet();
-});
+}
+document.getElementById('addFab').addEventListener('click', toggleAddSheet);
+document.getElementById('recordBtn').addEventListener('click', toggleAddSheet);
 document.getElementById('addOverlay').addEventListener('click', (e) => {
   // Тап повз аркуш закриває: усередині нього клік не має нічого закривати.
   if (e.target.id === 'addOverlay') closeAddSheet();
@@ -972,6 +995,9 @@ function renderLine() {
   if (!lineEl) return;
   const today = todayISO();
 
+  const dateEl = document.getElementById('todayDate');
+  if (dateEl) dateEl.textContent = capitalizeFirst(formatFullDate(today));
+
   const parts = [];
   if (homeData.tasks) {
     const open = homeData.tasks.filter((x) => x && !x.done && x.dueDate === today).length;
@@ -992,6 +1018,21 @@ function renderLine() {
 
 function capitalizeFirst(str) {
   return str ? str.charAt(0).toUpperCase() + str.slice(1) : str;
+}
+
+/** День тижня, число й місяць: «Субота, 29 серпня».
+ *
+ *  День тижня береться окремим форматом навмисно. В одному шаблоні з датою
+ *  українська ICU ставить його в знахідному — виходило «Суботу, 29 серпня»,
+ *  ніби речення обірвали на півслові. Окремо він у називному, як і треба
+ *  підпису. */
+function formatFullDate(iso) {
+  if (!iso) return '';
+  const locale = LOCALE_MAP[currentLang] || 'uk-UA';
+  const date = new Date(iso + 'T00:00:00');
+  const weekday = new Intl.DateTimeFormat(locale, { weekday: 'long' }).format(date);
+  const dayMonth = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long' }).format(date);
+  return `${weekday}, ${dayMonth}`;
 }
 
 /** Число й місяць: «22 серпня». */
@@ -1192,6 +1233,7 @@ function openExportDialog() {
   document.getElementById('exportSaveBtn').disabled = false;
   renderExportOptions();
   document.getElementById('appMenuOverlay').classList.remove('show');
+  document.getElementById('menuBtn').classList.remove('open');
   document.getElementById('exportOverlay').classList.add('show');
 }
 
@@ -1200,6 +1242,7 @@ function closeExportDialog() {
 }
 
 document.getElementById('exportBtn').addEventListener('click', openExportDialog);
+document.getElementById('sideExportBtn').addEventListener('click', openExportDialog);
 document.getElementById('exportCloseBtn').addEventListener('click', closeExportDialog);
 document.getElementById('exportOverlay').addEventListener('click', (e) => {
   if (e.target.id === 'exportOverlay') closeExportDialog();
