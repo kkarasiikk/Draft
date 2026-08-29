@@ -229,85 +229,57 @@
   }
 
   /**
-   * Де за тиждень був рух, а де тиша — по всіх чотирьох розділах разом.
+   * Календарний тиждень, у якому лежить сьогодні: понеділок — неділя.
    *
-   * Цього не показує жоден окремий модуль: бюджет знає свої операції, зал —
-   * свої тренування, і ніде не видно життя цілком. А саме там і читається
-   * головне: «гроші й цілі йдуть щодня, зал стоїть із понеділка».
+   * Саме календарний, а не «останні сім днів»: це календар, і субота в ньому
+   * має стояти там, де вона стоїть у місяці, а не там, куди її зсунув
+   * сьогоднішній день. Через це тиждень містить і МАЙБУТНІ дні — сторінка
+   * мусить прочитати завдання наперед, інакше крапки на них не буде.
    *
-   * Рівень навмисно грубий — 0 / 1 / 2+. Це відповідь на «чи був день
-   * живий», а не звіт: тонша шкала змушувала б порівнювати непорівнянне,
-   * три транзакції проти трьох підходів.
-   *
-   * @param {{transactions?: Array, tasks?: Array, goals?: Array, workouts?: Array}} data
-   * @param {string} todayIso
-   * @param {{completedIso?: function}} [deps] як дістати день виконання
-   *   завдання; за замовчуванням — та сама функція з tasks/stats.js, щоб
-   *   другої реалізації «коли це зробили» в проєкті не завелось
+   * Крапка означає рівно одне: на цей день є завдання. Виконані рахуються
+   * окремо, щоб день, де все закрито, міг виглядати інакше за день, де ще є
+   * що робити.
    */
-  function weekActivity(data, todayIso, deps) {
-    var days = weekDays(todayIso, 7);
-    var index = {};
-    days.forEach(function (d, i) { index[d] = i; });
-    var zeros = function () { return days.map(function () { return 0; }); };
-    // Саме число, а не «щось не undefined»: день поза тижнем дає undefined, а
-    // невиконане завдання — null, і обидва мусять просто не рахуватись.
-    var bump = function (arr, iso) {
-      var i = index[iso];
-      if (typeof i === 'number') arr[i] += 1;
-    };
+  function weekCalendar(tasks, todayIso) {
+    var today = new Date(todayIso + 'T00:00:00');
+    // getDay(): 0 — неділя. Тиждень починається з понеділка, як у календарі
+    // цілей і в решті проєкту.
+    var dow = (today.getDay() + 6) % 7;
+    var monday = new Date(today);
+    monday.setDate(monday.getDate() - dow);
 
-    var budget = zeros();
-    ((data && data.transactions) || []).forEach(function (t) {
-      if (t) bump(budget, t.date);
+    var byDay = {};
+    (tasks || []).forEach(function (task) {
+      if (!task || typeof task.dueDate !== 'string') return;
+      var slot = byDay[task.dueDate] || (byDay[task.dueDate] = { open: 0, done: 0 });
+      if (task.done) slot.done += 1; else slot.open += 1;
     });
 
-    // Ціль «рухалась» — це будь-який слід: відмітка, прогрес, закрита віха.
-    // Рахуємо цілі, а не події: два кілометри й чекін в одній цілі — це один
-    // рух, а не два.
-    var goals = zeros();
-    ((data && data.goals) || []).forEach(function (g) {
-      var seen = {};
-      ((g && g.checkins) || []).forEach(function (d) { seen[d] = true; });
-      ((g && g.progressLog) || []).forEach(function (e) { if (e && e.date) seen[e.date] = true; });
-      ((g && g.milestones) || []).forEach(function (m) {
-        if (m && m.done && m.doneAt) seen[m.doneAt] = true;
-      });
-      Object.keys(seen).forEach(function (d) { bump(goals, d); });
-    });
-
-    var doneIso = (deps && deps.completedIso) || root.completedIso;
-    var tasks = zeros();
-    if (doneIso) {
-      ((data && data.tasks) || []).forEach(function (task) {
-        bump(tasks, doneIso(task));
+    var days = [];
+    for (var i = 0; i < 7; i++) {
+      var d = new Date(monday);
+      d.setDate(d.getDate() + i);
+      var iso = isoOf(d);
+      var slot = byDay[iso] || { open: 0, done: 0 };
+      days.push({
+        date: iso,
+        dayNum: d.getDate(),
+        today: iso === todayIso,
+        past: iso < todayIso,
+        open: slot.open,
+        done: slot.done,
+        hasTasks: slot.open + slot.done > 0,
+        // День, де все закрито, — не те саме, що день, де ще є що робити.
+        allDone: slot.done > 0 && slot.open === 0,
       });
     }
-
-    var workout = zeros();
-    ((data && data.workouts) || []).forEach(function (w) {
-      if (w) bump(workout, w.date);
-    });
-
-    var level = function (n) { return n === 0 ? 0 : (n === 1 ? 1 : 2); };
-    var row = function (key, counts) {
-      return { key: key, counts: counts, levels: counts.map(level) };
-    };
-    var rows = [row('budget', budget), row('goals', goals), row('tasks', tasks), row('workout', workout)];
-
-    return {
-      days: days,
-      rows: rows,
-      // Порожній тиждень — теж відповідь, але сітка з нього нічого не каже,
-      // і сторінці варто знати про це, не перебираючи рядки самій.
-      moved: rows.some(function (r) { return r.counts.some(function (n) { return n > 0; }); }),
-    };
+    return { from: days[0].date, to: days[6].date, days: days };
   }
 
   var api = {
     isoOf: isoOf,
     weekDays: weekDays,
-    weekActivity: weekActivity,
+    weekCalendar: weekCalendar,
     tasksRing: tasksRing,
     workoutToday: workoutToday,
     featuredGoal: featuredGoal,

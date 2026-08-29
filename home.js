@@ -73,7 +73,6 @@ const STRINGS = {
     capDone: (n) => `${n} вже ${plural(n, { one: 'закрито', few: 'закрито', many: 'закрито', other: 'закрито' })}`,
     capPlanned: 'заплановано на сьогодні', capDoing: 'сьогодні зроблено',
     capLast: (name) => `останнє — ${name}`, capLastPlain: 'від останнього',
-    weekTitle: 'Тиждень', weekNote: 'де був рух',
     todayEmpty: 'На сьогодні нічого не чекає.',
     todayAt: (hhmm) => `до ${hhmm}`,
     todaySince: (d) => `з ${d}`,
@@ -144,7 +143,6 @@ const STRINGS = {
     capDone: (n) => `${n} уже закрыто`,
     capPlanned: 'запланировано на сегодня', capDoing: 'сегодня сделано',
     capLast: (name) => `последняя — ${name}`, capLastPlain: 'от последней',
-    weekTitle: 'Неделя', weekNote: 'где было движение',
     todayEmpty: 'На сегодня ничего не ждёт.',
     todayAt: (hhmm) => `до ${hhmm}`,
     todaySince: (d) => `с ${d}`,
@@ -215,7 +213,6 @@ const STRINGS = {
     capDone: (n) => `${n} już zamknięto`,
     capPlanned: 'zaplanowano na dziś', capDoing: 'dziś zrobione',
     capLast: (name) => `ostatni — ${name}`, capLastPlain: 'od ostatniego',
-    weekTitle: 'Tydzień', weekNote: 'gdzie był ruch',
     todayEmpty: 'Na dziś nic nie czeka.',
     todayAt: (hhmm) => `do ${hhmm}`,
     todaySince: (d) => `od ${d}`,
@@ -286,7 +283,6 @@ const STRINGS = {
     capDone: (n) => `${n} already done`,
     capPlanned: 'planned for today', capDoing: 'done today',
     capLast: (name) => `last — ${name}`, capLastPlain: 'since the last one',
-    weekTitle: 'Week', weekNote: 'where the movement was',
     todayEmpty: 'Nothing waiting today.',
     todayAt: (hhmm) => `by ${hhmm}`,
     todaySince: (d) => `since ${d}`,
@@ -346,13 +342,11 @@ function applyTranslations() {
   document.getElementById('exportLabel').textContent = t('exportLabel');
   document.getElementById('logoutLabel').textContent = t('logout');
   document.getElementById('todayTitle').textContent = t('todayTitle');
-  document.getElementById('weekTitle').textContent = t('weekTitle');
-  document.getElementById('weekNote').textContent = t('weekNote');
   // Дата й рядок стану залежать від мови так само, як підписи, — і мова
   // може перемкнутись уже після того, як дані прийшли.
   renderLine();
   renderToday();
-  renderWeek();
+  renderCalendar();
   document.getElementById('budgetTitle').textContent = t('budgetTitle');
   document.getElementById('budgetSub').textContent = t('budgetSub');
   document.getElementById('goalsTitle').textContent = t('goalsTitle');
@@ -397,7 +391,7 @@ function setLang(lang) {
 // Сирі дані, з яких збираються «Сьогодні», рядок під датою і сітка тижня.
 // Кожен запит домальовує свою частину, щойно долетить: чекати на найповільніший,
 // щоб показати все разом, означало б дивитись на порожній екран довше, ніж треба.
-let homeData = { transactions: null, tasks: null, doneTasks: null, goals: null, workouts: null };
+let homeData = { transactions: null, tasks: null, goals: null, workouts: null };
 // Валюта з профілю — той самий документ, що вже читається заради мови й теми.
 let homeCurrency = '';
 
@@ -795,7 +789,7 @@ async function stepHomeGoal(goalId) {
   if (!result) return;
   goal.checkins = result.checkins;
   renderToday();
-  renderWeek();
+  renderCalendar();
   renderLine();
   await db.collection('users').doc(auth.currentUser.uid).collection('goals').doc(goalId).update({
     checkins: result.checkins,
@@ -803,52 +797,47 @@ async function stepHomeGoal(goalId) {
   }).catch((err) => console.error('stepHomeGoal:', err));
 }
 
-// ---- «Тиждень»: де був рух, а де тиша ----
-// Цього не показує жоден окремий модуль: кожен знає лише себе.
-function renderWeek() {
-  const panel = document.getElementById('weekPanel');
-  const host = document.getElementById('weekGrid');
-  if (!panel || !host) return;
-  if (!homeData.transactions && !homeData.goals && !homeData.workouts) { panel.hidden = true; return; }
+// ---- Календар тижня ----
+// Показує саме календарний тиждень (пн—нд), а не останні сім днів: день має
+// стояти там, де він стоїть у місяці. Крапка означає рівно одне — на цей
+// день є завдання.
+function renderCalendar() {
+  const monthEl = document.getElementById('calMonth');
+  const weekEl = document.getElementById('calWeek');
+  if (!monthEl || !weekEl) return;
 
   const today = todayISO();
-  const week = HomeSummary.weekActivity({
-    transactions: homeData.transactions || [],
-    tasks: homeData.doneTasks || [],
-    goals: homeData.goals || [],
-    workouts: homeData.workouts || [],
-  }, today);
-  panel.hidden = false;
-
+  const week = HomeSummary.weekCalendar(homeData.tasks || [], today);
   const locale = LOCALE_MAP[currentLang] || 'uk-UA';
   const dow = new Intl.DateTimeFormat(locale, { weekday: 'short' });
-  const NAMES = { budget: 'budgetTitle', goals: 'goalsTitle', tasks: 'tasksTitle', workout: 'workoutTitle' };
+  const month = new Intl.DateTimeFormat(locale, { month: 'long' });
 
-  const head = `<div class="week-row"><div></div>${week.days.map((d) =>
-    `<div class="week-dow${d === today ? ' today' : ''}">${escapeHtml(dow.format(new Date(d + 'T00:00:00')))}</div>`
-  ).join('')}</div>`;
+  // Тиждень може лежати на межі двох місяців — тоді один підпис збрехав би.
+  const first = month.format(new Date(week.from + 'T00:00:00'));
+  const last = month.format(new Date(week.to + 'T00:00:00'));
+  monthEl.textContent = first === last ? first : `${first} — ${last}`;
 
-  const rows = week.rows.map((row) => `
-    <div class="week-row">
-      <div class="week-name">${escapeHtml(t(NAMES[row.key]))}</div>
-      ${row.levels.map((lvl, i) =>
-        `<div class="week-cell${lvl ? ' l' + lvl : ''}${week.days[i] === today ? ' today' : ''}"></div>`
-      ).join('')}
-    </div>`).join('');
-
-  host.innerHTML = `<div class="week-grid">${head}${rows}</div>`;
+  weekEl.innerHTML = week.days.map((d) => {
+    const cls = ['cal-day'];
+    if (d.today) cls.push('today');
+    if (d.past) cls.push('past');
+    if (d.hasTasks) cls.push('has');
+    if (d.allDone) cls.push('done');
+    return `
+      <div class="${cls.join(' ')}">
+        <span class="cal-dow">${escapeHtml(dow.format(new Date(d.date + 'T00:00:00')))}</span>
+        <span class="cal-num">${d.dayNum}</span>
+        <span class="cal-dot"></span>
+      </div>`;
+  }).join('');
 }
 
 // ---- Рядок під датою ----
 // Увесь стан життя за секунду читання, ще до того, як око кудись поїхало.
 function renderLine() {
-  const dateEl = document.getElementById('todayDate');
   const lineEl = document.getElementById('todayLine');
-  if (!dateEl || !lineEl) return;
+  if (!lineEl) return;
   const today = todayISO();
-  const locale = LOCALE_MAP[currentLang] || 'uk-UA';
-  dateEl.textContent = new Intl.DateTimeFormat(locale, { weekday: 'long', day: 'numeric', month: 'long' })
-    .format(new Date(today + 'T00:00:00'));
 
   const parts = [];
   if (homeData.tasks) {
@@ -883,24 +872,22 @@ async function loadHomeSummary(uid) {
   const userRef = db.collection('users').doc(uid);
   const today = todayISO();
   const monthFrom = HomeSummary.monthStart(today);
-  const weekFrom = HomeSummary.weekDays(today, 7)[0];
-  // Сітці тижня потрібні сім днів, плиткам — місяць. На початку місяця тиждень
-  // заїжджає в попередній, тож беремо ранішу з двох меж, а не місяць.
-  const from = monthFrom < weekFrom ? monthFrom : weekFrom;
-  homeData = { transactions: null, tasks: null, doneTasks: null, goals: null, workouts: null };
+  // Календар показує ВЕСЬ тиждень, зокрема дні попереду, тож завдання
+  // читаються і наперед. Межі беремо ширші з двох: місяць потрібен плиткам,
+  // тиждень — крапкам у календарі, і на межі місяця вони не збігаються.
+  const cal = HomeSummary.weekCalendar([], today);
+  const taskFrom = monthFrom < cal.from ? monthFrom : cal.from;
+  const taskTo = today > cal.to ? today : cal.to;
+  homeData = { transactions: null, tasks: null, goals: null, workouts: null };
 
   // Бюджет: лише поточний місяць.
   // План витрат читаємо з профілю тим самим запитом, що вже потрібен для мови
   // й теми, — окремого звернення заради одного числа не робимо.
-  const txPromise = userRef.collection('transactions').where('date', '>=', from).where('date', '<=', today).get();
+  const txPromise = userRef.collection('transactions').where('date', '>=', monthFrom).where('date', '<=', today).get();
   Promise.all([txPromise, userRef.get()])
     .then(([snap, profileDoc]) => {
-      const txs = snap.docs.map((d) => d.data());
-      homeData.transactions = txs;
-      renderWeek();
-      // Баланс плитки рахується по місяцю, а не по всьому, що прийшло:
-      // ширший запит потрібен сітці тижня й не має міняти число на плитці.
-      const monthTxs = txs.filter((tx) => tx && tx.date >= monthFrom);
+      const monthTxs = snap.docs.map((d) => d.data());
+      homeData.transactions = monthTxs;
       const sum = HomeSummary.budgetSummary(monthTxs, today);
       // Знак ставимо тут, а не в перекладі: у переклад має приходити готовий
       // рядок, інакше кожна мова мусила б сама вирішувати, як його показати.
@@ -929,7 +916,7 @@ async function loadHomeSummary(uid) {
   // Завдання: від початку місяця до сьогодні — один діапазон по одному полю,
   // тож складений індекс не потрібен. Борги давніші за місяць сюди не
   // потраплять: для них у самому модулі є «розбір минулих днів».
-  userRef.collection('tasks').where('dueDate', '>=', from).where('dueDate', '<=', today).get()
+  userRef.collection('tasks').where('dueDate', '>=', taskFrom).where('dueDate', '<=', taskTo).get()
     .then((snap) => {
       const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
       homeData.tasks = docs;
@@ -949,7 +936,7 @@ async function loadHomeSummary(uid) {
       const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
       homeData.goals = docs;
       renderToday();
-      renderWeek();
+      renderCalendar();
       renderLine();
       const sum = HomeSummary.goalsSummary(docs, today);
       // Кільце показує одну ціль — найтерміновішу. Плитка не список, і
@@ -980,26 +967,14 @@ async function loadHomeSummary(uid) {
   // Тренування: досить найсвіжішого запису.
   // Найсвіжішого запису досить і для «скільки днів тому», і для «що сьогодні»:
   // якщо він датований сьогодні — це і є сьогоднішнє тренування.
-  // Що закрито за тиждень — окремим вузьким запитом по completedAt. Через
-  // dueDate це не дістати: завдання, прострочене з червня й закрите вчора,
-  // у діапазон строків не потрапляє, а в сітці тижня воно саме вчорашнє.
-  userRef.collection('tasks')
-    .where('completedAt', '>=', new Date(weekFrom + 'T00:00:00'))
-    .get()
-    .then((snap) => {
-      homeData.doneTasks = snap.docs.map((d) => d.data());
-      renderWeek();
-    })
-    .catch((err) => console.error('homeSummary doneTasks:', err));
-
-  // Тридцять останніх, а не один: сітці тижня потрібні сім днів, а «скільки
-  // днів тому» однаково відповідає найсвіжіший — він і лежить першим.
-  userRef.collection('workouts').orderBy('date', 'desc').limit(30).get()
+  // Найсвіжішого запису досить: він відповідає і на «скільки днів тому», і на
+  // «що сьогодні», і дає назву останнього тренування для підпису плитки.
+  userRef.collection('workouts').orderBy('date', 'desc').limit(1).get()
     .then((snap) => {
       const docs = snap.docs.map((d) => d.data());
       homeData.workouts = docs;
       renderToday();
-      renderWeek();
+      renderCalendar();
       renderLine();
       const todayWorkout = HomeSummary.workoutToday(docs, today);
       if (todayWorkout) {

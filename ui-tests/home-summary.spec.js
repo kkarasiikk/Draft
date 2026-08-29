@@ -239,29 +239,63 @@ test.describe('Сьогодні', () => {
   });
 });
 
-test.describe('Тиждень', () => {
-  test('сітка — чотири розділи на сім днів', async ({ page }) => {
-    await openHub(page, { workouts: [{ id: 'w1', date: iso(-2), exercises: [] }] });
-    await expect(page.locator('#weekPanel')).toBeVisible();
-    await expect(page.locator('.week-cell')).toHaveCount(28);
+test.describe('Календар тижня', () => {
+  // Понеділок того тижня, у якому лежить сьогодні.
+  const monday = () => {
+    const d = new Date();
+    d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+    return d.toISOString().slice(0, 10);
+  };
+  const dayOffset = (n) => {
+    const d = new Date(monday() + 'T00:00:00');
+    d.setDate(d.getDate() + n);
+    return d.toISOString().slice(0, 10);
+  };
+
+  test('сім днів і назва місяця над ними', async ({ page }) => {
+    await openHub(page, { tasks: [] });
+    await expect(page.locator('.cal-day')).toHaveCount(7);
+    await expect(page.locator('#calMonth')).not.toHaveText('');
   });
 
-  test('день із рухом пофарбований, порожній — ні', async ({ page }) => {
-    await openHub(page, { workouts: [{ id: 'w1', date: iso(), exercises: [] }] });
-    // Сьогодні — остання клітинка рядка тренувань (четвертого).
-    const cells = page.locator('.week-row').nth(4).locator('.week-cell');
-    await expect(cells.nth(6)).toHaveClass(/l1/);
-    await expect(cells.nth(0)).not.toHaveClass(/l1|l2/);
+  test('сьогодні виділене рівно один раз', async ({ page }) => {
+    await openHub(page, { tasks: [] });
+    await expect(page.locator('.cal-day.today')).toHaveCount(1);
   });
 
-  test('сьогоднішній стовпчик виділено в кожному рядку', async ({ page }) => {
-    await openHub(page, { workouts: [{ id: 'w1', date: iso(), exercises: [] }] });
-    await expect(page.locator('.week-cell.today')).toHaveCount(4);
+  test('день із завданням має крапку, порожній — ні', async ({ page }) => {
+    // Вівторок цього тижня — другий день у смузі.
+    await openHub(page, { tasks: [{ id: 'a', dueDate: dayOffset(1), done: false }] });
+    await expect(page.locator('.cal-day').nth(1)).toHaveClass(/has/);
+    await expect(page.locator('.cal-day').nth(0)).not.toHaveClass(/has/);
   });
 
-  test('рядки названі, бо колір несе лише кількість руху', async ({ page }) => {
-    await openHub(page, { workouts: [{ id: 'w1', date: iso(), exercises: [] }] });
-    await expect(page.locator('.week-name')).toHaveText(['Бюджет', 'Цілі', 'Завдання', 'Тренування']);
+  test('крапка стоїть і на майбутньому дні — календар дивиться вперед', async ({ page }) => {
+    await openHub(page, { tasks: [{ id: 'a', dueDate: dayOffset(6), done: false }] });
+    await expect(page.locator('.cal-day').nth(6)).toHaveClass(/has/);
+  });
+
+  test('день, де все закрито, відрізняється від дня з відкритими', async ({ page }) => {
+    await openHub(page, { tasks: [
+      { id: 'a', dueDate: dayOffset(0), done: true },
+      { id: 'b', dueDate: dayOffset(1), done: false },
+    ] });
+    await expect(page.locator('.cal-day').nth(0)).toHaveClass(/done/);
+    await expect(page.locator('.cal-day').nth(1)).not.toHaveClass(/done/);
+  });
+
+  test('тиждень починається з понеділка, а не з сьогодні', async ({ page }) => {
+    await openHub(page, { tasks: [] });
+    const nums = await page.locator('.cal-num').allTextContents();
+    const first = new Date(monday() + 'T00:00:00').getDate();
+    expect(Number(nums[0])).toBe(first);
+  });
+
+  test('числа йдуть підряд, без розривів', async ({ page }) => {
+    await openHub(page, { tasks: [] });
+    const nums = (await page.locator('.cal-num').allTextContents()).map(Number);
+    const dates = nums.map((n, i) => new Date(dayOffset(i) + 'T00:00:00').getDate());
+    expect(nums).toEqual(dates);
   });
 });
 
@@ -280,8 +314,4 @@ test.describe('Рядок під датою', () => {
     await expect(page.locator('#todayLine')).toHaveText('Сьогодні нічого не чекає.');
   });
 
-  test('дата стоїть над рядком', async ({ page }) => {
-    await openHub(page, { tasks: [] });
-    await expect(page.locator('#todayDate')).not.toHaveText('');
-  });
 });

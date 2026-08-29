@@ -202,7 +202,7 @@
     .wrap{max-width:none;margin:0;padding:0 40px 48px;}
     .home-topbar{padding-top:28px;}
     .app-menu{top:74px;left:33px;}
-    .sections, .today-head, .panel{max-width:720px;margin-left:auto;margin-right:auto;}
+    .sections, .today-head, .panel, .cal{max-width:720px;margin-left:auto;margin-right:auto;}
   }
 
 
@@ -273,24 +273,30 @@
     background:var(--accent);color:#fff;border:none;}
   .today-empty{font-size:13px;color:var(--ink-muted);padding:10px 10px 6px;line-height:1.45;}
 
-  /* «Тиждень»: 4 розділи x 7 днів. Колір несе одне — скільки було руху.
-     Чотири кольори під чотири модулі не пройшли перевірку на розрізнюваність,
-     тож розділи названі рядками зліва, а колір лишився один. */
-  .week-grid{margin-top:12px;}
-  .week-row{display:grid;grid-template-columns:76px repeat(7, 1fr);gap:5px;align-items:center;}
-  .week-row + .week-row{margin-top:5px;}
-  .week-dow{text-align:center;font-size:10.5px;font-weight:500;color:var(--ink-muted);}
-  .week-dow.today{font-weight:700;color:var(--ink-soft);}
-  .week-name{font-size:12px;color:var(--ink-soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .week-cell{height:30px;border-radius:7px;background:var(--card-bg);}
-  .week-cell.l1{background:var(--accent-light);}
-  .week-cell.l2{background:var(--accent);}
-  .week-cell.today{box-shadow:0 0 0 1.6px var(--accent);}
+  /* Календар тижня. Показує саме календарний тиждень (пн—нд), а не останні
+     сім днів: день має стояти там, де він у місяці. Крапка означає рівно
+     одне — на цей день є завдання. */
+  .cal{margin:2px 0 16px;}
+  .cal-month{font-size:12.5px;font-weight:600;color:var(--ink-muted);text-transform:capitalize;
+    margin-bottom:9px;padding-left:2px;}
+  .cal-week{display:grid;grid-template-columns:repeat(7, 1fr);gap:4px;}
+  .cal-day{display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 0 6px;
+    border-radius:13px;background:transparent;}
+  .cal-dow{font-size:10.5px;font-weight:500;color:var(--ink-muted);text-transform:lowercase;}
+  .cal-num{font-size:15px;font-weight:600;color:var(--ink-soft);line-height:1.1;}
+  .cal-day.past .cal-num{color:var(--ink-muted);}
+  .cal-day.today{background:var(--accent);}
+  .cal-day.today .cal-dow, .cal-day.today .cal-num{color:#fff;}
+  /* Крапка живе завжди — просто невидима без завдань. Інакше рядок із
+     крапкою був би вищим за рядок без неї, і числа стрибали б по вертикалі. */
+  .cal-dot{width:5px;height:5px;border-radius:50%;background:transparent;}
+  .cal-day.has .cal-dot{background:var(--accent);}
+  .cal-day.has.done .cal-dot{background:var(--income);}
+  .cal-day.today.has .cal-dot{background:#fff;}
 
   @media (max-width:359px){
     .panel{padding:16px 14px 12px;border-radius:18px;}
-    .week-row{grid-template-columns:58px repeat(7, 1fr);gap:4px;}
-    .week-cell{height:26px;}
+    .cal-num{font-size:14px;}
     .tile-stat b{font-size:23px;}
   }
 
@@ -420,8 +426,12 @@
         </div>
       </div>
 
+      <div class="cal">
+        <div class="cal-month" id="calMonth"></div>
+        <div class="cal-week" id="calWeek"></div>
+      </div>
+
       <div class="today-head">
-        <div class="today-date" id="todayDate"></div>
         <div class="today-line" id="todayLine"></div>
       </div>
 
@@ -431,14 +441,6 @@
           <div class="panel-note" id="todayCount"></div>
         </div>
         <div id="todayList"></div>
-      </section>
-
-      <section class="panel" id="weekPanel" hidden>
-        <div class="panel-head">
-          <div class="panel-title" id="weekTitle">Тиждень</div>
-          <div class="panel-note" id="weekNote">де був рух</div>
-        </div>
-        <div id="weekGrid"></div>
       </section>
 
       <main class="sections">
