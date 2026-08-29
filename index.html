@@ -123,6 +123,8 @@
 
   /* ---- Верхня панель: гамбургер-меню зліва (тема / мова / вихід) ---- */
   .home-topbar{display:flex;align-items:center;justify-content:flex-start;margin-bottom:8px;}
+  .home-brand{font-size:23px;font-weight:800;letter-spacing:-0.03em;color:var(--ink);padding-left:4px;}
+  .topbar-spacer{flex-grow:1;}
   .menu-btn{background:none;border:none;cursor:pointer;color:var(--ink);padding:13px;display:flex;border-radius:10px;transition:background .2s, transform .15s;touch-action:manipulation;}
   .menu-btn:hover{background:var(--glass-btn-bg-hover);}
   .menu-btn:active{transform:scale(.92);}
@@ -200,13 +202,31 @@
     .wrap{max-width:none;margin:0;padding:0 40px 48px;}
     .home-topbar{padding-top:28px;}
     .app-menu{top:74px;left:33px;}
-    .hero, .sections, .today-head, .panel{max-width:720px;margin-left:auto;margin-right:auto;}
+    .sections, .today-head, .panel{max-width:720px;margin-left:auto;margin-right:auto;}
   }
 
-  .hero{text-align:center;padding:40px 0 28px;}
-  .hero h1{font-size:clamp(52px,10vw,80px);font-weight:900;letter-spacing:-0.04em;margin:0;line-height:0.9;}
 
-  .sections{display:flex;flex-direction:column;gap:16px;}
+  /* Плитки — сітка 2x2 зі стат-числами. Це вже не двері («Відкрити»), а
+     факт, у який можна тицьнути: головне число розділу видно без заходу. */
+  .sections{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .tile{background:var(--surface);border:1px solid var(--border);border-radius:20px;
+    padding:15px 16px 16px;text-decoration:none;color:inherit;display:block;
+    transition:transform .15s, box-shadow .25s;}
+  .tile:active{transform:scale(.985);}
+  .tile-head{display:flex;align-items:center;gap:7px;margin-bottom:9px;color:var(--ink-muted);}
+  .tile-ico{width:16px;height:16px;flex-shrink:0;}
+  .tile-name{font-size:12.5px;font-weight:600;color:var(--ink-soft);}
+  .tile-stat{display:flex;align-items:baseline;gap:5px;min-width:0;}
+  .tile-stat b{font-size:26px;font-weight:700;letter-spacing:-0.02em;color:var(--ink);line-height:1.05;}
+  .tile-stat i{font-size:13px;font-style:normal;font-weight:500;color:var(--ink-soft);
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .tile-cap{font-size:12px;color:var(--ink-muted);margin-top:5px;line-height:1.35;}
+  .tile-note{font-size:12px;font-weight:600;color:var(--expense);margin-top:7px;
+    display:flex;align-items:center;gap:6px;}
+  /* Власний display перебиває [hidden] з UA-стилів, і рядок лишався б видимим
+     завжди — порожнім, з самою лише крапкою. */
+  .tile-note[hidden]{display:none;}
+  .tile-note::before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0;}
 
   /* ---- Головна перестала бути меню ----
      Раніше це був список із чотирьох кнопок «Відкрити»: щоб відмітити справу
@@ -243,7 +263,11 @@
   .today-box.checked{background:var(--accent);border-color:var(--accent);}
   .today-box svg{display:none;width:11px;height:11px;}
   .today-box.checked svg{display:block;}
-  .today-icon{flex-shrink:0;display:flex;color:var(--expense);}
+  .today-icon{flex-shrink:0;display:flex;color:var(--ink-muted);}
+  .today-row.overdue .today-icon{color:var(--expense);}
+  .today-more{display:flex;align-items:center;gap:6px;margin-top:6px;padding:9px 10px;
+    font-size:12.5px;font-weight:600;color:var(--accent);text-decoration:none;}
+  .today-more svg{width:14px;height:14px;flex-shrink:0;}
   .today-go{flex-shrink:0;cursor:pointer;text-decoration:none;white-space:nowrap;
     font-family:'Inter',sans-serif;font-size:12px;font-weight:600;padding:6px 11px;border-radius:9px;
     background:var(--accent);color:#fff;border:none;}
@@ -263,89 +287,11 @@
   .week-cell.l2{background:var(--accent);}
   .week-cell.today{box-shadow:0 0 0 1.6px var(--accent);}
 
-  .module-card{
-    position:relative; overflow:hidden;
-    background:var(--surface); border:1px solid var(--border); border-radius:26px;
-    padding:24px 28px; display:flex; align-items:center; justify-content:space-between; gap:20px;
-    text-decoration:none; color:inherit;
-    backdrop-filter: blur(var(--glass-blur)) saturate(150%);
-    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(150%);
-    box-shadow: var(--glass-shadow);
-    transition: transform .35s, border-color .35s, box-shadow .35s;
-  }
-  .module-card::after{
-    content:""; position:absolute; inset:0; pointer-events:none;
-    background:linear-gradient(120deg, transparent 25%, var(--card-shine) 50%, transparent 75%);
-    transform:translateX(-120%); transition:transform .8s ease;
-  }
-  a.module-card:hover::after{transform:translateX(120%);}
-  .module-card:focus-visible{outline:2px solid var(--accent);outline-offset:3px;}
-  a.module-card:hover{transform:translateY(-6px); border-color:var(--card-border-hover); box-shadow: var(--card-hover-shadow), var(--glass-shadow);}
-  a.module-card:active{transform:translateY(-2px) scale(.99);}
-
-  /* Назва + пояснювальний підпис: коротка назва читається з першого погляду,
-     підпис знімає питання «чим цей модуль відрізняється від сусіднього». */
-  /* Кільце на плитці.
-     Дірка всередині — маска, а не другий круг із кольором тла: картка скляна
-     й напівпрозора, тож зафарбований круг проступав би плямою і зʼїдав би
-     розмиття під собою. Маска ж лишає справжню прозорість.
-     Колір — через --ring-colour, бо в бюджету він міняється при перевитраті,
-     а в решти сталий. */
-  .tile-ring{position:relative; flex-shrink:0; width:46px; height:46px;}
-  .tile-ring[hidden]{display:none;}
-  /* Сама дуга. Маска висить на НІЙ, а не на .tile-ring: маска ріже елемент
-     разом із нащадками, тож число всередині вона зрізала б теж. Тому дуга й
-     число — сусіди, а не вкладені. */
-  .tile-ring-arc{
-    position:absolute; inset:0; border-radius:50%;
-    background:conic-gradient(var(--ring-colour, var(--accent)) calc(var(--pct,0) * 1%), var(--ring-track) 0);
-    /* Відсотки в radial-gradient рахуються від РАДІУСА кола, а не від його
-       діаметра: farthest-side тут 23px, тож 100% — це край, а не середина.
-       Через це «50% - 6px» лишало дірку в 5px, тобто майже суцільний диск. */
-    -webkit-mask:radial-gradient(farthest-side, transparent calc(100% - 7px), #000 calc(100% - 6px));
-            mask:radial-gradient(farthest-side, transparent calc(100% - 7px), #000 calc(100% - 6px));
-    transition:background .4s ease;
-  }
-  .tile-ring-mid{
-    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-    font-size:12px; font-weight:700; color:var(--ink); font-variant-numeric:tabular-nums;
-  }
-  /* flex:1 — щоб кільця в чотирьох плитках стояли на одній вертикалі:
-     без нього місце кільця залежить від довжини підпису, і колонка їде. */
-  .module-text{min-width:0; flex:1;}
-  .module-title{font-size:21px;font-weight:700;letter-spacing:-0.01em;margin:0;}
-  /* Один рядок: підпис не має розсувати картку — інакше на вузькому екрані
-     картки стають різної висоти. Якщо не влазить — обрізаємо трикрапкою. */
-  /* Живий підсумок буває довшим за статичний опис («2 справи на сьогодні ·
-     +1 з минулих днів»), тож дозволяємо два рядки замість обрізання: число,
-     заради якого плитка й ожила, не має ховатись за трьома крапками. */
-  .module-sub{font-size:12.5px;line-height:1.3;color:var(--ink-muted);margin-top:3px;
-    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
-
-  .open-btn{
-    flex-shrink:0; display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:600;color:var(--ink);
-    background:var(--glass-btn-bg);border:1px solid var(--glass-btn-border);padding:10px 18px;border-radius:999px;
-    transition:background .3s, transform .3s;
-  }
-  a.module-card:hover .open-btn{background:var(--glass-btn-bg-hover); transform:translateX(2px);}
-  .open-btn svg{width:14px;height:14px;stroke:currentColor;}
-  /* Дуже вузькі екрани (320px): слово «Відкрити» з'їдає стільки місця, що
-     підпис лишається обрізаним. Лишаємо саму стрілку — вона зрозуміла і без слова. */
-  /* З кільцем на плитці тісно вже на звичайному телефоні, а не лише на
-     найвужчих: підпис починає обриватись на трьох крапках, ховаючи саме те
-     число, заради якого плитка й ожила. Слово «Відкрити» тут коштує найменше
-     — стрілка лишається, і вся картка й так посилання. */
-  @media (max-width:700px){
-    .module-card.has-ring .open-btn > span{display:none;}
-    .module-card.has-ring .open-btn{padding:10px;}
-  }
   @media (max-width:359px){
     .panel{padding:16px 14px 12px;border-radius:18px;}
     .week-row{grid-template-columns:58px repeat(7, 1fr);gap:4px;}
     .week-cell{height:26px;}
-    .module-card{padding:20px 18px;gap:12px;}
-    .open-btn{padding:10px 12px;}
-    .open-btn > span{display:none;}
+    .tile-stat b{font-size:23px;}
   }
 
   /* ---- Екран входу ---- */
@@ -378,7 +324,7 @@
   .auth-switch a{color:var(--accent);font-weight:600;cursor:pointer;text-decoration:none;}
 
   @media (prefers-reduced-motion: reduce){
-    a.module-card, .open-btn, .icon-btn, .theme-choice{transition:none;}
+    a.tile, .icon-btn, .theme-choice{transition:none;}
     .spinner{animation:none;opacity:.55;}
   }
 </style>
@@ -422,6 +368,8 @@
   <div id="homeScreen" style="display:none;">
     <div class="wrap">
       <div class="home-topbar">
+        <span class="home-brand">Life</span>
+        <span class="topbar-spacer"></span>
         <button class="menu-btn" id="menuBtn" aria-label="Меню">
           <span class="menu-btn-lines" aria-hidden="true"><span></span><span></span><span></span></span>
         </button>
@@ -472,10 +420,6 @@
         </div>
       </div>
 
-      <header class="hero">
-        <h1>Life</h1>
-      </header>
-
       <div class="today-head">
         <div class="today-date" id="todayDate"></div>
         <div class="today-line" id="todayLine"></div>
@@ -484,7 +428,7 @@
       <section class="panel" id="todayPanel" hidden>
         <div class="panel-head">
           <div class="panel-title" id="todayTitle">Сьогодні</div>
-          <div class="panel-note" id="todayNote">усе, що чекає на тебе</div>
+          <div class="panel-note" id="todayCount"></div>
         </div>
         <div id="todayList"></div>
       </section>
@@ -498,40 +442,44 @@
       </section>
 
       <main class="sections">
-        <a class="module-card" href="budget/index.html">
-          <div class="module-text">
-            <h2 class="module-title" id="budgetTitle">Бюджет</h2>
-            <div class="module-sub" id="budgetSub">витрати й доходи</div>
+        <a class="tile" href="budget/index.html">
+          <div class="tile-head">
+            <svg class="tile-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5.5" width="19" height="13" rx="2.5"/><path d="M2.5 10h19"/></svg>
+            <span class="tile-name" id="budgetTitle">Бюджет</span>
           </div>
-          <div class="tile-ring" id="budgetRing" hidden aria-hidden="true"><span class="tile-ring-arc"></span><span class="tile-ring-mid"></span></div>
-          <span class="open-btn"><span id="openBtnLabel">Відкрити</span> <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></span>
+          <div class="tile-stat"><b id="budgetStat">—</b><i id="budgetUnit"></i></div>
+          <div class="tile-cap" id="budgetSub">витрати й доходи</div>
+          <div class="tile-note" id="budgetNote" hidden></div>
         </a>
 
-        <a class="module-card" href="goals/index.html" id="goalsCard">
-          <div class="module-text">
-            <h2 class="module-title" id="goalsTitle">Цілі</h2>
-            <div class="module-sub" id="goalsSub">довгострокові</div>
+        <a class="tile" href="goals/index.html" id="goalsCard">
+          <div class="tile-head">
+            <svg class="tile-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg>
+            <span class="tile-name" id="goalsTitle">Цілі</span>
           </div>
-          <div class="tile-ring" id="goalsRing" hidden aria-hidden="true"><span class="tile-ring-arc"></span><span class="tile-ring-mid"></span></div>
-          <span class="open-btn"><span id="goalsOpenBtnLabel">Відкрити</span> <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></span>
+          <div class="tile-stat"><b id="goalsStat">—</b><i id="goalsUnit"></i></div>
+          <div class="tile-cap" id="goalsSub">довгострокові</div>
+          <div class="tile-note" id="goalsNote" hidden></div>
         </a>
 
-        <a class="module-card" href="tasks/index.html" id="tasksCard">
-          <div class="module-text">
-            <h2 class="module-title" id="tasksTitle">Завдання</h2>
-            <div class="module-sub" id="tasksSub">на кожен день</div>
+        <a class="tile" href="tasks/index.html" id="tasksCard">
+          <div class="tile-head">
+            <svg class="tile-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6.5l2 2 3.5-3.5"/><path d="M3 17.5l2 2 3.5-3.5"/><path d="M12 7h9"/><path d="M12 18h9"/></svg>
+            <span class="tile-name" id="tasksTitle">Завдання</span>
           </div>
-          <div class="tile-ring" id="tasksRing" hidden aria-hidden="true"><span class="tile-ring-arc"></span><span class="tile-ring-mid"></span></div>
-          <span class="open-btn"><span id="tasksOpenBtnLabel">Відкрити</span> <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></span>
+          <div class="tile-stat"><b id="tasksStat">—</b><i id="tasksUnit"></i></div>
+          <div class="tile-cap" id="tasksSub">на кожен день</div>
+          <div class="tile-note" id="tasksNote" hidden></div>
         </a>
 
-        <a class="module-card" href="workout/index.html" id="workoutCard">
-          <div class="module-text">
-            <h2 class="module-title" id="workoutTitle">Тренування</h2>
-            <div class="module-sub" id="workoutSub">сесії й рекорди</div>
+        <a class="tile" href="workout/index.html" id="workoutCard">
+          <div class="tile-head">
+            <svg class="tile-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M6.5 8v8"/><path d="M17.5 8v8"/><path d="M3.5 10.5v3"/><path d="M20.5 10.5v3"/><path d="M6.5 12h11"/></svg>
+            <span class="tile-name" id="workoutTitle">Тренування</span>
           </div>
-          <div class="tile-ring" id="workoutRing" hidden aria-hidden="true"><span class="tile-ring-arc"></span><span class="tile-ring-mid"></span></div>
-          <span class="open-btn"><span id="workoutOpenBtnLabel">Відкрити</span> <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></span>
+          <div class="tile-stat"><b id="workoutStat">—</b><i id="workoutUnit"></i></div>
+          <div class="tile-cap" id="workoutSub">сесії й рекорди</div>
+          <div class="tile-note" id="workoutNote" hidden></div>
         </a>
       </main>
     </div>

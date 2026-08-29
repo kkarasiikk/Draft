@@ -63,7 +63,16 @@ const STRINGS = {
       : `сьогодні тренувань немає · востаннє ${n} ${plural(n, { one: 'день', few: 'дні', many: 'днів', other: 'дня' })} тому`,
     sumWorkoutAgo: (n) => `востаннє ${n} ${plural(n, { one: 'день', few: 'дні', many: 'днів', other: 'дня' })} тому`,
     sumWorkoutNever: 'тренувань ще немає',
-    todayTitle: 'Сьогодні', todayNote: 'усе, що чекає на тебе',
+    todayTitle: 'Сьогодні',
+    todayCount: (n) => `${n} ${plural(n, { one: 'пункт', few: 'пункти', many: 'пунктів', other: 'пункту' })}`,
+    todayMore: (n) => `Побачити ще ${n}`,
+    unitToday: 'на сьогодні', unitDays: 'дн.', unitActive: 'активних',
+    unitSets: 'підходів', unitExercises: 'вправ', unitDaysAgo: 'дні тому',
+    capSpent: (m) => `витрачено за ${m}`, capStreak: 'найдовша серія',
+    capNoStep: (n) => `${n} без кроку`, capDebt: (n) => `${n} ${plural(n, { one: 'борг', few: 'борги', many: 'боргів', other: 'боргу' })}`,
+    capDone: (n) => `${n} вже ${plural(n, { one: 'закрито', few: 'закрито', many: 'закрито', other: 'закрито' })}`,
+    capPlanned: 'заплановано на сьогодні', capDoing: 'сьогодні зроблено',
+    capLast: (name) => `останнє — ${name}`, capLastPlain: 'від останнього',
     weekTitle: 'Тиждень', weekNote: 'де був рух',
     todayEmpty: 'На сьогодні нічого не чекає.',
     todayAt: (hhmm) => `до ${hhmm}`,
@@ -76,7 +85,6 @@ const STRINGS = {
     goalsTitle: 'Цілі', goalsSub: 'довгострокові',
     tasksTitle: 'Завдання', tasksSub: 'на кожен день',
     workoutTitle: 'Тренування', workoutSub: 'сесії й рекорди',
- openBtn: 'Відкрити',
     authTitleLogin: 'Вхід', authTitleSignup: 'Реєстрація',
     authSub: 'Увійди, щоб потрапити у свій особистий простір.',
     emailLabel: 'Email', passwordLabel: 'Пароль', passwordHint: 'Мінімум 6 символів',
@@ -126,7 +134,16 @@ const STRINGS = {
       : `сегодня тренировок нет · последний раз ${n} ${plural(n, { one: 'день', few: 'дня', many: 'дней', other: 'дня' })} назад`,
     sumWorkoutAgo: (n) => `последний раз ${n} ${plural(n, { one: 'день', few: 'дня', many: 'дней', other: 'дня' })} назад`,
     sumWorkoutNever: 'тренировок пока нет',
-    todayTitle: 'Сегодня', todayNote: 'всё, что тебя ждёт',
+    todayTitle: 'Сегодня',
+    todayCount: (n) => `${n} ${plural(n, { one: 'пункт', few: 'пункта', many: 'пунктов', other: 'пункта' })}`,
+    todayMore: (n) => `Посмотреть ещё ${n}`,
+    unitToday: 'на сегодня', unitDays: 'дн.', unitActive: 'активных',
+    unitSets: 'подходов', unitExercises: 'упражнений', unitDaysAgo: 'дня назад',
+    capSpent: (m) => `потрачено за ${m}`, capStreak: 'самая длинная серия',
+    capNoStep: (n) => `${n} без шага`, capDebt: (n) => `${n} ${plural(n, { one: 'долг', few: 'долга', many: 'долгов', other: 'долга' })}`,
+    capDone: (n) => `${n} уже закрыто`,
+    capPlanned: 'запланировано на сегодня', capDoing: 'сегодня сделано',
+    capLast: (name) => `последняя — ${name}`, capLastPlain: 'от последней',
     weekTitle: 'Неделя', weekNote: 'где было движение',
     todayEmpty: 'На сегодня ничего не ждёт.',
     todayAt: (hhmm) => `до ${hhmm}`,
@@ -139,7 +156,6 @@ const STRINGS = {
     goalsTitle: 'Цели', goalsSub: 'долгосрочные',
     tasksTitle: 'Задачи', tasksSub: 'на каждый день',
     workoutTitle: 'Тренировки', workoutSub: 'сессии и рекорды',
- openBtn: 'Открыть',
     authTitleLogin: 'Вход', authTitleSignup: 'Регистрация',
     authSub: 'Войди, чтобы попасть в своё личное пространство.',
     emailLabel: 'Email', passwordLabel: 'Пароль', passwordHint: 'Минимум 6 символов',
@@ -189,7 +205,16 @@ const STRINGS = {
       : `dziś brak treningu · ostatnio ${n} ${plural(n, { one: 'dzień', few: 'dni', many: 'dni', other: 'dnia' })} temu`,
     sumWorkoutAgo: (n) => `ostatnio ${n} ${plural(n, { one: 'dzień', few: 'dni', many: 'dni', other: 'dnia' })} temu`,
     sumWorkoutNever: 'nie ma jeszcze treningów',
-    todayTitle: 'Dziś', todayNote: 'wszystko, co na ciebie czeka',
+    todayTitle: 'Dziś',
+    todayCount: (n) => `${n} ${plural(n, { one: 'pozycja', few: 'pozycje', many: 'pozycji', other: 'pozycji' })}`,
+    todayMore: (n) => `Zobacz jeszcze ${n}`,
+    unitToday: 'na dziś', unitDays: 'dni', unitActive: 'aktywnych',
+    unitSets: 'serii', unitExercises: 'ćwiczeń', unitDaysAgo: 'dni temu',
+    capSpent: (m) => `wydano w ${m}`, capStreak: 'najdłuższa seria',
+    capNoStep: (n) => `${n} bez kroku`, capDebt: (n) => `${n} ${plural(n, { one: 'dług', few: 'długi', many: 'długów', other: 'długu' })}`,
+    capDone: (n) => `${n} już zamknięto`,
+    capPlanned: 'zaplanowano na dziś', capDoing: 'dziś zrobione',
+    capLast: (name) => `ostatni — ${name}`, capLastPlain: 'od ostatniego',
     weekTitle: 'Tydzień', weekNote: 'gdzie był ruch',
     todayEmpty: 'Na dziś nic nie czeka.',
     todayAt: (hhmm) => `do ${hhmm}`,
@@ -202,7 +227,6 @@ const STRINGS = {
     goalsTitle: 'Cele', goalsSub: 'długoterminowe',
     tasksTitle: 'Zadania', tasksSub: 'na każdy dzień',
     workoutTitle: 'Treningi', workoutSub: 'sesje i rekordy',
- openBtn: 'Otwórz',
     authTitleLogin: 'Logowanie', authTitleSignup: 'Rejestracja',
     authSub: 'Zaloguj się, aby przejść do swojej przestrzeni.',
     emailLabel: 'Email', passwordLabel: 'Hasło', passwordHint: 'Minimum 6 znaków',
@@ -252,7 +276,16 @@ const STRINGS = {
       : `no workout today · last one ${n} ${n === 1 ? 'day' : 'days'} ago`,
     sumWorkoutAgo: (n) => `last ${n} ${plural(n, { one: 'day', other: 'days' })} ago`,
     sumWorkoutNever: 'no workouts yet',
-    todayTitle: 'Today', todayNote: 'everything waiting for you',
+    todayTitle: 'Today',
+    todayCount: (n) => `${n} ${plural(n, { one: 'item', other: 'items' })}`,
+    todayMore: (n) => `See ${n} more`,
+    unitToday: 'today', unitDays: 'days', unitActive: 'active',
+    unitSets: 'sets', unitExercises: 'exercises', unitDaysAgo: 'days ago',
+    capSpent: (m) => `spent in ${m}`, capStreak: 'longest streak',
+    capNoStep: (n) => `${n} without a step`, capDebt: (n) => `${n} overdue`,
+    capDone: (n) => `${n} already done`,
+    capPlanned: 'planned for today', capDoing: 'done today',
+    capLast: (name) => `last — ${name}`, capLastPlain: 'since the last one',
     weekTitle: 'Week', weekNote: 'where the movement was',
     todayEmpty: 'Nothing waiting today.',
     todayAt: (hhmm) => `by ${hhmm}`,
@@ -265,7 +298,6 @@ const STRINGS = {
     goalsTitle: 'Goals', goalsSub: 'long-term',
     tasksTitle: 'Tasks', tasksSub: 'day to day',
     workoutTitle: 'Workouts', workoutSub: 'sessions & records',
- openBtn: 'Open',
     authTitleLogin: 'Log in', authTitleSignup: 'Sign up',
     authSub: 'Sign in to get to your personal space.',
     emailLabel: 'Email', passwordLabel: 'Password', passwordHint: 'Minimum 6 characters',
@@ -314,7 +346,6 @@ function applyTranslations() {
   document.getElementById('exportLabel').textContent = t('exportLabel');
   document.getElementById('logoutLabel').textContent = t('logout');
   document.getElementById('todayTitle').textContent = t('todayTitle');
-  document.getElementById('todayNote').textContent = t('todayNote');
   document.getElementById('weekTitle').textContent = t('weekTitle');
   document.getElementById('weekNote').textContent = t('weekNote');
   // Дата й рядок стану залежать від мови так само, як підписи, — і мова
@@ -324,16 +355,12 @@ function applyTranslations() {
   renderWeek();
   document.getElementById('budgetTitle').textContent = t('budgetTitle');
   document.getElementById('budgetSub').textContent = t('budgetSub');
-  document.getElementById('openBtnLabel').textContent = t('openBtn');
   document.getElementById('goalsTitle').textContent = t('goalsTitle');
   document.getElementById('goalsSub').textContent = t('goalsSub');
-  document.getElementById('goalsOpenBtnLabel').textContent = t('openBtn');
   document.getElementById('tasksTitle').textContent = t('tasksTitle');
   document.getElementById('tasksSub').textContent = t('tasksSub');
-  document.getElementById('tasksOpenBtnLabel').textContent = t('openBtn');
   document.getElementById('workoutTitle').textContent = t('workoutTitle');
   document.getElementById('workoutSub').textContent = t('workoutSub');
-  document.getElementById('workoutOpenBtnLabel').textContent = t('openBtn');
   document.getElementById('authSub').textContent = t('authSub');
   document.getElementById('authEmailLabel').textContent = t('emailLabel');
   document.getElementById('authPasswordLabel').textContent = t('passwordLabel');
@@ -371,6 +398,8 @@ function setLang(lang) {
 // Кожен запит домальовує свою частину, щойно долетить: чекати на найповільніший,
 // щоб показати все разом, означало б дивитись на порожній екран довше, ніж треба.
 let homeData = { transactions: null, tasks: null, doneTasks: null, goals: null, workouts: null };
+// Валюта з профілю — той самий документ, що вже читається заради мови й теми.
+let homeCurrency = '';
 
 const THEME_CHOICES = ['light', 'dark', 'system'];
 let themeChoice = localStorage.getItem('financeAppTheme') || 'system';
@@ -623,38 +652,32 @@ function todayISO() {
   return HomeSummary.isoOf(new Date());
 }
 
-function setSub(id, text) {
-  const el = document.getElementById(id);
-  if (el) el.textContent = text;
-}
-
-/**
- * Показати кільце на плитці. pct === null ховає його: кільце без знаменника
- * малювало б відсоток невідомо від чого, а порожнє коло на плитці читалось би
- * як «нуль», що неправда.
- */
-function setRing(id, pct, label, colour) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  // Клас на картці: на вузькому екрані кільце й підпис поруч зі словом
-  // «Відкрити» не влазять, і саме слово там найменш потрібне — кільце вже
-  // несе число, стрілка вже несе дію.
-  const card = el.closest('.module-card');
-  if (pct === null || pct === undefined) {
-    el.hidden = true;
-    if (card) card.classList.remove('has-ring');
-    return;
+// Плитка називає головне число розділу: великим — саме число, дрібним —
+// одиницю, під ним — за що воно, і окремим рядком те, що вимагає уваги.
+// Кільця пішли разом із кнопкою «Відкрити»: число читається швидше за дугу
+// й не потребує пояснень.
+function setStat(key, value, unit, caption, note) {
+  const stat = document.getElementById(key + 'Stat');
+  const unitEl = document.getElementById(key + 'Unit');
+  const cap = document.getElementById(key + 'Sub');
+  const noteEl = document.getElementById(key + 'Note');
+  if (stat) stat.textContent = value;
+  if (unitEl) unitEl.textContent = unit || '';
+  if (cap) cap.textContent = caption || '';
+  if (noteEl) {
+    noteEl.textContent = note || '';
+    noteEl.hidden = !note;
   }
-  el.hidden = false;
-  if (card) card.classList.add('has-ring');
-  el.querySelector('.tile-ring-arc').style.setProperty('--pct', Math.max(0, Math.min(100, pct)));
-  el.style.setProperty('--ring-colour', colour || 'var(--accent)');
-  el.querySelector('.tile-ring-mid').textContent = label == null ? '' : String(label);
 }
 
 // ---- «Сьогодні»: один список із трьох розділів ----
 // Щоб відмітити справу й крок до цілі, раніше треба було зайти у два розділи
 // й вийти назад. Тепер типовий день закривається, не виходячи з головної.
+// Два пункти й «побачити більше»: головна відповідає на «що зараз», а не
+// заміняє собою розділ завдань. Довгий список тут витіснив би тиждень і
+// плитки за межу екрана.
+const TODAY_TASK_LIMIT = 2;
+
 function renderToday() {
   const panel = document.getElementById('todayPanel');
   const list = document.getElementById('todayList');
@@ -662,6 +685,7 @@ function renderToday() {
   const today = todayISO();
   let html = '';
 
+  let count = 0;
   if (homeData.tasks) {
     const mine = homeData.tasks.filter((x) => x && x.dueDate === today);
     // Прострочене показуємо окремо й іншим кольором: це не «ще одна справа
@@ -669,24 +693,33 @@ function renderToday() {
     const overdue = homeData.tasks.filter((x) => x && !x.done && x.dueDate && x.dueDate < today);
     // Невиконане згори: закреслене вже нікуди не поспішає.
     mine.sort((a, b) => (a.done === b.done ? 0 : (a.done ? 1 : -1)));
-    if (mine.length || overdue.length) {
-      html += `<div class="today-sect">${escapeHtml(t('tasksTitle'))}</div>`;
-      html += mine.map((task) => `
-        <div class="today-row${task.done ? ' checked' : ''}">
-          <button type="button" class="today-box${task.done ? ' checked' : ''}" data-task="${escapeHtml(task.id)}" aria-label="${escapeHtml(task.title || '')}">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg>
-          </button>
-          <span class="today-name">${escapeHtml(task.title || '')}</span>
-          ${task.dueTime ? `<span class="today-when">${escapeHtml(t('todayAt', task.dueTime))}</span>` : ''}
-          <span class="today-spacer"></span>
-        </div>`).join('');
-      html += overdue.map((task) => `
-        <div class="today-row overdue">
-          <span class="today-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5"/><path d="M12 16.2v.1"/></svg></span>
-          <span class="today-name">${escapeHtml(task.title || '')}</span>
-          <span class="today-when">${escapeHtml(t('todaySince', formatDay(task.dueDate)))}</span>
-          <span class="today-spacer"></span>
-        </div>`).join('');
+    count += mine.length + overdue.length;
+    // Показуємо лише два: головна відповідає на «що зараз», а не заміняє
+    // собою розділ. Решта — за посиланням, разом із простроченим, яке теж
+    // рахується в «ще N».
+    const shownTasks = mine.slice(0, TODAY_TASK_LIMIT);
+    const shownOverdue = overdue.slice(0, Math.max(0, TODAY_TASK_LIMIT - shownTasks.length));
+    const hidden = (mine.length - shownTasks.length) + (overdue.length - shownOverdue.length);
+
+    html += shownTasks.map((task) => `
+      <div class="today-row${task.done ? ' checked' : ''}">
+        <button type="button" class="today-box${task.done ? ' checked' : ''}" data-task="${escapeHtml(task.id)}" aria-label="${escapeHtml(task.title || '')}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg>
+        </button>
+        <span class="today-name">${escapeHtml(task.title || '')}</span>
+        <span class="today-spacer"></span>
+        ${task.dueTime ? `<span class="today-when">${escapeHtml(t('todayAt', task.dueTime))}</span>` : ''}
+      </div>`).join('');
+    html += shownOverdue.map((task) => `
+      <div class="today-row overdue">
+        <span class="today-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5"/><path d="M12 16.2v.1"/></svg></span>
+        <span class="today-name">${escapeHtml(task.title || '')}</span>
+        <span class="today-spacer"></span>
+        <span class="today-when">${escapeHtml(t('todaySince', formatDay(task.dueDate)))}</span>
+      </div>`).join('');
+    if (hidden > 0) {
+      html += `<a class="today-more" href="tasks/index.html">${escapeHtml(t('todayMore', hidden))}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></a>`;
     }
   }
 
@@ -694,25 +727,25 @@ function renderToday() {
   // розділу: друге правило «яку ціль питати» розійшлося б із першим.
   if (homeData.goals && window.GoalStreak) {
     const pending = window.GoalStreak.eveningQueue(homeData.goals, today);
-    if (pending.length) {
-      html += `<div class="today-sect">${escapeHtml(t('goalsTitle'))}</div>`;
-      html += pending.slice(0, 3).map((g) => `
-        <div class="today-row">
-          <span class="today-name">${escapeHtml(g.title || '')}</span>
-          <span class="today-when">${escapeHtml(t('todayNoStep'))}</span>
-          <span class="today-spacer"></span>
-          <button type="button" class="today-go" data-goal-step="${escapeHtml(g.id)}">${escapeHtml(t('todayStepBtn'))}</button>
-        </div>`).join('');
-    }
+    count += pending.length;
+    html += pending.slice(0, 2).map((g) => `
+      <div class="today-row">
+        <span class="today-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg></span>
+        <span class="today-name">${escapeHtml(g.title || '')}</span>
+        <span class="today-spacer"></span>
+        <span class="today-when">${escapeHtml(t('todayNoStep'))}</span>
+        <button type="button" class="today-go" data-goal-step="${escapeHtml(g.id)}">${escapeHtml(t('todayStepBtn'))}</button>
+      </div>`).join('');
   }
 
   if (homeData.workouts) {
     const wt = HomeSummary.workoutToday(homeData.workouts, today);
     const sum = HomeSummary.workoutSummary(homeData.workouts, today);
     if (!wt) {
-      html += `<div class="today-sect">${escapeHtml(t('workoutTitle'))}</div>`;
+      count += 1;
       html += `
         <div class="today-row">
+          <span class="today-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M6.5 8v8"/><path d="M17.5 8v8"/><path d="M3.5 10.5v3"/><path d="M20.5 10.5v3"/><path d="M6.5 12h11"/></svg></span>
           <span class="today-name">${escapeHtml(sum.daysAgo === null ? t('sumWorkoutNever') : t('sumWorkoutAgo', sum.daysAgo))}</span>
           <span class="today-spacer"></span>
           <a class="today-go" href="workout/index.html">${escapeHtml(t('todayLogBtn'))}</a>
@@ -725,6 +758,8 @@ function renderToday() {
   const ready = homeData.tasks || homeData.goals || homeData.workouts;
   panel.hidden = !ready;
   list.innerHTML = html || `<div class="today-empty">${escapeHtml(t('todayEmpty'))}</div>`;
+  const countEl = document.getElementById('todayCount');
+  if (countEl) countEl.textContent = count ? t('todayCount', count) : '';
 
   list.querySelectorAll('[data-task]').forEach((btn) => {
     btn.addEventListener('click', () => toggleHomeTask(btn.dataset.task));
@@ -869,21 +904,25 @@ async function loadHomeSummary(uid) {
       const sum = HomeSummary.budgetSummary(monthTxs, today);
       // Знак ставимо тут, а не в перекладі: у переклад має приходити готовий
       // рядок, інакше кожна мова мусила б сама вирішувати, як його показати.
-      const sign = sum.balance >= 0 ? '+' : '\u2212';
-      const plan = (profileDoc.data() || {}).monthlyBudget;
+      const profile = profileDoc.data() || {};
+      homeCurrency = typeof profile.currency === 'string' ? profile.currency : '';
+      const plan = profile.monthlyBudget;
       const ring = HomeSummary.budgetRing(monthTxs, today, plan);
+      const monthName = new Intl.DateTimeFormat(LOCALE_MAP[currentLang] || 'uk-UA', { month: 'long' })
+        .format(new Date(today + 'T00:00:00'));
       if (!ring) {
-        setSub('budgetSub', t('sumBudget', sign + formatAmount(sum.balance)));
-        setRing('budgetRing', null);
+        // Без плану головне число — витрачене за місяць: воно й відповідає
+        // на питання, з яким у бюджет заходять.
+        setStat('budget', formatAmount(sum.expense), homeCurrency,
+          t('capSpent', monthName), null);
         return;
       }
       // З планом плитка відповідає на інше питання — не «скільки лишилось
       // у балансі», а «скільки лишилось до межі». Саме заради нього план і
       // заводять, тож воно й витісняє баланс.
-      setSub('budgetSub', ring.over
-        ? t('sumPlanOver', formatAmount(-ring.left))
-        : t('sumPlanLeft', formatAmount(ring.left)));
-      setRing('budgetRing', ring.pct, ring.pct + '%', ring.over ? 'var(--expense)' : 'var(--accent)');
+      setStat('budget', formatAmount(sum.expense), homeCurrency,
+        t('capSpent', monthName),
+        ring.over ? t('sumPlanOver', formatAmount(-ring.left)) : t('sumPlanLeft', formatAmount(ring.left)));
     })
     .catch((err) => console.error('homeSummary budget:', err));
 
@@ -897,13 +936,10 @@ async function loadHomeSummary(uid) {
       renderToday();
       renderLine();
       const sum = HomeSummary.tasksSummary(docs, today);
-      const parts = [sum.open ? t('sumTasksOpen', sum.open) : t('sumTasksFree')];
-      if (sum.overdue) parts.push(t('sumOverdue', sum.overdue));
-      setSub('tasksSub', parts.join(' · '));
       const ring = HomeSummary.tasksRing(docs, today);
-      // Порожній день кільця не отримує: нуль із нуля — не досягнення й не
-      // борг, а просто вільний день.
-      setRing('tasksRing', ring.total ? ring.pct : null, ring.done);
+      setStat('tasks', String(sum.open), t('unitToday'),
+        ring.done ? t('capDone', ring.done) : t('sumTasksFree'),
+        sum.overdue ? t('capDebt', sum.overdue) : null);
     })
     .catch((err) => console.error('homeSummary tasks:', err));
 
@@ -919,8 +955,7 @@ async function loadHomeSummary(uid) {
       // Кільце показує одну ціль — найтерміновішу. Плитка не список, і
       // чотири кільця в ряд не сказали б більше за одне.
       const featured = HomeSummary.featuredGoal(docs, today);
-      setRing('goalsRing', featured ? featured.pct : null, featured ? featured.pct + '%' : '');
-      if (!sum.active) { setSub('goalsSub', t('sumGoalsNone')); return; }
+      if (!sum.active) { setStat('goals', '0', '', t('sumGoalsNone'), null); return; }
       // Кільце показує ЯК далеко зайшла найтерміновіша ціль, підпис — ЯКА це
       // ціль і що з нею сьогодні. Без назви кільце нічого не означало б, а без
       // другої половини плитка втратила б те, заради чого й ожила: серію й
@@ -929,12 +964,16 @@ async function loadHomeSummary(uid) {
       // Порядок важливий: те, що стосується сьогодні, витісняє те, що
       // стосується строку. Дедлайн через 40 днів нікуди не втече, а
       // невідмічений сьогодні день — втече.
-      let note;
-      if (sum.pending) note = t('sumGoalsPending', sum.pending);
-      else if (sum.streak) note = t('sumStreak', sum.streak);
-      else if (featured && featured.daysLeft !== null) note = t('sumGoalDays', featured.daysLeft);
-      else note = t('sumGoalsDone');
-      setSub('goalsSub', featured ? featured.title + ' · ' + note : note);
+      // Велике число — серія: це найдовше, що людина втримала, і саме воно
+      // вартує погляду. Те, що вимагає дії сьогодні, іде окремим рядком.
+      if (sum.streak) {
+        setStat('goals', String(sum.streak), t('unitDays'), t('capStreak'),
+          sum.pending ? t('capNoStep', sum.pending) : null);
+      } else {
+        setStat('goals', String(sum.active), t('unitActive'),
+          featured ? featured.title : t('sumGoalsDone'),
+          sum.pending ? t('capNoStep', sum.pending) : null);
+      }
     })
     .catch((err) => console.error('homeSummary goals:', err));
 
@@ -965,18 +1004,19 @@ async function loadHomeSummary(uid) {
       const todayWorkout = HomeSummary.workoutToday(docs, today);
       if (todayWorkout) {
         // Записане наперед (підходи порожні) — це план, і казати про нього
-        // «зроблено 0%» було б неправдою: його ще тільки роблять.
-        setSub('workoutSub', todayWorkout.planned
-          ? t('sumWorkoutPlan', todayWorkout.exercises)
-          : t('sumWorkoutDoing', todayWorkout.setsDone, todayWorkout.setsTotal));
-        setRing('workoutRing', todayWorkout.pct, todayWorkout.setsDone + '/' + todayWorkout.setsTotal,
-          todayWorkout.pct >= 100 ? 'var(--income)' : 'var(--accent)');
+        // «зроблено» було б неправдою: його ще тільки роблять.
+        setStat('workout', todayWorkout.planned
+          ? String(todayWorkout.exercises) : `${todayWorkout.setsDone}/${todayWorkout.setsTotal}`,
+          todayWorkout.planned ? t('unitExercises') : t('unitSets'),
+          todayWorkout.planned ? t('capPlanned') : t('capDoing'),
+          null);
         return;
       }
-      setRing('workoutRing', null);
       const sum = HomeSummary.workoutSummary(docs, today);
-      if (sum.daysAgo === null) setSub('workoutSub', t('sumWorkoutNever'));
-      else setSub('workoutSub', t('sumWorkoutNoneToday', sum.daysAgo));
+      if (sum.daysAgo === null) { setStat('workout', '—', '', t('sumWorkoutNever'), null); return; }
+      const last = docs.find((w) => w && w.date === sum.lastDate);
+      setStat('workout', String(sum.daysAgo), t('unitDaysAgo'),
+        last && last.name ? t('capLast', last.name) : t('capLastPlain'), null);
     })
     .catch((err) => console.error('homeSummary workout:', err));
 }
