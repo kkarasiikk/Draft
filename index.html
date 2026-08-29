@@ -309,19 +309,27 @@
   .cal-month{font-size:12.5px;font-weight:600;color:var(--ink-muted);text-transform:capitalize;
     margin-bottom:9px;padding-left:2px;}
   .cal-week{display:grid;grid-template-columns:repeat(7, 1fr);gap:4px;}
-  .cal-day{display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 0 6px;
-    border-radius:13px;background:transparent;}
-  .cal-dow{font-size:10.5px;font-weight:500;color:var(--ink-muted);text-transform:lowercase;}
-  .cal-num{font-size:15px;font-weight:600;color:var(--ink-soft);line-height:1.1;}
+  .cal-day{display:flex;flex-direction:column;align-items:stretch;gap:3px;padding:7px 3px 6px;
+    border-radius:13px;background:transparent;min-width:0;}
+  .cal-dow{font-size:10.5px;font-weight:500;color:var(--ink-muted);text-transform:lowercase;text-align:center;}
+  .cal-num{font-size:15px;font-weight:600;color:var(--ink-soft);line-height:1.1;text-align:center;}
   .cal-day.past .cal-num{color:var(--ink-muted);}
   .cal-day.today{background:var(--accent);}
   .cal-day.today .cal-dow, .cal-day.today .cal-num{color:#fff;}
-  /* Крапка живе завжди — просто невидима без завдань. Інакше рядок із
-     крапкою був би вищим за рядок без неї, і числа стрибали б по вертикалі. */
-  .cal-dot{width:5px;height:5px;border-radius:50%;background:transparent;}
-  .cal-day.has .cal-dot{background:var(--accent);}
-  .cal-day.has.done .cal-dot{background:var(--income);}
-  .cal-day.today.has .cal-dot{background:#fff;}
+
+  /* Назви справ у дні — як у календарі телефона. Колонка вузька, тож назва
+     обрізається: пʼять-шість літер вистачає, щоб упізнати своє, а «є щось»
+     не каже нічого. Список має власну висоту навіть порожній, інакше дні з
+     справами були б вищими, і числа стрибали б по вертикалі. */
+  .cal-items{display:flex;flex-direction:column;gap:2px;margin-top:3px;min-height:32px;}
+  .cal-chip{font-size:9px;line-height:1.35;font-weight:600;padding:2px 3px;border-radius:4px;
+    background:var(--accent-light);color:var(--accent);
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .cal-chip.done{background:var(--control-bg);color:var(--ink-muted);text-decoration:line-through;}
+  .cal-day.today .cal-chip{background:rgba(255,255,255,.22);color:#fff;}
+  .cal-day.today .cal-chip.done{background:rgba(255,255,255,.12);color:rgba(255,255,255,.75);}
+  .cal-more{font-size:9px;font-weight:600;color:var(--ink-muted);text-align:center;}
+  .cal-day.today .cal-more{color:rgba(255,255,255,.8);}
 
   @media (max-width:359px){
     .panel{padding:16px 14px 12px;border-radius:18px;}

@@ -236,9 +236,12 @@
    * сьогоднішній день. Через це тиждень містить і МАЙБУТНІ дні — сторінка
    * мусить прочитати завдання наперед, інакше крапки на них не буде.
    *
-   * Крапка означає рівно одне: на цей день є завдання. Виконані рахуються
-   * окремо, щоб день, де все закрито, міг виглядати інакше за день, де ще є
-   * що робити.
+   * Кожен день несе свої завдання — не лише те, що вони є. Назву видно
+   * коротко, як у календарі телефона: пʼять-шість літер вистачає, щоб
+   * упізнати своє, а «є щось» не каже нічого.
+   *
+   * Невиконані йдуть першими: якщо в колонці вміщається один рядок, це має
+   * бути те, що ще треба зробити, а не закреслене.
    */
   function weekCalendar(tasks, todayIso) {
     var today = new Date(todayIso + 'T00:00:00');
@@ -251,8 +254,12 @@
     var byDay = {};
     (tasks || []).forEach(function (task) {
       if (!task || typeof task.dueDate !== 'string') return;
-      var slot = byDay[task.dueDate] || (byDay[task.dueDate] = { open: 0, done: 0 });
+      var slot = byDay[task.dueDate] || (byDay[task.dueDate] = { open: 0, done: 0, items: [] });
       if (task.done) slot.done += 1; else slot.open += 1;
+      slot.items.push({ title: task.title || '', done: !!task.done });
+    });
+    Object.keys(byDay).forEach(function (d) {
+      byDay[d].items.sort(function (a, b) { return (a.done === b.done) ? 0 : (a.done ? 1 : -1); });
     });
 
     var days = [];
@@ -260,7 +267,7 @@
       var d = new Date(monday);
       d.setDate(d.getDate() + i);
       var iso = isoOf(d);
-      var slot = byDay[iso] || { open: 0, done: 0 };
+      var slot = byDay[iso] || { open: 0, done: 0, items: [] };
       days.push({
         date: iso,
         dayNum: d.getDate(),
@@ -268,6 +275,7 @@
         past: iso < todayIso,
         open: slot.open,
         done: slot.done,
+        items: slot.items,
         hasTasks: slot.open + slot.done > 0,
         // День, де все закрито, — не те саме, що день, де ще є що робити.
         allDone: slot.done > 0 && slot.open === 0,

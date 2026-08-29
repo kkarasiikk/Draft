@@ -1384,6 +1384,24 @@ function openFromHash(open) {
   setTimeout(open, 0);
 }
 
+// Автофокус на першому полі форми — але не за будь-яку ціну.
+//
+// Затримка потрібна, щоб поле встигло зʼявитись разом із вікном. Але за ці
+// 50 мс людина (чи автотест) може вже почати заповнювати ІНШЕ поле — і тоді
+// фокус стрибав туди, куди його ніхто не просив, а набране летіло не в те
+// поле й тихо зникало. Тому забираємо фокус лише тоді, коли його ще ніхто
+// не зайняв усередині цієї ж форми.
+function focusWhenIdle(inputId, overlayId, delay) {
+  setTimeout(function () {
+    var input = document.getElementById(inputId);
+    var overlay = overlayId ? document.getElementById(overlayId) : null;
+    if (!input) return;
+    var active = document.activeElement;
+    if (overlay && active && active !== document.body && overlay.contains(active)) return;
+    input.focus();
+  }, delay || 50);
+}
+
 auth.onAuthStateChanged((user) => {
   document.getElementById('authLoading').style.display = 'none';
   if (user) {
@@ -1838,7 +1856,7 @@ function openGoalForm(existingGoal) {
   document.getElementById('goalFormError').style.display = 'none';
   document.getElementById('deleteGoalBtn').style.display = editingGoalId ? 'block' : 'none';
   document.getElementById('goalFormOverlay').classList.add('show');
-  setTimeout(() => document.getElementById('goalNameInput').focus(), 50);
+  focusWhenIdle('goalNameInput', 'goalFormOverlay');
 }
 
 async function submitGoalForm() {
@@ -1931,7 +1949,7 @@ function openSavingsForm(type, existing) {
   renderSavingsCurrencyPicker();
   savingsGuard.arm();
   document.getElementById('savingsFormOverlay').classList.add('show');
-  setTimeout(() => document.getElementById('savingsAmountInput').focus(), 50);
+  focusWhenIdle('savingsAmountInput', 'savingsFormOverlay');
 }
 
 function updateSavingsTypeToggleUI() {
@@ -2535,7 +2553,7 @@ function openForm(type, existingTx) {
   renderCatPicker();
   txGuard.arm();
   document.getElementById('formOverlay').classList.add('show');
-  setTimeout(() => document.getElementById('amountInput').focus(), 50);
+  focusWhenIdle('amountInput', 'formOverlay');
 }
 
 function updateTypeToggleUI() {

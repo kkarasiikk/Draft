@@ -1880,7 +1880,7 @@ function openExercisePicker() {
   renderPickerGroups('');
   renderPickerCustomMuscleRow();
   document.getElementById('exercisePickerOverlay').classList.add('show');
-  setTimeout(() => document.getElementById('pickerSearch').focus(), 50);
+  focusWhenIdle('pickerSearch', 'exercisePickerOverlay');
 }
 
 function setCustomFormOpen(open) {
@@ -2324,6 +2324,24 @@ function openFromHash(open) {
   // Даємо підписці домалювати перший кадр: форма читає категорії, шаблони
   // й решту того, що приїжджає першим снапшотом.
   setTimeout(open, 0);
+}
+
+// Автофокус на першому полі форми — але не за будь-яку ціну.
+//
+// Затримка потрібна, щоб поле встигло зʼявитись разом із вікном. Але за ці
+// 50 мс людина (чи автотест) може вже почати заповнювати ІНШЕ поле — і тоді
+// фокус стрибав туди, куди його ніхто не просив, а набране летіло не в те
+// поле й тихо зникало. Тому забираємо фокус лише тоді, коли його ще ніхто
+// не зайняв усередині цієї ж форми.
+function focusWhenIdle(inputId, overlayId, delay) {
+  setTimeout(function () {
+    var input = document.getElementById(inputId);
+    var overlay = overlayId ? document.getElementById(overlayId) : null;
+    if (!input) return;
+    var active = document.activeElement;
+    if (overlay && active && active !== document.body && overlay.contains(active)) return;
+    input.focus();
+  }, delay || 50);
 }
 
 auth.onAuthStateChanged((user) => {

@@ -320,3 +320,35 @@ describe('weekCalendar — календарний тиждень', () => {
     expect(w.days.map((d) => d.past)).toEqual([true, true, false, false, false, false, false]);
   });
 });
+
+describe('weekCalendar: назви завдань у дні', () => {
+  const WED = '2026-08-26';
+  const task = (dueDate, title, done = false) => ({ dueDate, title, done });
+
+  test('день несе свої завдання, а не лише те, що вони є', () => {
+    const w = H.weekCalendar([task('2026-08-25', 'Пошта'), task('2026-08-25', 'Дзвінок')], WED);
+    expect(w.days[1].items.map((i) => i.title)).toEqual(['Пошта', 'Дзвінок']);
+  });
+
+  test('невиконане йде першим — у колонці вміщається небагато', () => {
+    const w = H.weekCalendar([
+      task('2026-08-25', 'Закрите', true),
+      task('2026-08-25', 'Відкрите'),
+    ], WED);
+    expect(w.days[1].items[0]).toEqual({ title: 'Відкрите', done: false });
+  });
+
+  test('день без завдань має порожній список, а не відсутній', () => {
+    expect(H.weekCalendar([], WED).days.every((d) => Array.isArray(d.items) && !d.items.length)).toBe(true);
+  });
+
+  test('завдання поза тижнем у дні не потрапляють', () => {
+    const w = H.weekCalendar([task('2026-09-20', 'Пізніше')], WED);
+    expect(w.days.every((d) => !d.items.length)).toBe(true);
+  });
+
+  test('завдання без назви не ламає списку', () => {
+    const w = H.weekCalendar([{ dueDate: '2026-08-26', done: false }], WED);
+    expect(w.days[2].items).toEqual([{ title: '', done: false }]);
+  });
+});

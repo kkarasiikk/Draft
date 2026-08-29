@@ -423,6 +423,10 @@ function setLang(lang) {
 // Сирі дані, з яких збираються «Сьогодні», рядок під датою і сітка тижня.
 // Кожен запит домальовує свою частину, щойно долетить: чекати на найповільніший,
 // щоб показати все разом, означало б дивитись на порожній екран довше, ніж треба.
+// Скільки назв показувати в дні. Більше — і смуга починає важити більше за
+// сам список справ під нею; менше — і тиждень нічого не каже.
+const CAL_CHIPS = 2;
+
 let homeData = { transactions: null, tasks: null, goals: null, workouts: null };
 // Валюта з профілю — той самий документ, що вже читається заради мови й теми.
 let homeCurrency = '';
@@ -851,9 +855,9 @@ function addRow(kind, name, hint, href, attr) {
     <span class="add-ico">${ADD_ICONS[kind]}</span>
     <span class="add-text"><span class="add-name">${escapeHtml(name)}</span>
       <span class="add-hint">${escapeHtml(hint)}</span></span>
-    ${href || attr ? `<span class="add-arrow">${ARROW}</span>` : ''}`;
+    <span class="add-arrow">${ARROW}</span>`;
   if (href) return `<a class="add-row" href="${href}">${inner}</a>`;
-  return `<button type="button" class="add-row"${attr ? ' ' + attr : ' disabled'}>${inner}</button>`;
+  return `<button type="button" class="add-row" ${attr}>${inner}</button>`;
 }
 
 function renderAddSheet() {
@@ -864,17 +868,15 @@ function renderAddSheet() {
   // сама черга, що й у списку «Сьогодні».
   const pending = (homeData.goals && window.GoalStreak)
     ? window.GoalStreak.eveningQueue(homeData.goals, todayISO()) : [];
-  // «Усі відмічені» і «цілей немає» — різні речі, і плутати їх не можна:
-  // друге читалось як «ти все зробив», хоча робити не було чого.
-  const active = (homeData.goals || []).filter((g) => g && g.status === 'active').length;
-  const stepHint = pending.length
-    ? t('addGoalStepHint', pending.length)
-    : (active ? t('addGoalStepNone') : t('addGoalStepNoGoals'));
-
+  // Коли крок нема куди зарахувати, рядка просто немає: неактивний він лише
+  // займав місце й читався як поламаний. Завести ціль однаково є чим —
+  // рядок «Нова ціль» стоїть поруч.
   host.innerHTML = [
     addRow('expense', t('addExpense'), t('addExpenseHint'), 'budget/index.html#new'),
     addRow('task', t('addTask'), t('addTaskHint'), 'tasks/index.html#new'),
-    addRow('goal', t('addGoalStep'), stepHint, null, pending.length ? 'data-add-goal' : null),
+    pending.length
+      ? addRow('goal', t('addGoalStep'), t('addGoalStepHint', pending.length), null, 'data-add-goal')
+      : '',
     addRow('newGoal', t('addGoal'), t('addGoalHint'), 'goals/index.html#new'),
     addRow('workout', t('addWorkout'), t('addWorkoutHint'), 'workout/index.html#new'),
   ].join('');
@@ -946,13 +948,19 @@ function renderCalendar() {
     const cls = ['cal-day'];
     if (d.today) cls.push('today');
     if (d.past) cls.push('past');
-    if (d.hasTasks) cls.push('has');
-    if (d.allDone) cls.push('done');
+    // Два чипи — стільки вміщається в колонку, не роблячи смугу вищою за
+    // сам список справ під нею. Решта згортається в «+N»: це вже привід
+    // відкрити день, а не читати його згори.
+    const shown = d.items.slice(0, CAL_CHIPS);
+    const rest = d.items.length - shown.length;
     return `
       <div class="${cls.join(' ')}">
         <span class="cal-dow">${escapeHtml(dow.format(new Date(d.date + 'T00:00:00')))}</span>
         <span class="cal-num">${d.dayNum}</span>
-        <span class="cal-dot"></span>
+        <span class="cal-items">
+          ${shown.map((it) => `<span class="cal-chip${it.done ? ' done' : ''}" title="${escapeHtml(it.title)}">${escapeHtml(it.title)}</span>`).join('')}
+          ${rest > 0 ? `<span class="cal-more">+${rest}</span>` : ''}
+        </span>
       </div>`;
   }).join('');
 }

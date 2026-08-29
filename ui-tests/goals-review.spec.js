@@ -730,6 +730,20 @@ test.describe('Намір «якщо — то»', () => {
     await expect(page.locator('.plan')).toHaveCount(0);
   });
 
+  test('форма не забирає фокус із поля, яке вже заповнюють', async ({ page }) => {
+    // Автофокус на назві спрацьовував через 50 мс — і якщо в цей момент уже
+    // заповнювали інше поле, набране летіло в назву, а поле лишалось порожнім.
+    await openGoals(page, [goal()]);
+    await page.click('[data-open-goal="g1"]');
+    await page.click('#detailEditBtn');
+    await page.focus('#goalPlanCue');
+    // Довше за саму затримку автофокуса: якщо він спрацює попри зайняте
+    // поле, фокус до цього моменту вже поїде на назву.
+    await page.waitForTimeout(250);
+    const active = await page.evaluate(() => document.activeElement.id);
+    expect(active).toBe('goalPlanCue');
+  });
+
   test('намір зберігається з форми обома половинами', async ({ page }) => {
     await openGoals(page, [goal()]);
     await page.click('[data-open-goal="g1"]');
