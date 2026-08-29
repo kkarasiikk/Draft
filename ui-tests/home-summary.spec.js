@@ -329,18 +329,27 @@ test.describe('Швидкий запис', () => {
     await expect(page.locator('#addFab')).toBeVisible();
   });
 
-  test('шторка відкривається й показує чотири шляхи', async ({ page }) => {
+  test('шторка відкривається й показує всі шляхи запису', async ({ page }) => {
     await openHub(page, { goals: [goal('g1', 'Біг')] });
     await page.click('#addFab');
     await expect(page.locator('#addOverlay')).toHaveClass(/show/);
-    await expect(page.locator('.add-row')).toHaveCount(4);
+    await expect(page.locator('.add-row')).toHaveCount(5);
   });
 
-  test('три рядки ведуть одразу у форму створення', async ({ page }) => {
+  test('чотири рядки ведуть одразу у форму створення', async ({ page }) => {
     await openHub(page, {});
     await page.click('#addFab');
     const hrefs = await page.locator('.add-row[href]').evaluateAll((els) => els.map((e) => e.getAttribute('href')));
-    expect(hrefs).toEqual(['budget/index.html#new', 'tasks/index.html#new', 'workout/index.html#new']);
+    expect(hrefs).toEqual([
+      'budget/index.html#new', 'tasks/index.html#new',
+      'goals/index.html#new', 'workout/index.html#new',
+    ]);
+  });
+
+  test('ціль можна завести з головної, навіть коли жодної немає', async ({ page }) => {
+    await openHub(page, { goals: [] });
+    await page.click('#addFab');
+    await expect(page.locator('.add-row[href="goals/index.html#new"]')).toBeVisible();
   });
 
   test('крок до цілі нікуди не веде — це один тап, а не форма', async ({ page }) => {
@@ -369,7 +378,15 @@ test.describe('Швидкий запис', () => {
     await openHub(page, { goals: [{ ...goal('g1', 'Біг'), checkins: [iso()] }] });
     await page.click('#addFab');
     await expect(page.locator('[data-add-goal]')).toHaveCount(0);
-    await expect(page.locator('.add-row[disabled]')).toBeVisible();
+    await expect(page.locator('.add-row[disabled] .add-hint')).toHaveText('сьогодні всі відмічені');
+  });
+
+  test('«цілей немає» і «всі відмічені» — різні речі, і кажуться по-різному', async ({ page }) => {
+    // Раніше порожня база теж казала «сьогодні всі відмічені»: звучало як
+    // «ти все зробив», хоча робити не було чого.
+    await openHub(page, { goals: [] });
+    await page.click('#addFab');
+    await expect(page.locator('.add-row[disabled] .add-hint')).toHaveText('цілей ще немає');
   });
 
   test('тап повз меню закриває, а по самому меню — ні', async ({ page }) => {
@@ -419,6 +436,7 @@ test.describe('Швидкий запис', () => {
 const NEW_FORM = [
   ['бюджет', 'budget/index.html', '#formOverlay'],
   ['завдання', 'tasks/index.html', '#taskFormOverlay'],
+  ['цілі', 'goals/index.html', '#goalFormOverlay'],
   ['тренування', 'workout/index.html', '#sessionFormOverlay'],
 ];
 

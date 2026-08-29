@@ -67,7 +67,9 @@ const STRINGS = {
     addTask: 'Завдання', addTaskHint: 'на сьогодні або з датою',
     addGoalStep: 'Крок до цілі',
     addGoalStepHint: (n) => `${n} ${plural(n, { one: 'ціль', few: 'цілі', many: 'цілей', other: 'цілі' })} без кроку`,
-    addGoalStepNone: 'сьогодні всі відмічені', addGoalPickHint: 'зарахувати крок',
+    addGoalStepNone: 'сьогодні всі відмічені', addGoalStepNoGoals: 'цілей ще немає',
+    addGoal: 'Нова ціль', addGoalHint: 'на місяць або на рік',
+    addGoalPickHint: 'зарахувати крок',
     addWorkout: 'Тренування', addWorkoutHint: 'вправи й підходи',
     todayTitle: 'Сьогодні',
     todayCount: (n) => `${n} ${plural(n, { one: 'пункт', few: 'пункти', many: 'пунктів', other: 'пункту' })}`,
@@ -143,7 +145,9 @@ const STRINGS = {
     addTask: 'Задача', addTaskHint: 'на сегодня или с датой',
     addGoalStep: 'Шаг к цели',
     addGoalStepHint: (n) => `${n} ${plural(n, { one: 'цель', few: 'цели', many: 'целей', other: 'цели' })} без шага`,
-    addGoalStepNone: 'сегодня все отмечены', addGoalPickHint: 'засчитать шаг',
+    addGoalStepNone: 'сегодня все отмечены', addGoalStepNoGoals: 'целей ещё нет',
+    addGoal: 'Новая цель', addGoalHint: 'на месяц или на год',
+    addGoalPickHint: 'засчитать шаг',
     addWorkout: 'Тренировка', addWorkoutHint: 'упражнения и подходы',
     todayTitle: 'Сегодня',
     todayCount: (n) => `${n} ${plural(n, { one: 'пункт', few: 'пункта', many: 'пунктов', other: 'пункта' })}`,
@@ -219,7 +223,9 @@ const STRINGS = {
     addTask: 'Zadanie', addTaskHint: 'na dziś lub z datą',
     addGoalStep: 'Krok do celu',
     addGoalStepHint: (n) => `${n} ${plural(n, { one: 'cel', few: 'cele', many: 'celów', other: 'celu' })} bez kroku`,
-    addGoalStepNone: 'dziś wszystkie odhaczone', addGoalPickHint: 'zalicz krok',
+    addGoalStepNone: 'dziś wszystkie odhaczone', addGoalStepNoGoals: 'nie ma jeszcze celów',
+    addGoal: 'Nowy cel', addGoalHint: 'na miesiąc lub na rok',
+    addGoalPickHint: 'zalicz krok',
     addWorkout: 'Trening', addWorkoutHint: 'ćwiczenia i serie',
     todayTitle: 'Dziś',
     todayCount: (n) => `${n} ${plural(n, { one: 'pozycja', few: 'pozycje', many: 'pozycji', other: 'pozycji' })}`,
@@ -295,7 +301,9 @@ const STRINGS = {
     addTask: 'Task', addTaskHint: 'for today or with a date',
     addGoalStep: 'Step toward a goal',
     addGoalStepHint: (n) => `${n} ${plural(n, { one: 'goal', other: 'goals' })} without a step`,
-    addGoalStepNone: 'all marked today', addGoalPickHint: 'count the step',
+    addGoalStepNone: 'all marked today', addGoalStepNoGoals: 'no goals yet',
+    addGoal: 'New goal', addGoalHint: 'monthly or yearly',
+    addGoalPickHint: 'count the step',
     addWorkout: 'Workout', addWorkoutHint: 'exercises and sets',
     todayTitle: 'Today',
     todayCount: (n) => `${n} ${plural(n, { one: 'item', other: 'items' })}`,
@@ -833,6 +841,7 @@ const ADD_ICONS = {
   expense: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5.5" width="19" height="13" rx="2.5"/><path d="M2.5 10h19"/></svg>',
   task: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6.5l2 2 3.5-3.5"/><path d="M3 17.5l2 2 3.5-3.5"/><path d="M12 7h9"/><path d="M12 18h9"/></svg>',
   goal: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg>',
+  newGoal: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="11" cy="13" r="7.5"/><circle cx="11" cy="13" r="3.4"/><path d="M18.5 3v6M21.5 6h-6"/></svg>',
   workout: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M6.5 8v8"/><path d="M17.5 8v8"/><path d="M3.5 10.5v3"/><path d="M20.5 10.5v3"/><path d="M6.5 12h11"/></svg>',
 };
 const ARROW = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>';
@@ -855,13 +864,18 @@ function renderAddSheet() {
   // сама черга, що й у списку «Сьогодні».
   const pending = (homeData.goals && window.GoalStreak)
     ? window.GoalStreak.eveningQueue(homeData.goals, todayISO()) : [];
+  // «Усі відмічені» і «цілей немає» — різні речі, і плутати їх не можна:
+  // друге читалось як «ти все зробив», хоча робити не було чого.
+  const active = (homeData.goals || []).filter((g) => g && g.status === 'active').length;
+  const stepHint = pending.length
+    ? t('addGoalStepHint', pending.length)
+    : (active ? t('addGoalStepNone') : t('addGoalStepNoGoals'));
 
   host.innerHTML = [
     addRow('expense', t('addExpense'), t('addExpenseHint'), 'budget/index.html#new'),
     addRow('task', t('addTask'), t('addTaskHint'), 'tasks/index.html#new'),
-    pending.length
-      ? addRow('goal', t('addGoalStep'), t('addGoalStepHint', pending.length), null, 'data-add-goal')
-      : addRow('goal', t('addGoalStep'), t('addGoalStepNone')),
+    addRow('goal', t('addGoalStep'), stepHint, null, pending.length ? 'data-add-goal' : null),
+    addRow('newGoal', t('addGoal'), t('addGoalHint'), 'goals/index.html#new'),
     addRow('workout', t('addWorkout'), t('addWorkoutHint'), 'workout/index.html#new'),
   ].join('');
 
