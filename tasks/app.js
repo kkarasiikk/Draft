@@ -74,20 +74,11 @@ const T = {
     nowNothingShort: (min) => `Нічого коротшого за ${min} хв у списку немає — або візьми щось довше, або познач оцінку часу в завданнях.`,
     nowNothingToday: 'На сьогодні завдань немає. Додай перше — або візьми щось із того, що без дати.',
     nowAllDone: 'Усе на сьогодні зроблено. Можна видихнути 🎉',
-    nowOverdueBadge: 'Прострочено',
     nowProgress: (done, total) => `Сьогодні: ${done}/${total}`,
     nowRemaining: (time) => `лишилось роботи ~${time}`,
     nowFree: (time) => `вільного часу ~${time}`,
     nowOverloaded: 'Заплановано більше, ніж лишилось часу сьогодні',
-    nowOverdueCount: (n) => `Прострочено: ${n}`,
     nowOverCapacity: (left, norm) => `Заплановано ${left}, а зазвичай закриваєш ${norm}`,
-    carryTitle: 'Розбір минулих днів',
-    carryBannerText: (n) => `З минулих днів лишилось ${n}`,
-    carryOpen: 'Розібрати', carryLater: 'Пізніше',
-    carryHint: 'Перенеси те, що досі актуальне, решту познач «без дати». Щоб день показував правду, а не борги за місяць.',
-    carryToday: 'Сьогодні', carryTomorrow: 'Завтра', carryNoDate: 'Без дати',
-    carryAllToday: 'Перенести все на сьогодні',
-    carryEmpty: 'Розібрано. Тепер список дня чесний 👌',
     statsTitle: 'Що я зробив',
     statToday: 'сьогодні', statWeek: 'цього тижня',
     statStreak: (n) => plural(n, { one: 'день поспіль', few: 'дні поспіль', many: 'днів поспіль', other: 'дня поспіль' }),
@@ -179,20 +170,11 @@ const T = {
     nowNothingShort: (min) => `Ничего короче ${min} мин в списке нет — возьми что-то подлиннее или проставь оценку времени в задачах.`,
     nowNothingToday: 'На сегодня задач нет. Добавь первую — или возьми что-то из того, что без даты.',
     nowAllDone: 'Всё на сегодня сделано. Можно выдохнуть 🎉',
-    nowOverdueBadge: 'Просрочено',
     nowProgress: (done, total) => `Сегодня: ${done}/${total}`,
     nowRemaining: (time) => `осталось работы ~${time}`,
     nowFree: (time) => `свободного времени ~${time}`,
     nowOverloaded: 'Запланировано больше, чем осталось времени сегодня',
-    nowOverdueCount: (n) => `Просрочено: ${n}`,
     nowOverCapacity: (left, norm) => `Запланировано ${left}, а обычно закрываешь ${norm}`,
-    carryTitle: 'Разбор прошлых дней',
-    carryBannerText: (n) => `С прошлых дней осталось ${n}`,
-    carryOpen: 'Разобрать', carryLater: 'Позже',
-    carryHint: 'Перенеси то, что ещё актуально, остальное отметь «без даты». Чтобы день показывал правду, а не долги за месяц.',
-    carryToday: 'Сегодня', carryTomorrow: 'Завтра', carryNoDate: 'Без даты',
-    carryAllToday: 'Перенести всё на сегодня',
-    carryEmpty: 'Разобрано. Теперь список дня честный 👌',
     statsTitle: 'Что я сделал',
     statToday: 'сегодня', statWeek: 'на этой неделе',
     statStreak: (n) => plural(n, { one: 'день подряд', few: 'дня подряд', many: 'дней подряд', other: 'дня подряд' }),
@@ -284,20 +266,11 @@ const T = {
     nowNothingShort: (min) => `Nic krótszego niż ${min} min nie ma — weź coś dłuższego albo dodaj szacowany czas do zadań.`,
     nowNothingToday: 'Na dziś nie ma zadań. Dodaj pierwsze — albo weź coś bez daty.',
     nowAllDone: 'Wszystko na dziś zrobione. Można odetchnąć 🎉',
-    nowOverdueBadge: 'Zaległe',
     nowProgress: (done, total) => `Dziś: ${done}/${total}`,
     nowRemaining: (time) => `zostało pracy ~${time}`,
     nowFree: (time) => `wolnego czasu ~${time}`,
     nowOverloaded: 'Zaplanowano więcej, niż zostało dziś czasu',
-    nowOverdueCount: (n) => `Zaległe: ${n}`,
     nowOverCapacity: (left, norm) => `Zaplanowano ${left}, a zwykle zamykasz ${norm}`,
-    carryTitle: 'Przegląd zaległości',
-    carryBannerText: (n) => `Z poprzednich dni zostało ${n}`,
-    carryOpen: 'Przejrzyj', carryLater: 'Później',
-    carryHint: 'Przenieś to, co nadal aktualne, resztę oznacz „bez daty". Żeby dzień pokazywał prawdę, a nie długi z miesiąca.',
-    carryToday: 'Dziś', carryTomorrow: 'Jutro', carryNoDate: 'Bez daty',
-    carryAllToday: 'Przenieś wszystko na dziś',
-    carryEmpty: 'Przejrzane. Lista dnia jest uczciwa 👌',
     statsTitle: 'Co zrobiłem',
     statToday: 'dziś', statWeek: 'w tym tygodniu',
     statStreak: (n) => plural(n, { one: 'dzień z rzędu', few: 'dni z rzędu', many: 'dni z rzędu', other: 'dnia z rzędu' }),
@@ -389,20 +362,11 @@ const T = {
     nowNothingShort: (min) => `Nothing shorter than ${min} min on the list — take something longer, or add time estimates to your tasks.`,
     nowNothingToday: 'Nothing scheduled for today. Add something — or pick one of the undated tasks.',
     nowAllDone: 'Everything for today is done. Take a breath 🎉',
-    nowOverdueBadge: 'Overdue',
     nowProgress: (done, total) => `Today: ${done}/${total}`,
     nowRemaining: (time) => `~${time} of work left`,
     nowFree: (time) => `~${time} free`,
     nowOverloaded: 'You planned more than the time left today',
-    nowOverdueCount: (n) => `Overdue: ${n}`,
     nowOverCapacity: (left, norm) => `${left} planned, and you usually close ${norm}`,
-    carryTitle: 'Unfinished days',
-    carryBannerText: (n) => `${n} left from previous days`,
-    carryOpen: 'Sort out', carryLater: 'Later',
-    carryHint: 'Move what is still relevant, mark the rest as "no date". So the day shows the truth, not a month of debt.',
-    carryToday: 'Today', carryTomorrow: 'Tomorrow', carryNoDate: 'No date',
-    carryAllToday: 'Move everything to today',
-    carryEmpty: 'All sorted. The day list is honest now 👌',
     statsTitle: 'What I got done',
     statToday: 'today', statWeek: 'this week',
     statStreak: (n) => plural(n, { one: 'day in a row', other: 'days in a row' }),
@@ -551,10 +515,6 @@ function applyTranslations() {
   document.getElementById('statsHeading').textContent = t('statsTitle');
   document.getElementById('statChartTitle').textContent = t('statChartTitle');
   document.getElementById('statRecentTitle').textContent = t('statRecentTitle');
-  document.getElementById('carryTitle').textContent = t('carryTitle');
-  document.getElementById('carryHint').textContent = t('carryHint');
-  document.getElementById('carryLaterBtn').textContent = t('carryLater');
-  document.getElementById('carryAllTodayBtn').textContent = t('carryAllToday');
   document.getElementById('remindersTitle').textContent = t('remindersTitle');
   document.getElementById('remindersMenuLabel').textContent = t('remindersMenu');
   document.getElementById('reminderLabel').textContent = t('reminderLabel');
@@ -826,11 +786,10 @@ function taskRowHtml(task) {
   const checkedClass = task.done ? ' checked' : '';
   const prioClass = task.priority ? ` priority-${task.priority}` : '';
   const doneRowClass = task.done ? ' done' : '';
-  const isOverdue = !task.done && task.dueDate && task.dueDate < todayISO();
   const subtasks = task.subtasks || [];
   const subDone = subtasks.filter((s) => s.done).length;
   const metaParts = [];
-  if (task.dueTime) metaParts.push(`<span class="task-time${isOverdue ? ' overdue' : ''}">${escapeHtml(task.dueTime)}</span>`);
+  if (task.dueTime) metaParts.push(`<span class="task-time">${escapeHtml(task.dueTime)}</span>`);
   if (task.priority) metaParts.push(`<span class="priority-chip ${task.priority}">${priorityLabel(task.priority)}</span>`);
   if (subtasks.length) metaParts.push(`<span class="task-progress">${subDone}/${subtasks.length}</span>`);
   if (task.estimateMin) metaParts.push(`<span class="task-progress">${escapeHtml(t('estimateShort', task.estimateMin))}</span>`);
@@ -864,10 +823,10 @@ function taskRowHtml(task) {
     </div>`;
 }
 
-function dayGroupHtml(label, list, overdue) {
+function dayGroupHtml(label, list) {
   return `
     <div class="day-group">
-      <div class="day-label${overdue ? ' overdue' : ''}">${escapeHtml(label)}</div>
+      <div class="day-label">${escapeHtml(label)}</div>
       <div class="day-card">${sortTasks(list).map(taskRowHtml).join('')}</div>
     </div>`;
 }
@@ -1252,7 +1211,7 @@ function renderNoDateSection() {
   const undone = undated.filter((tsk) => !tsk.done);
   const done = undated.filter((tsk) => tsk.done);
   let html = '';
-  if (undone.length) html += dayGroupHtml(t('noDateLabel'), undone, false);
+  if (undone.length) html += dayGroupHtml(t('noDateLabel'), undone);
   html += completedSectionHtml(done);
   el.innerHTML = html;
 
@@ -1747,90 +1706,6 @@ function initRowSwipe(listEl) {
   listEl.addEventListener('pointercancel', () => { if (box) { reset(true); } });
 }
 
-// ---- Розбір минулих днів ----
-// Невиконане з минулого нікуди не дівається саме собою: через місяць список
-// перетворюється на кладовище, і людина перестає його відкривати. Тому раз на
-// день пропонуємо явно вирішити долю кожного боргу — перенести або відпустити
-// (позначити «без дати»). Список і порядок рахує carryOver у tasks/stats.js.
-const CARRY_DISMISS_KEY = 'tasksCarryDismissed';
-
-// «Пізніше» ховає банер до кінця дня, а не назавжди: завтра питання
-// актуальне знову, але сьогодні людина вже відповіла.
-function carryDismissedToday() {
-  return localStorage.getItem(CARRY_DISMISS_KEY) === todayISO();
-}
-function dismissCarryToday() {
-  localStorage.setItem(CARRY_DISMISS_KEY, todayISO());
-  renderCarryBanner();
-}
-
-let carryBannerVisible = false;
-
-function renderCarryBanner() {
-  const banner = document.getElementById('carryBanner');
-  if (!banner) return;
-  const list = carryOver(tasks, { today: todayISO() });
-  // Банер тільки на сьогоднішньому дні: гортаючи тиждень уперед, людина
-  // планує, а не розбирає борги.
-  const show = list.length > 0 && selectedDate === todayISO() && !carryDismissedToday();
-  carryBannerVisible = show;
-  banner.style.display = show ? 'flex' : 'none';
-  if (!show) return;
-  document.getElementById('carryBannerText').textContent = t('carryBannerText', list.length);
-  banner.setAttribute('aria-label', t('carryOpen'));
-}
-
-// Скільки днів тому мало бути зроблено — словами й потрібною мовою.
-function relativeDayLabel(iso) {
-  const today = parseISODate(todayISO());
-  const then = parseISODate(iso);
-  if (!then) return iso;
-  const days = Math.round((then - today) / 86400000);
-  const locale = LOCALE_MAP[currentLang] || 'uk-UA';
-  try {
-    return new Intl.RelativeTimeFormat(locale, { numeric: 'auto' }).format(days, 'day');
-  } catch (err) {
-    return iso;
-  }
-}
-
-function renderCarryList() {
-  const listEl = document.getElementById('carryList');
-  const actionsEl = document.getElementById('carryActions');
-  const list = carryOver(tasks, { today: todayISO() });
-
-  if (!list.length) {
-    listEl.innerHTML = `<div class="carry-empty">${escapeHtml(t('carryEmpty'))}</div>`;
-    actionsEl.style.display = 'none';
-    return;
-  }
-  actionsEl.style.display = 'flex';
-  listEl.innerHTML = list.map((task) => `
-    <div class="carry-item">
-      <div class="carry-item-name" data-carry-open="${task.id}">${escapeHtml(task.title)}</div>
-      <div class="carry-item-when">${escapeHtml(relativeDayLabel(task.dueDate))}</div>
-      <div class="carry-actions">
-        <button type="button" class="carry-action" data-carry-move="${task.id}" data-to="today">${escapeHtml(t('carryToday'))}</button>
-        <button type="button" class="carry-action" data-carry-move="${task.id}" data-to="tomorrow">${escapeHtml(t('carryTomorrow'))}</button>
-        <button type="button" class="carry-action" data-carry-move="${task.id}" data-to="none">${escapeHtml(t('carryNoDate'))}</button>
-      </div>
-    </div>`).join('');
-
-  listEl.querySelectorAll('[data-carry-move]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const to = btn.dataset.to;
-      moveTaskDate(btn.dataset.carryMove,
-        to === 'today' ? todayISO() : to === 'tomorrow' ? isoDateShift(todayISO(), 1) : null);
-    });
-  });
-  listEl.querySelectorAll('[data-carry-open]').forEach((el) => {
-    el.addEventListener('click', () => {
-      closeCarryOver();
-      openTaskForm(tasks.find((tsk) => tsk.id === el.dataset.carryOpen));
-    });
-  });
-}
-
 // Перенос — це зміна лише дати. Час свідомо лишаємо: «о 9:00» переїжджає
 // разом із завданням, інакше довелось би виставляти його заново.
 function moveTaskDate(id, iso) {
@@ -1840,33 +1715,6 @@ function moveTaskDate(id, iso) {
     updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
   }).catch((err) => console.error('moveTaskDate:', err));
 }
-
-function openCarryOver() {
-  renderCarryList();
-  document.getElementById('carryOverlay').classList.add('show');
-}
-function closeCarryOver() {
-  document.getElementById('carryOverlay').classList.remove('show');
-}
-
-document.getElementById('carryBanner').addEventListener('click', (e) => {
-  // Хрестик усередині банера — це «пізніше», а не «відкрити».
-  if (e.target.closest('#carryBannerClose')) { dismissCarryToday(); return; }
-  openCarryOver();
-});
-document.getElementById('closeCarry').addEventListener('click', closeCarryOver);
-document.getElementById('carryLaterBtn').addEventListener('click', () => { dismissCarryToday(); closeCarryOver(); });
-document.getElementById('carryOverlay').addEventListener('click', (e) => {
-  if (e.target.id === 'carryOverlay') closeCarryOver();
-});
-document.getElementById('carryAllTodayBtn').addEventListener('click', async () => {
-  const btn = document.getElementById('carryAllTodayBtn');
-  btn.disabled = true;
-  const list = carryOver(tasks, { today: todayISO() });
-  await Promise.all(list.map((task) => moveTaskDate(task.id, todayISO())));
-  btn.disabled = false;
-  renderCarryList();
-});
 
 // ---- Картка «Зараз» ----
 // Календар відповідає на «які в мене завдання», ця картка — на «що робити
@@ -1916,9 +1764,7 @@ function renderNowCard() {
   } else {
     if (nowIndex >= queue.length) nowIndex = 0;
     const task = queue[nowIndex];
-    const isOverdue = task.dueDate && task.dueDate < todayISO();
     const meta = [];
-    if (isOverdue) meta.push(`<span class="task-time overdue">${escapeHtml(t('nowOverdueBadge'))}</span>`);
     if (task.dueTime) meta.push(`<span class="task-time">${escapeHtml(task.dueTime)}</span>`);
     if (task.priority) meta.push(`<span class="priority-chip ${task.priority}">${escapeHtml(priorityLabel(task.priority))}</span>`);
     if (task.estimateMin) meta.push(`<span class="task-progress">${escapeHtml(t('estimateShort', task.estimateMin))}</span>`);
@@ -1960,9 +1806,6 @@ function renderNowCard() {
   if (summary.totalCount) parts.push(`<span>${escapeHtml(t('nowProgress', summary.doneCount, summary.totalCount))}</span>`);
   if (summary.remainingMin) parts.push(`<span>${escapeHtml(t('nowRemaining', formatMinutes(summary.remainingMin)))}</span>`);
   else if (summary.totalCount > summary.doneCount) parts.push(`<span>${escapeHtml(t('nowFree', formatMinutes(summary.freeMin)))}</span>`);
-  // Коли банер розбору вже показує це число вгорі, повторювати його в
-  // підсумку — просто бурчати двічі про одне.
-  if (summary.overdueCount && !carryBannerVisible) parts.push(`<span class="now-overdue">${escapeHtml(t('nowOverdueCount', summary.overdueCount))}</span>`);
   if (summary.overloaded) parts.push(`<span class="now-warn">${escapeHtml(t('nowOverloaded'))}</span>`);
   // Дві різні правди про перевантаження: за часом і за кількістю. Показуємо
   // одну — інакше картка починає бурчати двома рядками про те саме.
@@ -2072,9 +1915,6 @@ function renderCurrentScreen() {
   if (currentScreen === 'month') renderCalendar();
   else if (currentScreen === 'stats') renderStatsScreen();
   else renderWeekScreen();
-  // Розбір відкритий поверх екрана і живе з тих самих даних: після переносу
-  // (свого чи з іншого пристрою) список має оновитись, а не показувати старе.
-  if (document.getElementById('carryOverlay').classList.contains('show')) renderCarryList();
 }
 
 // Три екрани й одна нижня панель: тримаємо перемикання в одному місці,
@@ -2125,7 +1965,6 @@ function renderWeekScreen() {
     swipeInited = true;
   }
   renderWeekStrip();
-  renderCarryBanner();
   renderNowCard();
   renderTagFilterRow();
   renderSelectedDay();

@@ -15,12 +15,26 @@ const task = (over) => ({
 const titles = (list) => list.map((t) => t.title);
 
 describe('nowQueue: порядок', () => {
-  test('прострочене йде поперед сьогоднішнього', () => {
+  // Раніше вчорашнє йшло першим — «воно вже підвело». Через це картка
+  // місяцями показувала найстаріший борг замість того, що варто зробити
+  // зараз. Невиконане лишається у своєму дні, як і завтрашнє в своєму.
+  test('вчорашнє в «зараз» не потрапляє — так само, як завтрашнє', () => {
     const q = nowQueue([
       task({ title: 'Сьогодні', dueDate: TODAY }),
       task({ title: 'Вчорашнє', dueDate: YESTERDAY }),
+      task({ title: 'Завтрашнє', dueDate: TOMORROW }),
     ], { now: NOW });
-    expect(titles(q)).toEqual(['Вчорашнє', 'Сьогодні']);
+    expect(titles(q)).toEqual(['Сьогодні']);
+  });
+
+  // Без дати — запас на випадок порожнього дня. Вчорашнє його не заміняє:
+  // інакше «зараз» знову підсовувало б минуле.
+  test('порожній сьогоднішній день падає на «без дати», а не на вчорашнє', () => {
+    const q = nowQueue([
+      task({ title: 'Вчорашнє', dueDate: YESTERDAY }),
+      task({ title: 'Без дати' }),
+    ], { now: NOW });
+    expect(titles(q)).toEqual(['Без дати']);
   });
 
   test('час, що вже настав, важливіший за час попереду', () => {
@@ -167,14 +181,14 @@ describe('daySummary', () => {
     expect(s.overCapacity).toBe(false);
   });
 
-  test('прострочене рахується окремо, а не як навантаження на сьогодні', () => {
+  test('невиконане з минулого навантаженням на сьогодні не стає', () => {
     const s = daySummary([
       task({ title: 'старе', dueDate: YESTERDAY, estimateMin: 500 }),
       task({ title: 'сьогодні', dueDate: TODAY, estimateMin: 30 }),
     ], { now: NOW });
-    expect(s.overdueCount).toBe(1);
     expect(s.totalCount).toBe(1);
     expect(s.remainingMin).toBe(30);
+    expect(s.overdueCount).toBeUndefined();
   });
 });
 

@@ -48,7 +48,6 @@ const STRINGS = {
     sumBudget: (s) => `цього місяця ${s}`,
     sumTasksOpen: (n) => `${n} ${plural(n, { one: 'справа', few: 'справи', many: 'справ', other: 'справи' })} на сьогодні`,
     sumTasksFree: 'на сьогодні вільно',
-    sumOverdue: (n) => `+${n} з минулих днів`,
     sumStreak: (n) => `серія ${n} ${plural(n, { one: 'день', few: 'дні', many: 'днів', other: 'дня' })}`,
     sumGoalsPending: (n) => `${n} без кроку сьогодні`,
     sumGoalsDone: 'усе відмічено',
@@ -78,13 +77,12 @@ const STRINGS = {
     unitToday: 'на сьогодні', unitDays: 'дн.', unitActive: 'активних',
     unitSets: 'підходів', unitExercises: 'вправ', unitDaysAgo: 'дні тому',
     capSpent: (m) => `витрачено за ${m}`, capStreak: 'найдовша серія',
-    capNoStep: (n) => `${n} без кроку`, capDebt: (n) => `${n} ${plural(n, { one: 'борг', few: 'борги', many: 'боргів', other: 'боргу' })}`,
+    capNoStep: (n) => `${n} без кроку`,
     capDone: (n) => `${n} вже ${plural(n, { one: 'закрито', few: 'закрито', many: 'закрито', other: 'закрито' })}`,
     capPlanned: 'заплановано на сьогодні', capDoing: 'сьогодні зроблено',
     capLast: (name) => `останнє — ${name}`, capLastPlain: 'від останнього',
     todayEmpty: 'На сьогодні нічого не чекає.',
     todayAt: (hhmm) => `до ${hhmm}`,
-    todaySince: (d) => `з ${d}`,
     todayNoStep: 'сьогодні без кроку',
     todayStepBtn: 'Крок', todayLogBtn: 'Записати',
     lineGoals: (n) => `${n} ${plural(n, { one: 'ціль', few: 'цілі', many: 'цілей', other: 'цілі' })} без кроку`,
@@ -127,7 +125,6 @@ const STRINGS = {
     sumBudget: (s) => `в этом месяце ${s}`,
     sumTasksOpen: (n) => `${n} ${plural(n, { one: 'дело', few: 'дела', many: 'дел', other: 'дела' })} на сегодня`,
     sumTasksFree: 'на сегодня свободно',
-    sumOverdue: (n) => `+${n} из прошлых дней`,
     sumStreak: (n) => `серия ${n} ${plural(n, { one: 'день', few: 'дня', many: 'дней', other: 'дня' })}`,
     sumGoalsPending: (n) => `${n} без шага сегодня`,
     sumGoalsDone: 'всё отмечено',
@@ -157,13 +154,12 @@ const STRINGS = {
     unitToday: 'на сегодня', unitDays: 'дн.', unitActive: 'активных',
     unitSets: 'подходов', unitExercises: 'упражнений', unitDaysAgo: 'дня назад',
     capSpent: (m) => `потрачено за ${m}`, capStreak: 'самая длинная серия',
-    capNoStep: (n) => `${n} без шага`, capDebt: (n) => `${n} ${plural(n, { one: 'долг', few: 'долга', many: 'долгов', other: 'долга' })}`,
+    capNoStep: (n) => `${n} без шага`,
     capDone: (n) => `${n} уже закрыто`,
     capPlanned: 'запланировано на сегодня', capDoing: 'сегодня сделано',
     capLast: (name) => `последняя — ${name}`, capLastPlain: 'от последней',
     todayEmpty: 'На сегодня ничего не ждёт.',
     todayAt: (hhmm) => `до ${hhmm}`,
-    todaySince: (d) => `с ${d}`,
     todayNoStep: 'сегодня без шага',
     todayStepBtn: 'Шаг', todayLogBtn: 'Записать',
     lineGoals: (n) => `${n} ${plural(n, { one: 'цель', few: 'цели', many: 'целей', other: 'цели' })} без шага`,
@@ -206,7 +202,6 @@ const STRINGS = {
     sumBudget: (s) => `w tym miesiącu ${s}`,
     sumTasksOpen: (n) => `${n} ${plural(n, { one: 'zadanie', few: 'zadania', many: 'zadań', other: 'zadania' })} na dziś`,
     sumTasksFree: 'na dziś wolne',
-    sumOverdue: (n) => `+${n} z poprzednich dni`,
     sumStreak: (n) => `seria ${n} ${plural(n, { one: 'dzień', few: 'dni', many: 'dni', other: 'dnia' })}`,
     sumGoalsPending: (n) => `${n} bez kroku dziś`,
     sumGoalsDone: 'wszystko odhaczone',
@@ -236,13 +231,12 @@ const STRINGS = {
     unitToday: 'na dziś', unitDays: 'dni', unitActive: 'aktywnych',
     unitSets: 'serii', unitExercises: 'ćwiczeń', unitDaysAgo: 'dni temu',
     capSpent: (m) => `wydano w ${m}`, capStreak: 'najdłuższa seria',
-    capNoStep: (n) => `${n} bez kroku`, capDebt: (n) => `${n} ${plural(n, { one: 'dług', few: 'długi', many: 'długów', other: 'długu' })}`,
+    capNoStep: (n) => `${n} bez kroku`,
     capDone: (n) => `${n} już zamknięto`,
     capPlanned: 'zaplanowano na dziś', capDoing: 'dziś zrobione',
     capLast: (name) => `ostatni — ${name}`, capLastPlain: 'od ostatniego',
     todayEmpty: 'Na dziś nic nie czeka.',
     todayAt: (hhmm) => `do ${hhmm}`,
-    todaySince: (d) => `od ${d}`,
     todayNoStep: 'dziś bez kroku',
     todayStepBtn: 'Krok', todayLogBtn: 'Zapisz',
     lineGoals: (n) => `${n} ${plural(n, { one: 'cel', few: 'cele', many: 'celów', other: 'celu' })} bez kroku`,
@@ -285,7 +279,6 @@ const STRINGS = {
     sumBudget: (s) => `this month ${s}`,
     sumTasksOpen: (n) => `${n} ${plural(n, { one: 'task', other: 'tasks' })} today`,
     sumTasksFree: 'nothing due today',
-    sumOverdue: (n) => `+${n} carried over`,
     sumStreak: (n) => `${n}-day streak`,
     sumGoalsPending: (n) => `${n} with no step today`,
     sumGoalsDone: 'all checked in',
@@ -315,13 +308,12 @@ const STRINGS = {
     unitToday: 'today', unitDays: 'days', unitActive: 'active',
     unitSets: 'sets', unitExercises: 'exercises', unitDaysAgo: 'days ago',
     capSpent: (m) => `spent in ${m}`, capStreak: 'longest streak',
-    capNoStep: (n) => `${n} without a step`, capDebt: (n) => `${n} overdue`,
+    capNoStep: (n) => `${n} without a step`,
     capDone: (n) => `${n} already done`,
     capPlanned: 'planned for today', capDoing: 'done today',
     capLast: (name) => `last — ${name}`, capLastPlain: 'since the last one',
     todayEmpty: 'Nothing waiting today.',
     todayAt: (hhmm) => `by ${hhmm}`,
-    todaySince: (d) => `since ${d}`,
     todayNoStep: 'no step today',
     todayStepBtn: 'Step', todayLogBtn: 'Log',
     lineGoals: (n) => `${n} ${plural(n, { one: 'goal', other: 'goals' })} without a step`,
@@ -746,19 +738,17 @@ function renderToday() {
 
   let count = 0;
   if (homeData.tasks) {
+    // Тільки сьогоднішні. Невиконане з минулих днів лишається у своєму дні:
+    // воно не стає справою на сьогодні від того, що день минув, і тягнути
+    // його сюди означало б показувати борг замість дня.
     const mine = homeData.tasks.filter((x) => x && x.dueDate === today);
-    // Прострочене показуємо окремо й іншим кольором: це не «ще одна справа
-    // на сьогодні», це борг, і читатись він має інакше.
-    const overdue = homeData.tasks.filter((x) => x && !x.done && x.dueDate && x.dueDate < today);
     // Невиконане згори: закреслене вже нікуди не поспішає.
     mine.sort((a, b) => (a.done === b.done ? 0 : (a.done ? 1 : -1)));
-    count += mine.length + overdue.length;
+    count += mine.length;
     // Показуємо лише два: головна відповідає на «що зараз», а не заміняє
-    // собою розділ. Решта — за посиланням, разом із простроченим, яке теж
-    // рахується в «ще N».
+    // собою розділ. Решта — за посиланням.
     const shownTasks = mine.slice(0, TODAY_TASK_LIMIT);
-    const shownOverdue = overdue.slice(0, Math.max(0, TODAY_TASK_LIMIT - shownTasks.length));
-    const hidden = (mine.length - shownTasks.length) + (overdue.length - shownOverdue.length);
+    const hidden = mine.length - shownTasks.length;
 
     html += shownTasks.map((task) => `
       <div class="today-row${task.done ? ' checked' : ''}">
@@ -768,13 +758,6 @@ function renderToday() {
         <span class="today-name">${escapeHtml(task.title || '')}</span>
         <span class="today-spacer"></span>
         ${task.dueTime ? `<span class="today-when">${escapeHtml(t('todayAt', task.dueTime))}</span>` : ''}
-      </div>`).join('');
-    html += shownOverdue.map((task) => `
-      <div class="today-row overdue">
-        <span class="today-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5"/><path d="M12 16.2v.1"/></svg></span>
-        <span class="today-name">${escapeHtml(task.title || '')}</span>
-        <span class="today-spacer"></span>
-        <span class="today-when">${escapeHtml(t('todaySince', formatDay(task.dueDate)))}</span>
       </div>`).join('');
     if (hidden > 0) {
       html += `<a class="today-more" href="tasks/index.html">${escapeHtml(t('todayMore', hidden))}
@@ -1046,13 +1029,6 @@ function formatFullDate(iso) {
   return `${weekday}, ${dayMonth}`;
 }
 
-/** Число й місяць: «22 серпня». */
-function formatDay(iso) {
-  if (!iso) return '';
-  const locale = LOCALE_MAP[currentLang] || 'uk-UA';
-  return new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long' }).format(new Date(iso + 'T00:00:00'));
-}
-
 async function loadHomeSummary(uid) {
   const userRef = db.collection('users').doc(uid);
   const today = todayISO();
@@ -1110,8 +1086,7 @@ async function loadHomeSummary(uid) {
       const sum = HomeSummary.tasksSummary(docs, today);
       const ring = HomeSummary.tasksRing(docs, today);
       setStat('tasks', String(sum.open), t('unitToday'),
-        ring.done ? t('capDone', ring.done) : t('sumTasksFree'),
-        sum.overdue ? t('capDebt', sum.overdue) : null);
+        ring.done ? t('capDone', ring.done) : t('sumTasksFree'), null);
     })
     .catch((err) => console.error('homeSummary tasks:', err));
 

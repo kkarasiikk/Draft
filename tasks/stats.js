@@ -56,25 +56,6 @@
     return d && !isNaN(d) ? isoOf(d) : null;
   }
 
-  /**
-   * Невиконані завдання з минулих днів — те, що треба розібрати.
-   * Спершу найдавніші: борг, який висить два тижні, важливіший за вчорашній.
-   */
-  function carryOver(tasks, opts) {
-    opts = opts || {};
-    var today = opts.today || isoOf(new Date());
-    var prio = { high: 0, medium: 1, low: 2 };
-    return (tasks || [])
-      .filter(function (t) { return t && !t.done && t.dueDate && t.dueDate < today; })
-      .sort(function (a, b) {
-        if (a.dueDate !== b.dueDate) return a.dueDate < b.dueDate ? -1 : 1;
-        var pa = prio[a.priority] !== undefined ? prio[a.priority] : 3;
-        var pb = prio[b.priority] !== undefined ? prio[b.priority] : 3;
-        if (pa !== pb) return pa - pb;
-        return (a.title || '').localeCompare(b.title || '');
-      });
-  }
-
   /** Скільки завдань закрито в конкретний день. */
   function doneOn(tasks, iso) {
     var n = 0;
@@ -172,12 +153,10 @@
       streak: streak.days,
       streakIncludesToday: streak.includesToday,
       norm: personalNorm(tasks, { today: today }),
-      overdue: carryOver(tasks, { today: today }).length,
     };
   }
 
   root.completedIso = completedIso;
-  root.carryOver = carryOver;
   root.doneOn = doneOn;
   root.historyDays = historyDays;
   root.streakDays = streakDays;
@@ -185,7 +164,7 @@
   root.statsSummary = statsSummary;
   if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
-      completedIso: completedIso, carryOver: carryOver, doneOn: doneOn,
+      completedIso: completedIso, doneOn: doneOn,
       historyDays: historyDays, streakDays: streakDays, personalNorm: personalNorm,
       statsSummary: statsSummary,
       NORM_WINDOW_DAYS: NORM_WINDOW_DAYS, NORM_MIN_ACTIVE_DAYS: NORM_MIN_ACTIVE_DAYS,

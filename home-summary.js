@@ -45,22 +45,18 @@
   }
 
   /**
-   * Справи на сьогодні. Прострочене рахуємо окремо: воно так само вимагає
-   * уваги, але це інша новина, ніж «на сьогодні заплановано три».
+   * Справи на сьогодні — і тільки на сьогодні. Невиконане з минулих днів
+   * лишається у своєму дні: воно не стає справою на сьогодні від того, що
+   * день минув, і додавати його сюди означало б показувати борг замість дня.
    */
   function tasksSummary(tasks, todayIso) {
     var open = 0;
     var done = 0;
-    var overdue = 0;
     (tasks || []).forEach(function (task) {
-      if (!task || typeof task.dueDate !== 'string') return;
-      if (task.dueDate === todayIso) {
-        if (task.done) done += 1; else open += 1;
-      } else if (task.dueDate < todayIso && !task.done) {
-        overdue += 1;
-      }
+      if (!task || task.dueDate !== todayIso) return;
+      if (task.done) done += 1; else open += 1;
     });
-    return { open: open, done: done, overdue: overdue };
+    return { open: open, done: done };
   }
 
   /**
@@ -101,18 +97,13 @@
     return { pending: digest.pending, streak: best, active: active };
   }
 
-  /**
-   * Кільце завдань: скільки з сьогоднішніх уже закрито.
-   * Знаменник — усе заплановане на сьогодні, а не разом із боргами: борги
-   * живуть окремим числом у підписі й не мають розбавляти сьогоднішній день.
-   */
+  /** Кільце завдань: скільки з сьогоднішніх уже закрито. */
   function tasksRing(tasks, todayIso) {
     var s = tasksSummary(tasks, todayIso);
     var total = s.done + s.open;
     return {
       done: s.done,
       total: total,
-      overdue: s.overdue,
       pct: total ? Math.round((s.done / total) * 100) : 0,
     };
   }

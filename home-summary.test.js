@@ -35,17 +35,25 @@ describe('budgetSummary: баланс місяця', () => {
 describe('tasksSummary: справи на сьогодні', () => {
   const task = (dueDate, done) => ({ dueDate, done });
 
-  test('розділяє відкрите, зроблене й прострочене', () => {
+  test('розділяє відкрите й зроблене на сьогодні', () => {
     expect(H.tasksSummary([
       task(TODAY, false), task(TODAY, false), task(TODAY, true),
-      task('2026-08-20', false),          // борг
-      task('2026-08-19', true),           // зроблене вчора — не борг
       task('2026-09-01', false),          // майбутнє
-    ], TODAY)).toEqual({ open: 2, done: 1, overdue: 1 });
+    ], TODAY)).toEqual({ open: 2, done: 1 });
+  });
+
+  // Невиконане з минулого лишається у своєму дні. Раніше воно рахувалось
+  // окремим числом «боргів» і показувалось на головній; тепер день минув —
+  // і питання разом із ним.
+  test('невиконане з минулих днів у сьогодні не потрапляє', () => {
+    expect(H.tasksSummary([
+      task('2026-08-20', false),
+      task('2026-08-19', true),
+    ], TODAY)).toEqual({ open: 0, done: 0 });
   });
 
   test('завдання без дати підсумок не чіпають', () => {
-    expect(H.tasksSummary([task(null, false), {}], TODAY)).toEqual({ open: 0, done: 0, overdue: 0 });
+    expect(H.tasksSummary([task(null, false), {}], TODAY)).toEqual({ open: 0, done: 0 });
   });
 });
 
@@ -126,14 +134,13 @@ describe('tasksRing — скільки з сьогоднішнього закр�
     expect(r).toMatchObject({ done: 2, total: 4, pct: 50 });
   });
 
-  test('борги з минулого в знаменник не входять — це інший день', () => {
+  test('невиконане з минулого в знаменник не входить — це інший день', () => {
     const r = HomeSummary.tasksRing([
       { dueDate: T, done: true },
       { dueDate: '2026-08-20', done: false },
     ], T);
     expect(r.total).toBe(1);
     expect(r.pct).toBe(100);
-    expect(r.overdue).toBe(1);
   });
 
   test('порожній день — нуль, а не ділення на нуль', () => {

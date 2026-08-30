@@ -1,5 +1,5 @@
 const {
-  completedIso, carryOver, doneOn, historyDays, streakDays, personalNorm, statsSummary,
+  completedIso, doneOn, historyDays, streakDays, personalNorm, statsSummary,
 } = require('./stats');
 
 // Вівторок, 18 серпня 2026.
@@ -49,35 +49,6 @@ describe('completedIso: різні формати completedAt', () => {
 
   test('пізній вечір лишається тим самим днем (місцевий час, не UTC)', () => {
     expect(completedIso(doneTask('a', TODAY, { completedAt: at(TODAY, 23) }))).toBe(TODAY);
-  });
-});
-
-describe('carryOver: що треба розібрати', () => {
-  const list = [
-    task({ title: 'Вчорашнє', dueDate: '2026-08-17' }),
-    task({ title: 'Тижневої давнини', dueDate: '2026-08-11' }),
-    task({ title: 'Сьогоднішнє', dueDate: TODAY }),
-    task({ title: 'Завтрашнє', dueDate: '2026-08-19' }),
-    task({ title: 'Без дати' }),
-    doneTask('Виконане вчора', '2026-08-17', { dueDate: '2026-08-17' }),
-  ];
-
-  test('лише невиконані з минулих днів, найдавніші вгорі', () => {
-    expect(titles(carryOver(list, { today: TODAY }))).toEqual(['Тижневої давнини', 'Вчорашнє']);
-  });
-
-  test('за однакової дати вирішує пріоритет', () => {
-    const same = [
-      task({ title: 'Звичайне', dueDate: '2026-08-17' }),
-      task({ title: 'Важливе', dueDate: '2026-08-17', priority: 'high' }),
-    ];
-    expect(titles(carryOver(same, { today: TODAY }))).toEqual(['Важливе', 'Звичайне']);
-  });
-
-  test('порожній або некоректний список', () => {
-    expect(carryOver([], { today: TODAY })).toEqual([]);
-    expect(carryOver(null, { today: TODAY })).toEqual([]);
-    expect(carryOver([null], { today: TODAY })).toEqual([]);
   });
 });
 
@@ -184,17 +155,17 @@ describe('statsSummary', () => {
     doneTask('y1', '2026-08-17'),
     // Понеділок цього тижня — 17-е, тож неділя 16-го вже інший тиждень.
     doneTask('s1', '2026-08-16'),
-    task({ title: 'борг', dueDate: '2026-08-10' }),
+    // Невиконане з минулого підсумок не чіпає: воно лишається у своєму дні.
+    task({ title: 'Невиконане з 10-го', dueDate: '2026-08-10' }),
   ];
 
-  test('сьогодні, тиждень з понеділка, борг і серія', () => {
+  test('сьогодні, тиждень з понеділка і серія', () => {
     const s = statsSummary(list, { today: TODAY });
     expect(s.todayDone).toBe(2);
     expect(s.weekDone).toBe(3);
     expect(s.totalDone).toBe(4);
     expect(s.streak).toBe(3);
     expect(s.streakIncludesToday).toBe(true);
-    expect(s.overdue).toBe(1);
   });
 
   test('норми немає, поки історії мало', () => {
@@ -204,7 +175,7 @@ describe('statsSummary', () => {
   test('порожній список не ламає підсумок', () => {
     expect(statsSummary([], { today: TODAY })).toEqual({
       todayDone: 0, weekDone: 0, totalDone: 0, streak: 0,
-      streakIncludesToday: false, norm: null, overdue: 0,
+      streakIncludesToday: false, norm: null,
     });
   });
 });

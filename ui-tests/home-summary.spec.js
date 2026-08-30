@@ -74,12 +74,15 @@ test.describe('Плитки', () => {
     await expect(cap(page, 'tasks')).toContainText('1');
   });
 
-  test('завдання: борг видно окремим рядком', async ({ page }) => {
+  // Раніше тут був рядок «N боргів». Невиконане з минулих днів лишається у
+  // своєму дні: плитка каже про сьогодні й мовчить про те, що вже минуло.
+  test('завдання: невиконане з минулих днів плитку не чіпає', async ({ page }) => {
     await openHub(page, { tasks: [
       { id: 'a', dueDate: iso(), done: false },
       { id: 'b', dueDate: iso(-3), done: false },
     ] });
-    await expect(note(page, 'tasks')).toContainText('1');
+    await expect(stat(page, 'tasks')).toHaveText('1');
+    await expect(note(page, 'tasks')).toBeHidden();
   });
 
   test('порожній день так і каже', async ({ page }) => {
@@ -152,13 +155,13 @@ test.describe('Сьогодні', () => {
     await expect(page.locator('.today-name').first()).toHaveText('Забрати документи');
   });
 
-  test('прострочене відділене від сьогоднішнього', async ({ page }) => {
+  test('невиконане з минулих днів у «Сьогодні» не потрапляє', async ({ page }) => {
     await openHub(page, { tasks: [
       task('t1'),
       task('old', { title: 'Продовжити страховку', dueDate: iso(-4) }),
     ] });
-    await expect(page.locator('.today-row.overdue')).toHaveCount(1);
-    await expect(page.locator('.today-row.overdue .today-name')).toHaveText('Продовжити страховку');
+    await expect(page.locator('#todayList')).toContainText('Забрати документи');
+    await expect(page.locator('#todayList')).not.toContainText('Продовжити страховку');
   });
 
   test('виконане закреслене й лежить нижче невиконаного', async ({ page }) => {
@@ -221,12 +224,12 @@ test.describe('Сьогодні', () => {
     await expect(page.locator('.today-more')).toHaveCount(0);
   });
 
-  test('прострочене теж рахується в «ще N», а не губиться', async ({ page }) => {
+  test('невиконане з минулих днів у «ще N» не рахується', async ({ page }) => {
     await openHub(page, { tasks: [
       task('a'), task('b'),
       task('old', { title: 'Страховка', dueDate: iso(-4) }),
     ] });
-    await expect(page.locator('.today-more')).toHaveText(/1/);
+    await expect(page.locator('.today-more')).toHaveCount(0);
   });
 
   test('лічильник у шапці рахує все, а не лише показане', async ({ page }) => {
