@@ -1024,6 +1024,16 @@ function refreshDatePickersLang() {
 }
 
 // ---- Переклад статичних елементів ----
+// ---- Бічна колонка розділів (лише широкий екран) ----
+// Розмітку й назви розділів тримає ../side-nav.js — одні на всі пʼять
+// сторінок. Експорту й теми тут немає навмисно: вони живуть на головній,
+// і кнопка, яка веде на іншу сторінку щось зробити, — це не кнопка.
+window.SideNav.mount(document.getElementById('sideNavHost'), {
+  current: 'budget',
+  base: '../',
+  lang: currentLang,
+});
+
 function applyStaticTranslations() {
   document.getElementById('recSettingsLabel').textContent = t('recSettingsLabel');
   document.getElementById('openRecurringLabel').textContent = t('recSettingsLabel');
@@ -1035,6 +1045,7 @@ function applyStaticTranslations() {
   document.getElementById('recNextLabel').textContent = t('recNextLabel');
   renderRecurringBanner();
   document.getElementById('htmlRoot').setAttribute('lang', currentLang);
+  window.SideNav.setLang(currentLang);
   document.title = t('appTitle');
   document.getElementById('authSub').textContent = t('authSub');
   document.getElementById('authEmailLabel').textContent = t('emailLabel');

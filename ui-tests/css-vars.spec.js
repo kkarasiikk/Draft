@@ -24,7 +24,16 @@ for (const [name, path, ready] of PAGES) {
       await openModule(page, path, { ready, theme });
 
       const undefinedVars = await page.evaluate(() => {
-        const css = [...document.querySelectorAll('style')].map((s) => s.textContent).join('\n');
+        // Не лише <style>: стилі бічної колонки живуть окремим файлом, і
+        // якби ми дивились тільки у вбудовані, ціла спільна таблиця
+        // лишилась би поза перевіркою. Чужі таблиці (шрифти з Google)
+        // кидають на cssRules — їх пропускаємо, своїх змінних у них немає.
+        const sheets = [...document.styleSheets].map((sheet) => {
+          try {
+            return [...sheet.cssRules].map((r) => r.cssText).join('\n');
+          } catch (err) { return ''; }
+        });
+        const css = sheets.join('\n');
         // Звернення з власним запасним значенням — var(--x, щось) — не рахуємо:
         // там відсутність змінної передбачена автором.
         const used = new Set([...css.matchAll(/var\(\s*(--[a-z0-9-]+)\s*\)/g)].map((m) => m[1]));

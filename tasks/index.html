@@ -28,6 +28,7 @@
 <link rel="apple-touch-icon" href="../budget/icon-192.png">
 <link rel="icon" href="../budget/icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../side-nav.css">
 <link rel="stylesheet" href="../ai-chat.css">
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -442,8 +443,12 @@
      а базовий .priority-picker розрахований на чотири рівні клітинки
      пріоритету: набитий у той самий рядок текст обрізало б до «У час …».
      Тут кнопки переносяться й сідають по своєму тексту, а не тиснуться. */
-  .priority-picker.wrap{flex-wrap:wrap;}
-  .priority-picker.wrap .priority-choice{flex:0 1 auto;white-space:normal;}
+  /* Клас звався `wrap` — і потрапляв під правила сторінкового .wrap, який
+     задає ширину колонки вмісту. На комп'ютері це вже видно: вибір нагадувань
+     усередині форми діставав ліве поле сторінки. Назва мусить казати, що
+     вона робить, і не збігатися з чужою. */
+  .priority-picker.multiline{flex-wrap:wrap;}
+  .priority-picker.multiline .priority-choice{flex:0 1 auto;white-space:normal;}
   /* Поле оцінки — вузьке: 4 цифри більше не треба, а повна ширина створює
      враження, що туди мають писати щось довге. */
   #taskEstimateInput{max-width:140px;}
@@ -607,8 +612,16 @@
 
   @media (min-width:880px){
     body{padding-bottom:32px;}
-    .wrap{max-width:none;margin:0;padding:0 40px;}
-    .app-topbar{padding:28px 0 0;}
+    /* Місце під бічну колонку: вона лежить окремим шаром (side-nav.css),
+       тож сторінка лише звільняє їй ліве поле. Логотип переїхав туди ж —
+       тримати «Life» ще й у шапці означало б показати те саме двічі. */
+    .wrap{max-width:none;margin:0;padding:26px 40px 0 278px;}
+    .app-topbar-brand{display:none;}
+    .app-topbar{padding:2px 0 0;}
+    /* «Головна» в нижній панелі — та сама дія, що й перший рядок бічної
+       колонки. На телефоні колонки немає, тож вкладка потрібна; тут вона
+       вже друга кнопка на одне й те саме. */
+    #bnHome{display:none;}
     .content{max-width:960px;margin:0 auto;padding:20px 4px 40px;}
     #dayViewScreen{max-width:960px;margin:0 auto;padding:20px 4px 40px;}
     .cal-day{min-height:100px;padding:8px 6px;}
@@ -659,6 +672,7 @@
 
 <div id="appScreen">
 <div class="wrap" id="wrap">
+  <div id="sideNavHost"></div>
   <div class="app-topbar">
     <a href="../index.html" class="app-topbar-brand" id="topbarHomeLink" aria-label="На головну">Life</a>
     <div class="topbar-actions">
@@ -887,7 +901,7 @@
       <input type="number" id="taskEstimateInput" min="1" max="1440" step="1" inputmode="numeric" placeholder="хв">
 
       <label class="field-label" id="reminderLabel">Нагадати</label>
-      <div class="priority-picker wrap" id="taskReminderPicker"></div>
+      <div class="priority-picker multiline" id="taskReminderPicker"></div>
 
       <label class="field-label" id="recurrenceLabel">Повторювати</label>
       <div class="priority-picker" id="taskRecurrencePicker"></div>
@@ -934,6 +948,7 @@
 <script src="stats.js"></script>
 <script src="reminders.js"></script>
 <script src="push.js"></script>
+<script src="../side-nav.js"></script>
 <script src="app.js"></script>
 <script src="../ai-chat.js"></script>
 <script src="../scroll-lock.js"></script>

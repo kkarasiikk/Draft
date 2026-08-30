@@ -32,7 +32,7 @@ const STRINGS = {
   uk: {
     themeLabel: 'Тема', themeLight: 'Світла', themeDark: 'Темна', themeSystem: 'Системна',
     langLabel: 'Мова', logout: 'Вийти', exportLabel: 'Експорт даних',
-    settingsLabel: 'Налаштування', navHome: 'Головна', recordBtn: 'Записати',
+    settingsLabel: 'Налаштування', recordBtn: 'Записати',
     exportBusy: 'Готую файл…', exportError: 'Не вдалося зібрати файл. Спробуй ще раз.',
     exportModalTitle: 'Експорт даних', exportWhat: 'Що зберегти', exportFormat: 'Формат',
     exportSave: 'Зберегти', exportNothing: 'Обери хоча б один розділ.',
@@ -111,7 +111,7 @@ const STRINGS = {
   ru: {
     themeLabel: 'Тема', themeLight: 'Светлая', themeDark: 'Тёмная', themeSystem: 'Системная',
     langLabel: 'Язык', logout: 'Выйти', exportLabel: 'Экспорт данных',
-    settingsLabel: 'Настройки', navHome: 'Главная', recordBtn: 'Записать',
+    settingsLabel: 'Настройки', recordBtn: 'Записать',
     exportBusy: 'Готовлю файл…', exportError: 'Не удалось собрать файл. Попробуй ещё раз.',
     exportModalTitle: 'Экспорт данных', exportWhat: 'Что сохранить', exportFormat: 'Формат',
     exportSave: 'Сохранить', exportNothing: 'Выбери хотя бы один раздел.',
@@ -190,7 +190,7 @@ const STRINGS = {
   pl: {
     themeLabel: 'Motyw', themeLight: 'Jasny', themeDark: 'Ciemny', themeSystem: 'Systemowy',
     langLabel: 'Język', logout: 'Wyloguj', exportLabel: 'Eksport danych',
-    settingsLabel: 'Ustawienia', navHome: 'Główna', recordBtn: 'Zapisz',
+    settingsLabel: 'Ustawienia', recordBtn: 'Zapisz',
     exportBusy: 'Przygotowuję plik…', exportError: 'Nie udało się zebrać pliku. Spróbuj ponownie.',
     exportModalTitle: 'Eksport danych', exportWhat: 'Co zapisać', exportFormat: 'Format',
     exportSave: 'Zapisz', exportNothing: 'Wybierz przynajmniej jedną sekcję.',
@@ -269,7 +269,7 @@ const STRINGS = {
   en: {
     themeLabel: 'Theme', themeLight: 'Light', themeDark: 'Dark', themeSystem: 'System',
     langLabel: 'Language', logout: 'Log out', exportLabel: 'Export data',
-    settingsLabel: 'Settings', navHome: 'Home', recordBtn: 'Add',
+    settingsLabel: 'Settings', recordBtn: 'Add',
     exportBusy: 'Preparing the file…', exportError: 'Could not build the file. Try again.',
     exportModalTitle: 'Export data', exportWhat: 'What to save', exportFormat: 'Format',
     exportSave: 'Save', exportNothing: 'Pick at least one section.',
@@ -371,19 +371,30 @@ function escapeHtml(str) {
     .replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
+// ---- Бічна колонка розділів ----
+// Ставимо ДО applyTranslations(): він перекладає її нижні рядки, а обробники
+// на них навішуються далі по файлу — обох треба, щоб колонка вже була в DOM.
+// Експорт і тема живуть тільки тут: на сторінках розділів цих рядків немає,
+// бо кнопка, яка веде на іншу сторінку щось зробити, — це не кнопка.
+window.SideNav.mount(document.getElementById('sideNavHost'), {
+  current: 'home',
+  lang: currentLang,
+  extra: [
+    { id: 'sideExportBtn', labelId: 'sideExportLabel', label: t('exportLabel'),
+      icon: '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 19h16"/></svg>' },
+    { id: 'sideSettingsBtn', labelId: 'sideSettingsLabel', label: t('settingsLabel'),
+      icon: '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.6v2.2M12 19.2v2.2M21.4 12h-2.2M4.8 12H2.6M18.6 5.4l-1.6 1.6M7 17l-1.6 1.6M18.6 18.6L17 17M7 7L5.4 5.4"/></svg>' },
+  ],
+});
+
 function applyTranslations() {
   document.getElementById('htmlRoot').setAttribute('lang', currentLang);
   document.getElementById('themeMenuLabel').textContent = t('themeLabel');
   document.getElementById('langMenuLabel').textContent = t('langLabel');
   document.getElementById('exportLabel').textContent = t('exportLabel');
   document.getElementById('logoutLabel').textContent = t('logout');
-  // Бічне меню бере назви розділів із тих самих ключів, що й плитки: два
-  // різні слова для одного розділу — це вже дві різні назви.
-  document.getElementById('navHomeLabel').textContent = t('navHome');
-  document.getElementById('navBudgetLabel').textContent = t('budgetTitle');
-  document.getElementById('navGoalsLabel').textContent = t('goalsTitle');
-  document.getElementById('navTasksLabel').textContent = t('tasksTitle');
-  document.getElementById('navWorkoutLabel').textContent = t('workoutTitle');
+  // Назви розділів у колонці живуть у side-nav.js — одні на пʼять сторінок.
+  window.SideNav.setLang(currentLang);
   document.getElementById('sideExportLabel').textContent = t('exportLabel');
   document.getElementById('sideSettingsLabel').textContent = t('settingsLabel');
   document.getElementById('recordBtnLabel').textContent = t('recordBtn');

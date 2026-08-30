@@ -108,6 +108,9 @@ test.describe('Дії без гамбургера й «плюсика»', () => 
     expect(hrefs).toEqual([
       'budget/index.html', 'goals/index.html', 'tasks/index.html', 'workout/index.html',
     ]);
+    // Головна — не посилання: тиснути на неї означало б перезавантажити те саме.
+    await expect(page.locator('.side-link.current')).toHaveText('Головна');
+    await expect(page.locator('a.side-link.current')).toHaveCount(0);
   });
 });
 
@@ -124,7 +127,8 @@ test.describe('Шапка', () => {
     await openHub(page);
     await page.click('#sideSettingsBtn');
     await page.click('#langPicker .lang-choice[data-lang="en"]');
-    await expect(page.locator('#navHomeLabel')).toHaveText('Home');
+    await expect(page.locator('#sideLabel-home')).toHaveText('Home');
+    await expect(page.locator('#sideLabel-workout')).toHaveText('Workouts');
     await expect(page.locator('#sideSettingsLabel')).toHaveText('Settings');
     await expect(page.locator('#recordBtnLabel')).toHaveText('Add');
     const expected = new Intl.DateTimeFormat('en-US', { month: 'long' }).format(new Date());

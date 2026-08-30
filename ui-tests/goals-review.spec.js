@@ -957,8 +957,12 @@ test.describe('Сітка відміток', () => {
 
   test('майбутні дні не пофарбовані як пропуск', async ({ page }) => {
     await openDetail(page, [withCheckins()]);
-    const future = await page.locator('.grid-cell.future').count();
-    expect(future).toBeGreaterThan(0);
+    // Останній рядок сітки — поточний тиждень (пн—нд), тож майбутніх клітинок
+    // рівно стільки, скільки днів лишилось до неділі. Раніше тут стояло
+    // «більше нуля» — і в неділю, коли їх законно нуль, тест падав. Точне
+    // число і перевіряє більше, і не залежить від дня тижня.
+    const dow = (TODAY.getDay() + 6) % 7;
+    await expect(page.locator('.grid-cell.future')).toHaveCount(6 - dow);
     await expect(page.locator('.grid-cell.future.done')).toHaveCount(0);
   });
 });

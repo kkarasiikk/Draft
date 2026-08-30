@@ -1,0 +1,40 @@
+/*  Бічна колонка розділів — стилі, спільні для всіх пʼятьох сторінок.
+    Розмітку малює side-nav.js; тут — лише вигляд і поведінка на ширині.
+
+    Живе тільки на широкому екрані. На телефоні розділи відкриваються з
+    плиток головної й нижньої панелі модуля, а постійна колонка зʼїла б
+    третину екрана. На комп'ютері навпаки: без неї половина ширини лишалась
+    порожньою, а перехід між розділами йшов гаком через головну.
+
+    Колір, рамка й тінь — зі змінних теми сторінки: свого набору тут немає,
+    інакше колонка світлішала б окремо від решти. */
+
+.side-nav{display:none;}
+
+.side-brand{font-family:'Inter',sans-serif;font-size:30px;font-weight:900;letter-spacing:-0.04em;
+  line-height:1;color:var(--ink);padding:0 10px 24px;}
+
+.side-link{display:flex;align-items:center;gap:11px;width:100%;padding:10px 12px;border-radius:11px;
+  font-family:'Inter',sans-serif;font-size:13.5px;font-weight:600;color:var(--ink-soft);
+  background:none;border:none;text-align:left;cursor:pointer;text-decoration:none;
+  transition:background .2s, color .2s;}
+.side-link svg{flex-shrink:0;stroke:currentColor;}
+.side-link:hover{background:var(--glass-btn-bg-hover);}
+/* Сторінка, на якій стоїш, — не посилання, а позначка місця. */
+.side-link.current{background:var(--glass-btn-bg);color:var(--ink);cursor:default;}
+.side-quiet{font-size:13px;font-weight:500;color:var(--ink-muted);}
+.side-grow{flex-grow:1;}
+.side-divider{height:1px;background:var(--border);margin:12px 4px;}
+
+@media (min-width:880px){
+  /* Колонка стоїть на місці, поки сторінка гортається: з розділу в розділ
+     переходять тим самим рухом і згори, і з середини довгого списку.
+     position:fixed, а не звичайний блок у потоці, — щоб сторінкам розділів
+     не довелось перебирати розмітку: місце під колонку їм дає лише власний
+     padding-left, а самі вони лишаються такими, як були.
+     z-index нижчий за шари (55+): колонка під модалками, а не над ними. */
+  .side-nav{display:flex;flex-direction:column;width:216px;z-index:5;
+    position:fixed;left:40px;top:26px;bottom:26px;
+    background:var(--surface);border:1px solid var(--border);border-radius:22px;
+    padding:22px 14px 16px;}
+}

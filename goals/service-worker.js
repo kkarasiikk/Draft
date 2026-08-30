@@ -1,11 +1,11 @@
 // Service Worker модуля «Цілі» (scope /goals/). Кожен модуль має власний
 // SW — для сторінки виграє реєстрація з найдовшим збігом scope.
-const CACHE_NAME = 'life-goals-v53';
+const CACHE_NAME = 'life-goals-v54';
 // Чистимо лише власні (застарілі) кеші: `caches` спільний для всього
 // походження, тож видалення "всього зайвого" стерло б кеші інших модулів.
 const CACHE_PREFIXES = ['life-goals-'];
-const NETWORK_FIRST = ['./scroll-lock.js', './unsaved-guard.js', './ai-chat.js', './ai-chat.css', './', './index.html', './app.js', './streak.js', './review.js'];
-const FILES_TO_CACHE = ['../scroll-lock.js', '../unsaved-guard.js', '../ai-chat.js', '../ai-chat.css', './', './index.html', './app.js', './streak.js', './review.js', './manifest.json',
+const NETWORK_FIRST = ['./side-nav.js', './side-nav.css', './scroll-lock.js', './unsaved-guard.js', './ai-chat.js', './ai-chat.css', './', './index.html', './app.js', './streak.js', './review.js'];
+const FILES_TO_CACHE = ['../side-nav.js', '../side-nav.css', '../scroll-lock.js', '../unsaved-guard.js', '../ai-chat.js', '../ai-chat.css', './', './index.html', './app.js', './streak.js', './review.js', './manifest.json',
   '../budget/firebase-config.js', '../budget/icon-192.png', '../budget/icon-512.png',
   '../budget/icon-192-maskable.png', '../budget/icon-512-maskable.png'];
 // Сторінка жорстко залежить від Firebase SDK (firebase.initializeApp() —

@@ -28,6 +28,7 @@
 <link rel="apple-touch-icon" href="../budget/icon-192.png">
 <link rel="icon" href="../budget/icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../side-nav.css">
 <link rel="stylesheet" href="../ai-chat.css">
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -547,8 +548,12 @@
 
   @media (min-width:880px){
     body{padding-bottom:32px;}
-    .wrap{max-width:none;margin:0;padding:0 40px;}
-    .app-topbar{padding:28px 0 0;}
+    /* Місце під бічну колонку: вона лежить окремим шаром (side-nav.css),
+       тож сторінка лише звільняє їй ліве поле. Логотип переїхав туди ж —
+       тримати «Life» ще й у шапці означало б показати те саме двічі. */
+    .wrap{max-width:none;margin:0;padding:26px 40px 0 278px;}
+    .app-topbar-brand{display:none;}
+    .app-topbar{padding:2px 0 0;}
     .content{max-width:960px;margin:0 auto;padding:14px 4px 40px;}
     .bottom-nav{left:auto;right:32px;bottom:32px;margin:0;width:350px;}
     .bn-fab{--fab-right:32px;--fab-bottom:104px;}
@@ -599,6 +604,7 @@
 
 <div id="appScreen">
 <div class="wrap" id="wrap">
+  <div id="sideNavHost"></div>
   <div class="app-topbar">
     <a href="../index.html" class="app-topbar-brand" id="topbarHomeLink" aria-label="На головну">Life</a>
     <div class="topbar-actions">
@@ -745,6 +751,7 @@
 <script src="progress.js"></script>
 <script src="../goals/streak.js"></script>
 <script src="plan.js"></script>
+<script src="../side-nav.js"></script>
 <script src="app.js"></script>
 <script src="../ai-chat.js"></script>
 <script src="../scroll-lock.js"></script>

@@ -626,8 +626,19 @@ function setLang(lang) {
 }
 
 // ---- Переклад статичних елементів ----
+// ---- Бічна колонка розділів (лише широкий екран) ----
+// Розмітку й назви розділів тримає ../side-nav.js — одні на всі пʼять
+// сторінок. Експорту й теми тут немає навмисно: вони живуть на головній,
+// і кнопка, яка веде на іншу сторінку щось зробити, — це не кнопка.
+window.SideNav.mount(document.getElementById('sideNavHost'), {
+  current: 'goals',
+  base: '../',
+  lang: currentLang,
+});
+
 function applyTranslations() {
   document.getElementById('htmlRoot').setAttribute('lang', currentLang);
+  window.SideNav.setLang(currentLang);
   document.title = `${t('pageTitle')} · Life`;
   document.getElementById('openNewGoalBtn').setAttribute('aria-label', t('fabNewGoalLabel'));
   document.getElementById('bnMonthLabel').textContent = t('bnMonth');

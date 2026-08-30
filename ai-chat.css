@@ -1,5 +1,5 @@
-/* Колір «іде запис» задано тут, а не взято з теми сторінки: змінна --high
-   є лише в завданнях, і мікрофон світився б у різних розділах по-різному.
+/* Колір «іде запис» задано тут, а не взято з теми сторінки: він має бути
+   однаковим у всіх розділах, а не йти за палітрою кожного.
    Тема перемикається атрибутом на <html> (див. home.js), тож двох правил
    досить — системний режим сторінка все одно зводить до явного значення. */
 :root{--aic-rec:#C25A5A; --aic-rec-bg:rgba(194,90,90,.14);}
@@ -66,7 +66,7 @@
 .aic-model-hint{flex-basis:100%;font-size:11.5px;line-height:1.4;color:var(--ink-muted);}
 .aic-clear{border:1px solid var(--border);background:transparent;color:var(--ink-muted);
   font-family:'Inter',sans-serif;font-size:12px;padding:5px 11px;border-radius:20px;cursor:pointer;}
-.aic-clear:hover{color:var(--high, #C25A5A);}
+.aic-clear:hover{color:var(--expense);}
 
 .aic-log{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;gap:10px;
   padding:4px 6px 12px 2px;margin-bottom:10px;}
@@ -81,7 +81,11 @@
   white-space:pre-wrap;word-wrap:break-word;}
 .aic-msg.user{align-self:flex-end;background:var(--accent);color:#fff;border-bottom-right-radius:6px;}
 .aic-msg.assistant{align-self:flex-start;background:var(--control-bg, rgba(255,255,255,.35));color:var(--ink);border-bottom-left-radius:6px;}
-.aic-msg.error{align-self:flex-start;background:var(--high-light);color:var(--high);border-bottom-left-radius:6px;}
+/* Колір помилки — --expense, а не --high: остання є лише в завданнях і
+   тренуваннях, і в бюджеті та цілях повідомлення про помилку виходило без
+   тла й звичайним кольором тексту, тобто не читалось як помилка. Значення
+   в обох темах ті самі, тож вигляд там, де --high є, не змінився. */
+.aic-msg.error{align-self:flex-start;background:var(--expense-light);color:var(--expense);border-bottom-left-radius:6px;}
 /* Виконана дія — не репліка, а слід у розмові: окремий вузький рядок. */
 .aic-action{align-self:flex-start;display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;
   color:var(--low, #4F9C74);background:var(--low-light, rgba(79,156,116,.14));border-radius:999px;padding:5px 11px;}

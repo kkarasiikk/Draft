@@ -33,6 +33,7 @@
 <link rel="apple-touch-icon" href="budget/icon-192.png">
 <link rel="icon" href="budget/icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="side-nav.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -178,25 +179,6 @@
   .export-save-btn:disabled{opacity:.55;cursor:default;}
   .export-save-btn:active:not(:disabled){transform:scale(.98);}
   .export-error{font-size:13px;color:var(--expense);margin-top:10px;min-height:16px;line-height:1.4;}
-
-  /* ---- Бічне меню розділів. Живе тільки на широкому екрані ----
-     На телефоні розділи відкриваються з плиток, і постійна колонка навігації
-     зʼїла б третину екрана. На комп'ютері навпаки: плитки самі сторінку не
-     тримають, і без меню зліва половина ширини лишалась порожньою. */
-  .side-nav{display:none;}
-  .side-brand{font-family:'Inter',sans-serif;font-size:30px;font-weight:900;letter-spacing:-0.04em;
-    line-height:1;color:var(--ink);padding:0 10px 24px;}
-  .side-link{display:flex;align-items:center;gap:11px;width:100%;padding:10px 12px;border-radius:11px;
-    font-family:'Inter',sans-serif;font-size:13.5px;font-weight:600;color:var(--ink-soft);
-    background:none;border:none;text-align:left;cursor:pointer;text-decoration:none;
-    transition:background .2s, color .2s;}
-  .side-link svg{flex-shrink:0;stroke:currentColor;}
-  .side-link:hover{background:var(--glass-btn-bg-hover);}
-  /* Сторінка, на якій стоїш, — не посилання, а позначка місця. */
-  .side-link.current{background:var(--glass-btn-bg);color:var(--ink);cursor:default;}
-  .side-quiet{font-size:13px;font-weight:500;color:var(--ink-muted);}
-  .side-grow{flex-grow:1;}
-  .side-divider{height:1px;background:var(--border);margin:12px 4px;}
 
   /* «Записати» в шапці — той самий «+», що плаває внизу на телефоні: одна
      кнопка на всі чотири розділи, просто на своєму місці для миші. */
@@ -392,12 +374,9 @@
      розділів, справа шапка з датою й кнопкою «Записати», під нею вміст.
      Розмітка та сама, що на телефоні; переставляє її сітка. */
   @media (min-width:880px){
-    .wrap{max-width:none;margin:0;padding:26px 40px 48px;display:flex;align-items:flex-start;gap:22px;}
-
-    .side-nav{display:flex;flex-direction:column;flex-shrink:0;width:216px;
-      position:sticky;top:26px;min-height:calc(100vh - 74px);
-      background:var(--surface);border:1px solid var(--border);border-radius:22px;
-      padding:22px 14px 16px;}
+    /* padding-left = поле сторінки + колонка + проміжок: колонка лежить
+       окремим шаром, і місце під неї сторінка звільняє сама. */
+    .wrap{max-width:none;margin:0;padding:26px 40px 48px 278px;}
 
     /* Логотип і гамбургер переїхали в бічне меню: тримати їх іще й угорі
        означало б показати ті самі дві речі двічі. */
@@ -409,7 +388,7 @@
     /* Тут колонка ще одна: календарю потрібні сім читабельних стовпчиків, а
        поки їх нема куди покласти, він іде на всю ширину. Сітка потрібна й
        так — щоб шапка стала над календарем, а не під ним, як на телефоні. */
-    .home-main{flex:1;min-width:0;display:grid;gap:18px;align-content:start;
+    .home-main{display:grid;gap:18px;align-content:start;
       grid-template-columns:1fr;
       grid-template-areas:
         "head"
@@ -507,39 +486,7 @@
   <!-- ---- Головна (після входу) ---- -->
   <div id="homeScreen" style="display:none;">
     <div class="wrap">
-      <aside class="side-nav">
-        <span class="side-brand">Life</span>
-        <span class="side-link current" aria-current="page">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5L12 4l8 6.5"/><path d="M6 10v9a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-9"/></svg>
-          <span id="navHomeLabel">Головна</span>
-        </span>
-        <a class="side-link" href="budget/index.html">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="19" height="13" rx="3"/><path d="M2.5 10h19"/></svg>
-          <span id="navBudgetLabel">Бюджет</span>
-        </a>
-        <a class="side-link" href="goals/index.html">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke-width="1.9"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg>
-          <span id="navGoalsLabel">Цілі</span>
-        </a>
-        <a class="side-link" href="tasks/index.html">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7l2.5 2.5L11 5"/><path d="M4 17l2.5 2.5L11 15"/><path d="M14 8h6"/><path d="M14 18h6"/></svg>
-          <span id="navTasksLabel">Завдання</span>
-        </a>
-        <a class="side-link" href="workout/index.html">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 8v8"/><path d="M17.5 8v8"/><path d="M3.5 10.5v3"/><path d="M20.5 10.5v3"/><path d="M6.5 12h11"/></svg>
-          <span id="navWorkoutLabel">Тренування</span>
-        </a>
-        <span class="side-grow"></span>
-        <div class="side-divider"></div>
-        <button type="button" class="side-link side-quiet" id="sideExportBtn">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 19h16"/></svg>
-          <span id="sideExportLabel">Експорт даних</span>
-        </button>
-        <button type="button" class="side-link side-quiet" id="sideSettingsBtn">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.6v2.2M12 19.2v2.2M21.4 12h-2.2M4.8 12H2.6M18.6 5.4l-1.6 1.6M7 17l-1.6 1.6M18.6 18.6L17 17M7 7L5.4 5.4"/></svg>
-          <span id="sideSettingsLabel">Налаштування</span>
-        </button>
-      </aside>
+      <div id="sideNavHost"></div>
 
       <div class="home-main">
       <div class="home-topbar">
@@ -679,6 +626,7 @@
   <script src="export-data.js"></script>
   <script src="goals/streak.js"></script>
   <script src="tasks/stats.js"></script>
+  <script src="side-nav.js"></script>
   <script src="home-summary.js"></script>
   <script src="home.js"></script>
   <script src="scroll-lock.js"></script>

@@ -36,6 +36,7 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="icon" href="icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../side-nav.css">
 <link rel="stylesheet" href="../ai-chat.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
@@ -573,8 +574,12 @@
   /* ---- Desktop layout ---- */
   @media (min-width:880px){
     body{padding-bottom:100px;}
-    .wrap{max-width:none;margin:0;padding:0 40px;}
-    .app-topbar{padding:28px 0 0;}
+    /* Місце під бічну колонку: вона лежить окремим шаром (side-nav.css),
+       тож сторінка лише звільняє їй ліве поле. Логотип переїхав туди ж —
+       тримати «Life» ще й у шапці означало б показати те саме двічі. */
+    .wrap{max-width:none;margin:0;padding:26px 40px 0 278px;}
+    .app-topbar-brand{display:none;}
+    .app-topbar{padding:2px 0 0;}
     /* На широкому екрані баланс — картка в ряд з рештою карток, тож скло
        й тінь тут доречні (на телефоні той самий блок іде на всю ширину). */
     .header{border-radius:16px;border:1px solid var(--border);background:var(--surface);
@@ -640,6 +645,7 @@
 <!-- ---- Основний додаток ---- -->
 <div id="appScreen">
 <div class="wrap" id="wrap">
+  <div id="sideNavHost"></div>
   <div class="app-topbar">
     <a href="../index.html" class="app-topbar-brand" id="topbarHomeLink" aria-label="На головну">Life</a>
     <div class="topbar-actions">
@@ -1144,6 +1150,7 @@
 <script src="../tasks/recurrence.js"></script>
 <script src="recurring.js"></script>
 <script src="../categories-default.js"></script>
+<script src="../side-nav.js"></script>
 <script src="app.js"></script>
 <script src="../ai-chat.js"></script>
 <script src="../scroll-lock.js"></script>

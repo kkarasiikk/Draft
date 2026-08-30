@@ -1,11 +1,11 @@
 // Service Worker модуля «Завдання» (scope /tasks/). Кожен модуль має власний
 // SW — для сторінки виграє реєстрація з найдовшим збігом scope.
-const CACHE_NAME = 'life-tasks-v43';
+const CACHE_NAME = 'life-tasks-v44';
 // Чистимо лише власні (застарілі) кеші: `caches` спільний для всього
 // походження, тож видалення "всього зайвого" стерло б кеші інших модулів.
 const CACHE_PREFIXES = ['life-tasks-'];
-const NETWORK_FIRST = ['./scroll-lock.js', './unsaved-guard.js', './ai-chat.js', './ai-chat.css', './', './index.html', './app.js', './streak.js', './quick-parse.js', './now-queue.js', './recurrence.js', './stats.js', './reminders.js', './push.js'];
-const FILES_TO_CACHE = ['../scroll-lock.js', '../unsaved-guard.js', '../ai-chat.js', '../ai-chat.css', './', './index.html', './app.js', '../goals/streak.js', './quick-parse.js', './now-queue.js', './recurrence.js', './stats.js', './reminders.js', './push.js', './manifest.json',
+const NETWORK_FIRST = ['./side-nav.js', './side-nav.css', './scroll-lock.js', './unsaved-guard.js', './ai-chat.js', './ai-chat.css', './', './index.html', './app.js', './streak.js', './quick-parse.js', './now-queue.js', './recurrence.js', './stats.js', './reminders.js', './push.js'];
+const FILES_TO_CACHE = ['../side-nav.js', '../side-nav.css', '../scroll-lock.js', '../unsaved-guard.js', '../ai-chat.js', '../ai-chat.css', './', './index.html', './app.js', '../goals/streak.js', './quick-parse.js', './now-queue.js', './recurrence.js', './stats.js', './reminders.js', './push.js', './manifest.json',
   '../budget/firebase-config.js', '../budget/icon-192.png', '../budget/icon-512.png',
   '../budget/icon-192-maskable.png', '../budget/icon-512-maskable.png'];
 // Сторінка жорстко залежить від Firebase SDK (firebase.initializeApp() —
