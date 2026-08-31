@@ -72,6 +72,20 @@ jobs:
           # Усі тести, на будь-якому рівні.
           find _site -name '*.test.js' -delete
 
+          # Версія кешу service worker. Раніше її бампали руками в пʼятьох
+          # файлах — і це вже одного разу коштувало «змін на сайті не видно».
+          # Тепер вона просто дорівнює SHA коміта: кожен деплой — новий кеш,
+          # старий прибирається сам, і забути нема чого.
+          # Перевіряємо, що заміна справді сталась: мовчазний промах тут
+          # означав би, що оболонка назавжди лишилась на версії __BUILD__.
+          sed -i "s/__BUILD__/${GITHUB_SHA}/" _site/sw-core.js
+          if grep -q "__BUILD__" _site/sw-core.js; then
+            echo "sw-core.js: плейсхолдер версії лишився на місці"; exit 1
+          fi
+          if ! grep -q "${GITHUB_SHA}" _site/sw-core.js; then
+            echo "sw-core.js: SHA не знайдено після заміни"; exit 1
+          fi
+
           # Вимикаємо обробку Jekyll — сайт віддається як є, побайтно.
           touch _site/.nojekyll
       - uses: actions/upload-pages-artifact@v3

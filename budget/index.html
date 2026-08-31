@@ -35,16 +35,23 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="icon" href="icon-192.png">
+<!-- Заздалегідь відкриваємо зʼєднання до доменів, з яких одразу підуть
+     скрипти й шрифти: DNS, TLS і handshake до трьох чужих доменів — це
+     помітна частка часу до першого малювання, і робити її послідовно після
+     розбору <head> ні до чого. -->
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../side-nav.css">
 <link rel="stylesheet" href="../ai-chat.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-functions-compat.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check-compat.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-functions-compat.js"></script>
 <style>
   :root{
     --bg:#FFFFFF;
@@ -1145,14 +1152,14 @@
 </div>
 </div><!-- /appScreen -->
 
-<script src="firebase-config.js"></script>
-<script src="../unsaved-guard.js"></script>
-<script src="../tasks/recurrence.js"></script>
-<script src="recurring.js"></script>
-<script src="../categories-default.js"></script>
-<script src="../side-nav.js"></script>
-<script src="app.js"></script>
-<script src="../ai-chat.js"></script>
-<script src="../scroll-lock.js"></script>
+<script defer src="firebase-config.js"></script>
+<script defer src="../unsaved-guard.js"></script>
+<script defer src="../tasks/recurrence.js"></script>
+<script defer src="recurring.js"></script>
+<script defer src="../categories-default.js"></script>
+<script defer src="../side-nav.js"></script>
+<script defer src="app.js"></script>
+<script defer src="../ai-chat.js"></script>
+<script defer src="../scroll-lock.js"></script>
 </body>
 </html>
