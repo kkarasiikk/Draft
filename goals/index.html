@@ -55,14 +55,19 @@
     --card-hover-shadow: 0 20px 80px rgba(20,25,40,.10), 0 0 60px rgba(20,25,40,.05);
     --glass-btn-bg: rgba(20,25,40,.05); --glass-btn-bg-hover: rgba(20,25,40,.09); --glass-btn-border: rgba(20,25,40,.16);
     --gold:#B8912F; --gold-light:rgba(184,145,47,.14);
-    --cat-health:#3F9C8C; --cat-health-light:rgba(63,156,140,.14);
-    --cat-finance:#B98B2E; --cat-finance-light:rgba(185,139,46,.14);
-    --cat-learning:#6A5FC1; --cat-learning-light:rgba(106,95,193,.14);
-    --cat-career:#48607E; --cat-career-light:rgba(72,96,126,.14);
-    --cat-relationships:#C3527A; --cat-relationships-light:rgba(195,82,122,.14);
-    --cat-travel:#2E93A6; --cat-travel-light:rgba(46,147,166,.14);
-    --cat-creativity:#9C4FB0; --cat-creativity-light:rgba(156,79,176,.14);
-    --cat-other:#6E6E78; --cat-other-light:rgba(110,110,120,.14);
+    /* Палітра категорій — вісім НУМЕРОВАНИХ слотів, а не імена категорій.
+       Відколи категорії редагуються, «Здоров'я» може зникнути, а на її місце
+       стати «Хобі»: змінна --cat-health під нею означала б рівно нічого.
+       Значення й порядок ті самі, що були в іменованих слотах, тож стандартні
+       категорії лишились тих самих кольорів. */
+    --cat-c0:#3F9C8C; --cat-c0-light:rgba(63,156,140,.14);
+    --cat-c1:#B98B2E; --cat-c1-light:rgba(185,139,46,.14);
+    --cat-c2:#6A5FC1; --cat-c2-light:rgba(106,95,193,.14);
+    --cat-c3:#48607E; --cat-c3-light:rgba(72,96,126,.14);
+    --cat-c4:#C3527A; --cat-c4-light:rgba(195,82,122,.14);
+    --cat-c5:#2E93A6; --cat-c5-light:rgba(46,147,166,.14);
+    --cat-c6:#9C4FB0; --cat-c6-light:rgba(156,79,176,.14);
+    --cat-c7:#6E6E78; --cat-c7-light:rgba(110,110,120,.14);
     color-scheme: light;
   }
   [data-theme="dark"]{
@@ -79,14 +84,14 @@
     --card-hover-shadow: 0 20px 80px rgba(255,255,255,.08), 0 0 60px rgba(255,255,255,.04);
     --glass-btn-bg: rgba(255,255,255,.08); --glass-btn-bg-hover: rgba(255,255,255,.16); --glass-btn-border: rgba(255,255,255,.18);
     --gold:#E8C875; --gold-light:rgba(232,200,117,.16);
-    --cat-health:#6FCBBC; --cat-health-light:rgba(111,203,188,.16);
-    --cat-finance:#E3B95C; --cat-finance-light:rgba(227,185,92,.16);
-    --cat-learning:#A79BEF; --cat-learning-light:rgba(167,155,239,.16);
-    --cat-career:#8FB0D6; --cat-career-light:rgba(143,176,214,.16);
-    --cat-relationships:#EF9AC0; --cat-relationships-light:rgba(239,154,192,.16);
-    --cat-travel:#6FD6EA; --cat-travel-light:rgba(111,214,234,.16);
-    --cat-creativity:#D89AE8; --cat-creativity-light:rgba(216,154,232,.16);
-    --cat-other:#A9A7B4; --cat-other-light:rgba(169,167,180,.16);
+    --cat-c0:#6FCBBC; --cat-c0-light:rgba(111,203,188,.16);
+    --cat-c1:#E3B95C; --cat-c1-light:rgba(227,185,92,.16);
+    --cat-c2:#A79BEF; --cat-c2-light:rgba(167,155,239,.16);
+    --cat-c3:#8FB0D6; --cat-c3-light:rgba(143,176,214,.16);
+    --cat-c4:#EF9AC0; --cat-c4-light:rgba(239,154,192,.16);
+    --cat-c5:#6FD6EA; --cat-c5-light:rgba(111,214,234,.16);
+    --cat-c6:#D89AE8; --cat-c6-light:rgba(216,154,232,.16);
+    --cat-c7:#A9A7B4; --cat-c7-light:rgba(169,167,180,.16);
     color-scheme: dark;
   }
   body{transition:color .2s ease;}
@@ -280,26 +285,66 @@
   .goal-card-days{color:var(--ink-muted);}
 
   .category-chip{font-size:10.5px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap;display:inline-block;}
-  .category-chip.health{background:var(--cat-health-light);color:var(--cat-health);}
-  .category-chip.finance{background:var(--cat-finance-light);color:var(--cat-finance);}
-  .category-chip.learning{background:var(--cat-learning-light);color:var(--cat-learning);}
-  .category-chip.career{background:var(--cat-career-light);color:var(--cat-career);}
-  .category-chip.relationships{background:var(--cat-relationships-light);color:var(--cat-relationships);}
-  .category-chip.travel{background:var(--cat-travel-light);color:var(--cat-travel);}
-  .category-chip.creativity{background:var(--cat-creativity-light);color:var(--cat-creativity);}
-  .category-chip.other{background:var(--cat-other-light);color:var(--cat-other);}
+  .category-chip.c0{background:var(--cat-c0-light);color:var(--cat-c0);}
+  .category-chip.c1{background:var(--cat-c1-light);color:var(--cat-c1);}
+  .category-chip.c2{background:var(--cat-c2-light);color:var(--cat-c2);}
+  .category-chip.c3{background:var(--cat-c3-light);color:var(--cat-c3);}
+  .category-chip.c4{background:var(--cat-c4-light);color:var(--cat-c4);}
+  .category-chip.c5{background:var(--cat-c5-light);color:var(--cat-c5);}
+  .category-chip.c6{background:var(--cat-c6-light);color:var(--cat-c6);}
+  .category-chip.c7{background:var(--cat-c7-light);color:var(--cat-c7);}
 
   .category-picker{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;margin-bottom:16px;}
   .category-choice{padding:6px 12px;border-radius:20px;font-size:12.5px;cursor:pointer;font-family:'Inter',sans-serif;font-weight:600;
     border:1px solid var(--border);background:transparent;color:var(--ink-muted);white-space:nowrap;transition:background .15s,color .15s,border-color .15s;}
-  .category-choice.selected.health{background:var(--cat-health-light);color:var(--cat-health);border-color:transparent;}
-  .category-choice.selected.finance{background:var(--cat-finance-light);color:var(--cat-finance);border-color:transparent;}
-  .category-choice.selected.learning{background:var(--cat-learning-light);color:var(--cat-learning);border-color:transparent;}
-  .category-choice.selected.career{background:var(--cat-career-light);color:var(--cat-career);border-color:transparent;}
-  .category-choice.selected.relationships{background:var(--cat-relationships-light);color:var(--cat-relationships);border-color:transparent;}
-  .category-choice.selected.travel{background:var(--cat-travel-light);color:var(--cat-travel);border-color:transparent;}
-  .category-choice.selected.creativity{background:var(--cat-creativity-light);color:var(--cat-creativity);border-color:transparent;}
-  .category-choice.selected.other{background:var(--cat-other-light);color:var(--cat-other);border-color:transparent;}
+  .category-choice.selected.c0{background:var(--cat-c0-light);color:var(--cat-c0);border-color:transparent;}
+  .category-choice.selected.c1{background:var(--cat-c1-light);color:var(--cat-c1);border-color:transparent;}
+  .category-choice.selected.c2{background:var(--cat-c2-light);color:var(--cat-c2);border-color:transparent;}
+  .category-choice.selected.c3{background:var(--cat-c3-light);color:var(--cat-c3);border-color:transparent;}
+  .category-choice.selected.c4{background:var(--cat-c4-light);color:var(--cat-c4);border-color:transparent;}
+  .category-choice.selected.c5{background:var(--cat-c5-light);color:var(--cat-c5);border-color:transparent;}
+  .category-choice.selected.c6{background:var(--cat-c6-light);color:var(--cat-c6);border-color:transparent;}
+  .category-choice.selected.c7{background:var(--cat-c7-light);color:var(--cat-c7);border-color:transparent;}
+
+  /* «Змінити» стоїть останнім чипом у тому ж рядку, що й самі категорії:
+     редагують їх звідти, де вони видно, і окремий екран налаштувань заради
+     цього розділу заводити не довелось. Пунктир відрізняє дію від вибору —
+     інакше чип читався б як ще одна категорія. */
+  .category-edit-chip{padding:6px 11px;border-radius:20px;font-size:12.5px;cursor:pointer;font-family:'Inter',sans-serif;
+    font-weight:600;border:1px dashed var(--border);background:transparent;color:var(--ink-muted);white-space:nowrap;
+    display:inline-flex;align-items:center;gap:5px;transition:color .15s,border-color .15s;}
+  .category-edit-chip:hover{color:var(--ink-soft);border-color:var(--card-border-hover);}
+
+  .cat-manage-list{margin-top:8px;}
+  .cat-manage-row{display:flex;align-items:center;gap:9px;padding:7px 2px;}
+  .cat-manage-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+  .cat-manage-dot.c0{background:var(--cat-c0);}
+  .cat-manage-dot.c1{background:var(--cat-c1);}
+  .cat-manage-dot.c2{background:var(--cat-c2);}
+  .cat-manage-dot.c3{background:var(--cat-c3);}
+  .cat-manage-dot.c4{background:var(--cat-c4);}
+  .cat-manage-dot.c5{background:var(--cat-c5);}
+  .cat-manage-dot.c6{background:var(--cat-c6);}
+  .cat-manage-dot.c7{background:var(--cat-c7);}
+  /* Селектор навмисно з `input[type=text]`, а не самим класом: глобальне
+     правило полів форми має саме таку специфічність, і клас сам по собі їй
+     програє — рядки виходили б у півтора рази вищими за задумані, з полями
+     на всю ширину й відступами під поле форми. */
+  input[type=text].cat-manage-input{flex:1;width:auto;font-size:13.5px;border:1px solid transparent;
+    border-radius:7px;padding:6px 8px;margin:0;background:transparent;}
+  input[type=text].cat-manage-input:hover{background:var(--bg);}
+  input[type=text].cat-manage-input:focus{border-color:var(--accent);background:var(--bg);}
+  .cat-manage-del{background:none;border:none;cursor:pointer;color:var(--ink-muted);padding:5px;display:flex;flex-shrink:0;}
+  .cat-manage-del:hover{color:var(--expense);}
+  .cat-add-row{display:flex;gap:8px;align-items:center;margin-top:10px;}
+  .cat-add-row input[type=text]{flex:1;margin:0;}
+  .cat-add-row button{flex-shrink:0;width:38px;height:38px;border-radius:9px;border:1px solid var(--border);
+    background:transparent;color:var(--ink-soft);cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .cat-add-row button:hover{border-color:var(--accent);color:var(--accent);}
+  /* Вікно категорій виїжджає ПОВЕРХ форми цілі — тим самим шаром, що й діалог
+     «зберегти зміни» (z-index 60): форма лишається видимою під ним, і видно,
+     у що саме повернешся. */
+  .cat-manage-overlay{z-index:60;}
   /* Прості вибори з двох-трьох варіантів (горизонт, скарбничка) — та сама
      форма чипа, але без кольорів сфер життя: тут вони нічого не означали б. */
   .choice-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;margin-bottom:6px;}
@@ -862,6 +907,8 @@
       </div>
 
       <label class="field-label" id="categoryLabel">Категорія</label>
+      <!-- Останній чип у цьому рядку — «Змінити»: його домальовує
+           renderCategoryPicker(), бо він мусить стояти саме за категоріями. -->
       <div class="category-picker" id="categoryPicker"></div>
 
       <label class="field-label" id="whyLabel">Навіщо тобі це?</label>
@@ -910,6 +957,30 @@
   </div>
 </div>
 
+<!-- ---- Категорії цілей ----
+     Живуть тут, а не в окремому екрані налаштувань: у розділі цілей такого
+     екрана немає, а редагувати категорії хочеться рівно тоді, коли дивишся
+     на них у формі. -->
+<div class="modal-overlay cat-manage-overlay" id="catManageOverlay">
+  <div class="modal" id="catManageModal">
+    <div class="modal-head">
+      <div class="modal-title" id="catManageTitle">Категорії цілей</div>
+      <button class="close-btn" id="closeCatManage" aria-label="Закрити">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="cat-manage-list" id="goalCatManageList"></div>
+    <div class="cat-add-row">
+      <input type="text" id="newGoalCatInput" maxlength="40" placeholder="Нова категорія">
+      <button type="button" id="addGoalCatBtn" aria-label="Додати категорію">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+      </button>
+    </div>
+    <div class="field-hint" id="catManageHint"></div>
+    <div class="form-error" id="catManageError"></div>
+  </div>
+</div>
+
 <!-- ---- Підтвердження видалення ---- -->
 <div class="confirm-modal" id="confirmOverlay">
   <div class="confirm-box">
@@ -924,6 +995,7 @@
 
 <script src="../budget/firebase-config.js"></script>
 <script src="../unsaved-guard.js"></script>
+<script src="../categories-default.js"></script>
 <script src="streak.js"></script>
 <script src="review.js"></script>
 <script src="../side-nav.js"></script>

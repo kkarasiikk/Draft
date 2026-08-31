@@ -27,8 +27,11 @@ const goal = (over = {}) => ({
   ...over,
 });
 
-const open = (page, { workouts = [session(iso(TODAY))], goals = [goal()] } = {}) =>
-  openModule(page, 'workout/index.html', { seed: { workouts, goals } });
+const open = (page, { workouts = [session(iso(TODAY))], goals = [goal()], profile } = {}) => {
+  const seed = { workouts, goals };
+  if (profile) seed.profile = profile;
+  return openModule(page, 'workout/index.html', { seed });
+};
 
 const lastUpdate = (page) => page.evaluate(() => window.__fbCalls.update.at(-1));
 
@@ -45,6 +48,33 @@ test('без сьогоднішнього тренування нічого не
 
 test('ціль не про здоровʼя тут ні до чого', async ({ page }) => {
   await open(page, { goals: [goal({ category: 'learning', title: 'Вивчити польську' })] });
+  await expect(page.locator('.goal-credit')).toHaveCount(0);
+});
+
+// Категорії цілей редагуються, і 'health' може просто не існувати. Фільтр за
+// нею тоді завжди повертав би порожньо — картка зникла б назавжди в кожного,
+// хто переназвав категорії під себе.
+test('зі своїми категоріями пропонуються всі активні цілі, а не жодної', async ({ page }) => {
+  await open(page, {
+    goals: [goal({ category: 'gcat_body', title: 'Пробігти 100 км' })],
+    profile: { categoriesGoals: [
+      { id: 'gcat_body', label: 'Тіло', colorIndex: 0 },
+      { id: 'gcat_work', label: 'Робота', colorIndex: 1 },
+    ] },
+  });
+  await expect(page.locator('.goal-credit')).toBeVisible();
+  await expect(page.locator('.credit-title')).toHaveText('Пробігти 100 км');
+});
+
+test('а доки категорія «здоровʼя» на місці, відбір за нею лишається', async ({ page }) => {
+  await open(page, {
+    goals: [goal({ category: 'learning', title: 'Вивчити польську' })],
+    profile: { categoriesGoals: [
+      { id: 'health', label: 'Тіло і сон', colorIndex: 0 },
+      { id: 'learning', label: 'Навчання', colorIndex: 2 },
+    ] },
+  });
+  // Перейменована — але це та сама категорія: цілі тримаються за id.
   await expect(page.locator('.goal-credit')).toHaveCount(0);
 });
 

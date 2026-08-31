@@ -913,6 +913,24 @@ function subscribeToReadiness(uid) {
     }, (err) => console.error('subscribeToReadiness:', err));
 }
 
+// Категорії цілей людина редагує в розділі «Цілі», і сюди вони потрібні рівно
+// заради одного: зрозуміти, чи існує ще категорія 'health', за якою
+// відбирається, що зарахувати після тренування. `null` — профіль ще не
+// приїхав або списку в ньому немає (значить, стандартний, а в ньому 'health'
+// є), і тоді відбір лишається таким, як був.
+let goalCategoryIds = null;
+let unsubscribeGoalCategories = null;
+
+function subscribeToGoalCategories(uid) {
+  if (unsubscribeGoalCategories) unsubscribeGoalCategories();
+  unsubscribeGoalCategories = db.collection('users').doc(uid).onSnapshot((doc) => {
+    const data = doc.data();
+    const list = data && Array.isArray(data.categoriesGoals) ? data.categoriesGoals : null;
+    goalCategoryIds = list && list.length ? list.map((c) => c && c.id) : null;
+    renderCurrentScreen();
+  }, (err) => console.error('subscribeToGoalCategories:', err));
+}
+
 function subscribeToGoals(uid) {
   if (unsubscribeGoals) unsubscribeGoals();
   unsubscribeGoals = db.collection('users').doc(uid).collection('goals')
@@ -1263,7 +1281,7 @@ function renderGoalCreditCard() {
   // Пропонуємо тільки після сьогоднішнього тренування: без нього це просто
   // ще один список цілей у чужому розділі.
   if (!sessions.some((s) => s.date === todayISO())) return '';
-  const list = window.GoalStreak.trainingGoals(goals, todayISO());
+  const list = window.GoalStreak.trainingGoals(goals, todayISO(), goalCategoryIds);
   if (!list.length) return '';
 
   return `
@@ -2373,6 +2391,7 @@ auth.onAuthStateChanged((user) => {
     subscribeToSessions(user.uid);
     subscribeToReadiness(user.uid);
     subscribeToGoals(user.uid);
+    subscribeToGoalCategories(user.uid);
     openFromHash(() => openSessionForm(null));
     subscribeToTemplates(user.uid);
     subscribeToCustomExercises(user.uid);
@@ -2380,6 +2399,7 @@ auth.onAuthStateChanged((user) => {
     if (unsubscribeSessions) { unsubscribeSessions(); unsubscribeSessions = null; }
     if (unsubscribeReadiness) { unsubscribeReadiness(); unsubscribeReadiness = null; }
     if (unsubscribeGoals) { unsubscribeGoals(); unsubscribeGoals = null; goals = []; }
+    if (unsubscribeGoalCategories) { unsubscribeGoalCategories(); unsubscribeGoalCategories = null; goalCategoryIds = null; }
     if (unsubscribeTemplates) { unsubscribeTemplates(); unsubscribeTemplates = null; }
     if (unsubscribeCustomExercises) { unsubscribeCustomExercises(); unsubscribeCustomExercises = null; }
     readiness = null;

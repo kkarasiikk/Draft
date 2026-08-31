@@ -353,6 +353,42 @@ describe('trainingGoals — куди зарахувати тренування',
     expect(S.trainingGoals([], TODAY)).toEqual([]);
     expect(S.trainingGoals(null, TODAY)).toEqual([]);
   });
+
+  // Категорії цілей редагуються, тож 'health' може просто не існувати. Далі
+  // не про те, як відбирати цілі, а про те, коли відбирати за категорією
+  // взагалі перестає бути можливим.
+  describe('коли категорії свої', () => {
+    const own = ['gcat_body', 'gcat_work'];
+    const standard = ['health', 'finance', 'other'];
+
+    test('категорія на місці — відбір такий самий, як був', () => {
+      const list = [g(), g({ id: 'g2', category: 'finance' })];
+      const picked = S.trainingGoals(list, TODAY, standard);
+      expect(picked.map((x) => x.id)).toEqual(['g1']);
+    });
+
+    test('категорії немає — пропонуємо всі активні, а не жодної', () => {
+      // Інакше картка зарахування тихо зникла б назавжди в кожного, хто
+      // переназвав категорії під себе.
+      const list = [g({ category: 'gcat_body' }), g({ id: 'g2', category: 'gcat_work' })];
+      expect(S.trainingGoals(list, TODAY, own).map((x) => x.id)).toEqual(['g1', 'g2']);
+    });
+
+    test('решта правил не слабшає: пауза й повторна відмітка так само мовчать', () => {
+      const list = [
+        g({ id: 'paused', category: 'gcat_body', status: 'paused' }),
+        g({ id: 'done-today', category: 'gcat_work', checkins: [TODAY] }),
+        g({ id: 'measurable', category: 'gcat_work', checkins: [TODAY], targetValue: 100 }),
+      ];
+      expect(S.trainingGoals(list, TODAY, own).map((x) => x.id)).toEqual(['measurable']);
+    });
+
+    test('без третього аргументу поведінка та сама, що й раніше', () => {
+      const list = [g(), g({ id: 'g2', category: 'gcat_body' })];
+      expect(S.trainingGoals(list, TODAY).map((x) => x.id)).toEqual(['g1']);
+      expect(S.trainingGoals(list, TODAY, null).map((x) => x.id)).toEqual(['g1']);
+    });
+  });
 });
 
 describe('deadlineWarnDays — «ось-ось» у кожної цілі своє', () => {

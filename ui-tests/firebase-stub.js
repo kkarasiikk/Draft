@@ -43,19 +43,28 @@
   }
 
   function docRef(colName, id) {
+    // Документ профілю: те, що підклав тест, або порожньо.
+    const profileDoc = () => (colName === 'users' && seed.profile
+      ? { exists: true, id, data: () => seed.profile }
+      : { exists: false, id, data: () => ({}) });
     return {
       id,
+      // Ім'я колекції потрібне пакетному запису: у batch.update() приїжджає
+      // сам ref, і без цього поля не видно, куди саме він писав.
+      __col: colName,
       // Профіль користувача теж треба вміти підкласти: від нього залежать, до
       // прикладу, план витрат на місяць і кільце на плитці бюджету.
-      get: () => Promise.resolve(colName === 'users' && seed.profile
-        ? { exists: true, id, data: () => seed.profile }
-        : { exists: false, id, data: () => ({}) }),
+      get: () => Promise.resolve(profileDoc()),
       set: (p) => { calls.set.push({ col: colName, id, payload: p }); return Promise.resolve(); },
       update: (p) => { calls.update.push({ col: colName, id, payload: p }); return Promise.resolve(); },
       delete: () => { calls.delete.push({ col: colName, id }); return Promise.resolve(); },
       collection: (name) => colRef(name),
+      // Раніше підписка на документ завжди віддавала порожнечу, і сід профілю
+      // доїжджав лише через get(). Сторінка цілей читає профіль саме
+      // підпискою (там живе список категорій цілей), тож віддаємо те саме,
+      // що й get() — інакше тест бачив би базу, якої немає.
       onSnapshot: (cb) => {
-        setTimeout(() => cb({ exists: false, id, data: () => ({}) }), 0);
+        setTimeout(() => cb(profileDoc()), 0);
         return () => {};
       },
     };
@@ -81,9 +90,32 @@
     sendPasswordResetEmail: () => Promise.resolve(),
   };
 
+  // Пакетний запис. Потрібен там, де одна дія міняє багато документів —
+  // видалення категорії переносить у ній усі цілі. Операції складаються
+  // в той самий __fbCalls, що й поодинокі, тільки з позначкою batch: тест
+  // питає «що дійшло до бази», а не «яким саме API це надіслали».
+  function batch() {
+    const ops = [];
+    const record = (kind, ref, payload) => { ops.push({ kind, ref, payload }); };
+    return {
+      set: (ref, payload) => record('set', ref, payload),
+      update: (ref, payload) => record('update', ref, payload),
+      delete: (ref) => record('delete', ref),
+      commit: () => {
+        ops.forEach((op) => {
+          const entry = { col: op.ref.__col, id: op.ref.id, batch: true };
+          if (op.kind !== 'delete') entry.payload = op.payload;
+          calls[op.kind].push(entry);
+        });
+        return Promise.resolve();
+      },
+    };
+  }
+
   const firestore = () => ({
     collection: (name) => colRef(name),
     doc: (path) => docRef('root', path),
+    batch,
     enablePersistence: () => Promise.resolve(),
     settings: () => {},
   });

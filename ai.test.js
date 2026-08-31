@@ -92,6 +92,10 @@ describe("executeTool", () => {
     currency: "UAH",
     categoriesExpense: [{ id: "food", label: "Їжа" }, { id: "other", label: "Інше" }],
     categoriesIncome: [{ id: "salary", label: "Зарплата" }],
+    // Категорії цілей людина редагує сама, тож вони теж їдуть контекстом —
+    // так само, як категорії витрат. Беремо повний стандартний список: саме
+    // його бачить той, хто категорій ще не чіпав.
+    categoriesGoals: require("./categories-default").defaultGoalCategoryList("uk"),
   };
 
   test("add_transaction реально записує документ у Firestore-мок", async () => {
@@ -1148,6 +1152,7 @@ describe("категорії за замовчуванням", () => {
       currency: "UAH",
       categoriesExpense: defaults.defaultCategoryList("expense", "uk"),
       categoriesIncome: defaults.defaultCategoryList("income", "uk"),
+      categoriesGoals: defaults.defaultGoalCategoryList("uk"),
     };
     const r = await ai.executeTool("uid1", "add_transaction",
       { type: "expense", amount: 80, category: "food" }, ctx);
@@ -1159,6 +1164,7 @@ describe("категорії за замовчуванням", () => {
       today: "2026-08-20", lang: "uk", currency: "UAH",
       categoriesExpense: defaults.defaultCategoryList("expense", "uk"),
       categoriesIncome: defaults.defaultCategoryList("income", "uk"),
+      categoriesGoals: defaults.defaultGoalCategoryList("uk"),
     });
     expect(prompt).toContain("food (Їжа)");
     expect(prompt).toContain("salary (Зарплата)");
@@ -1167,11 +1173,116 @@ describe("категорії за замовчуванням", () => {
   // Модель раніше на «зроби діаграму» вибачалась і пропонувала зводити
   // цифри в Excel/Google Sheets — марна порада в телефоні, коли в
   // застосунку вже є готова кругова діаграма й графік по місяцях.
+  // ---- Категорії цілей ----
+  // Їх людина редагує сама (goals/app.js -> профіль categoriesGoals). Помічник
+  // мусить брати той самий список: інакше він у чаті пропонував би категорії,
+  // яких на екрані вже немає, а власну «Хобі» щоразу зводив би до «Іншого».
+  describe("категорії цілей", () => {
+    test("порожній профіль дає той самий список, що й форма цілі", () => {
+      const ids = defaults.defaultGoalCategoryList("uk").map((c) => c.id);
+      // Ids ті самі, що були захардкоджені в goals/app.js: інакше кожна вже
+      // заведена ціль осиротіла б на своєму 'health'.
+      expect(ids).toEqual(["health", "finance", "learning", "career",
+        "relationships", "travel", "creativity", "other"]);
+    });
+
+    test("стандартний список іде за мовою, а кольори за порядком", () => {
+      expect(defaults.defaultGoalCategoryList("en")[0]).toEqual({ id: "health", label: "Health", colorIndex: 0 });
+      expect(defaults.defaultGoalCategoryList("pl")[7]).toEqual({ id: "other", label: "Inne", colorIndex: 7 });
+      // Невідома мова не має валити список — просто лишається українська.
+      expect(defaults.defaultGoalCategoryList("de")[0].label).toBe("Здоров’я");
+    });
+
+    test("список цілей потрапляє в системний промпт назвами, а не id", () => {
+      const prompt = ai.buildSystemPrompt({
+        today: "2026-08-20", lang: "uk", currency: "UAH",
+        categoriesExpense: defaults.defaultCategoryList("expense", "uk"),
+        categoriesIncome: defaults.defaultCategoryList("income", "uk"),
+        categoriesGoals: [{ id: "gcat_x1", label: "Хобі" }, { id: "other", label: "Інше" }],
+      });
+      expect(prompt).toContain("Категорії цілей: gcat_x1 (Хобі), other (Інше).");
+    });
+
+    test("власна категорія доживає до документа, а не зводиться до «Іншого»", async () => {
+      const own = {
+        today: "2026-08-20", currency: "UAH",
+        categoriesExpense: [{ id: "other", label: "Інше" }],
+        categoriesIncome: [{ id: "other", label: "Інше" }],
+        categoriesGoals: [{ id: "gcat_x1", label: "Хобі" }, { id: "other", label: "Інше" }],
+      };
+      const add = await ai.executeTool("uid1", "add_goal", { title: "Зібрати модель", category: "gcat_x1" }, own);
+      const g = (await mockCurrent.collection("users").doc("uid1").collection("goals").doc(add.output.id).get()).data();
+      expect(g.category).toBe("gcat_x1");
+    });
+
+    test("категорія поза списком стає «Іншим», а не потрапляє в документ як є", async () => {
+      const own = {
+        today: "2026-08-20", currency: "UAH",
+        categoriesExpense: [{ id: "other", label: "Інше" }],
+        categoriesIncome: [{ id: "other", label: "Інше" }],
+        categoriesGoals: [{ id: "gcat_x1", label: "Хобі" }, { id: "other", label: "Інше" }],
+      };
+      const add = await ai.executeTool("uid1", "add_goal", { title: "Ціль", category: "career" }, own);
+      const g = (await mockCurrent.collection("users").doc("uid1").collection("goals").doc(add.output.id).get()).data();
+      expect(g.category).toBe("other");
+    });
+
+    test("без «Іншого» в списку запасною стає перша категорія, а не вигаданий id", async () => {
+      const own = {
+        today: "2026-08-20", currency: "UAH",
+        categoriesExpense: [{ id: "other", label: "Інше" }],
+        categoriesIncome: [{ id: "other", label: "Інше" }],
+        categoriesGoals: [{ id: "gcat_work", label: "Робота" }, { id: "gcat_body", label: "Тіло" }],
+      };
+      const add = await ai.executeTool("uid1", "add_goal", { title: "Ціль", category: "вигадане" }, own);
+      const g = (await mockCurrent.collection("users").doc("uid1").collection("goals").doc(add.output.id).get()).data();
+      expect(g.category).toBe("gcat_work");
+    });
+
+    // Раніше список був однаковий для всіх, і категорія переживала будь-яку
+    // правку сама собою. Відколи він у кожного свій, ціль може носити
+    // категорію, видалену на іншому пристрої, — і зміна статусу не має
+    // ставати мовчазним переїздом цієї цілі в «Інше».
+    test("правка, яка не торкається категорії, лишає її як була", async () => {
+      const own = {
+        today: "2026-08-20", currency: "UAH",
+        categoriesExpense: [{ id: "other", label: "Інше" }],
+        categoriesIncome: [{ id: "other", label: "Інше" }],
+        categoriesGoals: [{ id: "gcat_x1", label: "Хобі" }, { id: "other", label: "Інше" }],
+      };
+      const add = await ai.executeTool("uid1", "add_goal", { title: "Ціль", category: "gcat_x1" }, own);
+      // Категорію тим часом видалили на іншому пристрої.
+      const narrowed = { ...own, categoriesGoals: [{ id: "other", label: "Інше" }] };
+      await ai.executeTool("uid1", "edit_goal", { id: add.output.id, status: "paused" }, narrowed);
+      const g = (await mockCurrent.collection("users").doc("uid1").collection("goals").doc(add.output.id).get()).data();
+      expect(g.status).toBe("paused");
+      expect(g.category).toBe("gcat_x1");
+    });
+
+    test("а правка, яка торкається, — міняє й звіряє зі списком", async () => {
+      const own = {
+        today: "2026-08-20", currency: "UAH",
+        categoriesExpense: [{ id: "other", label: "Інше" }],
+        categoriesIncome: [{ id: "other", label: "Інше" }],
+        categoriesGoals: [{ id: "gcat_x1", label: "Хобі" }, { id: "other", label: "Інше" }],
+      };
+      const add = await ai.executeTool("uid1", "add_goal", { title: "Ціль", category: "other" }, own);
+      await ai.executeTool("uid1", "edit_goal", { id: add.output.id, category: "gcat_x1" }, own);
+      let g = (await mockCurrent.collection("users").doc("uid1").collection("goals").doc(add.output.id).get()).data();
+      expect(g.category).toBe("gcat_x1");
+
+      await ai.executeTool("uid1", "edit_goal", { id: add.output.id, category: "вигадане" }, own);
+      g = (await mockCurrent.collection("users").doc("uid1").collection("goals").doc(add.output.id).get()).data();
+      expect(g.category).toBe("other");
+    });
+  });
+
   test("на прохання про графік промпт веде до вкладки «Статистика», а не Excel", () => {
     const prompt = ai.buildSystemPrompt({
       today: "2026-08-20", lang: "uk", currency: "UAH",
       categoriesExpense: defaults.defaultCategoryList("expense", "uk"),
       categoriesIncome: defaults.defaultCategoryList("income", "uk"),
+      categoriesGoals: defaults.defaultGoalCategoryList("uk"),
     });
     expect(prompt).toContain("Статистика");
     expect(prompt).toMatch(/НЕ пропонуй.*Excel/);

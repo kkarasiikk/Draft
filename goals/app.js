@@ -33,8 +33,14 @@ const T = {
     newGoalTitle: 'Нова ціль', editGoalTitle: 'Редагувати ціль',
     titlePlaceholder: 'Назва цілі',
     categoryLabel: 'Категорія',
-    cat_health: 'Здоров’я', cat_finance: 'Фінанси', cat_learning: 'Навчання', cat_career: 'Кар’єра',
-    cat_relationships: 'Стосунки', cat_travel: 'Подорожі', cat_creativity: 'Творчість', cat_other: 'Інше',
+    catManageEdit: 'Змінити', catManageAria: 'Змінити категорії цілей',
+    catManageTitle: 'Категорії цілей', newCatPlaceholder: 'Нова категорія',
+    addCatAria: 'Додати категорію', deleteCatAria: 'Видалити категорію',
+    catManageHint: 'Список спільний для всіх цілей. Видалена категорія віддає свої цілі першій зі списку.',
+    catDuplicateError: 'Така категорія вже є.',
+    catLastError: 'Має лишитись хоча б одна категорія.',
+    catSaveError: 'Не вдалося зберегти. Спробуй ще раз.',
+    catInUseConfirm: (n, target) => `${n} ${n === 1 ? 'ціль перейде' : 'цілей перейде'} в «${target}». Видалити категорію?`,
     whyLabel: 'Навіщо тобі це?', whyPlaceholder: 'Чому ця ціль важлива саме для тебе (необов’язково)',
     targetDateLabel: 'Дедлайн (необов’язково)',
     milestonesLabel: 'Віхи', targetValueLabel: 'Числова мета (необовʼязково)',
@@ -167,8 +173,14 @@ const T = {
     newGoalTitle: 'Новая цель', editGoalTitle: 'Редактировать цель',
     titlePlaceholder: 'Название цели',
     categoryLabel: 'Категория',
-    cat_health: 'Здоровье', cat_finance: 'Финансы', cat_learning: 'Обучение', cat_career: 'Карьера',
-    cat_relationships: 'Отношения', cat_travel: 'Путешествия', cat_creativity: 'Творчество', cat_other: 'Другое',
+    catManageEdit: 'Изменить', catManageAria: 'Изменить категории целей',
+    catManageTitle: 'Категории целей', newCatPlaceholder: 'Новая категория',
+    addCatAria: 'Добавить категорию', deleteCatAria: 'Удалить категорию',
+    catManageHint: 'Список общий для всех целей. Удалённая категория отдаёт свои цели первой в списке.',
+    catDuplicateError: 'Такая категория уже есть.',
+    catLastError: 'Должна остаться хотя бы одна категория.',
+    catSaveError: 'Не удалось сохранить. Попробуй ещё раз.',
+    catInUseConfirm: (n, target) => `${n} ${n === 1 ? 'цель перейдёт' : 'целей перейдёт'} в «${target}». Удалить категорию?`,
     whyLabel: 'Зачем тебе это?', whyPlaceholder: 'Почему эта цель важна именно для тебя (необязательно)',
     targetDateLabel: 'Дедлайн (необязательно)',
     milestonesLabel: 'Вехи', targetValueLabel: 'Числовая цель (необязательно)',
@@ -301,8 +313,14 @@ const T = {
     newGoalTitle: 'Nowy cel', editGoalTitle: 'Edytuj cel',
     titlePlaceholder: 'Nazwa celu',
     categoryLabel: 'Kategoria',
-    cat_health: 'Zdrowie', cat_finance: 'Finanse', cat_learning: 'Nauka', cat_career: 'Kariera',
-    cat_relationships: 'Relacje', cat_travel: 'Podróże', cat_creativity: 'Kreatywność', cat_other: 'Inne',
+    catManageEdit: 'Zmień', catManageAria: 'Zmień kategorie celów',
+    catManageTitle: 'Kategorie celów', newCatPlaceholder: 'Nowa kategoria',
+    addCatAria: 'Dodaj kategorię', deleteCatAria: 'Usuń kategorię',
+    catManageHint: 'Lista jest wspólna dla wszystkich celów. Usunięta kategoria oddaje swoje cele pierwszej z listy.',
+    catDuplicateError: 'Taka kategoria już istnieje.',
+    catLastError: 'Musi zostać co najmniej jedna kategoria.',
+    catSaveError: 'Nie udało się zapisać. Spróbuj ponownie.',
+    catInUseConfirm: (n, target) => `${n} ${n === 1 ? 'cel przejdzie' : 'celów przejdzie'} do «${target}». Usunąć kategorię?`,
     whyLabel: 'Po co ci to?', whyPlaceholder: 'Dlaczego ten cel jest dla ciebie ważny (opcjonalnie)',
     targetDateLabel: 'Termin (opcjonalnie)',
     milestonesLabel: 'Kamienie milowe', targetValueLabel: 'Cel liczbowy (opcjonalnie)',
@@ -435,8 +453,14 @@ const T = {
     newGoalTitle: 'New goal', editGoalTitle: 'Edit goal',
     titlePlaceholder: 'Goal title',
     categoryLabel: 'Category',
-    cat_health: 'Health', cat_finance: 'Finance', cat_learning: 'Learning', cat_career: 'Career',
-    cat_relationships: 'Relationships', cat_travel: 'Travel', cat_creativity: 'Creativity', cat_other: 'Other',
+    catManageEdit: 'Edit', catManageAria: 'Edit goal categories',
+    catManageTitle: 'Goal categories', newCatPlaceholder: 'New category',
+    addCatAria: 'Add category', deleteCatAria: 'Delete category',
+    catManageHint: 'The list is shared by every goal. A deleted category hands its goals to the first one on the list.',
+    catDuplicateError: 'That category already exists.',
+    catLastError: 'At least one category must remain.',
+    catSaveError: 'Could not save. Try again.',
+    catInUseConfirm: (n, target) => `${n} ${n === 1 ? 'goal moves' : 'goals move'} to “${target}”. Delete the category?`,
     whyLabel: 'Why do you want this?', whyPlaceholder: 'Why this goal matters to you (optional)',
     targetDateLabel: 'Deadline (optional)',
     milestonesLabel: 'Milestones', targetValueLabel: 'Numeric target (optional)',
@@ -574,9 +598,78 @@ function t(key, ...args) {
 }
 
 // ---- Категорії цілей ----
-const CATEGORIES = ['health', 'finance', 'learning', 'career', 'relationships', 'travel', 'creativity', 'other'];
-function categoryLabel(cat) {
-  return t('cat_' + (CATEGORIES.includes(cat) ? cat : 'other'));
+// Список був захардкодженим і на вісім назв — тих самих для всіх. Але «Цілі»
+// це розділ про те, як людина ділить СВОЄ життя, і чужа розбивка тут гірша,
+// ніж у бюджеті: витрата з категорією «Інше» лишається витратою на 200 грн,
+// а ціль у чужій категорії просто не знаходить свого місця.
+//
+// Тепер список живе в профілі (`categoriesGoals`) — тим самим шляхом, що й
+// категорії бюджету, і в тому ж форматі [{ id, label, colorIndex }]. Доки
+// людина його не редагувала, у профілі його НЕМАЄ: тоді показуємо
+// стандартний, спільний із помічником (categories-default.js) — інакше в
+// чаті й на екрані стояли б різні списки.
+//
+// Ids стандартних категорій ті самі, що були в цьому масиві, тож усі вже
+// заведені цілі лишились у своїх категоріях без жодної міграції.
+const CATEGORY_SLOTS = 8; // скільки кольорових слотів дає --cat-c0..--cat-c7
+let goalCategories = defaultGoalCategoryList(currentLang, CATEGORY_SLOTS);
+// Доки список стандартний, він мусить іти за мовою сторінки: у ньому переклад,
+// а не те, що людина написала своєю рукою. Після першої ж правки — навпаки:
+// перекладати чужі слова не можна, тож прапорець гасне назавжди.
+let usingDefaultCategories = true;
+
+function findGoalCategory(id) {
+  return goalCategories.find((c) => c.id === id) || null;
+}
+
+/**
+ * Назва категорії. Незнайомий id означає категорію, видалену на іншому
+ * пристрої: показуємо сам id, а не підміняємо його на «Інше» — підміна
+ * виглядала б як факт про ціль, якого ніхто не встановлював.
+ */
+function categoryLabel(id) {
+  const cat = findGoalCategory(id);
+  return cat ? cat.label : String(id || '');
+}
+
+/**
+ * Клас кольору (`c0`…`c7`) — саме клас, а не колір: слоти палітри визначені
+ * в goals/index.html і мають дві версії, світлу й темну.
+ * Для категорії, якої вже немає в списку, колір беремо хешем від id — щоб він
+ * хоч лишався тим самим від перемальовування до перемальовування.
+ */
+function categoryColorClass(id) {
+  const cat = findGoalCategory(id);
+  if (cat && typeof cat.colorIndex === 'number') return 'c' + (cat.colorIndex % CATEGORY_SLOTS);
+  const str = String(id || '');
+  let h = 0;
+  for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
+  return 'c' + (h % CATEGORY_SLOTS);
+}
+
+/** Куди подіти ціль, у якої категорії більше немає. */
+function fallbackCategoryId() {
+  const other = findGoalCategory('other');
+  if (other) return other.id;
+  return goalCategories[0] ? goalCategories[0].id : 'other';
+}
+
+/** Список із профілю, якщо він там є і не порожній; інакше стандартний. */
+function applyProfileCategories(data) {
+  const fromProfile = data && Array.isArray(data.categoriesGoals) ? data.categoriesGoals : null;
+  const clean = (fromProfile || [])
+    .filter((c) => c && typeof c.id === 'string' && c.id && typeof c.label === 'string')
+    .map((c) => ({
+      id: c.id,
+      label: c.label,
+      colorIndex: Number.isInteger(c.colorIndex) ? c.colorIndex : 0,
+    }));
+  if (clean.length) {
+    goalCategories = clean;
+    usingDefaultCategories = false;
+  } else if (usingDefaultCategories) {
+    goalCategories = defaultGoalCategoryList(currentLang, CATEGORY_SLOTS);
+  }
 }
 
 // ---- Тема ----
@@ -618,6 +711,8 @@ function setLang(lang) {
   if (!LANGS.includes(lang)) return;
   currentLang = lang;
   localStorage.setItem('financeAppLang', lang);
+  // Свої назви не перекладаємо: після першої правки список належить людині.
+  if (usingDefaultCategories) goalCategories = defaultGoalCategoryList(currentLang, CATEGORY_SLOTS);
   if (auth.currentUser) {
     db.collection('users').doc(auth.currentUser.uid).set({ lang }, { merge: true }).catch(() => {});
   }
@@ -645,6 +740,10 @@ function applyTranslations() {
   document.getElementById('bnYearLabel').textContent = t('bnYear');
   document.getElementById('goalModalTitle').textContent = editingGoalId ? t('editGoalTitle') : t('newGoalTitle');
   document.getElementById('categoryLabel').textContent = t('categoryLabel');
+  document.getElementById('catManageTitle').textContent = t('catManageTitle');
+  document.getElementById('catManageHint').textContent = t('catManageHint');
+  document.getElementById('newGoalCatInput').placeholder = t('newCatPlaceholder');
+  document.getElementById('addGoalCatBtn').setAttribute('aria-label', t('addCatAria'));
   document.getElementById('whyLabel').textContent = t('whyLabel');
   document.getElementById('goalWhyInput').placeholder = t('whyPlaceholder');
   document.getElementById('planLabel').textContent = t('planLabel');
@@ -854,6 +953,38 @@ let unsubscribeActions = null;
 const EVENING_DISMISS_KEY = 'goalsEveningDismissed';
 
 // ---- Дані (Firestore, реалтайм) ----
+// Профіль тут потрібен заради двох речей: мови (сторінку могли відкрити з
+// іншого пристрою, де її вже змінили) і списку категорій цілей. Раніше це був
+// разовий `get()`, і мови вистачало; категорії ж редагуються просто з цієї
+// сторінки, тож підписка стала обовʼязковою — інакше другий пристрій не
+// побачив би правки, а власне вікно керування показувало б застарілий список.
+let unsubscribeProfile = null;
+
+function subscribeToProfile(uid) {
+  if (unsubscribeProfile) unsubscribeProfile();
+  unsubscribeProfile = db.collection('users').doc(uid).onSnapshot((doc) => {
+    const data = doc.data();
+    if (!data) return;
+    let langChanged = false;
+    if (data.lang && LANGS.includes(data.lang) && data.lang !== currentLang) {
+      currentLang = data.lang;
+      localStorage.setItem('financeAppLang', currentLang);
+      langChanged = true;
+    }
+    applyProfileCategories(data);
+    if (langChanged) {
+      applyTranslations();
+      renderAuthLangRow();
+    }
+    if (!findGoalCategory(formCategory)) formCategory = fallbackCategoryId();
+    // Вікно керування може бути відкрите просто зараз — на другому пристрої
+    // чи в сусідній вкладці.
+    if (document.getElementById('catManageOverlay').classList.contains('show')) renderGoalCatManager();
+    if (document.getElementById('goalFormOverlay').classList.contains('show')) renderCategoryPicker();
+    renderCurrentScreen();
+  }, (err) => console.error('subscribeToProfile:', err));
+}
+
 function subscribeToGoals(uid) {
   if (unsubscribeGoals) unsubscribeGoals();
   const col = db.collection('users').doc(uid).collection('goals');
@@ -1270,7 +1401,7 @@ function goalCardHtml(goal) {
     <div class="card goal-card" data-open-goal="${goal.id}">
       <div class="goal-card-top">
         <div>
-          <span class="category-chip ${goal.category}">${escapeHtml(categoryLabel(goal.category))}</span>
+          <span class="category-chip ${categoryColorClass(goal.category)}">${escapeHtml(categoryLabel(goal.category))}</span>
           <div class="goal-card-title">${escapeHtml(goal.title)}</div>
         </div>
         ${statusBadge}
@@ -1400,7 +1531,7 @@ function renderGoalDetail(goal) {
     ? `<span class="goal-card-status-badge">${escapeHtml(goal.status === 'done' ? t('statusDone') : t('statusArchived'))}</span>`
     : '';
   document.getElementById('detailBadgesRow').innerHTML =
-    `<span class="category-chip ${goal.category}">${escapeHtml(categoryLabel(goal.category))}</span>${statusBadge}`;
+    `<span class="category-chip ${categoryColorClass(goal.category)}">${escapeHtml(categoryLabel(goal.category))}</span>${statusBadge}`;
 
   document.getElementById('detailWhyBlock').innerHTML = goal.why
     ? `<div class="why-block">“${escapeHtml(goal.why)}”</div>` : '';
@@ -2422,14 +2553,179 @@ function renderParentPicker() {
   });
 }
 
+const PENCIL_ICON = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>';
+
 function renderCategoryPicker() {
   const picker = document.getElementById('categoryPicker');
-  picker.innerHTML = CATEGORIES.map((cat) =>
-    `<button type="button" class="category-choice ${cat}${formCategory === cat ? ' selected' : ''}" data-cat="${cat}">${escapeHtml(categoryLabel(cat))}</button>`
+  const chips = goalCategories.map((cat) =>
+    `<button type="button" class="category-choice ${categoryColorClass(cat.id)}${formCategory === cat.id ? ' selected' : ''}" data-cat="${escapeHtml(cat.id)}">${escapeHtml(cat.label)}</button>`
   ).join('');
+  // «Змінити» стоїть ЗА категоріями, а не перед ними: спершу вибір, і лише
+  // тому, кому запропонованого не вистачило, — правка.
+  picker.innerHTML = chips +
+    `<button type="button" class="category-edit-chip" id="editCategoriesBtn" aria-label="${escapeHtml(t('catManageAria'))}">${PENCIL_ICON}${escapeHtml(t('catManageEdit'))}</button>`;
   picker.querySelectorAll('[data-cat]').forEach((btn) => {
     btn.addEventListener('click', () => { formCategory = btn.dataset.cat; renderCategoryPicker(); });
   });
+  document.getElementById('editCategoriesBtn').addEventListener('click', openCatManage);
+}
+
+// ---- Керування категоріями ----
+// Той самий контракт, що й у категорій бюджету: правка одразу летить у
+// профіль, а не чекає на «зберегти». Категорії — не частина цілі, яку зараз
+// редагують; тримати їх у чернетці форми означало б, що скасування форми
+// скасовує ще й перейменування, зроблене для всіх цілей одразу.
+function saveGoalCategories(list) {
+  const uidCur = auth.currentUser && auth.currentUser.uid;
+  if (!uidCur) return Promise.reject(new Error('no-auth'));
+  // Показуємо новий список одразу, не чекаючи, поки долетить onSnapshot:
+  // інакше щойно набрана назва на мить зникала б із рядка.
+  goalCategories = list;
+  usingDefaultCategories = false;
+  return db.collection('users').doc(uidCur).set({ categoriesGoals: list }, { merge: true });
+}
+
+function newCategoryId() {
+  return 'gcat_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+}
+
+/** Найменш зайнятий слот палітри — щоб дві сусідні категорії не злились. */
+function freeColorIndex() {
+  const used = goalCategories.map((c) => c.colorIndex);
+  for (let i = 0; i < CATEGORY_SLOTS; i++) if (!used.includes(i)) return i;
+  return goalCategories.length % CATEGORY_SLOTS;
+}
+
+function addGoalCategory(label) {
+  const clean = label.trim().slice(0, 40);
+  if (!clean) return Promise.resolve();
+  if (goalCategories.some((c) => c.label.trim().toLowerCase() === clean.toLowerCase())) {
+    return Promise.reject(new Error('duplicate'));
+  }
+  return saveGoalCategories([...goalCategories, { id: newCategoryId(), label: clean, colorIndex: freeColorIndex() }]);
+}
+
+function renameGoalCategory(id, label) {
+  const clean = label.trim().slice(0, 40);
+  if (!clean) return Promise.resolve();
+  if (goalCategories.some((c) => c.id !== id && c.label.trim().toLowerCase() === clean.toLowerCase())) {
+    return Promise.reject(new Error('duplicate'));
+  }
+  // Перейменування не чіпає цілей: у них лежить id, а не назва — саме заради
+  // цього id взагалі й існує.
+  return saveGoalCategories(goalCategories.map((c) => (c.id === id ? { ...c, label: clean } : c)));
+}
+
+/** Скільки цілей носить цю категорію — рахуємо по всьому списку, а не по видимій вкладці. */
+function goalsInCategory(id) {
+  return rawGoals.filter((g) => g && g.category === id);
+}
+
+function deleteGoalCategory(id) {
+  if (goalCategories.length <= 1) return Promise.reject(new Error('last'));
+  const list = goalCategories.filter((c) => c.id !== id);
+  // Цілі видаленої категорії переносимо на першу з тих, що лишились: інакше
+  // вони лишились би з «сирітським» id, і замість назви в чипі стояв би він.
+  const fallback = list[0].id;
+  const affected = goalsInCategory(id);
+  const uidCur = auth.currentUser && auth.currentUser.uid;
+  if (!uidCur) return Promise.reject(new Error('no-auth'));
+  const col = db.collection('users').doc(uidCur).collection('goals');
+  const batch = db.batch();
+  affected.forEach((g) => {
+    batch.update(col.doc(g.id), {
+      category: fallback,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+  });
+  return batch.commit().then(() => saveGoalCategories(list));
+}
+
+function renderGoalCatManager() {
+  const container = document.getElementById('goalCatManageList');
+  if (!container) return;
+  container.innerHTML = goalCategories.map((cat) => `
+    <div class="cat-manage-row">
+      <span class="cat-manage-dot ${categoryColorClass(cat.id)}"></span>
+      <input type="text" class="cat-manage-input" maxlength="40" value="${escapeHtml(cat.label)}" data-id="${escapeHtml(cat.id)}">
+      <button type="button" class="cat-manage-del" data-id="${escapeHtml(cat.id)}" aria-label="${escapeHtml(t('deleteCatAria'))}">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>`).join('');
+
+  container.querySelectorAll('.cat-manage-input').forEach((input) => {
+    const commit = () => {
+      const cat = findGoalCategory(input.dataset.id);
+      if (!cat) return;
+      const val = input.value.trim();
+      // Порожнє поле — це не «прибрати назву», а промах: для видалення поруч
+      // стоїть хрестик. Повертаємо як було.
+      if (!val || val === cat.label) { input.value = cat.label; return; }
+      catManageError('');
+      renameGoalCategory(cat.id, val)
+        .then(() => refreshAfterCategoryChange())
+        .catch((err) => {
+          input.value = cat.label;
+          catManageError(err && err.message === 'duplicate' ? t('catDuplicateError') : t('catSaveError'));
+        });
+    };
+    input.addEventListener('blur', commit);
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') input.blur(); });
+  });
+
+  container.querySelectorAll('.cat-manage-del').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const cat = findGoalCategory(btn.dataset.id);
+      if (!cat) return;
+      if (goalCategories.length <= 1) { catManageError(t('catLastError')); return; }
+      const used = goalsInCategory(cat.id).length;
+      const target = goalCategories.filter((c) => c.id !== cat.id)[0];
+      if (used > 0 && !confirm(t('catInUseConfirm', used, target.label))) return;
+      catManageError('');
+      deleteGoalCategory(cat.id)
+        .then(() => refreshAfterCategoryChange())
+        .catch(() => catManageError(t('catSaveError')));
+    });
+  });
+}
+
+function catManageError(text) {
+  const el = document.getElementById('catManageError');
+  if (el) el.textContent = text;
+}
+
+/**
+ * Перемалювати все, на що впливає список: рядки вікна, чипи форми і самі
+ * картки цілей (у них теж стоїть назва категорії).
+ */
+function refreshAfterCategoryChange() {
+  if (!findGoalCategory(formCategory)) formCategory = fallbackCategoryId();
+  renderGoalCatManager();
+  renderCategoryPicker();
+  renderCurrentScreen();
+}
+
+function addGoalCategoryFromInput() {
+  const input = document.getElementById('newGoalCatInput');
+  const label = input.value.trim();
+  if (!label) return;
+  catManageError('');
+  addGoalCategory(label)
+    .then(() => { input.value = ''; refreshAfterCategoryChange(); })
+    .catch((err) => {
+      catManageError(err && err.message === 'duplicate' ? t('catDuplicateError') : t('catSaveError'));
+    });
+}
+
+function openCatManage() {
+  catManageError('');
+  document.getElementById('newGoalCatInput').value = '';
+  renderGoalCatManager();
+  document.getElementById('catManageOverlay').classList.add('show');
+}
+
+function closeCatManage() {
+  document.getElementById('catManageOverlay').classList.remove('show');
 }
 
 function renderMilestonesEditor() {
@@ -2629,7 +2925,11 @@ function openGoalForm(existingGoal) {
   document.getElementById('goalTargetValue').value =
     existingGoal && existingGoal.targetValue != null ? existingGoal.targetValue : '';
   document.getElementById('goalUnitInput').value = existingGoal ? existingGoal.unit || '' : '';
-  formCategory = existingGoal ? existingGoal.category || 'other' : 'other';
+  // Категорія цілі, якщо вона ще є в списку. Якщо її видалили на іншому
+  // пристрої — беремо запасну одразу тут, а не при збереженні: інакше форма
+  // показувала б невибраний рядок, а зберігала б щось третє.
+  const wantCategory = existingGoal ? existingGoal.category : fallbackCategoryId();
+  formCategory = findGoalCategory(wantCategory) ? wantCategory : fallbackCategoryId();
   formMilestones = existingGoal ? (existingGoal.milestones || []).map((m) => ({ ...m })) : [];
   formSavingsGoalId = existingGoal ? existingGoal.savingsGoalId || null : null;
   // Нова ціль народжується на тій вкладці, з якої її заводять: людина щойно
@@ -2724,6 +3024,17 @@ const goalGuard = UnsavedGuard.create({
   }),
 });
 
+// Вікно категорій. Закривається хрестиком і тапом повз вікно — як усі шари
+// застосунку; питати «зберегти?» тут нема про що: кожна правка вже в базі.
+document.getElementById('closeCatManage').addEventListener('click', closeCatManage);
+document.getElementById('catManageOverlay').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('catManageOverlay')) closeCatManage();
+});
+document.getElementById('addGoalCatBtn').addEventListener('click', addGoalCategoryFromInput);
+document.getElementById('newGoalCatInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') { e.preventDefault(); addGoalCategoryFromInput(); }
+});
+
 document.getElementById('openNewGoalBtn').addEventListener('click', () => openGoalForm(null));
 document.getElementById('closeGoalForm').addEventListener('click', () => goalGuard.requestClose());
 
@@ -2762,7 +3073,7 @@ async function saveGoalForm() {
 
   const payload = {
     title,
-    category: CATEGORIES.includes(formCategory) ? formCategory : 'other',
+    category: findGoalCategory(formCategory) ? formCategory : fallbackCategoryId(),
     why: document.getElementById('goalWhyInput').value.trim(),
     plan: readPlanFields(),
     targetDate: document.getElementById('goalTargetDate').value || null,
@@ -3087,19 +3398,16 @@ auth.onAuthStateChanged((user) => {
   if (user) {
     document.getElementById('authScreen').style.display = 'none';
     document.getElementById('appScreen').style.display = 'block';
-    db.collection('users').doc(user.uid).get().then((doc) => {
-      const data = doc.data();
-      if (data && data.lang && LANGS.includes(data.lang) && data.lang !== currentLang) {
-        currentLang = data.lang;
-        localStorage.setItem('financeAppLang', currentLang);
-        applyTranslations();
-        renderAuthLangRow();
-      }
-    }).catch(() => {});
+    subscribeToProfile(user.uid);
     subscribeToGoals(user.uid);
     openFromHash(() => openGoalForm(null));
   } else {
     if (unsubscribeGoals) { unsubscribeGoals(); unsubscribeGoals = null; }
+    if (unsubscribeProfile) { unsubscribeProfile(); unsubscribeProfile = null; }
+    // Наступний, хто увійде, побачить стандартний список своєю мовою, а не
+    // залишки чужого.
+    goalCategories = defaultGoalCategoryList(currentLang, CATEGORY_SLOTS);
+    usingDefaultCategories = true;
     stopSavings();
     savingsPickerList = null;
     goals = [];

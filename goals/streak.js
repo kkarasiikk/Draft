@@ -150,11 +150,22 @@
    *  пропонувати нема чого. Числовій цілі є що запропонувати навіть після
    *  чекіна: кілометри додаються окремо від «сьогодні був крок».
    *
+   *  `categoryIds` — список категорій, які людина має зараз (їх можна
+   *  редагувати). Якщо категорії 'health' у ньому немає — вона видалена або
+   *  її ніколи не заводили, — то фільтрувати за нею означало б завжди
+   *  повертати порожньо, і картка зарахування тихо зникла б назавжди. Тоді
+   *  чесніше не вгадувати, яка з власних категорій «про тіло», і показати
+   *  всі активні цілі: питання «я потренувався, чому це зарахувати» лишається
+   *  осмисленим, просто відповідь на нього тепер за людиною.
+   *  Аргумент необовʼязковий: без нього поведінка та сама, що й була.
+   *
    *  Сам факт «тренування сьогодні було» приходить ззовні: про тренування цей
    *  модуль нічого не знає й знати не повинен. */
-  function trainingGoals(goals, todayIso) {
+  function trainingGoals(goals, todayIso, categoryIds) {
+    var byCategory = !Array.isArray(categoryIds) || categoryIds.indexOf('health') >= 0;
     return (goals || []).filter(function (g) {
-      if (!g || g.status !== 'active' || g.category !== 'health') return false;
+      if (!g || g.status !== 'active') return false;
+      if (byCategory && g.category !== 'health') return false;
       var measurable = Number(g.targetValue) > 0;
       var checkedIn = ((g.checkins || []).indexOf(todayIso) >= 0);
       return measurable || !checkedIn;

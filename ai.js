@@ -12,7 +12,7 @@ const { suggestNext } = require("./workout/progression");
 const { suggestSession, adjustForReadiness, READINESS } = require("./workout/plan");
 // Ті самі категорії, що показує бюджет, доки людина їх не редагувала —
 // у профілі їх у цей момент ще немає (див. коментар у файлі).
-const { defaultCategoryList } = require("./categories-default");
+const { defaultCategoryList, defaultGoalCategoryList } = require("./categories-default");
 // Серія, рятунок і причини пропусків — той самий модуль, що й на сторінці
 // цілей. Правило «коли рятунок доступний» мусить бути одне.
 const goalStreak = require("./goals/streak");
@@ -46,11 +46,24 @@ const MAX_HISTORY_MESSAGES = 16; // скільки попередніх репл
 const MAX_TOOL_ROUNDS = 8;
 const MAX_OUTPUT_TOKENS = 2048;
 
-// Той самий перелік, що й у формі цілей (CATEGORIES у goals/app.js). Правила
-// Firestore перевіряють його жорстко, тож ціль із категорією поза списком
-// просто не запишеться.
-const GOAL_CATEGORIES = ["health", "finance", "learning", "career",
-  "relationships", "travel", "creativity", "other"];
+// Категорії цілей людина тепер редагує сама (профіль, categoriesGoals), тож
+// сталого переліку тут більше немає — рівно як і з категоріями витрат вище.
+// Список їде в системний промпт, а id з відповіді моделі звіряється з ним же:
+// enum у схемі інструмента довелось би збирати на кожен запит, і кеш промпта
+// (де список і так стоїть) платив би за це двічі.
+
+/** Категорії цілей цього користувача; порожньо в профілі — значить, стандартні. */
+function goalCategoriesOf(profile, lang) {
+  const list = profile && Array.isArray(profile.categoriesGoals) ? profile.categoriesGoals : null;
+  return list && list.length ? list : defaultGoalCategoryList(lang);
+}
+
+/** Категорія зі списку за id; якщо такої немає — «інша», а без неї перша. */
+function resolveGoalCategory(list, id) {
+  const found = list.find((c) => c && c.id === id);
+  if (found) return found;
+  return list.find((c) => c && c.id === "other") || list[0] || null;
+}
 
 function modelIdFor(profile) {
   const key = profile && typeof profile.aiModel === "string" ? profile.aiModel : DEFAULT_MODEL_KEY;
@@ -306,8 +319,7 @@ const tools = [
         title: { type: "string", description: "Формулювання цілі" },
         category: {
           type: "string",
-          enum: GOAL_CATEGORIES,
-          description: "Сфера життя; якщо не зрозуміло — other",
+          description: "ID категорії цілі зі списку в контексті (не вигадуй нові); якщо не зрозуміло — other",
         },
         why: { type: "string", description: "Навіщо це людині — її ж словами (необов'язково)" },
         targetDate: { type: "string", description: "Дедлайн YYYY-MM-DD (необов'язково)" },
@@ -520,7 +532,7 @@ const tools = [
       properties: {
         id: { type: "string", description: "id цілі з goals_progress" },
         title: { type: "string" },
-        category: { type: "string", enum: GOAL_CATEGORIES },
+        category: { type: "string", description: "ID категорії цілі зі списку в контексті" },
         why: { type: "string" },
         plan: { type: "object", description: "Намір «якщо ситуація — то дія»: {cue, action}. cue — коли й за чим саме («щовівторка й четверга о 19:00, після роботи»), action — що робиш («біжу 5 км»). Потрібні обидві частини: половина наміром не є.",
           properties: { cue: { type: "string" }, action: { type: "string" } } },
@@ -679,14 +691,14 @@ async function executeTool(uid, name, input, ctx) {
   if (name === "goals_progress") return goalsProgress(uid);
   if (name === "log_readiness") return logReadiness(uid, input, ctx);
   if (name === "add_workout") return addWorkout(uid, input, ctx);
-  if (name === "add_goal") return addGoal(uid, input);
+  if (name === "add_goal") return addGoal(uid, input, ctx);
   if (name === "add_savings_goal") return addSavingsGoal(uid, input);
   if (name === "add_savings_entry") return addSavingsEntry(uid, input, ctx);
   if (name === "rename_savings_goal") return renameSavingsGoal(uid, input);
   if (name === "edit_transaction") return editTransaction(uid, input, ctx);
   if (name === "edit_task") return editTask(uid, input);
   if (name === "edit_workout") return editWorkout(uid, input, ctx);
-  if (name === "edit_goal") return editGoal(uid, input);
+  if (name === "edit_goal") return editGoal(uid, input, ctx);
   if (name === "goal_progress") return goalProgress(uid, input);
   if (name === "goal_checkin") return goalCheckin(uid, input);
   if (name === "rescue_streak") return rescueStreak(uid, input, ctx);
@@ -1314,7 +1326,7 @@ async function editWorkout(uid, input, ctx) {
   };
 }
 
-async function editGoal(uid, input) {
+async function editGoal(uid, input, ctx) {
   const found = await loadForEdit(uid, "goals", input.id, "ціль не знайдена");
   if (found.error) return found.error;
 
@@ -1323,7 +1335,7 @@ async function editGoal(uid, input) {
   if (!Object.keys(patch).length) return { output: { ok: false, error: "нічого міняти" }, isError: true };
 
   const merged = { ...found.data, ...patch };
-  const result = sanitizeGoalInput(merged);
+  const result = sanitizeGoalInput(merged, ctx);
   if (result.error) return { output: { ok: false, error: result.error }, isError: true };
 
   // Віхи приходять новим списком, і sanitize позначає їх усі невиконаними.
@@ -1336,6 +1348,11 @@ async function editGoal(uid, input) {
 
   const value = {
     ...result.value,
+    // Категорію лишаємо як була, доки правка її не торкнулась. Відколи список
+    // редагується, він у кожного свій — і ціль, що носить категорію, видалену
+    // на іншому пристрої, інакше тихо переїжджала б в «Інше» від будь-якої
+    // сусідньої правки: зміни статусу, дедлайну, назви.
+    category: "category" in patch ? result.value.category : (found.data.category || result.value.category),
     status: ["active", "done", "archived", "paused"].includes(patch.status) ? patch.status : (found.data.status || "active"),
     // Пройдене — це факт, а не налаштування: правка формулювання чи дедлайну
     // не має обнуляти те, що людина вже зробила.
@@ -1357,7 +1374,7 @@ async function editGoal(uid, input) {
 // документа: правила Firestore вимагають why, milestones, checkins і journal
 // незалежно від того, чи людина щось про них сказала. Форма на сторінці
 // підставляє те саме.
-function sanitizeGoalInput(input) {
+function sanitizeGoalInput(input, ctx) {
   const title = typeof input.title === "string" ? input.title.trim().slice(0, 200) : "";
   if (!title) return { error: "title обов'язковий" };
 
@@ -1374,7 +1391,9 @@ function sanitizeGoalInput(input) {
   return {
     value: {
       title,
-      category: GOAL_CATEGORIES.includes(input.category) ? input.category : "other",
+      // Список категорій у кожного свій, тож звіряємось із ним, а не з
+      // захардкодженим переліком: інакше власна «Хобі» щоразу ставала б «Інше».
+      category: (resolveGoalCategory(ctx.categoriesGoals, input.category) || { id: "other" }).id,
       why: typeof input.why === "string" ? input.why.trim().slice(0, 1000) : "",
       plan: sanitizePlan(input.plan),
       targetDate: isDate(input.targetDate) ? input.targetDate : null,
@@ -1411,8 +1430,8 @@ function sanitizePlan(raw) {
   return cue || action ? { cue, action } : null;
 }
 
-async function addGoal(uid, input) {
-  const result = sanitizeGoalInput(input);
+async function addGoal(uid, input, ctx) {
+  const result = sanitizeGoalInput(input, ctx);
   if (result.error) return { output: { ok: false, error: result.error }, isError: true };
 
   const now = admin.firestore.FieldValue.serverTimestamp();
@@ -1626,6 +1645,7 @@ function buildSystemPrompt(ctx) {
     `Сьогодні: ${ctx.today}. Мова відповіді: ${ctx.lang}. Валюта: ${ctx.currency}.`,
     `Категорії витрат: ${catList(ctx.categoriesExpense)}.`,
     `Категорії доходів: ${catList(ctx.categoriesIncome)}.`,
+    `Категорії цілей: ${catList(ctx.categoriesGoals)}.`,
     "",
     "ЗАПИСУВАТИ. 'кава 80 грн' -> add_transaction (expense, 80, category 'food'). 'запиши подзвонити мамі завтра о 18' -> add_task. 'записав тренування: жим лежачи 4 по 8 на 60' -> add_workout. Не питай уточнень, якщо сенс зрозумілий; якщо в одному повідомленні кілька справ — створи кожну окремим викликом.",
     "",
@@ -1697,8 +1717,11 @@ async function handleAiChat(data, context, deps = {}) {
     ? profile.categoriesIncome
     : defaultCategoryList("income", lang);
   const currency = typeof profile.currency === "string" ? profile.currency : "UAH";
+  // Категорії цілей — та сама історія, що й з бюджетними: доки їх не чіпали,
+  // у профілі порожньо, а сторінка показує стандартний список.
+  const categoriesGoals = goalCategoriesOf(profile, lang);
 
-  const ctx = { today: new Date().toISOString().slice(0, 10), lang, currency, categoriesExpense, categoriesIncome };
+  const ctx = { today: new Date().toISOString().slice(0, 10), lang, currency, categoriesExpense, categoriesIncome, categoriesGoals };
   const model = modelIdFor(profile);
   // Системний проміпт і список інструментів однакові від запиту до запиту —
   // кешуємо їх, інакше кожне повідомлення платить за ті самі ~1.5 тис. токенів.
@@ -1837,10 +1860,15 @@ async function handleGoalBreakdown(data, context, deps = {}) {
   const profile = profileSnap.data() || {};
   const lang = typeof profile.lang === "string" ? profile.lang : "uk";
   const ctx = { today: new Date().toISOString().slice(0, 10) };
+  // Форма надсилає id категорії, а в промпт має піти назва: «gcat_m1x8» не
+  // каже моделі нічого, а «Здоровʼя» каже. Невідомий id лишається порожнім —
+  // краще без категорії, ніж із вигаданою.
+  const goalCategories = goalCategoriesOf(profile, lang);
+  const categoryLabel = (goalCategories.find((c) => c && c.id === data.category) || {}).label || "";
 
   const goal = {
     title,
-    category: GOAL_CATEGORIES.includes(data.category) ? data.category : "",
+    category: categoryLabel,
     why: typeof data.why === "string" ? data.why.trim().slice(0, 1000) : "",
     targetDate: typeof data.targetDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(data.targetDate) ? data.targetDate : "",
     targetValue: Number.isFinite(Number(data.targetValue)) && Number(data.targetValue) > 0 ? Number(data.targetValue) : 0,
