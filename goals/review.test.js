@@ -17,138 +17,101 @@ function goal(over = {}) {
   };
 }
 
-/** Журнал прогресу: рівний темп по `perDay` щодня, `days` днів поспіль,
- *  останній запис — `endIso`. */
-function evenLog(perDay, days, endIso = TODAY) {
-  const out = [];
-  const end = new Date(endIso + 'T00:00:00');
-  for (let i = days - 1; i >= 0; i--) {
-    const d = new Date(end);
-    d.setDate(d.getDate() - i);
-    out.push({ date: d.toISOString().slice(0, 10), delta: perDay });
-  }
-  return out;
-}
-
-describe('progressPct — чим міряємо шлях', () => {
-  test('числова мета важливіша за віхи', () => {
-    const p = R.progressPct(goal({
-      targetValue: 100, currentValue: 40,
-      milestones: [{ id: 'm1', title: 'a', done: true }],
-    }));
-    expect(p.kind).toBe('value');
-    expect(p.pct).toBe(40);
-    expect(p.remaining).toBe(60);
+// Окремого поля «дедлайн» у формі немає: для місячної цілі він уже сказаний
+// вибором місяця, і питати вдруге означало б просити повторити те саме.
+describe('deadlineForMonth — дедлайн, виведений із місяця', () => {
+  test('останній день місяця, а не перший наступного', () => {
+    expect(R.deadlineForMonth('2026-08')).toBe('2026-08-31');
+    expect(R.deadlineForMonth('2026-09')).toBe('2026-09-30');
   });
 
-  test('без числа рахуються віхи', () => {
+  test('лютий рахується правильно, і високосний теж', () => {
+    expect(R.deadlineForMonth('2026-02')).toBe('2026-02-28');
+    expect(R.deadlineForMonth('2024-02')).toBe('2024-02-29');
+  });
+
+  test('грудень не перескакує в наступний рік', () => {
+    expect(R.deadlineForMonth('2026-12')).toBe('2026-12-31');
+  });
+
+  test('без місяця дедлайну немає — річна ціль це напрямок, а не строк', () => {
+    expect(R.deadlineForMonth(null)).toBeNull();
+    expect(R.deadlineForMonth('')).toBeNull();
+    expect(R.deadlineForMonth('2026')).toBeNull();
+    expect(R.deadlineForMonth('серпень')).toBeNull();
+    expect(R.deadlineForMonth('2026-13')).toBeNull();
+  });
+});
+
+describe('progressPct — чим міряємо шлях', () => {
+  // Числової мети в застосунку більше немає: якщо число важливе, воно стоїть
+  // у самій назві цілі, а шлях до нього розкладено віхами.
+  test('шлях міряється віхами', () => {
     const p = R.progressPct(goal({
       milestones: [
         { id: 'm1', title: 'a', done: true },
         { id: 'm2', title: 'b', done: false },
       ],
     }));
-    expect(p.kind).toBe('milestones');
     expect(p.pct).toBe(50);
+    expect(p.done).toBe(1);
+    expect(p.total).toBe(2);
+    expect(p.remaining).toBe(1);
   });
 
-  test('ні числа, ні віх — міряти нічим', () => {
+  test('без віх міряти нічим', () => {
     expect(R.progressPct(goal())).toBeNull();
   });
 
-  test('перебір понад мету не дає більше за 100%', () => {
-    expect(R.progressPct(goal({ targetValue: 10, currentValue: 25 })).pct).toBe(100);
+  test('числа в документі старої цілі нічого не міняють', () => {
+    // Поля лишились у вже заведених цілях, але застосунок їх не читає.
+    expect(R.progressPct(goal({ targetValue: 100, currentValue: 40 }))).toBeNull();
   });
 });
 
 describe('pace — чи встигаєш', () => {
+  const milestones = (doneCount, total) =>
+    Array.from({ length: total }, (_, i) => ({ id: 'm' + i, title: 'крок', done: i < doneCount }));
+
   test('без дедлайну темп ні з чим порівнювати', () => {
-    expect(R.pace(goal({ targetDate: null, targetValue: 10 }), TODAY)).toBeNull();
+    // Річна ціль дедлайну не має — рік це напрямок, а не строк.
+    expect(R.pace(goal({ targetDate: null, milestones: milestones(1, 4) }), TODAY)).toBeNull();
   });
 
   test('закриту й архівну ціль не оцінюємо', () => {
-    expect(R.pace(goal({ status: 'done', targetValue: 10 }), TODAY)).toBeNull();
-    expect(R.pace(goal({ status: 'archived', targetValue: 10 }), TODAY)).toBeNull();
+    expect(R.pace(goal({ status: 'done', milestones: milestones(1, 4) }), TODAY)).toBeNull();
+    expect(R.pace(goal({ status: 'archived', milestones: milestones(1, 4) }), TODAY)).toBeNull();
   });
 
   test('ціль на паузі оцінюємо: її ще доведеться зняти з паузи', () => {
-    const p = R.pace(goal({ status: 'paused', targetValue: 100, currentValue: 10 }), TODAY);
-    expect(p).not.toBeNull();
+    expect(R.pace(goal({ status: 'paused', milestones: milestones(1, 10) }), TODAY)).not.toBeNull();
   });
 
-  test('поки історії мало — застосунок мовчить, а не вгадує', () => {
-    // Два записи, але за три дні: це збіг, а не темп.
-    const p = R.pace(goal({
-      targetValue: 100, currentValue: 6,
-      progressLog: evenLog(3, 3),
-    }), TODAY);
-    expect(p.enough).toBe(false);
-    expect(p.projectedDate).toBeNull();
-  });
-
-  test('одного запису мало навіть за довгий проміжок', () => {
-    const p = R.pace(goal({
-      targetValue: 100, currentValue: 5,
-      progressLog: [{ date: '2026-07-01', delta: 5 }],
-    }), TODAY);
-    expect(p.enough).toBe(false);
-  });
-
-  test('рівний темп, якого вистачає — «в графіку»', () => {
-    // 1 км/день протягом 30 днів; лишилось 70 км і 126 днів до дедлайну.
-    const p = R.pace(goal({
-      targetValue: 100, currentValue: 30,
-      progressLog: evenLog(1, 30),
-    }), TODAY);
-    expect(p.enough).toBe(true);
-    expect(p.ratePerDay).toBeCloseTo(1, 1);
-    expect(p.verdict).not.toBe('behind');
-    expect(p.diffDays).toBeLessThanOrEqual(0);
-  });
-
-  test('надто повільний темп — «не встигаєш», із датою прогнозу', () => {
-    // 0.1 км/день: на 90 км, що лишились, потрібно ~900 днів.
-    const p = R.pace(goal({
-      targetValue: 100, currentValue: 10,
-      progressLog: evenLog(0.1, 100),
-    }), TODAY);
-    expect(p.enough).toBe(true);
-    expect(p.verdict).toBe('behind');
-    expect(p.diffDays).toBeGreaterThan(0);
-    expect(p.projectedDate).toMatch(/^\d{4}-\d{2}-\d{2}$/);
-    // Прогноз мусить лежати ПІСЛЯ дедлайну — інакше вердикт суперечив би даті.
-    expect(p.projectedDate > '2026-12-31').toBe(true);
-  });
-
-  test('скільки треба на день, щоб устигнути — рахується й без історії', () => {
-    const p = R.pace(goal({ targetValue: 100, currentValue: 0 }), TODAY);
-    // 100 одиниць на 126 днів.
-    expect(p.requiredPerDay).toBeCloseTo(100 / 126, 3);
+  test('без жодної віхи міряти нічим', () => {
+    expect(R.pace(goal(), TODAY)).toBeNull();
   });
 
   test('прострочене — це факт, а не прогноз', () => {
-    const p = R.pace(goal({
-      targetDate: '2026-08-01', targetValue: 100, currentValue: 20,
-      progressLog: evenLog(1, 20),
-    }), TODAY);
+    const p = R.pace(goal({ targetDate: '2026-08-01', milestones: milestones(2, 10) }),
+      TODAY, { startIso: '2026-06-01' });
     expect(p.verdict).toBe('overdue');
     expect(p.overdue).toBe(true);
     expect(p.daysLeft).toBeLessThan(0);
   });
 
-  test('мета досягнута — прогнозувати нема чого', () => {
-    const p = R.pace(goal({ targetValue: 100, currentValue: 100 }), TODAY);
+  test('усі віхи закриті — прогнозувати нема чого', () => {
+    const p = R.pace(goal({ milestones: milestones(4, 4) }), TODAY, { startIso: '2026-06-01' });
     expect(p.verdict).toBe('ahead');
   });
 
-  test('записи є, а руху немає — це теж відповідь', () => {
-    const p = R.pace(goal({
-      targetValue: 100, currentValue: 0,
-      progressLog: evenLog(0, 30),
-    }), TODAY);
-    expect(p.enough).toBe(true);
-    expect(p.ratePerDay).toBe(0);
-    expect(p.verdict).toBe('behind');
+  // Прогноз конкретної дати давала лише числова мета — по журналу «скільки на
+  // день». Без неї застосунок порівнює частки й дати не називає: enough
+  // означає рівно «є прогноз із датою», тож він завжди false.
+  test('прогнозу з датою більше не буває — лишається порівняння часток', () => {
+    const p = R.pace(goal({ milestones: milestones(1, 10) }), TODAY, { startIso: '2026-01-01' });
+    expect(p.enough).toBe(false);
+    expect(p.projectedDate).toBeNull();
+    expect(p.diffDays).toBeNull();
   });
 });
 
@@ -158,17 +121,16 @@ describe('pace для віх — без жодних нових даних', () 
 
   test('часу минуло майже все, зроблено мало — «не встигаєш»', () => {
     const p = R.pace(goal({
-      targetValue: null, targetDate: '2026-09-05',
+      targetDate: '2026-09-05',
       milestones: milestones(1, 10),
     }), TODAY, { startIso: '2026-01-01' });
-    expect(p.kind).toBe('milestones');
     expect(p.verdict).toBe('behind');
     expect(p.timePct).toBeGreaterThan(p.pct);
   });
 
   test('зроблено більше, ніж минуло часу — «випереджаєш»', () => {
     const p = R.pace(goal({
-      targetValue: null, targetDate: '2026-12-31',
+      targetDate: '2026-12-31',
       milestones: milestones(8, 10),
     }), TODAY, { startIso: '2026-08-01' });
     expect(p.verdict).toBe('ahead');
@@ -177,7 +139,7 @@ describe('pace для віх — без жодних нових даних', () 
   test('прогрес іде врівень із часом — «в графіку»', () => {
     // Половина шляху, половина часу.
     const p = R.pace(goal({
-      targetValue: null, targetDate: '2026-10-26',
+      targetDate: '2026-10-26',
       milestones: milestones(5, 10),
     }), TODAY, { startIso: '2026-06-27' });
     expect(p.verdict).toBe('onTrack');
@@ -186,7 +148,7 @@ describe('pace для віх — без жодних нових даних', () 
   test('щойно заведена ціль не оголошується такою, що випереджає графік', () => {
     // Часу минуло 0%, а віха вже закрита — це не привід хвалити.
     const p = R.pace(goal({
-      targetValue: null, targetDate: '2026-12-31',
+      targetDate: '2026-12-31',
       milestones: milestones(1, 3),
     }), TODAY, { startIso: TODAY });
     expect(p.verdict).toBe('unknown');
@@ -195,7 +157,6 @@ describe('pace для віх — без жодних нових даних', () 
   test('невеликий відрив не робить людину боржником', () => {
     // Часу 55%, зроблено 45% — це ще не «відстаєш».
     const p = R.pace(goal({
-      targetValue: null,
       milestones: milestones(45, 100),
       targetDate: '2026-11-06',
     }), TODAY, { startIso: '2026-06-01' });
@@ -204,14 +165,13 @@ describe('pace для віх — без жодних нових даних', () 
 });
 
 describe('weekMovement — що зрушило', () => {
-  test('рахує чекіни, віхи, прогрес і записи щоденника за вікно', () => {
+  test('рахує чекіни, віхи й записи щоденника за вікно', () => {
     const m = R.weekMovement(goal({
       checkins: ['2026-08-26', '2026-08-24', '2026-07-01'],
       milestones: [
         { id: 'm1', title: 'a', done: true, doneAt: '2026-08-25' },
         { id: 'm2', title: 'b', done: true, doneAt: '2026-05-01' },
       ],
-      progressLog: [{ date: '2026-08-25', delta: 4 }, { date: '2026-01-01', delta: 99 }],
       journal: [
         { id: 'j1', text: 'нотатка', createdAt: new Date('2026-08-26T10:00:00').getTime() },
         { id: 'j2', text: 'стара', createdAt: new Date('2026-01-02T10:00:00').getTime() },
@@ -220,7 +180,6 @@ describe('weekMovement — що зрушило', () => {
 
     expect(m.checkins).toBe(2);
     expect(m.milestonesDone).toBe(1);
-    expect(m.progressDelta).toBe(4);
     expect(m.journal).toBe(1);
     expect(m.moved).toBe(true);
   });
@@ -229,7 +188,6 @@ describe('weekMovement — що зрушило', () => {
     const m = R.weekMovement(goal({ checkins: ['2026-06-01'] }), TODAY);
     expect(m.moved).toBe(false);
     expect(m.checkins).toBe(0);
-    expect(m.progressDelta).toBe(0);
   });
 
   test('вікно включає сьогодні й не залазить у майбутнє', () => {
@@ -288,13 +246,18 @@ describe('reviewItem — один рядок огляду', () => {
   test('несе назву, «навіщо», рух і темп', () => {
     const item = R.reviewItem(goal({
       why: 'щоб бігти півмарафон',
-      targetValue: 100, currentValue: 30,
-      progressLog: evenLog(1, 30),
-    }), TODAY);
+      checkins: ['2026-08-25', '2026-08-26'],
+      milestones: [
+        { id: 'm1', title: 'a', done: true, doneAt: '2026-08-24' },
+        { id: 'm2', title: 'b', done: false },
+      ],
+    }), TODAY, { startIso: '2026-01-01' });
     expect(item.title).toBe('Пробігти 100 км');
     expect(item.why).toBe('щоб бігти півмарафон');
     expect(item.movement.moved).toBe(true);
-    expect(item.pace.enough).toBe(true);
+    // Сам вердикт перевіряє сюїта pace — тут важливо, що рядок його несе.
+    expect(item.pace).not.toBeNull();
+    expect(item.pace.pct).toBe(50);
   });
 });
 
@@ -439,7 +402,9 @@ describe('retrospective — що закрито за період', () => {
 
   test('горизонт і прогрес їдуть разом із ціллю — картці більше нічого рахувати', () => {
     const r = R.retrospective([
-      done('a', '2026-08-20', { horizon: 'month', targetValue: 100, currentValue: 100 }),
+      done('a', '2026-08-20', { horizon: 'month', milestones: [
+        { id: 'm1', title: 'крок', done: true, doneAt: '2026-08-20' },
+      ] }),
     ], TODAY, { days: 365, startIsoOf });
     expect(r.items[0].horizon).toBe('month');
     expect(r.items[0].progress.pct).toBe(100);
@@ -452,67 +417,48 @@ describe('retrospective — що закрито за період', () => {
 });
 
 describe('progressSeries — щоб шлях було видно', () => {
+  // Лінію будують закриті віхи та їхні дати. Числового журналу більше немає:
+  // він жив разом із числовою метою й пішов разом із нею.
+  const ms = (...done) => done.map(([id, at], i) => ({
+    id: id, title: 'крок', done: !!at, ...(at ? { doneAt: at } : {}),
+  }));
+
   test('нема чим міряти — нема що малювати', () => {
     expect(R.progressSeries(goal(), TODAY)).toBeNull();
   });
 
-  test('порожній журнал не дає графіка', () => {
-    expect(R.progressSeries(goal({ targetValue: 100, progressLog: [] }), TODAY)).toBeNull();
-  });
-
-  test('накопичує прогрес, а не показує окремі внески', () => {
+  test('накопичує пройдене, а не показує окремі кроки', () => {
     const s = R.progressSeries(goal({
-      targetValue: 100, currentValue: 9,
-      progressLog: [
-        { date: '2026-08-10', delta: 2 },
-        { date: '2026-08-12', delta: 3 },
-        { date: '2026-08-20', delta: 4 },
-      ],
+      milestones: ms(['m1', '2026-08-10'], ['m2', '2026-08-12'], ['m3', '2026-08-20'], ['m4', null]),
     }), TODAY, { startIso: '2026-08-01' });
-    expect(s.points.map((p) => p.value)).toEqual([0, 2, 5, 9, 9]);
+    expect(s.points.map((p) => p.value)).toEqual([0, 1, 2, 3, 3]);
+    expect(s.max).toBe(4);
   });
 
-  test('кілька записів за один день — одна крапка', () => {
+  test('дві віхи в один день — одна крапка', () => {
     const s = R.progressSeries(goal({
-      targetValue: 100, currentValue: 5,
-      progressLog: [{ date: '2026-08-10', delta: 2 }, { date: '2026-08-10', delta: 3 }],
+      milestones: ms(['m1', '2026-08-10'], ['m2', '2026-08-10']),
     }), TODAY, { startIso: '2026-08-01' });
     const tenth = s.points.filter((p) => p.date === '2026-08-10');
     expect(tenth).toHaveLength(1);
-    expect(tenth[0].value).toBe(5);
+    expect(tenth[0].value).toBe(2);
   });
 
   test('лінія доводиться до сьогодні — пауза має бути видною', () => {
     const s = R.progressSeries(goal({
-      targetValue: 100, currentValue: 5,
-      progressLog: [{ date: '2026-08-01', delta: 5 }],
+      milestones: ms(['m1', '2026-08-01'], ['m2', null]),
     }), TODAY, { startIso: '2026-07-01' });
     const last = s.points.at(-1);
     expect(last.date).toBe(TODAY);
-    expect(last.value).toBe(5);
+    expect(last.value).toBe(1);
   });
 
-  test('прогрес, вписаний до журналу, не малюється ривком із нуля', () => {
-    // currentValue 50, а журнал памʼятає лише 10: 40 було до нього.
+  test('лінія починається з нуля: закрита віха — це подія з датою', () => {
     const s = R.progressSeries(goal({
-      targetValue: 100, currentValue: 50,
-      progressLog: [{ date: '2026-08-10', delta: 10 }],
+      milestones: ms(['m1', '2026-08-10'], ['m2', null]),
     }), TODAY, { startIso: '2026-08-01' });
-    expect(s.points[0].value).toBe(40);
-    expect(s.current).toBe(50);
-  });
-
-  test('віхи теж дають лінію — без жодного числа в цілі', () => {
-    const s = R.progressSeries(goal({
-      milestones: [
-        { id: 'm1', title: 'a', done: true, doneAt: '2026-08-05' },
-        { id: 'm2', title: 'b', done: true, doneAt: '2026-08-19' },
-        { id: 'm3', title: 'c', done: false },
-      ],
-    }), TODAY, { startIso: '2026-08-01' });
-    expect(s.kind).toBe('milestones');
-    expect(s.max).toBe(3);
-    expect(s.points.map((p) => p.value)).toEqual([0, 1, 2, 2]);
+    expect(s.points[0].value).toBe(0);
+    expect(s.current).toBe(1);
   });
 
   test('віха без дати виконання в лінію не потрапляє — коли це було, невідомо', () => {
@@ -523,27 +469,27 @@ describe('progressSeries — щоб шлях було видно', () => {
 
   test('лінія «щоб устигнути» веде від старту до дедлайну', () => {
     const s = R.progressSeries(goal({
-      targetValue: 100, currentValue: 5, targetDate: '2026-12-31',
-      progressLog: [{ date: '2026-08-10', delta: 5 }],
+      targetDate: '2026-12-31',
+      milestones: ms(['m1', '2026-08-10'], ['m2', null], ['m3', null], ['m4', null]),
     }), TODAY, { startIso: '2026-08-01' });
     expect(s.required).toEqual([
       { date: '2026-08-01', value: 0 },
-      { date: '2026-12-31', value: 100 },
+      { date: '2026-12-31', value: 4 },
     ]);
   });
 
   test('без дедлайну рівного темпу нізвідки взяти', () => {
     const s = R.progressSeries(goal({
-      targetDate: null, targetValue: 100, currentValue: 5,
-      progressLog: [{ date: '2026-08-10', delta: 5 }],
+      targetDate: null,
+      milestones: ms(['m1', '2026-08-10'], ['m2', null]),
     }), TODAY, { startIso: '2026-08-01' });
     expect(s.required).toBeNull();
   });
 
   test('вісь тягнеться до дедлайну, коли той попереду', () => {
     const s = R.progressSeries(goal({
-      targetValue: 100, currentValue: 5, targetDate: '2026-12-31',
-      progressLog: [{ date: '2026-08-10', delta: 5 }],
+      targetDate: '2026-12-31',
+      milestones: ms(['m1', '2026-08-10'], ['m2', null]),
     }), TODAY, { startIso: '2026-08-01' });
     expect(s.from).toBe('2026-08-01');
     expect(s.to).toBe('2026-12-31');
@@ -551,103 +497,30 @@ describe('progressSeries — щоб шлях було видно', () => {
 
   test('у простроченої цілі вісь не тягнеться назад у минуле', () => {
     const s = R.progressSeries(goal({
-      targetValue: 100, currentValue: 5, targetDate: '2026-03-01',
-      progressLog: [{ date: '2026-02-10', delta: 5 }],
+      targetDate: '2026-03-01',
+      milestones: ms(['m1', '2026-02-10'], ['m2', null]),
     }), TODAY, { startIso: '2026-02-01' });
     expect(s.to).toBe(TODAY);
   });
 
-  test('записи з майбутнього в лінію не беруться', () => {
+  test('віхи, закриті майбутньою датою, в лінію не беруться', () => {
     const s = R.progressSeries(goal({
-      targetValue: 100, currentValue: 5,
-      progressLog: [{ date: '2026-08-10', delta: 5 }, { date: '2027-01-01', delta: 90 }],
+      milestones: ms(['m1', '2026-08-10'], ['m2', '2027-01-01']),
     }), TODAY, { startIso: '2026-08-01' });
     expect(s.points.every((p) => p.date <= TODAY)).toBe(true);
-  });
-});
-
-describe('recordDeadlineShift — зсув лишає слід', () => {
-  test('перша постановка дедлайну зсувом не рахується', () => {
-    expect(R.recordDeadlineShift(goal({ targetDate: null }), '2026-12-31', TODAY)).toBeNull();
-  });
-
-  test('та сама дата — нічого не сталось', () => {
-    expect(R.recordDeadlineShift(goal({ targetDate: '2026-12-31' }), '2026-12-31', TODAY)).toBeNull();
-  });
-
-  test('перенесення записується з обома датами й днем, коли це зробили', () => {
-    const h = R.recordDeadlineShift(goal({ targetDate: '2026-10-01' }), '2026-12-31', TODAY);
-    expect(h).toEqual([{ from: '2026-10-01', to: '2026-12-31', at: TODAY }]);
-  });
-
-  test('історія накопичується, а не переписується', () => {
-    const g = goal({
-      targetDate: '2026-10-01',
-      deadlineHistory: [{ from: '2026-06-01', to: '2026-10-01', at: '2026-05-20' }],
-    });
-    expect(R.recordDeadlineShift(g, '2026-12-31', TODAY)).toHaveLength(2);
-  });
-
-  test('знятий дедлайн — теж зсув, і теж записується', () => {
-    const h = R.recordDeadlineShift(goal({ targetDate: '2026-10-01' }), null, TODAY);
-    expect(h[0].to).toBeNull();
-  });
-
-  test('історія не росте вічно — стеля 50', () => {
-    const old = Array.from({ length: 50 }, () => ({ from: '2026-01-01', to: '2026-02-01', at: '2026-01-01' }));
-    const h = R.recordDeadlineShift(goal({ targetDate: '2026-10-01', deadlineHistory: old }), '2026-12-31', TODAY);
-    expect(h).toHaveLength(50);
-    expect(h.at(-1).to).toBe('2026-12-31');
-  });
-});
-
-describe('deadlineDrift — куди дедлайн приїхав', () => {
-  test('цілі, яку не переносили, докоряти нема чим', () => {
-    expect(R.deadlineDrift(goal())).toBeNull();
-  });
-
-  test('рахує від НАЙПЕРШОЇ дати, а не як суму кроків', () => {
-    // Двічі вперед, раз назад: підсумок один, і він від початкової дати.
-    const d = R.deadlineDrift(goal({
-      targetDate: '2026-12-01',
-      deadlineHistory: [
-        { from: '2026-09-01', to: '2026-10-01', at: '2026-08-01' },
-        { from: '2026-10-01', to: '2026-12-15', at: '2026-09-20' },
-        { from: '2026-12-15', to: '2026-12-01', at: '2026-11-01' },
-      ],
-    }));
-    expect(d.count).toBe(3);
-    expect(d.originalDate).toBe('2026-09-01');
-    expect(d.days).toBe(91);
-  });
-
-  test('дедлайн підтягнули ближче — відʼємне теж чесне', () => {
-    const d = R.deadlineDrift(goal({
-      targetDate: '2026-09-01',
-      deadlineHistory: [{ from: '2026-10-01', to: '2026-09-01', at: TODAY }],
-    }));
-    expect(d.days).toBe(-30);
-  });
-
-  test('дедлайн зняли — порівнювати нема з чим, але факт зсуву лишається', () => {
-    const d = R.deadlineDrift(goal({
-      targetDate: null,
-      deadlineHistory: [{ from: '2026-10-01', to: null, at: TODAY }],
-    }));
-    expect(d.count).toBe(1);
-    expect(d.days).toBeNull();
   });
 });
 
 describe('needsMeasure — ціль, яку нема чим міряти', () => {
   const old = { startIso: '2026-01-01' };
 
-  test('ні числа, ні віх — питання є', () => {
+  test('жодної віхи — питання є', () => {
     expect(R.needsMeasure(goal(), TODAY, old)).not.toBeNull();
   });
 
-  test('є число — питання зняте', () => {
-    expect(R.needsMeasure(goal({ targetValue: 100 }), TODAY, old)).toBeNull();
+  test('число, що лишилось у старому документі, питання не знімає', () => {
+    // Числової мети застосунок більше не читає: міряти є чим лише віхами.
+    expect(R.needsMeasure(goal({ targetValue: 100 }), TODAY, old)).not.toBeNull();
   });
 
   test('є віхи — теж є чим міряти, навіть жодної не закритої', () => {
@@ -682,32 +555,6 @@ describe('needsMeasure — ціль, яку нема чим міряти', () =>
 
   test('невідомий день заведення — невідомо й чи настав час питати', () => {
     expect(R.needsMeasure(goal(), TODAY, {})).toBeNull();
-  });
-});
-
-describe('planOf — намір «якщо X, то Y»', () => {
-  test('обидві частини — є намір', () => {
-    expect(R.planOf(goal({ plan: { cue: 'щовівторка о 19:00', action: 'біжу 5 км' } })))
-      .toEqual({ cue: 'щовівторка о 19:00', action: 'біжу 5 км' });
-  });
-
-  test('ситуація без дії — це ще не намір', () => {
-    expect(R.planOf(goal({ plan: { cue: 'щовівторка', action: '' } }))).toBeNull();
-  });
-
-  test('дія без ситуації — просто переказ цілі', () => {
-    expect(R.planOf(goal({ plan: { cue: '  ', action: 'біжу 5 км' } }))).toBeNull();
-  });
-
-  test('порожній і відсутній план однаково мовчать', () => {
-    expect(R.planOf(goal())).toBeNull();
-    expect(R.planOf(goal({ plan: null }))).toBeNull();
-    expect(R.planOf(goal({ plan: 'щовівторка' }))).toBeNull();
-  });
-
-  test('пробіли по краях не роблять план існуючим і не лишаються в тексті', () => {
-    expect(R.planOf(goal({ plan: { cue: '  вранці  ', action: '  20 хвилин  ' } })))
-      .toEqual({ cue: 'вранці', action: '20 хвилин' });
   });
 });
 

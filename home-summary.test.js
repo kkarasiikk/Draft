@@ -206,18 +206,20 @@ describe('featuredGoal — яку ціль показати', () => {
   });
 
   test('серед цілей без дедлайну виграє та, де більше пройдено', () => {
+    const ms = (done, total) => Array.from({ length: total }, (_, i) => ({ done: i < done }));
     const r = HomeSummary.featuredGoal([
-      g({ title: 'початок', targetValue: 10, currentValue: 1 }),
-      g({ title: 'майже', targetValue: 10, currentValue: 9 }),
+      g({ title: 'початок', milestones: ms(1, 10) }),
+      g({ title: 'майже', milestones: ms(9, 10) }),
     ], T);
     expect(r.title).toBe('майже');
     expect(r.pct).toBe(90);
   });
 
-  test('прогрес рахується числом, а без числа — віхами', () => {
-    expect(HomeSummary.goalPct({ targetValue: 4, currentValue: 3 })).toBe(75);
+  test('прогрес рахується віхами — числової мети в застосунку немає', () => {
     expect(HomeSummary.goalPct({ milestones: [{ done: true }, { done: false }] })).toBe(50);
     expect(HomeSummary.goalPct({ milestones: [] })).toBe(0);
+    // Число, що лишилось у старому документі, кільце не малює.
+    expect(HomeSummary.goalPct({ targetValue: 4, currentValue: 3 })).toBe(0);
   });
 });
 

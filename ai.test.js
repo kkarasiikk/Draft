@@ -92,6 +92,10 @@ describe("executeTool", () => {
     currency: "UAH",
     categoriesExpense: [{ id: "food", label: "Їжа" }, { id: "other", label: "Інше" }],
     categoriesIncome: [{ id: "salary", label: "Зарплата" }],
+    // Категорії цілей людина редагує сама, тож вони теж їдуть контекстом —
+    // так само, як категорії витрат. Беремо повний стандартний список: саме
+    // його бачить той, хто категорій ще не чіпав.
+    categoriesGoals: require("./categories-default").defaultGoalCategoryList("uk"),
   };
 
   test("add_transaction реально записує документ у Firestore-мок", async () => {
@@ -515,7 +519,7 @@ describe("executeTool", () => {
     test("add_goal створює ціль із віхами й типовими полями", async () => {
       const r = await ai.executeTool("uid1", "add_goal", {
         title: "Пробігти марафон", category: "health", why: "хочу дожити до 90",
-        targetDate: "2027-04-18", milestones: ["10 км", "21 км"],
+        milestones: ["10 км", "21 км"],
       }, ctx);
       expect(r.output).toMatchObject({ ok: true, milestones: 2 });
 
@@ -523,7 +527,7 @@ describe("executeTool", () => {
       const g = doc.data();
       expect(g).toMatchObject({
         title: "Пробігти марафон", category: "health", why: "хочу дожити до 90",
-        targetDate: "2027-04-18", status: "active", checkins: [], journal: [],
+        status: "active", checkins: [], journal: [],
       });
       expect(g.milestones.map((m) => [m.title, m.done])).toEqual([["10 км", false], ["21 км", false]]);
       expect(new Set(g.milestones.map((m) => m.id)).size).toBe(2);
@@ -592,73 +596,53 @@ describe("executeTool", () => {
       ]);
     });
 
-    // ---- Числова мета ----
-    test("add_goal записує числову мету й починає з нуля", async () => {
+    // ---- Дедлайн, виведений із місяця ----
+    // Окремого поля дедлайну немає ні у формі, ні в інструменті: для місячної
+    // цілі він уже сказаний місяцем, а річна лишається без нього.
+    test("місячна ціль отримує дедлайном кінець свого місяця", async () => {
+      const r = await ai.executeTool("uid1", "add_goal",
+        { title: "Прочитати дві книжки", horizon: "month", month: "2026-02" }, ctx);
+      const g = (await mockCurrent.collection("users").doc("uid1").collection("goals").doc(r.output.id).get()).data();
+      expect(g).toMatchObject({ horizon: "month", month: "2026-02", targetDate: "2026-02-28" });
+    });
+
+    test("річна ціль лишається без дедлайну — рік це напрямок, а не строк", async () => {
+      const r = await ai.executeTool("uid1", "add_goal", { title: "Вивчити польську" }, ctx);
+      const g = (await mockCurrent.collection("users").doc("uid1").collection("goals").doc(r.output.id).get()).data();
+      expect(g).toMatchObject({ horizon: "year", month: null, targetDate: null });
+    });
+
+    test("дата, надіслана моделлю, дедлайну не задає — його вирішує місяць", async () => {
+      const r = await ai.executeTool("uid1", "add_goal",
+        { title: "Ціль", horizon: "month", month: "2026-08", targetDate: "2027-04-18" }, ctx);
+      const g = (await mockCurrent.collection("users").doc("uid1").collection("goals").doc(r.output.id).get()).data();
+      expect(g.targetDate).toBe("2026-08-31");
+    });
+
+    test("перенесення цілі на інший місяць пересуває й дедлайн", async () => {
+      const add = await ai.executeTool("uid1", "add_goal",
+        { title: "Ціль", horizon: "month", month: "2026-08" }, ctx);
+      await ai.executeTool("uid1", "edit_goal", { id: add.output.id, month: "2026-09" }, ctx);
+      const g = (await mockCurrent.collection("users").doc("uid1").collection("goals").doc(add.output.id).get()).data();
+      expect(g).toMatchObject({ month: "2026-09", targetDate: "2026-09-30" });
+    });
+
+    test("переїзд на річну вкладку знімає дедлайн разом із місяцем", async () => {
+      const add = await ai.executeTool("uid1", "add_goal",
+        { title: "Ціль", horizon: "month", month: "2026-08" }, ctx);
+      await ai.executeTool("uid1", "edit_goal", { id: add.output.id, horizon: "year" }, ctx);
+      const g = (await mockCurrent.collection("users").doc("uid1").collection("goals").doc(add.output.id).get()).data();
+      expect(g).toMatchObject({ horizon: "year", month: null, targetDate: null });
+    });
+
+    // Числової мети більше немає: якщо число важливе, воно стоїть у назві.
+    test("число, надіслане моделлю, в документ не потрапляє", async () => {
       const r = await ai.executeTool("uid1", "add_goal",
         { title: "Пробігти 10 км", targetValue: 10, unit: "км" }, ctx);
       const g = (await mockCurrent.collection("users").doc("uid1").collection("goals").doc(r.output.id).get()).data();
-      expect(g).toMatchObject({ targetValue: 10, unit: "км", currentValue: 0 });
-    });
-
-    // Одиниця без числа — це підпис ні до чого: смужки прогресу не буде,
-    // а «км» у картці лише збиватиме з пантелику.
-    test("одиниця без числової мети не зберігається", async () => {
-      const r = await ai.executeTool("uid1", "add_goal", { title: "Ціль", unit: "км" }, ctx);
-      const g = (await mockCurrent.collection("users").doc("uid1").collection("goals").doc(r.output.id).get()).data();
-      expect(g).toMatchObject({ targetValue: null, unit: "", currentValue: 0 });
-    });
-
-    test("нуль і відʼємна мета — те саме, що її немає", async () => {
-      const zero = await ai.executeTool("uid1", "add_goal", { title: "А", targetValue: 0 }, ctx);
-      const minus = await ai.executeTool("uid1", "add_goal", { title: "Б", targetValue: -5 }, ctx);
-      const col = mockCurrent.collection("users").doc("uid1").collection("goals");
-      expect((await col.doc(zero.output.id).get()).data().targetValue).toBe(null);
-      expect((await col.doc(minus.output.id).get()).data().targetValue).toBe(null);
-    });
-
-    // «Пробіг ще три кілометри» — це додати три, а не поставити три.
-    test("goal_progress додає до пройденого, а не замінює його", async () => {
-      const add = await ai.executeTool("uid1", "add_goal",
-        { title: "Марафон", targetValue: 10, unit: "км" }, ctx);
-      await ai.executeTool("uid1", "goal_progress", { id: add.output.id, add: 6.4 }, ctx);
-      const r = await ai.executeTool("uid1", "goal_progress", { id: add.output.id, add: 2.1 }, ctx);
-      expect(r.output).toMatchObject({ ok: true, current: 8.5, target: 10, unit: "км", pct: 85 });
-      const g = (await mockCurrent.collection("users").doc("uid1").collection("goals").doc(add.output.id).get()).data();
-      expect(g.currentValue).toBe(8.5);
-    });
-
-    test("відʼємне add зменшує, але нижче нуля не опускає", async () => {
-      const add = await ai.executeTool("uid1", "add_goal", { title: "Марафон", targetValue: 10 }, ctx);
-      await ai.executeTool("uid1", "goal_progress", { id: add.output.id, add: 3 }, ctx);
-      const r = await ai.executeTool("uid1", "goal_progress", { id: add.output.id, add: -8 }, ctx);
-      expect(r.output.current).toBe(0);
-    });
-
-    // Смужка не буває довшою за саму себе, навіть коли мету перевиконано.
-    test("перевиконана мета лишається сотнею відсотків", async () => {
-      const add = await ai.executeTool("uid1", "add_goal", { title: "Марафон", targetValue: 10 }, ctx);
-      const r = await ai.executeTool("uid1", "goal_progress", { id: add.output.id, add: 50 }, ctx);
-      expect(r.output).toMatchObject({ current: 50, pct: 100 });
-    });
-
-    test("goal_progress не працює без числової мети й без числа", async () => {
-      const plain = await ai.executeTool("uid1", "add_goal", { title: "Вивчити польську" }, ctx);
-      expect((await ai.executeTool("uid1", "goal_progress", { id: plain.output.id, add: 3 }, ctx)).isError).toBe(true);
-
-      const num = await ai.executeTool("uid1", "add_goal", { title: "Марафон", targetValue: 10 }, ctx);
-      expect((await ai.executeTool("uid1", "goal_progress", { id: num.output.id, add: 0 }, ctx)).isError).toBe(true);
-      expect((await ai.executeTool("uid1", "goal_progress", { id: num.output.id, add: "трохи" }, ctx)).isError).toBe(true);
-      expect((await ai.executeTool("uid1", "goal_progress", { id: "вигаданий", add: 3 }, ctx)).isError).toBe(true);
-      const g = (await mockCurrent.collection("users").doc("uid1").collection("goals").doc(num.output.id).get()).data();
-      expect(g.currentValue).toBe(0);
-    });
-
-    test("goals_progress віддає числову мету разом із пройденим", async () => {
-      const add = await ai.executeTool("uid1", "add_goal",
-        { title: "Марафон", targetValue: 10, unit: "км" }, ctx);
-      await ai.executeTool("uid1", "goal_progress", { id: add.output.id, add: 6.4 }, ctx);
-      const r = await ai.executeTool("uid1", "goals_progress", {}, ctx);
-      expect(r.output.goals[0]).toMatchObject({ targetValue: 10, currentValue: 6.4, unit: "км" });
+      expect(g.targetValue).toBeUndefined();
+      expect(g.unit).toBeUndefined();
+      expect(g.currentValue).toBeUndefined();
     });
 
     // ---- Серія: рятунок і причини пропусків ----
@@ -966,29 +950,15 @@ describe("executeTool", () => {
         .toEqual([["10 км", true], ["21 км", false], ["30 км", false]]);
     });
 
-    // Пройдені кілометри — така сама історія, як чекіни: правка формулювання
-    // мети не має її обнуляти.
-    test("edit_goal зберігає пройдене й уміє змінити саму мету", async () => {
-      const add = await ai.executeTool("uid1", "add_goal",
-        { title: "Марафон", targetValue: 10, unit: "км" }, ctx);
-      await ai.executeTool("uid1", "goal_progress", { id: add.output.id, add: 6.4 }, ctx);
-
-      await ai.executeTool("uid1", "edit_goal", { id: add.output.id, title: "Півмарафон" }, ctx);
-      const col = mockCurrent.collection("users").doc("uid1").collection("goals");
-      expect((await col.doc(add.output.id).get()).data())
-        .toMatchObject({ title: "Півмарафон", targetValue: 10, unit: "км", currentValue: 6.4 });
-
-      await ai.executeTool("uid1", "edit_goal", { id: add.output.id, targetValue: 21, unit: "км" }, ctx);
-      expect((await col.doc(add.output.id).get()).data())
-        .toMatchObject({ targetValue: 21, currentValue: 6.4 });
-    });
-
-    test("edit_goal прибирає числову мету разом із одиницею", async () => {
-      const add = await ai.executeTool("uid1", "add_goal",
-        { title: "Марафон", targetValue: 10, unit: "км" }, ctx);
-      await ai.executeTool("uid1", "edit_goal", { id: add.output.id, targetValue: null }, ctx);
+    // Числа в старому документі правка не воскрешає й не чіпає: застосунок
+    // їх не читає, а стерти чуже поле мовчки — гірше, ніж лишити.
+    test("edit_goal числову мету не заводить, скільки б її не надсилали", async () => {
+      const add = await ai.executeTool("uid1", "add_goal", { title: "Марафон" }, ctx);
+      await ai.executeTool("uid1", "edit_goal",
+        { id: add.output.id, title: "Півмарафон", targetValue: 21, unit: "км" }, ctx);
       const g = (await mockCurrent.collection("users").doc("uid1").collection("goals").doc(add.output.id).get()).data();
-      expect(g).toMatchObject({ targetValue: null, unit: "" });
+      expect(g.title).toBe("Півмарафон");
+      expect(g.targetValue).toBeUndefined();
     });
 
     test("edit_goal міняє статус, не чіпаючи решти", async () => {
@@ -1148,6 +1118,7 @@ describe("категорії за замовчуванням", () => {
       currency: "UAH",
       categoriesExpense: defaults.defaultCategoryList("expense", "uk"),
       categoriesIncome: defaults.defaultCategoryList("income", "uk"),
+      categoriesGoals: defaults.defaultGoalCategoryList("uk"),
     };
     const r = await ai.executeTool("uid1", "add_transaction",
       { type: "expense", amount: 80, category: "food" }, ctx);
@@ -1159,6 +1130,7 @@ describe("категорії за замовчуванням", () => {
       today: "2026-08-20", lang: "uk", currency: "UAH",
       categoriesExpense: defaults.defaultCategoryList("expense", "uk"),
       categoriesIncome: defaults.defaultCategoryList("income", "uk"),
+      categoriesGoals: defaults.defaultGoalCategoryList("uk"),
     });
     expect(prompt).toContain("food (Їжа)");
     expect(prompt).toContain("salary (Зарплата)");
@@ -1167,11 +1139,116 @@ describe("категорії за замовчуванням", () => {
   // Модель раніше на «зроби діаграму» вибачалась і пропонувала зводити
   // цифри в Excel/Google Sheets — марна порада в телефоні, коли в
   // застосунку вже є готова кругова діаграма й графік по місяцях.
+  // ---- Категорії цілей ----
+  // Їх людина редагує сама (goals/app.js -> профіль categoriesGoals). Помічник
+  // мусить брати той самий список: інакше він у чаті пропонував би категорії,
+  // яких на екрані вже немає, а власну «Хобі» щоразу зводив би до «Іншого».
+  describe("категорії цілей", () => {
+    test("порожній профіль дає той самий список, що й форма цілі", () => {
+      const ids = defaults.defaultGoalCategoryList("uk").map((c) => c.id);
+      // Ids ті самі, що були захардкоджені в goals/app.js: інакше кожна вже
+      // заведена ціль осиротіла б на своєму 'health'.
+      expect(ids).toEqual(["health", "finance", "learning", "career",
+        "relationships", "travel", "creativity", "other"]);
+    });
+
+    test("стандартний список іде за мовою, а кольори за порядком", () => {
+      expect(defaults.defaultGoalCategoryList("en")[0]).toEqual({ id: "health", label: "Health", colorIndex: 0 });
+      expect(defaults.defaultGoalCategoryList("pl")[7]).toEqual({ id: "other", label: "Inne", colorIndex: 7 });
+      // Невідома мова не має валити список — просто лишається українська.
+      expect(defaults.defaultGoalCategoryList("de")[0].label).toBe("Здоров’я");
+    });
+
+    test("список цілей потрапляє в системний промпт назвами, а не id", () => {
+      const prompt = ai.buildSystemPrompt({
+        today: "2026-08-20", lang: "uk", currency: "UAH",
+        categoriesExpense: defaults.defaultCategoryList("expense", "uk"),
+        categoriesIncome: defaults.defaultCategoryList("income", "uk"),
+        categoriesGoals: [{ id: "gcat_x1", label: "Хобі" }, { id: "other", label: "Інше" }],
+      });
+      expect(prompt).toContain("Категорії цілей: gcat_x1 (Хобі), other (Інше).");
+    });
+
+    test("власна категорія доживає до документа, а не зводиться до «Іншого»", async () => {
+      const own = {
+        today: "2026-08-20", currency: "UAH",
+        categoriesExpense: [{ id: "other", label: "Інше" }],
+        categoriesIncome: [{ id: "other", label: "Інше" }],
+        categoriesGoals: [{ id: "gcat_x1", label: "Хобі" }, { id: "other", label: "Інше" }],
+      };
+      const add = await ai.executeTool("uid1", "add_goal", { title: "Зібрати модель", category: "gcat_x1" }, own);
+      const g = (await mockCurrent.collection("users").doc("uid1").collection("goals").doc(add.output.id).get()).data();
+      expect(g.category).toBe("gcat_x1");
+    });
+
+    test("категорія поза списком стає «Іншим», а не потрапляє в документ як є", async () => {
+      const own = {
+        today: "2026-08-20", currency: "UAH",
+        categoriesExpense: [{ id: "other", label: "Інше" }],
+        categoriesIncome: [{ id: "other", label: "Інше" }],
+        categoriesGoals: [{ id: "gcat_x1", label: "Хобі" }, { id: "other", label: "Інше" }],
+      };
+      const add = await ai.executeTool("uid1", "add_goal", { title: "Ціль", category: "career" }, own);
+      const g = (await mockCurrent.collection("users").doc("uid1").collection("goals").doc(add.output.id).get()).data();
+      expect(g.category).toBe("other");
+    });
+
+    test("без «Іншого» в списку запасною стає перша категорія, а не вигаданий id", async () => {
+      const own = {
+        today: "2026-08-20", currency: "UAH",
+        categoriesExpense: [{ id: "other", label: "Інше" }],
+        categoriesIncome: [{ id: "other", label: "Інше" }],
+        categoriesGoals: [{ id: "gcat_work", label: "Робота" }, { id: "gcat_body", label: "Тіло" }],
+      };
+      const add = await ai.executeTool("uid1", "add_goal", { title: "Ціль", category: "вигадане" }, own);
+      const g = (await mockCurrent.collection("users").doc("uid1").collection("goals").doc(add.output.id).get()).data();
+      expect(g.category).toBe("gcat_work");
+    });
+
+    // Раніше список був однаковий для всіх, і категорія переживала будь-яку
+    // правку сама собою. Відколи він у кожного свій, ціль може носити
+    // категорію, видалену на іншому пристрої, — і зміна статусу не має
+    // ставати мовчазним переїздом цієї цілі в «Інше».
+    test("правка, яка не торкається категорії, лишає її як була", async () => {
+      const own = {
+        today: "2026-08-20", currency: "UAH",
+        categoriesExpense: [{ id: "other", label: "Інше" }],
+        categoriesIncome: [{ id: "other", label: "Інше" }],
+        categoriesGoals: [{ id: "gcat_x1", label: "Хобі" }, { id: "other", label: "Інше" }],
+      };
+      const add = await ai.executeTool("uid1", "add_goal", { title: "Ціль", category: "gcat_x1" }, own);
+      // Категорію тим часом видалили на іншому пристрої.
+      const narrowed = { ...own, categoriesGoals: [{ id: "other", label: "Інше" }] };
+      await ai.executeTool("uid1", "edit_goal", { id: add.output.id, status: "paused" }, narrowed);
+      const g = (await mockCurrent.collection("users").doc("uid1").collection("goals").doc(add.output.id).get()).data();
+      expect(g.status).toBe("paused");
+      expect(g.category).toBe("gcat_x1");
+    });
+
+    test("а правка, яка торкається, — міняє й звіряє зі списком", async () => {
+      const own = {
+        today: "2026-08-20", currency: "UAH",
+        categoriesExpense: [{ id: "other", label: "Інше" }],
+        categoriesIncome: [{ id: "other", label: "Інше" }],
+        categoriesGoals: [{ id: "gcat_x1", label: "Хобі" }, { id: "other", label: "Інше" }],
+      };
+      const add = await ai.executeTool("uid1", "add_goal", { title: "Ціль", category: "other" }, own);
+      await ai.executeTool("uid1", "edit_goal", { id: add.output.id, category: "gcat_x1" }, own);
+      let g = (await mockCurrent.collection("users").doc("uid1").collection("goals").doc(add.output.id).get()).data();
+      expect(g.category).toBe("gcat_x1");
+
+      await ai.executeTool("uid1", "edit_goal", { id: add.output.id, category: "вигадане" }, own);
+      g = (await mockCurrent.collection("users").doc("uid1").collection("goals").doc(add.output.id).get()).data();
+      expect(g.category).toBe("other");
+    });
+  });
+
   test("на прохання про графік промпт веде до вкладки «Статистика», а не Excel", () => {
     const prompt = ai.buildSystemPrompt({
       today: "2026-08-20", lang: "uk", currency: "UAH",
       categoriesExpense: defaults.defaultCategoryList("expense", "uk"),
       categoriesIncome: defaults.defaultCategoryList("income", "uk"),
+      categoriesGoals: defaults.defaultGoalCategoryList("uk"),
     });
     expect(prompt).toContain("Статистика");
     expect(prompt).toMatch(/НЕ пропонуй.*Excel/);
@@ -1342,14 +1419,14 @@ describe("handleGoalBreakdown", () => {
     const fake = reply({ milestones: [{ title: "A" }, { title: "Б" }, { title: "В" }] });
     await ai.handleGoalBreakdown({
       title: "Пробігти марафон", category: "health", why: "хочу дожити до 90",
-      targetDate: "2027-04-18", targetValue: 42.2, unit: "км",
+      // Дедлайн форма надсилає вже виведеним із місяця цілі.
+      targetDate: "2027-04-30",
     }, authedCtx, { anthropicClient: fake });
     const args = fake.messages.create.mock.calls[0][0];
     const prompt = args.messages[0].content;
     expect(prompt).toContain("Пробігти марафон");
     expect(prompt).toContain("хочу дожити до 90");
-    expect(prompt).toContain("2027-04-18");
-    expect(prompt).toContain("42.2 км");
+    expect(prompt).toContain("2027-04-30");
     expect(args.system).toContain("польською");
   });
 

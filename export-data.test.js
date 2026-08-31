@@ -8,7 +8,7 @@ const L = {
   colDate: 'Дата', colType: 'Тип', colCategory: 'Категорія', colAmount: 'Сума', colCurrency: 'Валюта',
   colNote: 'Нотатка', colGoal: 'Ціль', colName: 'Назва', colCreated: 'Створено', colUpdated: 'Оновлено',
   colTitle: 'Заголовок', colContent: 'Зміст', colStatus: 'Статус', colDeadline: 'Дедлайн',
-  colTarget: 'Мета', colCurrent: 'Пройдено', colUnit: 'Одиниця', colMilestones: 'Віхи',
+  colMilestones: 'Віхи',
   colCheckins: 'Чекінів', colWhy: 'Навіщо', colDone: 'Виконано', colTime: 'Час', colPriority: 'Пріоритет',
   colTags: 'Теги', colEstimate: 'Хвилин', colRepeat: 'Повтор', colSubtasks: 'Підзадачі',
   colCompleted: 'Завершено', colExercise: 'Вправа', colMuscle: 'Група', colSets: 'Підходів',
@@ -96,16 +96,17 @@ describe('цілі', () => {
     expect(row[L.colMilestones]).toBe('10 км ✓; 21 км');
     expect(row[L.colCheckins]).toBe(2);
     expect(row[L.colStatus]).toBe('Активна');
-    expect(row[L.colTarget]).toBe(42.2);
-    expect(row[L.colCurrent]).toBe(10);
   });
 
-  // У цілі без числової мети порожня клітинка сама показує, що вона
-  // міряється віхами, — нуль читався б як «нічого не пройдено».
-  test('ціль без числової мети лишає стовпці порожніми', () => {
-    const row = E.buildSheets(['goals'], { goals: [{ title: 'Вивчити польську', milestones: [], checkins: [] }] }, L)[0].rows[0];
-    expect(row[L.colTarget]).toBe('');
-    expect(row[L.colCurrent]).toBe('');
+  // Дедлайн ціль отримує з місяця, а не окремим полем: у місячної це кінець
+  // її місяця, у річної його немає — і тоді клітинка порожня.
+  test('дедлайн їде у файл як є, а річна ціль лишає клітинку порожньою', () => {
+    const rows = E.buildSheets(['goals'], { goals: [
+      { title: 'Прочитати дві книжки', horizon: 'month', month: '2026-08', targetDate: '2026-08-31', milestones: [], checkins: [] },
+      { title: 'Вивчити польську', horizon: 'year', targetDate: null, milestones: [], checkins: [] },
+    ] }, L)[0].rows;
+    expect(rows[0][L.colDeadline]).toBe('2026-08-31');
+    expect(rows[1][L.colDeadline]).toBe('');
   });
 
   test('щоденник — окремим аркушем, із назвою цілі', () => {

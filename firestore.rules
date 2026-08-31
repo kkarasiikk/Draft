@@ -2,7 +2,8 @@ rules_version = '2';
 
 // Модель даних (за app.js):
 //   users/{uid}                       -- профіль: lang, currency, theme,
-//                                         categoriesIncome, categoriesExpense, ...
+//                                         categoriesIncome, categoriesExpense,
+//                                         categoriesGoals, ...
 //   users/{uid}/transactions/{id}     -- {type, amount, category, note, date}
 //   users/{uid}/savings/{id}          -- {type, amount, currency, note, date, goalId}
 //   users/{uid}/savingsGoals/{id}     -- {name, createdAt}
@@ -61,6 +62,9 @@ service cloud.firestore {
                (!('theme' in d) || d.theme is string) &&
                (!('categoriesIncome' in d) || d.categoriesIncome is list) &&
                (!('categoriesExpense' in d) || d.categoriesExpense is list) &&
+               // Категорії цілей: [{id, label, colorIndex}]. Форму елементів,
+               // як і в categoriesIncome/Expense поруч, гарантує клієнт.
+               (!('categoriesGoals' in d) || d.categoriesGoals is list) &&
                // Яку модель питати в AI-помічнику: haiku | sonnet | opus.
                (!('aiModel' in d) || d.aiModel is string) &&
                // План витрат на місяць: число або null (плану немає). Від нього
@@ -309,12 +313,26 @@ service cloud.firestore {
         // addJournalEntry).
         function isValidLifeGoal(d) {
           return isNonEmptyString(d.title, 200) &&
-                 d.category in ['health', 'finance', 'learning', 'career',
-                   'relationships', 'travel', 'creativity', 'other'] &&
+                 // Категорії цілей редагуються (профіль, categoriesGoals), тож
+                 // перелічити їх тут більше не можна: власна «Хобі» отримує
+                 // згенерований id, і жорсткий список відхиляв би кожну ціль
+                 // у ній. Лишається те, що правило й може гарантувати, — що це
+                 // непорожній рядок розумної довжини; що id справді є у списку,
+                 // стежить клієнт (fallbackCategoryId у goals/app.js) і
+                 // помічник (sanitizeGoalInput в ai.js).
+                 isNonEmptyString(d.category, 64) &&
                  d.why is string && d.why.size() <= 1000 &&
+                 // Дедлайн окремим полем не задається: застосунок виводить
+                 // його з місяця цілі (кінець місяця), а річна лишається без
+                 // нього. Форма поля та сама, тож правило не змінилось.
                  (d.targetDate == null || (d.targetDate is string && d.targetDate.size() == 10)) &&
-                 // Числова мета: «10» + «км». Її може не бути — тоді прогрес
-                 // рахується за віхами, як і раніше.
+                 // СПАДЩИНА. Числова мета («10» + «км») і пройдене по ній.
+                 // Застосунок їх більше не питає, не показує й не пише — шлях
+                 // міряється віхами, а число, якщо воно потрібне, стоїть у
+                 // самій назві цілі. Але правило бачить документ ЦІЛКОМ, а не
+                 // лише те, що прилетіло в update: цілі, заведені раніше, ці
+                 // поля ще носять, і прибрати ключі означало б, що будь-яка їх
+                 // правка відхиляється.
                  (!('targetValue' in d) || d.targetValue == null ||
                    (d.targetValue is number && d.targetValue > 0 && d.targetValue < 1000000000)) &&
                  (!('currentValue' in d) || d.currentValue is number) &&
@@ -330,14 +348,10 @@ service cloud.firestore {
                  // документи не мають — тому лише перевіряємо форму тих, що є.
                  (!('rescues' in d) || (d.rescues is list && d.rescues.size() <= 50)) &&
                  (!('blockers' in d) || (d.blockers is list && d.blockers.size() <= 200)) &&
-                 // Журнал прогресу: [{date, delta}]. currentValue лишається
-                 // сумою — його показує смужка, — але саме по собі одне число
-                 // не памʼятає, КОЛИ прогрес був, а без цього не порахувати
-                 // ні темп, ні рух за тиждень. Форму елементів, як і всюди
-                 // поруч, гарантує клієнт (addGoalProgress у goals/app.js).
+                 // СПАДЩИНА. Журнал числового прогресу ([{date, delta}]) і
+                 // звʼязок зі скарбничкою бюджету, звідки це число бралось.
+                 // Обидва жили разом із числовою метою й пішли разом із нею.
                  (!('progressLog' in d) || (d.progressLog is list && d.progressLog.size() <= 400)) &&
-                 // Коли ціль звʼязана зі скарбничкою бюджету, число береться
-                 // з реальних операцій, а не вбивається руками.
                  (!('savingsGoalId' in d) || d.savingsGoalId == null ||
                    (d.savingsGoalId is string && d.savingsGoalId.size() <= 64)) &&
                  // Дата останнього огляду — щоб черга тижневого огляду знала,
@@ -365,18 +379,24 @@ service cloud.firestore {
                  // перерви. Історію не стирає — міняє лише точку відліку.
                  (!('restartedAt' in d) || d.restartedAt == null ||
                    (d.restartedAt is string && d.restartedAt.size() == 10)) &&
-                 // Намір «якщо ситуація — то дія»: {cue, action}. Довжину
-                 // рядків, як і форму решти вкладених обʼєктів поруч,
-                 // гарантує клієнт (readPlanFields у goals/app.js).
+                 // СПАДЩИНА. Намір «якщо ситуація — то дія»: {cue, action}.
+                 // Застосунок його більше не питає, не показує й не пише, але
+                 // документи, заведені раніше, поле ще носять — а правило
+                 // бачить документ ЦІЛКОМ, не лише те, що прилетіло в update.
+                 // Прибрати ключ звідси означало б, що будь-яка правка старої
+                 // цілі (навіть зміна статусу) відхиляється.
                  (!('plan' in d) || d.plan == null || d.plan is map) &&
-                 // Куди й коли їхав дедлайн. Форму елементів ({from, to, at}),
-                 // як і в решті списків поруч, гарантує клієнт.
+                 // СПАДЩИНА. Куди й коли їхав дедлайн. Зсунути його руками
+                 // більше нема як — він іде за місяцем цілі, — тож нових
+                 // записів не буває; старі документи поле ще носять.
                  (!('deadlineHistory' in d) ||
                    (d.deadlineHistory is list && d.deadlineHistory.size() <= 50)) &&
                  d.createdAt is timestamp && d.updatedAt is timestamp &&
                  d.keys().hasOnly(['title', 'category', 'why', 'targetDate', 'status',
                    'targetValue', 'currentValue', 'unit', 'rescues', 'blockers',
-                   'progressLog', 'savingsGoalId', 'reviewedAt', 'horizon', 'month', 'parentGoalId', 'completedAt', 'deadlineHistory', 'plan', 'restartedAt',
+                   'progressLog', 'savingsGoalId', 'reviewedAt', 'horizon', 'month', 'parentGoalId', 'completedAt', 'deadlineHistory', 'restartedAt',
+                   // 'plan' — спадщина, див. коментар вище.
+                   'plan',
                    'milestones', 'checkins', 'journal', 'createdAt', 'updatedAt']);
         }
         allow read, delete: if isOwner(uid);

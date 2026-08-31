@@ -55,14 +55,19 @@
     --card-hover-shadow: 0 20px 80px rgba(20,25,40,.10), 0 0 60px rgba(20,25,40,.05);
     --glass-btn-bg: rgba(20,25,40,.05); --glass-btn-bg-hover: rgba(20,25,40,.09); --glass-btn-border: rgba(20,25,40,.16);
     --gold:#B8912F; --gold-light:rgba(184,145,47,.14);
-    --cat-health:#3F9C8C; --cat-health-light:rgba(63,156,140,.14);
-    --cat-finance:#B98B2E; --cat-finance-light:rgba(185,139,46,.14);
-    --cat-learning:#6A5FC1; --cat-learning-light:rgba(106,95,193,.14);
-    --cat-career:#48607E; --cat-career-light:rgba(72,96,126,.14);
-    --cat-relationships:#C3527A; --cat-relationships-light:rgba(195,82,122,.14);
-    --cat-travel:#2E93A6; --cat-travel-light:rgba(46,147,166,.14);
-    --cat-creativity:#9C4FB0; --cat-creativity-light:rgba(156,79,176,.14);
-    --cat-other:#6E6E78; --cat-other-light:rgba(110,110,120,.14);
+    /* Палітра категорій — вісім НУМЕРОВАНИХ слотів, а не імена категорій.
+       Відколи категорії редагуються, «Здоров'я» може зникнути, а на її місце
+       стати «Хобі»: змінна --cat-health під нею означала б рівно нічого.
+       Значення й порядок ті самі, що були в іменованих слотах, тож стандартні
+       категорії лишились тих самих кольорів. */
+    --cat-c0:#3F9C8C; --cat-c0-light:rgba(63,156,140,.14);
+    --cat-c1:#B98B2E; --cat-c1-light:rgba(185,139,46,.14);
+    --cat-c2:#6A5FC1; --cat-c2-light:rgba(106,95,193,.14);
+    --cat-c3:#48607E; --cat-c3-light:rgba(72,96,126,.14);
+    --cat-c4:#C3527A; --cat-c4-light:rgba(195,82,122,.14);
+    --cat-c5:#2E93A6; --cat-c5-light:rgba(46,147,166,.14);
+    --cat-c6:#9C4FB0; --cat-c6-light:rgba(156,79,176,.14);
+    --cat-c7:#6E6E78; --cat-c7-light:rgba(110,110,120,.14);
     color-scheme: light;
   }
   [data-theme="dark"]{
@@ -79,14 +84,14 @@
     --card-hover-shadow: 0 20px 80px rgba(255,255,255,.08), 0 0 60px rgba(255,255,255,.04);
     --glass-btn-bg: rgba(255,255,255,.08); --glass-btn-bg-hover: rgba(255,255,255,.16); --glass-btn-border: rgba(255,255,255,.18);
     --gold:#E8C875; --gold-light:rgba(232,200,117,.16);
-    --cat-health:#6FCBBC; --cat-health-light:rgba(111,203,188,.16);
-    --cat-finance:#E3B95C; --cat-finance-light:rgba(227,185,92,.16);
-    --cat-learning:#A79BEF; --cat-learning-light:rgba(167,155,239,.16);
-    --cat-career:#8FB0D6; --cat-career-light:rgba(143,176,214,.16);
-    --cat-relationships:#EF9AC0; --cat-relationships-light:rgba(239,154,192,.16);
-    --cat-travel:#6FD6EA; --cat-travel-light:rgba(111,214,234,.16);
-    --cat-creativity:#D89AE8; --cat-creativity-light:rgba(216,154,232,.16);
-    --cat-other:#A9A7B4; --cat-other-light:rgba(169,167,180,.16);
+    --cat-c0:#6FCBBC; --cat-c0-light:rgba(111,203,188,.16);
+    --cat-c1:#E3B95C; --cat-c1-light:rgba(227,185,92,.16);
+    --cat-c2:#A79BEF; --cat-c2-light:rgba(167,155,239,.16);
+    --cat-c3:#8FB0D6; --cat-c3-light:rgba(143,176,214,.16);
+    --cat-c4:#EF9AC0; --cat-c4-light:rgba(239,154,192,.16);
+    --cat-c5:#6FD6EA; --cat-c5-light:rgba(111,214,234,.16);
+    --cat-c6:#D89AE8; --cat-c6-light:rgba(216,154,232,.16);
+    --cat-c7:#A9A7B4; --cat-c7-light:rgba(169,167,180,.16);
     color-scheme: dark;
   }
   body{transition:color .2s ease;}
@@ -209,24 +214,6 @@
   .lapse-btn.primary{background:var(--gold);border-color:transparent;color:#fff;}
   .review-lapse{margin-top:8px;font-size:12px;font-weight:600;color:var(--gold);}
 
-  /* Число просто у вечірній картці: «+3 км» не має вимагати заходу в розділ. */
-  .evening-amount{display:flex;gap:6px;margin-top:8px;}
-  .evening-amount input{flex:1;min-width:0;padding:8px 12px;border-radius:10px;
-    border:1px solid var(--border);background:var(--surface-flat);color:var(--ink);
-    font-family:'Inter',sans-serif;font-size:13.5px;}
-  .evening-amount .evening-btn{flex:0 0 auto;min-width:46px;font-size:16px;font-weight:700;}
-
-  /* Намір «якщо ситуація — то дія». Дві половини стоять поруч саме тому,
-     що поодинці жодна з них наміром не є. */
-  .plan-fields{display:flex;flex-direction:column;gap:6px;}
-  .plan{background:var(--accent-light);border-radius:14px;padding:12px 14px;margin-bottom:14px;}
-  .plan-label{font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--accent);
-    font-weight:700;margin-bottom:5px;}
-  .plan-text{font-size:14px;color:var(--ink);line-height:1.45;}
-  .plan-text b{font-weight:700;}
-  .evening-plan{margin:6px 0 8px;font-size:12.5px;color:var(--accent);line-height:1.45;}
-  .review-plan{margin-top:8px;font-size:12.5px;color:var(--accent);line-height:1.45;}
-
   /* Ціль, яку нема чим міряти. Тон спокійний: це пропущений крок
      постановки, а не провина. */
   .measure-banner{background:var(--gold-light);border-radius:14px;padding:13px 14px;margin-bottom:14px;}
@@ -242,7 +229,6 @@
     background:var(--surface-flat);color:var(--ink);font-family:'Inter',sans-serif;font-size:13.5px;}
 
   /* Скільки разів дедлайн уже їхав. Тон рівний: це факт, а не докір. */
-  .drift{margin:-6px 0 14px;font-size:11.5px;color:var(--ink-muted);line-height:1.45;}
 
   /* Графік прогресу: темп називає підсумок, а лінія показує форму шляху. */
   .chart{background:var(--surface);border:1px solid var(--border);border-radius:16px;
@@ -280,26 +266,66 @@
   .goal-card-days{color:var(--ink-muted);}
 
   .category-chip{font-size:10.5px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap;display:inline-block;}
-  .category-chip.health{background:var(--cat-health-light);color:var(--cat-health);}
-  .category-chip.finance{background:var(--cat-finance-light);color:var(--cat-finance);}
-  .category-chip.learning{background:var(--cat-learning-light);color:var(--cat-learning);}
-  .category-chip.career{background:var(--cat-career-light);color:var(--cat-career);}
-  .category-chip.relationships{background:var(--cat-relationships-light);color:var(--cat-relationships);}
-  .category-chip.travel{background:var(--cat-travel-light);color:var(--cat-travel);}
-  .category-chip.creativity{background:var(--cat-creativity-light);color:var(--cat-creativity);}
-  .category-chip.other{background:var(--cat-other-light);color:var(--cat-other);}
+  .category-chip.c0{background:var(--cat-c0-light);color:var(--cat-c0);}
+  .category-chip.c1{background:var(--cat-c1-light);color:var(--cat-c1);}
+  .category-chip.c2{background:var(--cat-c2-light);color:var(--cat-c2);}
+  .category-chip.c3{background:var(--cat-c3-light);color:var(--cat-c3);}
+  .category-chip.c4{background:var(--cat-c4-light);color:var(--cat-c4);}
+  .category-chip.c5{background:var(--cat-c5-light);color:var(--cat-c5);}
+  .category-chip.c6{background:var(--cat-c6-light);color:var(--cat-c6);}
+  .category-chip.c7{background:var(--cat-c7-light);color:var(--cat-c7);}
 
   .category-picker{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;margin-bottom:16px;}
   .category-choice{padding:6px 12px;border-radius:20px;font-size:12.5px;cursor:pointer;font-family:'Inter',sans-serif;font-weight:600;
     border:1px solid var(--border);background:transparent;color:var(--ink-muted);white-space:nowrap;transition:background .15s,color .15s,border-color .15s;}
-  .category-choice.selected.health{background:var(--cat-health-light);color:var(--cat-health);border-color:transparent;}
-  .category-choice.selected.finance{background:var(--cat-finance-light);color:var(--cat-finance);border-color:transparent;}
-  .category-choice.selected.learning{background:var(--cat-learning-light);color:var(--cat-learning);border-color:transparent;}
-  .category-choice.selected.career{background:var(--cat-career-light);color:var(--cat-career);border-color:transparent;}
-  .category-choice.selected.relationships{background:var(--cat-relationships-light);color:var(--cat-relationships);border-color:transparent;}
-  .category-choice.selected.travel{background:var(--cat-travel-light);color:var(--cat-travel);border-color:transparent;}
-  .category-choice.selected.creativity{background:var(--cat-creativity-light);color:var(--cat-creativity);border-color:transparent;}
-  .category-choice.selected.other{background:var(--cat-other-light);color:var(--cat-other);border-color:transparent;}
+  .category-choice.selected.c0{background:var(--cat-c0-light);color:var(--cat-c0);border-color:transparent;}
+  .category-choice.selected.c1{background:var(--cat-c1-light);color:var(--cat-c1);border-color:transparent;}
+  .category-choice.selected.c2{background:var(--cat-c2-light);color:var(--cat-c2);border-color:transparent;}
+  .category-choice.selected.c3{background:var(--cat-c3-light);color:var(--cat-c3);border-color:transparent;}
+  .category-choice.selected.c4{background:var(--cat-c4-light);color:var(--cat-c4);border-color:transparent;}
+  .category-choice.selected.c5{background:var(--cat-c5-light);color:var(--cat-c5);border-color:transparent;}
+  .category-choice.selected.c6{background:var(--cat-c6-light);color:var(--cat-c6);border-color:transparent;}
+  .category-choice.selected.c7{background:var(--cat-c7-light);color:var(--cat-c7);border-color:transparent;}
+
+  /* «Змінити» стоїть останнім чипом у тому ж рядку, що й самі категорії:
+     редагують їх звідти, де вони видно, і окремий екран налаштувань заради
+     цього розділу заводити не довелось. Пунктир відрізняє дію від вибору —
+     інакше чип читався б як ще одна категорія. */
+  .category-edit-chip{padding:6px 11px;border-radius:20px;font-size:12.5px;cursor:pointer;font-family:'Inter',sans-serif;
+    font-weight:600;border:1px dashed var(--border);background:transparent;color:var(--ink-muted);white-space:nowrap;
+    display:inline-flex;align-items:center;gap:5px;transition:color .15s,border-color .15s;}
+  .category-edit-chip:hover{color:var(--ink-soft);border-color:var(--card-border-hover);}
+
+  .cat-manage-list{margin-top:8px;}
+  .cat-manage-row{display:flex;align-items:center;gap:9px;padding:7px 2px;}
+  .cat-manage-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+  .cat-manage-dot.c0{background:var(--cat-c0);}
+  .cat-manage-dot.c1{background:var(--cat-c1);}
+  .cat-manage-dot.c2{background:var(--cat-c2);}
+  .cat-manage-dot.c3{background:var(--cat-c3);}
+  .cat-manage-dot.c4{background:var(--cat-c4);}
+  .cat-manage-dot.c5{background:var(--cat-c5);}
+  .cat-manage-dot.c6{background:var(--cat-c6);}
+  .cat-manage-dot.c7{background:var(--cat-c7);}
+  /* Селектор навмисно з `input[type=text]`, а не самим класом: глобальне
+     правило полів форми має саме таку специфічність, і клас сам по собі їй
+     програє — рядки виходили б у півтора рази вищими за задумані, з полями
+     на всю ширину й відступами під поле форми. */
+  input[type=text].cat-manage-input{flex:1;width:auto;font-size:13.5px;border:1px solid transparent;
+    border-radius:7px;padding:6px 8px;margin:0;background:transparent;}
+  input[type=text].cat-manage-input:hover{background:var(--bg);}
+  input[type=text].cat-manage-input:focus{border-color:var(--accent);background:var(--bg);}
+  .cat-manage-del{background:none;border:none;cursor:pointer;color:var(--ink-muted);padding:5px;display:flex;flex-shrink:0;}
+  .cat-manage-del:hover{color:var(--expense);}
+  .cat-add-row{display:flex;gap:8px;align-items:center;margin-top:10px;}
+  .cat-add-row input[type=text]{flex:1;margin:0;}
+  .cat-add-row button{flex-shrink:0;width:38px;height:38px;border-radius:9px;border:1px solid var(--border);
+    background:transparent;color:var(--ink-soft);cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .cat-add-row button:hover{border-color:var(--accent);color:var(--accent);}
+  /* Вікно категорій виїжджає ПОВЕРХ форми цілі — тим самим шаром, що й діалог
+     «зберегти зміни» (z-index 60): форма лишається видимою під ним, і видно,
+     у що саме повернешся. */
+  .cat-manage-overlay{z-index:60;}
   /* Прості вибори з двох-трьох варіантів (горизонт, скарбничка) — та сама
      форма чипа, але без кольорів сфер життя: тут вони нічого не означали б. */
   .choice-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;margin-bottom:6px;}
@@ -456,8 +482,6 @@
     border-radius:12px;cursor:pointer;}
   .review-btn.primary{background:var(--accent);color:#fff;border-color:transparent;}
   .review-btn:active{transform:scale(.97);}
-  .review-shift-row{display:flex;gap:7px;margin-top:9px;}
-  .review-shift-row input{flex:1;}
   .review-empty{text-align:center;color:var(--ink-muted);font-size:13.5px;padding:30px 0;}
 
   /* Віхи у формі: ручка, поля, дата. Ручка ліворуч, а не праворуч поруч із
@@ -583,9 +607,20 @@
   .modal-title{font-family:'Inter',sans-serif;font-size:18px;font-weight:700;}
   .close-btn{background:none;border:none;cursor:pointer;color:var(--ink-muted);}
   label.field-label{font-size:12px;color:var(--ink-muted);font-weight:500;display:block;margin-top:2px;}
-  .title-input{width:100%;font-family:'Inter',sans-serif;font-size:20px;font-weight:700;border:none;
-    border-bottom:2px solid var(--border);padding:8px 0;margin-bottom:16px;outline:none;background:transparent;color:var(--ink);}
-  .title-input:focus{border-color:var(--accent);}
+  /* Поля, висоту яких веде JS (autoGrow у app.js): ручка зміни розміру тут ні
+     до чого — поле й так рівно під текст, — а смуга гортання означала б, що
+     частину написаного знову не видно. Саме заради цього все й робилось. */
+  .grow-field{resize:none;overflow:hidden;}
+
+  /* Назва цілі. Рамку, поля й тло їй дає спільне правило полів форми нижче —
+     тут лишається тільки те, чим назва від них відрізняється.
+     Раніше тут лежав повний набір (20px, без рамки, лише підкреслення знизу),
+     але жодне з тих правил не діяло: `input[type=text]` нижче має вищу
+     специфічність за клас і перебивав усе, крім насиченості шрифту. Поле й так
+     мало вигляд звичайного — тепер це просто написано чесно.
+     min-height збиває стелю 60px від правила textarea нижче: порожня назва має
+     бути в один рядок, а не в три. */
+  .title-input{font-weight:700;line-height:1.35;min-height:0;}
   input[type=text], textarea{width:100%;font-family:'Inter',sans-serif;font-size:15.5px;
     border:1px solid var(--border);border-radius:8px;padding:9px 12px;margin-top:6px;margin-bottom:16px;outline:none;color:var(--ink);background:var(--bg);}
   input[type=text]:focus, textarea:focus{border-color:var(--accent);}
@@ -603,24 +638,7 @@
   .milestone-remove-btn{flex-shrink:0;width:34px;height:34px;border-radius:8px;border:1px solid var(--border);
     background:transparent;color:var(--ink-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;}
   .milestone-remove-btn:hover{border-color:var(--expense);color:var(--expense);}
-  .target-row{display:flex;gap:8px;}
-  .target-row input{margin:0;}
-  .target-row input[type=number]{flex:2;min-width:0;}
-  .target-row input[type=text]{flex:1;min-width:0;}
   .field-hint{font-size:12px;color:var(--ink-muted);margin:6px 0 14px;line-height:1.4;}
-  /* Смужка числового прогресу на екрані цілі: та сама мова, що й у міні-смужці
-     на картці, але більша й з підписом. */
-  .value-progress{margin:4px 0 14px;}
-  .value-progress-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:8px;}
-  .value-progress-now{font-family:'Inter',sans-serif;font-size:22px;font-weight:800;color:var(--ink);letter-spacing:-0.02em;}
-  .value-progress-pct{font-size:14px;font-weight:700;color:var(--accent);}
-  .value-progress-bar{height:10px;border-radius:99px;background:var(--control-bg);overflow:hidden;}
-  .value-progress-fill{height:100%;border-radius:99px;background:var(--accent);transition:width .3s ease;}
-  .value-add-row{display:flex;gap:8px;margin-top:10px;}
-  .value-add-row input{flex:1;min-width:0;margin:0;}
-  .value-add-btn{flex-shrink:0;border:none;border-radius:12px;background:var(--accent);color:#fff;cursor:pointer;
-    font-family:'Inter',sans-serif;font-size:14px;font-weight:700;padding:0 16px;}
-  .value-add-btn:disabled{opacity:.5;cursor:default;}
   .add-milestone-btn{width:100%;border:1px dashed var(--border);background:transparent;color:var(--accent);
     font-family:'Inter',sans-serif;font-size:14px;font-weight:600;padding:10px 0;border-radius:8px;cursor:pointer;margin-bottom:16px;}
   .add-milestone-btn:hover{border-color:var(--accent);}
@@ -634,45 +652,6 @@
   .breakdown-btn svg{opacity:.7;}
   .breakdown-note{font-size:12.5px;color:var(--ink-muted);line-height:1.45;margin-bottom:14px;}
   .breakdown-note:empty{display:none;}
-
-  /* ---- Кастомний datepicker (той самий компонент, що й у tasks/) ---- */
-  .dp-field{position:relative;margin-top:6px;margin-bottom:16px;}
-  input[data-dp-native]{position:absolute;opacity:0;pointer-events:none;width:1px;height:1px;}
-  .dp-trigger{width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;
-    font-family:'Inter',sans-serif;font-size:15.5px;text-align:left;
-    border:1px solid var(--border);border-radius:8px;padding:9px 12px;background:var(--bg);color:var(--ink);
-    cursor:pointer;-webkit-tap-highlight-color:transparent;}
-  .dp-trigger:hover, .dp-trigger:focus-visible{border-color:var(--accent);}
-  .dp-field.open .dp-trigger{border-color:var(--accent);}
-  .dp-trigger-text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .dp-trigger-text.dp-placeholder{color:var(--ink-muted);}
-  .dp-trigger-icon{flex-shrink:0;color:var(--ink-muted);display:flex;}
-  .dp-panel{position:fixed;z-index:55;width:280px;max-width:calc(100vw - 32px);
-    background:var(--surface);    border:1px solid var(--border);border-radius:18px;box-shadow:var(--glass-shadow), 0 12px 34px rgba(20,20,30,.18);
-    padding:14px;opacity:0;transform:translateY(-6px) scale(.98);pointer-events:none;transition:opacity .14s ease,transform .14s ease;}
-  .dp-panel.show{opacity:1;transform:translateY(0) scale(1);pointer-events:auto;}
-  .dp-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
-  .dp-head-label{font-size:14px;font-weight:600;color:var(--ink);text-transform:capitalize;}
-  .dp-nav{display:flex;gap:4px;}
-  .dp-nav-btn{width:28px;height:28px;border-radius:8px;border:1px solid var(--border);background:transparent;
-    color:var(--ink-soft);display:flex;align-items:center;justify-content:center;cursor:pointer;}
-  .dp-nav-btn:hover{border-color:var(--accent);color:var(--accent);}
-  .dp-weekdays{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:4px;}
-  .dp-weekday{font-size:11px;font-weight:600;color:var(--ink-muted);text-align:center;padding:4px 0;text-transform:uppercase;}
-  .dp-days{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
-  .dp-day{position:relative;aspect-ratio:1;display:flex;align-items:center;justify-content:center;
-    font-size:13px;font-family:'Inter',sans-serif;color:var(--ink);background:transparent;border:none;border-radius:50%;
-    cursor:pointer;}
-  .dp-day:hover:not(:disabled):not(.dp-day-selected){background:var(--accent-light);}
-  .dp-day.dp-day-muted{color:var(--ink-muted);opacity:.45;}
-  .dp-day.dp-day-today:not(.dp-day-selected)::after{content:"";position:absolute;bottom:3px;left:50%;transform:translateX(-50%);
-    width:4px;height:4px;border-radius:50%;background:var(--accent);}
-  .dp-day.dp-day-selected{background:var(--accent);color:#fff;font-weight:600;}
-  .dp-day:disabled{opacity:.28;cursor:default;}
-  .dp-foot{display:flex;align-items:center;justify-content:space-between;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);}
-  .dp-today-btn, .dp-clear-btn{background:none;border:none;color:var(--accent);font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;padding:4px 6px;}
-  .dp-clear-btn{color:var(--ink-muted);}
-  .dp-today-btn:hover, .dp-clear-btn:hover{text-decoration:underline;}
 
   .confirm-modal{position:fixed;inset:0;background:rgba(34,38,43,.32);display:none;align-items:center;justify-content:center;z-index:60;padding:20px;}
   .confirm-modal.show{display:flex;}
@@ -811,12 +790,9 @@
     </div>
     <div class="detail-badges-row" id="detailBadgesRow"></div>
     <div id="detailWhyBlock"></div>
-    <div id="detailProgressBlock"></div>
     <div id="detailLapseBlock"></div>
-    <div id="detailPlanBlock"></div>
     <div id="detailPaceBlock"></div>
     <div id="detailMeasureBlock"></div>
-    <div id="detailDriftRow"></div>
     <div id="detailChartBlock"></div>
     <div id="detailJourneyBlock"></div>
     <div id="detailActionsBlock"></div>
@@ -845,7 +821,10 @@
       <button class="close-btn" id="closeGoalForm" aria-label="Закрити"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
     </div>
     <form id="goalForm">
-      <input type="text" id="goalTitleInput" class="title-input" placeholder="Назва цілі" maxlength="200">
+      <!-- textarea, а не input: довга назва має переноситись, а не їхати
+           вбік. rows=1 — початкова висота в один рядок, далі її веде
+           autoGrowTitle() у app.js. -->
+      <textarea id="goalTitleInput" class="title-input grow-field" placeholder="Назва цілі" maxlength="200" rows="1"></textarea>
 
       <!-- Горизонт стоїть першим після назви: він вирішує, на якій вкладці
            ціль опиниться, і питати про це в кінці форми було б пізно. -->
@@ -862,35 +841,14 @@
       </div>
 
       <label class="field-label" id="categoryLabel">Категорія</label>
+      <!-- Останній чип у цьому рядку — «Змінити»: його домальовує
+           renderCategoryPicker(), бо він мусить стояти саме за категоріями. -->
       <div class="category-picker" id="categoryPicker"></div>
 
       <label class="field-label" id="whyLabel">Навіщо тобі це?</label>
-      <textarea id="goalWhyInput" maxlength="1000"></textarea>
-
-      <label class="field-label" id="planLabel">Коли саме ти це робиш?</label>
-      <div class="plan-fields">
-        <input type="text" id="goalPlanCue" maxlength="120">
-        <input type="text" id="goalPlanAction" maxlength="120">
-      </div>
-      <div class="field-hint" id="planHint"></div>
-
-      <label class="field-label" id="targetDateLabel">Дедлайн (необовʼязково)</label>
-      <input type="date" id="goalTargetDate" data-dp-native data-dp-clearable>
-
-      <label class="field-label" id="targetValueLabel">Числова мета (необовʼязково)</label>
-      <div class="target-row">
-        <input type="number" id="goalTargetValue" inputmode="decimal" step="any" min="0" placeholder="10">
-        <input type="text" id="goalUnitInput" maxlength="20" placeholder="км">
-      </div>
-      <div class="field-hint" id="targetValueHint">Якщо задати — прогрес рахується числом, а не віхами.</div>
-
-      <!-- Звʼязок зі скарбничкою бюджету. Показується лише тоді, коли задана
-           числова мета: без неї підтягувати нема куди. -->
-      <div id="savingsLinkBlock" style="display:none;">
-        <label class="field-label" id="savingsLinkLabel">Брати число зі скарбнички</label>
-        <div class="choice-row" id="savingsLinkPicker"></div>
-        <div class="field-hint" id="savingsLinkHint"></div>
-      </div>
+      <!-- Росте під текст, як і назва: «навіщо» пишуть абзацом, і перечитати
+           його цілком — рівно те, заради чого поле існує. -->
+      <textarea id="goalWhyInput" class="grow-field" maxlength="1000"></textarea>
 
       <label class="field-label" id="milestonesLabel">Віхи</label>
       <div id="milestonesEditor"></div>
@@ -910,6 +868,30 @@
   </div>
 </div>
 
+<!-- ---- Категорії цілей ----
+     Живуть тут, а не в окремому екрані налаштувань: у розділі цілей такого
+     екрана немає, а редагувати категорії хочеться рівно тоді, коли дивишся
+     на них у формі. -->
+<div class="modal-overlay cat-manage-overlay" id="catManageOverlay">
+  <div class="modal" id="catManageModal">
+    <div class="modal-head">
+      <div class="modal-title" id="catManageTitle">Категорії цілей</div>
+      <button class="close-btn" id="closeCatManage" aria-label="Закрити">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="cat-manage-list" id="goalCatManageList"></div>
+    <div class="cat-add-row">
+      <input type="text" id="newGoalCatInput" maxlength="40" placeholder="Нова категорія">
+      <button type="button" id="addGoalCatBtn" aria-label="Додати категорію">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+      </button>
+    </div>
+    <div class="field-hint" id="catManageHint"></div>
+    <div class="form-error" id="catManageError"></div>
+  </div>
+</div>
+
 <!-- ---- Підтвердження видалення ---- -->
 <div class="confirm-modal" id="confirmOverlay">
   <div class="confirm-box">
@@ -924,6 +906,7 @@
 
 <script src="../budget/firebase-config.js"></script>
 <script src="../unsaved-guard.js"></script>
+<script src="../categories-default.js"></script>
 <script src="streak.js"></script>
 <script src="review.js"></script>
 <script src="../side-nav.js"></script>

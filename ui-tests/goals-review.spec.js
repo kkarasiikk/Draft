@@ -142,9 +142,10 @@ test.describe('Огляд тижня', () => {
     await page.click('#reviewBannerBtn');
     await expect(page.locator('#reviewScreen')).toBeVisible();
     await expect(page.locator('.review-item')).toHaveCount(1);
-    // Чотири рішення, як у «розборі минулих днів»: нічого не вирішується само.
-    // Саме в рядку дій — у прихованому рядку зсуву дедлайну є ще своя кнопка.
-    await expect(page.locator('.review-item .review-actions .review-btn')).toHaveCount(4);
+    // Три рішення, і жодне не вирішується само. Четвертим був «зсунути
+    // дедлайн» — його немає відтоді, як дедлайн іде за місяцем цілі й руками
+    // його не пересунеш.
+    await expect(page.locator('.review-item .review-actions .review-btn')).toHaveCount(3);
   });
 
   test('«нічого не зрушило» кажеться чесно', async ({ page }) => {
@@ -184,24 +185,32 @@ test.describe('Огляд тижня', () => {
 });
 
 test.describe('Темп на екрані цілі', () => {
-  test('поки історії мало — чесне «даних замало», а не вигаданий прогноз', async ({ page }) => {
-    await openGoals(page, [goal({ targetValue: 100, currentValue: 3, progressLog: [{ date: shift(-1), delta: 3 }] })]);
+  const ms = (done, total, at) => Array.from({ length: total }, (_, i) => ({
+    id: 'm' + i, title: 'крок', done: i < done, ...(i < done ? { doneAt: at } : {}),
+  }));
+
+  test('поки історії мало — застосунок мовчить, а не вгадує', async ({ page }) => {
+    // Ціль заведена вчора: часу минуло майже нічого, і будь-який вердикт був
+    // би вигадкою.
+    await openGoals(page, [goal({
+      milestones: ms(1, 4, shift(-1)), createdAt: { __ts: shift(-1) },
+    })]);
     await page.click('[data-open-goal="g1"]');
-    await expect(page.locator('#detailPaceBlock .pace')).toBeVisible();
-    // Без достатньої історії прогнозної дати бути не повинно.
-    await expect(page.locator('#detailPaceBlock')).not.toContainText(/Таким темпом/);
+    await expect(page.locator('#detailPaceBlock .pace.unknown')).toBeVisible();
   });
 
-  test('повільний темп читається як «не встигаєш»', async ({ page }) => {
-    const log = [];
-    for (let i = 60; i >= 0; i -= 3) log.push({ date: shift(-i), delta: 0.1 });
-    await openGoals(page, [goal({ targetValue: 100, currentValue: 2, progressLog: log })]);
+  test('повільний рух читається як «не встигаєш»', async ({ page }) => {
+    await openGoals(page, [goal({
+      targetDate: shift(10), milestones: ms(1, 10, shift(-60)),
+      createdAt: { __ts: shift(-90) },
+    })]);
     await page.click('[data-open-goal="g1"]');
     await expect(page.locator('#detailPaceBlock .pace.behind')).toBeVisible();
   });
 
   test('без дедлайну темп не показуємо — його нема з чим порівняти', async ({ page }) => {
-    await openGoals(page, [goal({ targetDate: null, targetValue: 100, currentValue: 10 })]);
+    // Річна ціль дедлайну не має: рік — це напрямок, а не строк.
+    await openGoals(page, [goal({ targetDate: null, milestones: ms(1, 4, shift(-10)) })]);
     await page.click('[data-open-goal="g1"]');
     await expect(page.locator('#detailPaceBlock .pace')).toHaveCount(0);
   });
@@ -210,7 +219,13 @@ test.describe('Темп на екрані цілі', () => {
 test.describe('Драбина: місяць → рік', () => {
   const year = goal({ id: 'gy', title: 'Пробігти 200 км', horizon: 'year' });
   const month = goal({ id: 'gm', title: 'Цього місяця 20 км', horizon: 'month',
-    parentGoalId: 'gy', targetValue: 20, currentValue: 5 });
+    parentGoalId: 'gy',
+    milestones: [
+      { id: 'm1', title: '5 км', done: true },
+      { id: 'm2', title: '10 км', done: false },
+      { id: 'm3', title: '15 км', done: false },
+      { id: 'm4', title: '20 км', done: false },
+    ] });
 
   test('річна ціль показує, що на неї працює', async ({ page }) => {
     await openGoals(page, [year, month]);
@@ -503,12 +518,13 @@ test.describe('Віха стає завданням', () => {
 });
 
 test.describe('Графік прогресу', () => {
-  const measured = (over = {}) => goal({
-    targetValue: 100, currentValue: 9, unit: 'км',
-    progressLog: [
-      { date: shift(-20), delta: 2 },
-      { date: shift(-12), delta: 3 },
-      { date: shift(-4), delta: 4 },
+  // Лінію будують закриті віхи та їхні дати: числового журналу більше немає.
+  const walked = (over = {}) => goal({
+    milestones: [
+      { id: 'm1', title: 'a', done: true, doneAt: shift(-20) },
+      { id: 'm2', title: 'b', done: true, doneAt: shift(-12) },
+      { id: 'm3', title: 'c', done: true, doneAt: shift(-4) },
+      { id: 'm4', title: 'd', done: false },
     ],
     ...over,
   });
@@ -519,97 +535,38 @@ test.describe('Графік прогресу', () => {
   };
 
   test('на екрані цілі видно лінію пройденого', async ({ page }) => {
-    await openDetail(page, [measured()]);
+    await openDetail(page, [walked()]);
     await expect(page.locator('.chart')).toBeVisible();
     await expect(page.locator('.chart-line')).toBeVisible();
   });
 
   test('поруч стоїть, де ти зараз', async ({ page }) => {
-    await openDetail(page, [measured()]);
-    await expect(page.locator('.chart-now')).toHaveText('9 / 100 км');
+    await openDetail(page, [walked()]);
+    await expect(page.locator('.chart-now')).toHaveText('3 / 4');
   });
 
   test('є дедлайн — є пунктир «щоб устигнути»', async ({ page }) => {
-    await openDetail(page, [measured({ targetDate: shift(100) })]);
+    await openDetail(page, [walked({ targetDate: shift(100) })]);
     await expect(page.locator('.chart-required')).toBeVisible();
   });
 
   test('без дедлайну пунктира немає — рівного темпу нізвідки взяти', async ({ page }) => {
-    await openDetail(page, [measured({ targetDate: null })]);
+    await openDetail(page, [walked({ targetDate: null })]);
     await expect(page.locator('.chart-line')).toBeVisible();
     await expect(page.locator('.chart-required')).toHaveCount(0);
   });
 
   test('без історії графіка немає — одна крапка це не лінія', async ({ page }) => {
-    await openDetail(page, [goal({ targetValue: 100, currentValue: 0, progressLog: [] })]);
+    await openDetail(page, [goal({ milestones: [{ id: 'm1', title: 'a', done: false }] })]);
     await expect(page.locator('.chart')).toHaveCount(0);
   });
 
   test('лінія росте, а не стрибає: крапки йдуть вгору', async ({ page }) => {
-    await openDetail(page, [measured()]);
+    await openDetail(page, [walked()]);
     const pts = await page.locator('.chart-line').getAttribute('points');
     const ys = pts.trim().split(/\s+/).map((p) => Number(p.split(',')[1]));
     // Вісь Y у SVG росте вниз, тож накопичений прогрес має спадати за y.
     for (let i = 1; i < ys.length; i++) expect(ys[i]).toBeLessThanOrEqual(ys[i - 1]);
-  });
-
-  test('ціль на віхах теж отримує лінію — без жодного числа', async ({ page }) => {
-    await openDetail(page, [goal({
-      id: 'gm', targetValue: null,
-      milestones: [
-        { id: 'm1', title: 'a', done: true, doneAt: shift(-20) },
-        { id: 'm2', title: 'b', done: true, doneAt: shift(-5) },
-        { id: 'm3', title: 'c', done: false },
-      ],
-    })]);
-    await expect(page.locator('.chart-now')).toHaveText('2 / 3');
-  });
-});
-
-test.describe('Дедлайн, який їде', () => {
-  test('зсув на екрані огляду лишає слід у записі', async ({ page }) => {
-    await openGoals(page, [goal({ targetDate: shift(30) })]);
-    await page.click('#reviewBannerBtn');
-    await page.click('[data-shift="g1"]');
-    await page.fill('[data-shift-input="g1"]', shift(90));
-    await page.click('[data-shift-save="g1"]');
-
-    await expect.poll(() => page.evaluate(() => window.__fbCalls.update.length)).toBeGreaterThan(0);
-    const upd = await page.evaluate(() => window.__fbCalls.update.at(-1));
-    expect(upd.payload.targetDate).toBe(shift(90));
-    expect(upd.payload.deadlineHistory).toHaveLength(1);
-    expect(upd.payload.deadlineHistory[0].from).toBe(shift(30));
-  });
-
-  test('ціль без дедлайну сліду не заводить — зсувати не було чого', async ({ page }) => {
-    await openGoals(page, [goal({ targetDate: null })]);
-    await page.click('#reviewBannerBtn');
-    await page.click('[data-shift="g1"]');
-    await page.fill('[data-shift-input="g1"]', shift(90));
-    await page.click('[data-shift-save="g1"]');
-
-    await expect.poll(() => page.evaluate(() => window.__fbCalls.update.length)).toBeGreaterThan(0);
-    const upd = await page.evaluate(() => window.__fbCalls.update.at(-1));
-    expect(upd.payload.deadlineHistory).toBeUndefined();
-  });
-
-  test('на екрані цілі видно, скільки разів дедлайн їхав і яким був спершу', async ({ page }) => {
-    await openGoals(page, [goal({
-      targetDate: '2026-12-01',
-      deadlineHistory: [
-        { from: '2026-09-01', to: '2026-10-01', at: '2026-08-01' },
-        { from: '2026-10-01', to: '2026-12-01', at: '2026-09-20' },
-      ],
-    })]);
-    await page.click('[data-open-goal="g1"]');
-    await expect(page.locator('.drift')).toContainText('Дедлайн зсувався разів: 2');
-    await expect(page.locator('.drift')).toContainText('+91 дн.');
-  });
-
-  test('цілі, яку не переносили, докоряти нема чим', async ({ page }) => {
-    await openGoals(page, [goal()]);
-    await page.click('[data-open-goal="g1"]');
-    await expect(page.locator('.drift')).toHaveCount(0);
   });
 });
 
@@ -671,7 +628,7 @@ test.describe('Крок тижня в огляді', () => {
 test.describe('Ціль, яку нема чим міряти', () => {
   // Ціль без числа й без віх, заведена давно (createdAt їде як Timestamp).
   const vague = (over = {}) => goal({
-    title: 'Вивчити польську', targetValue: null, milestones: [],
+    title: 'Вивчити польську', milestones: [],
     createdAt: { __ts: shift(-40) }, ...over,
   });
 
@@ -681,10 +638,11 @@ test.describe('Ціль, яку нема чим міряти', () => {
     await expect(page.locator('.measure-banner')).toBeVisible();
   });
 
-  test('є число — питання зняте', async ({ page }) => {
+  test('число, що лишилось у старому документі, питання не знімає', async ({ page }) => {
+    // Числової мети застосунок більше не читає: міряти є чим лише віхами.
     await openGoals(page, [vague({ targetValue: 100, currentValue: 0, unit: 'год' })]);
     await page.click('[data-open-goal="g1"]');
-    await expect(page.locator('.measure-banner')).toHaveCount(0);
+    await expect(page.locator('.measure-banner')).toBeVisible();
   });
 
   test('є віхи — теж є чим міряти', async ({ page }) => {
@@ -713,141 +671,145 @@ test.describe('Ціль, яку нема чим міряти', () => {
   });
 });
 
-test.describe('Намір «якщо — то»', () => {
-  const planned = (over = {}) => goal({
-    plan: { cue: 'щовівторка о 19:00', action: 'біжу 5 км' }, ...over,
+test.describe('Поля форми ростуть під текст', () => {
+  const LONG = 'Написати собі чіткий план тренувань до кінця року і не злити його на другому тижні';
+  const LONG_WHY = 'який буде досить таки ефективним для мене та просто буду його дотримуватись, '
+    + 'а не думати кожен тиждень, а як мені тренуватись і чи взагалі варто це робити саме сьогодні';
+
+  const height = (page, id = 'goalTitleInput') => page.evaluate((i) =>
+    document.getElementById(i).getBoundingClientRect().height, id);
+  /** scrollHeight понад clientHeight означає, що частину тексту сховано. */
+  const clipped = (page, id) => page.evaluate((i) => {
+    const el = document.getElementById(i);
+    return el.scrollHeight > el.clientHeight + 1;
+  }, id);
+
+  test('довга назва переноситься, а поле стає вищим', async ({ page }) => {
+    await openGoals(page, [goal()]);
+    await page.click('#openNewGoalBtn');
+    const before = await height(page);
+    await page.fill('#goalTitleInput', LONG);
+    expect(await height(page)).toBeGreaterThan(before);
   });
 
-  test('на екрані цілі намір стоїть окремим блоком', async ({ page }) => {
-    await openGoals(page, [planned()]);
+  test('нічого не лишається за краєм — гортати поле не доводиться', async ({ page }) => {
+    await openGoals(page, [goal()]);
+    await page.click('#openNewGoalBtn');
+    await page.fill('#goalTitleInput', LONG);
+    expect(await clipped(page, 'goalTitleInput')).toBe(false);
+  });
+
+  test('коротка назва лишається в один рядок', async ({ page }) => {
+    await openGoals(page, [goal()]);
+    await page.click('#openNewGoalBtn');
+    const empty = await height(page);
+    await page.fill('#goalTitleInput', 'Бігати');
+    expect(await height(page)).toBe(empty);
+  });
+
+  // Вікно відкривається з уже набраною назвою, і висота має бути правильною
+  // одразу: рахувати її можна лише після показу вікна — у схованому
+  // scrollHeight дорівнює нулю.
+  test('уже збережена довга назва відкривається розгорнутою', async ({ page }) => {
+    await openGoals(page, [goal({ title: LONG })]);
     await page.click('[data-open-goal="g1"]');
-    await expect(page.locator('.plan-text')).toHaveText('щовівторка о 19:00 → біжу 5 км');
+    await page.click('#detailEditBtn');
+    expect(await clipped(page, 'goalTitleInput')).toBe(false);
   });
 
-  test('половина плану наміром не є — блока немає', async ({ page }) => {
-    await openGoals(page, [planned({ plan: { cue: 'щовівторка', action: '' } })]);
+  // «Навіщо» — те саме, тільки поле від початку багаторядкове: воно крутилось
+  // усередині віконця на три рядки, хоч перечитати написане цілком і є те,
+  // заради чого воно існує.
+  test('довге «навіщо» розгортається, а не крутиться всередині', async ({ page }) => {
+    await openGoals(page, [goal()]);
+    await page.click('#openNewGoalBtn');
+    const before = await height(page, 'goalWhyInput');
+    await page.fill('#goalWhyInput', LONG_WHY);
+    expect(await height(page, 'goalWhyInput')).toBeGreaterThan(before);
+    expect(await clipped(page, 'goalWhyInput')).toBe(false);
+  });
+
+  // Поле мусить і зменшуватись: інакше текст можна було б лише додавати, а
+  // стерши половину, лишитись із порожнім місцем на пів екрана.
+  test('стерте «навіщо» повертає полю висоту, а не лишає діру', async ({ page }) => {
+    await openGoals(page, [goal()]);
+    await page.click('#openNewGoalBtn');
+    const empty = await height(page, 'goalWhyInput');
+    await page.fill('#goalWhyInput', LONG_WHY);
+    await page.fill('#goalWhyInput', 'коротко');
+    expect(await height(page, 'goalWhyInput')).toBe(empty);
+  });
+
+  test('уже збережене довге «навіщо» відкривається розгорнутим', async ({ page }) => {
+    await openGoals(page, [goal({ why: LONG_WHY })]);
     await page.click('[data-open-goal="g1"]');
-    await expect(page.locator('.plan')).toHaveCount(0);
+    await page.click('#detailEditBtn');
+    expect(await clipped(page, 'goalWhyInput')).toBe(false);
   });
 
+  // Протилежність назві: тут абзаци, і зберігати ціль на пів слові було б
+  // несподіванкою.
+  test('Enter у «навіщо» додає рядок, а не зберігає ціль', async ({ page }) => {
+    await openGoals(page, [goal()]);
+    await page.click('#openNewGoalBtn');
+    await page.fill('#goalTitleInput', 'Ціль');
+    await page.click('#goalWhyInput');
+    await page.keyboard.type('перший');
+    await page.keyboard.press('Enter');
+    await page.keyboard.type('другий');
+
+    await expect(page.locator('#goalFormOverlay')).toHaveClass(/show/);
+    expect(await page.inputValue('#goalWhyInput')).toBe('перший\nдругий');
+    const added = await page.evaluate(() => window.__fbCalls.add.filter((c) => c.col === 'goals').length);
+    expect(added).toBe(0);
+  });
+
+  // Поле стало багаторядковим, але назва — ні: Enter у ньому робить те саме,
+  // що робив в однорядковому input.
+  test('Enter зберігає ціль, а не додає рядок', async ({ page }) => {
+    await openGoals(page, [goal()]);
+    await page.click('#openNewGoalBtn');
+    await page.fill('#goalTitleInput', 'Нова ціль');
+    await page.press('#goalTitleInput', 'Enter');
+
+    await expect.poll(() => page.evaluate(() =>
+      window.__fbCalls.add.filter((c) => c.col === 'goals').length)).toBeGreaterThan(0);
+    const added = await page.evaluate(() =>
+      window.__fbCalls.add.filter((c) => c.col === 'goals').at(-1));
+    expect(added.payload.title).toBe('Нова ціль');
+  });
+
+  test('переноси, що приїхали вставкою, склеюються пробілом', async ({ page }) => {
+    await openGoals(page, [goal()]);
+    await page.click('#openNewGoalBtn');
+    await page.evaluate(() => {
+      const el = document.getElementById('goalTitleInput');
+      el.value = 'Пробігти\n100 км';
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    await page.click('#goalSubmitBtn');
+
+    await expect.poll(() => page.evaluate(() =>
+      window.__fbCalls.add.filter((c) => c.col === 'goals').length)).toBeGreaterThan(0);
+    const added = await page.evaluate(() =>
+      window.__fbCalls.add.filter((c) => c.col === 'goals').at(-1));
+    expect(added.payload.title).toBe('Пробігти 100 км');
+  });
+});
+
+test.describe('Автофокус, який не перебиває', () => {
   test('форма не забирає фокус із поля, яке вже заповнюють', async ({ page }) => {
     // Автофокус на назві спрацьовував через 50 мс — і якщо в цей момент уже
     // заповнювали інше поле, набране летіло в назву, а поле лишалось порожнім.
     await openGoals(page, [goal()]);
     await page.click('[data-open-goal="g1"]');
     await page.click('#detailEditBtn');
-    await page.focus('#goalPlanCue');
+    await page.focus('#goalWhyInput');
     // Довше за саму затримку автофокуса: якщо він спрацює попри зайняте
     // поле, фокус до цього моменту вже поїде на назву.
     await page.waitForTimeout(250);
     const active = await page.evaluate(() => document.activeElement.id);
-    expect(active).toBe('goalPlanCue');
-  });
-
-  test('намір зберігається з форми обома половинами', async ({ page }) => {
-    await openGoals(page, [goal()]);
-    await page.click('[data-open-goal="g1"]');
-    await page.click('#detailEditBtn');
-    await page.fill('#goalPlanCue', 'щоранку після душу');
-    await page.fill('#goalPlanAction', '20 сторінок');
-    await page.click('#goalSubmitBtn');
-
-    // Саме запис із наміром, а не останній за часом: після збереження форми
-    // може прилетіти ще один (огляд, снапшот), і .at(-1) читав би чужий.
-    await expect.poll(() => page.evaluate(() =>
-      window.__fbCalls.update.filter((c) => c.payload.plan !== undefined).length)).toBeGreaterThan(0);
-    const upd = await page.evaluate(() =>
-      window.__fbCalls.update.filter((c) => c.payload.plan !== undefined).at(-1));
-    expect(upd.payload.plan).toEqual({ cue: 'щоранку після душу', action: '20 сторінок' });
-  });
-
-  test('порожні поля не пишуть порожній намір', async ({ page }) => {
-    await openGoals(page, [goal()]);
-    await page.click('[data-open-goal="g1"]');
-    await page.click('#detailEditBtn');
-    await page.click('#goalSubmitBtn');
-    await expect.poll(() => page.evaluate(() =>
-      window.__fbCalls.update.filter((c) => 'plan' in c.payload).length)).toBeGreaterThan(0);
-    const upd = await page.evaluate(() =>
-      window.__fbCalls.update.filter((c) => 'plan' in c.payload).at(-1));
-    expect(upd.payload.plan).toBeNull();
-  });
-
-  test('форма показує вже записаний намір, а не порожні поля', async ({ page }) => {
-    await openGoals(page, [planned()]);
-    await page.click('[data-open-goal="g1"]');
-    await page.click('#detailEditBtn');
-    await expect(page.locator('#goalPlanCue')).toHaveValue('щовівторка о 19:00');
-    await expect(page.locator('#goalPlanAction')).toHaveValue('біжу 5 км');
-  });
-
-  test('в огляді намір теж видно — там про нього і йдеться', async ({ page }) => {
-    await openGoals(page, [planned()]);
-    await page.click('#reviewBannerBtn');
-    await expect(page.locator('.review-plan')).toHaveText('щовівторка о 19:00 → біжу 5 км');
-  });
-});
-
-test.describe('Число просто у вечірній картці', () => {
-  // Картка живе лише ввечері (EVENING_HOUR = 18), тож переводимо годинник.
-  const openEvening = async (page, goals) => {
-    const evening = new Date(TODAY);
-    evening.setHours(20, 0, 0, 0);
-    await page.clock.setFixedTime(evening);
-    await openGoals(page, goals);
-  };
-
-  const measured = (over = {}) => goal({
-    targetValue: 100, currentValue: 20, unit: 'км', ...over,
-  });
-
-  test('у вимірюваної цілі поле числа стоїть прямо в картці', async ({ page }) => {
-    await openEvening(page, [measured()]);
-    await expect(page.locator('[data-amount-input="g1"]')).toBeVisible();
-  });
-
-  test('ціль без числа поля не отримує — там нічого вводити', async ({ page }) => {
-    await openEvening(page, [goal({ targetValue: null })]);
-    await expect(page.locator('.evening-card')).toBeVisible();
-    await expect(page.locator('[data-amount-input="g1"]')).toHaveCount(0);
-  });
-
-  test('«+» додає до цілі, не заходячи в розділ', async ({ page }) => {
-    await openEvening(page, [measured()]);
-    await page.fill('[data-amount-input="g1"]', '3');
-    await page.click('[data-amount-add="g1"]');
-
-    await expect.poll(() => page.evaluate(() => window.__fbCalls.update.length)).toBeGreaterThan(0);
-    const calls = await page.evaluate(() => window.__fbCalls.update);
-    const progress = calls.find((c) => c.payload.currentValue !== undefined);
-    expect(progress.payload.currentValue).toBe(23);
-    expect(progress.payload.progressLog).toEqual([{ date: iso(TODAY), delta: 3 }]);
-  });
-
-  test('записане число саме відмічає день — «так» тиснути не треба', async ({ page }) => {
-    await openEvening(page, [measured()]);
-    await page.fill('[data-amount-input="g1"]', '3');
-    await page.click('[data-amount-add="g1"]');
-
-    await expect.poll(() => page.evaluate(() => window.__fbCalls.update.length)).toBeGreaterThan(1);
-    const calls = await page.evaluate(() => window.__fbCalls.update);
-    const checkin = calls.find((c) => c.payload.checkins !== undefined);
-    expect(checkin.payload.checkins).toEqual([iso(TODAY)]);
-  });
-
-  test('порожнє поле нічого не пише — це не нуль, це «не ввів»', async ({ page }) => {
-    await openEvening(page, [measured()]);
-    await page.click('[data-amount-add="g1"]');
-    await page.waitForTimeout(200);
-    expect(await page.evaluate(() => window.__fbCalls.update.length)).toBe(0);
-  });
-
-  test('вдень картки немає — питання про крок доречне ввечері', async ({ page }) => {
-    const noon = new Date(TODAY);
-    noon.setHours(12, 0, 0, 0);
-    await page.clock.setFixedTime(noon);
-    await openGoals(page, [measured()]);
-    await expect(page.locator('.evening-card')).toHaveCount(0);
+    expect(active).toBe('goalWhyInput');
   });
 });
 
@@ -887,7 +849,7 @@ test.describe('Повернення після перерви', () => {
     expect(upd.payload.restartedAt).toBe(iso(TODAY));
     // Історію не чіпаємо: пройдене лишається пройденим.
     expect(upd.payload.checkins).toBeUndefined();
-    expect(upd.payload.progressLog).toBeUndefined();
+    expect(upd.payload.milestones).toBeUndefined();
   });
 
   test('після перезапуску ціль перестає виглядати покинутою', async ({ page }) => {
