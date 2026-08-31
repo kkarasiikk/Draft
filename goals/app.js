@@ -2558,22 +2558,35 @@ document.getElementById('addMilestoneBtn').addEventListener('click', () => {
   if (inputs.length) inputs[inputs.length - 1].focus();
 });
 
-// ---- Назва цілі ----
-// Поле назви — textarea, а не однорядковий input: довгу назву треба бачити
-// цілком, а не гортати вбік по одному слову. Висоту веде цей код, бо сама
-// textarea рости не вміє: вона лишається заввишки rows і ховає решту.
+// ---- Поля, що ростуть під текст ----
+// Назва цілі й «навіщо тобі це» — textarea, і сама вона рости не вміє:
+// лишається заввишки rows і ховає решту за власною смугою гортання. Обидва
+// поля від цього страждали по-своєму: довгу назву доводилось гортати вбік по
+// одному слову, а «навіщо» — крутити всередині віконця на три рядки, хоч
+// перечитати його цілком і є те, заради чого поле існує.
 //
 // scrollHeight міряє вміст разом із внутрішніми полями, але БЕЗ рамки, а
 // box-sizing у застосунку border-box — тобто висота має включати й рамку.
 // Без цієї поправки поле щоразу було б на два пікселі нижчим за вміст, і в
 // ньому лишалась би смуга гортання завширшки з рамку.
-function autoGrowTitle() {
-  const el = document.getElementById('goalTitleInput');
+//
+// `height: auto` перед виміром обовʼязковий: без нього поле, яке щойно було
+// високим, тримало б стару висоту, і scrollHeight повертав би її ж — текст
+// можна було б лише додавати, а стерши половину, порожнє місце нікуди б не
+// поділось. CSS-ний min-height лишається підлогою: «навіщо» не стискається
+// нижче трьох рядків навіть порожнє.
+const GROW_FIELDS = ['goalTitleInput', 'goalWhyInput'];
+
+function autoGrow(el) {
   if (!el) return;
   const cs = getComputedStyle(el);
   const border = (parseFloat(cs.borderTopWidth) || 0) + (parseFloat(cs.borderBottomWidth) || 0);
   el.style.height = 'auto';
   el.style.height = (el.scrollHeight + border) + 'px';
+}
+
+function growFormFields() {
+  GROW_FIELDS.forEach((id) => autoGrow(document.getElementById(id)));
 }
 
 // Назва — один рядок тексту, хай навіть поле тепер багаторядкове. Enter у
@@ -2608,9 +2621,9 @@ function openGoalForm(existingGoal) {
   document.getElementById('breakdownNote').textContent = '';
   goalGuard.arm();
   document.getElementById('goalFormOverlay').classList.add('show');
-  // Саме після show: у схованому вікні scrollHeight дорівнює нулю, і поле
-  // згорнулось би в нитку.
-  autoGrowTitle();
+  // Саме після show: у схованому вікні scrollHeight дорівнює нулю, і поля
+  // згорнулись би в нитку.
+  growFormFields();
   focusWhenIdle('goalTitleInput', 'goalFormOverlay');
 }
 
@@ -2653,11 +2666,15 @@ document.getElementById('goalForm').addEventListener('submit', (e) => {
   saveGoalForm();
 });
 
-// Поле назви росте разом із текстом — і від набору, і від вставки.
-document.getElementById('goalTitleInput').addEventListener('input', autoGrowTitle);
-// Enter зберігає, а не додає рядок: назва однорядкова, і в input на цьому
-// місці Enter робив саме це. Забрати звичку разом зі зміною тега було б
-// несподіванкою на порожньому місці.
+// Обидва поля ростуть разом із текстом — і від набору, і від вставки.
+GROW_FIELDS.forEach((id) => {
+  document.getElementById(id).addEventListener('input', (e) => autoGrow(e.target));
+});
+
+// Enter зберігає, а не додає рядок — але ЛИШЕ в назві: вона однорядкова, і в
+// input на цьому місці Enter робив саме це. У «навіщо» він, навпаки, мусить
+// лишитись переносом: там пишуть абзацами, і зберігати ціль на пів слові було
+// б несподіванкою.
 document.getElementById('goalTitleInput').addEventListener('keydown', (e) => {
   if (e.key !== 'Enter') return;
   e.preventDefault();

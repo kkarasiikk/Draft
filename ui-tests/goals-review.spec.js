@@ -671,11 +671,18 @@ test.describe('Ціль, яку нема чим міряти', () => {
   });
 });
 
-test.describe('Назва цілі росте вниз', () => {
+test.describe('Поля форми ростуть під текст', () => {
   const LONG = 'Написати собі чіткий план тренувань до кінця року і не злити його на другому тижні';
+  const LONG_WHY = 'який буде досить таки ефективним для мене та просто буду його дотримуватись, '
+    + 'а не думати кожен тиждень, а як мені тренуватись і чи взагалі варто це робити саме сьогодні';
 
-  const height = (page) => page.evaluate(() =>
-    document.getElementById('goalTitleInput').getBoundingClientRect().height);
+  const height = (page, id = 'goalTitleInput') => page.evaluate((i) =>
+    document.getElementById(i).getBoundingClientRect().height, id);
+  /** scrollHeight понад clientHeight означає, що частину тексту сховано. */
+  const clipped = (page, id) => page.evaluate((i) => {
+    const el = document.getElementById(i);
+    return el.scrollHeight > el.clientHeight + 1;
+  }, id);
 
   test('довга назва переноситься, а поле стає вищим', async ({ page }) => {
     await openGoals(page, [goal()]);
@@ -689,12 +696,7 @@ test.describe('Назва цілі росте вниз', () => {
     await openGoals(page, [goal()]);
     await page.click('#openNewGoalBtn');
     await page.fill('#goalTitleInput', LONG);
-    // scrollHeight понад clientHeight означало б, що частину назви сховано.
-    const clipped = await page.evaluate(() => {
-      const el = document.getElementById('goalTitleInput');
-      return el.scrollHeight > el.clientHeight + 1;
-    });
-    expect(clipped).toBe(false);
+    expect(await clipped(page, 'goalTitleInput')).toBe(false);
   });
 
   test('коротка назва лишається в один рядок', async ({ page }) => {
@@ -712,11 +714,54 @@ test.describe('Назва цілі росте вниз', () => {
     await openGoals(page, [goal({ title: LONG })]);
     await page.click('[data-open-goal="g1"]');
     await page.click('#detailEditBtn');
-    const clipped = await page.evaluate(() => {
-      const el = document.getElementById('goalTitleInput');
-      return el.scrollHeight > el.clientHeight + 1;
-    });
-    expect(clipped).toBe(false);
+    expect(await clipped(page, 'goalTitleInput')).toBe(false);
+  });
+
+  // «Навіщо» — те саме, тільки поле від початку багаторядкове: воно крутилось
+  // усередині віконця на три рядки, хоч перечитати написане цілком і є те,
+  // заради чого воно існує.
+  test('довге «навіщо» розгортається, а не крутиться всередині', async ({ page }) => {
+    await openGoals(page, [goal()]);
+    await page.click('#openNewGoalBtn');
+    const before = await height(page, 'goalWhyInput');
+    await page.fill('#goalWhyInput', LONG_WHY);
+    expect(await height(page, 'goalWhyInput')).toBeGreaterThan(before);
+    expect(await clipped(page, 'goalWhyInput')).toBe(false);
+  });
+
+  // Поле мусить і зменшуватись: інакше текст можна було б лише додавати, а
+  // стерши половину, лишитись із порожнім місцем на пів екрана.
+  test('стерте «навіщо» повертає полю висоту, а не лишає діру', async ({ page }) => {
+    await openGoals(page, [goal()]);
+    await page.click('#openNewGoalBtn');
+    const empty = await height(page, 'goalWhyInput');
+    await page.fill('#goalWhyInput', LONG_WHY);
+    await page.fill('#goalWhyInput', 'коротко');
+    expect(await height(page, 'goalWhyInput')).toBe(empty);
+  });
+
+  test('уже збережене довге «навіщо» відкривається розгорнутим', async ({ page }) => {
+    await openGoals(page, [goal({ why: LONG_WHY })]);
+    await page.click('[data-open-goal="g1"]');
+    await page.click('#detailEditBtn');
+    expect(await clipped(page, 'goalWhyInput')).toBe(false);
+  });
+
+  // Протилежність назві: тут абзаци, і зберігати ціль на пів слові було б
+  // несподіванкою.
+  test('Enter у «навіщо» додає рядок, а не зберігає ціль', async ({ page }) => {
+    await openGoals(page, [goal()]);
+    await page.click('#openNewGoalBtn');
+    await page.fill('#goalTitleInput', 'Ціль');
+    await page.click('#goalWhyInput');
+    await page.keyboard.type('перший');
+    await page.keyboard.press('Enter');
+    await page.keyboard.type('другий');
+
+    await expect(page.locator('#goalFormOverlay')).toHaveClass(/show/);
+    expect(await page.inputValue('#goalWhyInput')).toBe('перший\nдругий');
+    const added = await page.evaluate(() => window.__fbCalls.add.filter((c) => c.col === 'goals').length);
+    expect(added).toBe(0);
   });
 
   // Поле стало багаторядковим, але назва — ні: Enter у ньому робить те саме,
