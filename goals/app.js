@@ -140,10 +140,6 @@ const T = {
     emptyMonthNamed: (m) => `Немає цілей на ${m}`,
     carriedFrom: (m) => `з ${m}`,
     horizonHintMonth: (m) => `Ціль піде в ${m}.`,
-    planLabel: 'Коли саме ти це робиш?', planBlockLabel: 'План',
-    planCuePlaceholder: 'Щовівторка й четверга о 19:00, після роботи',
-    planActionPlaceholder: 'Біжу 5 км',
-    planHint: 'Рішення, ухвалене заздалегідь, у момент дії не треба ухвалювати знову.',
     retroYear: 'За рік', retroAll: 'За весь час',
     retroClosed: (n) => `Закрито цілей: ${n}`,
     retroEmptyPeriod: 'За цей період нічого не закрито',
@@ -280,10 +276,6 @@ const T = {
     emptyMonthNamed: (m) => `Нет целей на ${m}`,
     carriedFrom: (m) => `с ${m}`,
     horizonHintMonth: (m) => `Цель пойдёт в ${m}.`,
-    planLabel: 'Когда именно ты это делаешь?', planBlockLabel: 'План',
-    planCuePlaceholder: 'По вторникам и четвергам в 19:00, после работы',
-    planActionPlaceholder: 'Бегу 5 км',
-    planHint: 'Решение, принятое заранее, в момент действия принимать заново не нужно.',
     retroYear: 'За год', retroAll: 'За всё время',
     retroClosed: (n) => `Закрыто целей: ${n}`,
     retroEmptyPeriod: 'За этот период ничего не закрыто',
@@ -420,10 +412,6 @@ const T = {
     emptyMonthNamed: (m) => `Brak celów na ${m}`,
     carriedFrom: (m) => `z ${m}`,
     horizonHintMonth: (m) => `Cel trafi do ${m}.`,
-    planLabel: 'Kiedy dokładnie to robisz?', planBlockLabel: 'Plan',
-    planCuePlaceholder: 'We wtorki i czwartki o 19:00, po pracy',
-    planActionPlaceholder: 'Biegnę 5 km',
-    planHint: 'Decyzja podjęta z wyprzedzeniem nie musi być podejmowana ponownie w chwili działania.',
     retroYear: 'Za rok', retroAll: 'Cały czas',
     retroClosed: (n) => `Ukończonych celów: ${n}`,
     retroEmptyPeriod: 'W tym okresie nic nie ukończono',
@@ -560,10 +548,6 @@ const T = {
     emptyMonthNamed: (m) => `No goals for ${m}`,
     carriedFrom: (m) => `from ${m}`,
     horizonHintMonth: (m) => `This goal goes to ${m}.`,
-    planLabel: 'When exactly do you do this?', planBlockLabel: 'Plan',
-    planCuePlaceholder: 'Tuesdays and Thursdays at 19:00, right after work',
-    planActionPlaceholder: 'Run 5 km',
-    planHint: 'A decision made in advance does not have to be made again in the moment.',
     retroYear: 'Past year', retroAll: 'All time',
     retroClosed: (n) => `Goals closed: ${n}`,
     retroEmptyPeriod: 'Nothing closed in this period',
@@ -746,10 +730,6 @@ function applyTranslations() {
   document.getElementById('addGoalCatBtn').setAttribute('aria-label', t('addCatAria'));
   document.getElementById('whyLabel').textContent = t('whyLabel');
   document.getElementById('goalWhyInput').placeholder = t('whyPlaceholder');
-  document.getElementById('planLabel').textContent = t('planLabel');
-  document.getElementById('planHint').textContent = t('planHint');
-  document.getElementById('goalPlanCue').placeholder = t('planCuePlaceholder');
-  document.getElementById('goalPlanAction').placeholder = t('planActionPlaceholder');
   document.getElementById('targetDateLabel').textContent = t('targetDateLabel');
   document.getElementById('milestonesLabel').textContent = t('milestonesLabel');
   document.getElementById('targetValueLabel').textContent = t('targetValueLabel');
@@ -1217,11 +1197,6 @@ function renderEveningCard() {
         const whyBlock = g.why && streakAtRisk >= 3
           ? `<div class="evening-why">${escapeHtml(t('whyReminder'))} “${escapeHtml(g.why)}”</div>`
           : '';
-        // Намір показуємо ЗАВЖДИ, коли він є: саме тут він і мусить
-        // спрацювати — питання «чи був крок» і є тією ситуацією.
-        const plan = Review.planOf(g);
-        const planBlock = plan
-          ? `<div class="evening-plan">${escapeHtml(plan.cue)} → ${escapeHtml(plan.action)}</div>` : '';
         // Головне тертя було саме тут: «так» записати можна було одним тапом,
         // а «+3 км» — тільки зайшовши в розділ, знайшовши ціль і відкривши її.
         // Число для вимірюваної цілі важливіше за галочку, тож поле стоїть
@@ -1236,7 +1211,6 @@ function renderEveningCard() {
         return `
         <div class="evening-goal">
           <div class="evening-goal-title">${escapeHtml(g.title || '')}${streakAtRisk >= 3 ? ` <span class="evening-streak">🔥 ${streakAtRisk}</span>` : ''}</div>
-          ${planBlock}
           ${whyBlock}
           <div class="evening-actions">
             <button type="button" class="evening-btn yes" data-yes="${g.id}">${escapeHtml(t('eveningYes'))}</button>
@@ -1581,7 +1555,6 @@ function renderGoalDetail(goal) {
   }
 
   renderLapseBanner(goal);
-  renderPlanBlock(goal);
   renderPaceBlock(goal);
   renderMeasureBanner(goal);
   renderDriftRow(goal);
@@ -1709,8 +1682,6 @@ function renderReviewScreen() {
           </div>` : ''}
         ${movementChips(item, goal)}
         ${goal.why ? `<div class="review-why">${escapeHtml(t('whyReminder'))} “${escapeHtml(goal.why)}”</div>` : ''}
-        ${(() => { const pl = Review.planOf(goal); return pl
-          ? `<div class="review-plan">${escapeHtml(pl.cue)} → ${escapeHtml(pl.action)}</div>` : ''; })()}
         ${(() => { const lp = Review.lapse(goal, today, { startIso: createdIso(goal) }); return lp
           ? `<div class="review-lapse">${escapeHtml(t('lapseShort', lp.days))}</div>` : ''; })()}
         ${blockersLine(goal)}
@@ -1952,26 +1923,6 @@ async function restartGoal(goalId) {
 }
 
 // Намір «якщо ситуація — то дія». Порожню половину зберігаємо як є: людина
-// могла набрати лише одну й повернутись пізніше, і стирати набране було б
-// несподівано. Наміром це стає лише тоді, коли є обидві (див. Review.planOf).
-function readPlanFields() {
-  const cue = document.getElementById('goalPlanCue').value.trim().slice(0, 120);
-  const action = document.getElementById('goalPlanAction').value.trim().slice(0, 120);
-  return cue || action ? { cue, action } : null;
-}
-
-function renderPlanBlock(goal) {
-  const el = document.getElementById('detailPlanBlock');
-  if (!el) return;
-  const plan = Review.planOf(goal);
-  if (!plan) { el.innerHTML = ''; return; }
-  el.innerHTML = `
-    <div class="plan">
-      <div class="plan-label">${escapeHtml(t('planBlockLabel'))}</div>
-      <div class="plan-text">${escapeHtml(plan.cue)} → <b>${escapeHtml(plan.action)}</b></div>
-    </div>`;
-}
-
 // Скільки разів дедлайн уже їхав. Показуємо БЕЗ докору — просто факт, який
 // інакше стирається кожним новим перенесенням: людина памʼятає останню дату,
 // а не те, що спершу стояв березень.
@@ -2918,9 +2869,6 @@ function openGoalForm(existingGoal) {
   document.getElementById('goalFormError').textContent = '';
   document.getElementById('goalTitleInput').value = existingGoal ? existingGoal.title : '';
   document.getElementById('goalWhyInput').value = existingGoal ? existingGoal.why || '' : '';
-  const existingPlan = (existingGoal && existingGoal.plan) || {};
-  document.getElementById('goalPlanCue').value = existingPlan.cue || '';
-  document.getElementById('goalPlanAction').value = existingPlan.action || '';
   document.getElementById('goalTargetDate').value = existingGoal ? existingGoal.targetDate || '' : '';
   document.getElementById('goalTargetValue').value =
     existingGoal && existingGoal.targetValue != null ? existingGoal.targetValue : '';
@@ -3006,8 +2954,6 @@ const goalGuard = UnsavedGuard.create({
   snapshot: () => JSON.stringify({
     title: document.getElementById('goalTitleInput').value.trim(),
     why: document.getElementById('goalWhyInput').value.trim(),
-    planCue: document.getElementById('goalPlanCue').value.trim(),
-    planAction: document.getElementById('goalPlanAction').value.trim(),
     targetDate: document.getElementById('goalTargetDate').value,
     targetValue: document.getElementById('goalTargetValue').value,
     unit: document.getElementById('goalUnitInput').value.trim(),
@@ -3075,7 +3021,6 @@ async function saveGoalForm() {
     title,
     category: findGoalCategory(formCategory) ? formCategory : fallbackCategoryId(),
     why: document.getElementById('goalWhyInput').value.trim(),
-    plan: readPlanFields(),
     targetDate: document.getElementById('goalTargetDate').value || null,
     targetValue,
     // Одиниця без мети ні про що не каже, тож тримаються разом.

@@ -221,17 +221,6 @@
     font-family:'Inter',sans-serif;font-size:13.5px;}
   .evening-amount .evening-btn{flex:0 0 auto;min-width:46px;font-size:16px;font-weight:700;}
 
-  /* Намір «якщо ситуація — то дія». Дві половини стоять поруч саме тому,
-     що поодинці жодна з них наміром не є. */
-  .plan-fields{display:flex;flex-direction:column;gap:6px;}
-  .plan{background:var(--accent-light);border-radius:14px;padding:12px 14px;margin-bottom:14px;}
-  .plan-label{font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--accent);
-    font-weight:700;margin-bottom:5px;}
-  .plan-text{font-size:14px;color:var(--ink);line-height:1.45;}
-  .plan-text b{font-weight:700;}
-  .evening-plan{margin:6px 0 8px;font-size:12.5px;color:var(--accent);line-height:1.45;}
-  .review-plan{margin-top:8px;font-size:12.5px;color:var(--accent);line-height:1.45;}
-
   /* Ціль, яку нема чим міряти. Тон спокійний: це пропущений крок
      постановки, а не провина. */
   .measure-banner{background:var(--gold-light);border-radius:14px;padding:13px 14px;margin-bottom:14px;}
@@ -858,7 +847,6 @@
     <div id="detailWhyBlock"></div>
     <div id="detailProgressBlock"></div>
     <div id="detailLapseBlock"></div>
-    <div id="detailPlanBlock"></div>
     <div id="detailPaceBlock"></div>
     <div id="detailMeasureBlock"></div>
     <div id="detailDriftRow"></div>
@@ -913,13 +901,6 @@
 
       <label class="field-label" id="whyLabel">Навіщо тобі це?</label>
       <textarea id="goalWhyInput" maxlength="1000"></textarea>
-
-      <label class="field-label" id="planLabel">Коли саме ти це робиш?</label>
-      <div class="plan-fields">
-        <input type="text" id="goalPlanCue" maxlength="120">
-        <input type="text" id="goalPlanAction" maxlength="120">
-      </div>
-      <div class="field-hint" id="planHint"></div>
 
       <label class="field-label" id="targetDateLabel">Дедлайн (необовʼязково)</label>
       <input type="date" id="goalTargetDate" data-dp-native data-dp-clearable>

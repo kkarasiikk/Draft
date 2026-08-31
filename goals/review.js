@@ -425,27 +425,6 @@
   }
 
   /**
-   * Намір «якщо ситуація X — то дія Y».
-   *
-   * У цілі вже є «навіщо» (мотив), віхи (що) і дедлайн (доки) — але ніде не
-   * записано, ЗА ЧИМ САМЕ і КОЛИ дія настає. «Пробігти 100 км» і «щовівторка
-   * й четверга о 19:00, одразу після роботи — біжу 5 км» це різні речі, і
-   * друга спрацьовує помітно частіше: рішення ухвалене заздалегідь, у момент
-   * дії його вже не треба ухвалювати знову.
-   *
-   * Половини плану не буває: «щовівторка» без дії — це не намір, а «біжу
-   * 5 км» без ситуації — просто переказ цілі. Тому потрібні обидві частини.
-   */
-  function planOf(goal) {
-    var p = goal && goal.plan;
-    if (!p || typeof p !== 'object') return null;
-    var cue = typeof p.cue === 'string' ? p.cue.trim() : '';
-    var action = typeof p.action === 'string' ? p.action.trim() : '';
-    if (!cue || !action) return null;
-    return { cue: cue, action: action };
-  }
-
-  /**
    * Ціль, у якій немає жодного способу зрозуміти, що ти дійшов.
    *
    * «Вивчити польську» без числа, без віх і без дати можна завести — і вона
@@ -732,7 +711,6 @@
     reviewDigest: reviewDigest,
     progressSeries: progressSeries,
     needsMeasure: needsMeasure,
-    planOf: planOf,
     lapse: lapse,
     monthKeyOf: monthKeyOf,
     goalsOfMonth: goalsOfMonth,

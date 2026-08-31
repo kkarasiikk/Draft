@@ -713,78 +713,19 @@ test.describe('Ціль, яку нема чим міряти', () => {
   });
 });
 
-test.describe('Намір «якщо — то»', () => {
-  const planned = (over = {}) => goal({
-    plan: { cue: 'щовівторка о 19:00', action: 'біжу 5 км' }, ...over,
-  });
-
-  test('на екрані цілі намір стоїть окремим блоком', async ({ page }) => {
-    await openGoals(page, [planned()]);
-    await page.click('[data-open-goal="g1"]');
-    await expect(page.locator('.plan-text')).toHaveText('щовівторка о 19:00 → біжу 5 км');
-  });
-
-  test('половина плану наміром не є — блока немає', async ({ page }) => {
-    await openGoals(page, [planned({ plan: { cue: 'щовівторка', action: '' } })]);
-    await page.click('[data-open-goal="g1"]');
-    await expect(page.locator('.plan')).toHaveCount(0);
-  });
-
+test.describe('Автофокус, який не перебиває', () => {
   test('форма не забирає фокус із поля, яке вже заповнюють', async ({ page }) => {
     // Автофокус на назві спрацьовував через 50 мс — і якщо в цей момент уже
     // заповнювали інше поле, набране летіло в назву, а поле лишалось порожнім.
     await openGoals(page, [goal()]);
     await page.click('[data-open-goal="g1"]');
     await page.click('#detailEditBtn');
-    await page.focus('#goalPlanCue');
+    await page.focus('#goalWhyInput');
     // Довше за саму затримку автофокуса: якщо він спрацює попри зайняте
     // поле, фокус до цього моменту вже поїде на назву.
     await page.waitForTimeout(250);
     const active = await page.evaluate(() => document.activeElement.id);
-    expect(active).toBe('goalPlanCue');
-  });
-
-  test('намір зберігається з форми обома половинами', async ({ page }) => {
-    await openGoals(page, [goal()]);
-    await page.click('[data-open-goal="g1"]');
-    await page.click('#detailEditBtn');
-    await page.fill('#goalPlanCue', 'щоранку після душу');
-    await page.fill('#goalPlanAction', '20 сторінок');
-    await page.click('#goalSubmitBtn');
-
-    // Саме запис із наміром, а не останній за часом: після збереження форми
-    // може прилетіти ще один (огляд, снапшот), і .at(-1) читав би чужий.
-    await expect.poll(() => page.evaluate(() =>
-      window.__fbCalls.update.filter((c) => c.payload.plan !== undefined).length)).toBeGreaterThan(0);
-    const upd = await page.evaluate(() =>
-      window.__fbCalls.update.filter((c) => c.payload.plan !== undefined).at(-1));
-    expect(upd.payload.plan).toEqual({ cue: 'щоранку після душу', action: '20 сторінок' });
-  });
-
-  test('порожні поля не пишуть порожній намір', async ({ page }) => {
-    await openGoals(page, [goal()]);
-    await page.click('[data-open-goal="g1"]');
-    await page.click('#detailEditBtn');
-    await page.click('#goalSubmitBtn');
-    await expect.poll(() => page.evaluate(() =>
-      window.__fbCalls.update.filter((c) => 'plan' in c.payload).length)).toBeGreaterThan(0);
-    const upd = await page.evaluate(() =>
-      window.__fbCalls.update.filter((c) => 'plan' in c.payload).at(-1));
-    expect(upd.payload.plan).toBeNull();
-  });
-
-  test('форма показує вже записаний намір, а не порожні поля', async ({ page }) => {
-    await openGoals(page, [planned()]);
-    await page.click('[data-open-goal="g1"]');
-    await page.click('#detailEditBtn');
-    await expect(page.locator('#goalPlanCue')).toHaveValue('щовівторка о 19:00');
-    await expect(page.locator('#goalPlanAction')).toHaveValue('біжу 5 км');
-  });
-
-  test('в огляді намір теж видно — там про нього і йдеться', async ({ page }) => {
-    await openGoals(page, [planned()]);
-    await page.click('#reviewBannerBtn');
-    await expect(page.locator('.review-plan')).toHaveText('щовівторка о 19:00 → біжу 5 км');
+    expect(active).toBe('goalWhyInput');
   });
 });
 
