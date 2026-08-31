@@ -2,7 +2,13 @@
 // Реєструємо тут, а не інлайн у <script> в index.html, щоб CSP міг
 // забороняти інлайн-скрипти (script-src без 'unsafe-inline') без винятків.
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => navigator.serviceWorker.register('service-worker.js').catch(() => {}));
+  // updateViaCache:'none' — щоб і сам воркер, і його importScripts('sw-core.js')
+  // бралися з мережі, а не з HTTP-кешу браузера. За замовчуванням ('imports')
+  // імпорти віддаються з кешу, і оболонка, яку тримає sw-core, лишалась би
+  // старою навіть після деплою: саме в цьому файлі живе версія збірки.
+  window.addEventListener('load', () => navigator.serviceWorker
+    .register('service-worker.js', { updateViaCache: 'none' })
+    .catch(() => {}));
 }
 
 // ---- Firebase ----
