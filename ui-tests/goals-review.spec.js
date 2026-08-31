@@ -671,6 +671,87 @@ test.describe('Ціль, яку нема чим міряти', () => {
   });
 });
 
+test.describe('Назва цілі росте вниз', () => {
+  const LONG = 'Написати собі чіткий план тренувань до кінця року і не злити його на другому тижні';
+
+  const height = (page) => page.evaluate(() =>
+    document.getElementById('goalTitleInput').getBoundingClientRect().height);
+
+  test('довга назва переноситься, а поле стає вищим', async ({ page }) => {
+    await openGoals(page, [goal()]);
+    await page.click('#openNewGoalBtn');
+    const before = await height(page);
+    await page.fill('#goalTitleInput', LONG);
+    expect(await height(page)).toBeGreaterThan(before);
+  });
+
+  test('нічого не лишається за краєм — гортати поле не доводиться', async ({ page }) => {
+    await openGoals(page, [goal()]);
+    await page.click('#openNewGoalBtn');
+    await page.fill('#goalTitleInput', LONG);
+    // scrollHeight понад clientHeight означало б, що частину назви сховано.
+    const clipped = await page.evaluate(() => {
+      const el = document.getElementById('goalTitleInput');
+      return el.scrollHeight > el.clientHeight + 1;
+    });
+    expect(clipped).toBe(false);
+  });
+
+  test('коротка назва лишається в один рядок', async ({ page }) => {
+    await openGoals(page, [goal()]);
+    await page.click('#openNewGoalBtn');
+    const empty = await height(page);
+    await page.fill('#goalTitleInput', 'Бігати');
+    expect(await height(page)).toBe(empty);
+  });
+
+  // Вікно відкривається з уже набраною назвою, і висота має бути правильною
+  // одразу: рахувати її можна лише після показу вікна — у схованому
+  // scrollHeight дорівнює нулю.
+  test('уже збережена довга назва відкривається розгорнутою', async ({ page }) => {
+    await openGoals(page, [goal({ title: LONG })]);
+    await page.click('[data-open-goal="g1"]');
+    await page.click('#detailEditBtn');
+    const clipped = await page.evaluate(() => {
+      const el = document.getElementById('goalTitleInput');
+      return el.scrollHeight > el.clientHeight + 1;
+    });
+    expect(clipped).toBe(false);
+  });
+
+  // Поле стало багаторядковим, але назва — ні: Enter у ньому робить те саме,
+  // що робив в однорядковому input.
+  test('Enter зберігає ціль, а не додає рядок', async ({ page }) => {
+    await openGoals(page, [goal()]);
+    await page.click('#openNewGoalBtn');
+    await page.fill('#goalTitleInput', 'Нова ціль');
+    await page.press('#goalTitleInput', 'Enter');
+
+    await expect.poll(() => page.evaluate(() =>
+      window.__fbCalls.add.filter((c) => c.col === 'goals').length)).toBeGreaterThan(0);
+    const added = await page.evaluate(() =>
+      window.__fbCalls.add.filter((c) => c.col === 'goals').at(-1));
+    expect(added.payload.title).toBe('Нова ціль');
+  });
+
+  test('переноси, що приїхали вставкою, склеюються пробілом', async ({ page }) => {
+    await openGoals(page, [goal()]);
+    await page.click('#openNewGoalBtn');
+    await page.evaluate(() => {
+      const el = document.getElementById('goalTitleInput');
+      el.value = 'Пробігти\n100 км';
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    await page.click('#goalSubmitBtn');
+
+    await expect.poll(() => page.evaluate(() =>
+      window.__fbCalls.add.filter((c) => c.col === 'goals').length)).toBeGreaterThan(0);
+    const added = await page.evaluate(() =>
+      window.__fbCalls.add.filter((c) => c.col === 'goals').at(-1));
+    expect(added.payload.title).toBe('Пробігти 100 км');
+  });
+});
+
 test.describe('Автофокус, який не перебиває', () => {
   test('форма не забирає фокус із поля, яке вже заповнюють', async ({ page }) => {
     // Автофокус на назві спрацьовував через 50 мс — і якщо в цей момент уже

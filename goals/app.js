@@ -2513,7 +2513,7 @@ document.getElementById('breakdownBtn').addEventListener('click', async () => {
   const label = document.getElementById('breakdownBtnLabel');
   const errorEl = document.getElementById('goalFormError');
   const noteEl = document.getElementById('breakdownNote');
-  const title = document.getElementById('goalTitleInput').value.trim();
+  const title = goalTitleValue();
   if (!title) { errorEl.textContent = t('breakdownNoTitle'); return; }
 
   btn.disabled = true;
@@ -2558,6 +2558,32 @@ document.getElementById('addMilestoneBtn').addEventListener('click', () => {
   if (inputs.length) inputs[inputs.length - 1].focus();
 });
 
+// ---- Назва цілі ----
+// Поле назви — textarea, а не однорядковий input: довгу назву треба бачити
+// цілком, а не гортати вбік по одному слову. Висоту веде цей код, бо сама
+// textarea рости не вміє: вона лишається заввишки rows і ховає решту.
+//
+// scrollHeight міряє вміст разом із внутрішніми полями, але БЕЗ рамки, а
+// box-sizing у застосунку border-box — тобто висота має включати й рамку.
+// Без цієї поправки поле щоразу було б на два пікселі нижчим за вміст, і в
+// ньому лишалась би смуга гортання завширшки з рамку.
+function autoGrowTitle() {
+  const el = document.getElementById('goalTitleInput');
+  if (!el) return;
+  const cs = getComputedStyle(el);
+  const border = (parseFloat(cs.borderTopWidth) || 0) + (parseFloat(cs.borderBottomWidth) || 0);
+  el.style.height = 'auto';
+  el.style.height = (el.scrollHeight + border) + 'px';
+}
+
+// Назва — один рядок тексту, хай навіть поле тепер багаторядкове. Enter у
+// ньому зберігає ціль (як робив input у формі), а переноси, що приїхали
+// вставкою, склеюємо пробілом: у картці й у списку назва все одно стоїть
+// одним рядком, і зберігати в базі невидимий злам ні до чого.
+function goalTitleValue() {
+  return document.getElementById('goalTitleInput').value.replace(/\s*[\r\n]+\s*/g, ' ').trim();
+}
+
 function openGoalForm(existingGoal) {
   editingGoalId = existingGoal ? existingGoal.id : null;
   document.getElementById('goalModalTitle').textContent = existingGoal ? t('editGoalTitle') : t('newGoalTitle');
@@ -2582,6 +2608,9 @@ function openGoalForm(existingGoal) {
   document.getElementById('breakdownNote').textContent = '';
   goalGuard.arm();
   document.getElementById('goalFormOverlay').classList.add('show');
+  // Саме після show: у схованому вікні scrollHeight дорівнює нулю, і поле
+  // згорнулось би в нитку.
+  autoGrowTitle();
   focusWhenIdle('goalTitleInput', 'goalFormOverlay');
 }
 
@@ -2591,7 +2620,7 @@ function openGoalForm(existingGoal) {
 const goalGuard = UnsavedGuard.create({
   overlay: 'goalFormOverlay',
   snapshot: () => JSON.stringify({
-    title: document.getElementById('goalTitleInput').value.trim(),
+    title: goalTitleValue(),
     why: document.getElementById('goalWhyInput').value.trim(),
     horizon: formHorizon,
     parentGoalId: formParentGoalId,
@@ -2624,10 +2653,21 @@ document.getElementById('goalForm').addEventListener('submit', (e) => {
   saveGoalForm();
 });
 
+// Поле назви росте разом із текстом — і від набору, і від вставки.
+document.getElementById('goalTitleInput').addEventListener('input', autoGrowTitle);
+// Enter зберігає, а не додає рядок: назва однорядкова, і в input на цьому
+// місці Enter робив саме це. Забрати звичку разом зі зміною тега було б
+// несподіванкою на порожньому місці.
+document.getElementById('goalTitleInput').addEventListener('keydown', (e) => {
+  if (e.key !== 'Enter') return;
+  e.preventDefault();
+  saveGoalForm();
+});
+
 // Винесено з обробника події, бо збереження запускає ще й діалог
 // «зберегти зміни перед виходом».
 async function saveGoalForm() {
-  const title = document.getElementById('goalTitleInput').value.trim();
+  const title = goalTitleValue();
   const errorEl = document.getElementById('goalFormError');
   if (!title) {
     errorEl.textContent = t('titleRequiredError');
