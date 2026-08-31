@@ -174,12 +174,9 @@
   }
 
   /** Прогрес цілі у відсотках — те саме правило, що й на сторінці цілей:
-   *  числова мета важливіша за віхи. */
+   *  міряється віхами. Числової мети в застосунку немає: число, якщо воно
+   *  потрібне, людина пише в самій назві цілі. */
   function goalPct(goal) {
-    var target = num(goal && goal.targetValue);
-    if (target > 0) {
-      return Math.max(0, Math.min(100, Math.round((num(goal.currentValue) / target) * 100)));
-    }
     var milestones = (goal && goal.milestones) || [];
     if (!milestones.length) return 0;
     var done = milestones.filter(function (m) { return m && m.done; }).length;

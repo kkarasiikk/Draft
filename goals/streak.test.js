@@ -277,50 +277,6 @@ describe('goalsDigest: що сказати про цілі ввечері', () =
   });
 });
 
-describe('applyProgress — прогрес числової цілі', () => {
-  const TODAY = '2026-08-27';
-
-  test('додає до суми й лишає запис у журналі', () => {
-    const r = S.applyProgress({ currentValue: 10, progressLog: [] }, 2.5, TODAY);
-    expect(r.currentValue).toBe(12.5);
-    expect(r.progressLog).toEqual([{ date: TODAY, delta: 2.5 }]);
-  });
-
-  test('додає, а не задає: людина думає «пробіг ще 2 км»', () => {
-    const r = S.applyProgress({ currentValue: 40, progressLog: [{ date: '2026-01-01', delta: 40 }] }, 3, TODAY);
-    expect(r.currentValue).toBe(43);
-    expect(r.progressLog).toHaveLength(2);
-  });
-
-  test('відʼємне віднімає, але нижче нуля не пускає', () => {
-    expect(S.applyProgress({ currentValue: 2 }, -5, TODAY).currentValue).toBe(0);
-  });
-
-  test('нуль і не-число нічого не міняють — це не прогрес', () => {
-    expect(S.applyProgress({ currentValue: 1 }, 0, TODAY)).toBeNull();
-    expect(S.applyProgress({ currentValue: 1 }, 'скільки', TODAY)).toBeNull();
-  });
-
-  test('дробові не накопичують хвіст із плаваючої коми', () => {
-    const r = S.applyProgress({ currentValue: 0.1 }, 0.2, TODAY);
-    expect(r.currentValue).toBe(0.3);
-  });
-
-  test('журнал не росте нескінченно — стеля 400 записів', () => {
-    const log = Array.from({ length: 400 }, (_, i) => ({ date: '2026-01-01', delta: 1 }));
-    const r = S.applyProgress({ currentValue: 400, progressLog: log }, 1, TODAY);
-    expect(r.progressLog).toHaveLength(400);
-    expect(r.progressLog.at(-1)).toEqual({ date: TODAY, delta: 1 });
-  });
-
-  test('вихідну ціль не чіпаємо — журнал копіюється, а не дописується на місці', () => {
-    const goal = { currentValue: 1, progressLog: [] };
-    S.applyProgress(goal, 5, TODAY);
-    expect(goal.progressLog).toHaveLength(0);
-    expect(goal.currentValue).toBe(1);
-  });
-});
-
 describe('trainingGoals — куди зарахувати тренування', () => {
   const TODAY = '2026-08-27';
   const g = (over = {}) => ({
@@ -345,9 +301,6 @@ describe('trainingGoals — куди зарахувати тренування',
     expect(S.trainingGoals([g({ checkins: [TODAY] })], TODAY)).toHaveLength(0);
   });
 
-  test('числовій цілі є що додати навіть після відмітки — кілометри це не «був крок»', () => {
-    expect(S.trainingGoals([g({ checkins: [TODAY], targetValue: 100 })], TODAY)).toHaveLength(1);
-  });
 
   test('порожній список нікого не пропонує', () => {
     expect(S.trainingGoals([], TODAY)).toEqual([]);
@@ -378,9 +331,9 @@ describe('trainingGoals — куди зарахувати тренування',
       const list = [
         g({ id: 'paused', category: 'gcat_body', status: 'paused' }),
         g({ id: 'done-today', category: 'gcat_work', checkins: [TODAY] }),
-        g({ id: 'measurable', category: 'gcat_work', checkins: [TODAY], targetValue: 100 }),
+        g({ id: 'open', category: 'gcat_work' }),
       ];
-      expect(S.trainingGoals(list, TODAY, own).map((x) => x.id)).toEqual(['measurable']);
+      expect(S.trainingGoals(list, TODAY, own).map((x) => x.id)).toEqual(['open']);
     });
 
     test('без третього аргументу поведінка та сама, що й раніше', () => {

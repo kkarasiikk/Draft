@@ -120,12 +120,9 @@
         row[L.colTitle] = g.title || '';
         row[L.colCategory] = g.category || '';
         row[L.colStatus] = L['status_' + g.status] || g.status || '';
+        // Дедлайн ціль отримує з місяця, а не окремим полем: у місячної це
+        // кінець її місяця, у річної його немає.
         row[L.colDeadline] = g.targetDate || '';
-        // Числову мету й віхи тримаємо в сусідніх стовпцях: ціль міряється
-        // або одним, або другим, і порожня клітинка тут сама це показує.
-        row[L.colTarget] = g.targetValue != null ? g.targetValue : '';
-        row[L.colCurrent] = g.targetValue != null ? (Number(g.currentValue) || 0) : '';
-        row[L.colUnit] = g.unit || '';
         row[L.colMilestones] = milestones.map(function (m) {
           return (m.title || '') + (m.done ? ' ✓' : '');
         }).join('; ');

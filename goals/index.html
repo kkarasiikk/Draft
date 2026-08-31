@@ -214,13 +214,6 @@
   .lapse-btn.primary{background:var(--gold);border-color:transparent;color:#fff;}
   .review-lapse{margin-top:8px;font-size:12px;font-weight:600;color:var(--gold);}
 
-  /* Число просто у вечірній картці: «+3 км» не має вимагати заходу в розділ. */
-  .evening-amount{display:flex;gap:6px;margin-top:8px;}
-  .evening-amount input{flex:1;min-width:0;padding:8px 12px;border-radius:10px;
-    border:1px solid var(--border);background:var(--surface-flat);color:var(--ink);
-    font-family:'Inter',sans-serif;font-size:13.5px;}
-  .evening-amount .evening-btn{flex:0 0 auto;min-width:46px;font-size:16px;font-weight:700;}
-
   /* Ціль, яку нема чим міряти. Тон спокійний: це пропущений крок
      постановки, а не провина. */
   .measure-banner{background:var(--gold-light);border-radius:14px;padding:13px 14px;margin-bottom:14px;}
@@ -236,7 +229,6 @@
     background:var(--surface-flat);color:var(--ink);font-family:'Inter',sans-serif;font-size:13.5px;}
 
   /* Скільки разів дедлайн уже їхав. Тон рівний: це факт, а не докір. */
-  .drift{margin:-6px 0 14px;font-size:11.5px;color:var(--ink-muted);line-height:1.45;}
 
   /* Графік прогресу: темп називає підсумок, а лінія показує форму шляху. */
   .chart{background:var(--surface);border:1px solid var(--border);border-radius:16px;
@@ -490,8 +482,6 @@
     border-radius:12px;cursor:pointer;}
   .review-btn.primary{background:var(--accent);color:#fff;border-color:transparent;}
   .review-btn:active{transform:scale(.97);}
-  .review-shift-row{display:flex;gap:7px;margin-top:9px;}
-  .review-shift-row input{flex:1;}
   .review-empty{text-align:center;color:var(--ink-muted);font-size:13.5px;padding:30px 0;}
 
   /* Віхи у формі: ручка, поля, дата. Ручка ліворуч, а не праворуч поруч із
@@ -637,24 +627,7 @@
   .milestone-remove-btn{flex-shrink:0;width:34px;height:34px;border-radius:8px;border:1px solid var(--border);
     background:transparent;color:var(--ink-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;}
   .milestone-remove-btn:hover{border-color:var(--expense);color:var(--expense);}
-  .target-row{display:flex;gap:8px;}
-  .target-row input{margin:0;}
-  .target-row input[type=number]{flex:2;min-width:0;}
-  .target-row input[type=text]{flex:1;min-width:0;}
   .field-hint{font-size:12px;color:var(--ink-muted);margin:6px 0 14px;line-height:1.4;}
-  /* Смужка числового прогресу на екрані цілі: та сама мова, що й у міні-смужці
-     на картці, але більша й з підписом. */
-  .value-progress{margin:4px 0 14px;}
-  .value-progress-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:8px;}
-  .value-progress-now{font-family:'Inter',sans-serif;font-size:22px;font-weight:800;color:var(--ink);letter-spacing:-0.02em;}
-  .value-progress-pct{font-size:14px;font-weight:700;color:var(--accent);}
-  .value-progress-bar{height:10px;border-radius:99px;background:var(--control-bg);overflow:hidden;}
-  .value-progress-fill{height:100%;border-radius:99px;background:var(--accent);transition:width .3s ease;}
-  .value-add-row{display:flex;gap:8px;margin-top:10px;}
-  .value-add-row input{flex:1;min-width:0;margin:0;}
-  .value-add-btn{flex-shrink:0;border:none;border-radius:12px;background:var(--accent);color:#fff;cursor:pointer;
-    font-family:'Inter',sans-serif;font-size:14px;font-weight:700;padding:0 16px;}
-  .value-add-btn:disabled{opacity:.5;cursor:default;}
   .add-milestone-btn{width:100%;border:1px dashed var(--border);background:transparent;color:var(--accent);
     font-family:'Inter',sans-serif;font-size:14px;font-weight:600;padding:10px 0;border-radius:8px;cursor:pointer;margin-bottom:16px;}
   .add-milestone-btn:hover{border-color:var(--accent);}
@@ -668,45 +641,6 @@
   .breakdown-btn svg{opacity:.7;}
   .breakdown-note{font-size:12.5px;color:var(--ink-muted);line-height:1.45;margin-bottom:14px;}
   .breakdown-note:empty{display:none;}
-
-  /* ---- Кастомний datepicker (той самий компонент, що й у tasks/) ---- */
-  .dp-field{position:relative;margin-top:6px;margin-bottom:16px;}
-  input[data-dp-native]{position:absolute;opacity:0;pointer-events:none;width:1px;height:1px;}
-  .dp-trigger{width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;
-    font-family:'Inter',sans-serif;font-size:15.5px;text-align:left;
-    border:1px solid var(--border);border-radius:8px;padding:9px 12px;background:var(--bg);color:var(--ink);
-    cursor:pointer;-webkit-tap-highlight-color:transparent;}
-  .dp-trigger:hover, .dp-trigger:focus-visible{border-color:var(--accent);}
-  .dp-field.open .dp-trigger{border-color:var(--accent);}
-  .dp-trigger-text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .dp-trigger-text.dp-placeholder{color:var(--ink-muted);}
-  .dp-trigger-icon{flex-shrink:0;color:var(--ink-muted);display:flex;}
-  .dp-panel{position:fixed;z-index:55;width:280px;max-width:calc(100vw - 32px);
-    background:var(--surface);    border:1px solid var(--border);border-radius:18px;box-shadow:var(--glass-shadow), 0 12px 34px rgba(20,20,30,.18);
-    padding:14px;opacity:0;transform:translateY(-6px) scale(.98);pointer-events:none;transition:opacity .14s ease,transform .14s ease;}
-  .dp-panel.show{opacity:1;transform:translateY(0) scale(1);pointer-events:auto;}
-  .dp-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
-  .dp-head-label{font-size:14px;font-weight:600;color:var(--ink);text-transform:capitalize;}
-  .dp-nav{display:flex;gap:4px;}
-  .dp-nav-btn{width:28px;height:28px;border-radius:8px;border:1px solid var(--border);background:transparent;
-    color:var(--ink-soft);display:flex;align-items:center;justify-content:center;cursor:pointer;}
-  .dp-nav-btn:hover{border-color:var(--accent);color:var(--accent);}
-  .dp-weekdays{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:4px;}
-  .dp-weekday{font-size:11px;font-weight:600;color:var(--ink-muted);text-align:center;padding:4px 0;text-transform:uppercase;}
-  .dp-days{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
-  .dp-day{position:relative;aspect-ratio:1;display:flex;align-items:center;justify-content:center;
-    font-size:13px;font-family:'Inter',sans-serif;color:var(--ink);background:transparent;border:none;border-radius:50%;
-    cursor:pointer;}
-  .dp-day:hover:not(:disabled):not(.dp-day-selected){background:var(--accent-light);}
-  .dp-day.dp-day-muted{color:var(--ink-muted);opacity:.45;}
-  .dp-day.dp-day-today:not(.dp-day-selected)::after{content:"";position:absolute;bottom:3px;left:50%;transform:translateX(-50%);
-    width:4px;height:4px;border-radius:50%;background:var(--accent);}
-  .dp-day.dp-day-selected{background:var(--accent);color:#fff;font-weight:600;}
-  .dp-day:disabled{opacity:.28;cursor:default;}
-  .dp-foot{display:flex;align-items:center;justify-content:space-between;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);}
-  .dp-today-btn, .dp-clear-btn{background:none;border:none;color:var(--accent);font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;padding:4px 6px;}
-  .dp-clear-btn{color:var(--ink-muted);}
-  .dp-today-btn:hover, .dp-clear-btn:hover{text-decoration:underline;}
 
   .confirm-modal{position:fixed;inset:0;background:rgba(34,38,43,.32);display:none;align-items:center;justify-content:center;z-index:60;padding:20px;}
   .confirm-modal.show{display:flex;}
@@ -845,11 +779,9 @@
     </div>
     <div class="detail-badges-row" id="detailBadgesRow"></div>
     <div id="detailWhyBlock"></div>
-    <div id="detailProgressBlock"></div>
     <div id="detailLapseBlock"></div>
     <div id="detailPaceBlock"></div>
     <div id="detailMeasureBlock"></div>
-    <div id="detailDriftRow"></div>
     <div id="detailChartBlock"></div>
     <div id="detailJourneyBlock"></div>
     <div id="detailActionsBlock"></div>
@@ -901,24 +833,6 @@
 
       <label class="field-label" id="whyLabel">Навіщо тобі це?</label>
       <textarea id="goalWhyInput" maxlength="1000"></textarea>
-
-      <label class="field-label" id="targetDateLabel">Дедлайн (необовʼязково)</label>
-      <input type="date" id="goalTargetDate" data-dp-native data-dp-clearable>
-
-      <label class="field-label" id="targetValueLabel">Числова мета (необовʼязково)</label>
-      <div class="target-row">
-        <input type="number" id="goalTargetValue" inputmode="decimal" step="any" min="0" placeholder="10">
-        <input type="text" id="goalUnitInput" maxlength="20" placeholder="км">
-      </div>
-      <div class="field-hint" id="targetValueHint">Якщо задати — прогрес рахується числом, а не віхами.</div>
-
-      <!-- Звʼязок зі скарбничкою бюджету. Показується лише тоді, коли задана
-           числова мета: без неї підтягувати нема куди. -->
-      <div id="savingsLinkBlock" style="display:none;">
-        <label class="field-label" id="savingsLinkLabel">Брати число зі скарбнички</label>
-        <div class="choice-row" id="savingsLinkPicker"></div>
-        <div class="field-hint" id="savingsLinkHint"></div>
-      </div>
 
       <label class="field-label" id="milestonesLabel">Віхи</label>
       <div id="milestonesEditor"></div>

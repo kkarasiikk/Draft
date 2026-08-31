@@ -121,34 +121,11 @@
     return { checkins: checkins };
   }
 
-  /** Додає прогрес до числової цілі: сума плюс запис у журнал.
-   *
-   *  Живе тут, а не на сторінці цілей, бо прогрес додає не лише вона: у
-   *  тренуваннях пробіг зараховується в ціль «пробігти 100 км» просто там, де
-   *  його записали. Дві копії арифметики розійшлися б — а від неї залежать і
-   *  смужка, і темп.
-   *
-   *  currentValue лишається сумою, progressLog — історією: одне число не
-   *  памʼятає, КОЛИ прогрес був, і без цього не порахувати ні темп, ні рух
-   *  за тиждень. */
-  function applyProgress(goal, delta, todayIso) {
-    var d = Number(delta);
-    if (!Number.isFinite(d) || d === 0) return null;
-    var round2 = function (n) { return Math.round(n * 100) / 100; };
-    var next = Math.max(0, round2((Number(goal && goal.currentValue) || 0) + d));
-    var log = ((goal && goal.progressLog) || []).slice();
-    log.push({ date: todayIso, delta: round2(d) });
-    if (log.length > 400) log = log.slice(log.length - 400);
-    return { currentValue: next, progressLog: log };
-  }
-
   /** Цілі, у які має сенс зарахувати сьогоднішнє тренування.
    *
    *  Тільки здоровʼя і тільки активні: ціль на паузі саме тим і є, що про неї
-   *  не питають, а «вивчити польську» до тренування стосунку не має. Ті, де
-   *  сьогодні вже відмічено І нема куди додавати число, теж відпадають —
-   *  пропонувати нема чого. Числовій цілі є що запропонувати навіть після
-   *  чекіна: кілометри додаються окремо від «сьогодні був крок».
+   *  не питають, а «вивчити польську» до тренування стосунку не має. Уже
+   *  відмічені сьогодні теж відпадають — пропонувати нема чого.
    *
    *  `categoryIds` — список категорій, які людина має зараз (їх можна
    *  редагувати). Якщо категорії 'health' у ньому немає — вона видалена або
@@ -166,9 +143,7 @@
     return (goals || []).filter(function (g) {
       if (!g || g.status !== 'active') return false;
       if (byCategory && g.category !== 'health') return false;
-      var measurable = Number(g.targetValue) > 0;
-      var checkedIn = ((g.checkins || []).indexOf(todayIso) >= 0);
-      return measurable || !checkedIn;
+      return ((g.checkins || []).indexOf(todayIso) < 0);
     });
   }
 
@@ -388,7 +363,6 @@
     rescueState: rescueState,
     applyRescue: applyRescue,
     applyCheckin: applyCheckin,
-    applyProgress: applyProgress,
     trainingGoals: trainingGoals,
     applyBlocker: applyBlocker,
     blockerStats: blockerStats,

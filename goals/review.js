@@ -24,7 +24,6 @@
   // Скільки днів історії треба, щоб узагалі говорити про темп. Два записи за
   // три дні — це не темп, це збіг; прогноз на них збрехав би впевненим тоном.
   var MIN_HISTORY_DAYS = 7;
-  var MIN_PROGRESS_ENTRIES = 2;
 
   // Скільки днів мовчання роблять паузу «перервою», а не звичайним
   // пропуском. Два тижні: тиждень без кроку буває в кожної живої цілі, а от
@@ -59,7 +58,38 @@
     return Math.max(0, Math.min(100, Math.round(n)));
   }
 
-  /** Найраніший слід життя цілі в самих даних — коли createdAt не передали. */
+  /**
+   * Дедлайн місячної цілі — останній день її місяця.
+   *
+   * Окремого поля «до якого числа» більше немає, і не тому, що дедлайн
+   * перестав існувати, а тому, що для місячної цілі він і так уже сказаний:
+   * «зробити в серпні» означає «до 31 серпня». Питати про це вдруге означало б
+   * просити людину повторити те, що вона щойно ввела вибором місяця.
+   *
+   * Річна ціль місяця не має, тож і дедлайну не отримує: рік — це напрямок,
+   * а не строк, і вигадувати їй 31 грудня було б припущенням, а не фактом.
+   *
+   * @param {string} monthKey 'YYYY-MM'
+   * @returns {string|null} 'YYYY-MM-DD' або null, якщо місяць не заданий
+   */
+  function deadlineForMonth(monthKey) {
+    if (typeof monthKey !== 'string' || !/^\d{4}-\d{2}$/.test(monthKey)) return null;
+    var year = Number(monthKey.slice(0, 4));
+    var month = Number(monthKey.slice(5, 7));
+    if (!year || month < 1 || month > 12) return null;
+    // Нульовий день наступного місяця — це останній день цього, і рахувати
+    // високосні роки вручну не доводиться.
+    var last = new Date(Date.UTC(year, month, 0)).getUTCDate();
+    return monthKey + '-' + (last < 10 ? '0' + last : String(last));
+  }
+
+  /** Найраніший слід життя цілі в самих даних — коли createdAt не передали.
+   *
+   *  progressLog тут читається як спадщина: числової мети більше немає й нових
+   *  записів не буває, але в цілей, заведених раніше, вони лежать — і це такі
+   *  самі справжні дати життя цілі, як чекіни. Викинути їх означало б
+   *  «омолодити» стару ціль на кілька місяців. Те саме нижче в latestSignal
+   *  і в lapse. */
   function earliestSignal(goal) {
     var dates = [];
     ((goal && goal.progressLog) || []).forEach(function (e) {
@@ -89,40 +119,18 @@
   }
 
   /** Прогрес цілі у відсотках плюс сирі числа. Дзеркалить progressOf зі
-   *  сторінки: числова мета важливіша за віхи, бо коли людина задала «10 км»,
-   *  відсоток має рахуватись від пройденого, а не від кількості придуманих
-   *  кроків. */
+   *  сторінки. Міряється віхами: числової мети в застосунку більше немає —
+   *  число, якщо воно комусь потрібне, живе в самій назві цілі. */
   function progressPct(goal) {
-    var target = num(goal && goal.targetValue);
-    if (target > 0) {
-      var current = num(goal && goal.currentValue);
-      return {
-        kind: 'value',
-        pct: clampPct((current / target) * 100),
-        current: current,
-        target: target,
-        remaining: Math.max(0, target - current),
-      };
-    }
     var milestones = (goal && goal.milestones) || [];
     if (!milestones.length) return null;
     var done = milestones.filter(function (m) { return m && m.done; }).length;
     return {
-      kind: 'milestones',
       pct: clampPct((done / milestones.length) * 100),
       done: done,
       total: milestones.length,
       remaining: milestones.length - done,
     };
-  }
-
-  /** Сума прогресу, набраного за останні `days` днів. */
-  function progressSince(goal, fromIso) {
-    var sum = 0;
-    ((goal && goal.progressLog) || []).forEach(function (e) {
-      if (e && typeof e.date === 'string' && e.date >= fromIso) sum += num(e.delta);
-    });
-    return sum;
   }
 
   /**
@@ -158,16 +166,14 @@
     var timePct = clampPct((elapsed / totalDays) * 100);
 
     var out = {
-      kind: prog.kind,
       pct: prog.pct,
       timePct: timePct,
       daysLeft: daysLeft,
       overdue: daysLeft < 0,
-      // «Є прогноз із конкретною датою». Запасний шлях (частка часу проти
-      // частки роботи) дати не дає, тож там лишається false.
+      // «Є прогноз із конкретною датою». Такий прогноз давала лише числова
+      // мета — по журналу «скільки на день»; без неї дати взяти нізвідки, тож
+      // поле лишається завжди false, а висновок несе verdict.
       enough: false,
-      ratePerDay: null,
-      requiredPerDay: null,
       projectedDate: null,
       diffDays: null,
       verdict: 'unknown',
@@ -184,41 +190,10 @@
       return out;
     }
 
-    if (prog.kind === 'value') {
-      var log = (goal.progressLog || []).filter(function (e) {
-        return e && typeof e.date === 'string';
-      });
-      var dates = log.map(function (e) { return e.date; }).sort();
-      var spanDays = dates.length ? S.daysBetween(dates[0], todayIso) : 0;
-
-      out.requiredPerDay = daysLeft > 0 ? prog.remaining / daysLeft : null;
-
-      if (log.length >= MIN_PROGRESS_ENTRIES && spanDays >= MIN_HISTORY_DAYS) {
-        var gained = 0;
-        log.forEach(function (e) { gained += num(e.delta); });
-        // Ділимо на прожиті дні, а не на кількість записів: темп — це
-        // «скільки на день», а не «скільки за підхід».
-        var rate = gained / Math.max(1, spanDays);
-        if (rate > 0) {
-          out.enough = true;
-          out.ratePerDay = rate;
-          var daysNeeded = Math.ceil(prog.remaining / rate);
-          out.projectedDate = S.shift(todayIso, daysNeeded);
-          out.diffDays = S.daysBetween(goal.targetDate, out.projectedDate);
-          out.verdict = out.diffDays > 0 ? 'behind' : (out.diffDays < -Math.round(totalDays * 0.1) ? 'ahead' : 'onTrack');
-          return out;
-        }
-        // Записи є, а руху нема (усе в нуль або назад) — це теж відповідь.
-        out.enough = true;
-        out.ratePerDay = 0;
-        out.verdict = 'behind';
-        return out;
-      }
-    }
-
-    // Спільний запасний шлях: порівнюємо частку пройденого шляху з часткою
-    // витраченого часу. Він не потребує ЖОДНИХ нових даних і однаково працює
-    // для віх — саме тому «вивчити польську» теж отримує чесну оцінку.
+    // Порівнюємо частку пройденого шляху з часткою витраченого часу. Раніше
+    // поруч жив другий, точніший шлях — по журналу числового прогресу, з
+    // прогнозом конкретної дати. Числової мети більше немає, а з нею пішов і
+    // він: лишився цей, який не потребує ЖОДНИХ додаткових даних.
     //
     // Але не з першого дня: у щойно заведеної цілі часу минуло 0%, і будь-яка
     // закрита віха читалась би як «випереджаєш графік». Це той самий поріг, що
@@ -262,15 +237,12 @@
       return day >= from && day <= todayIso;
     }).length;
 
-    var progressDelta = progressSince(goal, from);
-
     return {
       from: from,
       checkins: checkins,
       milestonesDone: milestonesDone,
       journal: journal,
-      progressDelta: progressDelta,
-      moved: checkins > 0 || milestonesDone > 0 || progressDelta > 0,
+      moved: checkins > 0 || milestonesDone > 0,
     };
   }
 
@@ -454,57 +426,13 @@
     return { daysOld: age, hasDeadline: !!goal.targetDate };
   }
 
-  /**
-   * Дописує зсув дедлайну в історію.
-   *
-   * Дедлайн зсувається одним рухом, і старе значення досі зникало без сліду.
-   * А ціль, яку переносили чотири рази, — це вже не ціль, це звичка
-   * домовлятися з собою; побачити цю звичку можна лише тоді, коли її
-   * записують.
-   *
-   * Повертає null, коли писати нема чого: дата не змінилась, або дедлайн
-   * ставлять уперше — зсувати ще не було чого.
-   */
-  function recordDeadlineShift(goal, nextDate, todayIso) {
-    var prev = (goal && goal.targetDate) || null;
-    var next = nextDate || null;
-    if (prev === next || !prev) return null;
-    var hist = ((goal && goal.deadlineHistory) || []).slice();
-    hist.push({ from: prev, to: next, at: todayIso });
-    // Стеля така сама, як у решти списків цілі: історія не має рости вічно.
-    if (hist.length > 50) hist = hist.slice(hist.length - 50);
-    return hist;
-  }
-
-  /**
-   * Скільки разів дедлайн їхав і куди він приїхав від початкового.
-   *
-   * `days` рахується від НАЙПЕРШОЇ дати до теперішньої, а не як сума кроків:
-   * два зсуви вперед і один назад — це не три факти, а один підсумок.
-   * Відʼємне значення (дедлайн підтягнули ближче) теж чесне й показується.
-   */
-  function deadlineDrift(goal) {
-    var S = streak();
-    var hist = ((goal && goal.deadlineHistory) || []).filter(function (h) {
-      return h && typeof h.from === 'string';
-    });
-    if (!hist.length) return null;
-    var original = hist[0].from;
-    var current = (goal && goal.targetDate) || null;
-    return {
-      count: hist.length,
-      originalDate: original,
-      // Дедлайн могли й зовсім прибрати — тоді порівнювати нема з чим.
-      days: current && S ? S.daysBetween(original, current) : null,
-    };
-  }
 
   /**
    * Ряд накопиченого прогресу — щоб шлях було ВИДНО, а не лише названо.
    *
    * Темп уже каже «не встигаєш», але не каже, ЯКИЙ шлях був: де ривок, де три
    * тижні пусто, чи прискорився я саме зараз. Усе це вже лежить у
-   * progressLog і в датах віх — бракувало тільки того, хто складе це в лінію.
+   * датах закритих віх — бракувало тільки того, хто складе це в лінію.
    *
    * `required` — де прогрес мав би бути, щоб устигнути рівним темпом. Це не
    * докір, а система координат: без неї сама по собі зростаюча крива нічого
@@ -526,28 +454,17 @@
     var startIso = (opts && opts.startIso) || earliestSignal(goal);
     var byDay = {};
 
-    if (prog.kind === 'value') {
-      ((goal && goal.progressLog) || []).forEach(function (e) {
-        if (!e || typeof e.date !== 'string' || e.date > todayIso) return;
-        byDay[e.date] = (byDay[e.date] || 0) + num(e.delta);
-      });
-    } else {
-      ((goal && goal.milestones) || []).forEach(function (m) {
-        if (!m || !m.done || typeof m.doneAt !== 'string' || m.doneAt > todayIso) return;
-        byDay[m.doneAt] = (byDay[m.doneAt] || 0) + 1;
-      });
-    }
+    ((goal && goal.milestones) || []).forEach(function (m) {
+      if (!m || !m.done || typeof m.doneAt !== 'string' || m.doneAt > todayIso) return;
+      byDay[m.doneAt] = (byDay[m.doneAt] || 0) + 1;
+    });
 
     var days = Object.keys(byDay).sort();
     if (!days.length) return null;
 
-    // Прогрес, набраний ДО журналу: у старих цілей currentValue могли просто
-    // вписати числом, і журнал його не памʼятає. Починати лінію з нуля
-    // означало б домалювати ривок, якого не було.
-    var logged = days.reduce(function (sum, d) { return sum + byDay[d]; }, 0);
-    var baseline = prog.kind === 'value'
-      ? Math.max(0, Math.round((prog.current - logged) * 100) / 100)
-      : 0;
+    // Віхи рахуються від нуля: закрита віха — це подія з датою, і нічого
+    // «набраного до журналу» тут не буває.
+    var baseline = 0;
 
     var from = startIso && startIso < days[0] ? startIso : days[0];
     var points = [{ date: from, value: baseline }];
@@ -567,7 +484,7 @@
     points.forEach(function (pt) { distinct[pt.date] = true; });
     if (Object.keys(distinct).length < 2) return null;
 
-    var max = prog.kind === 'value' ? prog.target : prog.total;
+    var max = prog.total;
     var to = goal.targetDate && goal.targetDate > todayIso ? goal.targetDate : todayIso;
     if (to < points[points.length - 1].date) to = points[points.length - 1].date;
 
@@ -579,7 +496,6 @@
     }
 
     return {
-      kind: prog.kind,
       from: from,
       to: to,
       max: max,
@@ -698,11 +614,10 @@
   var api = {
     REVIEW_PERIOD_DAYS: REVIEW_PERIOD_DAYS,
     MIN_HISTORY_DAYS: MIN_HISTORY_DAYS,
-    MIN_PROGRESS_ENTRIES: MIN_PROGRESS_ENTRIES,
     MEASURE_GRACE_DAYS: MEASURE_GRACE_DAYS,
     LAPSE_DAYS: LAPSE_DAYS,
+    deadlineForMonth: deadlineForMonth,
     progressPct: progressPct,
-    progressSince: progressSince,
     pace: pace,
     weekMovement: weekMovement,
     daysSinceReview: daysSinceReview,
@@ -714,8 +629,6 @@
     lapse: lapse,
     monthKeyOf: monthKeyOf,
     goalsOfMonth: goalsOfMonth,
-    recordDeadlineShift: recordDeadlineShift,
-    deadlineDrift: deadlineDrift,
     closedOn: closedOn,
     goalSpan: goalSpan,
     retrospective: retrospective,
