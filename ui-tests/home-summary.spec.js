@@ -165,13 +165,11 @@ test.describe('Сьогодні', () => {
   });
 
   test('виконане закреслене й лежить нижче невиконаного', async ({ page }) => {
-    // Тренування на сьогодні — щоб у списку лишились самі завдання.
     await openHub(page, {
       tasks: [
         task('done', { title: 'Купити протеїн', done: true }),
         task('open', { title: 'Відповісти Міші' }),
       ],
-      workouts: [{ id: 'w', date: iso(), exercises: [] }],
     });
     const names = await page.locator('.today-row .today-name').allTextContents();
     expect(names).toEqual(['Відповісти Міші', 'Купити протеїн']);
@@ -185,59 +183,51 @@ test.describe('Сьогодні', () => {
     expect(upd.payload.done).toBe(true);
   });
 
-  test('ціль без кроку показана з кнопкою, і кнопка відмічає день', async ({ page }) => {
-    await openHub(page, { goals: [
-      { id: 'g1', title: 'Подушка 20 000', status: 'active', category: 'finance', checkins: [], milestones: [] },
-    ] });
-    await expect(page.locator('[data-goal-step="g1"]')).toBeVisible();
-    await page.click('[data-goal-step="g1"]');
-    await expect.poll(() => page.evaluate(() => window.__fbCalls.update.length)).toBeGreaterThan(0);
-    const upd = await page.evaluate(() => window.__fbCalls.update.at(-1));
-    expect(upd.payload.checkins).toEqual([iso()]);
+  // Картка називається «Сьогодні» й показує саме завдання на сьогодні.
+  // Цілі без кроку й рядок про тренування звідси пішли: разом із «побачити
+  // ще N» виходило шість рядків, і головна не вміщалась в екран.
+  test('ціль без сьогоднішнього кроку в картку не лізе', async ({ page }) => {
+    await openHub(page, {
+      tasks: [task('t1')],
+      goals: [{ id: 'g1', title: 'Подушка 20 000', status: 'active', category: 'finance', checkins: [], milestones: [] }],
+    });
+    await expect(page.locator('#todayList')).toContainText('Забрати документи');
+    await expect(page.locator('#todayList')).not.toContainText('Подушка');
+    await expect(page.locator('[data-goal-step]')).toHaveCount(0);
   });
 
-  test('відмічена сьогодні ціль у списку не висить', async ({ page }) => {
-    await openHub(page, { goals: [
-      { id: 'g1', title: 'Подушка', status: 'active', category: 'finance', checkins: [iso()], milestones: [] },
-    ] });
-    await expect(page.locator('[data-goal-step="g1"]')).toHaveCount(0);
+  test('рядка про тренування в картці немає', async ({ page }) => {
+    // Тренувань немає взагалі — саме той випадок, коли рядок «востаннє N днів
+    // тому» зʼявлявся й займав місце під справами.
+    await openHub(page, { tasks: [task('t1')], workouts: [] });
+    await expect(page.locator('#todayList .today-row')).toHaveCount(1);
   });
 
-  test('видно два завдання, решта — за посиланням', async ({ page }) => {
+  test('більше чотирьох завдань — показуємо чотири, без пʼятого рядка', async ({ page }) => {
     await openHub(page, { tasks: [
       task('a', { title: 'Перше' }), task('b', { title: 'Друге' }),
       task('c', { title: 'Третє' }), task('d', { title: 'Четверте' }),
+      task('e', { title: 'Пʼяте' }), task('f', { title: 'Шосте' }),
     ] });
-    await expect(page.locator('[data-task]')).toHaveCount(2);
-    await expect(page.locator('.today-more')).toHaveText(/2/);
+    await expect(page.locator('[data-task]')).toHaveCount(4);
+    await expect(page.locator('#todayList')).not.toContainText('Пʼяте');
+    // Скільки їх насправді, каже лічильник у шапці — окремий рядок зайвий.
+    await expect(page.locator('#todayList a')).toHaveCount(0);
   });
 
-  test('посилання веде саме в завдання', async ({ page }) => {
-    await openHub(page, { tasks: [
-      task('a'), task('b'), task('c'),
-    ] });
-    await expect(page.locator('.today-more')).toHaveAttribute('href', 'tasks/index.html');
+  test('чотири завдання вміщаються всі', async ({ page }) => {
+    await openHub(page, { tasks: [task('a'), task('b'), task('c'), task('d')] });
+    await expect(page.locator('[data-task]')).toHaveCount(4);
   });
 
-  test('коли завдань два — посилання ні до чого', async ({ page }) => {
-    await openHub(page, { tasks: [task('a'), task('b')] });
-    await expect(page.locator('.today-more')).toHaveCount(0);
-  });
-
-  test('невиконане з минулих днів у «ще N» не рахується', async ({ page }) => {
-    await openHub(page, { tasks: [
-      task('a'), task('b'),
-      task('old', { title: 'Страховка', dueDate: iso(-4) }),
-    ] });
-    await expect(page.locator('.today-more')).toHaveCount(0);
-  });
-
-  test('лічильник у шапці рахує все, а не лише показане', async ({ page }) => {
+  test('лічильник рахує сьогоднішні завдання, а не показані рядки', async ({ page }) => {
     await openHub(page, {
-      tasks: [task('a'), task('b'), task('c'), task('d')],
-      workouts: [{ id: 'w', date: iso(), exercises: [] }],
+      tasks: [task('a'), task('b'), task('c'), task('d'), task('e'),
+        task('old', { dueDate: iso(-4) })],
+      goals: [{ id: 'g1', title: 'Подушка', status: 'active', category: 'finance', checkins: [], milestones: [] }],
     });
-    await expect(page.locator('#todayCount')).toHaveText(/4/);
+    // Пʼять сьогоднішніх: ані вчорашнє, ані ціль сюди не додаються.
+    await expect(page.locator('#todayCount')).toHaveText(/5/);
   });
 
   test('порожній день — це новина, а не порожній екран', async ({ page }) => {
@@ -270,54 +260,53 @@ test.describe('Календар тижня', () => {
     await expect(page.locator('.cal-day.today')).toHaveCount(1);
   });
 
-  test('у дні видно назву справи, а не саме лише «щось є»', async ({ page }) => {
+  // Під числом — крапка, і більше нічого. Назви справ тут були обрізані до
+  // «Ввече…»: упізнати за ними своє однаково не виходило, а смуга виростала
+  // втричі й виштовхувала решту головної за межу екрана.
+  test('у дні зі справами стоїть крапка, у порожньому — ні', async ({ page }) => {
     // Вівторок цього тижня — другий день у смузі.
     await openHub(page, { tasks: [{ id: 'a', dueDate: dayOffset(1), title: 'Пошта', done: false }] });
-    await expect(page.locator('.cal-day').nth(1).locator('.cal-chip')).toHaveText('Пошта');
-    await expect(page.locator('.cal-day').nth(0).locator('.cal-chip')).toHaveCount(0);
+    await expect(page.locator('.cal-day').nth(1).locator('.cal-dot')).toHaveClass(/has/);
+    await expect(page.locator('.cal-day').nth(0).locator('.cal-dot')).not.toHaveClass(/has|all-done/);
   });
 
-  test('назва стоїть і на майбутньому дні — календар дивиться вперед', async ({ page }) => {
+  test('назв справ у смузі немає', async ({ page }) => {
+    await openHub(page, { tasks: [{ id: 'a', dueDate: dayOffset(1), title: 'Пошта', done: false }] });
+    await expect(page.locator('#calWeek')).not.toContainText('Пошта');
+  });
+
+  test('крапка стоїть і на майбутньому дні — тиждень дивиться вперед', async ({ page }) => {
     await openHub(page, { tasks: [{ id: 'a', dueDate: dayOffset(6), title: 'Звіт', done: false }] });
-    await expect(page.locator('.cal-day').nth(6).locator('.cal-chip')).toHaveText('Звіт');
+    await expect(page.locator('.cal-day').nth(6).locator('.cal-dot')).toHaveClass(/has/);
   });
 
-  test('закрита справа виглядає інакше за відкриту', async ({ page }) => {
+  test('день, де все закрито, виглядає інакше за день, де ще є що робити', async ({ page }) => {
     await openHub(page, { tasks: [
       { id: 'a', dueDate: dayOffset(0), title: 'Готово', done: true },
       { id: 'b', dueDate: dayOffset(1), title: 'Робити', done: false },
     ] });
-    await expect(page.locator('.cal-day').nth(0).locator('.cal-chip')).toHaveClass(/done/);
-    await expect(page.locator('.cal-day').nth(1).locator('.cal-chip')).not.toHaveClass(/done/);
+    await expect(page.locator('.cal-day').nth(0).locator('.cal-dot')).toHaveClass(/all-done/);
+    await expect(page.locator('.cal-day').nth(1).locator('.cal-dot')).toHaveClass(/has/);
   });
 
-  test('невиконане показується першим — рядків у колонці мало', async ({ page }) => {
+  test('день з відкритим і закритим лишається днем, де є що робити', async ({ page }) => {
     await openHub(page, { tasks: [
       { id: 'a', dueDate: dayOffset(1), title: 'Закрите', done: true },
       { id: 'b', dueDate: dayOffset(1), title: 'Відкрите', done: false },
     ] });
-    await expect(page.locator('.cal-day').nth(1).locator('.cal-chip').first()).toHaveText('Відкрите');
+    await expect(page.locator('.cal-day').nth(1).locator('.cal-dot')).toHaveClass(/has/);
   });
 
-  test('більше двох справ згортаються в «+N»', async ({ page }) => {
-    await openHub(page, { tasks: [1, 2, 3, 4].map((n) => (
+  test('десять справ у дні — та сама одна крапка', async ({ page }) => {
+    await openHub(page, { tasks: Array.from({ length: 10 }, (_, n) => (
       { id: 't' + n, dueDate: dayOffset(2), title: 'Справа ' + n, done: false }
     )) });
-    const day = page.locator('.cal-day').nth(2);
-    await expect(day.locator('.cal-chip')).toHaveCount(2);
-    await expect(day.locator('.cal-more')).toHaveText('+2');
-  });
-
-  test('рівно дві справи в «+N» не згортаються', async ({ page }) => {
-    await openHub(page, { tasks: [1, 2].map((n) => (
-      { id: 't' + n, dueDate: dayOffset(2), title: 'Справа ' + n, done: false }
-    )) });
-    await expect(page.locator('.cal-day').nth(2).locator('.cal-more')).toHaveCount(0);
+    await expect(page.locator('.cal-day').nth(2).locator('.cal-dot')).toHaveCount(1);
   });
 
   test('порожній день не робить смугу нижчою — числа не стрибають', async ({ page }) => {
     await openHub(page, { tasks: [{ id: 'a', dueDate: dayOffset(1), title: 'Пошта', done: false }] });
-    const heights = await page.locator('.cal-items').evaluateAll((els) =>
+    const heights = await page.locator('.cal-day').evaluateAll((els) =>
       els.map((e) => Math.round(e.getBoundingClientRect().height)));
     expect(new Set(heights).size).toBe(1);
   });
