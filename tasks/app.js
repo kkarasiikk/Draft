@@ -38,7 +38,6 @@ const T = {
     pageTitle: 'Завдання',
     noDateLabel: 'Без дати',
     dayViewEmptyTitle: 'На цю дату завдань немає', dayViewEmptySub: 'Додай завдання кнопкою внизу.',
-    completedLabel: (n) => `Виконано (${n})`,
     newTaskTitle: 'Нове завдання', editTaskTitle: 'Редагувати завдання',
     titlePlaceholder: 'Назва завдання',
     notesLabel: 'Нотатка', notesPlaceholder: 'Додаткові деталі (необовʼязково)',
@@ -139,7 +138,6 @@ const T = {
     pageTitle: 'Задачи',
     noDateLabel: 'Без даты',
     dayViewEmptyTitle: 'На эту дату задач нет', dayViewEmptySub: 'Добавь задачу кнопкой внизу.',
-    completedLabel: (n) => `Выполнено (${n})`,
     newTaskTitle: 'Новая задача', editTaskTitle: 'Редактировать задачу',
     titlePlaceholder: 'Название задачи',
     notesLabel: 'Заметка', notesPlaceholder: 'Дополнительные детали (необязательно)',
@@ -238,7 +236,6 @@ const T = {
     pageTitle: 'Zadania',
     noDateLabel: 'Bez daty',
     dayViewEmptyTitle: 'Na ten dzień nie ma zadań', dayViewEmptySub: 'Dodaj zadanie przyciskiem poniżej.',
-    completedLabel: (n) => `Ukończono (${n})`,
     newTaskTitle: 'Nowe zadanie', editTaskTitle: 'Edytuj zadanie',
     titlePlaceholder: 'Nazwa zadania',
     notesLabel: 'Notatka', notesPlaceholder: 'Dodatkowe szczegóły (opcjonalnie)',
@@ -337,7 +334,6 @@ const T = {
     pageTitle: 'Tasks',
     noDateLabel: 'No date',
     dayViewEmptyTitle: 'No tasks for this date', dayViewEmptySub: 'Add a task with the button below.',
-    completedLabel: (n) => `Completed (${n})`,
     newTaskTitle: 'New task', editTaskTitle: 'Edit task',
     titlePlaceholder: 'Task title',
     notesLabel: 'Notes', notesPlaceholder: 'Extra details (optional)',
@@ -762,6 +758,12 @@ function subscribeToGoalTitles(uid) {
 function sortTasks(list) {
   const prioOrder = { high: 0, medium: 1, low: 2 };
   return [...list].sort((a, b) => {
+    // Виконане опускається в кінець списку — і на цьому все. Раніше воно
+    // ще й ховалось у згорнутий блок «Виконано (N)»: щоб побачити зроблене
+    // за день, доводилось його розгортати, а сам блок займав рядок екрана
+    // заради лічильника. Тепер зроблене просто лежить унизу — закреслене,
+    // видиме, і галочку можна зняти одним тапом там же, де вона стояла.
+    if (!a.done !== !b.done) return a.done ? 1 : -1;
     const ta = a.dueTime || (a.dueDate ? '23:59' : '99:99');
     const tb = b.dueTime || (b.dueDate ? '23:59' : '99:99');
     if (ta !== tb) return ta < tb ? -1 : 1;
@@ -848,19 +850,6 @@ function dayGroupHtml(label, list) {
     <div class="day-group">
       <div class="day-label">${escapeHtml(label)}</div>
       <div class="day-card">${sortTasks(list).map(taskRowHtml).join('')}</div>
-    </div>`;
-}
-
-function completedSectionHtml(list) {
-  if (!list.length) return '';
-  const expanded = document.getElementById('completedSection')?.classList.contains('open');
-  return `
-    <div class="day-group" id="completedSection">
-      <button type="button" class="day-label" id="completedToggle" style="background:none;border:none;cursor:pointer;padding:0;display:flex;align-items:center;gap:4px;">
-        ${escapeHtml(t('completedLabel', list.length))}
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="transition:transform .2s;${expanded ? 'transform:rotate(180deg);' : ''}"><path d="M6 9l6 6 6-6"/></svg>
-      </button>
-      <div class="day-card" style="${expanded ? '' : 'display:none;'}" id="completedList">${sortTasks(list).map(taskRowHtml).join('')}</div>
     </div>`;
 }
 
@@ -1228,12 +1217,7 @@ function renderNoDateSection() {
   const el = document.getElementById('noDateSection');
   const undated = tasks.filter(matchesFilters).filter((tsk) => !tsk.dueDate);
   if (!undated.length) { el.innerHTML = ''; return; }
-  const undone = undated.filter((tsk) => !tsk.done);
-  const done = undated.filter((tsk) => tsk.done);
-  let html = '';
-  if (undone.length) html += dayGroupHtml(t('noDateLabel'), undone);
-  html += completedSectionHtml(done);
-  el.innerHTML = html;
+  el.innerHTML = dayGroupHtml(t('noDateLabel'), undated);
 
   el.querySelectorAll('[data-toggle]').forEach((btn) => {
     btn.addEventListener('click', (e) => { e.stopPropagation(); toggleDone(btn.dataset.toggle); });
@@ -1241,13 +1225,6 @@ function renderNoDateSection() {
   el.querySelectorAll('[data-open]').forEach((elx) => {
     elx.addEventListener('click', () => openTaskForm(tasks.find((tsk) => tsk.id === elx.dataset.open)));
   });
-  const completedToggle = el.querySelector('#completedToggle');
-  if (completedToggle) {
-    completedToggle.addEventListener('click', () => {
-      document.getElementById('completedSection').classList.toggle('open');
-      renderNoDateSection();
-    });
-  }
 }
 
 
@@ -2090,12 +2067,8 @@ function renderSelectedDay() {
     listEl.innerHTML = `<div class="day-view-empty"><div class="title">${escapeHtml(t('dayViewEmptyTitle'))}</div><div>${escapeHtml(t('dayViewEmptySub'))}</div></div>`;
     return;
   }
-  const undone = dayTasks.filter((tsk) => !tsk.done);
-  const done = dayTasks.filter((tsk) => tsk.done);
-  let html = '';
-  if (undone.length) html += `<div class="day-card">${undone.map(taskRowHtml).join('')}</div>`;
-  html += completedSectionHtml(done);
-  listEl.innerHTML = html;
+  // Одна картка на день: виконане вже стоїть у кінці (див. sortTasks).
+  listEl.innerHTML = `<div class="day-card">${dayTasks.map(taskRowHtml).join('')}</div>`;
 
   listEl.querySelectorAll('[data-toggle]').forEach((btn) => {
     btn.addEventListener('click', (e) => { e.stopPropagation(); toggleDone(btn.dataset.toggle); });
@@ -2103,13 +2076,6 @@ function renderSelectedDay() {
   listEl.querySelectorAll('[data-open]').forEach((elx) => {
     elx.addEventListener('click', () => openTaskForm(tasks.find((tsk) => tsk.id === elx.dataset.open)));
   });
-  const completedToggle = listEl.querySelector('#completedToggle');
-  if (completedToggle) {
-    completedToggle.addEventListener('click', () => {
-      document.getElementById('completedSection').classList.toggle('open');
-      renderSelectedDay();
-    });
-  }
 }
 
 document.querySelectorAll('#bottomNav [data-screen]').forEach((btn) => {
