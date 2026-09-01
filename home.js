@@ -37,6 +37,7 @@ const LOCALE_MAP = { uk: 'uk-UA', ru: 'ru-RU', pl: 'pl-PL', en: 'en-US' };
 const STRINGS = {
   uk: {
     themeLabel: 'Тема', themeLight: 'Світла', themeDark: 'Темна', themeSystem: 'Системна',
+    amountsLabel: 'Сума витрат', amountsShow: 'Показувати', amountsHide: 'Ховати',
     langLabel: 'Мова', logout: 'Вийти', exportLabel: 'Експорт даних',
     settingsLabel: 'Налаштування', recordBtn: 'Записати',
     exportBusy: 'Готую файл…', exportError: 'Не вдалося зібрати файл. Спробуй ще раз.',
@@ -111,6 +112,7 @@ const STRINGS = {
   },
   ru: {
     themeLabel: 'Тема', themeLight: 'Светлая', themeDark: 'Тёмная', themeSystem: 'Системная',
+    amountsLabel: 'Сумма расходов', amountsShow: 'Показывать', amountsHide: 'Скрывать',
     langLabel: 'Язык', logout: 'Выйти', exportLabel: 'Экспорт данных',
     settingsLabel: 'Настройки', recordBtn: 'Записать',
     exportBusy: 'Готовлю файл…', exportError: 'Не удалось собрать файл. Попробуй ещё раз.',
@@ -185,6 +187,7 @@ const STRINGS = {
   },
   pl: {
     themeLabel: 'Motyw', themeLight: 'Jasny', themeDark: 'Ciemny', themeSystem: 'Systemowy',
+    amountsLabel: 'Kwota wydatków', amountsShow: 'Pokazuj', amountsHide: 'Ukrywaj',
     langLabel: 'Język', logout: 'Wyloguj', exportLabel: 'Eksport danych',
     settingsLabel: 'Ustawienia', recordBtn: 'Zapisz',
     exportBusy: 'Przygotowuję plik…', exportError: 'Nie udało się zebrać pliku. Spróbuj ponownie.',
@@ -259,6 +262,7 @@ const STRINGS = {
   },
   en: {
     themeLabel: 'Theme', themeLight: 'Light', themeDark: 'Dark', themeSystem: 'System',
+    amountsLabel: 'Spending amount', amountsShow: 'Show', amountsHide: 'Hide',
     langLabel: 'Language', logout: 'Log out', exportLabel: 'Export data',
     settingsLabel: 'Settings', recordBtn: 'Add',
     exportBusy: 'Preparing the file…', exportError: 'Could not build the file. Try again.',
@@ -377,6 +381,7 @@ function applyTranslations() {
   document.getElementById('htmlRoot').setAttribute('lang', currentLang);
   document.getElementById('themeMenuLabel').textContent = t('themeLabel');
   document.getElementById('langMenuLabel').textContent = t('langLabel');
+  document.getElementById('amountsMenuLabel').textContent = t('amountsLabel');
   document.getElementById('exportLabel').textContent = t('exportLabel');
   document.getElementById('logoutLabel').textContent = t('logout');
   // Назви розділів у колонці живуть у side-nav.js — одні на пʼять сторінок.
@@ -441,10 +446,26 @@ function setLang(lang) {
 const TODAY_TASK_LIMIT = 4;
 
 let homeData = { transactions: null, tasks: null, goals: null, workouts: null };
+// План витрат на місяць із профілю (null/undefined — плану немає). Лежить
+// тут, а не в замиканні запиту: плитку перемальовує ще й перемикач сум.
+let budgetPlan = null;
 // Валюта з профілю — той самий документ, що вже читається заради мови й теми.
 let homeCurrency = '';
 
 const THEME_CHOICES = ['light', 'dark', 'system'];
+// Ховати суму витрат на плитці «Бюджет».
+//
+// Головна — єдиний екран, який видно з чужого боку мимохідь: телефон лежить
+// на столі, хтось зазирнув через плече. Тому ховається саме тут, а не в
+// самому бюджеті: туди заходять свідомо.
+//
+// Тільки localStorage, без профілю: це налаштування ПРИСТРОЮ, а не людини.
+// Телефон носять із собою, компʼютер стоїть удома, і синхронізувати між
+// ними «ховати» означало б ховати там, де ховати нема від кого.
+let hideAmounts = localStorage.getItem('financeAppHideAmounts') === '1';
+// Крапки, а не зірочки: зірочки в тій самій позиції читаються як виноска.
+const AMOUNT_MASK = '•••';
+
 let themeChoice = localStorage.getItem('financeAppTheme') || 'system';
 if (!THEME_CHOICES.includes(themeChoice)) themeChoice = 'system';
 const darkMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
@@ -483,6 +504,37 @@ function renderThemePicker() {
     btn.addEventListener('click', () => setTheme(btn.dataset.themeChoice));
   });
 }
+function renderAmountsPicker() {
+  const picker = document.getElementById('amountsPicker');
+  if (!picker) return;
+  const options = [
+    { hide: false, label: t('amountsShow') },
+    { hide: true, label: t('amountsHide') },
+  ];
+  picker.innerHTML = options
+    .map((o) => `<button type="button" class="theme-choice${o.hide === hideAmounts ? ' selected' : ''}" data-hide-amounts="${o.hide}">${o.label}</button>`)
+    .join('');
+  picker.querySelectorAll('[data-hide-amounts]').forEach((btn) => {
+    btn.addEventListener('click', () => setHideAmounts(btn.dataset.hideAmounts === 'true'));
+  });
+}
+
+function setHideAmounts(hide) {
+  hideAmounts = !!hide;
+  try { localStorage.setItem('financeAppHideAmounts', hideAmounts ? '1' : '0'); }
+  catch (err) { /* приватний режим — сховати на цей сеанс однаково вийде */ }
+  renderAmountsPicker();
+  // Плитка малюється з даних, які вже прийшли: перезапитувати базу заради
+  // перемикача не треба.
+  renderBudgetTile();
+}
+
+// Сума або крапки — залежно від перемикача. Один вхід на всі місця, де на
+// головній зʼявляються гроші: інакше наступне таке місце неминуче забули б.
+function shownAmount(value) {
+  return hideAmounts ? AMOUNT_MASK : formatAmount(value);
+}
+
 function setTheme(choice) {
   if (!THEME_CHOICES.includes(choice)) return;
   themeChoice = choice;
@@ -553,6 +605,7 @@ setAuthMode('login');
 applyTheme();
 renderThemePicker();
 renderLangPicker();
+renderAmountsPicker();
 applyTranslations();
 
 document.getElementById('authForm').addEventListener('submit', async (e) => {
@@ -714,6 +767,32 @@ function setStat(key, value, unit, caption, note) {
     noteEl.textContent = note || '';
     noteEl.hidden = !note;
   }
+}
+
+// Плитка «Бюджет». Винесена з обробника запиту: перемикач «ховати суму»
+// перемальовує її з даних, які вже прийшли, а не ходить у базу вдруге.
+function renderBudgetTile() {
+  const txs = homeData.transactions;
+  if (!txs) return;
+  const today = todayISO();
+  const sum = HomeSummary.budgetSummary(txs, today);
+  const ring = HomeSummary.budgetRing(txs, today, budgetPlan);
+  const monthName = new Intl.DateTimeFormat(LOCALE_MAP[currentLang] || 'uk-UA', { month: 'long' })
+    .format(new Date(today + 'T00:00:00'));
+  if (!ring) {
+    // Без плану головне число — витрачене за місяць: воно й відповідає
+    // на питання, з яким у бюджет заходять.
+    setStat('budget', shownAmount(sum.expense), homeCurrency, t('capSpent', monthName), null);
+    return;
+  }
+  // З планом плитка відповідає на інше питання — не «скільки лишилось
+  // у балансі», а «скільки лишилось до межі». Саме заради нього план і
+  // заводять, тож воно й витісняє баланс.
+  //
+  // Знак ставимо тут, а не в перекладі: у переклад має приходити готовий
+  // рядок, інакше кожна мова мусила б сама вирішувати, як його показати.
+  setStat('budget', shownAmount(sum.expense), homeCurrency, t('capSpent', monthName),
+    ring.over ? t('sumPlanOver', shownAmount(-ring.left)) : t('sumPlanLeft', shownAmount(ring.left)));
 }
 
 // ---- «Сьогодні»: завдання на сьогодні, і все ----
@@ -1006,30 +1085,11 @@ async function loadHomeSummary(uid) {
   const txPromise = userRef.collection('transactions').where('date', '>=', monthFrom).where('date', '<=', today).get();
   Promise.all([txPromise, userRef.get()])
     .then(([snap, profileDoc]) => {
-      const monthTxs = snap.docs.map((d) => d.data());
-      homeData.transactions = monthTxs;
-      const sum = HomeSummary.budgetSummary(monthTxs, today);
-      // Знак ставимо тут, а не в перекладі: у переклад має приходити готовий
-      // рядок, інакше кожна мова мусила б сама вирішувати, як його показати.
+      homeData.transactions = snap.docs.map((d) => d.data());
       const profile = profileDoc.data() || {};
       homeCurrency = typeof profile.currency === 'string' ? profile.currency : '';
-      const plan = profile.monthlyBudget;
-      const ring = HomeSummary.budgetRing(monthTxs, today, plan);
-      const monthName = new Intl.DateTimeFormat(LOCALE_MAP[currentLang] || 'uk-UA', { month: 'long' })
-        .format(new Date(today + 'T00:00:00'));
-      if (!ring) {
-        // Без плану головне число — витрачене за місяць: воно й відповідає
-        // на питання, з яким у бюджет заходять.
-        setStat('budget', formatAmount(sum.expense), homeCurrency,
-          t('capSpent', monthName), null);
-        return;
-      }
-      // З планом плитка відповідає на інше питання — не «скільки лишилось
-      // у балансі», а «скільки лишилось до межі». Саме заради нього план і
-      // заводять, тож воно й витісняє баланс.
-      setStat('budget', formatAmount(sum.expense), homeCurrency,
-        t('capSpent', monthName),
-        ring.over ? t('sumPlanOver', formatAmount(-ring.left)) : t('sumPlanLeft', formatAmount(ring.left)));
+      budgetPlan = profile.monthlyBudget;
+      renderBudgetTile();
     })
     .catch((err) => console.error('homeSummary budget:', err));
 
@@ -1268,6 +1328,8 @@ auth.onAuthStateChanged((user) => {
         applyTranslations();
         renderThemePicker();
         renderLangPicker();
+        // Підписи «Показувати / Ховати» теж мовні.
+        renderAmountsPicker();
       }
     }).catch(() => {});
   } else {
