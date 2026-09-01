@@ -24,9 +24,32 @@ async function openModule(page, modulePath, opts = {}) {
     served = true;
     route.fulfill({ status: 200, contentType: 'application/javascript', body });
   });
-  // Зовнішні CDN у тестах не потрібні — без них сторінка працює, а чекати
-  // на мережу в CI немає сенсу.
+  // Решта зовнішніх CDN у тестах не потрібна — без них сторінка працює, а
+  // чекати на мережу в CI немає сенсу.
   await page.route('**/cdnjs.cloudflare.com/**', (route) => route.fulfill({ status: 200, body: '' }));
+  // DOMPurify — виняток серед CDN, і маршрут для нього стоїть ПІСЛЯ
+  // загального: Playwright бере останній доданий обробник, тож вужчий
+  // маршрут має бути нижчим, інакше його перекриє «все з cdnjs — порожньо».
+  // Без бібліотеки sanitizeNoteHtml() свідомо
+  // віддає екранований текст замість HTML, і будь-яка перевірка вигляду
+  // нотатки перевіряла б цей запасний шлях, а не те, що бачить людина.
+  // Тут стоїть двійник із тією ж роллю, що й firebase-stub: віддає HTML,
+  // прибираючи те, чого в нотатках і так не буває — скрипти й обробники
+  // подій. Білий список тегів залишаємо справжньому DOMPurify у бою.
+  await page.route('**/dompurify/**', (route) => route.fulfill({
+    status: 200,
+    contentType: 'application/javascript',
+    body: `window.DOMPurify = { sanitize: function (html) {
+      var doc = new DOMParser().parseFromString(String(html || ''), 'text/html');
+      doc.body.querySelectorAll('script, style, iframe, object, embed').forEach(function (el) { el.remove(); });
+      doc.body.querySelectorAll('*').forEach(function (el) {
+        Array.prototype.slice.call(el.attributes).forEach(function (a) {
+          if (/^on/i.test(a.name)) el.removeAttribute(a.name);
+        });
+      });
+      return doc.body.innerHTML;
+    } };`,
+  }));
   await page.route('**/fonts.googleapis.com/**', (route) => route.fulfill({ status: 200, contentType: 'text/css', body: '' }));
 
   await page.addInitScript(([seed, theme, lang]) => {

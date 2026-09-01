@@ -2051,6 +2051,24 @@ function inlineFormat(text) {
   return escapeHtml(text).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
 }
 
+// Чи вміст нотатки — це HTML з редактора, а не старий текстовий формат.
+//
+// Розрізняли за ПЕРШИМ символом: «починається з тега — значить HTML». Але
+// contenteditable не загортає перший рядок у тег, тільки наступні, тож майже
+// кожна нотатка з редактора починається зі слова, а теги стоять усередині:
+// «Міша винен за серпень -&nbsp;<br>Діма винен -&nbsp;». Такий вміст ішов у
+// гілку для старого формату, де його чесно екранували — і теги з сутностями
+// показувались як текст і в підписі під назвою, і в самій нотатці.
+//
+// Тепер вирішує наявність тега чи сутності будь-де. «R&D» під це не підпадає
+// (сутність вимагає крапки з комою), «a < b» теж (після «<» має стояти
+// літера, «/» або «!»).
+const HTMLISH_RE = /<[a-z!/][^>]*>|&[a-z]+;|&#\d+;/i;
+
+function looksLikeHtml(content) {
+  return HTMLISH_RE.test(content || '');
+}
+
 // Старий текстовий формат (нотатки, збережені до появи WYSIWYG-редактора) —
 // конвертує "# Заголовок", "**жирний**", "- пункт", "[ ] діло" у нормальний HTML.
 function legacyNoteToHtml(text) {
@@ -2098,10 +2116,9 @@ function legacyNoteToHtml(text) {
 }
 
 // Стара нотатка зберігалась як звичайний текст, нова — як HTML з редактора.
-// Розрізняємо за тим, чи починається вміст з тега.
 function noteContentToHtml(content) {
   const c = content || '';
-  return sanitizeNoteHtml(/^\s*</.test(c) ? c : legacyNoteToHtml(c));
+  return sanitizeNoteHtml(looksLikeHtml(c) ? c : legacyNoteToHtml(c));
 }
 
 // Санітизація HTML нотаток. Нотатки містять лише простий текст, чекбокси,
@@ -2128,13 +2145,20 @@ function toggleNoteCheckboxAndSave(pageId, containerEl) {
     .catch(e => console.error(e));
 }
 
+// Підпис під назвою нотатки — звичайний текст, тож HTML із нього треба
+// прибрати, а не показати (див. looksLikeHtml вище).
 function pageSnippet(content) {
   const c = content || '';
   let text;
-  if (/^\s*</.test(c)) {
-    const tmp = document.createElement('div');
-    tmp.innerHTML = c;
-    text = tmp.textContent || '';
+  if (looksLikeHtml(c)) {
+    // Розриви рядків і кінці блоків — це проміжки між словами: без них
+    // «за серпень<br>Діма» злиплось би в одне слово.
+    const spaced = c.replace(/<br\s*\/?>|<\/(p|div|li|h[1-6]|tr)>/gi, ' ');
+    // DOMParser, а не innerHTML живого елемента: документ інертний, тож
+    // <img onerror> у ньому нічого не запускає, а сутності однаково
+    // розкриваються.
+    const doc = new DOMParser().parseFromString(spaced, 'text/html');
+    text = (doc.body && doc.body.textContent) || '';
   } else {
     text = c
       .replace(/^\[([ x])\]\s?/gim, '')
