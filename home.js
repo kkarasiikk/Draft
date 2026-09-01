@@ -79,7 +79,6 @@ const STRINGS = {
     addWorkout: 'Тренування', addWorkoutHint: 'вправи й підходи',
     todayTitle: 'Сьогодні',
     todayCount: (n) => `${n} ${plural(n, { one: 'пункт', few: 'пункти', many: 'пунктів', other: 'пункту' })}`,
-    todayMore: (n) => `Побачити ще ${n}`,
     unitToday: 'на сьогодні', unitDays: 'дн.', unitActive: 'активних',
     unitSets: 'підходів', unitExercises: 'вправ', unitDaysAgo: 'дні тому',
     capSpent: (m) => `витрачено за ${m}`, capStreak: 'найдовша серія',
@@ -89,8 +88,6 @@ const STRINGS = {
     capLast: (name) => `останнє — ${name}`, capLastPlain: 'від останнього',
     todayEmpty: 'На сьогодні нічого не чекає.',
     todayAt: (hhmm) => `до ${hhmm}`,
-    todayNoStep: 'сьогодні без кроку',
-    todayStepBtn: 'Крок', todayLogBtn: 'Записати',
     lineGoals: (n) => `${n} ${plural(n, { one: 'ціль', few: 'цілі', many: 'цілей', other: 'цілі' })} без кроку`,
     lineWorkout: (n) => `${n} ${plural(n, { one: 'день', few: 'дні', many: 'днів', other: 'дня' })} без залу`,
     lineFree: 'Сьогодні нічого не чекає.',
@@ -156,7 +153,6 @@ const STRINGS = {
     addWorkout: 'Тренировка', addWorkoutHint: 'упражнения и подходы',
     todayTitle: 'Сегодня',
     todayCount: (n) => `${n} ${plural(n, { one: 'пункт', few: 'пункта', many: 'пунктов', other: 'пункта' })}`,
-    todayMore: (n) => `Посмотреть ещё ${n}`,
     unitToday: 'на сегодня', unitDays: 'дн.', unitActive: 'активных',
     unitSets: 'подходов', unitExercises: 'упражнений', unitDaysAgo: 'дня назад',
     capSpent: (m) => `потрачено за ${m}`, capStreak: 'самая длинная серия',
@@ -166,8 +162,6 @@ const STRINGS = {
     capLast: (name) => `последняя — ${name}`, capLastPlain: 'от последней',
     todayEmpty: 'На сегодня ничего не ждёт.',
     todayAt: (hhmm) => `до ${hhmm}`,
-    todayNoStep: 'сегодня без шага',
-    todayStepBtn: 'Шаг', todayLogBtn: 'Записать',
     lineGoals: (n) => `${n} ${plural(n, { one: 'цель', few: 'цели', many: 'целей', other: 'цели' })} без шага`,
     lineWorkout: (n) => `${n} ${plural(n, { one: 'день', few: 'дня', many: 'дней', other: 'дня' })} без зала`,
     lineFree: 'Сегодня ничего не ждёт.',
@@ -233,7 +227,6 @@ const STRINGS = {
     addWorkout: 'Trening', addWorkoutHint: 'ćwiczenia i serie',
     todayTitle: 'Dziś',
     todayCount: (n) => `${n} ${plural(n, { one: 'pozycja', few: 'pozycje', many: 'pozycji', other: 'pozycji' })}`,
-    todayMore: (n) => `Zobacz jeszcze ${n}`,
     unitToday: 'na dziś', unitDays: 'dni', unitActive: 'aktywnych',
     unitSets: 'serii', unitExercises: 'ćwiczeń', unitDaysAgo: 'dni temu',
     capSpent: (m) => `wydano w ${m}`, capStreak: 'najdłuższa seria',
@@ -243,8 +236,6 @@ const STRINGS = {
     capLast: (name) => `ostatni — ${name}`, capLastPlain: 'od ostatniego',
     todayEmpty: 'Na dziś nic nie czeka.',
     todayAt: (hhmm) => `do ${hhmm}`,
-    todayNoStep: 'dziś bez kroku',
-    todayStepBtn: 'Krok', todayLogBtn: 'Zapisz',
     lineGoals: (n) => `${n} ${plural(n, { one: 'cel', few: 'cele', many: 'celów', other: 'celu' })} bez kroku`,
     lineWorkout: (n) => `${n} ${plural(n, { one: 'dzień', few: 'dni', many: 'dni', other: 'dnia' })} bez siłowni`,
     lineFree: 'Na dziś nic nie czeka.',
@@ -310,7 +301,6 @@ const STRINGS = {
     addWorkout: 'Workout', addWorkoutHint: 'exercises and sets',
     todayTitle: 'Today',
     todayCount: (n) => `${n} ${plural(n, { one: 'item', other: 'items' })}`,
-    todayMore: (n) => `See ${n} more`,
     unitToday: 'today', unitDays: 'days', unitActive: 'active',
     unitSets: 'sets', unitExercises: 'exercises', unitDaysAgo: 'days ago',
     capSpent: (m) => `spent in ${m}`, capStreak: 'longest streak',
@@ -320,8 +310,6 @@ const STRINGS = {
     capLast: (name) => `last — ${name}`, capLastPlain: 'since the last one',
     todayEmpty: 'Nothing waiting today.',
     todayAt: (hhmm) => `by ${hhmm}`,
-    todayNoStep: 'no step today',
-    todayStepBtn: 'Step', todayLogBtn: 'Log',
     lineGoals: (n) => `${n} ${plural(n, { one: 'goal', other: 'goals' })} without a step`,
     lineWorkout: (n) => `${n} ${plural(n, { one: 'day', other: 'days' })} without the gym`,
     lineFree: 'Nothing waiting today.',
@@ -447,9 +435,10 @@ function setLang(lang) {
 // Сирі дані, з яких збираються «Сьогодні», рядок під датою і сітка тижня.
 // Кожен запит домальовує свою частину, щойно долетить: чекати на найповільніший,
 // щоб показати все разом, означало б дивитись на порожній екран довше, ніж треба.
-// Скільки назв показувати в дні. Більше — і смуга починає важити більше за
-// сам список справ під нею; менше — і тиждень нічого не каже.
-const CAL_CHIPS = 2;
+// Скільки справ показує картка «Сьогодні». Чотири рядки — стеля, підібрана
+// під екран: разом зі смугою тижня й плитками розділів вони ще вміщаються
+// без гортання.
+const TODAY_TASK_LIMIT = 4;
 
 let homeData = { transactions: null, tasks: null, goals: null, workouts: null };
 // Валюта з профілю — той самий документ, що вже читається заради мови й теми.
@@ -727,36 +716,39 @@ function setStat(key, value, unit, caption, note) {
   }
 }
 
-// ---- «Сьогодні»: один список із трьох розділів ----
-// Щоб відмітити справу й крок до цілі, раніше треба було зайти у два розділи
-// й вийти назад. Тепер типовий день закривається, не виходячи з головної.
-// Два пункти й «побачити більше»: головна відповідає на «що зараз», а не
-// заміняє собою розділ завдань. Довгий список тут витіснив би тиждень і
-// плитки за межу екрана.
-const TODAY_TASK_LIMIT = 2;
+// ---- «Сьогодні»: завдання на сьогодні, і все ----
+// Тут був спільний список трьох розділів: завдання, цілі без сьогоднішнього
+// кроку, рядок про тренування. Виходило, що картка «Сьогодні» показувала що
+// завгодно, крім самих справ на сьогодні: два завдання, «побачити ще N», дві
+// цілі й тренування — шість рядків, головна не вміщалась в екран, і по ній
+// доводилось гортати. Тепер тут рівно те, що написано в заголовку.
+//
+// Крок до цілі нікуди не подівся — він живе у шторці «+», де його й шукають
+// свідомо, а не натикаються на нього між справами.
+//
+// Саму стелю оголошено вище, разом зі станом сторінки: applyLang() малює
+// картку ще до того, як дійде сюди виконання, і const у цьому місці був би
+// прочитаний до ініціалізації.
 
 function renderToday() {
   const panel = document.getElementById('todayPanel');
   const list = document.getElementById('todayList');
   if (!panel || !list) return;
   const today = todayISO();
-  let html = '';
 
-  let count = 0;
-  if (homeData.tasks) {
-    // Тільки сьогоднішні. Невиконане з минулих днів лишається у своєму дні:
-    // воно не стає справою на сьогодні від того, що день минув, і тягнути
-    // його сюди означало б показувати борг замість дня.
-    const mine = homeData.tasks.filter((x) => x && x.dueDate === today);
-    // Невиконане згори: закреслене вже нікуди не поспішає.
-    mine.sort((a, b) => (a.done === b.done ? 0 : (a.done ? 1 : -1)));
-    count += mine.length;
-    // Показуємо лише два: головна відповідає на «що зараз», а не заміняє
-    // собою розділ. Решта — за посиланням.
-    const shownTasks = mine.slice(0, TODAY_TASK_LIMIT);
-    const hidden = mine.length - shownTasks.length;
+  // Тільки сьогоднішні. Невиконане з минулих днів лишається у своєму дні:
+  // воно не стає справою на сьогодні від того, що день минув, і тягнути
+  // його сюди означало б показувати борг замість дня.
+  const mine = (homeData.tasks || []).filter((x) => x && x.dueDate === today);
+  // Невиконане згори: закреслене вже нікуди не поспішає.
+  mine.sort((a, b) => (a.done === b.done ? 0 : (a.done ? 1 : -1)));
 
-    html += shownTasks.map((task) => `
+  // Чотири рядки — стеля, підібрана під екран: разом зі смугою тижня й
+  // плитками розділів вони ще вміщаються без гортання. Скільки справ
+  // насправді, каже лічильник у шапці картки, тож окремий рядок
+  // «побачити ще N» тут лише з'їдав би пʼятий рядок заради того, що вже
+  // написано вище.
+  const html = mine.slice(0, TODAY_TASK_LIMIT).map((task) => `
       <div class="today-row${task.done ? ' checked' : ''}">
         <button type="button" class="today-box${task.done ? ' checked' : ''}" data-task="${escapeHtml(task.id)}" aria-label="${escapeHtml(task.title || '')}">
           <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg>
@@ -765,55 +757,16 @@ function renderToday() {
         <span class="today-spacer"></span>
         ${task.dueTime ? `<span class="today-when">${escapeHtml(t('todayAt', task.dueTime))}</span>` : ''}
       </div>`).join('');
-    if (hidden > 0) {
-      html += `<a class="today-more" href="tasks/index.html">${escapeHtml(t('todayMore', hidden))}
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></a>`;
-    }
-  }
-
-  // Ціль без сьогоднішнього кроку. Черга та сама, що й у вечірній картці
-  // розділу: друге правило «яку ціль питати» розійшлося б із першим.
-  if (homeData.goals && window.GoalStreak) {
-    const pending = window.GoalStreak.eveningQueue(homeData.goals, today);
-    count += pending.length;
-    html += pending.slice(0, 2).map((g) => `
-      <div class="today-row">
-        <span class="today-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg></span>
-        <span class="today-name">${escapeHtml(g.title || '')}</span>
-        <span class="today-spacer"></span>
-        <span class="today-when">${escapeHtml(t('todayNoStep'))}</span>
-        <button type="button" class="today-go" data-goal-step="${escapeHtml(g.id)}">${escapeHtml(t('todayStepBtn'))}</button>
-      </div>`).join('');
-  }
-
-  if (homeData.workouts) {
-    const wt = HomeSummary.workoutToday(homeData.workouts, today);
-    const sum = HomeSummary.workoutSummary(homeData.workouts, today);
-    if (!wt) {
-      count += 1;
-      html += `
-        <div class="today-row">
-          <span class="today-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M6.5 8v8"/><path d="M17.5 8v8"/><path d="M3.5 10.5v3"/><path d="M20.5 10.5v3"/><path d="M6.5 12h11"/></svg></span>
-          <span class="today-name">${escapeHtml(sum.daysAgo === null ? t('sumWorkoutNever') : t('sumWorkoutAgo', sum.daysAgo))}</span>
-          <span class="today-spacer"></span>
-          <a class="today-go" href="workout/index.html">${escapeHtml(t('todayLogBtn'))}</a>
-        </div>`;
-    }
-  }
 
   // Порожній список — теж відповідь, і ховати панель не треба: «нічого не
   // чекає» це новина, а не відсутність новин.
-  const ready = homeData.tasks || homeData.goals || homeData.workouts;
-  panel.hidden = !ready;
+  panel.hidden = !homeData.tasks;
   list.innerHTML = html || `<div class="today-empty">${escapeHtml(t('todayEmpty'))}</div>`;
   const countEl = document.getElementById('todayCount');
-  if (countEl) countEl.textContent = count ? t('todayCount', count) : '';
+  if (countEl) countEl.textContent = mine.length ? t('todayCount', mine.length) : '';
 
   list.querySelectorAll('[data-task]').forEach((btn) => {
     btn.addEventListener('click', () => toggleHomeTask(btn.dataset.task));
-  });
-  list.querySelectorAll('[data-goal-step]').forEach((btn) => {
-    btn.addEventListener('click', () => stepHomeGoal(btn.dataset.goalStep));
   });
 }
 
@@ -971,19 +924,19 @@ function renderCalendar() {
     const cls = ['cal-day'];
     if (d.today) cls.push('today');
     if (d.past) cls.push('past');
-    // Два чипи — стільки вміщається в колонку, не роблячи смугу вищою за
-    // сам список справ під нею. Решта згортається в «+N»: це вже привід
-    // відкрити день, а не читати його згори.
-    const shown = d.items.slice(0, CAL_CHIPS);
-    const rest = d.items.length - shown.length;
+    // Під числом — крапка, і більше нічого. Тут стояли назви справ, обрізані
+    // до «Ввече…» й «Приді…»: колонка завширшки в сім екранів вміщає стільки
+    // літер, що впізнати за ними своє однаково не виходило, а смуга виростала
+    // втричі й виштовхувала все інше за межу екрана. Крапка відповідає на
+    // питання, заради якого на тиждень і дивляться: чи є щось на цей день.
+    // Порожнє кільце — день, де все вже закрито (те саме, що в розділі
+    // завдань: два різні стани не мають виглядати однаково).
+    const dot = d.hasTasks ? (d.allDone ? ' all-done' : ' has') : '';
     return `
       <div class="${cls.join(' ')}">
         <span class="cal-dow">${escapeHtml(dow.format(new Date(d.date + 'T00:00:00')))}</span>
         <span class="cal-num">${d.dayNum}</span>
-        <span class="cal-items">
-          ${shown.map((it) => `<span class="cal-chip${it.done ? ' done' : ''}" title="${escapeHtml(it.title)}">${escapeHtml(it.title)}</span>`).join('')}
-          ${rest > 0 ? `<span class="cal-more">+${rest}</span>` : ''}
-        </span>
+        <span class="cal-dot${dot}"></span>
       </div>`;
   }).join('');
 }

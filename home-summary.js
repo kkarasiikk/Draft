@@ -242,12 +242,8 @@
     var byDay = {};
     (tasks || []).forEach(function (task) {
       if (!task || typeof task.dueDate !== 'string') return;
-      var slot = byDay[task.dueDate] || (byDay[task.dueDate] = { open: 0, done: 0, items: [] });
+      var slot = byDay[task.dueDate] || (byDay[task.dueDate] = { open: 0, done: 0 });
       if (task.done) slot.done += 1; else slot.open += 1;
-      slot.items.push({ title: task.title || '', done: !!task.done });
-    });
-    Object.keys(byDay).forEach(function (d) {
-      byDay[d].items.sort(function (a, b) { return (a.done === b.done) ? 0 : (a.done ? 1 : -1); });
     });
 
     var days = [];
@@ -255,7 +251,7 @@
       var d = new Date(monday);
       d.setDate(d.getDate() + i);
       var iso = isoOf(d);
-      var slot = byDay[iso] || { open: 0, done: 0, items: [] };
+      var slot = byDay[iso] || { open: 0, done: 0 };
       days.push({
         date: iso,
         dayNum: d.getDate(),
@@ -263,7 +259,8 @@
         past: iso < todayIso,
         open: slot.open,
         done: slot.done,
-        items: slot.items,
+        // Назви справ звідси пішли разом із чипами в смузі тижня: під числом
+        // тепер крапка, а їй досить знати, чи є щось і чи все закрито.
         hasTasks: slot.open + slot.done > 0,
         // День, де все закрито, — не те саме, що день, де ще є що робити.
         allDone: slot.done > 0 && slot.open === 0,
