@@ -1217,6 +1217,11 @@ function renderSavingsTotalCurrencySelect() {
   select.value = savingsTotalCurrency;
 }
 
+// Колір беремо через catColor(), а не з CATEGORY_PALETTE навпростець.
+// Тут стояло CATEGORY_PALETTE[c.colorIndex % …].text — і категорія без
+// colorIndex (NaN як індекс) валила весь обробник снапшота профілю разом
+// із перемальовуванням сторінки. catPair() такий випадок уже вміє: колір
+// виводиться з id.
 function renderCategoryManager() {
   ['expense', 'income'].forEach(type => {
     const list = type === 'income' ? categoriesIncome : categoriesExpense;
@@ -1224,7 +1229,7 @@ function renderCategoryManager() {
     if (!container) return;
     container.innerHTML = list.map(c => `
       <div class="cat-manage-row">
-        <span class="cat-manage-dot" style="background:${CATEGORY_PALETTE[c.colorIndex % CATEGORY_PALETTE.length].text}"></span>
+        <span class="cat-manage-dot" style="background:${catColor(type, c.id)}"></span>
         <input type="text" class="cat-manage-input" value="${escapeHtml(c.label)}" data-id="${c.id}" data-type="${type}">
         <button type="button" class="cat-manage-del" data-id="${c.id}" data-type="${type}" aria-label="${t('deleteCatAria')}">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
@@ -1541,10 +1546,36 @@ function subscribeToProfile(uid) {
     } else if (usingDefaultCategories.income) {
       categoriesIncome = defaultCategories('income');
     }
+    // Чи чіпали форму — питаємо ДО того, як самі підмінимо в ній категорію:
+    // після підміни будь-яка форма виглядала б зміненою.
+    const formWasClean = isTxFormOpen() && !txGuard.isDirty();
     if (formType === 'expense' && !findCategory('expense', selectedCategory)) selectedCategory = categoriesExpense[0] ? categoriesExpense[0].id : null;
     if (formType === 'income' && !findCategory('income', selectedCategory)) selectedCategory = categoriesIncome[0] ? categoriesIncome[0].id : null;
-    if (changed) { applyStaticTranslations(); render(); }
+    if (changed) { applyStaticTranslations(); render(); refreshOpenTxForm(formWasClean); }
   }, () => {});
+}
+
+// Перемальовує КАТЕГОРІЇ у вже відкритій формі транзакції.
+//
+// Форму могли відкрити ще до того, як приїхав профіль: з головної «+» веде
+// сюди одразу за #new, форма малюється в наступному ж такті, а свої
+// категорії лежать у профілі й прилітають окремим снапшотом. Виходило, що
+// перехід з головної щоразу показував стандартні сім категорій замість
+// власних, і полагодити це можна було лише закривши й відкривши форму
+// вручну — рівно те, чого людина не має робити.
+//
+// Знімок гарда незбереженого оновлюємо, якщо у формі ще нічого не чіпали:
+// категорія входить у знімок, тож інакше підміна, якої людина не робила,
+// рахувалась би за незбережену зміну — і закриття форми питало б про неї.
+function isTxFormOpen() {
+  const overlay = document.getElementById('formOverlay');
+  return !!overlay && overlay.classList.contains('show');
+}
+
+function refreshOpenTxForm(wasClean) {
+  if (!isTxFormOpen()) return;
+  renderCatPicker();
+  if (wasClean) txGuard.arm();
 }
 
 function addTransactionRemote(tx) {

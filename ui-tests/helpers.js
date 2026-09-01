@@ -13,6 +13,8 @@ const STUB = fs.readFileSync(path.join(__dirname, 'firebase-stub.js'), 'utf8');
  * @param {{seed?:object, theme?:string, lang?:string, ready?:string}} [opts]
  *   ready — селектор, поява якого означає «сторінка готова». Модулі показують
  *   #appScreen, домашній хаб — #homeScreen.
+ *   profileDelay — на скільки мілісекунд затримати снапшот профілю; потрібен,
+ *   щоб відтворити випадок «сторінка намалювалась раніше за свої категорії».
  */
 async function openModule(page, modulePath, opts = {}) {
   // Скрипти Firebase із gstatic підміняються заглушкою: перший запит віддає
@@ -52,13 +54,15 @@ async function openModule(page, modulePath, opts = {}) {
   }));
   await page.route('**/fonts.googleapis.com/**', (route) => route.fulfill({ status: 200, contentType: 'text/css', body: '' }));
 
-  await page.addInitScript(([seed, theme, lang]) => {
+  await page.addInitScript(([seed, theme, lang, profileDelay]) => {
     window.__fbSeed = seed;
+    // Скільки мілісекунд заглушка тримає снапшот профілю (0 — віддає одразу).
+    window.__fbProfileDelay = profileDelay;
     try {
       localStorage.setItem('financeAppTheme', theme);
       localStorage.setItem('financeAppLang', lang);
     } catch (err) { /* приватний режим — тест від цього не залежить */ }
-  }, [opts.seed || {}, opts.theme || 'light', opts.lang || 'uk']);
+  }, [opts.seed || {}, opts.theme || 'light', opts.lang || 'uk', opts.profileDelay || 0]);
 
   await page.goto(`/${modulePath}`);
   await page.waitForSelector(opts.ready || '#appScreen', { state: 'visible' });
