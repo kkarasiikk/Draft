@@ -609,7 +609,13 @@
   .modal::-webkit-scrollbar-track{background:transparent;}
   .modal::-webkit-scrollbar-thumb{background:var(--card-border-hover);border-radius:999px;}
   .modal{background:var(--surface);border-radius:26px 26px 0 0;padding:20px 20px calc(28px + env(safe-area-inset-bottom));width:100%;max-width:480px;
-    max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;}
+    max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;
+    /* Вікно гортається лише вгору-вниз. touch-action:pan-y забороняє браузеру
+       возити його вбік пальцем — саме це й виглядало як «менюшка плаває»:
+       вміст їхав убік, і половина форми ховалась за краєм екрана.
+       overflow-x:hidden — щоб і випадковий ширший вміст (довга назва,
+       широкий рядок чипів) не робив горизонтальної прокрутки. */
+    touch-action:pan-y;overflow-x:hidden;}
   .modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
   .modal-title{font-family:'Inter',sans-serif;font-size:18px;font-weight:700;}
   .close-btn{background:none;border:none;cursor:pointer;color:var(--ink-muted);}
