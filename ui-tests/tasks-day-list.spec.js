@@ -29,6 +29,17 @@ const SEED = {
   ],
 };
 
+// Над списком стояла картка «Зараз»: одна наступна дія, «маю час: 15/30/60
+// хв» і підсумок дня. Прибрана на прохання — тиждень і список дня тепер
+// стоять поруч, без прошарку між ними.
+test('картки «Зараз» над списком немає', async ({ page }) => {
+  await openModule(page, 'tasks/index.html', { seed: SEED });
+  await page.waitForSelector('#dayList .task-row');
+  await expect(page.locator('#nowCard')).toHaveCount(0);
+  await expect(page.locator('.now-card')).toHaveCount(0);
+  await expect(page.locator('#appScreen')).not.toContainText('Маю час');
+});
+
 test('виконане опускається вниз списку, а не зникає з нього', async ({ page }) => {
   await openModule(page, 'tasks/index.html', { seed: SEED });
   await page.waitForSelector('#dayList .task-row');

@@ -51,9 +51,7 @@ const T = {
     recurAnchorCompletion: 'Рахувати від дня виконання, а не від плану',
     recurShortDaily: (n) => (n === 1 ? 'Щодня' : `Кожні ${n} дн.`),
     recurShortMonthly: (n, day) => (n === 1 ? `${day} числа` : `Кожні ${n} міс.`),
-    nowTitle: 'Зараз', nowSkip: 'Далі',
     swipeDone: 'Виконано', swipeTomorrow: 'Завтра',
-    nowHaveTime: 'Маю час:',
     remindersTitle: 'Нагадування', remindersMenu: 'Нагадування',
     reminderLabel: 'Нагадати', reminderNone: 'Не треба',
     reminderOnTime: 'У час завдання',
@@ -76,13 +74,6 @@ const T = {
     templateSteps: (n) => `${n} ${plural(n, { one: 'крок', few: 'кроки', many: 'кроків', other: 'кроку' })}`,
     templateEmpty: 'Шаблонів ще немає. Відкрий будь-яке завдання з кроками і натисни «Зберегти як шаблон» — далі його можна буде завести одним тапом.',
     templateLimit: (n) => `Більше ${n} шаблонів — це вже список завдань. Видали зайві в меню «Шаблони».`,
-    nowNothingShort: (min) => `Нічого коротшого за ${min} хв у списку немає — або візьми щось довше, або познач оцінку часу в завданнях.`,
-    nowNothingToday: 'На сьогодні завдань немає. Додай перше — або візьми щось із того, що без дати.',
-    nowAllDone: 'Усе на сьогодні зроблено. Можна видихнути 🎉',
-    nowProgress: (done, total) => `Сьогодні: ${done}/${total}`,
-    nowRemaining: (time) => `лишилось роботи ~${time}`,
-    nowFree: (time) => `вільного часу ~${time}`,
-    nowOverloaded: 'Заплановано більше, ніж лишилось часу сьогодні',
     statsTitle: 'Що я зробив',
     statToday: 'сьогодні', statWeek: 'цього тижня',
     statStreak: (n) => plural(n, { one: 'день поспіль', few: 'дні поспіль', many: 'днів поспіль', other: 'дня поспіль' }),
@@ -150,9 +141,7 @@ const T = {
     recurAnchorCompletion: 'Считать от дня выполнения, а не от плана',
     recurShortDaily: (n) => (n === 1 ? 'Ежедневно' : `Каждые ${n} дн.`),
     recurShortMonthly: (n, day) => (n === 1 ? `${day} числа` : `Каждые ${n} мес.`),
-    nowTitle: 'Сейчас', nowSkip: 'Дальше',
     swipeDone: 'Выполнено', swipeTomorrow: 'Завтра',
-    nowHaveTime: 'Есть время:',
     remindersTitle: 'Напоминания', remindersMenu: 'Напоминания',
     reminderLabel: 'Напомнить', reminderNone: 'Не надо',
     reminderOnTime: 'В момент задачи',
@@ -175,13 +164,6 @@ const T = {
     templateSteps: (n) => `${n} ${plural(n, { one: 'шаг', few: 'шага', many: 'шагов', other: 'шага' })}`,
     templateEmpty: 'Шаблонов пока нет. Открой любую задачу с шагами и нажми «Сохранить как шаблон» — дальше её можно будет завести одним тапом.',
     templateLimit: (n) => `Больше ${n} шаблонов — это уже список задач. Удали лишние в меню «Шаблоны».`,
-    nowNothingShort: (min) => `Ничего короче ${min} мин в списке нет — возьми что-то подлиннее или проставь оценку времени в задачах.`,
-    nowNothingToday: 'На сегодня задач нет. Добавь первую — или возьми что-то из того, что без даты.',
-    nowAllDone: 'Всё на сегодня сделано. Можно выдохнуть 🎉',
-    nowProgress: (done, total) => `Сегодня: ${done}/${total}`,
-    nowRemaining: (time) => `осталось работы ~${time}`,
-    nowFree: (time) => `свободного времени ~${time}`,
-    nowOverloaded: 'Запланировано больше, чем осталось времени сегодня',
     statsTitle: 'Что я сделал',
     statToday: 'сегодня', statWeek: 'на этой неделе',
     statStreak: (n) => plural(n, { one: 'день подряд', few: 'дня подряд', many: 'дней подряд', other: 'дня подряд' }),
@@ -247,9 +229,7 @@ const T = {
     recurAnchorCompletion: 'Licz od dnia wykonania, nie od planu',
     recurShortDaily: (n) => (n === 1 ? 'Codziennie' : `Co ${n} dni`),
     recurShortMonthly: (n, day) => (n === 1 ? `${day}. dnia` : `Co ${n} mies.`),
-    nowTitle: 'Teraz', nowSkip: 'Dalej',
     swipeDone: 'Zrobione', swipeTomorrow: 'Jutro',
-    nowHaveTime: 'Mam czas:',
     remindersTitle: 'Przypomnienia', remindersMenu: 'Przypomnienia',
     reminderLabel: 'Przypomnij', reminderNone: 'Nie trzeba',
     reminderOnTime: 'O godzinie zadania',
@@ -272,13 +252,6 @@ const T = {
     templateSteps: (n) => `${n} ${plural(n, { one: 'krok', few: 'kroki', many: 'kroków', other: 'kroku' })}`,
     templateEmpty: 'Nie ma jeszcze szablonów. Otwórz dowolne zadanie z krokami i naciśnij „Zapisz jako szablon" — potem założysz je jednym tapnięciem.',
     templateLimit: (n) => `Więcej niż ${n} szablonów to już lista zadań. Usuń zbędne w menu „Szablony".`,
-    nowNothingShort: (min) => `Nic krótszego niż ${min} min nie ma — weź coś dłuższego albo dodaj szacowany czas do zadań.`,
-    nowNothingToday: 'Na dziś nie ma zadań. Dodaj pierwsze — albo weź coś bez daty.',
-    nowAllDone: 'Wszystko na dziś zrobione. Można odetchnąć 🎉',
-    nowProgress: (done, total) => `Dziś: ${done}/${total}`,
-    nowRemaining: (time) => `zostało pracy ~${time}`,
-    nowFree: (time) => `wolnego czasu ~${time}`,
-    nowOverloaded: 'Zaplanowano więcej, niż zostało dziś czasu',
     statsTitle: 'Co zrobiłem',
     statToday: 'dziś', statWeek: 'w tym tygodniu',
     statStreak: (n) => plural(n, { one: 'dzień z rzędu', few: 'dni z rzędu', many: 'dni z rzędu', other: 'dnia z rzędu' }),
@@ -344,9 +317,7 @@ const T = {
     recurAnchorCompletion: 'Count from the day it is done, not from the plan',
     recurShortDaily: (n) => (n === 1 ? 'Daily' : `Every ${n} days`),
     recurShortMonthly: (n, day) => (n === 1 ? `On the ${day}th` : `Every ${n} months`),
-    nowTitle: 'Now', nowSkip: 'Next',
     swipeDone: 'Done', swipeTomorrow: 'Tomorrow',
-    nowHaveTime: 'I have:',
     remindersTitle: 'Reminders', remindersMenu: 'Reminders',
     reminderLabel: 'Remind me', reminderNone: 'No need',
     reminderOnTime: 'At task time',
@@ -369,13 +340,6 @@ const T = {
     templateSteps: (n) => `${n} ${plural(n, { one: 'step', other: 'steps' })}`,
     templateEmpty: 'No templates yet. Open any task with steps and hit "Save as template" — after that you can create it with one tap.',
     templateLimit: (n) => `More than ${n} templates is a task list of its own. Remove some in the "Templates" menu.`,
-    nowNothingShort: (min) => `Nothing shorter than ${min} min on the list — take something longer, or add time estimates to your tasks.`,
-    nowNothingToday: 'Nothing scheduled for today. Add something — or pick one of the undated tasks.',
-    nowAllDone: 'Everything for today is done. Take a breath 🎉',
-    nowProgress: (done, total) => `Today: ${done}/${total}`,
-    nowRemaining: (time) => `~${time} of work left`,
-    nowFree: (time) => `~${time} free`,
-    nowOverloaded: 'You planned more than the time left today',
     statsTitle: 'What I got done',
     statToday: 'today', statWeek: 'this week',
     statStreak: (n) => plural(n, { one: 'day in a row', other: 'days in a row' }),
@@ -522,7 +486,6 @@ function applyTranslations() {
   document.getElementById('authPasswordHint').textContent = t('passwordHint');
   document.getElementById('rememberMeLabel').textContent = t('rememberMe');
   document.getElementById('forgotPasswordLink').textContent = t('forgotPassword');
-  document.getElementById('nowTitle').textContent = t('nowTitle');
   document.getElementById('monthHint').textContent = t('monthHintText');
   document.getElementById('statsHeading').textContent = t('statsTitle');
   document.getElementById('statChartTitle').textContent = t('statChartTitle');
@@ -1498,7 +1461,7 @@ function renderTemplateRow() {
   const row = document.getElementById('templateRow');
   if (!row) return;
   if (!templates.length) { row.innerHTML = ''; return; }
-  row.innerHTML = `<span class="now-time-label">${escapeHtml(t('templatesTitle'))}:</span>` + templates.map((tpl) => {
+  row.innerHTML = `<span class="chip-row-label">${escapeHtml(t('templatesTitle'))}:</span>` + templates.map((tpl) => {
     const subCount = (tpl.subtasks || []).length;
     return `<button type="button" class="template-chip" data-template="${tpl.id}">
       <span class="name">${escapeHtml(tpl.title)}</span>
@@ -1709,133 +1672,6 @@ function moveTaskDate(id, iso) {
   }).catch((err) => console.error('moveTaskDate:', err));
 }
 
-// ---- Картка «Зараз» ----
-// Календар відповідає на «які в мене завдання», ця картка — на «що робити
-// прямо зараз»: одна наступна дія плюс чесний підсумок дня. Порядок і
-// підрахунки живуть у tasks/now-queue.js (чисті функції, покриті тестами).
-let nowIndex = 0;      // на скільки кроків уперед людина «перегорнула» чергу
-let nowTimeLimit = null; // «маю 15 хвилин»: стеля тривалості для черги, у хвилинах
-let nowClockTimer = null;
-
-function formatMinutes(min) {
-  return t('estimateShort', min).replace(/^~/, '');
-}
-
-function renderNowCard() {
-  const bodyEl = document.getElementById('nowBody');
-  const footEl = document.getElementById('nowFoot');
-  if (!bodyEl) return;
-  // «Зараз» має сенс тільки для сьогоднішнього дня: коли людина гортає тиждень
-  // уперед, картка про поточний момент лише плутала б.
-  const isToday = selectedDate === todayISO();
-  document.getElementById('nowCard').style.display = isToday ? '' : 'none';
-  if (!isToday) return;
-
-  const now = new Date();
-  const locale = LOCALE_MAP[currentLang] || 'uk-UA';
-  document.getElementById('nowClock').textContent =
-    new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit' }).format(now);
-
-  let queue = nowQueue(tasks, { now });
-  // «Маю 15 хвилин» — не окремий екран, а звуження тієї самої черги: людина
-  // питає не «покажи короткі справи», а «що з мого списку зараз влізе».
-  const fullQueueLength = queue.length;
-  if (nowTimeLimit) {
-    queue = queue.filter((task) => typeof task.estimateMin === 'number' && task.estimateMin <= nowTimeLimit);
-  }
-  // Норма з власної історії робить попередження чесним: до 22:00 формально
-  // лишається 8 годин, але ніхто не працює 8 годин поспіль.
-  const summary = daySummary(tasks, { now });
-
-  if (!queue.length) {
-    nowIndex = 0;
-    // Порожньо буває з трьох причин, і це різні новини для людини.
-    const message = nowTimeLimit && fullQueueLength
-      ? t('nowNothingShort', nowTimeLimit)
-      : summary.totalCount > 0 ? t('nowAllDone') : t('nowNothingToday');
-    bodyEl.innerHTML = `<div class="now-empty">${escapeHtml(message)}</div>`;
-  } else {
-    if (nowIndex >= queue.length) nowIndex = 0;
-    const task = queue[nowIndex];
-    const meta = [];
-    if (task.dueTime) meta.push(`<span class="task-time">${escapeHtml(task.dueTime)}</span>`);
-    if (task.priority) meta.push(`<span class="priority-chip ${task.priority}">${escapeHtml(priorityLabel(task.priority))}</span>`);
-    if (task.estimateMin) meta.push(`<span class="task-progress">${escapeHtml(t('estimateShort', task.estimateMin))}</span>`);
-    if (task.recurrence) meta.push(`<span class="task-progress">\u21BB ${escapeHtml(recurrenceShortLabel(task.recurrence))}</span>`);
-    if (!task.dueDate) meta.push(`<span class="task-progress">${escapeHtml(t('noDateLabel'))}</span>`);
-
-    bodyEl.innerHTML = `
-      <div class="now-next">
-        <button type="button" class="task-check${task.priority ? ' priority-' + task.priority : ''}" data-now-done="${task.id}" aria-label="done">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
-        </button>
-        <div class="now-body" data-now-open="${task.id}">
-          <div class="now-name">${escapeHtml(task.title)}</div>
-          ${meta.length ? `<div class="now-meta">${meta.join('')}</div>` : ''}
-        </div>
-        ${queue.length > 1 ? `<button type="button" class="now-skip" id="nowSkipBtn">${escapeHtml(t('nowSkip'))}</button>` : ''}
-      </div>`;
-
-    bodyEl.querySelector('[data-now-done]').addEventListener('click', (e) => {
-      e.stopPropagation();
-      // Після виконання показуємо наступне з початку черги, а не там,
-      // де людина зупинилась, гортаючи.
-      nowIndex = 0;
-      toggleDone(task.id);
-    });
-    bodyEl.querySelector('[data-now-open]').addEventListener('click', () => openTaskForm(task));
-    const skipBtn = bodyEl.querySelector('#nowSkipBtn');
-    if (skipBtn) {
-      skipBtn.addEventListener('click', () => {
-        nowIndex = (nowIndex + 1) % queue.length;
-        renderNowCard();
-      });
-    }
-  }
-
-  renderNowTimeRow(fullQueueLength);
-
-  const parts = [];
-  if (summary.totalCount) parts.push(`<span>${escapeHtml(t('nowProgress', summary.doneCount, summary.totalCount))}</span>`);
-  if (summary.remainingMin) parts.push(`<span>${escapeHtml(t('nowRemaining', formatMinutes(summary.remainingMin)))}</span>`);
-  else if (summary.totalCount > summary.doneCount) parts.push(`<span>${escapeHtml(t('nowFree', formatMinutes(summary.freeMin)))}</span>`);
-  if (summary.overloaded) parts.push(`<span class="now-warn">${escapeHtml(t('nowOverloaded'))}</span>`);
-  footEl.innerHTML = parts.join('');
-}
-
-// Скільки часу «є прямо зараз». Ці три значення покривають реальні паузи:
-// коротка пауза між справами, півгодини і година.
-const NOW_TIME_LIMITS = [15, 30, 60];
-
-function renderNowTimeRow(queueLength) {
-  const row = document.getElementById('nowTimeRow');
-  if (!row) return;
-  // Коли робити взагалі нема чого, питання «скільки в мене часу» беззмістовне.
-  if (!queueLength) { row.innerHTML = ''; return; }
-  row.innerHTML = `<span class="now-time-label">${escapeHtml(t('nowHaveTime'))}</span>` +
-    NOW_TIME_LIMITS.map((min) =>
-      `<button type="button" class="now-time-chip${nowTimeLimit === min ? ' selected' : ''}" data-limit="${min}">${escapeHtml(formatMinutes(min))}</button>`
-    ).join('');
-  row.querySelectorAll('[data-limit]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const min = Number(btn.dataset.limit);
-      // Повторний тап знімає обмеження — окрема кнопка «скинути» тут зайва.
-      nowTimeLimit = nowTimeLimit === min ? null : min;
-      nowIndex = 0;
-      renderNowCard();
-    });
-  });
-}
-
-// Черга залежить від поточного часу (завдання «о 15:00» о 15:01 змінює групу),
-// тож раз на хвилину перемальовуємо картку — і заразом годинник у ній.
-function startNowClock() {
-  if (nowClockTimer) clearInterval(nowClockTimer);
-  nowClockTimer = setInterval(() => {
-    if (currentScreen === 'week') renderNowCard();
-  }, 60000);
-}
-
 // ---- Горизонтальне гортання пальцем ----
 // Один хелпер на тиждень і на місяць. Pointer Events, а не touch: так само
 // працює і мишею на десктопі, і пальцем на телефоні, без подвійних обробників.
@@ -1955,7 +1791,6 @@ function renderWeekScreen() {
     swipeInited = true;
   }
   renderWeekStrip();
-  renderNowCard();
   renderTagFilterRow();
   renderSelectedDay();
   renderNoDateSection();
@@ -2830,7 +2665,6 @@ setTimeout(() => {
 
 // ---- Ініціалізація ----
 initDatePicker('taskDueDate');
-startNowClock();
 applyTheme();
 applyTranslations();
 renderAuthLangRow();
