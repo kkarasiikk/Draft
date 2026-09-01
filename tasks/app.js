@@ -83,12 +83,11 @@ const T = {
     nowRemaining: (time) => `лишилось роботи ~${time}`,
     nowFree: (time) => `вільного часу ~${time}`,
     nowOverloaded: 'Заплановано більше, ніж лишилось часу сьогодні',
-    nowOverCapacity: (left, norm) => `Заплановано ${left}, а зазвичай закриваєш ${norm}`,
     statsTitle: 'Що я зробив',
     statToday: 'сьогодні', statWeek: 'цього тижня',
     statStreak: (n) => plural(n, { one: 'день поспіль', few: 'дні поспіль', many: 'днів поспіль', other: 'дня поспіль' }),
     statChartTitle: 'Останні два тижні', statRecentTitle: 'Закрито днями',
-    statNorm: (n) => `Зазвичай ти закриваєш ${n} ${plural(n, { one: 'справу', few: 'справи', many: 'справ', other: 'справи' })} за день — на цю цифру й спирається попередження про перевантажений день.`,
+    statNorm: (n) => `Зазвичай ти закриваєш ${n} ${plural(n, { one: 'справу', few: 'справи', many: 'справ', other: 'справи' })} за день.`,
     statNormUnknown: 'Норма зʼявиться, коли назбирається кілька активних днів — тоді застосунок зможе казати не «до 22:00 ще купа часу», а скільки ти встигаєш насправді.',
     statsEmpty: 'Тут зʼявиться те, що ти закрив. Позначай зроблене — і за тиждень буде видно свій темп.',
     statsAllTime: (n) => `Усього закрито: ${n}`,
@@ -183,12 +182,11 @@ const T = {
     nowRemaining: (time) => `осталось работы ~${time}`,
     nowFree: (time) => `свободного времени ~${time}`,
     nowOverloaded: 'Запланировано больше, чем осталось времени сегодня',
-    nowOverCapacity: (left, norm) => `Запланировано ${left}, а обычно закрываешь ${norm}`,
     statsTitle: 'Что я сделал',
     statToday: 'сегодня', statWeek: 'на этой неделе',
     statStreak: (n) => plural(n, { one: 'день подряд', few: 'дня подряд', many: 'дней подряд', other: 'дня подряд' }),
     statChartTitle: 'Последние две недели', statRecentTitle: 'Закрыто по дням',
-    statNorm: (n) => `Обычно ты закрываешь ${n} ${plural(n, { one: 'дело', few: 'дела', many: 'дел', other: 'дела' })} за день — на эту цифру и опирается предупреждение о перегруженном дне.`,
+    statNorm: (n) => `Обычно ты закрываешь ${n} ${plural(n, { one: 'дело', few: 'дела', many: 'дел', other: 'дела' })} за день.`,
     statNormUnknown: 'Норма появится, когда накопится несколько активных дней — тогда приложение сможет говорить не «до 22:00 ещё уйма времени», а сколько ты успеваешь на самом деле.',
     statsEmpty: 'Здесь появится то, что ты закрыл. Отмечай сделанное — и через неделю будет виден свой темп.',
     statsAllTime: (n) => `Всего закрыто: ${n}`,
@@ -281,12 +279,11 @@ const T = {
     nowRemaining: (time) => `zostało pracy ~${time}`,
     nowFree: (time) => `wolnego czasu ~${time}`,
     nowOverloaded: 'Zaplanowano więcej, niż zostało dziś czasu',
-    nowOverCapacity: (left, norm) => `Zaplanowano ${left}, a zwykle zamykasz ${norm}`,
     statsTitle: 'Co zrobiłem',
     statToday: 'dziś', statWeek: 'w tym tygodniu',
     statStreak: (n) => plural(n, { one: 'dzień z rzędu', few: 'dni z rzędu', many: 'dni z rzędu', other: 'dnia z rzędu' }),
     statChartTitle: 'Ostatnie dwa tygodnie', statRecentTitle: 'Zamknięte dzień po dniu',
-    statNorm: (n) => `Zwykle zamykasz ${n} ${plural(n, { one: 'sprawę', few: 'sprawy', many: 'spraw', other: 'sprawy' })} dziennie — na tej liczbie opiera się ostrzeżenie o przeciążonym dniu.`,
+    statNorm: (n) => `Zwykle zamykasz ${n} ${plural(n, { one: 'sprawę', few: 'sprawy', many: 'spraw', other: 'sprawy' })} dziennie.`,
     statNormUnknown: 'Norma pojawi się, gdy uzbiera się kilka aktywnych dni — wtedy aplikacja powie nie „do 22:00 jeszcze mnóstwo czasu", tylko ile naprawdę zdążysz.',
     statsEmpty: 'Tu pojawi się to, co zamkniesz. Odznaczaj zrobione — po tygodniu zobaczysz swoje tempo.',
     statsAllTime: (n) => `Łącznie zamknięte: ${n}`,
@@ -379,12 +376,11 @@ const T = {
     nowRemaining: (time) => `~${time} of work left`,
     nowFree: (time) => `~${time} free`,
     nowOverloaded: 'You planned more than the time left today',
-    nowOverCapacity: (left, norm) => `${left} planned, and you usually close ${norm}`,
     statsTitle: 'What I got done',
     statToday: 'today', statWeek: 'this week',
     statStreak: (n) => plural(n, { one: 'day in a row', other: 'days in a row' }),
     statChartTitle: 'Last two weeks', statRecentTitle: 'Closed day by day',
-    statNorm: (n) => `You usually close ${n} ${plural(n, { one: 'task', other: 'tasks' })} a day — that is the number the overload warning is based on.`,
+    statNorm: (n) => `You usually close ${n} ${plural(n, { one: 'task', other: 'tasks' })} a day.`,
     statNormUnknown: 'The norm shows up once a few active days add up — then the app can tell you how much you actually get done, instead of "there are hours left until 22:00".',
     statsEmpty: 'What you close will show up here. Tick things off — after a week you will see your own pace.',
     statsAllTime: (n) => `Closed in total: ${n}`,
@@ -1749,7 +1745,7 @@ function renderNowCard() {
   }
   // Норма з власної історії робить попередження чесним: до 22:00 формально
   // лишається 8 годин, але ніхто не працює 8 годин поспіль.
-  const summary = daySummary(tasks, { now, norm: personalNorm(tasks, { today: todayISO() }) });
+  const summary = daySummary(tasks, { now });
 
   if (!queue.length) {
     nowIndex = 0;
@@ -1804,9 +1800,6 @@ function renderNowCard() {
   if (summary.remainingMin) parts.push(`<span>${escapeHtml(t('nowRemaining', formatMinutes(summary.remainingMin)))}</span>`);
   else if (summary.totalCount > summary.doneCount) parts.push(`<span>${escapeHtml(t('nowFree', formatMinutes(summary.freeMin)))}</span>`);
   if (summary.overloaded) parts.push(`<span class="now-warn">${escapeHtml(t('nowOverloaded'))}</span>`);
-  // Дві різні правди про перевантаження: за часом і за кількістю. Показуємо
-  // одну — інакше картка починає бурчати двома рядками про те саме.
-  else if (summary.overCapacity) parts.push(`<span class="now-warn">${escapeHtml(t('nowOverCapacity', summary.leftCount, summary.norm))}</span>`);
   footEl.innerHTML = parts.join('');
 }
 

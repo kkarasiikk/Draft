@@ -153,32 +153,17 @@ describe('daySummary', () => {
     expect(s.overloaded).toBe(false);
   });
 
-  test('норма: заплановано більше, ніж людина зазвичай закриває', () => {
-    const list = [
-      task({ title: 'a', dueDate: TODAY }), task({ title: 'b', dueDate: TODAY }),
-      task({ title: 'c', dueDate: TODAY }), task({ title: 'd', dueDate: TODAY }),
-      task({ title: 'e', dueDate: TODAY }),
-    ];
-    const s = daySummary(list, { now: NOW, norm: 3 });
-    expect(s.leftCount).toBe(5);
-    expect(s.norm).toBe(3);
-    expect(s.overCapacity).toBe(true);
-  });
-
-  test('норма рахується від того, що ЛИШИЛОСЬ, а не від плану на весь день', () => {
-    const list = [
-      task({ title: 'a', dueDate: TODAY, done: true }), task({ title: 'b', dueDate: TODAY, done: true }),
-      task({ title: 'c', dueDate: TODAY, done: true }), task({ title: 'd', dueDate: TODAY }),
-    ];
-    const s = daySummary(list, { now: NOW, norm: 3 });
-    expect(s.overCapacity).toBe(false);
-  });
-
-  test('без норми (мало історії) про перевантаження за кількістю мовчимо', () => {
+  // Попередження за кількістю («заплановано 4, а зазвичай закриваєш 3»)
+  // прибрано на прохання — воно бурчало мало не щодня. Підсумок дня про
+  // норму більше не знає взагалі: скільки б завдань не стояло на день,
+  // сам по собі їх список приводом для попередження не є.
+  test('великий список на день сам по собі попередженням не стає', () => {
     const list = Array.from({ length: 20 }, (_, i) => task({ title: 'x' + i, dueDate: TODAY }));
-    const s = daySummary(list, { now: NOW });
-    expect(s.norm).toBeNull();
-    expect(s.overCapacity).toBe(false);
+    const s = daySummary(list, { now: NOW, norm: 3 });
+    expect(s.leftCount).toBe(20);
+    expect(s.overloaded).toBe(false);
+    expect(s.overCapacity).toBeUndefined();
+    expect(s.norm).toBeUndefined();
   });
 
   test('невиконане з минулого навантаженням на сьогодні не стає', () => {
