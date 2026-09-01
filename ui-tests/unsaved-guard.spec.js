@@ -97,6 +97,47 @@ test.describe('Завдання', () => {
     await tapBackdrop(page, 'taskFormOverlay');
     expect(await dialog.shown(page)).toBe(true);
   });
+
+  // Швидке додавання — одне поле, але воно так само нікуди не записане, доки
+  // не натиснуто «Додати».
+  const openQuick = (page) => async () => {
+    await page.click('#openQuickAdd');
+    await page.waitForSelector('#quickAddOverlay.show');
+  };
+
+  test('швидке додавання не втрачає набраний рядок', async ({ page }) => {
+    await openModule(page, 'tasks/index.html');
+    await checksOutUnsavedGuard({
+      page,
+      overlay: 'quickAddOverlay',
+      closeBtn: '#closeQuickAdd',
+      open: openQuick(page),
+      dirty: () => page.fill('#quickAddInput', 'Купити молоко завтра о 18'),
+    });
+  });
+
+  test('«додати» з діалогу справді заводить завдання', async ({ page }) => {
+    await openModule(page, 'tasks/index.html');
+    await openQuick(page)();
+    await page.fill('#quickAddInput', 'Купити молоко завтра о 18');
+    await tapBackdrop(page, 'quickAddOverlay');
+    await dialog.save(page);
+
+    await expect.poll(() => page.evaluate(() => window.__fbCalls.add.length)).toBe(1);
+    const [call] = await page.evaluate(() => window.__fbCalls.add);
+    expect(call.payload.title).toBe('Купити молоко');
+    expect(await isShown(page, '#quickAddOverlay')).toBe(false);
+  });
+
+  test('«Деталі…» переносить набране у повну форму без питань', async ({ page }) => {
+    await openModule(page, 'tasks/index.html');
+    await openQuick(page)();
+    await page.fill('#quickAddInput', 'Купити молоко');
+    await page.click('#quickAddDetailsBtn');
+    await page.waitForSelector('#taskFormOverlay.show');
+    expect(await dialog.shown(page), 'текст не втрачено, питати нема про що').toBe(false);
+    expect(await page.inputValue('#taskTitleInput')).toBe('Купити молоко');
+  });
 });
 
 test.describe('Цілі', () => {
