@@ -65,6 +65,11 @@ service cloud.firestore {
                // Категорії цілей: [{id, label, colorIndex}]. Форму елементів,
                // як і в categoriesIncome/Expense поруч, гарантує клієнт.
                (!('categoriesGoals' in d) || d.categoriesGoals is list) &&
+               // Вбудовані вправи, які людина прибрала зі списку вибору:
+               // масив id з бібліотеки (workout/exercises.js). Самі вправи
+               // лежать у файлі, тож «видалити» їх нема звідки — цей перелік
+               // і є все, що про них зберігається.
+               (!('hiddenExercises' in d) || d.hiddenExercises is list) &&
                // Яку модель питати в AI-помічнику: haiku | sonnet | opus.
                (!('aiModel' in d) || d.aiModel is string) &&
                // План витрат на місяць: число або null (плану немає). Від нього

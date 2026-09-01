@@ -57,6 +57,13 @@ const T = {
     confirmDeleteExerciseTitle: 'Видалити вправу зі списку?',
     confirmDeleteExerciseSub: 'Вона зникне з вибору. Записані тренування з нею лишаться недоторканими.',
     deleteExerciseAria: 'Видалити вправу зі списку',
+    // Вбудовану вправу не видаляють, а ховають: вона живе у файлі бібліотеки,
+    // а не в базі, тож «видалення» повернулось би після перезавантаження.
+    confirmHideExerciseTitle: 'Сховати вправу зі списку?',
+    confirmHideExerciseSub: 'Вона зникне з вибору. Записані тренування з нею лишаться недоторканими, а повернути її можна внизу цього ж списку.',
+    hideExerciseAria: 'Сховати вправу зі списку',
+    hideConfirmBtn: 'Сховати',
+    hiddenTitle: 'Сховані вправи', restoreBtn: 'Повернути',
     cancelBtn: 'Скасувати', deleteConfirmBtn: 'Видалити',
     unsavedTitle: 'Зберегти зміни?',
     unsavedSub: 'Є незбережені зміни. Якщо вийти зараз, вони пропадуть.',
@@ -132,6 +139,11 @@ const T = {
     confirmDeleteExerciseTitle: 'Удалить упражнение из списка?',
     confirmDeleteExerciseSub: 'Оно исчезнет из выбора. Записанные тренировки с ним останутся нетронутыми.',
     deleteExerciseAria: 'Удалить упражнение из списка',
+    confirmHideExerciseTitle: 'Скрыть упражнение из списка?',
+    confirmHideExerciseSub: 'Оно исчезнет из выбора. Записанные тренировки с ним останутся нетронутыми, а вернуть его можно внизу этого же списка.',
+    hideExerciseAria: 'Скрыть упражнение из списка',
+    hideConfirmBtn: 'Скрыть',
+    hiddenTitle: 'Скрытые упражнения', restoreBtn: 'Вернуть',
     cancelBtn: 'Отмена', deleteConfirmBtn: 'Удалить',
     unsavedTitle: 'Сохранить изменения?',
     unsavedSub: 'Есть несохранённые изменения. Если выйти сейчас, они пропадут.',
@@ -207,6 +219,11 @@ const T = {
     confirmDeleteExerciseTitle: 'Usunąć ćwiczenie z listy?',
     confirmDeleteExerciseSub: 'Zniknie z wyboru. Zapisane treningi z nim pozostaną nienaruszone.',
     deleteExerciseAria: 'Usuń ćwiczenie z listy',
+    confirmHideExerciseTitle: 'Ukryć ćwiczenie z listy?',
+    confirmHideExerciseSub: 'Zniknie z wyboru. Zapisane treningi z nim pozostaną nienaruszone, a przywrócić je można na dole tej samej listy.',
+    hideExerciseAria: 'Ukryj ćwiczenie z listy',
+    hideConfirmBtn: 'Ukryj',
+    hiddenTitle: 'Ukryte ćwiczenia', restoreBtn: 'Przywróć',
     cancelBtn: 'Anuluj', deleteConfirmBtn: 'Usuń',
     unsavedTitle: 'Zapisać zmiany?',
     unsavedSub: 'Są niezapisane zmiany. Jeśli teraz wyjdziesz, przepadną.',
@@ -282,6 +299,11 @@ const T = {
     confirmDeleteExerciseTitle: 'Remove exercise from the list?',
     confirmDeleteExerciseSub: 'It disappears from the picker. Workouts already logged with it stay untouched.',
     deleteExerciseAria: 'Remove exercise from the list',
+    confirmHideExerciseTitle: 'Hide exercise from the list?',
+    confirmHideExerciseSub: 'It disappears from the picker. Workouts already logged with it stay untouched, and you can bring it back at the bottom of this same list.',
+    hideExerciseAria: 'Hide exercise from the list',
+    hideConfirmBtn: 'Hide',
+    hiddenTitle: 'Hidden exercises', restoreBtn: 'Restore',
     cancelBtn: 'Cancel', deleteConfirmBtn: 'Delete',
     unsavedTitle: 'Save changes?',
     unsavedSub: 'There are unsaved changes. Leaving now discards them.',
@@ -433,9 +455,10 @@ function applyTranslations() {
   document.getElementById('sessionNotesInput').placeholder = t('sessionNotesPlaceholder');
   document.getElementById('deleteSessionBtn').textContent = t('deleteBtn');
   document.getElementById('sessionSubmitBtn').textContent = t('saveBtn');
+  // applyConfirmTexts() ставить і підпис кнопки теж: він залежить від того,
+  // що саме питають — «Видалити» чи «Сховати».
   applyConfirmTexts();
   document.getElementById('confirmCancel').textContent = t('cancelBtn');
-  document.getElementById('confirmDelete').textContent = t('deleteConfirmBtn');
   document.getElementById('templatesTitle').textContent = t('templatesTitle');
   document.getElementById('saveAsTemplateBtn').textContent = t('saveAsTemplate');
   renderTemplateRow();
@@ -874,6 +897,11 @@ function subscribeToTemplates(uid) {
 // є), і тоді відбір лишається таким, як був.
 let goalCategoryIds = null;
 let unsubscribeGoalCategories = null;
+// Вбудовані вправи, які людина прибрала зі списку вибору. Лежать у
+// профілі, а не в колекції: це не сутності, а лише перелік id з
+// бібліотеки, і документ на кожен був би надто дорогим способом
+// сказати «цю не показуй».
+let hiddenExercises = [];
 
 function subscribeToGoalCategories(uid) {
   if (unsubscribeGoalCategories) unsubscribeGoalCategories();
@@ -881,6 +909,12 @@ function subscribeToGoalCategories(uid) {
     const data = doc.data();
     const list = data && Array.isArray(data.categoriesGoals) ? data.categoriesGoals : null;
     goalCategoryIds = list && list.length ? list.map((c) => c && c.id) : null;
+    // Той самий документ, та сама підписка: другий слухач на профіль коштував
+    // би зайвого читання щоразу й нічого б не додав.
+    hiddenExercises = data && Array.isArray(data.hiddenExercises)
+      ? data.hiddenExercises.filter((id) => typeof id === 'string')
+      : [];
+    renderPickerGroups(document.getElementById('pickerSearch').value);
     renderCurrentScreen();
   }, (err) => console.error('subscribeToGoalCategories:', err));
 }
@@ -1759,8 +1793,10 @@ document.getElementById('pickerCustomToggle').addEventListener('click', () => {
 function renderPickerGroups(query) {
   const q = query.trim().toLowerCase();
   const root = document.getElementById('pickerGroups');
+  if (!root) return;
   const byMuscle = new Map();
   EXERCISE_LIB.forEach((item) => {
+    if (hiddenExercises.includes(item.id)) return;
     const label = exerciseLabel(item.id);
     if (q && !label.toLowerCase().includes(q)) return;
     if (!byMuscle.has(item.muscle)) byMuscle.set(item.muscle, []);
@@ -1779,8 +1815,17 @@ function renderPickerGroups(query) {
     <div class="picker-group">
       ${m === 'other' ? '' : `<div class="picker-group-label">${escapeHtml(muscleLabel(m))}</div>`}
       ${byMuscle.get(m).map((item) => item.kind === 'lib'
-        ? `<div class="picker-item" data-pick-lib="${item.id}" data-muscle="${m}"><span class="picker-item-name">${escapeHtml(item.label)}</span></div>`
-        // Хрестик лише у своїх вправ: бібліотечні вбудовані, їх видаляти нема сенсу.
+        // Хрестик тепер і у вбудованих. Раніше його не було зовсім — мовляв,
+        // бібліотечну вправу однаково не видалити, вона у файлі, а не в базі.
+        // Тільки людині від цього не легше: у списку висіли вправи, яких вона
+        // не робить, і прибрати їх було ніяк. Тож видалення тут і немає —
+        // є приховування, і воно оборотне (блок «Сховані вправи» нижче).
+        ? `<div class="picker-item" data-pick-lib="${item.id}" data-muscle="${m}">
+             <span class="picker-item-name">${escapeHtml(item.label)}</span>
+             <button type="button" class="picker-item-del" data-hide-lib="${item.id}" aria-label="${escapeHtml(t('hideExerciseAria'))}">
+               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+             </button>
+           </div>`
         : `<div class="picker-item" data-pick-custom="${item.id}" data-muscle="${m}">
              <span class="picker-item-name">${escapeHtml(item.label)}</span>
              <button type="button" class="picker-item-del" data-del-custom="${item.id}" aria-label="${escapeHtml(t('deleteExerciseAria'))}">
@@ -1789,7 +1834,7 @@ function renderPickerGroups(query) {
            </div>`
       ).join('')}
     </div>
-  `).join('');
+  `).join('') + hiddenSectionHtml();
   root.querySelectorAll('[data-pick-lib]').forEach((el) => {
     el.addEventListener('click', () => selectExercise({ libId: el.dataset.pickLib, muscle: el.dataset.muscle, name: exerciseLabel(el.dataset.pickLib) }));
   });
@@ -1808,6 +1853,56 @@ function renderPickerGroups(query) {
       askDelete('customExercise', btn.dataset.delCustom);
     });
   });
+  root.querySelectorAll('[data-hide-lib]').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      askDelete('libExercise', btn.dataset.hideLib);
+    });
+  });
+  // Повернення питання не ставить: воно нічого не втрачає, а зайвий діалог
+  // на дію, яку легко скасувати тим самим хрестиком, лише заважає.
+  root.querySelectorAll('[data-restore-lib]').forEach((btn) => {
+    btn.addEventListener('click', () => setExerciseHidden(btn.dataset.restoreLib, false));
+  });
+}
+
+// Сховане має бути видно — інакше «прибрав і не знайшов, як повернути».
+// Живе в кінці списку, з'являється лише коли є що показати, і пошуком не
+// фільтрується: сюди приходять по конкретну вправу, якої в пошуку вже немає.
+function hiddenSectionHtml() {
+  const known = hiddenExercises.filter((id) => EXERCISE_LIB.some((x) => x.id === id));
+  if (!known.length) return '';
+  return `
+    <div class="picker-group picker-hidden">
+      <div class="picker-group-label">${escapeHtml(t('hiddenTitle'))}</div>
+      ${known.map((id) => `
+        <div class="picker-item">
+          <span class="picker-item-name">${escapeHtml(exerciseLabel(id))}</span>
+          <button type="button" class="picker-restore-btn" data-restore-lib="${id}">${escapeHtml(t('restoreBtn'))}</button>
+        </div>`).join('')}
+    </div>`;
+}
+
+// Список id у профілі: arrayUnion/arrayRemove замість читання-запису всього
+// масиву — два пристрої не затруть правки одне одного. merge:true, бо
+// профіль може ще не існувати (нова людина, яка нічого не налаштовувала).
+async function setExerciseHidden(id, hidden) {
+  if (!auth.currentUser || !id) return;
+  const ref = db.collection('users').doc(auth.currentUser.uid);
+  const value = hidden
+    ? firebase.firestore.FieldValue.arrayUnion(id)
+    : firebase.firestore.FieldValue.arrayRemove(id);
+  // Не чекаємо на сервер: список має відповісти одразу, а підписка на профіль
+  // однаково приведе його до того, що реально лежить у базі.
+  hiddenExercises = hidden
+    ? [...new Set([...hiddenExercises, id])]
+    : hiddenExercises.filter((x) => x !== id);
+  renderPickerGroups(document.getElementById('pickerSearch').value);
+  try {
+    await ref.set({ hiddenExercises: value }, { merge: true });
+  } catch (err) {
+    console.error('setExerciseHidden:', err);
+  }
 }
 document.getElementById('pickerSearch').addEventListener('input', (e) => renderPickerGroups(e.target.value));
 
@@ -2132,12 +2227,21 @@ function showPrToast(name, weight, reps) {
   prToastTimer = setTimeout(() => toast.classList.remove('show'), 4200);
 }
 
+// Три випадки, і формулювання в них різні не для краси: видалення
+// тренування незворотне, видалення своєї вправи прибирає запис із бази,
+// а вбудована вправа лише ховається — і кнопка має казати саме це, бо
+// «Видалити» на оборотній дії лякає рівно там, де боятись нема чого.
 function applyConfirmTexts() {
+  const isHide = pendingDeleteKind === 'libExercise';
   const isExercise = pendingDeleteKind === 'customExercise';
   document.getElementById('confirmTitle').textContent =
-    t(isExercise ? 'confirmDeleteExerciseTitle' : 'confirmDeleteSessionTitle');
+    t(isHide ? 'confirmHideExerciseTitle'
+      : (isExercise ? 'confirmDeleteExerciseTitle' : 'confirmDeleteSessionTitle'));
   document.getElementById('confirmSub').textContent =
-    t(isExercise ? 'confirmDeleteExerciseSub' : 'confirmDeleteSessionSub');
+    t(isHide ? 'confirmHideExerciseSub'
+      : (isExercise ? 'confirmDeleteExerciseSub' : 'confirmDeleteSessionSub'));
+  document.getElementById('confirmDelete').textContent =
+    t(isHide ? 'hideConfirmBtn' : 'deleteConfirmBtn');
 }
 
 function askDelete(kind, id) {
@@ -2164,11 +2268,16 @@ document.getElementById('confirmOverlay').addEventListener('click', (e) => {
 });
 document.getElementById('confirmDelete').addEventListener('click', async () => {
   if (!pendingDeleteId || !auth.currentUser) return;
-  const colName = pendingDeleteKind === 'customExercise' ? 'customExercises' : 'workouts';
-  try {
-    await db.collection('users').doc(auth.currentUser.uid).collection(colName).doc(pendingDeleteId).delete();
-  } catch (err) {
-    console.error('delete ' + colName + ':', err);
+  if (pendingDeleteKind === 'libExercise') {
+    // Вбудовану вправу нема звідки видаляти — вона у файлі бібліотеки.
+    await setExerciseHidden(pendingDeleteId, true);
+  } else {
+    const colName = pendingDeleteKind === 'customExercise' ? 'customExercises' : 'workouts';
+    try {
+      await db.collection('users').doc(auth.currentUser.uid).collection(colName).doc(pendingDeleteId).delete();
+    } catch (err) {
+      console.error('delete ' + colName + ':', err);
+    }
   }
   pendingDeleteId = null;
   document.getElementById('confirmOverlay').classList.remove('show');
@@ -2229,7 +2338,7 @@ auth.onAuthStateChanged((user) => {
   } else {
     if (unsubscribeSessions) { unsubscribeSessions(); unsubscribeSessions = null; }
     if (unsubscribeGoals) { unsubscribeGoals(); unsubscribeGoals = null; goals = []; }
-    if (unsubscribeGoalCategories) { unsubscribeGoalCategories(); unsubscribeGoalCategories = null; goalCategoryIds = null; }
+    if (unsubscribeGoalCategories) { unsubscribeGoalCategories(); unsubscribeGoalCategories = null; goalCategoryIds = null; hiddenExercises = []; }
     if (unsubscribeTemplates) { unsubscribeTemplates(); unsubscribeTemplates = null; }
     if (unsubscribeCustomExercises) { unsubscribeCustomExercises(); unsubscribeCustomExercises = null; }
     customExercises = [];
