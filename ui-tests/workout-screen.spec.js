@@ -4,16 +4,27 @@ const { openModule, isShown } = require('./helpers');
 
 const ex = (libId, name, muscle, sets) => ({ id: libId, libId, name, muscle, sets });
 
-// Серпень 2026: тренування 5-го, 18-го і два 20-го.
+// Дати сидів прив'язані до ПОТОЧНОГО місяця, а не зашиті числом.
+// Календар відкривається на поточному місяці, тож зашитий «2026-08-…»
+// працював рівно до 31 серпня, а 1 вересня чотири тести з календарем
+// упали на порожньому екрані — хоча в коді нічого не мінялось.
+// Числа днів (5, 10, 18, 20, 22, 25) є в будь-якому місяці.
+const MONTH = (() => {
+  const now = new Date();
+  return now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+})();
+const day = (n) => MONTH + '-' + String(n).padStart(2, '0');
+
+// Тренування 5-го, 18-го і два 20-го.
 const SEED = {
   workouts: [
-    { id: 'w1', date: '2026-08-05', name: 'Груди', notes: '',
+    { id: 'w1', date: day(5), name: 'Груди', notes: '',
       exercises: [ex('benchPress', 'Жим лежачи', 'chest', [{ weight: 70, reps: 8 }])] },
-    { id: 'w2', date: '2026-08-18', name: 'Ноги', notes: '',
+    { id: 'w2', date: day(18), name: 'Ноги', notes: '',
       exercises: [ex('squat', 'Присідання', 'legs', [{ weight: 100, reps: 5 }])] },
-    { id: 'w3', date: '2026-08-20', name: 'Ранкове', notes: '',
+    { id: 'w3', date: day(20), name: 'Ранкове', notes: '',
       exercises: [ex('plank', 'Планка', 'core', [{ weight: 0, reps: 60 }])] },
-    { id: 'w4', date: '2026-08-20', name: 'Вечірнє', notes: '',
+    { id: 'w4', date: day(20), name: 'Вечірнє', notes: '',
       exercises: [ex('deadlift', 'Станова', 'back', [{ weight: 120, reps: 5 }])] },
   ],
 };
@@ -24,20 +35,20 @@ test.describe('Календар', () => {
     await page.waitForSelector('.wcal');
     // Клікабельні лише дні з тренуванням; 20-те одне, хоч тренувань там два.
     const days = await page.locator('[data-cal-day]').evaluateAll((els) => els.map((e) => e.dataset.calDay));
-    expect(days.sort()).toEqual(['2026-08-05', '2026-08-18', '2026-08-20']);
+    expect(days.sort()).toEqual([day(5), day(18), day(20)]);
   });
 
   test('тап по дню з одним тренуванням відкриває саме його', async ({ page }) => {
     await openModule(page, 'workout/index.html', { seed: SEED });
-    await page.click('[data-cal-day="2026-08-18"]');
+    await page.click(`[data-cal-day="${day(18)}"]`);
     await page.waitForSelector('#sessionFormOverlay.show');
     expect(await page.inputValue('#sessionNameInput')).toBe('Ноги');
-    expect(await page.inputValue('#sessionDateInput')).toBe('2026-08-18');
+    expect(await page.inputValue('#sessionDateInput')).toBe(day(18));
   });
 
   test('день із кількома тренуваннями звужує список, а не вгадує', async ({ page }) => {
     await openModule(page, 'workout/index.html', { seed: SEED });
-    await page.click('[data-cal-day="2026-08-20"]');
+    await page.click(`[data-cal-day="${day(20)}"]`);
     expect(await isShown(page, '#sessionFormOverlay'), 'вгадувати, яке з двох — гірше').toBe(false);
     await expect(page.locator('.session-card')).toHaveCount(2);
 
@@ -49,15 +60,15 @@ test.describe('Календар', () => {
   test('стрілки гортають місяці, назва вертає в поточний', async ({ page }) => {
     await openModule(page, 'workout/index.html', { seed: SEED });
     const title = () => page.textContent('#wcalTitle');
-    const august = await title();
+    const thisMonth = await title();
 
     await page.click('[data-cal-shift="-1"]');
-    expect(await title()).not.toBe(august);
-    // У липні тренувань не було — і клікати нема на що.
+    expect(await title()).not.toBe(thisMonth);
+    // У попередньому місяці тренувань не було — і клікати нема на що.
     await expect(page.locator('[data-cal-day]')).toHaveCount(0);
 
     await page.click('#wcalTitle');
-    expect(await title()).toBe(august);
+    expect(await title()).toBe(thisMonth);
     await expect(page.locator('[data-cal-day]')).toHaveCount(3);
   });
 });
@@ -164,7 +175,7 @@ test.describe('Тренування наперед (план)', () => {
   test('запланований підхід відкривається порожнім, а не нулями', async ({ page }) => {
     const seed = {
       workouts: [{
-        id: 'p1', date: '2026-08-25', name: 'План', notes: '',
+        id: 'p1', date: day(25), name: 'План', notes: '',
         exercises: [{ id: 'a', libId: 'benchPress', muscle: 'chest', name: 'Жим лежачи',
           sets: [{ weight: 0, reps: 0 }, { weight: 0, reps: 0 }] }],
       }],
@@ -181,7 +192,7 @@ test.describe('Тренування наперед (план)', () => {
   test('власна вага (0 кг, але є повторення) нулем не стирається', async ({ page }) => {
     const seed = {
       workouts: [{
-        id: 'b1', date: '2026-08-20', name: 'Турнік', notes: '',
+        id: 'b1', date: day(20), name: 'Турнік', notes: '',
         exercises: [{ id: 'a', libId: 'pullUp', muscle: 'back', name: 'Підтягування',
           sets: [{ weight: 0, reps: 12 }] }],
       }],
@@ -196,17 +207,17 @@ test.describe('Тренування наперед (план)', () => {
   test('план не стає рекордом і не підказує вагу наступного разу', async ({ page }) => {
     const seed = {
       workouts: [
-        { id: 'done', date: '2026-08-10', name: 'Робота', notes: '',
+        { id: 'done', date: day(10), name: 'Робота', notes: '',
           exercises: [{ id: 'a', libId: 'benchPress', muscle: 'chest', name: 'Жим лежачи',
             sets: [{ weight: 80, reps: 8 }] }] },
-        { id: 'plan', date: '2026-08-22', name: 'План', notes: '',
+        { id: 'plan', date: day(22), name: 'План', notes: '',
           exercises: [{ id: 'b', libId: 'benchPress', muscle: 'chest', name: 'Жим лежачи',
             sets: [{ weight: 0, reps: 0 }] }] },
       ],
     };
     await openModule(page, 'workout/index.html', { seed });
     // У списку планове тренування показує «—», а не «0×0».
-    await page.click('[data-cal-day="2026-08-22"]');
+    await page.click(`[data-cal-day="${day(22)}"]`);
     await page.waitForSelector('#sessionFormOverlay.show');
     await page.click('#closeSessionForm');
 
@@ -223,7 +234,7 @@ test.describe('Тренування наперед (план)', () => {
 test.describe('Підпис у картці тренування', () => {
   const seed = {
     workouts: [{
-      id: 's1', date: '2026-08-20', name: 'Ноги', notes: '',
+      id: 's1', date: day(20), name: 'Ноги', notes: '',
       exercises: [
         ex('squat', 'Присідання', 'legs', [{ weight: 100, reps: 5 }, { weight: 100, reps: 5 }]),
         ex('lunge', 'Випади', 'legs', [{ weight: 20, reps: 10 }]),
@@ -239,7 +250,7 @@ test.describe('Підпис у картці тренування', () => {
   });
 
   test('однина не ламається', async ({ page }) => {
-    const one = { workouts: [{ id: 's2', date: '2026-08-20', name: 'Швидке', notes: '',
+    const one = { workouts: [{ id: 's2', date: day(20), name: 'Швидке', notes: '',
       exercises: [ex('plank', 'Планка', 'core', [{ weight: 0, reps: 60 }])] }] };
     await openModule(page, 'workout/index.html', { seed: one });
     // Було «1 вправи · 1 повт.».

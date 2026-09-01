@@ -112,6 +112,11 @@ const T = {
     unsavedTitle: 'Зберегти зміни?',
     unsavedSub: 'Є незбережені зміни. Якщо вийти зараз, вони пропадуть.',
     unsavedSave: 'Зберегти', unsavedDiscard: 'Не зберігати', unsavedKeep: 'Продовжити редагування',
+    // Швидке додавання питає про те саме, але своїми словами: там ще нема
+    // «змін», там є набраний рядок, який нікуди не записаний.
+    unsavedQuickTitle: 'Додати завдання?',
+    unsavedQuickSub: 'Набране ще нікуди не записано. Якщо закрити зараз, воно зникне.',
+    unsavedQuickDiscard: 'Не додавати',
     themeLabel: 'Тема', themeLight: 'Світла', themeDark: 'Темна', themeSystem: 'Системна',
     langLabel: 'Мова', logout: 'Вийти',
     authTitleLogin: 'Вхід', authTitleSignup: 'Реєстрація',
@@ -208,6 +213,9 @@ const T = {
     unsavedTitle: 'Сохранить изменения?',
     unsavedSub: 'Есть несохранённые изменения. Если выйти сейчас, они пропадут.',
     unsavedSave: 'Сохранить', unsavedDiscard: 'Не сохранять', unsavedKeep: 'Продолжить редактирование',
+    unsavedQuickTitle: 'Добавить задачу?',
+    unsavedQuickSub: 'Набранное ещё никуда не записано. Если закрыть сейчас, оно исчезнет.',
+    unsavedQuickDiscard: 'Не добавлять',
     themeLabel: 'Тема', themeLight: 'Светлая', themeDark: 'Тёмная', themeSystem: 'Системная',
     langLabel: 'Язык', logout: 'Выйти',
     authTitleLogin: 'Вход', authTitleSignup: 'Регистрация',
@@ -304,6 +312,9 @@ const T = {
     unsavedTitle: 'Zapisać zmiany?',
     unsavedSub: 'Są niezapisane zmiany. Jeśli teraz wyjdziesz, przepadną.',
     unsavedSave: 'Zapisz', unsavedDiscard: 'Nie zapisuj', unsavedKeep: 'Wróć do edycji',
+    unsavedQuickTitle: 'Dodać zadanie?',
+    unsavedQuickSub: 'Wpisany tekst nie jest nigdzie zapisany. Jeśli teraz zamkniesz, przepadnie.',
+    unsavedQuickDiscard: 'Nie dodawaj',
     themeLabel: 'Motyw', themeLight: 'Jasny', themeDark: 'Ciemny', themeSystem: 'Systemowy',
     langLabel: 'Język', logout: 'Wyloguj',
     authTitleLogin: 'Logowanie', authTitleSignup: 'Rejestracja',
@@ -400,6 +411,9 @@ const T = {
     unsavedTitle: 'Save changes?',
     unsavedSub: 'There are unsaved changes. Leaving now discards them.',
     unsavedSave: 'Save', unsavedDiscard: "Don't save", unsavedKeep: 'Keep editing',
+    unsavedQuickTitle: 'Add the task?',
+    unsavedQuickSub: 'What you typed is not saved anywhere yet. Closing now discards it.',
+    unsavedQuickDiscard: "Don't add",
     themeLabel: 'Theme', themeLight: 'Light', themeDark: 'Dark', themeSystem: 'System',
     langLabel: 'Language', logout: 'Log out',
     authTitleLogin: 'Log in', authTitleSignup: 'Sign up',
@@ -2663,12 +2677,32 @@ function openQuickAdd(prefillDate) {
   quickAddDate = prefillDate || null;
   document.getElementById('quickAddError').textContent = '';
   refreshQuickAddPreview();
+  // Знімок робимо після очищення поля — інакше щойно відкрите вікно вважалось
+  // би зміненим ще до першої літери.
+  quickGuard.arm();
   document.getElementById('quickAddOverlay').classList.add('show');
   setTimeout(() => input.focus(), 50);
 }
 
+// ---- Незбережене у швидкому додаванні ----
+// Вікно закривається тапом повз нього, а набраний рядок нікуди не пишеться,
+// доки не натиснуто «Додати». Промах повз вікно стирав усе без питання —
+// саме те, від чого повну форму завдання вже захищає ../unsaved-guard.js.
+// Тут той самий гард, тільки знімок простіший: одне поле.
+const quickGuard = UnsavedGuard.create({
+  overlay: 'quickAddOverlay',
+  snapshot: () => document.getElementById('quickAddInput').value.trim(),
+  save: () => submitQuickAdd(),
+  texts: () => ({
+    title: t('unsavedQuickTitle'), sub: t('unsavedQuickSub'),
+    save: t('quickAddSubmit'), discard: t('unsavedQuickDiscard'), keep: t('unsavedKeep'),
+  }),
+});
+
+// Закриття без питань: після вдалого запису й при переході в «Деталі…», де
+// набране не втрачається, а їде далі у повну форму.
 function closeQuickAdd() {
-  document.getElementById('quickAddOverlay').classList.remove('show');
+  quickGuard.close();
 }
 
 async function submitQuickAdd() {
@@ -2734,10 +2768,8 @@ function openQuickAddInForm() {
 }
 
 document.getElementById('openQuickAdd').addEventListener('click', () => openQuickAdd(selectedDate));
-document.getElementById('closeQuickAdd').addEventListener('click', closeQuickAdd);
-document.getElementById('quickAddOverlay').addEventListener('click', (e) => {
-  if (e.target.id === 'quickAddOverlay') closeQuickAdd();
-});
+document.getElementById('closeQuickAdd').addEventListener('click', () => quickGuard.requestClose());
+// Тап повз вікно слухає сам гард — див. UnsavedGuard.create().
 document.getElementById('quickAddInput').addEventListener('input', refreshQuickAddPreview);
 document.getElementById('quickAddForm').addEventListener('submit', (e) => { e.preventDefault(); submitQuickAdd(); });
 document.getElementById('quickAddDetailsBtn').addEventListener('click', openQuickAddInForm);
