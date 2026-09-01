@@ -5,7 +5,7 @@ importScripts('../sw-core.js');
 LifeSW({
   name: 'workout',
   files: [
-    './', './index.html', './app.js', './exercises.js', './progression.js',
+    './', './index.html', './app.js', './exercises.js',
     './progress.js',
     '../side-nav.js', '../side-nav.css', '../scroll-lock.js', '../unsaved-guard.js',
     '../ai-chat.js', '../ai-chat.css', '../goals/streak.js',

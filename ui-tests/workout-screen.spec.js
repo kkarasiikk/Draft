@@ -260,6 +260,48 @@ test.describe('Тренування наперед (план)', () => {
   });
 });
 
+// Порада «Спробуй: 30×8 · вага росте» з кнопкою «Підставити» прибрана на
+// прохання: скільки ставити сьогодні, вирішує людина. «Минулого разу» —
+// не порада, а власний запис, і саме на нього дивляться, набираючи вагу.
+test.describe('Підказки у формі', () => {
+  const seed = {
+    workouts: [{
+      id: 'w1', date: day(10), name: 'Груди', notes: '',
+      exercises: [ex('benchPress', 'Жим лежачи', 'chest',
+        [{ weight: 80, reps: 8 }, { weight: 80, reps: 8 }, { weight: 80, reps: 8 }])],
+    }],
+  };
+
+  const openWithExercise = async (page) => {
+    await openModule(page, 'workout/index.html', { seed });
+    await page.click('#newSessionBtn');
+    await page.waitForSelector('#sessionFormOverlay.show');
+    await page.click('#addExerciseBtn');
+    await page.waitForSelector('#exercisePickerOverlay.show');
+    await page.click('[data-pick-lib="benchPress"]');
+    await page.waitForSelector('.ex-block');
+  };
+
+  test('«минулого разу» лишається — це власний запис', async ({ page }) => {
+    await openWithExercise(page);
+    await expect(page.locator('.hint-last')).toContainText('80');
+  });
+
+  test('поради «Спробуй» із кнопкою «Підставити» немає', async ({ page }) => {
+    await openWithExercise(page);
+    await expect(page.locator('.hint-next')).toHaveCount(0);
+    await expect(page.locator('[data-fill]')).toHaveCount(0);
+    await expect(page.locator('#sessionFormOverlay')).not.toContainText('Спробуй');
+    await expect(page.locator('#sessionFormOverlay')).not.toContainText('Підставити');
+  });
+
+  test('поля підходів лишаються порожніми — нічого не підставляється саме', async ({ page }) => {
+    await openWithExercise(page);
+    const weights = await page.locator('.set-weight').evaluateAll((els) => els.map((e) => e.value));
+    expect(weights.every((v) => v === ''), 'вагу вписує людина, а не застосунок').toBe(true);
+  });
+});
+
 test.describe('Підпис у картці тренування', () => {
   const seed = {
     workouts: [{
