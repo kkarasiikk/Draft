@@ -87,18 +87,8 @@ const T = {
     progressNotEnough: (n) => `Замало даних — ще ${n} ${plural(n, { one: 'тренування', few: 'тренування', many: 'тренувань' })}, і зʼявиться порівняння з минулим місяцем.`,
     progressNoCompare: 'Ще немає з чим порівнювати — потрібен місяць історії тих самих вправ.',
     progressVolumeLabel: 'Обсяг', progressNewMark: 'нове',
-    planTitle: 'План на сьогодні',
     creditTitle: 'Зарахувати в ціль', creditDay: 'Зарахувати день',
     creditCounted: 'День зараховано',
-    // Без дієслова: «Спина відпочивали» — так не кажуть, а рід і число
-    // назв мʼязів різні.
-    planRested: (m, d) => `${m} — ${d} ${plural(d, { one: 'день', few: 'дні', many: 'днів' })} відпочинку`,
-    planRestDay: 'Усі групи тренувались щойно. Дай їм день — і повертайся.',
-    planStartBtn: 'Почати тренування',
-    readyLabel: 'Як почуваєшся?',
-    ready_ready: '🟢 Готовий', ready_ok: '🟡 Так собі', ready_low: '🔴 Розбитий',
-    readyNoteOk: 'Обсяг трохи менший, вага не росте — сьогодні без геройства.',
-    readyNoteLow: 'Легка сесія: два підходи й менша вага. Пропустити теж нормально.',
     unitKg: 'кг', unitReps: 'повт.',
     nextTryAddLoad: 'час на обтяження', nextTryFill: 'Підставити',
     prToastText: (name, w, r) => `Новий рекорд: ${name} — ${w}×${r}`,
@@ -172,16 +162,8 @@ const T = {
     progressNotEnough: (n) => `Мало данных — ещё ${n} ${plural(n, { one: 'тренировка', few: 'тренировки', many: 'тренировок' })}, и появится сравнение с прошлым месяцем.`,
     progressNoCompare: 'Пока не с чем сравнивать — нужен месяц истории тех же упражнений.',
     progressVolumeLabel: 'Объём', progressNewMark: 'новое',
-    planTitle: 'План на сегодня',
     creditTitle: 'Засчитать в цель', creditDay: 'Засчитать день',
     creditCounted: 'День засчитан',
-    planRested: (m, d) => `${m} — ${d} ${plural(d, { one: 'день', few: 'дня', many: 'дней' })} отдыха`,
-    planRestDay: 'Все группы тренировались только что. Дай им день — и возвращайся.',
-    planStartBtn: 'Начать тренировку',
-    readyLabel: 'Как самочувствие?',
-    ready_ready: '🟢 Готов', ready_ok: '🟡 Так себе', ready_low: '🔴 Разбит',
-    readyNoteOk: 'Объём чуть меньше, вес не растёт — сегодня без геройства.',
-    readyNoteLow: 'Лёгкая сессия: два подхода и меньший вес. Пропустить тоже нормально.',
     unitKg: 'кг', unitReps: 'повт.',
     nextTryAddLoad: 'пора на отягощение', nextTryFill: 'Подставить',
     prToastText: (name, w, r) => `Новый рекорд: ${name} — ${w}×${r}`,
@@ -255,16 +237,8 @@ const T = {
     progressNotEnough: (n) => `Za mało danych — jeszcze ${n} ${plural(n, { one: 'trening', few: 'treningi', many: 'treningów' })} i pojawi się porównanie z poprzednim miesiącem.`,
     progressNoCompare: 'Nie ma jeszcze do czego porównać — potrzeba miesiąca historii tych samych ćwiczeń.',
     progressVolumeLabel: 'Objętość', progressNewMark: 'nowe',
-    planTitle: 'Plan na dziś',
     creditTitle: 'Zalicz do celu', creditDay: 'Zalicz dzień',
     creditCounted: 'Dzień zaliczony',
-    planRested: (m, d) => `${m} — ${d} ${plural(d, { one: 'dzień', few: 'dni', many: 'dni' })} odpoczynku`,
-    planRestDay: 'Wszystkie partie trenowane były przed chwilą. Daj im dzień i wracaj.',
-    planStartBtn: 'Zacznij trening',
-    readyLabel: 'Jak się czujesz?',
-    ready_ready: '🟢 Gotowy', ready_ok: '🟡 Tak sobie', ready_low: '🔴 Rozbity',
-    readyNoteOk: 'Objętość nieco mniejsza, ciężar nie rośnie — dziś bez bohaterstwa.',
-    readyNoteLow: 'Lekka sesja: dwie serie i mniejszy ciężar. Odpuścić też jest w porządku.',
     unitKg: 'kg', unitReps: 'powt.',
     nextTryAddLoad: 'czas na obciążenie', nextTryFill: 'Wstaw',
     prToastText: (name, w, r) => `Nowy rekord: ${name} — ${w}×${r}`,
@@ -338,16 +312,8 @@ const T = {
     progressNotEnough: (n) => `Not enough data — ${n} more ${plural(n, { one: 'workout', other: 'workouts' })} and the month-over-month comparison appears.`,
     progressNoCompare: 'Nothing to compare yet — needs a month of history on the same exercises.',
     progressVolumeLabel: 'Volume', progressNewMark: 'new',
-    planTitle: 'Today',
     creditTitle: 'Count toward a goal', creditDay: 'Count the day',
     creditCounted: 'Day counted',
-    planRested: (m, d) => `${m} — rested ${d} ${plural(d, { one: 'day', other: 'days' })}`,
-    planRestDay: 'Everything was trained just now. Give it a day and come back.',
-    planStartBtn: 'Start workout',
-    readyLabel: 'How do you feel?',
-    ready_ready: '🟢 Ready', ready_ok: '🟡 So-so', ready_low: '🔴 Wrecked',
-    readyNoteOk: 'Slightly less volume, no weight increase — no heroics today.',
-    readyNoteLow: 'Light session: two sets and less weight. Skipping is fine too.',
     unitKg: 'kg', unitReps: 'reps',
     nextTryAddLoad: 'time to add load', nextTryFill: 'Fill in',
     prToastText: (name, w, r) => `New PR: ${name} — ${w}×${r}`,
@@ -854,8 +820,6 @@ function refreshDatePickersLang() {
 let sessions = [];
 let unsubscribeSessions = null;
 // Самопочуття на сьогодні: 'ready' | 'ok' | 'low' або null, поки не питали.
-let readiness = null;
-let unsubscribeReadiness = null;
 // Цілі здоровʼя: тренування вміє зарахуватись у них просто тут, не
 // змушуючи йти в інший розділ і повторювати те саме руками.
 let goals = [];
@@ -903,18 +867,6 @@ function subscribeToTemplates(uid) {
   }, (err) => console.error('subscribeToTemplates:', err));
 }
 
-// Один документ на добу, id — сама дата: перезапис замість накопичення
-// й нуль зайвих читань.
-function subscribeToReadiness(uid) {
-  if (unsubscribeReadiness) unsubscribeReadiness();
-  unsubscribeReadiness = db.collection('users').doc(uid).collection('readiness').doc(todayISO())
-    .onSnapshot((doc) => {
-      const data = doc.exists ? (doc.data() || {}) : {};
-      readiness = data.level || null;
-      renderCurrentScreen();
-    }, (err) => console.error('subscribeToReadiness:', err));
-}
-
 // Категорії цілей людина редагує в розділі «Цілі», і сюди вони потрібні рівно
 // заради одного: зрозуміти, чи існує ще категорія 'health', за якою
 // відбирається, що зарахувати після тренування. `null` — профіль ще не
@@ -954,22 +906,6 @@ function subscribeToCustomExercises(uid) {
       renderPickerGroups(document.getElementById('pickerSearch').value);
     }
   }, (err) => console.error('subscribeToCustomExercises:', err));
-}
-
-async function setReadiness(level) {
-  if (!auth.currentUser) return;
-  // Повторний дотик по тій самій кнопці знімає відповідь: людина могла
-  // промахнутись, і застрягти в «розбитий» до півночі було б безглуздо.
-  const next = readiness === level ? null : level;
-  const ref = db.collection('users').doc(auth.currentUser.uid).collection('readiness').doc(todayISO());
-  readiness = next;   // не чекаємо на сервер: кнопка має відповідати одразу
-  renderCurrentScreen();
-  try {
-    if (!next) await ref.delete();
-    else await ref.set({ level: next, date: todayISO(), createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-  } catch (err) {
-    console.error('setReadiness:', err);
-  }
 }
 
 function sortedSessions() {
@@ -1043,68 +979,6 @@ function historyForExercise(key) {
 // ---- Рендер ----
 function renderCurrentScreen() {
   if (activeTab === 'sessions') renderSessionsTab(); else renderRecordsTab();
-}
-
-// ---- План на сьогодні ----
-// Найперше питання в залі — не «яку вагу», а «що взагалі робити». Тут
-// показуємо групу, яка найдовше відпочивала, і її звичні вправи з уже
-// порахованими вагами. Нічого не вигадується: у плані лише те, що людина
-// вже робила.
-function renderPlanCard() {
-  const list = sortedSessions();
-  // Сьогодні вже тренувався — план більше ні до чого й зникає сам,
-  // без жодних «сховати на сьогодні».
-  if (list.some((s) => s.date === todayISO())) return '';
-
-  const plan = window.WorkoutPlan.suggestSession(sessions, todayISO());
-  if (!plan) return '';
-  if (plan.rest) {
-    return `
-      <div class="plan-card">
-        <div class="plan-title">${escapeHtml(t('planTitle'))}</div>
-        <div class="plan-rest">${escapeHtml(t('planRestDay'))}</div>
-      </div>`;
-  }
-
-  const names = plan.muscles.map((m) => muscleLabel(m.muscle));
-  const head = names.join(' + ');
-  const why = t('planRested', names[0], plan.muscles[0].daysAgo);
-  // Самопочуття зсуває план, а не замінює його: та сама сесія, менший
-  // обсяг. Сну й пульсу застосунок не знає, тож питаємо навпростець.
-  const shown = window.WorkoutPlan.adjustForReadiness(plan.exercises, readiness);
-  const note = readiness === 'ok' ? t('readyNoteOk') : (readiness === 'low' ? t('readyNoteLow') : '');
-
-  return `
-    <div class="plan-card">
-      <div class="plan-title">${escapeHtml(t('planTitle'))}</div>
-      <div class="plan-head">${escapeHtml(head)}</div>
-      <div class="plan-why">${escapeHtml(why)}</div>
-      <div class="ready-label">${escapeHtml(t('readyLabel'))}</div>
-      <div class="ready-row">
-        ${window.WorkoutPlan.READINESS.map((lvl) => `
-          <button type="button" class="ready-btn${readiness === lvl ? ' selected ' + lvl : ''}" data-ready="${lvl}">${escapeHtml(t('ready_' + lvl))}</button>`).join('')}
-      </div>
-      ${note ? `<div class="ready-note">${escapeHtml(note)}</div>` : ''}
-      ${shown.map((e) => `
-        <div class="plan-row">
-          <span class="plan-name">${escapeHtml(e.libId ? exerciseLabel(e.libId) : e.name)}</span>
-          <span class="plan-load ${e.direction}">${e.sets}\u00D7\u2009${escapeHtml(setLabel(e.weight, e.reps))}</span>
-        </div>`).join('')}
-      <button type="button" class="plan-start-btn" id="planStartBtn">${escapeHtml(t('planStartBtn'))}</button>
-    </div>`;
-}
-
-// Кнопка не «створює тренування», а відкриває форму вже заповненою:
-// далі людина міняє що завгодно, а зайве прибирає хрестиком.
-function startPlannedSession() {
-  const plan = window.WorkoutPlan.suggestSession(sessions, todayISO());
-  if (!plan || plan.rest) return;
-  openSessionForm(null);
-  formExercises = window.WorkoutPlan.adjustForReadiness(plan.exercises, readiness).map((e) => ({
-    id: uid4(), libId: e.libId || null, name: e.name || '', muscle: e.muscle === 'other' ? null : e.muscle,
-    sets: Array.from({ length: e.sets }, () => ({ weight: e.weight, reps: e.reps })),
-  }));
-  renderExerciseBlocks();
 }
 
 // ---- Календар тренувань ----
@@ -1255,7 +1129,7 @@ function renderSessionsTab() {
       <button type="button" id="wcalClearBtn">${escapeHtml(t('calShowAll'))}</button>
     </div>` : '';
 
-  root.innerHTML = renderCalendar() + renderPlanCard() + renderGoalCreditCard() + filterBar + shownGroups.map((g) => `
+  root.innerHTML = renderCalendar() + renderGoalCreditCard() + filterBar + shownGroups.map((g) => `
     <div class="day-group">
       <div class="day-label">${escapeHtml(dayLabel(g.date))}</div>
       ${g.items.map((s) => renderSessionCard(s)).join('')}
@@ -1264,11 +1138,6 @@ function renderSessionsTab() {
   attachCalendarEvents(root);
   root.querySelectorAll('[data-open-session]').forEach((el) => {
     el.addEventListener('click', () => openSessionForm(sessions.find((s) => s.id === el.dataset.openSession)));
-  });
-  const startBtn = document.getElementById('planStartBtn');
-  if (startBtn) startBtn.addEventListener('click', startPlannedSession);
-  root.querySelectorAll('[data-ready]').forEach((btn) => {
-    btn.addEventListener('click', () => setReadiness(btn.dataset.ready));
   });
   wireGoalCreditCard(root);
 }
@@ -2352,7 +2221,6 @@ auth.onAuthStateChanged((user) => {
       }
     }).catch(() => {});
     subscribeToSessions(user.uid);
-    subscribeToReadiness(user.uid);
     subscribeToGoals(user.uid);
     subscribeToGoalCategories(user.uid);
     openFromHash(() => openSessionForm(null));
@@ -2360,12 +2228,10 @@ auth.onAuthStateChanged((user) => {
     subscribeToCustomExercises(user.uid);
   } else {
     if (unsubscribeSessions) { unsubscribeSessions(); unsubscribeSessions = null; }
-    if (unsubscribeReadiness) { unsubscribeReadiness(); unsubscribeReadiness = null; }
     if (unsubscribeGoals) { unsubscribeGoals(); unsubscribeGoals = null; goals = []; }
     if (unsubscribeGoalCategories) { unsubscribeGoalCategories(); unsubscribeGoalCategories = null; goalCategoryIds = null; }
     if (unsubscribeTemplates) { unsubscribeTemplates(); unsubscribeTemplates = null; }
     if (unsubscribeCustomExercises) { unsubscribeCustomExercises(); unsubscribeCustomExercises = null; }
-    readiness = null;
     customExercises = [];
     sessions = [];
     templates = [];
