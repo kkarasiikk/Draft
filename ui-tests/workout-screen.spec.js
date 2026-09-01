@@ -29,6 +29,35 @@ const SEED = {
   ],
 };
 
+// Картка «План на сьогодні» — рекомендація, яку ніхто не просив: вона сама
+// вирішувала, що тренувати, з якими вагами, і питала про самопочуття.
+// Прибрана на прохання; тест стереже, щоб вона не повернулась разом із
+// чиїмось «а давайте підкажемо».
+test('застосунок не пропонує, що тренувати сьогодні', async ({ page }) => {
+  // Історія є, сьогоднішнього тренування немає — саме та ситуація, в якій
+  // картка раніше зʼявлялась.
+  const daysAgo = (n) => {
+    const d = new Date();
+    d.setDate(d.getDate() - n);
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0')
+      + '-' + String(d.getDate()).padStart(2, '0');
+  };
+  const seed = {
+    workouts: [
+      { id: 'p1', date: daysAgo(9), name: 'Ноги', notes: '',
+        exercises: [ex('squat', 'Присідання', 'legs', [{ weight: 100, reps: 5 }])] },
+      { id: 'p2', date: daysAgo(7), name: 'Груди', notes: '',
+        exercises: [ex('benchPress', 'Жим лежачи', 'chest', [{ weight: 80, reps: 8 }])] },
+    ],
+  };
+  await openModule(page, 'workout/index.html', { seed });
+  await page.waitForSelector('.session-card');
+  await expect(page.locator('.plan-card')).toHaveCount(0);
+  await expect(page.locator('#planStartBtn')).toHaveCount(0);
+  await expect(page.locator('[data-ready]')).toHaveCount(0);
+  await expect(page.locator('#appScreen')).not.toContainText('План на сьогодні');
+});
+
 test.describe('Календар', () => {
   test('крапки стоять рівно на днях із тренуваннями', async ({ page }) => {
     await openModule(page, 'workout/index.html', { seed: SEED });
