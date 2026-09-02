@@ -333,11 +333,6 @@ describe('monthCalendar — місяць повними тижнями', () => {
     expect(m.days[m.days.length - 1].otherMonth).toBe(true);
   });
 
-  test('місяць називає себе сам, а не за краями сітки', () => {
-    // Краї — це серпень і жовтень; підпис по них збрехав би про вересень.
-    expect(H.monthCalendar([], SEP).month).toBe('2026-09-01');
-  });
-
   test('крапка означає те саме, що й у тижні', () => {
     const m = H.monthCalendar([task('2026-09-10'), task('2026-09-11', true)], SEP);
     const byDate = {};

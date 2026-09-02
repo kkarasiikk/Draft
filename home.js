@@ -1001,17 +1001,12 @@ function renderCalendar() {
     ? HomeSummary.monthCalendar(homeData.tasks || [], today)
     : HomeSummary.weekCalendar(homeData.tasks || [], today);
 
-  if (wide) {
-    // Місяць підписуємо його власною назвою, а не назвами країв сітки: хвости
-    // сусідніх місяців у ній є завжди, і «серпень — жовтень» над вереснем
-    // збрехало б.
-    monthEl.textContent = month.format(new Date(cal.month + 'T00:00:00'));
-  } else {
-    // Тиждень може лежати на межі двох місяців — тоді один підпис збрехав би.
-    const first = month.format(new Date(cal.from + 'T00:00:00'));
-    const last = month.format(new Date(cal.to + 'T00:00:00'));
-    monthEl.textContent = first === last ? first : `${first} — ${last}`;
-  }
+  // Підпис — це місяць СЬОГОДНІШНЬОГО дня, а не країв сітки. Тиждень на межі
+  // місяців підписувався обома назвами («серпень — вересень»), і в сітці
+  // місяця хвости сусідніх місяців є завжди, тож обидва варіанти по краях
+  // однаково брехали б. 31 серпня це ще серпень, 1 вересня — вже вересень,
+  // хай навіть у тому самому рядку стоять числа обох.
+  monthEl.textContent = month.format(new Date(today + 'T00:00:00'));
 
   const dow = new Intl.DateTimeFormat(locale, { weekday: 'short' });
   // У місяці день тижня стоїть один раз шапкою над стовпчиком, а не в кожній

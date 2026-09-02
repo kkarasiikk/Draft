@@ -91,3 +91,40 @@ test.describe('Телефон', () => {
     await expect(page.locator('.today-more')).toHaveText('Ще 10 у завданнях →');
   });
 });
+
+// Підпис над календарем — це місяць СЬОГОДНІШНЬОГО дня. Тиждень на межі
+// місяців підписувався обома назвами («серпень — вересень»), а в сітці
+// місяця хвости сусідніх місяців є завжди, тож підпис по краях однаково
+// брехав би. 31 серпня — це ще серпень; 1 вересня — вже вересень.
+test.describe('Назва місяця над календарем', () => {
+  const atNoon = (iso) => new Date(`${iso}T12:00:00`);
+
+  test.describe('телефон', () => {
+    test.use({ viewport: { width: 390, height: 844 } });
+
+    test('останній день серпня підписаний серпнем, хоч у тижні вже вересень', async ({ page }) => {
+      await page.clock.install({ time: atNoon('2026-08-31') });
+      await openHub(page);
+      // Той самий тиждень: 31 серпня — 6 вересня.
+      await expect(page.locator('.cal-week .cal-day').first().locator('.cal-num')).toHaveText('31');
+      await expect(page.locator('#calMonth')).toHaveText('серпень');
+    });
+
+    test('наступного дня той самий тиждень підписаний вереснем', async ({ page }) => {
+      await page.clock.install({ time: atNoon('2026-09-01') });
+      await openHub(page);
+      await expect(page.locator('.cal-week .cal-day').first().locator('.cal-num')).toHaveText('31');
+      await expect(page.locator('#calMonth')).toHaveText('вересень');
+    });
+  });
+
+  test.describe('широкий екран', () => {
+    test.use({ viewport: { width: 1280, height: 800 } });
+
+    test('сітка серпня підписана серпнем, хоч по краях є липень і вересень', async ({ page }) => {
+      await page.clock.install({ time: atNoon('2026-08-31') });
+      await openHub(page);
+      await expect(page.locator('#calMonth')).toHaveText('серпень');
+    });
+  });
+});
