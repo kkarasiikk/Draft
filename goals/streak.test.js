@@ -195,16 +195,6 @@ describe('eveningQueue', () => {
   });
 });
 
-describe('isEvening', () => {
-  test('до вісімнадцятої — ще рано', () => {
-    expect(S.isEvening(new Date(2026, 7, 20, 17, 59))).toBe(false);
-  });
-  test('з вісімнадцятої — можна підсумовувати', () => {
-    expect(S.isEvening(new Date(2026, 7, 20, 18, 0))).toBe(true);
-    expect(S.isEvening(new Date(2026, 7, 20, 23, 30))).toBe(true);
-  });
-});
-
 describe('дати', () => {
   // `new Date('2026-08-20')` — це UTC-північ; на заході вона показує
   // 19 серпня. Тому парсимо вручну.

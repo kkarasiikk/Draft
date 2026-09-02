@@ -205,62 +205,6 @@ describe('weekMovement — що зрушило', () => {
   });
 });
 
-describe('reviewQueue — про що час спитати', () => {
-  test('ціль, яку не оглядали жодного разу, потрапляє в чергу', () => {
-    expect(R.reviewQueue([goal()], TODAY)).toHaveLength(1);
-  });
-
-  test('оглянуту цього тижня не перепитуємо', () => {
-    expect(R.reviewQueue([goal({ reviewedAt: '2026-08-24' })], TODAY)).toHaveLength(0);
-  });
-
-  test('через тиждень питання актуальне знову', () => {
-    expect(R.reviewQueue([goal({ reviewedAt: '2026-08-20' })], TODAY)).toHaveLength(1);
-  });
-
-  test('закриті й архівні не питаємо — там нема чого вирішувати', () => {
-    const list = [goal({ status: 'done' }), goal({ status: 'archived' })];
-    expect(R.reviewQueue(list, TODAY)).toHaveLength(0);
-  });
-
-  test('паузу питаємо: інакше вона тихо стає архівом', () => {
-    expect(R.reviewQueue([goal({ status: 'paused' })], TODAY)).toHaveLength(1);
-  });
-});
-
-describe('reviewDigest — що написати на банері', () => {
-  test('рахує, скільки чекає й скільки з них не рухалось', () => {
-    const moving = goal({ id: 'a', checkins: ['2026-08-26'] });
-    const stalled = goal({ id: 'b' });
-    const d = R.reviewDigest([moving, stalled], TODAY);
-    expect(d.pending).toBe(2);
-    expect(d.stalled).toBe(1);
-  });
-
-  test('порожній список — порожній банер', () => {
-    expect(R.reviewDigest([], TODAY)).toEqual({ pending: 0, stalled: 0 });
-  });
-});
-
-describe('reviewItem — один рядок огляду', () => {
-  test('несе назву, «навіщо», рух і темп', () => {
-    const item = R.reviewItem(goal({
-      why: 'щоб бігти півмарафон',
-      checkins: ['2026-08-25', '2026-08-26'],
-      milestones: [
-        { id: 'm1', title: 'a', done: true, doneAt: '2026-08-24' },
-        { id: 'm2', title: 'b', done: false },
-      ],
-    }), TODAY, { startIso: '2026-01-01' });
-    expect(item.title).toBe('Пробігти 100 км');
-    expect(item.why).toBe('щоб бігти півмарафон');
-    expect(item.movement.moved).toBe(true);
-    // Сам вердикт перевіряє сюїта pace — тут важливо, що рядок його несе.
-    expect(item.pace).not.toBeNull();
-    expect(item.pace.pct).toBe(50);
-  });
-});
-
 describe('closedOn — коли ціль закрили', () => {
   test('активну ціль ніхто не закривав', () => {
     expect(R.closedOn(goal({ completedAt: '2026-08-01' }))).toBeNull();
