@@ -6,7 +6,7 @@ LifeSW({
   name: 'goals',
   files: [
     './', './index.html', './app.js', './streak.js', './review.js',
-    '../side-nav.js', '../side-nav.css', '../scroll-lock.js', '../unsaved-guard.js',
+    '../boot-guard.js', '../side-nav.js', '../side-nav.css', '../scroll-lock.js', '../unsaved-guard.js',
     '../ai-chat.js', '../ai-chat.css', '../categories-default.js',
     './manifest.json',
     '../budget/firebase-config.js',

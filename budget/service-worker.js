@@ -9,7 +9,7 @@ LifeSW({
   legacyPrefixes: ['moi-finansy-'],
   files: [
     './', './index.html', './app.js', './recurring.js', './firebase-config.js',
-    '../side-nav.js', '../side-nav.css', '../scroll-lock.js', '../unsaved-guard.js',
+    '../boot-guard.js', '../side-nav.js', '../side-nav.css', '../scroll-lock.js', '../unsaved-guard.js',
     '../ai-chat.js', '../ai-chat.css', '../tasks/recurrence.js', '../categories-default.js',
     './manifest.json',
     './icon-192.png', './icon-512.png', './icon-192-maskable.png', './icon-512-maskable.png',
