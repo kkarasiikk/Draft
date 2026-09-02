@@ -128,3 +128,64 @@ test.describe('Назва місяця над календарем', () => {
     });
   });
 });
+
+// На великому моніторі вміст мав власну висоту й тулився до верху, а під ним
+// лишалась порожня третина сторінки. Тепер сітка головної має мінімальну
+// висоту на весь екран: плитки стають нижнім краєм, а ряд «Сьогодні +
+// календар» забирає решту. Там, де вміст і так вищий за екран, це не
+// змінює нічого.
+test.describe('Великий монітор', () => {
+  test.use({ viewport: { width: 1900, height: 950 } });
+
+  test('сторінка заповнює екран і не гортається', async ({ page }) => {
+    await openHub(page, manyTasks(6));
+    const { doc, win } = await page.evaluate(() => ({
+      doc: document.documentElement.scrollHeight,
+      win: window.innerHeight,
+    }));
+    expect(doc).toBeLessThanOrEqual(win);
+  });
+
+  test('плитки стоять унизу, а не посеред сторінки', async ({ page }) => {
+    await openHub(page, manyTasks(6));
+    const gap = await page.evaluate(() => {
+      const r = document.querySelector('.sections').getBoundingClientRect();
+      return window.innerHeight - r.bottom;
+    });
+    // Рівно поле сторінки знизу (48px) — і нічого більше.
+    expect(gap).toBeLessThan(60);
+  });
+
+  test('ряд «Сьогодні + календар» забирає вільну висоту', async ({ page }) => {
+    await openHub(page, manyTasks(6));
+    const h = await page.evaluate(() => ({
+      panel: document.getElementById('todayPanel').getBoundingClientRect().height,
+      cal: document.querySelector('.cal').getBoundingClientRect().height,
+    }));
+    // Обидві картки однієї висоти й помітно вищі за свій вміст.
+    expect(Math.abs(h.panel - h.cal)).toBeLessThan(2);
+    expect(h.panel).toBeGreaterThan(500);
+  });
+
+  // Ростуть рядки, а не клітинки: інакше виділення сьогоднішнього дня
+  // витягувалось у високу синю смугу замість позначки дня.
+  test('клітинка сьогодні лишається позначкою дня, а не смугою', async ({ page }) => {
+    await openHub(page, manyTasks(6));
+    const cell = await page.locator('.cal-grid .cal-day.today').boundingBox();
+    expect(cell.height).toBeLessThanOrEqual(97);
+    // І не вужча за себе саму по горизонталі — тобто це все ще квадратик.
+    expect(cell.height / cell.width).toBeLessThan(1.6);
+  });
+});
+
+// Ноутбук: тут вміст і так заповнював екран, і розкладка не мала змінитись.
+test.describe('Ноутбук', () => {
+  test.use({ viewport: { width: 1280, height: 800 } });
+
+  test('десять справ і місяць не породжують горизонтального скролу', async ({ page }) => {
+    await openHub(page, manyTasks(14));
+    const over = await page.evaluate(() =>
+      document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    expect(over).toBeLessThanOrEqual(0);
+  });
+});
