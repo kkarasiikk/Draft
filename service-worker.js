@@ -9,7 +9,7 @@ LifeSW({
   name: 'home',
   files: [
     './', './index.html', './home.js', './home-summary.js', './export-data.js',
-    './side-nav.js', './side-nav.css', './scroll-lock.js',
+    './side-nav.js', './side-nav.css', './scroll-lock.js', './boot-guard.js',
     './goals/streak.js', './tasks/stats.js', './categories-default.js',
     './manifest.json',
     './budget/firebase-config.js',

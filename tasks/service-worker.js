@@ -7,7 +7,7 @@ LifeSW({
   files: [
     './', './index.html', './app.js', './quick-parse.js', './now-queue.js',
     './recurrence.js', './stats.js', './reminders.js', './push.js',
-    '../side-nav.js', '../side-nav.css', '../scroll-lock.js', '../unsaved-guard.js',
+    '../boot-guard.js', '../side-nav.js', '../side-nav.css', '../scroll-lock.js', '../unsaved-guard.js',
     '../ai-chat.js', '../ai-chat.css', '../goals/streak.js',
     './manifest.json',
     '../budget/firebase-config.js',
