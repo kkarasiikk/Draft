@@ -211,48 +211,95 @@
    * Невиконані йдуть першими: якщо в колонці вміщається один рядок, це має
    * бути те, що ще треба зробити, а не закреслене.
    */
-  function weekCalendar(tasks, todayIso) {
-    var today = new Date(todayIso + 'T00:00:00');
-    // getDay(): 0 — неділя. Тиждень починається з понеділка, як у календарі
-    // цілей і в решті проєкту.
-    var dow = (today.getDay() + 6) % 7;
-    var monday = new Date(today);
-    monday.setDate(monday.getDate() - dow);
-
+  /** Скільки завдань на кожен день: { 'YYYY-MM-DD': {open, done} }. */
+  function tasksByDay(tasks) {
     var byDay = {};
     (tasks || []).forEach(function (task) {
       if (!task || typeof task.dueDate !== 'string') return;
       var slot = byDay[task.dueDate] || (byDay[task.dueDate] = { open: 0, done: 0 });
       if (task.done) slot.done += 1; else slot.open += 1;
     });
+    return byDay;
+  }
+
+  /** Понеділок того тижня, у якому лежить дата. */
+  function mondayOf(date) {
+    // getDay(): 0 — неділя. Тиждень починається з понеділка, як у календарі
+    // цілей і в решті проєкту.
+    var dow = (date.getDay() + 6) % 7;
+    var out = new Date(date);
+    out.setDate(out.getDate() - dow);
+    return out;
+  }
+
+  /** Один день сітки. Спільний для тижня й місяця, щоб крапка означала те
+   *  саме в обох. */
+  function calendarDay(date, byDay, todayIso, monthNum) {
+    var iso = isoOf(date);
+    var slot = byDay[iso] || { open: 0, done: 0 };
+    return {
+      date: iso,
+      dayNum: date.getDate(),
+      today: iso === todayIso,
+      past: iso < todayIso,
+      open: slot.open,
+      done: slot.done,
+      // Назви справ звідси пішли разом із чипами в смузі тижня: під числом
+      // тепер крапка, а їй досить знати, чи є щось і чи все закрито.
+      hasTasks: slot.open + slot.done > 0,
+      // День, де все закрито, — не те саме, що день, де ще є що робити.
+      allDone: slot.done > 0 && slot.open === 0,
+      // Хвіст сусіднього місяця в сітці місяця. У тижні його не буває.
+      otherMonth: monthNum != null && date.getMonth() !== monthNum,
+    };
+  }
+
+  function weekCalendar(tasks, todayIso) {
+    var byDay = tasksByDay(tasks);
+    var monday = mondayOf(new Date(todayIso + 'T00:00:00'));
 
     var days = [];
     for (var i = 0; i < 7; i++) {
       var d = new Date(monday);
       d.setDate(d.getDate() + i);
-      var iso = isoOf(d);
-      var slot = byDay[iso] || { open: 0, done: 0 };
-      days.push({
-        date: iso,
-        dayNum: d.getDate(),
-        today: iso === todayIso,
-        past: iso < todayIso,
-        open: slot.open,
-        done: slot.done,
-        // Назви справ звідси пішли разом із чипами в смузі тижня: під числом
-        // тепер крапка, а їй досить знати, чи є щось і чи все закрито.
-        hasTasks: slot.open + slot.done > 0,
-        // День, де все закрито, — не те саме, що день, де ще є що робити.
-        allDone: slot.done > 0 && slot.open === 0,
-      });
+      days.push(calendarDay(d, byDay, todayIso, null));
     }
     return { from: days[0].date, to: days[6].date, days: days };
+  }
+
+  /**
+   * Той самий календар, але цілим місяцем: повні тижні пн—нд, які його
+   * накривають. Дні сусідніх місяців у сітці лишаються (`otherMonth`) — без
+   * них перший тиждень починався б із дірки, і число стояло б не під своїм
+   * днем тижня.
+   *
+   * Потрібен широкому екрану: там смуга з семи днів лишала півсторінки
+   * порожньою, а місяць відповідає на те саме питання («на які дні щось
+   * є») і заразом показує, що попереду.
+   */
+  function monthCalendar(tasks, todayIso) {
+    var byDay = tasksByDay(tasks);
+    var today = new Date(todayIso + 'T00:00:00');
+    var monthNum = today.getMonth();
+    var first = new Date(today.getFullYear(), monthNum, 1);
+    var last = new Date(today.getFullYear(), monthNum + 1, 0);
+
+    var cursor = mondayOf(first);
+    var days = [];
+    // Доки не пройшли останній день місяця й не дійшли до кінця тижня.
+    while (cursor <= last || days.length % 7 !== 0) {
+      days.push(calendarDay(cursor, byDay, todayIso, monthNum));
+      cursor = new Date(cursor);
+      cursor.setDate(cursor.getDate() + 1);
+    }
+    return { from: days[0].date, to: days[days.length - 1].date, days: days, month: isoOf(first) };
   }
 
   var api = {
     isoOf: isoOf,
     weekDays: weekDays,
     weekCalendar: weekCalendar,
+    monthCalendar: monthCalendar,
     tasksRing: tasksRing,
     workoutToday: workoutToday,
     featuredGoal: featuredGoal,

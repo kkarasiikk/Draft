@@ -86,6 +86,7 @@ const STRINGS = {
     capPlanned: 'заплановано на сьогодні', capDoing: 'сьогодні зроблено',
     capLast: (name) => `останнє — ${name}`, capLastPlain: 'від останнього',
     todayEmpty: 'На сьогодні нічого не чекає.',
+    todayMore: (n) => `Ще ${n} у завданнях →`,
     todayAt: (hhmm) => `до ${hhmm}`,
     lineGoals: (n) => `${n} ${plural(n, { one: 'ціль', few: 'цілі', many: 'цілей', other: 'цілі' })} без кроку`,
     lineWorkout: (n) => `${n} ${plural(n, { one: 'день', few: 'дні', many: 'днів', other: 'дня' })} без залу`,
@@ -159,6 +160,7 @@ const STRINGS = {
     capPlanned: 'запланировано на сегодня', capDoing: 'сегодня сделано',
     capLast: (name) => `последняя — ${name}`, capLastPlain: 'от последней',
     todayEmpty: 'На сегодня ничего не ждёт.',
+    todayMore: (n) => `Ещё ${n} в задачах →`,
     todayAt: (hhmm) => `до ${hhmm}`,
     lineGoals: (n) => `${n} ${plural(n, { one: 'цель', few: 'цели', many: 'целей', other: 'цели' })} без шага`,
     lineWorkout: (n) => `${n} ${plural(n, { one: 'день', few: 'дня', many: 'дней', other: 'дня' })} без зала`,
@@ -232,6 +234,7 @@ const STRINGS = {
     capPlanned: 'zaplanowano na dziś', capDoing: 'dziś zrobione',
     capLast: (name) => `ostatni — ${name}`, capLastPlain: 'od ostatniego',
     todayEmpty: 'Na dziś nic nie czeka.',
+    todayMore: (n) => `Jeszcze ${n} w zadaniach →`,
     todayAt: (hhmm) => `do ${hhmm}`,
     lineGoals: (n) => `${n} ${plural(n, { one: 'cel', few: 'cele', many: 'celów', other: 'celu' })} bez kroku`,
     lineWorkout: (n) => `${n} ${plural(n, { one: 'dzień', few: 'dni', many: 'dni', other: 'dnia' })} bez siłowni`,
@@ -305,6 +308,7 @@ const STRINGS = {
     capPlanned: 'planned for today', capDoing: 'done today',
     capLast: (name) => `last — ${name}`, capLastPlain: 'since the last one',
     todayEmpty: 'Nothing waiting today.',
+    todayMore: (n) => `${n} more in Tasks →`,
     todayAt: (hhmm) => `by ${hhmm}`,
     lineGoals: (n) => `${n} ${plural(n, { one: 'goal', other: 'goals' })} without a step`,
     lineWorkout: (n) => `${n} ${plural(n, { one: 'day', other: 'days' })} without the gym`,
@@ -427,10 +431,25 @@ function setLang(lang) {
 // Сирі дані, з яких збираються «Сьогодні», рядок під датою і сітка тижня.
 // Кожен запит домальовує свою частину, щойно долетить: чекати на найповільніший,
 // щоб показати все разом, означало б дивитись на порожній екран довше, ніж треба.
-// Скільки справ показує картка «Сьогодні». Чотири рядки — стеля, підібрана
-// під екран: разом зі смугою тижня й плитками розділів вони ще вміщаються
-// без гортання.
+// Скільки справ показує картка «Сьогодні» і який календар малюється — те й
+// те залежить від ширини екрана, і поріг той самий, що в CSS (880px), інакше
+// сторінка й скрипт розходились би в тому, яка зараз розкладка.
+//
+// Чотири рядки — стеля телефона: разом зі смугою тижня й плитками розділів
+// вони ще вміщаються без гортання. На широкому екрані та сама стеля лишала
+// півсторінки порожньою, тож там їх десять, а решта ховається за рядком
+// «ще N» — посиланням у розділ, а не мовчазним обрізанням.
 const TODAY_TASK_LIMIT = 4;
+const TODAY_TASK_LIMIT_WIDE = 10;
+const WIDE_SCREEN = '(min-width:880px)';
+
+function isWideScreen() {
+  return typeof window.matchMedia === 'function' && window.matchMedia(WIDE_SCREEN).matches;
+}
+
+function todayTaskLimit() {
+  return isWideScreen() ? TODAY_TASK_LIMIT_WIDE : TODAY_TASK_LIMIT;
+}
 
 let homeData = { transactions: null, tasks: null, goals: null, workouts: null };
 // План витрат на місяць із профілю (null/undefined — плану немає). Лежить
@@ -797,12 +816,9 @@ function renderToday() {
   // Невиконане згори: закреслене вже нікуди не поспішає.
   mine.sort((a, b) => (a.done === b.done ? 0 : (a.done ? 1 : -1)));
 
-  // Чотири рядки — стеля, підібрана під екран: разом зі смугою тижня й
-  // плитками розділів вони ще вміщаються без гортання. Скільки справ
-  // насправді, каже лічильник у шапці картки, тож окремий рядок
-  // «побачити ще N» тут лише з'їдав би пʼятий рядок заради того, що вже
-  // написано вище.
-  const html = mine.slice(0, TODAY_TASK_LIMIT).map((task) => `
+  // Стелю бере todayTaskLimit(): 4 на телефоні, 10 на широкому екрані.
+  const limit = todayTaskLimit();
+  const html = mine.slice(0, limit).map((task) => `
       <div class="today-row${task.done ? ' checked' : ''}">
         <button type="button" class="today-box${task.done ? ' checked' : ''}" data-task="${escapeHtml(task.id)}" aria-label="${escapeHtml(task.title || '')}">
           <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg>
@@ -812,10 +828,18 @@ function renderToday() {
         ${task.dueTime ? `<span class="today-when">${escapeHtml(t('todayAt', task.dueTime))}</span>` : ''}
       </div>`).join('');
 
+  // Те, що не вмістилось, не зникає мовчки: рядок веде в розділ завдань, де
+  // видно весь день. Лічильник у шапці каже, скільки справ усього, а цей
+  // рядок — скільки з них лишилось за межею картки.
+  const hidden = mine.length - limit;
+  const more = hidden > 0
+    ? `<a class="today-more" href="tasks/index.html">${escapeHtml(t('todayMore', hidden))}</a>`
+    : '';
+
   // Порожній список — теж відповідь, і ховати панель не треба: «нічого не
   // чекає» це новина, а не відсутність новин.
   panel.hidden = !homeData.tasks;
-  list.innerHTML = html || `<div class="today-empty">${escapeHtml(t('todayEmpty'))}</div>`;
+  list.innerHTML = html ? html + more : `<div class="today-empty">${escapeHtml(t('todayEmpty'))}</div>`;
   const countEl = document.getElementById('todayCount');
   if (countEl) countEl.textContent = mine.length ? t('todayCount', mine.length) : '';
 
@@ -954,45 +978,74 @@ document.getElementById('addOverlay').addEventListener('click', (e) => {
   if (e.target.id === 'addOverlay') closeAddSheet();
 });
 
-// ---- Календар тижня ----
-// Показує саме календарний тиждень (пн—нд), а не останні сім днів: день має
-// стояти там, де він стоїть у місяці. Крапка означає рівно одне — на цей
-// день є завдання.
+// ---- Календар ----
+// Крапка означає рівно одне — на цей день є завдання; порожнє кільце — день,
+// де все вже закрито (те саме, що в розділі завдань: два різні стани не мають
+// виглядати однаково).
+//
+// Днів у сітці стільки, скільки вміщає екран. На телефоні це календарний
+// тиждень (пн—нд), а не останні сім днів: день має стояти там, де він стоїть
+// у місяці. На широкому екрані — весь місяць: смуга з семи днів лишала
+// півсторінки порожньою, а місяць відповідає на те саме питання й заразом
+// показує, що попереду.
 function renderCalendar() {
   const monthEl = document.getElementById('calMonth');
   const weekEl = document.getElementById('calWeek');
   if (!monthEl || !weekEl) return;
 
   const today = todayISO();
-  const week = HomeSummary.weekCalendar(homeData.tasks || [], today);
   const locale = LOCALE_MAP[currentLang] || 'uk-UA';
-  const dow = new Intl.DateTimeFormat(locale, { weekday: 'short' });
   const month = new Intl.DateTimeFormat(locale, { month: 'long' });
+  const wide = isWideScreen();
+  const cal = wide
+    ? HomeSummary.monthCalendar(homeData.tasks || [], today)
+    : HomeSummary.weekCalendar(homeData.tasks || [], today);
 
-  // Тиждень може лежати на межі двох місяців — тоді один підпис збрехав би.
-  const first = month.format(new Date(week.from + 'T00:00:00'));
-  const last = month.format(new Date(week.to + 'T00:00:00'));
-  monthEl.textContent = first === last ? first : `${first} — ${last}`;
+  if (wide) {
+    // Місяць підписуємо його власною назвою, а не назвами країв сітки: хвости
+    // сусідніх місяців у ній є завжди, і «серпень — жовтень» над вереснем
+    // збрехало б.
+    monthEl.textContent = month.format(new Date(cal.month + 'T00:00:00'));
+  } else {
+    // Тиждень може лежати на межі двох місяців — тоді один підпис збрехав би.
+    const first = month.format(new Date(cal.from + 'T00:00:00'));
+    const last = month.format(new Date(cal.to + 'T00:00:00'));
+    monthEl.textContent = first === last ? first : `${first} — ${last}`;
+  }
 
-  weekEl.innerHTML = week.days.map((d) => {
+  const dow = new Intl.DateTimeFormat(locale, { weekday: 'short' });
+  // У місяці день тижня стоїть один раз шапкою над стовпчиком, а не в кожній
+  // клітинці: тридцять однакових підписів — це шум, а не орієнтир.
+  const head = wide
+    ? cal.days.slice(0, 7).map((d) => `<div class="cal-dow-head">${escapeHtml(dow.format(new Date(d.date + 'T00:00:00')))}</div>`).join('')
+    : '';
+
+  const cells = cal.days.map((d) => {
     const cls = ['cal-day'];
     if (d.today) cls.push('today');
     if (d.past) cls.push('past');
-    // Під числом — крапка, і більше нічого. Тут стояли назви справ, обрізані
-    // до «Ввече…» й «Приді…»: колонка завширшки в сім екранів вміщає стільки
-    // літер, що впізнати за ними своє однаково не виходило, а смуга виростала
-    // втричі й виштовхувала все інше за межу екрана. Крапка відповідає на
-    // питання, заради якого на тиждень і дивляться: чи є щось на цей день.
-    // Порожнє кільце — день, де все вже закрито (те саме, що в розділі
-    // завдань: два різні стани не мають виглядати однаково).
+    if (d.otherMonth) cls.push('other-month');
     const dot = d.hasTasks ? (d.allDone ? ' all-done' : ' has') : '';
     return `
       <div class="${cls.join(' ')}">
-        <span class="cal-dow">${escapeHtml(dow.format(new Date(d.date + 'T00:00:00')))}</span>
+        ${wide ? '' : `<span class="cal-dow">${escapeHtml(dow.format(new Date(d.date + 'T00:00:00')))}</span>`}
         <span class="cal-num">${d.dayNum}</span>
         <span class="cal-dot${dot}"></span>
       </div>`;
   }).join('');
+
+  weekEl.className = wide ? 'cal-grid' : 'cal-week';
+  weekEl.innerHTML = head + cells;
+}
+
+// Розкладка міняється не лише при завантаженні: вікно на компʼютері
+// розтягують і звужують. Перемальовуємо з тих самих даних — у базу за цим
+// ходити не треба.
+if (typeof window.matchMedia === 'function') {
+  const mq = window.matchMedia(WIDE_SCREEN);
+  const onChange = () => { renderCalendar(); renderToday(); };
+  if (typeof mq.addEventListener === 'function') mq.addEventListener('change', onChange);
+  else if (typeof mq.addListener === 'function') mq.addListener(onChange);
 }
 
 // ---- Рядок під датою ----
@@ -1046,10 +1099,11 @@ async function loadHomeSummary(uid) {
   const userRef = db.collection('users').doc(uid);
   const today = todayISO();
   const monthFrom = HomeSummary.monthStart(today);
-  // Календар показує ВЕСЬ тиждень, зокрема дні попереду, тож завдання
-  // читаються і наперед. Межі беремо ширші з двох: місяць потрібен плиткам,
-  // тиждень — крапкам у календарі, і на межі місяця вони не збігаються.
-  const cal = HomeSummary.weekCalendar([], today);
+  // Календар показує дні попереду, тож завдання читаються і наперед. Межі
+  // беремо по сітці МІСЯЦЯ, а не тижня: на широкому екрані малюється саме
+  // вона, і на неї ж перемальовується сторінка, якщо вікно розтягнути вже
+  // після завантаження. Ширше на кілька днів — дешевше за другий запит.
+  const cal = HomeSummary.monthCalendar([], today);
   const taskFrom = monthFrom < cal.from ? monthFrom : cal.from;
   const taskTo = today > cal.to ? today : cal.to;
   homeData = { transactions: null, tasks: null, goals: null, workouts: null };

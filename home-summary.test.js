@@ -303,3 +303,70 @@ describe('weekCalendar — календарний тиждень', () => {
   });
 });
 
+
+describe('monthCalendar — місяць повними тижнями', () => {
+  // Вересень 2026 починається у вівторок і закінчується в середу, тож у
+  // сітці є хвости обох сусідніх місяців.
+  const SEP = '2026-09-02';
+  const task = (dueDate, done = false) => ({ title: 'x', dueDate, done });
+
+  test('сітка починається в понеділок і закінчується в неділю', () => {
+    const m = H.monthCalendar([], SEP);
+    expect(m.from).toBe('2026-08-31');
+    expect(m.to).toBe('2026-10-04');
+    expect(m.days.length % 7).toBe(0);
+  });
+
+  test('усі числа місяця на місці — жодного пропуску', () => {
+    const m = H.monthCalendar([], SEP);
+    const own = m.days.filter((d) => !d.otherMonth).map((d) => d.dayNum);
+    expect(own).toEqual(Array.from({ length: 30 }, (_, i) => i + 1));
+  });
+
+  test('хвости сусідніх місяців позначені, а не викинуті', () => {
+    // Викинути їх означало б почати перший тиждень із дірки, і число стояло
+    // б не під своїм днем тижня.
+    const m = H.monthCalendar([], SEP);
+    expect(m.days[0].otherMonth).toBe(true);
+    expect(m.days[0].dayNum).toBe(31);
+    expect(m.days[1].otherMonth).toBe(false);
+    expect(m.days[m.days.length - 1].otherMonth).toBe(true);
+  });
+
+  test('місяць називає себе сам, а не за краями сітки', () => {
+    // Краї — це серпень і жовтень; підпис по них збрехав би про вересень.
+    expect(H.monthCalendar([], SEP).month).toBe('2026-09-01');
+  });
+
+  test('крапка означає те саме, що й у тижні', () => {
+    const m = H.monthCalendar([task('2026-09-10'), task('2026-09-11', true)], SEP);
+    const byDate = {};
+    m.days.forEach((d) => { byDate[d.date] = d; });
+    expect(byDate['2026-09-10'].hasTasks).toBe(true);
+    expect(byDate['2026-09-10'].allDone).toBe(false);
+    expect(byDate['2026-09-11'].allDone).toBe(true);
+    expect(byDate['2026-09-12'].hasTasks).toBe(false);
+  });
+
+  test('сьогодні одне, і воно в цьому місяці', () => {
+    const m = H.monthCalendar([], SEP);
+    const today = m.days.filter((d) => d.today);
+    expect(today).toHaveLength(1);
+    expect(today[0].date).toBe(SEP);
+  });
+
+  test('місяць, що починається в понеділок, не тягне зайвого тижня', () => {
+    // Червень 2026 починається в понеділок — хвоста попереду немає.
+    const m = H.monthCalendar([], '2026-06-15');
+    expect(m.from).toBe('2026-06-01');
+    expect(m.days[0].otherMonth).toBe(false);
+  });
+
+  test('лютий невисокосного року вміщається рівно у чотири тижні', () => {
+    // 2027-02-01 — понеділок, 28 днів: рідкісний випадок, коли сітка
+    // збігається з місяцем день у день.
+    const m = H.monthCalendar([], '2027-02-10');
+    expect(m.days).toHaveLength(28);
+    expect(m.days.every((d) => !d.otherMonth)).toBe(true);
+  });
+});
