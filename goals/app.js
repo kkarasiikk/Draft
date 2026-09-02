@@ -69,7 +69,7 @@ const T = {
     emptyYearTitle: 'Немає річних цілей', emptyYearSub: 'Куди ти йдеш цього року?',
     statusAll: 'Усі', statusActive: 'Активні', statusDone: 'Завершені', statusArchived: 'Архів',
     statusPaused: 'На паузі', pauseBtn: 'Поставити на паузу', resumeBtn: 'Повернути в роботу',
-    pausedNote: 'Ціль на паузі: про неї не питають вечорами, і серія не рветься.',
+    archiveBtn: 'Перенести в архів',
     paceAhead: 'Випереджаєш графік', paceOnTrack: 'У графіку',
     paceBehind: 'Не встигаєш таким темпом', paceOverdue: 'Дедлайн минув',
     paceUnknown: 'Даних для прогнозу ще замало',
@@ -77,16 +77,6 @@ const T = {
     paceLate: (n) => `На ${n} дн. пізніше за дедлайн`,
     paceTimeVsWork: (t, p) => `Часу минуло ${t}%, зроблено ${p}%`,
     paceDaysLeft: (n) => `${n} дн. до дедлайну`,
-    reviewTitle: 'Огляд тижня', reviewOpen: 'Переглянути',
-    reviewBanner: (n) => `${n} ${n === 1 ? 'ціль чекає' : 'цілей чекають'} на огляд`,
-    reviewStalled: (n) => `${n} без руху цього тижня`,
-    reviewSub: 'Раз на тиждень — коротке питання: ти досі цього хочеш?',
-    reviewLater: 'Пізніше', reviewMoved: 'Цього тижня', reviewNoMove: 'Цього тижня нічого не зрушило',
-    reviewCheckins: (n) => `${n} дн. із кроком`, reviewMilestones: (n) => `віх: ${n}`,
-    reviewJournal: (n) => `записів: ${n}`,
-    reviewKeep: 'Веду далі', reviewPause: 'На паузу', reviewArchive: 'В архів',
-    reviewDone: 'Огляд завершено', reviewEmpty: 'Усе оглянуто',
-    whyReminder: 'Ти писав(ла), навіщо це:',
     noMilestonesYet: 'Ще немає віх — додай перший крок у редагуванні цілі',
     allMilestonesDoneMsg: '🎉 Усі віхи пройдено!',
     markGoalDoneBtn: 'Позначити ціль виконаною',
@@ -100,15 +90,11 @@ const T = {
     actionsEmpty: 'Ще немає щоденних дій — додай перший крок нижче.',
     actionOverdue: 'прострочено',
     rescueWait: (n) => `Серія обірвалась. Наступний рятунок буде доступний через ${n} дн.`,
-    eveningTitle: 'Як пройшов день?',
-    eveningSub: 'Відмічай, що вдалося. Якщо ні — скажи одним словом, що завадило.',
-    eveningYes: '✓ Було', eveningNo: 'Не вийшло', eveningLater: 'Пізніше',
-    eveningRescue: '🛟 Врятувати серію',
     parentLabel: 'Служить річній цілі', parentNone: 'Сама по собі',
     parentHint: 'Рік — напрямок, місяць — крок до нього. На річній цілі буде видно, що на неї працює.',
     parentEmpty: 'Річних цілей ще немає — заведи одну на вкладці «Рік».',
     childrenTitle: (n) => `Цього місяця над цим працюють: ${n}`,
-    blockersTitle: 'Що заважає найчастіше', blockersShort: 'Заважало:',
+    blockersTitle: 'Що заважає найчастіше',
     reason_noTime: 'Не було часу', reason_forgot: 'Забув(ла)', reason_tired: 'Втома',
     reason_mood: 'Не було настрою', reason_other: 'Інше',
     journalPlaceholder: 'Що сьогодні зробив(ла) для цієї цілі?',
@@ -120,15 +106,13 @@ const T = {
     milestonesCountSuffix: 'віх',
     milestoneToTask: 'У завдання', milestoneInTasks: 'У завданнях',
     chartLabel: 'Шлях', chartRequired: 'щоб устигнути',
-    reviewStepPlaceholder: 'Один крок до наступного огляду', reviewStepBtn: 'Записати крок',
     measureTitle: 'Як ти зрозумієш, що дійшов?',
     measureSub: 'У цілі немає ні числа, ні кроків — виміряти її нічим.',
-    measureBtn: 'Додати мірило', measureShort: 'Виміряти нічим',
+    measureBtn: 'Додати мірило',
     lapseTitle: (n) => `Тебе не було ${n} дн.`,
     lapseNeverTitle: (n) => `Ціль стоїть ${n} дн. без жодного кроку`,
     lapseSub: 'Це буває. Питання не в тому, чому так вийшло, а в тому, куди повертатись.',
     lapseRestart: 'Почати відлік заново', lapseEdit: 'Змінити ціль', lapsePause: 'На паузу',
-    lapseShort: (n) => `Без руху ${n} дн.`,
     gridLabel: 'Останні вісім тижнів', gridDone: 'був крок', gridBlocked: 'сказав, що завадило',
     monthPrev: 'Попередній місяць', monthNext: 'Наступний місяць',
     emptyMonthNamed: (m) => `Немає цілей на ${m}`,
@@ -193,7 +177,7 @@ const T = {
     emptyYearTitle: 'Нет годовых целей', emptyYearSub: 'Куда ты идёшь в этом году?',
     statusAll: 'Все', statusActive: 'Активные', statusDone: 'Завершённые', statusArchived: 'Архив',
     statusPaused: 'На паузе', pauseBtn: 'Поставить на паузу', resumeBtn: 'Вернуть в работу',
-    pausedNote: 'Цель на паузе: о ней не спрашивают вечерами, и серия не рвётся.',
+    archiveBtn: 'Перенести в архив',
     paceAhead: 'Опережаешь график', paceOnTrack: 'В графике',
     paceBehind: 'Не успеваешь таким темпом', paceOverdue: 'Дедлайн прошёл',
     paceUnknown: 'Данных для прогноза пока мало',
@@ -201,16 +185,6 @@ const T = {
     paceLate: (n) => `На ${n} дн. позже дедлайна`,
     paceTimeVsWork: (t, p) => `Времени прошло ${t}%, сделано ${p}%`,
     paceDaysLeft: (n) => `${n} дн. до дедлайна`,
-    reviewTitle: 'Обзор недели', reviewOpen: 'Посмотреть',
-    reviewBanner: (n) => `${n} ${n === 1 ? 'цель ждёт' : 'целей ждут'} обзора`,
-    reviewStalled: (n) => `${n} без движения на этой неделе`,
-    reviewSub: 'Раз в неделю — короткий вопрос: ты всё ещё этого хочешь?',
-    reviewLater: 'Позже', reviewMoved: 'На этой неделе', reviewNoMove: 'На этой неделе ничего не сдвинулось',
-    reviewCheckins: (n) => `${n} дн. с шагом`, reviewMilestones: (n) => `вех: ${n}`,
-    reviewJournal: (n) => `записей: ${n}`,
-    reviewKeep: 'Веду дальше', reviewPause: 'На паузу', reviewArchive: 'В архив',
-    reviewDone: 'Обзор завершён', reviewEmpty: 'Всё просмотрено',
-    whyReminder: 'Ты писал(а), зачем это:',
     noMilestonesYet: 'Ещё нет вех — добавь первый шаг в редактировании цели',
     allMilestonesDoneMsg: '🎉 Все вехи пройдены!',
     markGoalDoneBtn: 'Отметить цель выполненной',
@@ -224,15 +198,11 @@ const T = {
     actionsEmpty: 'Ещё нет ежедневных действий — добавь первый шаг ниже.',
     actionOverdue: 'просрочено',
     rescueWait: (n) => `Серия оборвалась. Следующее спасение будет доступно через ${n} дн.`,
-    eveningTitle: 'Как прошёл день?',
-    eveningSub: 'Отмечай, что получилось. Если нет — скажи одним словом, что помешало.',
-    eveningYes: '✓ Было', eveningNo: 'Не вышло', eveningLater: 'Позже',
-    eveningRescue: '🛟 Спасти серию',
     parentLabel: 'Служит годовой цели', parentNone: 'Сама по себе',
     parentHint: 'Год — направление, месяц — шаг к нему. На годовой цели будет видно, что на неё работает.',
     parentEmpty: 'Годовых целей ещё нет — заведи одну на вкладке «Год».',
     childrenTitle: (n) => `В этом месяце над этим работают: ${n}`,
-    blockersTitle: 'Что мешает чаще всего', blockersShort: 'Мешало:',
+    blockersTitle: 'Что мешает чаще всего',
     reason_noTime: 'Не было времени', reason_forgot: 'Забыл(а)', reason_tired: 'Усталость',
     reason_mood: 'Не было настроения', reason_other: 'Другое',
     journalPlaceholder: 'Что сегодня сделал(а) для этой цели?',
@@ -244,15 +214,13 @@ const T = {
     milestonesCountSuffix: 'вех',
     milestoneToTask: 'В задачи', milestoneInTasks: 'В задачах',
     chartLabel: 'Путь', chartRequired: 'чтобы успеть',
-    reviewStepPlaceholder: 'Один шаг до следующего обзора', reviewStepBtn: 'Записать шаг',
     measureTitle: 'Как ты поймёшь, что дошёл?',
     measureSub: 'В цели нет ни числа, ни шагов — измерить её нечем.',
-    measureBtn: 'Добавить мерило', measureShort: 'Измерить нечем',
+    measureBtn: 'Добавить мерило',
     lapseTitle: (n) => `Тебя не было ${n} дн.`,
     lapseNeverTitle: (n) => `Цель стоит ${n} дн. без единого шага`,
     lapseSub: 'Так бывает. Вопрос не в том, почему так вышло, а в том, куда возвращаться.',
     lapseRestart: 'Начать отсчёт заново', lapseEdit: 'Изменить цель', lapsePause: 'На паузу',
-    lapseShort: (n) => `Без движения ${n} дн.`,
     gridLabel: 'Последние восемь недель', gridDone: 'был шаг', gridBlocked: 'сказал, что помешало',
     monthPrev: 'Предыдущий месяц', monthNext: 'Следующий месяц',
     emptyMonthNamed: (m) => `Нет целей на ${m}`,
@@ -317,7 +285,7 @@ const T = {
     emptyYearTitle: 'Brak celów rocznych', emptyYearSub: 'Dokąd zmierzasz w tym roku?',
     statusAll: 'Wszystkie', statusActive: 'Aktywne', statusDone: 'Ukończone', statusArchived: 'Archiwum',
     statusPaused: 'Wstrzymane', pauseBtn: 'Wstrzymaj', resumeBtn: 'Wznów',
-    pausedNote: 'Cel wstrzymany: wieczorem nie pytamy o niego, a seria się nie rwie.',
+    archiveBtn: 'Przenieś do archiwum',
     paceAhead: 'Wyprzedzasz plan', paceOnTrack: 'Zgodnie z planem',
     paceBehind: 'W tym tempie nie zdążysz', paceOverdue: 'Termin minął',
     paceUnknown: 'Za mało danych na prognozę',
@@ -325,16 +293,6 @@ const T = {
     paceLate: (n) => `${n} dni po terminie`,
     paceTimeVsWork: (t, p) => `Czasu minęło ${t}%, zrobione ${p}%`,
     paceDaysLeft: (n) => `${n} dni do terminu`,
-    reviewTitle: 'Przegląd tygodnia', reviewOpen: 'Zobacz',
-    reviewBanner: (n) => `${n} ${n === 1 ? 'cel czeka' : 'celów czeka'} na przegląd`,
-    reviewStalled: (n) => `${n} bez ruchu w tym tygodniu`,
-    reviewSub: 'Raz w tygodniu krótkie pytanie: czy nadal tego chcesz?',
-    reviewLater: 'Później', reviewMoved: 'W tym tygodniu', reviewNoMove: 'W tym tygodniu nic się nie ruszyło',
-    reviewCheckins: (n) => `${n} dni z krokiem`, reviewMilestones: (n) => `kamieni: ${n}`,
-    reviewJournal: (n) => `wpisów: ${n}`,
-    reviewKeep: 'Prowadzę dalej', reviewPause: 'Wstrzymaj', reviewArchive: 'Do archiwum',
-    reviewDone: 'Przegląd zakończony', reviewEmpty: 'Wszystko przejrzane',
-    whyReminder: 'Napisałeś(-aś), po co to:',
     noMilestonesYet: 'Jeszcze brak kamieni milowych — dodaj pierwszy krok w edycji celu',
     allMilestonesDoneMsg: '🎉 Wszystkie kamienie milowe osiągnięte!',
     markGoalDoneBtn: 'Oznacz cel jako ukończony',
@@ -348,15 +306,11 @@ const T = {
     actionsEmpty: 'Brak codziennych działań — dodaj pierwszy krok poniżej.',
     actionOverdue: 'po terminie',
     rescueWait: (n) => `Seria się urwała. Kolejny ratunek będzie dostępny za ${n} dni.`,
-    eveningTitle: 'Jak minął dzień?',
-    eveningSub: 'Zaznacz, co się udało. Jeśli nie — powiedz jednym słowem, co przeszkodziło.',
-    eveningYes: '✓ Udało się', eveningNo: 'Nie wyszło', eveningLater: 'Później',
-    eveningRescue: '🛟 Uratuj serię',
     parentLabel: 'Służy celowi rocznemu', parentNone: 'Sam w sobie',
     parentHint: 'Rok to kierunek, miesiąc to krok do niego. Na celu rocznym będzie widać, co na niego pracuje.',
     parentEmpty: 'Nie ma jeszcze celów rocznych — dodaj jeden na zakładce «Rok».',
     childrenTitle: (n) => `W tym miesiącu pracuje nad tym: ${n}`,
-    blockersTitle: 'Co przeszkadza najczęściej', blockersShort: 'Przeszkadzało:',
+    blockersTitle: 'Co przeszkadza najczęściej',
     reason_noTime: 'Brak czasu', reason_forgot: 'Zapomniałem', reason_tired: 'Zmęczenie',
     reason_mood: 'Brak nastroju', reason_other: 'Inne',
     journalPlaceholder: 'Co dziś zrobiłeś(aś) dla tego celu?',
@@ -368,15 +322,13 @@ const T = {
     milestonesCountSuffix: 'kam.',
     milestoneToTask: 'Do zadań', milestoneInTasks: 'W zadaniach',
     chartLabel: 'Droga', chartRequired: 'żeby zdążyć',
-    reviewStepPlaceholder: 'Jeden krok do następnego przeglądu', reviewStepBtn: 'Zapisz krok',
     measureTitle: 'Po czym poznasz, że doszedłeś?',
     measureSub: 'Cel nie ma ani liczby, ani kroków — nie ma czym go zmierzyć.',
-    measureBtn: 'Dodaj miarę', measureShort: 'Brak miary',
+    measureBtn: 'Dodaj miarę',
     lapseTitle: (n) => `Nie było cię ${n} dni`,
     lapseNeverTitle: (n) => `Cel stoi ${n} dni bez żadnego kroku`,
     lapseSub: 'Tak bywa. Pytanie nie brzmi dlaczego, tylko dokąd wracasz.',
     lapseRestart: 'Zacznij liczyć od nowa', lapseEdit: 'Zmień cel', lapsePause: 'Wstrzymaj',
-    lapseShort: (n) => `Bez ruchu ${n} dni`,
     gridLabel: 'Ostatnie osiem tygodni', gridDone: 'był krok', gridBlocked: 'powiedziałeś, co przeszkodziło',
     monthPrev: 'Poprzedni miesiąc', monthNext: 'Następny miesiąc',
     emptyMonthNamed: (m) => `Brak celów na ${m}`,
@@ -441,7 +393,7 @@ const T = {
     emptyYearTitle: 'No yearly goals', emptyYearSub: 'Where are you heading this year?',
     statusAll: 'All', statusActive: 'Active', statusDone: 'Done', statusArchived: 'Archived',
     statusPaused: 'Paused', pauseBtn: 'Pause this goal', resumeBtn: 'Resume',
-    pausedNote: 'Paused: no evening questions, and the streak stays intact.',
+    archiveBtn: 'Move to archive',
     paceAhead: 'Ahead of schedule', paceOnTrack: 'On track',
     paceBehind: 'Not on pace to finish in time', paceOverdue: 'Deadline has passed',
     paceUnknown: 'Not enough history to forecast yet',
@@ -449,16 +401,6 @@ const T = {
     paceLate: (n) => `${n} days past the deadline`,
     paceTimeVsWork: (t, p) => `${t}% of the time gone, ${p}% done`,
     paceDaysLeft: (n) => `${n} days to the deadline`,
-    reviewTitle: 'Weekly review', reviewOpen: 'Review',
-    reviewBanner: (n) => `${n} ${n === 1 ? 'goal is' : 'goals are'} due for review`,
-    reviewStalled: (n) => `${n} with no movement this week`,
-    reviewSub: 'Once a week, one short question: do you still want this?',
-    reviewLater: 'Later', reviewMoved: 'This week', reviewNoMove: 'Nothing moved this week',
-    reviewCheckins: (n) => `${n} days with a step`, reviewMilestones: (n) => `milestones: ${n}`,
-    reviewJournal: (n) => `entries: ${n}`,
-    reviewKeep: 'Keep going', reviewPause: 'Pause', reviewArchive: 'Archive',
-    reviewDone: 'Review done', reviewEmpty: 'All reviewed',
-    whyReminder: 'You wrote why this matters:',
     noMilestonesYet: 'No milestones yet — add the first step by editing the goal',
     allMilestonesDoneMsg: '🎉 All milestones reached!',
     markGoalDoneBtn: 'Mark goal as done',
@@ -472,15 +414,11 @@ const T = {
     actionsEmpty: 'No daily actions yet — add the first step below.',
     actionOverdue: 'overdue',
     rescueWait: (n) => `The streak broke. The next rescue unlocks in ${n} days.`,
-    eveningTitle: 'How did the day go?',
-    eveningSub: 'Tick off what you managed. If not — say in one word what got in the way.',
-    eveningYes: '✓ Did it', eveningNo: 'Didn\u2019t happen', eveningLater: 'Later',
-    eveningRescue: '🛟 Rescue the streak',
     parentLabel: 'Serves a yearly goal', parentNone: 'Stands alone',
     parentHint: 'The year is the direction, the month is a step toward it. The yearly goal will show what feeds it.',
     parentEmpty: 'No yearly goals yet — add one on the Year tab.',
     childrenTitle: (n) => `Working on this: ${n}`,
-    blockersTitle: 'What gets in the way most', blockersShort: 'Blocked by:',
+    blockersTitle: 'What gets in the way most',
     reason_noTime: 'No time', reason_forgot: 'Forgot', reason_tired: 'Too tired',
     reason_mood: 'Not in the mood', reason_other: 'Other',
     journalPlaceholder: 'What did you do for this goal today?',
@@ -492,15 +430,13 @@ const T = {
     milestonesCountSuffix: 'milestones',
     milestoneToTask: 'To tasks', milestoneInTasks: 'In tasks',
     chartLabel: 'Path', chartRequired: 'to be on time',
-    reviewStepPlaceholder: 'One step before the next review', reviewStepBtn: 'Save the step',
     measureTitle: 'How will you know you got there?',
     measureSub: 'This goal has no number and no steps — nothing to measure it by.',
-    measureBtn: 'Add a measure', measureShort: 'Nothing to measure',
+    measureBtn: 'Add a measure',
     lapseTitle: (n) => `You were away ${n} days`,
     lapseNeverTitle: (n) => `This goal has stood ${n} days without a single step`,
     lapseSub: 'It happens. The question is not why, but where you come back to.',
     lapseRestart: 'Start the count over', lapseEdit: 'Change the goal', lapsePause: 'Pause',
-    lapseShort: (n) => `No movement for ${n} days`,
     gridLabel: 'Last eight weeks', gridDone: 'a step happened', gridBlocked: 'said what got in the way',
     monthPrev: 'Previous month', monthNext: 'Next month',
     emptyMonthNamed: (m) => `No goals for ${m}`,
@@ -850,7 +786,7 @@ function weekdayShortLabels() {
 // ---- Стан ----
 let goals = [];
 let unsubscribeGoals = null;
-let currentScreen = 'dashboard'; // 'dashboard' | 'detail' | 'review'
+let currentScreen = 'dashboard'; // 'dashboard' | 'detail'
 let activeDetailGoalId = null;
 let statusFilter = 'active'; // null(all) | 'active' | 'paused' | 'done' | 'archived'
 // Вікно ретроспективи: 365 днів або null — за весь час.
@@ -875,13 +811,11 @@ let formParentGoalId = null;
 let formHorizon = 'month';
 let pendingDeleteId = null;
 // Яка ціль у вечірньому підсумку зараз питає «що завадило».
-let eveningReasonForId = null;
 // Щоденні дії відкритої цілі — це звичайні завдання з розділу «Завдання»,
 // просто відфільтровані за goalId. Слухаємо їх лише поки ціль відкрита:
 // тримати підписку на весь список заради екрана, якого не видно, ні до чого.
 let goalActions = [];
 let unsubscribeActions = null;
-const EVENING_DISMISS_KEY = 'goalsEveningDismissed';
 
 // ---- Дані (Firestore, реалтайм) ----
 // Профіль тут потрібен заради двох речей: мови (сторінку могли відкрити з
@@ -945,8 +879,8 @@ function progressOf(goal) {
 // доступний» мусить бути одне: інакше в чаті пишеться одне, а на сторінці
 // показується інше.
 const Streak = window.GoalStreak;
-// Темп і черга огляду — goals/review.js. Той самий модуль читає помічник на
-// сервері: інакше в чаті звучала б одна оцінка, а на екрані стояла інша.
+// Темп цілі — goals/review.js. Той самий модуль читає помічник на сервері:
+// інакше в чаті звучала б одна оцінка, а на екрані стояла інша.
 const Review = window.GoalReview;
 function computeStreak(checkins) {
   return Streak.computeStreak(checkins, todayISO());
@@ -975,7 +909,6 @@ function computeBadges(list) {
 
 // ---- Рендер: дашборд ----
 function renderCurrentScreen() {
-  if (currentScreen === 'review') { renderReviewScreen(); return; }
   if (currentScreen === 'detail' && activeDetailGoalId) {
     const goal = goals.find((g) => g.id === activeDetailGoalId);
     if (goal) { renderGoalDetail(goal); return; }
@@ -991,92 +924,10 @@ function renderCurrentScreen() {
 
 function renderDashboard() {
   renderBadgesRow();
-  renderReviewBanner();
-  renderEveningCard();
   renderMonthHeader();
   renderStatusFilterRow();
   renderRetro();
   renderGoalsList();
-}
-
-// ---- Вечірній підсумок ----
-// З'являється надвечір і питає рівно про те, на що ще нема відповіді.
-// Відповів «було» чи назвав причину — ціль зникає зі списку; відповів на
-// всі — картка зникає сама. Це не звіт, а два дотики перед сном.
-function renderEveningCard() {
-  const host = document.getElementById('eveningCard');
-  if (!host) return;
-  const today = todayISO();
-  if (!Streak.isEvening(new Date()) || localStorage.getItem(EVENING_DISMISS_KEY) === today) {
-    host.innerHTML = '';
-    return;
-  }
-  // Більше п'яти питань перед сном — це вже допит. Решта дочекається
-  // наступного перерендеру: відповіді прибирають цілі з черги.
-  // По ВСІХ цілях, а не лише по видимій вкладці: серія тримається на тому, що
-  // людина не забула, і мовчки рватись, поки відкрито інший горизонт, вона не
-  // має. Те саме з оглядом тижня нижче — це ритуал над усім списком.
-  const queue = Streak.eveningQueue(goals, today).slice(0, 5);
-  if (!queue.length) { host.innerHTML = ''; return; }
-
-  host.innerHTML = `
-    <div class="evening-card">
-      <div class="evening-head">
-        <div class="evening-title">${escapeHtml(t('eveningTitle'))}</div>
-        <button type="button" class="evening-later" id="eveningLaterBtn">${escapeHtml(t('eveningLater'))}</button>
-      </div>
-      <div class="evening-sub">${escapeHtml(t('eveningSub'))}</div>
-      ${queue.map((g) => {
-        const rescue = Streak.rescueState(g, today);
-        const canRescue = rescue && rescue.available;
-        const reasons = eveningReasonForId === g.id
-          ? `<div class="evening-reasons">${BLOCKER_KEYS.map((k) =>
-              `<button type="button" class="evening-reason" data-reason="${k}" data-goal="${g.id}">${escapeHtml(t('reason_' + k))}</button>`).join('')}</div>`
-          : '';
-        // «Навіщо» має сенс рівно тут: поле заповнюють на холодну голову, а
-        // читати його треба тоді, коли не хочеться. Показуємо не завжди —
-        // лише коли є що втрачати: серія, яку обірве саме сьогоднішній
-        // пропуск. Інакше цитата стала б декором і перестала б читатись.
-        const streakAtRisk = Streak.computeStreak(g.checkins, today);
-        const whyBlock = g.why && streakAtRisk >= 3
-          ? `<div class="evening-why">${escapeHtml(t('whyReminder'))} “${escapeHtml(g.why)}”</div>`
-          : '';
-        return `
-        <div class="evening-goal">
-          <div class="evening-goal-title">${escapeHtml(g.title || '')}${streakAtRisk >= 3 ? ` <span class="evening-streak">🔥 ${streakAtRisk}</span>` : ''}</div>
-          ${whyBlock}
-          <div class="evening-actions">
-            <button type="button" class="evening-btn yes" data-yes="${g.id}">${escapeHtml(t('eveningYes'))}</button>
-            <button type="button" class="evening-btn" data-no="${g.id}">${escapeHtml(t('eveningNo'))}</button>
-            ${canRescue ? `<button type="button" class="evening-btn" data-rescue="${g.id}">${escapeHtml(t('eveningRescue'))}</button>` : ''}
-          </div>
-          ${reasons}
-        </div>`;
-      }).join('')}
-    </div>`;
-
-  document.getElementById('eveningLaterBtn').addEventListener('click', () => {
-    localStorage.setItem(EVENING_DISMISS_KEY, today);
-    eveningReasonForId = null;
-    renderEveningCard();
-  });
-  host.querySelectorAll('[data-yes]').forEach((btn) => {
-    btn.addEventListener('click', () => { eveningReasonForId = null; toggleTodayCheckin(btn.dataset.yes); });
-  });
-  host.querySelectorAll('[data-no]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      // Другий дотик по «не вийшло» згортає причини — щоб натиснуте
-      // помилково можна було закрити, а не тільки чимось відповісти.
-      eveningReasonForId = eveningReasonForId === btn.dataset.no ? null : btn.dataset.no;
-      renderEveningCard();
-    });
-  });
-  host.querySelectorAll('[data-reason]').forEach((btn) => {
-    btn.addEventListener('click', () => { eveningReasonForId = null; logBlocker(btn.dataset.goal, btn.dataset.reason); });
-  });
-  host.querySelectorAll('[data-rescue]').forEach((btn) => {
-    btn.addEventListener('click', () => rescueStreak(btn.dataset.rescue));
-  });
 }
 
 function renderBadgesRow() {
@@ -1282,21 +1133,10 @@ function showDashboard() {
   activeDetailGoalId = null;
   stopActions();
   document.getElementById('goalDetailScreen').style.display = 'none';
-  document.getElementById('reviewScreen').style.display = 'none';
   document.getElementById('dashboardScreen').style.display = '';
   renderCurrentScreen();
 }
-function showReview() {
-  currentScreen = 'review';
-  activeDetailGoalId = null;
-  stopActions();
-  document.getElementById('goalDetailScreen').style.display = 'none';
-  document.getElementById('dashboardScreen').style.display = 'none';
-  document.getElementById('reviewScreen').style.display = 'block';
-  renderReviewScreen();
-}
 document.getElementById('detailBackBtn').addEventListener('click', showDashboard);
-document.getElementById('reviewBackBtn').addEventListener('click', showDashboard);
 // Вкладка «Цілі» — і повернення з екрана деталей, і просто підсвічений стан.
 function selectHorizon(next) {
   horizon = next === 'year' ? 'year' : 'month';
@@ -1363,177 +1203,6 @@ function renderGoalDetail(goal) {
   renderBlockers(goal);
   renderPauseRow(goal);
   renderJournalList(goal);
-}
-
-// ---- Огляд тижня ----
-// Той самий каркас, що й «розбір минулих днів» у завданнях і «регулярні
-// операції» в бюджеті: банер каже, що настало, окремий екран дає вирішити,
-// і НІЧОГО не вирішується само. Довгі цілі гинуть не тому, що важкі, а тому,
-// що про них забувають — і через півроку це вже чуже сміття в списку.
-const REVIEW_DISMISS_KEY = 'goalsReviewDismissed';
-
-function renderReviewBanner() {
-  const host = document.getElementById('reviewBanner');
-  if (!host) return;
-  const today = todayISO();
-  // «Пізніше» ховає банер до кінця дня, а не назавжди: завтра питання
-  // актуальне знову. Так само, як із боргами в завданнях.
-  if (localStorage.getItem(REVIEW_DISMISS_KEY) === today) { host.innerHTML = ''; return; }
-  // Свідомо по всіх горизонтах — див. коментар у вечірній картці.
-  const digest = Review.reviewDigest(goals, today);
-  if (!digest.pending) { host.innerHTML = ''; return; }
-
-  host.innerHTML = `
-    <div class="review-banner">
-      <div id="reviewBannerBtn" style="flex:1;cursor:pointer;">
-        <div class="review-banner-text">${escapeHtml(t('reviewBanner', digest.pending))}</div>
-        ${digest.stalled ? `<div class="review-banner-sub">${escapeHtml(t('reviewStalled', digest.stalled))}</div>` : ''}
-      </div>
-      <span class="review-banner-go" id="reviewBannerGo">${escapeHtml(t('reviewOpen'))} →</span>
-      <button type="button" class="review-later" id="reviewLaterBtn">${escapeHtml(t('reviewLater'))}</button>
-    </div>`;
-  const open = () => showReview();
-  document.getElementById('reviewBannerBtn').addEventListener('click', open);
-  document.getElementById('reviewBannerGo').addEventListener('click', open);
-  document.getElementById('reviewLaterBtn').addEventListener('click', () => {
-    localStorage.setItem(REVIEW_DISMISS_KEY, todayISO());
-    renderReviewBanner();
-  });
-}
-
-function movementChips(item, goal) {
-  const m = item.movement;
-  if (!m || !m.moved) return `<div class="review-moved">${escapeHtml(t('reviewNoMove'))}</div>`;
-  const chips = [];
-  if (m.checkins) chips.push(t('reviewCheckins', m.checkins));
-  if (m.milestonesDone) chips.push(t('reviewMilestones', m.milestonesDone));
-  if (m.journal) chips.push(t('reviewJournal', m.journal));
-  return `
-    <div class="review-moved">${escapeHtml(t('reviewMoved'))}</div>
-    <div class="review-chips">${chips.map((c) => `<span class="review-chip">${escapeHtml(c)}</span>`).join('')}</div>`;
-}
-
-// В огляді причини йдуть одним рядком, а не чипами: там і так щільно, а
-// питання тижня — «ти досі цього хочеш», і причини тут лише підказка до
-// відповіді, а не окремий блок.
-function blockersLine(goal) {
-  const top = Streak.blockerStats(goal, 2);
-  if (!top.length) return '';
-  const text = top.map((b) => `${blockerLabel(b.reason)} (${b.count})`).join(', ');
-  return `<div class="review-blockers">${escapeHtml(t('blockersShort'))} ${escapeHtml(text)}</div>`;
-}
-
-function renderReviewScreen() {
-  document.getElementById('reviewTitleLabel').textContent = t('reviewTitle');
-  document.getElementById('reviewSubLabel').textContent = t('reviewSub');
-  const host = document.getElementById('reviewList');
-  const today = todayISO();
-  const queue = Review.reviewQueue(goals, today);
-
-  if (!queue.length) {
-    host.innerHTML = `<div class="review-empty">${escapeHtml(t('reviewEmpty'))}</div>`;
-    return;
-  }
-
-  host.innerHTML = queue.map((goal) => {
-    const item = Review.reviewItem(goal, today, { startIso: createdIso(goal) });
-    const p = item.pace;
-    const VERDICT = { ahead: 'paceAhead', onTrack: 'paceOnTrack', behind: 'paceBehind',
-      overdue: 'paceOverdue', unknown: 'paceUnknown' };
-    return `
-      <div class="review-item" data-review="${goal.id}">
-        <div class="review-item-title">${escapeHtml(goal.title)}</div>
-        ${p ? `<div class="pace ${p.verdict}" style="margin:10px 0 0;">
-            <div class="pace-head"><span class="pace-dot"></span>${escapeHtml(t(VERDICT[p.verdict] || 'paceUnknown'))}</div>
-          </div>` : ''}
-        ${movementChips(item, goal)}
-        ${goal.why ? `<div class="review-why">${escapeHtml(t('whyReminder'))} “${escapeHtml(goal.why)}”</div>` : ''}
-        ${(() => { const lp = Review.lapse(goal, today, { startIso: createdIso(goal) }); return lp
-          ? `<div class="review-lapse">${escapeHtml(t('lapseShort', lp.days))}</div>` : ''; })()}
-        ${blockersLine(goal)}
-        ${Review.needsMeasure(goal, today, { startIso: createdIso(goal) })
-          ? `<div class="review-measure">${escapeHtml(t('measureShort'))}</div>` : ''}
-        <div class="review-step">
-          <input type="text" maxlength="200" data-step-input="${goal.id}" placeholder="${escapeHtml(t('reviewStepPlaceholder'))}">
-          <button type="button" class="review-btn primary" data-step-save="${goal.id}">${escapeHtml(t('reviewStepBtn'))}</button>
-        </div>
-        <div class="review-actions">
-          <button type="button" class="review-btn" data-keep="${goal.id}">${escapeHtml(t('reviewKeep'))}</button>
-          <button type="button" class="review-btn" data-pause="${goal.id}">${escapeHtml(goal.status === 'paused' ? t('resumeBtn') : t('reviewPause'))}</button>
-          <button type="button" class="review-btn" data-archive="${goal.id}">${escapeHtml(t('reviewArchive'))}</button>
-        </div>
-      </div>`;
-  }).join('');
-
-  host.querySelectorAll('[data-keep]').forEach((btn) => {
-    btn.addEventListener('click', () => markReviewed(btn.dataset.keep));
-  });
-  host.querySelectorAll('[data-step-save]').forEach((btn) => {
-    const commit = () => {
-      const id = btn.dataset.stepSave;
-      const input = host.querySelector(`[data-step-input="${id}"]`);
-      const title = (input && input.value.trim()) || '';
-      if (!title) return;
-      input.value = '';
-      commitReviewStep(id, title);
-    };
-    btn.addEventListener('click', commit);
-    const input = host.querySelector(`[data-step-input="${btn.dataset.stepSave}"]`);
-    if (input) input.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') { e.preventDefault(); commit(); }
-    });
-  });
-  host.querySelectorAll('[data-pause]').forEach((btn) => {
-    const goal = goals.find((g) => g.id === btn.dataset.pause);
-    btn.addEventListener('click', () =>
-      markReviewed(btn.dataset.pause, { status: goal && goal.status === 'paused' ? 'active' : 'paused' }));
-  });
-  host.querySelectorAll('[data-archive]').forEach((btn) => {
-    btn.addEventListener('click', () => markReviewed(btn.dataset.archive, { status: 'archived' }));
-  });
-}
-
-// Огляд завершено — ціль виходить із черги на тиждень. Патч дописується тим
-// самим записом, тож «на паузу» і «оглянуто» це одна дія, а не дві.
-// Огляд досі питав тільки про ДОЛЮ цілі — веду далі / зсунути / пауза /
-// архів, — і жодного питання про ДІЮ. Через це він лишався рефлексією без
-// наслідку: тиждень закінчувався рішенням, а не кроком.
-//
-// Крок стає звичайним завданням із датою наступного огляду: не «колись», а
-// «до того, як я спитаю знову». Записати крок — це і є огляд, тож ціль
-// заразом позначається переглянутою й іде з черги.
-async function commitReviewStep(goalId, title) {
-  if (!auth.currentUser) return;
-  const due = Streak.shift(todayISO(), Review.REVIEW_PERIOD_DAYS);
-  await db.collection('users').doc(auth.currentUser.uid).collection('tasks').add({
-    title: title.slice(0, 200),
-    notes: '', done: false, completedAt: null,
-    priority: null, tags: [],
-    dueDate: due, dueTime: null,
-    estimateMin: null, recurrence: null,
-    reminderAt: null, notifiedAt: null,
-    subtasks: [],
-    goalId,
-    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-  }).catch((err) => console.error('commitReviewStep:', err));
-  await markReviewed(goalId);
-}
-
-async function markReviewed(goalId, patch) {
-  if (!auth.currentUser) return;
-  const next = { ...(patch || {}) };
-  await db.collection('users').doc(auth.currentUser.uid).collection('goals').doc(goalId).update({
-    ...next,
-    reviewedAt: todayISO(),
-    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-  }).catch((err) => console.error('markReviewed:', err));
-  patch = next;
-  // Черга перерахується з живих даних, коли долетить onSnapshot; але екран
-  // має відреагувати одразу — інакше здається, що тап не спрацював.
-  const goal = goals.find((g) => g.id === goalId);
-  if (goal) Object.assign(goal, patch || {}, { reviewedAt: todayISO() });
-  renderReviewScreen();
 }
 
 // ---- Темп: чи встигаєш до дедлайну ----
@@ -1793,10 +1462,14 @@ function renderBlockers(goal) {
     </div>`;
 }
 
-// ---- Пауза ----
-// Раніше вибір був між «щовечора нагадувати» і «поховати в архів». Пауза —
-// це третє: ціль жива, але про неї свідомо не питають. Серія при цьому не
-// рветься, бо eveningQueue бере лише активні.
+// ---- Пауза й архів ----
+// Пауза — це середнє між «ціль тисне» і «поховати в архів»: ціль жива, але
+// свідомо відкладена, і серія при цьому не рветься.
+//
+// Архів колись жив лише в екрані щотижневого огляду. Огляд прибрано, а
+// фільтр «Архів» лишився й далі показує складене туди раніше, тож кнопка
+// переїхала сюди — інакше застосунок умів би показувати архів, але не вмів
+// би нічого туди покласти.
 function renderPauseRow(goal) {
   const el = document.getElementById('detailPauseRow');
   if (goal.status === 'done' || goal.status === 'archived') { el.innerHTML = ''; return; }
@@ -1804,9 +1477,13 @@ function renderPauseRow(goal) {
   el.innerHTML = `
     <div class="pause-row">
       <button type="button" class="pause-btn" id="pauseToggleBtn">${escapeHtml(paused ? t('resumeBtn') : t('pauseBtn'))}</button>
+      <button type="button" class="pause-btn" id="archiveGoalBtn">${escapeHtml(t('archiveBtn'))}</button>
     </div>`;
   document.getElementById('pauseToggleBtn').addEventListener('click', () => {
     setGoalStatus(goal.id, paused ? 'active' : 'paused');
+  });
+  document.getElementById('archiveGoalBtn').addEventListener('click', () => {
+    setGoalStatus(goal.id, 'archived');
   });
 }
 
@@ -2859,7 +2536,6 @@ setTimeout(() => {
 // не з'явиться, бо перерендеру не було. Повернення до вкладки — достатній
 // привід перевірити годинник ще раз.
 document.addEventListener('visibilitychange', () => {
-  if (!document.hidden && currentScreen === 'dashboard') renderEveningCard();
 });
 
 // ---- Ініціалізація ----

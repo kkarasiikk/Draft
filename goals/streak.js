@@ -16,10 +16,6 @@
   // перестає щось означати.
   var RESCUE_COOLDOWN_DAYS = 7;
 
-  // З якої години день уже можна підсумовувати. Не опівночі: питати «як
-  // пройшов день» о 23:59 запізно, людина вже спить.
-  var EVENING_HOUR = 18;
-
   function pad2(n) { return String(n).padStart(2, '0'); }
 
   /** Локальна дата як YYYY-MM-DD. Саме локальна: `toISOString()` у поясах
@@ -222,10 +218,6 @@
       .slice(0, limit || 3);
   }
 
-  function isEvening(date) {
-    return (date || new Date()).getHours() >= EVENING_HOUR;
-  }
-
   /** Про які цілі варто спитати ввечері: активні, ще не відмічені сьогодні
    *  і без сьогоднішньої причини. Відповів — питання зникає. */
   function eveningQueue(goals, todayIso) {
@@ -348,7 +340,6 @@
 
   var api = {
     RESCUE_COOLDOWN_DAYS: RESCUE_COOLDOWN_DAYS,
-    EVENING_HOUR: EVENING_HOUR,
     daysToDeadline: daysToDeadline,
     goalsDigest: goalsDigest,
     deadlineWarnDays: deadlineWarnDays,
@@ -366,7 +357,6 @@
     trainingGoals: trainingGoals,
     applyBlocker: applyBlocker,
     blockerStats: blockerStats,
-    isEvening: isEvening,
     eveningQueue: eveningQueue,
   };
 

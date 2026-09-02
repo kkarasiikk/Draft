@@ -1,4 +1,4 @@
-// ---- Темп цілі та щотижневий огляд ----
+// ---- Темп цілі ----
 //
 // Модуль називається «довгострокові цілі», а вся його механіка досі працювала
 // з одним днем: серія, вечірнє «чи був крок», причини пропуску. Ціль із
@@ -8,8 +8,7 @@
 //
 // Тут — саме цей звʼязок:
 //   pace()         чи встигаєш до дедлайну таким темпом;
-//   weekMovement() що зрушило за тиждень;
-//   reviewQueue()  про які цілі час спитати «ти досі цього хочеш».
+//   weekMovement() що зрушило за тиждень.
 //
 // Ні DOM, ні Firestore — тільки чисті функції від даних і поточної дати
 // (див. goals/review.test.js). Той самий модуль читає й AI-помічник: інакше
@@ -17,8 +16,8 @@
 (function (root) {
   'use strict';
 
-  // Раз на тиждень. Частіше — це вже не огляд, а те саме вечірнє питання;
-  // рідше — і ціль встигає протухнути непоміченою.
+  // Вікно, за яким рахується «що зрушило»: тиждень. Довше — і рух місячної
+  // цілі губиться в середньому; коротше — кожен вихідний виглядає застоєм.
   var REVIEW_PERIOD_DAYS = 7;
 
   // Скільки днів історії треба, щоб узагалі говорити про темп. Два записи за
@@ -244,58 +243,6 @@
       journal: journal,
       moved: checkins > 0 || milestonesDone > 0,
     };
-  }
-
-  /** Скільки днів минуло від останнього огляду. null — не оглядали жодного разу. */
-  function daysSinceReview(goal, todayIso) {
-    var S = streak();
-    if (!S) return null;
-    var last = goal && goal.reviewedAt;
-    if (typeof last !== 'string' || last.length !== 10) return null;
-    return S.daysBetween(last, todayIso);
-  }
-
-  /**
-   * Про які цілі час спитати. Той самий підхід, що й «розбір минулих днів» у
-   * завданнях і «регулярні операції» в бюджеті: застосунок КАЖЕ, що настало,
-   * але нічого не вирішує сам.
-   *
-   * Закриті й архівні не питаємо — там нема чого вирішувати. Паузу питаємо:
-   * саме її й треба колись зняти, інакше пауза тихо стає архівом.
-   */
-  function reviewQueue(goals, todayIso, opts) {
-    var period = (opts && opts.periodDays) || REVIEW_PERIOD_DAYS;
-    return (goals || []).filter(function (g) {
-      if (!g || (g.status !== 'active' && g.status !== 'paused')) return false;
-      var since = daysSinceReview(g, todayIso);
-      return since === null || since >= period;
-    });
-  }
-
-  /**
-   * Один рядок огляду: ціль, що зрушило, як із темпом. Зібрано тут, а не на
-   * сторінці, щоб те саме міг показати помічник.
-   */
-  function reviewItem(goal, todayIso, opts) {
-    return {
-      id: goal && goal.id,
-      title: (goal && goal.title) || '',
-      why: (goal && goal.why) || '',
-      status: goal && goal.status,
-      movement: weekMovement(goal, todayIso, opts && opts.periodDays),
-      pace: pace(goal, todayIso, opts),
-    };
-  }
-
-  /** Чи є про що показувати банер, і скільки там пунктів. */
-  function reviewDigest(goals, todayIso, opts) {
-    var queue = reviewQueue(goals, todayIso, opts);
-    var stalled = 0;
-    queue.forEach(function (g) {
-      var m = weekMovement(g, todayIso, opts && opts.periodDays);
-      if (m && !m.moved) stalled += 1;
-    });
-    return { pending: queue.length, stalled: stalled };
   }
 
   /**
@@ -620,10 +567,6 @@
     progressPct: progressPct,
     pace: pace,
     weekMovement: weekMovement,
-    daysSinceReview: daysSinceReview,
-    reviewQueue: reviewQueue,
-    reviewItem: reviewItem,
-    reviewDigest: reviewDigest,
     progressSeries: progressSeries,
     needsMeasure: needsMeasure,
     lapse: lapse,

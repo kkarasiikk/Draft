@@ -221,7 +221,6 @@
     padding:8px 13px;border-radius:10px;white-space:nowrap;
     border:1px solid var(--border);background:var(--surface-flat);color:var(--ink-soft);}
   .lapse-btn.primary{background:var(--gold);border-color:transparent;color:#fff;}
-  .review-lapse{margin-top:8px;font-size:12px;font-weight:600;color:var(--gold);}
 
   /* Ціль, яку нема чим міряти. Тон спокійний: це пропущений крок
      постановки, а не провина. */
@@ -230,12 +229,6 @@
   .measure-sub{font-size:12.5px;color:var(--ink-soft);line-height:1.45;margin-bottom:10px;}
   .measure-banner button{cursor:pointer;border:none;font-family:'Inter',sans-serif;font-size:12.5px;
     font-weight:600;padding:8px 14px;border-radius:10px;background:var(--gold);color:#fff;}
-  .review-measure{margin-top:8px;font-size:12px;font-weight:600;color:var(--gold);}
-
-  /* Крок тижня: огляд закінчується дією, а не лише рішенням про долю цілі. */
-  .review-step{display:flex;gap:6px;margin:12px 0 10px;}
-  .review-step input{flex:1;min-width:0;padding:9px 12px;border-radius:10px;border:1px solid var(--border);
-    background:var(--surface-flat);color:var(--ink);font-family:'Inter',sans-serif;font-size:13.5px;}
 
   /* Скільки разів дедлайн уже їхав. Тон рівний: це факт, а не докір. */
 
@@ -456,42 +449,13 @@
   .pace.ahead .pace-head, .pace.onTrack .pace-head{color:var(--income);}
 
   /* Пауза — тиха дія, тож і кнопка тиха: не червона й не на всю ширину. */
-  .pause-row{display:flex;justify-content:center;margin-top:10px;}
+  .pause-row{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:10px;}
   .pause-btn{border:1px solid var(--border);background:transparent;color:var(--ink-muted);
     font-family:'Inter',sans-serif;font-size:13px;font-weight:600;padding:9px 16px;
     border-radius:999px;cursor:pointer;}
   .pause-btn:active{transform:scale(.97);}
   .paused-note{background:var(--surface-flat);color:var(--ink-muted);border-radius:14px;
     padding:10px 14px;margin-bottom:12px;font-size:12.5px;line-height:1.45;text-align:center;}
-
-  /* Огляд тижня. Той самий каркас, що й «розбір минулих днів» у завданнях:
-     банер на дашборді, за ним екран, де кожен пункт треба вирішити. */
-  .review-banner{display:flex;align-items:center;gap:10px;justify-content:space-between;
-    background:var(--surface);border-radius:18px;padding:13px 16px;margin-bottom:14px;cursor:pointer;
-    border:1px solid var(--border);}
-  .review-banner-text{font-size:13.5px;font-weight:600;color:var(--ink);line-height:1.4;}
-  .review-banner-sub{font-size:12px;color:var(--ink-muted);margin-top:2px;}
-  .review-banner-go{flex-shrink:0;font-size:12.5px;font-weight:600;color:var(--accent);cursor:pointer;}
-  #reviewScreen{display:none;padding:16px 20px 40px;}
-  .review-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:2px;}
-  .review-title{font-size:20px;font-weight:800;color:var(--ink);}
-  .review-later{border:none;background:none;color:var(--ink-muted);font-family:'Inter',sans-serif;
-    font-size:13px;cursor:pointer;padding:4px;}
-  .review-sub{font-size:13px;color:var(--ink-muted);margin-bottom:16px;line-height:1.45;}
-  .review-item{background:var(--surface);border-radius:18px;padding:15px 16px;margin-bottom:12px;}
-  .review-item-title{font-size:15px;font-weight:700;color:var(--ink);line-height:1.35;}
-  .review-why{margin-top:8px;padding-left:10px;border-left:2px solid var(--border);
-    font-size:12.5px;color:var(--ink-soft);font-style:italic;line-height:1.45;}
-  .review-moved{margin-top:10px;font-size:12.5px;color:var(--ink-muted);}
-  .review-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
-  .review-chip{background:var(--surface-flat);border-radius:999px;padding:4px 10px;font-size:12px;color:var(--ink-soft);}
-  .review-actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:13px;}
-  .review-btn{flex:1 1 45%;border:1px solid var(--border);background:transparent;color:var(--ink-soft);
-    font-family:'Inter',sans-serif;font-size:12.5px;font-weight:600;padding:9px 6px;
-    border-radius:12px;cursor:pointer;}
-  .review-btn.primary{background:var(--accent);color:#fff;border-color:transparent;}
-  .review-btn:active{transform:scale(.97);}
-  .review-empty{text-align:center;color:var(--ink-muted);font-size:13.5px;padding:30px 0;}
 
   /* Віхи у формі: ручка, поля, дата. Ручка ліворуч, а не праворуч поруч із
      хрестиком, — щоб «переставити» не плуталось із «видалити». */
@@ -517,7 +481,6 @@
   .blocker-chip{display:inline-flex;align-items:baseline;gap:5px;background:var(--surface);
     border:1px solid var(--border);border-radius:999px;padding:4px 10px;font-size:12px;color:var(--ink-soft);}
   .blocker-count{font-size:11px;font-weight:700;color:var(--ink-muted);font-variant-numeric:tabular-nums;}
-  .review-blockers{margin-top:9px;font-size:12px;color:var(--ink-muted);line-height:1.45;}
 
   /* Драбина місяць -> рік. На річній цілі — що на неї працює цього місяця;
      на місячній — кому вона служить. Обидва блоки навмисно тихі: це контекст,
@@ -533,30 +496,6 @@
   .child-title{flex:1;min-width:0;font-size:13px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .child-pct{font-size:12px;font-weight:700;color:var(--ink-muted);font-variant-numeric:tabular-nums;flex-shrink:0;}
   .child-row.done .child-title{text-decoration:line-through;color:var(--ink-muted);}
-
-  /* Вечірній підсумок */
-  .evening-why{margin:6px 0 2px;padding-left:9px;border-left:2px solid var(--border);
-    font-size:12.5px;color:var(--ink-soft);font-style:italic;line-height:1.45;}
-  .evening-streak{font-size:12.5px;font-weight:600;color:var(--ink-muted);}
-  .evening-card{background:var(--surface);border-radius:20px;padding:16px;margin-bottom:16px;}
-  .evening-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:4px;}
-  .evening-title{font-family:'Inter',sans-serif;font-size:15px;font-weight:700;color:var(--ink);}
-  .evening-later{border:none;background:none;font-family:'Inter',sans-serif;font-size:12.5px;font-weight:600;
-    color:var(--ink-muted);cursor:pointer;padding:4px 2px;}
-  .evening-sub{font-size:12.5px;color:var(--ink-muted);line-height:1.45;margin-bottom:12px;}
-  .evening-goal{padding:12px 0;border-top:1px solid var(--border);}
-  .evening-goal:first-of-type{border-top:none;}
-  .evening-goal-title{font-size:14.5px;font-weight:600;color:var(--ink);margin-bottom:8px;line-height:1.35;}
-  .evening-actions{display:flex;gap:8px;flex-wrap:wrap;}
-  .evening-btn{border:1px solid var(--glass-btn-border);background:var(--glass-btn-bg);border-radius:999px;
-    padding:8px 14px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;}
-  .evening-btn:active{transform:scale(.96);}
-  .evening-btn.yes{background:var(--income-light);color:var(--income);border-color:transparent;}
-  .evening-reasons{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
-  .evening-reason{border:1px solid var(--glass-btn-border);background:none;border-radius:999px;padding:6px 12px;
-    font-family:'Inter',sans-serif;font-size:12.5px;color:var(--ink);cursor:pointer;}
-  .evening-reason:active{transform:scale(.96);}
-  .evening-done{font-size:13px;color:var(--income);font-weight:600;}
 
   /* Щоденні дії з цілі — ті самі завдання, що й у розділі «Завдання»,
      просто показані звідси. Виконав таку дію — день у серії відмічається сам. */
@@ -745,8 +684,6 @@
   <div class="content">
     <div id="monthHeader"></div>
     <div class="badges-row" id="badgesRow"></div>
-    <div id="reviewBanner"></div>
-    <div id="eveningCard"></div>
     <div class="status-filter-row" id="statusFilterRow"></div>
     <div id="retroBlock"></div>
     <div id="goalsList"></div>
@@ -778,20 +715,6 @@
       </button>
     </div>
   </nav>
-
-  <!-- Огляд тижня. Окремий екран, а не ще один блок на дашборді: рішення тут
-       свідомі, і їх не приймають між ділом, гортаючи список. -->
-  <div id="reviewScreen">
-    <div class="detail-header">
-      <button type="button" id="reviewBackBtn" class="cal-nav-btn" aria-label="Назад">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-      </button>
-      <div class="detail-title" id="reviewTitleLabel">Огляд тижня</div>
-      <span style="width:34px;"></span>
-    </div>
-    <div class="review-sub" id="reviewSubLabel"></div>
-    <div id="reviewList"></div>
-  </div>
 
   <div id="goalDetailScreen">
     <div class="detail-header">
