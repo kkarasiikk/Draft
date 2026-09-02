@@ -118,6 +118,26 @@ test.describe('Плитки', () => {
     await expect(cap(page, 'workout')).toContainText('Ноги');
   });
 
+  // План на наступний тиждень записують тими самими документами, що й
+  // зроблене, тож найсвіжішим записом виявлявся план — і плитка казала
+  // «-4 дні тому», а рядок стану про зал мовчав.
+  test('план на майбутнє не витісняє останнє тренування', async ({ page }) => {
+    await openHub(page, { workouts: [
+      { id: 'w1', date: iso(-4), name: 'Fullbody СБ' },
+      { id: 'plan', date: iso(5), name: 'Ноги', exercises: [{ sets: [{ weight: 0, reps: 0 }] }] },
+    ] });
+    await expect(stat(page, 'workout')).toHaveText('4');
+    await expect(cap(page, 'workout')).toContainText('Fullbody СБ');
+  });
+
+  test('самі лише плани попереду — тренувань ще не було', async ({ page }) => {
+    await openHub(page, { workouts: [
+      { id: 'plan', date: iso(5), name: 'Ноги', exercises: [{ sets: [{ weight: 0, reps: 0 }] }] },
+    ] });
+    await expect(stat(page, 'workout')).toHaveText('—');
+    await expect(cap(page, 'workout')).toHaveText('тренувань ще немає');
+  });
+
   test('тренування наперед — це план, а не зроблене', async ({ page }) => {
     await openHub(page, { workouts: [{ date: T, name: '', exercises: [
       { sets: [{ weight: 0, reps: 0 }, { weight: 0, reps: 0 }] },

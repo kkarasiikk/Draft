@@ -61,12 +61,20 @@
 
   /**
    * Скільки днів минуло від останнього тренування.
+   *
+   * Записи МАЙБУТНІМ днем сюди не рахуються: у розділі тренувань план на
+   * наступний тиждень записують тими самими документами, що й зроблене, і
+   * «найсвіжіший запис» ставав планом. На плитці від цього стояло «-4 дні
+   * тому», а рядок стану замовкав зовсім. План — це ще не тренування, тож
+   * «останнє» шукається серед сьогоднішнього й минулого.
+   *
    * @returns {{daysAgo:number|null, lastDate:string|null}} null — тренувань ще не було
    */
   function workoutSummary(workouts, todayIso) {
     var last = null;
     (workouts || []).forEach(function (w) {
       if (!w || typeof w.date !== 'string') return;
+      if (w.date > todayIso) return;
       if (!last || w.date > last) last = w.date;
     });
     if (!last) return { daysAgo: null, lastDate: null };

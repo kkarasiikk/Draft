@@ -70,6 +70,24 @@ describe('workoutSummary: коли востаннє', () => {
   test('тренувань ще не було', () => {
     expect(H.workoutSummary([], TODAY)).toEqual({ daysAgo: null, lastDate: null });
   });
+
+  // План на наступний тиждень записують тими самими документами, що й
+  // зроблене. Найсвіжішим тоді ставав план — і виходило «-4 дні тому».
+  test('запис майбутнім днем не рахується за останнє тренування', () => {
+    const r = H.workoutSummary([{ date: '2026-08-23' }, { date: '2026-08-30' }], TODAY);
+    expect(r).toEqual({ daysAgo: 3, lastDate: '2026-08-23' });
+  });
+
+  test('самі лише плани попереду — це «тренувань ще не було»', () => {
+    // Не «0 днів тому» й не відʼємне число: жодного тренування ще не сталося.
+    expect(H.workoutSummary([{ date: '2026-08-30' }], TODAY))
+      .toEqual({ daysAgo: null, lastDate: null });
+  });
+
+  test('сьогоднішнє майбутнім не вважається', () => {
+    expect(H.workoutSummary([{ date: TODAY }, { date: '2026-09-05' }], TODAY))
+      .toEqual({ daysAgo: 0, lastDate: TODAY });
+  });
 });
 
 describe('goalsSummary: серія і що без кроку', () => {
