@@ -129,7 +129,8 @@ test.describe('Шапка', () => {
     await page.click('#langPicker .lang-choice[data-lang="en"]');
     await expect(page.locator('#sideLabel-home')).toHaveText('Home');
     await expect(page.locator('#sideLabel-workout')).toHaveText('Workouts');
-    await expect(page.locator('#sideSettingsLabel')).toHaveText('Settings');
+    await expect(page.locator('#sideLabel-settings')).toHaveText('Settings');
+    await expect(page.locator('#sideLabel-export')).toHaveText('Export data');
     await expect(page.locator('#recordBtnLabel')).toHaveText('Add');
     const expected = new Intl.DateTimeFormat('en-US', { month: 'long' }).format(new Date());
     await expect(page.locator('#todayDate')).toContainText(expected);

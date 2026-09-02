@@ -366,15 +366,12 @@ function escapeHtml(str) {
 // на них навішуються далі по файлу — обох треба, щоб колонка вже була в DOM.
 // Експорт і тема живуть тільки тут: на сторінках розділів цих рядків немає,
 // бо кнопка, яка веде на іншу сторінку щось зробити, — це не кнопка.
+// Рядки «Експорт даних» і «Налаштування» малює сама колонка — вони стоять
+// на всіх пʼятьох сторінках. Тут вони кнопки, бо діалог експорту й меню
+// налаштувань живуть саме на головній; з розділів колонка веде сюди хешем.
 window.SideNav.mount(document.getElementById('sideNavHost'), {
   current: 'home',
   lang: currentLang,
-  extra: [
-    { id: 'sideExportBtn', labelId: 'sideExportLabel', label: t('exportLabel'),
-      icon: '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 19h16"/></svg>' },
-    { id: 'sideSettingsBtn', labelId: 'sideSettingsLabel', label: t('settingsLabel'),
-      icon: '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.6v2.2M12 19.2v2.2M21.4 12h-2.2M4.8 12H2.6M18.6 5.4l-1.6 1.6M7 17l-1.6 1.6M18.6 18.6L17 17M7 7L5.4 5.4"/></svg>' },
-  ],
 });
 
 function applyTranslations() {
@@ -386,8 +383,6 @@ function applyTranslations() {
   document.getElementById('logoutLabel').textContent = t('logout');
   // Назви розділів у колонці живуть у side-nav.js — одні на пʼять сторінок.
   window.SideNav.setLang(currentLang);
-  document.getElementById('sideExportLabel').textContent = t('exportLabel');
-  document.getElementById('sideSettingsLabel').textContent = t('settingsLabel');
   document.getElementById('recordBtnLabel').textContent = t('recordBtn');
   document.getElementById('recordBtn').setAttribute('aria-label', t('recordBtn'));
   document.getElementById('todayTitle').textContent = t('todayTitle');
@@ -1248,6 +1243,24 @@ function closeExportDialog() {
 
 document.getElementById('exportBtn').addEventListener('click', openExportDialog);
 document.getElementById('sideExportBtn').addEventListener('click', openExportDialog);
+
+// Колонка розділів веде сюди з хешем: у розділі кнопки «Експорт даних» і
+// «Налаштування» нічого відкрити не можуть — і діалог експорту, і меню
+// налаштувань живуть на головній. Хеш прибираємо одразу, щоб оновлення
+// сторінки не відкривало те саме вдруге, а «назад» вело туди, звідки
+// прийшли: той самий прийом, що й #new у розділах.
+function openFromHash() {
+  const hash = location.hash;
+  if (hash !== '#export' && hash !== '#settings') return;
+  try { history.replaceState(null, '', location.pathname + location.search); }
+  catch (err) { /* file:// */ }
+  // Даємо сторінці домалювати перший кадр — інакше діалог відкривається
+  // над ще порожнім екраном.
+  setTimeout(() => {
+    if (hash === '#export') openExportDialog(); else toggleAppMenu();
+  }, 0);
+}
+openFromHash();
 document.getElementById('exportCloseBtn').addEventListener('click', closeExportDialog);
 document.getElementById('exportOverlay').addEventListener('click', (e) => {
   if (e.target.id === 'exportOverlay') closeExportDialog();
