@@ -292,7 +292,7 @@
       cursor = new Date(cursor);
       cursor.setDate(cursor.getDate() + 1);
     }
-    return { from: days[0].date, to: days[days.length - 1].date, days: days, month: isoOf(first) };
+    return { from: days[0].date, to: days[days.length - 1].date, days: days };
   }
 
   var api = {
