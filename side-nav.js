@@ -18,10 +18,14 @@
   'use strict';
 
   var LABELS = {
-    uk: { home: 'Головна', budget: 'Бюджет', goals: 'Цілі', tasks: 'Завдання', workout: 'Тренування' },
-    ru: { home: 'Главная', budget: 'Бюджет', goals: 'Цели', tasks: 'Задачи', workout: 'Тренировки' },
-    pl: { home: 'Główna', budget: 'Budżet', goals: 'Cele', tasks: 'Zadania', workout: 'Treningi' },
-    en: { home: 'Home', budget: 'Budget', goals: 'Goals', tasks: 'Tasks', workout: 'Workouts' },
+    uk: { home: 'Головна', budget: 'Бюджет', goals: 'Цілі', tasks: 'Завдання', workout: 'Тренування',
+      export: 'Експорт даних', settings: 'Налаштування' },
+    ru: { home: 'Главная', budget: 'Бюджет', goals: 'Цели', tasks: 'Задачи', workout: 'Тренировки',
+      export: 'Экспорт данных', settings: 'Настройки' },
+    pl: { home: 'Główna', budget: 'Budżet', goals: 'Cele', tasks: 'Zadania', workout: 'Treningi',
+      export: 'Eksport danych', settings: 'Ustawienia' },
+    en: { home: 'Home', budget: 'Budget', goals: 'Goals', tasks: 'Tasks', workout: 'Workouts',
+      export: 'Export data', settings: 'Settings' },
   };
 
   var ICONS = {
@@ -30,6 +34,11 @@
     goals: '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="currentColor"/>',
     tasks: '<path d="M4 7l2.5 2.5L11 5"/><path d="M4 17l2.5 2.5L11 15"/><path d="M14 8h6"/><path d="M14 18h6"/>',
     workout: '<path d="M6.5 8v8"/><path d="M17.5 8v8"/><path d="M3.5 10.5v3"/><path d="M20.5 10.5v3"/><path d="M6.5 12h11"/>',
+    export: '<path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 19h16"/>',
+    // Шестерня, а не сонце. Сонце тут стояло від першої версії меню, де
+    // під «налаштуваннями» малась на увазі передусім тема — і читалось воно
+    // як «світла тема», а не «налаштування».
+    settings: '<circle cx="12" cy="12" r="3.1"/><path d="M19.2 14.6a1.6 1.6 0 0 0 .32 1.76l.06.06a1.9 1.9 0 1 1-2.7 2.7l-.05-.06a1.6 1.6 0 0 0-1.77-.32 1.6 1.6 0 0 0-.97 1.47v.17a1.9 1.9 0 1 1-3.8 0v-.09a1.6 1.6 0 0 0-1.05-1.47 1.6 1.6 0 0 0-1.76.32l-.06.06a1.9 1.9 0 1 1-2.7-2.7l.06-.06a1.6 1.6 0 0 0 .32-1.76 1.6 1.6 0 0 0-1.47-.98H3.4a1.9 1.9 0 1 1 0-3.8h.09a1.6 1.6 0 0 0 1.47-1.05 1.6 1.6 0 0 0-.32-1.76l-.06-.06a1.9 1.9 0 1 1 2.7-2.7l.06.06a1.6 1.6 0 0 0 1.76.32h.08A1.6 1.6 0 0 0 10.15 3.5V3.4a1.9 1.9 0 1 1 3.8 0v.09a1.6 1.6 0 0 0 .97 1.47 1.6 1.6 0 0 0 1.77-.32l.05-.06a1.9 1.9 0 1 1 2.7 2.7l-.06.06a1.6 1.6 0 0 0-.32 1.76v.08a1.6 1.6 0 0 0 1.47.97h.17a1.9 1.9 0 1 1 0 3.8h-.09a1.6 1.6 0 0 0-1.47.97z"/>',
   };
 
   var ITEMS = [
@@ -38,6 +47,13 @@
     { key: 'goals', href: 'goals/index.html' },
     { key: 'tasks', href: 'tasks/index.html' },
     { key: 'workout', href: 'workout/index.html' },
+  ];
+
+  // Два рядки внизу колонки. Вони не розділи, а дії над усім застосунком,
+  // тож відділені рискою й приглушені.
+  var BOTTOM = [
+    { key: 'export', id: 'sideExportBtn', hash: '#export' },
+    { key: 'settings', id: 'sideSettingsBtn', hash: '#settings' },
   ];
 
   var current = 'home';
@@ -62,11 +78,7 @@
 
   /**
    *  @param {Element} host   куди підставити колонку (замінюється цілком)
-   *  @param {{current?:string, base?:string, lang?:string,
-   *           extra?:Array<{id:string, labelId:string, label:string, icon:string}>}} opts
-   *    extra — рядки внизу колонки, які належать самій сторінці (експорт,
-   *    налаштування). Їхні підписи сторінка перекладає сама: тут вони лише
-   *    отримують місце й id, за яким їх знайти.
+   *  @param {{current?:string, base?:string, lang?:string}} opts
    */
   function mount(host, opts) {
     if (!host) return null;
@@ -74,7 +86,6 @@
     current = o.current || 'home';
     if (LABELS[o.lang]) lang = o.lang;
     var base = o.base || '';
-    var extra = o.extra || [];
 
     var rows = ITEMS.map(function (item) {
       var text = '<span id="sideLabel-' + item.key + '">' + escapeHtml(labelOf(item.key)) + '</span>';
@@ -86,13 +97,20 @@
       return '<a class="side-link" href="' + base + item.href + '">' + icon(item.key) + text + '</a>';
     }).join('');
 
-    var bottom = '';
-    if (extra.length) {
-      bottom = '<div class="side-divider"></div>' + extra.map(function (row) {
-        return '<button type="button" class="side-link side-quiet" id="' + row.id + '">' +
-          (row.icon || '') + '<span id="' + row.labelId + '">' + escapeHtml(row.label || '') + '</span></button>';
-      }).join('');
-    }
+    var bottom = '<div class="side-divider"></div>' + BOTTOM.map(function (row) {
+      var body = icon(row.key) + '<span id="sideLabel-' + row.key + '">' +
+        escapeHtml(labelOf(row.key)) + '</span>';
+      // На головній це кнопки: діалог експорту й меню налаштувань живуть
+      // саме там, і сторінка навішує на них обробники за цими id.
+      if (current === 'home') {
+        return '<button type="button" class="side-link side-quiet" id="' + row.id + '">' + body + '</button>';
+      }
+      // З розділу — посилання на головну з хешем, який одразу відкриє
+      // потрібне. Рядки стоять на всіх пʼятьох сторінках: вони позначають
+      // те, що в застосунку є завжди, і зникати при переході в розділ не
+      // мають. Той самий прийом, що й #new у зворотному напрямку.
+      return '<a class="side-link side-quiet" href="' + base + 'index.html' + row.hash + '">' + body + '</a>';
+    }).join('');
 
     var aside = document.createElement('aside');
     aside.className = 'side-nav';
@@ -103,12 +121,12 @@
     return aside;
   }
 
-  /** Міняє лише підписи розділів. Рядки внизу перекладає сама сторінка. */
+  /** Міняє підписи — і розділів, і двох рядків унизу. */
   function setLang(next) {
     if (!LABELS[next]) return;
     lang = next;
     if (!mounted) return;
-    ITEMS.forEach(function (item) {
+    ITEMS.concat(BOTTOM).forEach(function (item) {
       var el = mounted.querySelector('#sideLabel-' + item.key);
       if (el) el.textContent = labelOf(item.key);
     });

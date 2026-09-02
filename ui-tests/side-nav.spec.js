@@ -22,11 +22,30 @@ test.describe('Комп’ютер', () => {
     test(`${name}: колонка стоїть і знає, де ти`, async ({ page }) => {
       await openModule(page, path, { ready });
       await expect(page.locator('.side-nav')).toBeVisible();
-      // Рівно пʼять розділів, і поточний — не посилання.
-      await expect(page.locator('.side-nav .side-link')).toHaveCount(
-        path === 'index.html' ? 7 : 5); // на головній ще експорт і налаштування
+      // Пʼять розділів плюс два нижні рядки — і так на КОЖНІЙ сторінці:
+      // «Експорт даних» і «Налаштування» позначають те, що в застосунку є
+      // завжди, тож зникати при переході в розділ вони не мають.
+      await expect(page.locator('.side-nav .side-link')).toHaveCount(7);
       await expect(page.locator('.side-link.current')).toHaveText(current);
       await expect(page.locator('a.side-link.current')).toHaveCount(0);
+    });
+
+    test(`${name}: експорт і налаштування стоять унизу колонки`, async ({ page }) => {
+      await openModule(page, path, { ready });
+      const rows = page.locator('.side-nav .side-quiet');
+      await expect(rows).toHaveCount(2);
+      await expect(rows.nth(0)).toHaveText('Експорт даних');
+      await expect(rows.nth(1)).toHaveText('Налаштування');
+      if (path === 'index.html') {
+        // На головній обидва відкривають своє просто тут.
+        await expect(page.locator('button#sideExportBtn')).toHaveCount(1);
+        await expect(page.locator('button#sideSettingsBtn')).toHaveCount(1);
+      } else {
+        // З розділу — посилання на головну з хешем: діалог експорту й меню
+        // налаштувань живуть саме там.
+        await expect(rows.nth(0)).toHaveAttribute('href', homeHref + '#export');
+        await expect(rows.nth(1)).toHaveAttribute('href', homeHref + '#settings');
+      }
     });
 
     test(`${name}: вміст не залазить під колонку`, async ({ page }) => {
