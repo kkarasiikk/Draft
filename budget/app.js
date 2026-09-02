@@ -116,8 +116,6 @@ const T = {
     unsavedSave: 'Зберегти', unsavedDiscard: 'Не зберігати', unsavedKeep: 'Продовжити редагування',
     settingsTitle: 'Налаштування', themeLabel: 'Тема', themeLight: 'Світла', themeDark: 'Темна', themeSystem: 'Як в системі',
     langLabel: 'Мова', currencyLabel: 'Валюта', categoriesTitle: 'Категорії',
-    monthlyPlanLabel: 'План витрат на місяць', monthlyPlanClear: 'Прибрати',
-    monthlyPlanHint: 'Скільки готовий(-а) витратити за місяць. На головній зʼявиться кільце «витрачено з плану». Порожньо — плану немає.',
     expenseCatManageLabel: 'Категорії витрат', incomeCatManageLabel: 'Категорії доходів',
     newCatPlaceholder: 'Нова категорія', addCatAria: 'Додати категорію', deleteCatAria: 'Видалити категорію',
     catLastError: 'Має залишитися хоча б одна категорія',
@@ -193,8 +191,6 @@ const T = {
     unsavedSave: 'Сохранить', unsavedDiscard: 'Не сохранять', unsavedKeep: 'Продолжить редактирование',
     settingsTitle: 'Настройки', themeLabel: 'Тема', themeLight: 'Светлая', themeDark: 'Тёмная', themeSystem: 'Как в системе',
     langLabel: 'Язык', currencyLabel: 'Валюта', categoriesTitle: 'Категории',
-    monthlyPlanLabel: 'План расходов на месяц', monthlyPlanClear: 'Убрать',
-    monthlyPlanHint: 'Сколько готов(а) потратить за месяц. На главной появится кольцо «потрачено из плана». Пусто — плана нет.',
     expenseCatManageLabel: 'Категории расходов', incomeCatManageLabel: 'Категории доходов',
     newCatPlaceholder: 'Новая категория', addCatAria: 'Добавить категорию', deleteCatAria: 'Удалить категорию',
     catLastError: 'Должна остаться хотя бы одна категория',
@@ -270,8 +266,6 @@ const T = {
     unsavedSave: 'Zapisz', unsavedDiscard: 'Nie zapisuj', unsavedKeep: 'Wróć do edycji',
     settingsTitle: 'Ustawienia', themeLabel: 'Motyw', themeLight: 'Jasny', themeDark: 'Ciemny', themeSystem: 'Jak w systemie',
     langLabel: 'Język', currencyLabel: 'Waluta', categoriesTitle: 'Kategorie',
-    monthlyPlanLabel: 'Plan wydatków na miesiąc', monthlyPlanClear: 'Usuń',
-    monthlyPlanHint: 'Ile chcesz wydać w miesiącu. Na stronie głównej pojawi się pierścień «wydane z planu». Pusto — brak planu.',
     expenseCatManageLabel: 'Kategorie wydatków', incomeCatManageLabel: 'Kategorie przychodów',
     newCatPlaceholder: 'Nowa kategoria', addCatAria: 'Dodaj kategorię', deleteCatAria: 'Usuń kategorię',
     catLastError: 'Musi zostać przynajmniej jedna kategoria',
@@ -347,8 +341,6 @@ const T = {
     unsavedSave: 'Save', unsavedDiscard: "Don't save", unsavedKeep: 'Keep editing',
     settingsTitle: 'Settings', themeLabel: 'Theme', themeLight: 'Light', themeDark: 'Dark', themeSystem: 'System',
     langLabel: 'Language', currencyLabel: 'Currency', categoriesTitle: 'Categories',
-    monthlyPlanLabel: 'Monthly spending plan', monthlyPlanClear: 'Clear',
-    monthlyPlanHint: 'How much you are willing to spend this month. A «spent of plan» ring appears on the home screen. Empty — no plan.',
     expenseCatManageLabel: 'Expense categories', incomeCatManageLabel: 'Income categories',
     newCatPlaceholder: 'New category', addCatAria: 'Add category', deleteCatAria: 'Delete category',
     catLastError: 'At least one category must remain',
@@ -670,7 +662,6 @@ let currentLang = (localStorage.getItem('financeAppLang')) || 'uk';
 // План витрат на місяць. Живе тільки в профілі (не в localStorage): це не
 // налаштування вигляду, а число, від якого залежить кільце на головній, —
 // і воно мусить бути тим самим на всіх пристроях.
-let monthlyPlan = null;
 let currentCurrency = (localStorage.getItem('financeAppCurrency')) || 'UAH';
 if (!LANGS.includes(currentLang)) currentLang = 'uk';
 if (!CURRENCY_CODES.includes(currentCurrency)) currentCurrency = 'UAH';
@@ -1493,31 +1484,6 @@ function subscribeToTransactions(uid) {
   });
 }
 
-// Поле плану. Пишемо не на кожен натиск клавіші, а на blur і Enter: план
-// набирають цілим числом, і проміжні «1», «10», «100» у базі нікому не
-// потрібні.
-function renderMonthlyPlan() {
-  const input = document.getElementById('monthlyPlanInput');
-  if (!input) return;
-  document.getElementById('monthlyPlanLabel').textContent = t('monthlyPlanLabel');
-  document.getElementById('monthlyPlanHint').textContent = t('monthlyPlanHint');
-  document.getElementById('monthlyPlanClear').textContent = t('monthlyPlanClear');
-  document.getElementById('monthlyPlanClear').style.display = monthlyPlan ? '' : 'none';
-  // Поки поле у фокусі, не перебиваємо те, що людина набирає.
-  if (document.activeElement !== input) input.value = monthlyPlan == null ? '' : String(monthlyPlan);
-}
-
-async function saveMonthlyPlan(value) {
-  if (!auth.currentUser) return;
-  const num = parseFloat(String(value).replace(',', '.'));
-  const next = Number.isFinite(num) && num > 0 ? Math.round(num * 100) / 100 : null;
-  monthlyPlan = next;
-  await db.collection('users').doc(auth.currentUser.uid)
-    .set({ monthlyBudget: next }, { merge: true })
-    .catch((err) => console.error('saveMonthlyPlan:', err));
-  renderMonthlyPlan();
-}
-
 function subscribeToProfile(uid) {
   if (unsubscribeProfile) unsubscribeProfile();
   unsubscribeProfile = db.collection('users').doc(uid).onSnapshot((doc) => {
@@ -1526,9 +1492,6 @@ function subscribeToProfile(uid) {
     let changed = false;
     if (data.lang && LANGS.includes(data.lang) && data.lang !== currentLang) { currentLang = data.lang; localStorage.setItem('financeAppLang', currentLang); changed = true; }
     if (data.currency && CURRENCY_CODES.includes(data.currency) && data.currency !== currentCurrency) { currentCurrency = data.currency; localStorage.setItem('financeAppCurrency', currentCurrency); changed = true; }
-    const planFromProfile = Number(data.monthlyBudget);
-    monthlyPlan = Number.isFinite(planFromProfile) && planFromProfile > 0 ? planFromProfile : null;
-    renderMonthlyPlan();
     if (data.theme && THEME_CHOICES.includes(data.theme) && data.theme !== themeChoice) {
       themeChoice = data.theme; localStorage.setItem('financeAppTheme', themeChoice); applyTheme(); changed = true;
     }
@@ -3290,14 +3253,6 @@ document.getElementById('categoriesBtn').addEventListener('click', () => {
   }
 });
 document.getElementById('closeCategories').addEventListener('click', () => document.getElementById('categoriesOverlay').classList.remove('show'));
-document.getElementById('monthlyPlanInput').addEventListener('blur', (e) => saveMonthlyPlan(e.target.value));
-document.getElementById('monthlyPlanInput').addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') { e.preventDefault(); e.target.blur(); }
-});
-document.getElementById('monthlyPlanClear').addEventListener('click', () => {
-  document.getElementById('monthlyPlanInput').value = '';
-  saveMonthlyPlan('');
-});
 document.getElementById('categoriesOverlay').addEventListener('click', (e) => { if (e.target.id === 'categoriesOverlay') e.currentTarget.classList.remove('show'); });
 
 document.getElementById('closeStatsSettings').addEventListener('click', () => document.getElementById('statsSettingsOverlay').classList.remove('show'));

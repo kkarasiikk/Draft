@@ -183,26 +183,6 @@
     return Math.round((done / milestones.length) * 100);
   }
 
-  /**
-   * Кільце бюджету: скільки з місячного плану витрат уже витрачено.
-   * null — плану немає, і вигадувати його не можна: кільце без знаменника
-   * показувало б відсоток невідомо від чого.
-   */
-  function budgetRing(transactions, todayIso, plan) {
-    var limit = num(plan);
-    if (!(limit > 0)) return null;
-    var sum = budgetSummary(transactions, todayIso);
-    return {
-      spent: sum.expense,
-      plan: limit,
-      left: limit - sum.expense,
-      over: sum.expense > limit,
-      // Понад 100% кільце не малює — повнішим за повне воно не буває, а
-      // перевитрату видно і числом, і кольором.
-      pct: Math.min(100, Math.round((sum.expense / limit) * 100)),
-    };
-  }
-
   /** Сім днів, що закінчуються сьогоднішнім: від найранішого до сьогодні. */
   function weekDays(todayIso, count) {
     var n = count || 7;
@@ -277,7 +257,6 @@
     workoutToday: workoutToday,
     featuredGoal: featuredGoal,
     goalPct: goalPct,
-    budgetRing: budgetRing,
     monthStart: monthStart,
     budgetSummary: budgetSummary,
     tasksSummary: tasksSummary,

@@ -60,8 +60,6 @@ const STRINGS = {
     sumGoalsDone: 'усе відмічено',
     sumGoalsNone: 'цілей ще немає',
     sumWorkoutToday: 'сьогодні тренувався',
-    sumPlanLeft: (v) => `лишилось ${v} з плану`,
-    sumPlanOver: (v) => `перевитрата ${v}`,
     sumGoalDays: (days) => days < 0 ? 'дедлайн минув' : `${days} дн. лишилось`,
     sumWorkoutPlan: (n) => `на сьогодні заплановано ${n} ${plural(n, { one: 'вправу', few: 'вправи', many: 'вправ', other: 'вправи' })}`,
     sumWorkoutDoing: (a, b) => `сьогодні: ${a} з ${b} підходів`,
@@ -135,8 +133,6 @@ const STRINGS = {
     sumGoalsDone: 'всё отмечено',
     sumGoalsNone: 'целей пока нет',
     sumWorkoutToday: 'сегодня тренировался',
-    sumPlanLeft: (v) => `осталось ${v} из плана`,
-    sumPlanOver: (v) => `перерасход ${v}`,
     sumGoalDays: (days) => days < 0 ? 'дедлайн прошёл' : `${days} дн. осталось`,
     sumWorkoutPlan: (n) => `на сегодня запланировано ${n} ${plural(n, { one: 'упражнение', few: 'упражнения', many: 'упражнений', other: 'упражнения' })}`,
     sumWorkoutDoing: (a, b) => `сегодня: ${a} из ${b} подходов`,
@@ -210,8 +206,6 @@ const STRINGS = {
     sumGoalsDone: 'wszystko odhaczone',
     sumGoalsNone: 'nie ma jeszcze celów',
     sumWorkoutToday: 'dziś trenowałeś',
-    sumPlanLeft: (v) => `zostało ${v} z planu`,
-    sumPlanOver: (v) => `przekroczenie o ${v}`,
     sumGoalDays: (days) => days < 0 ? 'termin minął' : `zostało ${days} dni`,
     sumWorkoutPlan: (n) => `na dziś zaplanowano ${n} ${plural(n, { one: 'ćwiczenie', few: 'ćwiczenia', many: 'ćwiczeń', other: 'ćwiczenia' })}`,
     sumWorkoutDoing: (a, b) => `dziś: ${a} z ${b} serii`,
@@ -285,8 +279,6 @@ const STRINGS = {
     sumGoalsDone: 'all checked in',
     sumGoalsNone: 'no goals yet',
     sumWorkoutToday: 'trained today',
-    sumPlanLeft: (v) => `${v} left of the plan`,
-    sumPlanOver: (v) => `${v} over the plan`,
     sumGoalDays: (days) => days < 0 ? 'deadline passed' : `${days} days left`,
     sumWorkoutPlan: (n) => `${n} ${n === 1 ? 'exercise' : 'exercises'} planned for today`,
     sumWorkoutDoing: (a, b) => `today: ${a} of ${b} sets`,
@@ -443,7 +435,6 @@ const TODAY_TASK_LIMIT = 4;
 let homeData = { transactions: null, tasks: null, goals: null, workouts: null };
 // План витрат на місяць із профілю (null/undefined — плану немає). Лежить
 // тут, а не в замиканні запиту: плитку перемальовує ще й перемикач сум.
-let budgetPlan = null;
 // Валюта з профілю — той самий документ, що вже читається заради мови й теми.
 let homeCurrency = '';
 
@@ -771,23 +762,12 @@ function renderBudgetTile() {
   if (!txs) return;
   const today = todayISO();
   const sum = HomeSummary.budgetSummary(txs, today);
-  const ring = HomeSummary.budgetRing(txs, today, budgetPlan);
   const monthName = new Intl.DateTimeFormat(LOCALE_MAP[currentLang] || 'uk-UA', { month: 'long' })
     .format(new Date(today + 'T00:00:00'));
-  if (!ring) {
-    // Без плану головне число — витрачене за місяць: воно й відповідає
-    // на питання, з яким у бюджет заходять.
-    setStat('budget', shownAmount(sum.expense), homeCurrency, t('capSpent', monthName), null);
-    return;
-  }
-  // З планом плитка відповідає на інше питання — не «скільки лишилось
-  // у балансі», а «скільки лишилось до межі». Саме заради нього план і
-  // заводять, тож воно й витісняє баланс.
-  //
-  // Знак ставимо тут, а не в перекладі: у переклад має приходити готовий
-  // рядок, інакше кожна мова мусила б сама вирішувати, як його показати.
-  setStat('budget', shownAmount(sum.expense), homeCurrency, t('capSpent', monthName),
-    ring.over ? t('sumPlanOver', shownAmount(-ring.left)) : t('sumPlanLeft', shownAmount(ring.left)));
+  // Головне число — витрачене за місяць: воно й відповідає на питання, з
+  // яким у бюджет заходять. Другим рядком колись стояло «лишилось N з
+  // плану», але поля, звідки брався той план, більше немає.
+  setStat('budget', shownAmount(sum.expense), homeCurrency, t('capSpent', monthName), null);
 }
 
 // ---- «Сьогодні»: завдання на сьогодні, і все ----
@@ -1083,7 +1063,6 @@ async function loadHomeSummary(uid) {
       homeData.transactions = snap.docs.map((d) => d.data());
       const profile = profileDoc.data() || {};
       homeCurrency = typeof profile.currency === 'string' ? profile.currency : '';
-      budgetPlan = profile.monthlyBudget;
       renderBudgetTile();
     })
     .catch((err) => console.error('homeSummary budget:', err));
