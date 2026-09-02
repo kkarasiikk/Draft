@@ -72,8 +72,9 @@ service cloud.firestore {
                (!('hiddenExercises' in d) || d.hiddenExercises is list) &&
                // Яку модель питати в AI-помічнику: haiku | sonnet | opus.
                (!('aiModel' in d) || d.aiModel is string) &&
-               // План витрат на місяць: число або null (плану немає). Від нього
-               // залежить кільце «витрачено з плану» на головній.
+               // План витрат на місяць: число або null. Поля, яке його
+               // задавало, у застосунку більше немає — правило лишається
+               // заради документів, у яких число вже лежить.
                (!('monthlyBudget' in d) || d.monthlyBudget == null ||
                  (d.monthlyBudget is number && d.monthlyBudget > 0)) &&
                // Налаштування нагадувань: { enabled, morningHour, eveningHour,

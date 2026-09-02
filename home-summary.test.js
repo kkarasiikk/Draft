@@ -223,33 +223,6 @@ describe('featuredGoal — яку ціль показати', () => {
   });
 });
 
-describe('budgetRing — витрачено з плану', () => {
-  const T = '2026-08-27';
-  const tx = (amount, type = 'expense') => ({ type, amount, date: '2026-08-10' });
-
-  test('без плану кільця немає — знаменник не вигадуємо', () => {
-    expect(HomeSummary.budgetRing([tx(100)], T, null)).toBeNull();
-    expect(HomeSummary.budgetRing([tx(100)], T, 0)).toBeNull();
-  });
-
-  test('рахує частку витраченого', () => {
-    const r = HomeSummary.budgetRing([tx(2500), tx(2500)], T, 10000);
-    expect(r).toMatchObject({ spent: 5000, plan: 10000, left: 5000, pct: 50, over: false });
-  });
-
-  test('доходи в кільце витрат не входять', () => {
-    const r = HomeSummary.budgetRing([tx(1000), tx(9000, 'income')], T, 10000);
-    expect(r.spent).toBe(1000);
-  });
-
-  test('перевитрата видно числом, а кільце не буває понад 100%', () => {
-    const r = HomeSummary.budgetRing([tx(12000)], T, 10000);
-    expect(r.over).toBe(true);
-    expect(r.left).toBe(-2000);
-    expect(r.pct).toBe(100);
-  });
-});
-
 describe('weekCalendar — календарний тиждень', () => {
   const WED = '2026-08-26';   // середа
   const SUN = '2026-08-30';   // неділя

@@ -49,25 +49,15 @@ test.describe('Плитки', () => {
     await expect(cap(page, 'budget')).toContainText('витрачено');
   });
 
-  test('бюджет: із планом видно, скільки лишилось', async ({ page }) => {
+  // Плану витрат на місяць більше немає — ні поля в налаштуваннях, ні рядка
+  // «лишилось N з плану» під сумою. Навіть якщо число ще лежить у профілі з
+  // тих часів, плитка про нього мовчить.
+  test('бюджет: рядка про план немає навіть зі старим числом у профілі', async ({ page }) => {
     await openHub(page, {
       transactions: [{ type: 'expense', amount: 5000, date: T, category: 'food' }],
       profile: { monthlyBudget: 10000 },
     });
-    await expect(note(page, 'budget')).toContainText('5 000');
-    await expect(note(page, 'budget')).toBeVisible();
-  });
-
-  test('бюджет: перевитрата названа перевитратою', async ({ page }) => {
-    await openHub(page, {
-      transactions: [{ type: 'expense', amount: 12000, date: T, category: 'food' }],
-      profile: { monthlyBudget: 10000 },
-    });
-    await expect(note(page, 'budget')).toContainText(/перевитрата/i);
-  });
-
-  test('бюджет: без плану рядка про план немає', async ({ page }) => {
-    await openHub(page, { transactions: [{ type: 'expense', amount: 5000, date: T, category: 'food' }] });
+    await expect(stat(page, 'budget')).toHaveText('5 000');
     await expect(note(page, 'budget')).toBeHidden();
   });
 

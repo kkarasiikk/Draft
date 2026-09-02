@@ -75,20 +75,6 @@ test('раз схована — схована й на наступному ві
   await expect(page.locator('[data-hide-amounts="true"]')).toHaveClass(/selected/);
 });
 
-test('рядок про план теж не світить числом', async ({ page }) => {
-  // З планом під сумою стоїть «лишилось N із плану» — це теж гроші.
-  await openHub(page, {
-    transactions: [{ id: 't1', date: monthStart(), type: 'expense', amount: 15400 }],
-    profile: { monthlyBudget: 30000, currency: 'PLN' },
-  });
-  await expect(page.locator('#budgetNote')).toHaveText(/\d/);
-
-  await openMenu(page);
-  await hide(page);
-  await expect(page.locator('#budgetNote')).toContainText('•••');
-  await expect(page.locator('#budgetNote'), 'у рядку не має лишитись жодної цифри').not.toHaveText(/\d/);
-});
-
 test('решта плиток не маскується — гроші лише в бюджеті', async ({ page }) => {
   await openHub(page, Object.assign({}, SEED, {
     tasks: [{ id: 'a', title: 'Справа', done: false, dueDate: iso() }],
