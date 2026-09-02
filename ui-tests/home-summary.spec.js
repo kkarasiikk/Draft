@@ -200,7 +200,7 @@ test.describe('Сьогодні', () => {
     await expect(page.locator('#todayList .today-row')).toHaveCount(1);
   });
 
-  test('більше чотирьох завдань — показуємо чотири, без пʼятого рядка', async ({ page }) => {
+  test('більше чотирьох завдань — показуємо чотири, решта за посиланням', async ({ page }) => {
     await openHub(page, { tasks: [
       task('a', { title: 'Перше' }), task('b', { title: 'Друге' }),
       task('c', { title: 'Третє' }), task('d', { title: 'Четверте' }),
@@ -208,8 +208,9 @@ test.describe('Сьогодні', () => {
     ] });
     await expect(page.locator('[data-task]')).toHaveCount(4);
     await expect(page.locator('#todayList')).not.toContainText('Пʼяте');
-    // Скільки їх насправді, каже лічильник у шапці — окремий рядок зайвий.
-    await expect(page.locator('#todayList a')).toHaveCount(0);
+    // Те, що не вмістилось, не зникає мовчки — рядок веде в розділ завдань
+    // (стеля й сам рядок залежать від ширини екрана, див. home-fill.spec.js).
+    await expect(page.locator('.today-more')).toHaveText('Ще 2 у завданнях →');
   });
 
   test('чотири завдання вміщаються всі', async ({ page }) => {
