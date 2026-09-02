@@ -228,13 +228,14 @@
   .day-view-empty{text-align:center;padding:48px 20px;color:var(--ink-muted);}
   .day-view-empty .title{font-family:'Inter',sans-serif;font-size:17px;font-weight:600;color:var(--ink-soft);margin-bottom:6px;}
   /* ---- Нижня панель навігації (та сама, що в «Бюджеті») ---- */
-  /* Групи ліворуч і праворуч однакової ширини, тож кругла кнопка «+» завжди
-     рівно посередині, скільки б вкладок не було в модулі. */
+  /* Вкладки — простий рядок однакових кнопок, як у «Бюджеті». Поділ на дві
+     групи лишався від часів, коли між ними сиділа кругла кнопка «+»: вона
+     давно живе окремо (.bn-fab), а на широкому екрані, де «Головна» схована,
+     половина панелі просто стояла б порожньою. */
   .bottom-nav{position:fixed;left:14px;right:14px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:25;
     max-width:400px;margin:0 auto;display:flex;align-items:flex-end;justify-content:space-between;
     padding:7px 4px;background:var(--surface);
     border:1px solid var(--border);border-radius:26px;box-shadow:var(--glass-shadow), 0 12px 34px rgba(20,20,30,.16);}
-  .bn-side{flex:1;min-width:0;display:flex;justify-content:space-around;}
   .bn-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
     background:none;border:none;color:var(--ink-muted);cursor:pointer;padding:6px 1px;border-radius:14px;
     text-decoration:none;-webkit-tap-highlight-color:transparent;min-width:0;}
@@ -351,33 +352,6 @@
      «Зараз», де такий рядок зʼявився вперше; сама картка прибрана, а
      рядок шаблонів ним і далі користується — тому й перейменований. */
   .chip-row-label{font-size:11.5px;color:var(--ink-muted);margin-right:1px;}
-
-  /* ---- Статистика: «що я зробив» ---- */
-  .stat-tiles{display:flex;gap:8px;margin-bottom:20px;}
-  .stat-tile{flex:1;min-width:0;background:var(--surface);border:1px solid var(--border);border-radius:16px;
-    padding:13px 10px;text-align:center;}
-  .stat-value{font-size:24px;font-weight:800;letter-spacing:-0.02em;line-height:1.1;font-variant-numeric:tabular-nums;}
-  .stat-caption{font-size:11px;color:var(--ink-muted);margin-top:4px;line-height:1.25;}
-  .stat-section-title{font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-muted);
-    font-weight:700;margin:0 0 10px;}
-  .stat-note{font-size:13px;line-height:1.45;color:var(--ink-soft);
-    background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:12px 14px;margin-bottom:20px;}
-  /* Стовпчики: висота у відсотках від найбільшого дня, тож ряд читається як
-     форма тижня, а не як абсолютні числа. */
-  .bars{display:grid;grid-template-columns:repeat(14,minmax(0,1fr));gap:3px;align-items:end;height:96px;margin-bottom:6px;}
-  .bar-col{display:flex;flex-direction:column;justify-content:flex-end;height:100%;}
-  .bar{width:100%;border-radius:4px;background:var(--accent-light);min-height:3px;}
-  .bar.has{background:var(--accent);}
-  /* Сьогодні позначаємо підписом, а не рамкою навколо стовпчика: у день
-     з однією закритою справою рамка більша за сам стовпчик. */
-  .bar-labels .today{color:var(--accent);font-weight:700;}
-  .bar-labels{display:grid;grid-template-columns:repeat(14,minmax(0,1fr));gap:3px;
-    font-size:9px;color:var(--ink-muted);text-align:center;margin-bottom:22px;}
-  .done-day{margin-bottom:16px;}
-  .done-day-head{font-size:12.5px;font-weight:700;color:var(--ink-soft);margin-bottom:7px;}
-  .done-item{display:flex;align-items:baseline;gap:8px;font-size:14px;color:var(--ink-soft);padding:5px 0;line-height:1.35;}
-  .done-item::before{content:"";flex-shrink:0;width:6px;height:6px;border-radius:50%;background:var(--low);transform:translateY(-1px);}
-  .stats-empty{font-size:14px;line-height:1.5;color:var(--ink-muted);text-align:center;padding:30px 10px;}
 
   /* ---- Швидке додавання ---- */
   .quick-preview{display:flex;flex-wrap:wrap;gap:6px;min-height:26px;margin:2px 0 10px;}
@@ -708,7 +682,6 @@
   </button>
 
 <nav class="bottom-nav" id="bottomNav">
-  <div class="bn-side">
     <button type="button" class="bn-item active" data-screen="week" id="bnWeek">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg>
       <span id="bnWeekLabel">Тиждень</span>
@@ -717,32 +690,11 @@
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>
       <span id="bnMonthLabel">Календар</span>
     </button>
-  </div>
-  <div class="bn-side">
-    <button type="button" class="bn-item" data-screen="stats" id="bnStats">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M22 20H2"/></svg>
-      <span id="bnStatsLabel">Статистика</span>
-    </button>
     <a class="bn-item" href="../index.html" id="bnHome">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 10v10h14V10"/></svg>
       <span id="bnHomeLabel">Головна</span>
     </a>
-  </div>
 </nav>
-
-  <!-- ---- Окремий екран: що я зробив ---- -->
-  <div id="statsScreen" style="display:none;">
-  <div class="content">
-    <div class="day-heading" id="statsHeading">Що я зробив</div>
-    <div class="stat-tiles" id="statTiles"></div>
-    <div class="stat-note" id="statNorm"></div>
-    <div class="stat-section-title" id="statChartTitle">Останні два тижні</div>
-    <div class="bars" id="statBars"></div>
-    <div class="bar-labels" id="statBarLabels"></div>
-    <div class="stat-section-title" id="statRecentTitle">Закрито днями</div>
-    <div id="statRecent"></div>
-  </div>
-  </div>
 
 <!-- ---- Нагадування ---- -->
 <div class="modal-overlay" id="remindersOverlay">
@@ -871,7 +823,6 @@
 <script defer src="quick-parse.js"></script>
 <script defer src="now-queue.js"></script>
 <script defer src="recurrence.js"></script>
-<script defer src="stats.js"></script>
 <script defer src="reminders.js"></script>
 <script defer src="push.js"></script>
 <script defer src="../side-nav.js"></script>

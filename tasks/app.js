@@ -74,21 +74,13 @@ const T = {
     templateSteps: (n) => `${n} ${plural(n, { one: 'крок', few: 'кроки', many: 'кроків', other: 'кроку' })}`,
     templateEmpty: 'Шаблонів ще немає. Відкрий будь-яке завдання з кроками і натисни «Зберегти як шаблон» — далі його можна буде завести одним тапом.',
     templateLimit: (n) => `Більше ${n} шаблонів — це вже список завдань. Видали зайві в меню «Шаблони».`,
-    statsTitle: 'Що я зробив',
-    statToday: 'сьогодні', statWeek: 'цього тижня',
-    statStreak: (n) => plural(n, { one: 'день поспіль', few: 'дні поспіль', many: 'днів поспіль', other: 'дня поспіль' }),
-    statChartTitle: 'Останні два тижні', statRecentTitle: 'Закрито днями',
-    statNorm: (n) => `Зазвичай ти закриваєш ${n} ${plural(n, { one: 'справу', few: 'справи', many: 'справ', other: 'справи' })} за день.`,
-    statNormUnknown: 'Норма зʼявиться, коли назбирається кілька активних днів — тоді застосунок зможе казати не «до 22:00 ще купа часу», а скільки ти встигаєш насправді.',
-    statsEmpty: 'Тут зʼявиться те, що ти закрив. Позначай зроблене — і за тиждень буде видно свій темп.',
-    statsAllTime: (n) => `Усього закрито: ${n}`,
     priorityLabel: 'Пріоритет',
     tagsLabel: 'Теги', tagPlaceholder: 'Додати тег', removeTagAria: 'Прибрати тег',
     subtasksLabel: 'Підзадачі', subtaskPlaceholder: 'Наступний крок',
     addSubtaskBtn: '+ Додати підзадачу', removeSubtaskAria: 'Прибрати підзадачу',
     estimateLabel: 'Скільки часу займе', estimatePlaceholder: 'хв',
     estimateShort: (min) => (min >= 60 ? `~${Math.floor(min / 60)} год${min % 60 ? ' ' + (min % 60) + ' хв' : ''}` : `~${min} хв`),
-    bnWeek: 'Тиждень', bnMonth: 'Календар', bnStats: 'Статистика', bnHome: 'Головна',
+    bnWeek: 'Тиждень', bnMonth: 'Календар', bnHome: 'Головна',
     quickAddFabLabel: 'Додати', quickAddTitle: 'Швидке додавання',
     quickAddPlaceholder: 'Купити молоко завтра о 18',
     quickAddHint: 'Дату, час, #тег, ~тривалість, пріоритет (!1 !2 !3) і повторення («щодня», «щосуботи», «кожні 3 дні») можна писати прямо в рядку.',
@@ -164,21 +156,13 @@ const T = {
     templateSteps: (n) => `${n} ${plural(n, { one: 'шаг', few: 'шага', many: 'шагов', other: 'шага' })}`,
     templateEmpty: 'Шаблонов пока нет. Открой любую задачу с шагами и нажми «Сохранить как шаблон» — дальше её можно будет завести одним тапом.',
     templateLimit: (n) => `Больше ${n} шаблонов — это уже список задач. Удали лишние в меню «Шаблоны».`,
-    statsTitle: 'Что я сделал',
-    statToday: 'сегодня', statWeek: 'на этой неделе',
-    statStreak: (n) => plural(n, { one: 'день подряд', few: 'дня подряд', many: 'дней подряд', other: 'дня подряд' }),
-    statChartTitle: 'Последние две недели', statRecentTitle: 'Закрыто по дням',
-    statNorm: (n) => `Обычно ты закрываешь ${n} ${plural(n, { one: 'дело', few: 'дела', many: 'дел', other: 'дела' })} за день.`,
-    statNormUnknown: 'Норма появится, когда накопится несколько активных дней — тогда приложение сможет говорить не «до 22:00 ещё уйма времени», а сколько ты успеваешь на самом деле.',
-    statsEmpty: 'Здесь появится то, что ты закрыл. Отмечай сделанное — и через неделю будет виден свой темп.',
-    statsAllTime: (n) => `Всего закрыто: ${n}`,
     priorityLabel: 'Приоритет',
     tagsLabel: 'Теги', tagPlaceholder: 'Добавить тег', removeTagAria: 'Убрать тег',
     subtasksLabel: 'Подзадачи', subtaskPlaceholder: 'Следующий шаг',
     addSubtaskBtn: '+ Добавить подзадачу', removeSubtaskAria: 'Убрать подзадачу',
     estimateLabel: 'Сколько времени займёт', estimatePlaceholder: 'мин',
     estimateShort: (min) => (min >= 60 ? `~${Math.floor(min / 60)} ч${min % 60 ? ' ' + (min % 60) + ' мин' : ''}` : `~${min} мин`),
-    bnWeek: 'Неделя', bnMonth: 'Календарь', bnStats: 'Статистика', bnHome: 'Главная',
+    bnWeek: 'Неделя', bnMonth: 'Календарь', bnHome: 'Главная',
     quickAddFabLabel: 'Добавить', quickAddTitle: 'Быстрое добавление',
     quickAddPlaceholder: 'Купить молоко завтра в 18',
     quickAddHint: 'Дату, время, #тег, ~длительность, приоритет (!1 !2 !3) и повтор («ежедневно», «по субботам», «каждые 3 дня») можно писать прямо в строке.',
@@ -252,21 +236,13 @@ const T = {
     templateSteps: (n) => `${n} ${plural(n, { one: 'krok', few: 'kroki', many: 'kroków', other: 'kroku' })}`,
     templateEmpty: 'Nie ma jeszcze szablonów. Otwórz dowolne zadanie z krokami i naciśnij „Zapisz jako szablon" — potem założysz je jednym tapnięciem.',
     templateLimit: (n) => `Więcej niż ${n} szablonów to już lista zadań. Usuń zbędne w menu „Szablony".`,
-    statsTitle: 'Co zrobiłem',
-    statToday: 'dziś', statWeek: 'w tym tygodniu',
-    statStreak: (n) => plural(n, { one: 'dzień z rzędu', few: 'dni z rzędu', many: 'dni z rzędu', other: 'dnia z rzędu' }),
-    statChartTitle: 'Ostatnie dwa tygodnie', statRecentTitle: 'Zamknięte dzień po dniu',
-    statNorm: (n) => `Zwykle zamykasz ${n} ${plural(n, { one: 'sprawę', few: 'sprawy', many: 'spraw', other: 'sprawy' })} dziennie.`,
-    statNormUnknown: 'Norma pojawi się, gdy uzbiera się kilka aktywnych dni — wtedy aplikacja powie nie „do 22:00 jeszcze mnóstwo czasu", tylko ile naprawdę zdążysz.',
-    statsEmpty: 'Tu pojawi się to, co zamkniesz. Odznaczaj zrobione — po tygodniu zobaczysz swoje tempo.',
-    statsAllTime: (n) => `Łącznie zamknięte: ${n}`,
     priorityLabel: 'Priorytet',
     tagsLabel: 'Tagi', tagPlaceholder: 'Dodaj tag', removeTagAria: 'Usuń tag',
     subtasksLabel: 'Podzadania', subtaskPlaceholder: 'Następny krok',
     addSubtaskBtn: '+ Dodaj podzadanie', removeSubtaskAria: 'Usuń podzadanie',
     estimateLabel: 'Ile czasu zajmie', estimatePlaceholder: 'min',
     estimateShort: (min) => (min >= 60 ? `~${Math.floor(min / 60)} godz${min % 60 ? ' ' + (min % 60) + ' min' : ''}` : `~${min} min`),
-    bnWeek: 'Tydzień', bnMonth: 'Kalendarz', bnStats: 'Statystyki', bnHome: 'Główna',
+    bnWeek: 'Tydzień', bnMonth: 'Kalendarz', bnHome: 'Główna',
     quickAddFabLabel: 'Dodaj', quickAddTitle: 'Szybkie dodawanie',
     quickAddPlaceholder: 'Kupić mleko jutro o 18',
     quickAddHint: 'Datę, godzinę, #tag, ~czas trwania, priorytet (!1 !2 !3) i powtarzanie („codziennie", „co sobotę") możesz wpisać w tej samej linii.',
@@ -340,21 +316,13 @@ const T = {
     templateSteps: (n) => `${n} ${plural(n, { one: 'step', other: 'steps' })}`,
     templateEmpty: 'No templates yet. Open any task with steps and hit "Save as template" — after that you can create it with one tap.',
     templateLimit: (n) => `More than ${n} templates is a task list of its own. Remove some in the "Templates" menu.`,
-    statsTitle: 'What I got done',
-    statToday: 'today', statWeek: 'this week',
-    statStreak: (n) => plural(n, { one: 'day in a row', other: 'days in a row' }),
-    statChartTitle: 'Last two weeks', statRecentTitle: 'Closed day by day',
-    statNorm: (n) => `You usually close ${n} ${plural(n, { one: 'task', other: 'tasks' })} a day.`,
-    statNormUnknown: 'The norm shows up once a few active days add up — then the app can tell you how much you actually get done, instead of "there are hours left until 22:00".',
-    statsEmpty: 'What you close will show up here. Tick things off — after a week you will see your own pace.',
-    statsAllTime: (n) => `Closed in total: ${n}`,
     priorityLabel: 'Priority',
     tagsLabel: 'Tags', tagPlaceholder: 'Add a tag', removeTagAria: 'Remove tag',
     subtasksLabel: 'Subtasks', subtaskPlaceholder: 'Next step',
     addSubtaskBtn: '+ Add subtask', removeSubtaskAria: 'Remove subtask',
     estimateLabel: 'How long will it take', estimatePlaceholder: 'min',
     estimateShort: (min) => (min >= 60 ? `~${Math.floor(min / 60)}h${min % 60 ? ' ' + (min % 60) + 'm' : ''}` : `~${min}m`),
-    bnWeek: 'Week', bnMonth: 'Calendar', bnStats: 'Stats', bnHome: 'Home',
+    bnWeek: 'Week', bnMonth: 'Calendar', bnHome: 'Home',
     quickAddFabLabel: 'Add', quickAddTitle: 'Quick add',
     quickAddPlaceholder: 'Buy milk tomorrow at 6pm',
     quickAddHint: 'Date, time, #tag, ~duration, priority (!1 !2 !3) and repetition ("daily", "every friday", "every 3 days") can go right in the line.',
@@ -487,9 +455,6 @@ function applyTranslations() {
   document.getElementById('rememberMeLabel').textContent = t('rememberMe');
   document.getElementById('forgotPasswordLink').textContent = t('forgotPassword');
   document.getElementById('monthHint').textContent = t('monthHintText');
-  document.getElementById('statsHeading').textContent = t('statsTitle');
-  document.getElementById('statChartTitle').textContent = t('statChartTitle');
-  document.getElementById('statRecentTitle').textContent = t('statRecentTitle');
   document.getElementById('remindersTitle').textContent = t('remindersTitle');
   document.getElementById('remindersMenuLabel').textContent = t('remindersMenu');
   document.getElementById('reminderLabel').textContent = t('reminderLabel');
@@ -503,7 +468,6 @@ function applyTranslations() {
   document.getElementById('saveAsTemplateBtn').textContent = t('saveAsTemplate');
   document.getElementById('bnWeekLabel').textContent = t('bnWeek');
   document.getElementById('bnMonthLabel').textContent = t('bnMonth');
-  document.getElementById('bnStatsLabel').textContent = t('bnStats');
   document.getElementById('bnHomeLabel').textContent = t('bnHome');
   document.getElementById('openQuickAdd').setAttribute('aria-label', t('quickAddFabLabel'));
   document.getElementById('quickAddTitle').textContent = t('quickAddTitle');
@@ -1187,77 +1151,6 @@ function renderNoDateSection() {
 }
 
 
-// ---- Статистика: «що я зробив» ----
-// Застосунок увесь час нагадує про невиконане; цей екран існує, щоб хоч
-// десь було видно зроблене. Плюс тут живе особиста норма — з неї картка
-// «Зараз» бере чесне попередження про перевантажений день.
-const STATS_CHART_DAYS = 14;
-const STATS_RECENT_DAYS = 7;
-
-// Підпис під стовпчиком: перша літера дня тижня.
-function barLabel(iso) {
-  const d = parseISODate(iso);
-  if (!d) return '';
-  const locale = LOCALE_MAP[currentLang] || 'uk-UA';
-  return new Intl.DateTimeFormat(locale, { weekday: 'narrow' }).format(d).toUpperCase();
-}
-
-// Заголовок дня в історії: «Сьогодні», «Вчора» — і далі звичайна дата.
-function historyDayLabel(iso) {
-  const today = todayISO();
-  if (iso === today) return t('todayLabel');
-  if (iso === isoDateShift(today, -1)) return t('yesterdayLabel');
-  const d = parseISODate(iso);
-  const locale = LOCALE_MAP[currentLang] || 'uk-UA';
-  return new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long' }).format(d);
-}
-
-function renderStatsScreen() {
-  const today = todayISO();
-  const summary = statsSummary(tasks, { today });
-
-  document.getElementById('statTiles').innerHTML = [
-    { value: summary.todayDone, caption: t('statToday') },
-    { value: summary.weekDone, caption: t('statWeek') },
-    { value: summary.streak, caption: t('statStreak', summary.streak) },
-  ].map((tile) => `
-    <div class="stat-tile">
-      <div class="stat-value">${tile.value}</div>
-      <div class="stat-caption">${escapeHtml(tile.caption)}</div>
-    </div>`).join('');
-
-  document.getElementById('statNorm').textContent =
-    summary.norm !== null ? t('statNorm', summary.norm) : t('statNormUnknown');
-
-  const days = historyDays(tasks, { today, days: STATS_CHART_DAYS });
-  const max = Math.max(1, ...days.map((d) => d.count));
-  document.getElementById('statBars').innerHTML = days.map((d) => `
-    <div class="bar-col" title="${escapeHtml(d.iso)}: ${d.count}">
-      <div class="bar${d.count ? ' has' : ''}" style="height:${d.count ? Math.round((d.count / max) * 100) : 0}%"></div>
-    </div>`).join('');
-  document.getElementById('statBarLabels').innerHTML =
-    days.map((d) => `<div${d.iso === today ? ' class="today"' : ''}>${escapeHtml(barLabel(d.iso))}</div>`).join('');
-
-  // Сам список зробленого: те, заради чого екран і робився.
-  const byDay = [];
-  for (let i = 0; i < STATS_RECENT_DAYS; i++) {
-    const iso = isoDateShift(today, -i);
-    const items = tasks.filter((task) => completedIso(task) === iso);
-    if (items.length) byDay.push({ iso, items });
-  }
-  const recentEl = document.getElementById('statRecent');
-  if (!byDay.length) {
-    recentEl.innerHTML = `<div class="stats-empty">${escapeHtml(t('statsEmpty'))}</div>`;
-    return;
-  }
-  recentEl.innerHTML = byDay.map((day) => `
-    <div class="done-day">
-      <div class="done-day-head">${escapeHtml(historyDayLabel(day.iso))} · ${day.items.length}</div>
-      ${day.items.map((task) => `<div class="done-item">${escapeHtml(task.title)}</div>`).join('')}
-    </div>`).join('')
-    + `<div class="stat-caption" style="text-align:left;margin-top:2px;">${escapeHtml(t('statsAllTime', summary.totalDone))}</div>`;
-}
-
 // ---- Нагадування ----
 // Клієнт відповідає лише за «коли» і «на який пристрій»: рахує момент
 // (tasks/reminders.js), зберігає його в завданні й тримає токен пристрою.
@@ -1739,25 +1632,17 @@ let selectedDate = todayISO();
 
 function renderCurrentScreen() {
   if (currentScreen === 'month') renderCalendar();
-  else if (currentScreen === 'stats') renderStatsScreen();
   else renderWeekScreen();
 }
 
-// Три екрани й одна нижня панель: тримаємо перемикання в одному місці,
+// Два екрани й одна нижня панель: тримаємо перемикання в одному місці,
 // щоб підсвічена вкладка не розʼїжджалась із тим, що насправді видно.
 function showScreenChrome(screen) {
   document.getElementById('weekScreen').style.display = screen === 'week' ? '' : 'none';
   document.getElementById('monthScreen').style.display = screen === 'month' ? 'block' : 'none';
-  document.getElementById('statsScreen').style.display = screen === 'stats' ? 'block' : 'none';
   document.querySelectorAll('#bottomNav [data-screen]').forEach((btn) => {
     btn.classList.toggle('active', btn.dataset.screen === screen);
   });
-}
-
-function showStatsScreen() {
-  currentScreen = 'stats';
-  showScreenChrome('stats');
-  renderStatsScreen();
 }
 
 function showMonthScreen() {
@@ -1910,7 +1795,6 @@ document.querySelectorAll('#bottomNav [data-screen]').forEach((btn) => {
   btn.addEventListener('click', () => {
     const screen = btn.dataset.screen;
     if (screen === 'month') showMonthScreen();
-    else if (screen === 'stats') showStatsScreen();
     else showWeekScreen();
   });
 });
@@ -2023,7 +1907,7 @@ function toggleDone(id) {
   if (done && task.goalId) markGoalCheckin(task.goalId);
 
   // Виконане повторюване завдання лишається в історії як виконане, а наступне
-  // створюється окремим документом — інакше статистика бачила б одну задачу
+  // створюється окремим документом — інакше в історії була б одна задача
   // замість двадцяти зроблених прибирань. Знята галочка наступне НЕ видаляє:
   // мовчки прибирати вже створене завдання було б несподівано.
   if (done && task.recurrence) {
