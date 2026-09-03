@@ -37,7 +37,7 @@ const LOCALE_MAP = { uk: 'uk-UA', ru: 'ru-RU', pl: 'pl-PL', en: 'en-US' };
 const STRINGS = {
   uk: {
     themeLabel: 'Тема', themeLight: 'Світла', themeDark: 'Темна', themeSystem: 'Системна',
-    amountsLabel: 'Сума витрат', amountsShow: 'Показувати', amountsHide: 'Ховати',
+    amountsShow: 'Показати суму', amountsHide: 'Сховати суму',
     langLabel: 'Мова', logout: 'Вийти', exportLabel: 'Експорт даних',
     settingsLabel: 'Налаштування',
     exportBusy: 'Готую файл…', exportError: 'Не вдалося зібрати файл. Спробуй ще раз.',
@@ -113,7 +113,7 @@ const STRINGS = {
   },
   ru: {
     themeLabel: 'Тема', themeLight: 'Светлая', themeDark: 'Тёмная', themeSystem: 'Системная',
-    amountsLabel: 'Сумма расходов', amountsShow: 'Показывать', amountsHide: 'Скрывать',
+    amountsShow: 'Показать сумму', amountsHide: 'Скрыть сумму',
     langLabel: 'Язык', logout: 'Выйти', exportLabel: 'Экспорт данных',
     settingsLabel: 'Настройки',
     exportBusy: 'Готовлю файл…', exportError: 'Не удалось собрать файл. Попробуй ещё раз.',
@@ -189,7 +189,7 @@ const STRINGS = {
   },
   pl: {
     themeLabel: 'Motyw', themeLight: 'Jasny', themeDark: 'Ciemny', themeSystem: 'Systemowy',
-    amountsLabel: 'Kwota wydatków', amountsShow: 'Pokazuj', amountsHide: 'Ukrywaj',
+    amountsShow: 'Pokaż kwotę', amountsHide: 'Ukryj kwotę',
     langLabel: 'Język', logout: 'Wyloguj', exportLabel: 'Eksport danych',
     settingsLabel: 'Ustawienia',
     exportBusy: 'Przygotowuję plik…', exportError: 'Nie udało się zebrać pliku. Spróbuj ponownie.',
@@ -265,7 +265,7 @@ const STRINGS = {
   },
   en: {
     themeLabel: 'Theme', themeLight: 'Light', themeDark: 'Dark', themeSystem: 'System',
-    amountsLabel: 'Spending amount', amountsShow: 'Show', amountsHide: 'Hide',
+    amountsShow: 'Show the amount', amountsHide: 'Hide the amount',
     langLabel: 'Language', logout: 'Log out', exportLabel: 'Export data',
     settingsLabel: 'Settings',
     exportBusy: 'Preparing the file…', exportError: 'Could not build the file. Try again.',
@@ -382,7 +382,6 @@ function applyTranslations() {
   document.getElementById('htmlRoot').setAttribute('lang', currentLang);
   document.getElementById('themeMenuLabel').textContent = t('themeLabel');
   document.getElementById('langMenuLabel').textContent = t('langLabel');
-  document.getElementById('amountsMenuLabel').textContent = t('amountsLabel');
   document.getElementById('exportLabel').textContent = t('exportLabel');
   document.getElementById('logoutLabel').textContent = t('logout');
   // Назви розділів у колонці живуть у side-nav.js — одні на пʼять сторінок.
@@ -530,26 +529,30 @@ function renderThemePicker() {
     btn.addEventListener('click', () => setTheme(btn.dataset.themeChoice));
   });
 }
-function renderAmountsPicker() {
-  const picker = document.getElementById('amountsPicker');
-  if (!picker) return;
-  const options = [
-    { hide: false, label: t('amountsShow') },
-    { hide: true, label: t('amountsHide') },
-  ];
-  picker.innerHTML = options
-    .map((o) => `<button type="button" class="theme-choice${o.hide === hideAmounts ? ' selected' : ''}" data-hide-amounts="${o.hide}">${o.label}</button>`)
-    .join('');
-  picker.querySelectorAll('[data-hide-amounts]').forEach((btn) => {
-    btn.addEventListener('click', () => setHideAmounts(btn.dataset.hideAmounts === 'true'));
-  });
+// Око на самій плитці, а не рядок у меню налаштувань. Перемикач був там, і
+// його ніхто не знаходив: ховати суму хочеться в ту саму секунду, коли до
+// тебе підходять, а не після подорожі в меню.
+const EYE_OPEN = '<path d="M2 12s3.6-6.4 10-6.4S22 12 22 12s-3.6 6.4-10 6.4S2 12 2 12Z"/><circle cx="12" cy="12" r="2.7"/>';
+const EYE_OFF = '<path d="M3 3l18 18"/><path d="M10.7 6.1A9.9 9.9 0 0 1 12 6c6.4 0 10 6 10 6a17.3 17.3 0 0 1-3.3 3.9"/>'
+  + '<path d="M6.6 8A16.9 16.9 0 0 0 2 12s3.6 6 10 6c1.2 0 2.3-.2 3.3-.5"/><path d="M9.9 10.1a2.8 2.8 0 0 0 4 4"/>';
+
+function renderAmountsToggle() {
+  const btn = document.getElementById('hideAmountsBtn');
+  if (!btn) return;
+  // Значок показує ДІЮ, а не стан: коли сума видна, око перекреслене —
+  // «сховати». Інакше довелось би гадати, що саме він означає.
+  btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+    stroke-linecap="round" stroke-linejoin="round">${hideAmounts ? EYE_OPEN : EYE_OFF}</svg>`;
+  btn.setAttribute('aria-label', t(hideAmounts ? 'amountsShow' : 'amountsHide'));
+  btn.setAttribute('title', t(hideAmounts ? 'amountsShow' : 'amountsHide'));
+  btn.setAttribute('aria-pressed', hideAmounts ? 'true' : 'false');
 }
 
 function setHideAmounts(hide) {
   hideAmounts = !!hide;
   try { localStorage.setItem('financeAppHideAmounts', hideAmounts ? '1' : '0'); }
   catch (err) { /* приватний режим — сховати на цей сеанс однаково вийде */ }
-  renderAmountsPicker();
+  renderAmountsToggle();
   // Плитка малюється з даних, які вже прийшли: перезапитувати базу заради
   // перемикача не треба.
   renderBudgetTile();
@@ -631,8 +634,10 @@ setAuthMode('login');
 applyTheme();
 renderThemePicker();
 renderLangPicker();
-renderAmountsPicker();
+renderAmountsToggle();
 applyTranslations();
+
+document.getElementById('hideAmountsBtn').addEventListener('click', () => setHideAmounts(!hideAmounts));
 
 document.getElementById('authForm').addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -1444,7 +1449,7 @@ auth.onAuthStateChanged((user) => {
         renderThemePicker();
         renderLangPicker();
         // Підписи «Показувати / Ховати» теж мовні.
-        renderAmountsPicker();
+        renderAmountsToggle();
       }
     }).catch(() => {});
   } else {
