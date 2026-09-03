@@ -54,11 +54,8 @@ const STRINGS = {
     sumLoading: '…',
     sumBudget: (s) => `цього місяця ${s}`,
     sumTasksOpen: (n) => `${n} ${plural(n, { one: 'справа', few: 'справи', many: 'справ', other: 'справи' })} на сьогодні`,
-    sumTasksFree: 'на сьогодні вільно',
     sumStreak: (n) => `серія ${n} ${plural(n, { one: 'день', few: 'дні', many: 'днів', other: 'дня' })}`,
     sumGoalsPending: (n) => `${n} без кроку сьогодні`,
-    sumGoalsDone: 'усе відмічено',
-    sumGoalsNone: 'цілей ще немає',
     sumWorkoutToday: 'сьогодні тренувався',
     sumGoalDays: (days) => days < 0 ? 'дедлайн минув' : `${days} дн. лишилось`,
     sumWorkoutPlan: (n) => `на сьогодні заплановано ${n} ${plural(n, { one: 'вправу', few: 'вправи', many: 'вправ', other: 'вправи' })}`,
@@ -67,7 +64,6 @@ const STRINGS = {
       ? 'сьогодні тренувань немає'
       : `сьогодні тренувань немає · востаннє ${n} ${plural(n, { one: 'день', few: 'дні', many: 'днів', other: 'дня' })} тому`,
     sumWorkoutAgo: (n) => `востаннє ${n} ${plural(n, { one: 'день', few: 'дні', many: 'днів', other: 'дня' })} тому`,
-    sumWorkoutNever: 'тренувань ще немає',
     addExpense: 'Витрата', addExpenseHint: 'сума, категорія, опис',
     addTask: 'Завдання', addTaskHint: 'на сьогодні або з датою',
     addGoalStep: 'Крок до цілі',
@@ -78,13 +74,19 @@ const STRINGS = {
     addWorkout: 'Тренування', addWorkoutHint: 'вправи й підходи',
     todayTitle: 'Сьогодні',
     todayCount: (n) => `${n} ${plural(n, { one: 'пункт', few: 'пункти', many: 'пунктів', other: 'пункту' })}`,
-    unitToday: 'на сьогодні', unitDays: 'дн.', unitActive: 'активних',
-    unitSets: 'підходів', unitExercises: 'вправ', unitDaysAgo: 'дні тому',
-    capSpent: (m) => `витрачено за ${m}`, capStreak: 'найдовша серія',
+    unitPlanned: 'заплановано', unitThisMonth: 'на цей місяць',
+    unitSets: 'підходів', unitExercises: 'вправ',
+    capSpent: 'витрачено за поточний місяць',
     capNoStep: (n) => `${n} без кроку`,
-    capDone: (n) => `${n} вже ${plural(n, { one: 'закрито', few: 'закрито', many: 'закрито', other: 'закрито' })}`,
-    capPlanned: 'заплановано на сьогодні', capDoing: 'сьогодні зроблено',
-    capLast: (name) => `останнє — ${name}`, capLastPlain: 'від останнього',
+    capTasksPlanned: (n) => `${plural(n, { one: 'завдання', few: 'завдання', many: 'завдань', other: 'завдання' })} на сьогодні`,
+    capTasksEmpty: 'завдань на сьогодні — маєш вихідний, чи просто не записано?',
+    capGoalsMonthNone: 'цілей на цей місяць ще немає',
+    capWorkoutPlanned: 'Сьогодні маєш заплановане тренування',
+    capWorkoutToday: 'Сьогодні маєш тренування',
+    capWorkoutNone: 'Сьогодні тренувань немає',
+    capWorkoutNext: (when) => `Наступне — ${when}`,
+    whenTomorrow: 'завтра', whenDayAfter: 'післязавтра',
+    capWorkoutInvite: 'Сюди можеш додавати власні тренування, та слідкувати за їх прогресом.',
     todayEmpty: 'На сьогодні нічого не чекає.',
     todayMore: (n) => `Ще ${n} у завданнях →`,
     todayAt: (hhmm) => `до ${hhmm}`,
@@ -128,11 +130,8 @@ const STRINGS = {
     sumLoading: '…',
     sumBudget: (s) => `в этом месяце ${s}`,
     sumTasksOpen: (n) => `${n} ${plural(n, { one: 'дело', few: 'дела', many: 'дел', other: 'дела' })} на сегодня`,
-    sumTasksFree: 'на сегодня свободно',
     sumStreak: (n) => `серия ${n} ${plural(n, { one: 'день', few: 'дня', many: 'дней', other: 'дня' })}`,
     sumGoalsPending: (n) => `${n} без шага сегодня`,
-    sumGoalsDone: 'всё отмечено',
-    sumGoalsNone: 'целей пока нет',
     sumWorkoutToday: 'сегодня тренировался',
     sumGoalDays: (days) => days < 0 ? 'дедлайн прошёл' : `${days} дн. осталось`,
     sumWorkoutPlan: (n) => `на сегодня запланировано ${n} ${plural(n, { one: 'упражнение', few: 'упражнения', many: 'упражнений', other: 'упражнения' })}`,
@@ -141,7 +140,6 @@ const STRINGS = {
       ? 'сегодня тренировок нет'
       : `сегодня тренировок нет · последний раз ${n} ${plural(n, { one: 'день', few: 'дня', many: 'дней', other: 'дня' })} назад`,
     sumWorkoutAgo: (n) => `последний раз ${n} ${plural(n, { one: 'день', few: 'дня', many: 'дней', other: 'дня' })} назад`,
-    sumWorkoutNever: 'тренировок пока нет',
     addExpense: 'Расход', addExpenseHint: 'сумма, категория, описание',
     addTask: 'Задача', addTaskHint: 'на сегодня или с датой',
     addGoalStep: 'Шаг к цели',
@@ -152,13 +150,19 @@ const STRINGS = {
     addWorkout: 'Тренировка', addWorkoutHint: 'упражнения и подходы',
     todayTitle: 'Сегодня',
     todayCount: (n) => `${n} ${plural(n, { one: 'пункт', few: 'пункта', many: 'пунктов', other: 'пункта' })}`,
-    unitToday: 'на сегодня', unitDays: 'дн.', unitActive: 'активных',
-    unitSets: 'подходов', unitExercises: 'упражнений', unitDaysAgo: 'дня назад',
-    capSpent: (m) => `потрачено за ${m}`, capStreak: 'самая длинная серия',
+    unitPlanned: 'запланировано', unitThisMonth: 'на этот месяц',
+    unitSets: 'подходов', unitExercises: 'упражнений',
+    capSpent: 'потрачено за текущий месяц',
     capNoStep: (n) => `${n} без шага`,
-    capDone: (n) => `${n} уже закрыто`,
-    capPlanned: 'запланировано на сегодня', capDoing: 'сегодня сделано',
-    capLast: (name) => `последняя — ${name}`, capLastPlain: 'от последней',
+    capTasksPlanned: (n) => `${plural(n, { one: 'задача', few: 'задачи', many: 'задач', other: 'задачи' })} на сегодня`,
+    capTasksEmpty: 'задач на сегодня — у тебя выходной или просто не записано?',
+    capGoalsMonthNone: 'целей на этот месяц пока нет',
+    capWorkoutPlanned: 'Сегодня у тебя запланированная тренировка',
+    capWorkoutToday: 'Сегодня у тебя тренировка',
+    capWorkoutNone: 'Сегодня тренировок нет',
+    capWorkoutNext: (when) => `Следующая — ${when}`,
+    whenTomorrow: 'завтра', whenDayAfter: 'послезавтра',
+    capWorkoutInvite: 'Сюда можешь добавлять свои тренировки и следить за их прогрессом.',
     todayEmpty: 'На сегодня ничего не ждёт.',
     todayMore: (n) => `Ещё ${n} в задачах →`,
     todayAt: (hhmm) => `до ${hhmm}`,
@@ -202,11 +206,8 @@ const STRINGS = {
     sumLoading: '…',
     sumBudget: (s) => `w tym miesiącu ${s}`,
     sumTasksOpen: (n) => `${n} ${plural(n, { one: 'zadanie', few: 'zadania', many: 'zadań', other: 'zadania' })} na dziś`,
-    sumTasksFree: 'na dziś wolne',
     sumStreak: (n) => `seria ${n} ${plural(n, { one: 'dzień', few: 'dni', many: 'dni', other: 'dnia' })}`,
     sumGoalsPending: (n) => `${n} bez kroku dziś`,
-    sumGoalsDone: 'wszystko odhaczone',
-    sumGoalsNone: 'nie ma jeszcze celów',
     sumWorkoutToday: 'dziś trenowałeś',
     sumGoalDays: (days) => days < 0 ? 'termin minął' : `zostało ${days} dni`,
     sumWorkoutPlan: (n) => `na dziś zaplanowano ${n} ${plural(n, { one: 'ćwiczenie', few: 'ćwiczenia', many: 'ćwiczeń', other: 'ćwiczenia' })}`,
@@ -215,7 +216,6 @@ const STRINGS = {
       ? 'dziś brak treningu'
       : `dziś brak treningu · ostatnio ${n} ${plural(n, { one: 'dzień', few: 'dni', many: 'dni', other: 'dnia' })} temu`,
     sumWorkoutAgo: (n) => `ostatnio ${n} ${plural(n, { one: 'dzień', few: 'dni', many: 'dni', other: 'dnia' })} temu`,
-    sumWorkoutNever: 'nie ma jeszcze treningów',
     addExpense: 'Wydatek', addExpenseHint: 'kwota, kategoria, opis',
     addTask: 'Zadanie', addTaskHint: 'na dziś lub z datą',
     addGoalStep: 'Krok do celu',
@@ -226,13 +226,19 @@ const STRINGS = {
     addWorkout: 'Trening', addWorkoutHint: 'ćwiczenia i serie',
     todayTitle: 'Dziś',
     todayCount: (n) => `${n} ${plural(n, { one: 'pozycja', few: 'pozycje', many: 'pozycji', other: 'pozycji' })}`,
-    unitToday: 'na dziś', unitDays: 'dni', unitActive: 'aktywnych',
-    unitSets: 'serii', unitExercises: 'ćwiczeń', unitDaysAgo: 'dni temu',
-    capSpent: (m) => `wydano w ${m}`, capStreak: 'najdłuższa seria',
+    unitPlanned: 'zaplanowano', unitThisMonth: 'na ten miesiąc',
+    unitSets: 'serii', unitExercises: 'ćwiczeń',
+    capSpent: 'wydano w tym miesiącu',
     capNoStep: (n) => `${n} bez kroku`,
-    capDone: (n) => `${n} już zamknięto`,
-    capPlanned: 'zaplanowano na dziś', capDoing: 'dziś zrobione',
-    capLast: (name) => `ostatni — ${name}`, capLastPlain: 'od ostatniego',
+    capTasksPlanned: (n) => `${plural(n, { one: 'zadanie', few: 'zadania', many: 'zadań', other: 'zadania' })} na dziś`,
+    capTasksEmpty: 'zadań na dziś — masz wolne czy po prostu nie zapisane?',
+    capGoalsMonthNone: 'nie ma jeszcze celów na ten miesiąc',
+    capWorkoutPlanned: 'Dziś masz zaplanowany trening',
+    capWorkoutToday: 'Dziś masz trening',
+    capWorkoutNone: 'Dziś nie ma treningu',
+    capWorkoutNext: (when) => `Następny — ${when}`,
+    whenTomorrow: 'jutro', whenDayAfter: 'pojutrze',
+    capWorkoutInvite: 'Tu możesz dodawać własne treningi i śledzić ich postępy.',
     todayEmpty: 'Na dziś nic nie czeka.',
     todayMore: (n) => `Jeszcze ${n} w zadaniach →`,
     todayAt: (hhmm) => `do ${hhmm}`,
@@ -276,11 +282,8 @@ const STRINGS = {
     sumLoading: '…',
     sumBudget: (s) => `this month ${s}`,
     sumTasksOpen: (n) => `${n} ${plural(n, { one: 'task', other: 'tasks' })} today`,
-    sumTasksFree: 'nothing due today',
     sumStreak: (n) => `${n}-day streak`,
     sumGoalsPending: (n) => `${n} with no step today`,
-    sumGoalsDone: 'all checked in',
-    sumGoalsNone: 'no goals yet',
     sumWorkoutToday: 'trained today',
     sumGoalDays: (days) => days < 0 ? 'deadline passed' : `${days} days left`,
     sumWorkoutPlan: (n) => `${n} ${n === 1 ? 'exercise' : 'exercises'} planned for today`,
@@ -289,7 +292,6 @@ const STRINGS = {
       ? 'no workout today'
       : `no workout today · last one ${n} ${n === 1 ? 'day' : 'days'} ago`,
     sumWorkoutAgo: (n) => `last ${n} ${plural(n, { one: 'day', other: 'days' })} ago`,
-    sumWorkoutNever: 'no workouts yet',
     addExpense: 'Expense', addExpenseHint: 'amount, category, note',
     addTask: 'Task', addTaskHint: 'for today or with a date',
     addGoalStep: 'Step toward a goal',
@@ -300,13 +302,19 @@ const STRINGS = {
     addWorkout: 'Workout', addWorkoutHint: 'exercises and sets',
     todayTitle: 'Today',
     todayCount: (n) => `${n} ${plural(n, { one: 'item', other: 'items' })}`,
-    unitToday: 'today', unitDays: 'days', unitActive: 'active',
-    unitSets: 'sets', unitExercises: 'exercises', unitDaysAgo: 'days ago',
-    capSpent: (m) => `spent in ${m}`, capStreak: 'longest streak',
+    unitPlanned: 'planned', unitThisMonth: 'this month',
+    unitSets: 'sets', unitExercises: 'exercises',
+    capSpent: 'spent this month',
     capNoStep: (n) => `${n} without a step`,
-    capDone: (n) => `${n} already done`,
-    capPlanned: 'planned for today', capDoing: 'done today',
-    capLast: (name) => `last — ${name}`, capLastPlain: 'since the last one',
+    capTasksPlanned: (n) => `${plural(n, { one: 'task', other: 'tasks' })} for today`,
+    capTasksEmpty: 'tasks for today — a day off, or just nothing written down?',
+    capGoalsMonthNone: 'no goals for this month yet',
+    capWorkoutPlanned: 'You have a workout planned today',
+    capWorkoutToday: 'You have a workout today',
+    capWorkoutNone: 'No workout today',
+    capWorkoutNext: (when) => `Next — ${when}`,
+    whenTomorrow: 'tomorrow', whenDayAfter: 'the day after tomorrow',
+    capWorkoutInvite: 'Add your own workouts here and follow their progress.',
     todayEmpty: 'Nothing waiting today.',
     todayMore: (n) => `${n} more in Tasks →`,
     todayAt: (hhmm) => `by ${hhmm}`,
@@ -796,12 +804,14 @@ function renderBudgetTile() {
   if (!txs) return;
   const today = todayISO();
   const sum = HomeSummary.budgetSummary(txs, today);
-  const monthName = new Intl.DateTimeFormat(LOCALE_MAP[currentLang] || 'uk-UA', { month: 'long' })
-    .format(new Date(today + 'T00:00:00'));
   // Головне число — витрачене за місяць: воно й відповідає на питання, з
   // яким у бюджет заходять. Другим рядком колись стояло «лишилось N з
   // плану», але поля, звідки брався той план, більше немає.
-  setStat('budget', shownAmount(sum.expense), homeCurrency, t('capSpent', monthName), null);
+  //
+  // Підпис каже «за поточний місяць», а не називає місяць: назва місяця
+  // читалась як фільтр («а де решта?»), хоч плитка завжди показує саме
+  // поточний і ніколи інший.
+  setStat('budget', shownAmount(sum.expense), homeCurrency, t('capSpent'), null);
 }
 
 // ---- «Сьогодні»: завдання на сьогодні, і все ----
@@ -1144,9 +1154,13 @@ async function loadHomeSummary(uid) {
       renderToday();
       renderLine();
       const sum = HomeSummary.tasksSummary(docs, today);
-      const ring = HomeSummary.tasksRing(docs, today);
-      setStat('tasks', String(sum.open), t('unitToday'),
-        ring.done ? t('capDone', ring.done) : t('sumTasksFree'), null);
+      // Велике число — скільки СПЛАНОВАНО на сьогодні, разом із уже
+      // виконаним. Раніше тут стояло невиконане, і число падало щоразу, як
+      // людина ставила галочку: плитка ніби забувала про зроблене. Скільки
+      // з них уже закрито, каже окремий рядок.
+      const planned = sum.open + sum.done;
+      setStat('tasks', String(planned), t('unitPlanned'),
+        planned ? t('capTasksPlanned', planned) : t('capTasksEmpty'), null);
     })
     .catch((err) => console.error('homeSummary tasks:', err));
 
@@ -1159,62 +1173,73 @@ async function loadHomeSummary(uid) {
       renderCalendar();
       renderLine();
       const sum = HomeSummary.goalsSummary(docs, today);
-      // Кільце показує одну ціль — найтерміновішу. Плитка не список, і
-      // чотири кільця в ряд не сказали б більше за одне.
-      const featured = HomeSummary.featuredGoal(docs, today);
-      if (!sum.active) { setStat('goals', '0', '', t('sumGoalsNone'), null); return; }
-      // Кільце показує ЯК далеко зайшла найтерміновіша ціль, підпис — ЯКА це
-      // ціль і що з нею сьогодні. Без назви кільце нічого не означало б, а без
-      // другої половини плитка втратила б те, заради чого й ожила: серію й
-      // «сьогодні без кроку».
-      //
-      // Порядок важливий: те, що стосується сьогодні, витісняє те, що
-      // стосується строку. Дедлайн через 40 днів нікуди не втече, а
-      // невідмічений сьогодні день — втече.
-      // Велике число — серія: це найдовше, що людина втримала, і саме воно
-      // вартує погляду. Те, що вимагає дії сьогодні, іде окремим рядком.
-      if (sum.streak) {
-        setStat('goals', String(sum.streak), t('unitDays'), t('capStreak'),
-          sum.pending ? t('capNoStep', sum.pending) : null);
-      } else {
-        setStat('goals', String(sum.active), t('unitActive'),
-          featured ? featured.title : t('sumGoalsDone'),
-          sum.pending ? t('capNoStep', sum.pending) : null);
-      }
+      // Рахуємо цілі ПОТОЧНОГО МІСЯЦЯ — тієї самої вкладки, на якій розділ
+      // відкривається. Правило бере goals/review.js, а не своє друге: інакше
+      // плитка й розділ рахували б по-різному, і число на головній нічого не
+      // означало б. Незакриті цілі з минулих місяців воно теж підтягує сюди —
+      // саме про них треба памʼятати найбільше.
+      const monthKey = today.slice(0, 7);
+      const monthGoals = window.GoalReview
+        ? window.GoalReview.goalsOfMonth(docs, monthKey, { currentMonth: monthKey })
+          .filter((g) => g && g.status === 'active')
+        : docs.filter((g) => g && g.status === 'active');
+      // Одна ціль під числом — випадкова, і на кожне відкриття головної інша.
+      // Раніше тут стояла найтерміновіша, і з десятка цілей на очі місяцями
+      // потрапляла та сама.
+      const shown = HomeSummary.pickGoal(monthGoals);
+      setStat('goals', String(monthGoals.length), t('unitThisMonth'),
+        shown ? shown.title : t('capGoalsMonthNone'),
+        sum.pending ? t('capNoStep', sum.pending) : null);
     })
     .catch((err) => console.error('homeSummary goals:', err));
 
-  // Тренування: досить найсвіжішого запису, який НЕ в майбутньому. Він
-  // відповідає і на «скільки днів тому», і на «що сьогодні», і дає назву
-  // останнього тренування для підпису плитки.
+  // Тренування: два запити — останнє зроблене (не в майбутньому) і найближче
+  // заплановане (у майбутньому). Плитка відповідає на «що в мене сьогодні», а
+  // коли сьогодні нічого — на «а коли наступне».
   //
-  // Межа `date <= today` тут не косметична. План на наступний тиждень
-  // записують тими самими документами, що й зроблене, тож без неї
+  // Межа `date <= today` у першому запиті не косметична: план на наступний
+  // тиждень записують тими самими документами, що й зроблене, тож без неї
   // найсвіжішим виявлявся план, і плитка казала «-4 дні тому». Діапазон і
   // сортування по одному полю — окремий складений індекс не потрібен.
-  userRef.collection('workouts').where('date', '<=', today).orderBy('date', 'desc').limit(1).get()
-    .then((snap) => {
-      const docs = snap.docs.map((d) => d.data());
+  Promise.all([
+    userRef.collection('workouts').where('date', '<=', today).orderBy('date', 'desc').limit(1).get(),
+    userRef.collection('workouts').where('date', '>', today).orderBy('date', 'asc').limit(1).get(),
+  ])
+    .then(([pastSnap, nextSnap]) => {
+      const docs = pastSnap.docs.map((d) => d.data());
+      const next = HomeSummary.nextWorkout(nextSnap.docs.map((d) => d.data()), today);
       homeData.workouts = docs;
       renderToday();
       renderCalendar();
       renderLine();
+
       const todayWorkout = HomeSummary.workoutToday(docs, today);
       if (todayWorkout) {
         // Записане наперед (підходи порожні) — це план, і казати про нього
-        // «зроблено» було б неправдою: його ще тільки роблять.
+        // «зроблено» було б неправдою: його ще тільки роблять. Тому й підпис
+        // різний: «заплановане» лише про те, до чого ще не бралися.
         setStat('workout', todayWorkout.planned
           ? String(todayWorkout.exercises) : `${todayWorkout.setsDone}/${todayWorkout.setsTotal}`,
           todayWorkout.planned ? t('unitExercises') : t('unitSets'),
-          todayWorkout.planned ? t('capPlanned') : t('capDoing'),
-          null);
+          t(todayWorkout.planned ? 'capWorkoutPlanned' : 'capWorkoutToday'), null);
         return;
       }
-      const sum = HomeSummary.workoutSummary(docs, today);
-      if (sum.daysAgo === null) { setStat('workout', '—', '', t('sumWorkoutNever'), null); return; }
-      const last = docs.find((w) => w && w.date === sum.lastDate);
-      setStat('workout', String(sum.daysAgo), t('unitDaysAgo'),
-        last && last.name ? t('capLast', last.name) : t('capLastPlain'), null);
+
+      // Сьогодні нічого. Тоді головне — коли наступне: «завтра» й
+      // «післязавтра» словами, далі датою (див. nextDayKind).
+      const kind = next ? HomeSummary.nextDayKind(next.date, today) : null;
+      let second;
+      if (!kind) {
+        // Попереду не заплановано нічого — тоді плитка не звітує, а запрошує.
+        second = t('capWorkoutInvite');
+      } else if (kind === 'date') {
+        const when = new Intl.DateTimeFormat(LOCALE_MAP[currentLang] || 'uk-UA',
+          { day: 'numeric', month: 'long' }).format(new Date(next.date + 'T00:00:00'));
+        second = t('capWorkoutNext', when);
+      } else {
+        second = t('capWorkoutNext', t(kind === 'tomorrow' ? 'whenTomorrow' : 'whenDayAfter'));
+      }
+      setStat('workout', '—', '', `${t('capWorkoutNone')}\n${second}`, null);
     })
     .catch((err) => console.error('homeSummary workout:', err));
 }

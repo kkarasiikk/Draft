@@ -258,7 +258,10 @@
   .tile-stat b{font-size:26px;font-weight:700;letter-spacing:-0.02em;color:var(--ink);line-height:1.05;}
   .tile-stat i{font-size:13px;font-style:normal;font-weight:500;color:var(--ink-soft);
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .tile-cap{font-size:12px;color:var(--ink-muted);margin-top:5px;line-height:1.35;}
+  /* pre-line — щоб підпис міг бути у два рядки: плитка тренувань пише
+     спершу сам факт («Сьогодні маєш тренування»), а під ним — яке саме.
+     setStat пише текстом, тож перенос робить CSS, а не тег у розмітці. */
+  .tile-cap{font-size:12px;color:var(--ink-muted);margin-top:5px;line-height:1.35;white-space:pre-line;}
   .tile-note{font-size:12px;font-weight:600;color:var(--expense);margin-top:7px;
     display:flex;align-items:center;gap:6px;}
   /* Власний display перебиває [hidden] з UA-стилів, і рядок лишався б видимим
@@ -692,6 +695,7 @@
   <script defer src="categories-default.js"></script>
   <script defer src="export-data.js"></script>
   <script defer src="goals/streak.js"></script>
+  <script defer src="goals/review.js"></script>
   <script defer src="side-nav.js"></script>
   <script defer src="home-summary.js"></script>
   <script defer src="home.js"></script>
