@@ -70,22 +70,43 @@ test.describe('Розкладка', () => {
   });
 });
 
-test.describe('Дії без гамбургера й «плюсика»', () => {
-  test('гамбургер і плаваючий «+» на комп’ютері сховані', async ({ page }) => {
+test.describe('Дії без гамбургера', () => {
+  test('гамбургер на комп’ютері схований, а «+» — ні', async ({ page }) => {
     await openHub(page);
     await expect(page.locator('#menuBtn')).toBeHidden();
-    await expect(page.locator('#addFab')).toBeHidden();
+    // Той самий круглий «+», що й у розділах. Колись його тут ховали, а
+    // замість нього в шапці стояла кнопка «Записати» — виходило дві звички
+    // на одну дію, залежно від того, з чого відкрив застосунок.
+    await expect(page.locator('#addFab')).toBeVisible();
+    await expect(page.locator('#recordBtn')).toHaveCount(0);
   });
 
-  test('«Записати» відкриває той самий список, що й «+»', async ({ page }) => {
+  test('«+» стоїть у нижньому куті, як у розділах', async ({ page }) => {
     await openHub(page);
-    await expect(page.locator('#recordBtn')).toBeVisible();
-    await page.click('#recordBtn');
+    const box = await page.locator('#addFab').boundingBox();
+    const size = page.viewportSize();
+    expect(size.width - (box.x + box.width)).toBeLessThan(60);
+    expect(size.height - (box.y + box.height)).toBeLessThan(60);
+  });
+
+  test('«+» відкриває список і другим дотиком закриває', async ({ page }) => {
+    await openHub(page);
+    await page.click('#addFab');
     await expect(page.locator('#addOverlay')).toHaveClass(/show/);
     await expect(page.locator('.add-row')).not.toHaveCount(0);
-    // Другий дотик закриває — інакше кнопку нічим було б відмінити.
-    await page.click('#recordBtn');
+    // Кнопка лишається над затемненням — інакше другий дотик упирався б у
+    // підкладку, і вона не вміла б закрити те, що сама відкрила.
+    await page.click('#addFab');
     await expect(page.locator('#addOverlay')).not.toHaveClass(/show/);
+  });
+
+  test('список виїжджає з-під кнопки, а не з іншого кута', async ({ page }) => {
+    await openHub(page);
+    await page.click('#addFab');
+    const menu = await page.locator('#addMenu').boundingBox();
+    const fab = await page.locator('#addFab').boundingBox();
+    expect(menu.y + menu.height).toBeLessThanOrEqual(fab.y + 1);
+    expect(Math.abs((menu.x + menu.width) - (fab.x + fab.width))).toBeLessThan(30);
   });
 
   test('«Налаштування» відкривають меню теми й мови', async ({ page }) => {
@@ -131,7 +152,6 @@ test.describe('Шапка', () => {
     await expect(page.locator('#sideLabel-workout')).toHaveText('Workouts');
     await expect(page.locator('#sideLabel-settings')).toHaveText('Settings');
     await expect(page.locator('#sideLabel-export')).toHaveText('Export data');
-    await expect(page.locator('#recordBtnLabel')).toHaveText('Add');
     const expected = new Intl.DateTimeFormat('en-US', { month: 'long' }).format(new Date());
     await expect(page.locator('#todayDate')).toContainText(expected);
   });
@@ -173,10 +193,9 @@ test.describe('Вузький екран: колонка є, розкладка 
 test.describe('Телефон не змінився', () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
-  test('бічної колонки й «Записати» на телефоні немає', async ({ page }) => {
+  test('бічної колонки на телефоні немає, а «+» стоїть як стояв', async ({ page }) => {
     await openHub(page);
     await expect(page.locator('.side-nav')).toBeHidden();
-    await expect(page.locator('#recordBtn')).toBeHidden();
     await expect(page.locator('#todayDate')).toBeHidden();
     await expect(page.locator('#menuBtn')).toBeVisible();
     await expect(page.locator('#addFab')).toBeVisible();

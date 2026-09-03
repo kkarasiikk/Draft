@@ -39,7 +39,7 @@ const STRINGS = {
     themeLabel: 'Тема', themeLight: 'Світла', themeDark: 'Темна', themeSystem: 'Системна',
     amountsLabel: 'Сума витрат', amountsShow: 'Показувати', amountsHide: 'Ховати',
     langLabel: 'Мова', logout: 'Вийти', exportLabel: 'Експорт даних',
-    settingsLabel: 'Налаштування', recordBtn: 'Записати',
+    settingsLabel: 'Налаштування',
     exportBusy: 'Готую файл…', exportError: 'Не вдалося зібрати файл. Спробуй ще раз.',
     exportModalTitle: 'Експорт даних', exportWhat: 'Що зберегти', exportFormat: 'Формат',
     exportSave: 'Зберегти', exportNothing: 'Обери хоча б один розділ.',
@@ -115,7 +115,7 @@ const STRINGS = {
     themeLabel: 'Тема', themeLight: 'Светлая', themeDark: 'Тёмная', themeSystem: 'Системная',
     amountsLabel: 'Сумма расходов', amountsShow: 'Показывать', amountsHide: 'Скрывать',
     langLabel: 'Язык', logout: 'Выйти', exportLabel: 'Экспорт данных',
-    settingsLabel: 'Настройки', recordBtn: 'Записать',
+    settingsLabel: 'Настройки',
     exportBusy: 'Готовлю файл…', exportError: 'Не удалось собрать файл. Попробуй ещё раз.',
     exportModalTitle: 'Экспорт данных', exportWhat: 'Что сохранить', exportFormat: 'Формат',
     exportSave: 'Сохранить', exportNothing: 'Выбери хотя бы один раздел.',
@@ -191,7 +191,7 @@ const STRINGS = {
     themeLabel: 'Motyw', themeLight: 'Jasny', themeDark: 'Ciemny', themeSystem: 'Systemowy',
     amountsLabel: 'Kwota wydatków', amountsShow: 'Pokazuj', amountsHide: 'Ukrywaj',
     langLabel: 'Język', logout: 'Wyloguj', exportLabel: 'Eksport danych',
-    settingsLabel: 'Ustawienia', recordBtn: 'Zapisz',
+    settingsLabel: 'Ustawienia',
     exportBusy: 'Przygotowuję plik…', exportError: 'Nie udało się zebrać pliku. Spróbuj ponownie.',
     exportModalTitle: 'Eksport danych', exportWhat: 'Co zapisać', exportFormat: 'Format',
     exportSave: 'Zapisz', exportNothing: 'Wybierz przynajmniej jedną sekcję.',
@@ -267,7 +267,7 @@ const STRINGS = {
     themeLabel: 'Theme', themeLight: 'Light', themeDark: 'Dark', themeSystem: 'System',
     amountsLabel: 'Spending amount', amountsShow: 'Show', amountsHide: 'Hide',
     langLabel: 'Language', logout: 'Log out', exportLabel: 'Export data',
-    settingsLabel: 'Settings', recordBtn: 'Add',
+    settingsLabel: 'Settings',
     exportBusy: 'Preparing the file…', exportError: 'Could not build the file. Try again.',
     exportModalTitle: 'Export data', exportWhat: 'What to save', exportFormat: 'Format',
     exportSave: 'Save', exportNothing: 'Pick at least one section.',
@@ -387,8 +387,6 @@ function applyTranslations() {
   document.getElementById('logoutLabel').textContent = t('logout');
   // Назви розділів у колонці живуть у side-nav.js — одні на пʼять сторінок.
   window.SideNav.setLang(currentLang);
-  document.getElementById('recordBtnLabel').textContent = t('recordBtn');
-  document.getElementById('recordBtn').setAttribute('aria-label', t('recordBtn'));
   document.getElementById('todayTitle').textContent = t('todayTitle');
   // Дата й рядок стану залежать від мови так само, як підписи, — і мова
   // може перемкнутись уже після того, як дані прийшли.
@@ -983,13 +981,11 @@ function openAddSheet() {
   renderAddSheet();
   document.getElementById('addOverlay').classList.add('show');
   document.getElementById('addFab').classList.add('open');
-  document.getElementById('recordBtn').classList.add('open');
 }
 
 function closeAddSheet() {
   document.getElementById('addOverlay').classList.remove('show');
   document.getElementById('addFab').classList.remove('open');
-  document.getElementById('recordBtn').classList.remove('open');
 }
 
 // Обидві кнопки — одна дія: на телефоні видно «+», на комп'ютері «Записати».
@@ -998,7 +994,6 @@ function toggleAddSheet() {
   if (open) closeAddSheet(); else openAddSheet();
 }
 document.getElementById('addFab').addEventListener('click', toggleAddSheet);
-document.getElementById('recordBtn').addEventListener('click', toggleAddSheet);
 document.getElementById('addOverlay').addEventListener('click', (e) => {
   // Тап повз аркуш закриває: усередині нього клік не має нічого закривати.
   if (e.target.id === 'addOverlay') closeAddSheet();

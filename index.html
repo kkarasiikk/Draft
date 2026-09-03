@@ -189,15 +189,6 @@
   .export-save-btn:active:not(:disabled){transform:scale(.98);}
   .export-error{font-size:13px;color:var(--expense);margin-top:10px;min-height:16px;line-height:1.4;}
 
-  /* «Записати» в шапці — той самий «+», що плаває внизу на телефоні: одна
-     кнопка на всі чотири розділи, просто на своєму місці для миші. */
-  .record-btn{display:none;align-items:center;gap:7px;flex-shrink:0;border:none;cursor:pointer;
-    font-family:'Inter',sans-serif;font-size:13.5px;font-weight:600;color:#fff;background:var(--accent);
-    padding:11px 18px;border-radius:11px;transition:transform .15s;}
-  .record-btn svg{width:15px;height:15px;transition:transform .18s ease;}
-  .record-btn.open svg{transform:rotate(45deg);}
-  .record-btn:active{transform:scale(.97);}
-
   /* «+» і шторка швидкого запису. Одна кнопка на всі чотири розділи: щоб
      записати витрату, більше не треба спершу знайти потрібний розділ. */
   .add-fab{position:fixed;right:20px;bottom:calc(20px + env(safe-area-inset-bottom));z-index:70;
@@ -409,13 +400,8 @@
         "panel"
         "tiles";}
 
-    .today-head{grid-area:head;margin-bottom:0;display:flex;align-items:flex-end;gap:18px;}
-    .today-head-text{flex:1;min-width:0;}
+    .today-head{grid-area:head;margin-bottom:0;}
     .today-date{display:block;}
-    /* Над затемненням, як і «+» на телефоні: інакше другий дотик
-       упирався б у підкладку, і кнопка не вміла б закрити те, що
-       сама відкрила. */
-    .record-btn{display:inline-flex;position:relative;z-index:71;}
 
     #todayPanel{grid-area:panel;margin-bottom:0;}
     .cal{grid-area:cal;margin:0;
@@ -433,12 +419,13 @@
     .sections{grid-area:tiles;gap:18px;}
     .tile:hover{border-color:var(--card-border-hover);box-shadow:var(--card-hover-shadow);}
 
-    /* Кругла кнопка в кутку — рішення для великого пальця; для миші її
-       замінює «Записати» в шапці, і список виїжджає з-під неї. */
-    .add-fab{display:none;}
-    .add-menu{left:auto;right:40px;top:100px;bottom:auto;width:360px;max-width:none;margin:0;
-      transform:translateY(-14px);}
-    .add-overlay.show .add-menu{transform:translateY(0);}
+    /* Той самий круглий «+» у нижньому куті, що й у розділах: одна кнопка
+       на всі чотири, і на комп'ютері вона стоїть там само, де в них. Колись
+       тут була кнопка «Записати» в шапці — вона робила з однієї звички дві,
+       залежно від того, з чого відкрив застосунок.
+       Відступи ті самі, що й поля сторінки, тож кнопка сідає на її кут. */
+    .add-fab{right:40px;bottom:40px;}
+    .add-menu{left:auto;right:40px;bottom:112px;top:auto;width:360px;max-width:none;margin:0;}
   }
 
   /* ---- Дві колонки ----
@@ -622,10 +609,6 @@
           <div class="today-date" id="todayDate"></div>
           <div class="today-line" id="todayLine"></div>
         </div>
-        <button type="button" class="record-btn" id="recordBtn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
-          <span id="recordBtnLabel">Записати</span>
-        </button>
       </div>
 
       <section class="panel" id="todayPanel" hidden>
