@@ -74,15 +74,14 @@ const STRINGS = {
     addWorkout: 'Тренування', addWorkoutHint: 'вправи й підходи',
     todayTitle: 'Сьогодні',
     todayCount: (n) => `${n} ${plural(n, { one: 'пункт', few: 'пункти', many: 'пунктів', other: 'пункту' })}`,
-    unitPlanned: 'заплановано', unitThisMonth: 'на цей місяць',
+    prefixPlanned: 'Заплановано', unitTasks: (n) => plural(n, { one: 'завдання', few: 'завдання', many: 'завдань', other: 'завдання' }),
+    unitThisMonth: 'на цей місяць',
     unitSets: 'підходів', unitExercises: 'вправ',
     capSpent: 'витрачено за поточний місяць',
     capNoStep: (n) => `${n} без кроку`,
-    capTasksPlanned: (n) => `${plural(n, { one: 'завдання', few: 'завдання', many: 'завдань', other: 'завдання' })} на сьогодні`,
-    capTasksEmpty: 'завдань на сьогодні — маєш вихідний, чи просто не записано?',
+    capTasksEmpty: 'Маєш вихідний, чи просто не записано?',
     capGoalsMonthNone: 'цілей на цей місяць ще немає',
-    capWorkoutPlanned: 'Сьогодні маєш заплановане тренування',
-    capWorkoutToday: 'Сьогодні маєш тренування',
+    capWorkoutToday: 'Сьогодні *є* тренування',
     capWorkoutNone: 'Сьогодні тренувань немає',
     capWorkoutNext: (when) => `Наступне — ${when}`,
     whenTomorrow: 'завтра', whenDayAfter: 'післязавтра',
@@ -150,15 +149,14 @@ const STRINGS = {
     addWorkout: 'Тренировка', addWorkoutHint: 'упражнения и подходы',
     todayTitle: 'Сегодня',
     todayCount: (n) => `${n} ${plural(n, { one: 'пункт', few: 'пункта', many: 'пунктов', other: 'пункта' })}`,
-    unitPlanned: 'запланировано', unitThisMonth: 'на этот месяц',
+    prefixPlanned: 'Запланировано', unitTasks: (n) => plural(n, { one: 'задача', few: 'задачи', many: 'задач', other: 'задачи' }),
+    unitThisMonth: 'на этот месяц',
     unitSets: 'подходов', unitExercises: 'упражнений',
     capSpent: 'потрачено за текущий месяц',
     capNoStep: (n) => `${n} без шага`,
-    capTasksPlanned: (n) => `${plural(n, { one: 'задача', few: 'задачи', many: 'задач', other: 'задачи' })} на сегодня`,
-    capTasksEmpty: 'задач на сегодня — у тебя выходной или просто не записано?',
+    capTasksEmpty: 'У тебя выходной или просто не записано?',
     capGoalsMonthNone: 'целей на этот месяц пока нет',
-    capWorkoutPlanned: 'Сегодня у тебя запланированная тренировка',
-    capWorkoutToday: 'Сегодня у тебя тренировка',
+    capWorkoutToday: 'Сегодня *есть* тренировка',
     capWorkoutNone: 'Сегодня тренировок нет',
     capWorkoutNext: (when) => `Следующая — ${when}`,
     whenTomorrow: 'завтра', whenDayAfter: 'послезавтра',
@@ -226,15 +224,14 @@ const STRINGS = {
     addWorkout: 'Trening', addWorkoutHint: 'ćwiczenia i serie',
     todayTitle: 'Dziś',
     todayCount: (n) => `${n} ${plural(n, { one: 'pozycja', few: 'pozycje', many: 'pozycji', other: 'pozycji' })}`,
-    unitPlanned: 'zaplanowano', unitThisMonth: 'na ten miesiąc',
+    prefixPlanned: 'Zaplanowano', unitTasks: (n) => plural(n, { one: 'zadanie', few: 'zadania', many: 'zadań', other: 'zadania' }),
+    unitThisMonth: 'na ten miesiąc',
     unitSets: 'serii', unitExercises: 'ćwiczeń',
     capSpent: 'wydano w tym miesiącu',
     capNoStep: (n) => `${n} bez kroku`,
-    capTasksPlanned: (n) => `${plural(n, { one: 'zadanie', few: 'zadania', many: 'zadań', other: 'zadania' })} na dziś`,
-    capTasksEmpty: 'zadań na dziś — masz wolne czy po prostu nie zapisane?',
+    capTasksEmpty: 'Masz wolne czy po prostu nie zapisane?',
     capGoalsMonthNone: 'nie ma jeszcze celów na ten miesiąc',
-    capWorkoutPlanned: 'Dziś masz zaplanowany trening',
-    capWorkoutToday: 'Dziś masz trening',
+    capWorkoutToday: 'Dziś *jest* trening',
     capWorkoutNone: 'Dziś nie ma treningu',
     capWorkoutNext: (when) => `Następny — ${when}`,
     whenTomorrow: 'jutro', whenDayAfter: 'pojutrze',
@@ -302,15 +299,14 @@ const STRINGS = {
     addWorkout: 'Workout', addWorkoutHint: 'exercises and sets',
     todayTitle: 'Today',
     todayCount: (n) => `${n} ${plural(n, { one: 'item', other: 'items' })}`,
-    unitPlanned: 'planned', unitThisMonth: 'this month',
+    prefixPlanned: 'Planned', unitTasks: (n) => plural(n, { one: 'task', other: 'tasks' }),
+    unitThisMonth: 'this month',
     unitSets: 'sets', unitExercises: 'exercises',
     capSpent: 'spent this month',
     capNoStep: (n) => `${n} without a step`,
-    capTasksPlanned: (n) => `${plural(n, { one: 'task', other: 'tasks' })} for today`,
-    capTasksEmpty: 'tasks for today — a day off, or just nothing written down?',
+    capTasksEmpty: 'A day off, or just nothing written down?',
     capGoalsMonthNone: 'no goals for this month yet',
-    capWorkoutPlanned: 'You have a workout planned today',
-    capWorkoutToday: 'You have a workout today',
+    capWorkoutToday: 'There *is* a workout today',
     capWorkoutNone: 'No workout today',
     capWorkoutNext: (when) => `Next — ${when}`,
     whenTomorrow: 'tomorrow', whenDayAfter: 'the day after tomorrow',
@@ -781,14 +777,34 @@ function todayISO() {
 // одиницю, під ним — за що воно, і окремим рядком те, що вимагає уваги.
 // Кільця пішли разом із кнопкою «Відкрити»: число читається швидше за дугу
 // й не потребує пояснень.
-function setStat(key, value, unit, caption, note) {
+// Підпис може нести жирне слово: «Сьогодні *є* тренування». Зірочки, а не
+// теги, бо рядок живе у словнику й перекладається — а перекладачеві простіше
+// не загубити зірочку, ніж закритий тег. Збираємо вузлами, тож у розмітку
+// потрапляє лише текст, хай би що стояло в словнику.
+function fillCaption(el, text) {
+  el.textContent = '';
+  String(text || '').split(/\*([^*]+)\*/).forEach((part, i) => {
+    if (!part) return;
+    if (i % 2 === 0) { el.appendChild(document.createTextNode(part)); return; }
+    const b = document.createElement('b');
+    b.textContent = part;
+    el.appendChild(b);
+  });
+}
+
+// prefix — слово ПЕРЕД числом («Заплановано 8 завдань»). Порожній елемент
+// сховано в CSS (.tile-stat i:empty), тож плитки без нього не отримують
+// зайвого проміжку.
+function setStat(key, value, unit, caption, note, prefix) {
   const stat = document.getElementById(key + 'Stat');
   const unitEl = document.getElementById(key + 'Unit');
+  const preEl = document.getElementById(key + 'Pre');
   const cap = document.getElementById(key + 'Sub');
   const noteEl = document.getElementById(key + 'Note');
   if (stat) stat.textContent = value;
   if (unitEl) unitEl.textContent = unit || '';
-  if (cap) cap.textContent = caption || '';
+  if (preEl) preEl.textContent = prefix || '';
+  if (cap) fillCaption(cap, caption);
   if (noteEl) {
     noteEl.textContent = note || '';
     noteEl.hidden = !note;
@@ -1154,8 +1170,11 @@ async function loadHomeSummary(uid) {
       // людина ставила галочку: плитка ніби забувала про зроблене. Скільки
       // з них уже закрито, каже окремий рядок.
       const planned = sum.open + sum.done;
-      setStat('tasks', String(planned), t('unitPlanned'),
-        planned ? t('capTasksPlanned', planned) : t('capTasksEmpty'), null);
+      // «Заплановано 8 завдань» — одним рядком, слово перед числом і слово
+      // після. Підпис лишається порожнім: скільки з них закрито, видно в
+      // самому розділі, куди по галочки й ідуть.
+      setStat('tasks', String(planned), t('unitTasks', planned),
+        planned ? '' : t('capTasksEmpty'), null, t('prefixPlanned'));
     })
     .catch((err) => console.error('homeSummary tasks:', err));
 
@@ -1211,12 +1230,13 @@ async function loadHomeSummary(uid) {
       const todayWorkout = HomeSummary.workoutToday(docs, today);
       if (todayWorkout) {
         // Записане наперед (підходи порожні) — це план, і казати про нього
-        // «зроблено» було б неправдою: його ще тільки роблять. Тому й підпис
-        // різний: «заплановане» лише про те, до чого ще не бралися.
+        // «зроблено» було б неправдою: його ще тільки роблять. Тому різниця
+        // лишається в числі (вправи проти підходів), а підпис один: «сьогодні
+        // є тренування» правда і про заплановане, і про розпочате.
         setStat('workout', todayWorkout.planned
           ? String(todayWorkout.exercises) : `${todayWorkout.setsDone}/${todayWorkout.setsTotal}`,
           todayWorkout.planned ? t('unitExercises') : t('unitSets'),
-          t(todayWorkout.planned ? 'capWorkoutPlanned' : 'capWorkoutToday'), null);
+          t('capWorkoutToday'), null);
         return;
       }
 

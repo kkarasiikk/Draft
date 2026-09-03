@@ -249,10 +249,15 @@
   .tile-stat b{font-size:26px;font-weight:700;letter-spacing:-0.02em;color:var(--ink);line-height:1.05;}
   .tile-stat i{font-size:13px;font-style:normal;font-weight:500;color:var(--ink-soft);
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  /* Слово перед числом («Заплановано 8 завдань») є не в кожній плитці, а
+     проміжок flex ставить і між порожніми елементами — тож порожній ховаємо. */
+  .tile-stat i:empty{display:none;}
   /* pre-line — щоб підпис міг бути у два рядки: плитка тренувань пише
      спершу сам факт («Сьогодні маєш тренування»), а під ним — яке саме.
      setStat пише текстом, тож перенос робить CSS, а не тег у розмітці. */
   .tile-cap{font-size:12px;color:var(--ink-muted);margin-top:5px;line-height:1.35;white-space:pre-line;}
+  /* Одне слово в підписі буває головним: «Сьогодні Є тренування». */
+  .tile-cap b{font-weight:700;color:var(--ink-soft);}
   .tile-note{font-size:12px;font-weight:600;color:var(--expense);margin-top:7px;
     display:flex;align-items:center;gap:6px;}
   /* Власний display перебиває [hidden] з UA-стилів, і рядок лишався б видимим
@@ -635,7 +640,7 @@
             <svg class="tile-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6.5l2 2 3.5-3.5"/><path d="M3 17.5l2 2 3.5-3.5"/><path d="M12 7h9"/><path d="M12 18h9"/></svg>
             <span class="tile-name" id="tasksTitle">Завдання</span>
           </div>
-          <div class="tile-stat"><b id="tasksStat">—</b><i id="tasksUnit"></i></div>
+          <div class="tile-stat"><i id="tasksPre"></i><b id="tasksStat">—</b><i id="tasksUnit"></i></div>
           <div class="tile-cap" id="tasksSub">на кожен день</div>
           <div class="tile-note" id="tasksNote" hidden></div>
         </a>
