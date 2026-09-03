@@ -68,6 +68,20 @@ const STRINGS = {
     addGoalStep: 'Крок до цілі',
     addGoalStepHint: (n) => `${n} ${plural(n, { one: 'ціль', few: 'цілі', many: 'цілей', other: 'цілі' })} без кроку`,
     addGoalStepNone: 'сьогодні всі відмічені', addGoalStepNoGoals: 'цілей ще немає',
+    quickClose: 'Закрити',
+    quickExpenseTitle: 'Нова витрата', quickIncomeTitle: 'Новий дохід',
+    quickTaskTitle: 'Нове завдання',
+    quickTypeExpense: 'Витрата', quickTypeIncome: 'Дохід',
+    quickAmount: 'Сума', quickCat: 'Категорія', quickDate: 'Дата',
+    quickNote: 'Нотатка (необовʼязково)',
+    quickTitleField: 'Назва', quickTime: 'Час',
+    quickSave: 'Зберегти запис', quickSaveTask: 'Зберегти завдання',
+    quickAmountError: 'Вкажи суму більшу за нуль',
+    quickTitleError: 'Напиши назву завдання',
+    quickSaveError: 'Не вдалося зберегти. Спробуй ще раз.',
+    unsavedTitle: 'Зберегти зміни?',
+    unsavedSub: 'Є незбережені зміни. Якщо вийти зараз, вони пропадуть.',
+    unsavedSave: 'Зберегти', unsavedDiscard: 'Не зберігати', unsavedKeep: 'Продовжити редагування',
     addGoal: 'Нова ціль', addGoalHint: 'на місяць або на рік',
     addGoalPickHint: 'зарахувати крок',
     addWorkout: 'Тренування', addWorkoutHint: 'вправи й підходи',
@@ -144,6 +158,20 @@ const STRINGS = {
     addGoalStep: 'Шаг к цели',
     addGoalStepHint: (n) => `${n} ${plural(n, { one: 'цель', few: 'цели', many: 'целей', other: 'цели' })} без шага`,
     addGoalStepNone: 'сегодня все отмечены', addGoalStepNoGoals: 'целей ещё нет',
+    quickClose: 'Закрыть',
+    quickExpenseTitle: 'Новый расход', quickIncomeTitle: 'Новый доход',
+    quickTaskTitle: 'Новая задача',
+    quickTypeExpense: 'Расход', quickTypeIncome: 'Доход',
+    quickAmount: 'Сумма', quickCat: 'Категория', quickDate: 'Дата',
+    quickNote: 'Заметка (необязательно)',
+    quickTitleField: 'Название', quickTime: 'Время',
+    quickSave: 'Сохранить запись', quickSaveTask: 'Сохранить задачу',
+    quickAmountError: 'Укажи сумму больше нуля',
+    quickTitleError: 'Напиши название задачи',
+    quickSaveError: 'Не удалось сохранить. Попробуй ещё раз.',
+    unsavedTitle: 'Сохранить изменения?',
+    unsavedSub: 'Есть несохранённые изменения. Если выйти сейчас, они пропадут.',
+    unsavedSave: 'Сохранить', unsavedDiscard: 'Не сохранять', unsavedKeep: 'Продолжить редактирование',
     addGoal: 'Новая цель', addGoalHint: 'на месяц или на год',
     addGoalPickHint: 'засчитать шаг',
     addWorkout: 'Тренировка', addWorkoutHint: 'упражнения и подходы',
@@ -220,6 +248,20 @@ const STRINGS = {
     addGoalStep: 'Krok do celu',
     addGoalStepHint: (n) => `${n} ${plural(n, { one: 'cel', few: 'cele', many: 'celów', other: 'celu' })} bez kroku`,
     addGoalStepNone: 'dziś wszystkie odhaczone', addGoalStepNoGoals: 'nie ma jeszcze celów',
+    quickClose: 'Zamknij',
+    quickExpenseTitle: 'Nowy wydatek', quickIncomeTitle: 'Nowy przychód',
+    quickTaskTitle: 'Nowe zadanie',
+    quickTypeExpense: 'Wydatek', quickTypeIncome: 'Przychód',
+    quickAmount: 'Kwota', quickCat: 'Kategoria', quickDate: 'Data',
+    quickNote: 'Notatka (opcjonalnie)',
+    quickTitleField: 'Nazwa', quickTime: 'Godzina',
+    quickSave: 'Zapisz wpis', quickSaveTask: 'Zapisz zadanie',
+    quickAmountError: 'Podaj kwotę większą od zera',
+    quickTitleError: 'Wpisz nazwę zadania',
+    quickSaveError: 'Nie udało się zapisać. Spróbuj ponownie.',
+    unsavedTitle: 'Zapisać zmiany?',
+    unsavedSub: 'Są niezapisane zmiany. Jeśli teraz wyjdziesz, przepadną.',
+    unsavedSave: 'Zapisz', unsavedDiscard: 'Nie zapisuj', unsavedKeep: 'Wróć do edycji',
     addGoal: 'Nowy cel', addGoalHint: 'na miesiąc lub na rok',
     addGoalPickHint: 'zalicz krok',
     addWorkout: 'Trening', addWorkoutHint: 'ćwiczenia i serie',
@@ -296,6 +338,20 @@ const STRINGS = {
     addGoalStep: 'Step toward a goal',
     addGoalStepHint: (n) => `${n} ${plural(n, { one: 'goal', other: 'goals' })} without a step`,
     addGoalStepNone: 'all marked today', addGoalStepNoGoals: 'no goals yet',
+    quickClose: 'Close',
+    quickExpenseTitle: 'New expense', quickIncomeTitle: 'New income',
+    quickTaskTitle: 'New task',
+    quickTypeExpense: 'Expense', quickTypeIncome: 'Income',
+    quickAmount: 'Amount', quickCat: 'Category', quickDate: 'Date',
+    quickNote: 'Note (optional)',
+    quickTitleField: 'Title', quickTime: 'Time',
+    quickSave: 'Save entry', quickSaveTask: 'Save task',
+    quickAmountError: 'Enter an amount greater than zero',
+    quickTitleError: 'Type a task title',
+    quickSaveError: 'Could not save. Try again.',
+    unsavedTitle: 'Save changes?',
+    unsavedSub: 'You have unsaved changes. Leaving now discards them.',
+    unsavedSave: 'Save', unsavedDiscard: 'Discard', unsavedKeep: 'Keep editing',
     addGoal: 'New goal', addGoalHint: 'monthly or yearly',
     addGoalPickHint: 'count the step',
     addWorkout: 'Workout', addWorkoutHint: 'exercises and sets',
@@ -400,6 +456,7 @@ function applyTranslations() {
   document.getElementById('tasksSub').textContent = t('tasksSub');
   document.getElementById('workoutTitle').textContent = t('workoutTitle');
   document.getElementById('workoutSub').textContent = t('workoutSub');
+  applyQuickTranslations();
   document.getElementById('authSub').textContent = t('authSub');
   document.getElementById('authEmailLabel').textContent = t('emailLabel');
   document.getElementById('authPasswordLabel').textContent = t('passwordLabel');
@@ -933,12 +990,16 @@ async function stepHomeGoal(goalId) {
 
 // ---- «+»: одна кнопка на всі чотири розділи ----
 // Щоб записати витрату, треба було спершу зайти в Бюджет, знайти кнопку й
-// лише тоді відкрити форму. Тепер шторка веде одразу у потрібну форму —
-// модулі відкривають її за #new у адресі.
+// лише тоді відкрити форму. Тепер шторка веде одразу у потрібну форму.
 //
-// «Крок до цілі» — виняток: це не форма, а один тап, і код для нього на
-// головній уже є. Тому рядок не веде нікуди, а розкриває список активних
-// цілей просто тут.
+// Витрата й завдання відкривають її ПРОСТО ТУТ, без переходу: два поля не
+// варті перезавантаження сторінки й дороги назад. Ціль і тренування ведуть
+// у розділ за #new — там не форма, а екран, і стиснути його до аркуша
+// означало б зробити другу, гіршу форму замість наявної.
+//
+// «Крок до цілі» — виняток серед винятків: це не форма, а один тап, і код
+// для нього на головній уже є. Тому рядок не веде нікуди, а розкриває список
+// активних цілей просто тут.
 const ADD_ICONS = {
   expense: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5.5" width="19" height="13" rx="2.5"/><path d="M2.5 10h19"/></svg>',
   task: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6.5l2 2 3.5-3.5"/><path d="M3 17.5l2 2 3.5-3.5"/><path d="M12 7h9"/><path d="M12 18h9"/></svg>',
@@ -970,14 +1031,20 @@ function renderAddSheet() {
   // займав місце й читався як поламаний. Завести ціль однаково є чим —
   // рядок «Нова ціль» стоїть поруч.
   host.innerHTML = [
-    addRow('expense', t('addExpense'), t('addExpenseHint'), 'budget/index.html#new'),
-    addRow('task', t('addTask'), t('addTaskHint'), 'tasks/index.html#new'),
+    addRow('expense', t('addExpense'), t('addExpenseHint'), null, 'data-quick="expense"'),
+    addRow('task', t('addTask'), t('addTaskHint'), null, 'data-quick="task"'),
     pending.length
       ? addRow('goal', t('addGoalStep'), t('addGoalStepHint', pending.length), null, 'data-add-goal')
       : '',
     addRow('newGoal', t('addGoal'), t('addGoalHint'), 'goals/index.html#new'),
     addRow('workout', t('addWorkout'), t('addWorkoutHint'), 'workout/index.html#new'),
   ].join('');
+
+  // Витрата й завдання відкривають форму просто тут; шторка при цьому
+  // закривається — інакше вікно виїжджало б поверх власного меню.
+  host.querySelectorAll('[data-quick]').forEach((btn) => {
+    btn.addEventListener('click', () => { closeAddSheet(); openQuick(btn.dataset.quick); });
+  });
 
   const goalBtn = host.querySelector('[data-add-goal]');
   if (goalBtn) goalBtn.addEventListener('click', () => renderAddGoalList(pending));
@@ -1022,6 +1089,262 @@ document.getElementById('addFab').addEventListener('click', toggleAddSheet);
 document.getElementById('addOverlay').addEventListener('click', (e) => {
   // Тап повз аркуш закриває: усередині нього клік не має нічого закривати.
   if (e.target.id === 'addOverlay') closeAddSheet();
+});
+
+
+// ---- Форма швидкого запису просто тут ----
+// Рядки «Витрата» й «Завдання» більше не ведуть у розділ: форма відкривається
+// на самій головній. Перехід коштував повного перезавантаження сторінки
+// заради двох полів, а потім треба було ще й вернутись назад — при тому що
+// людина нікуди йти й не збиралась, вона хотіла записати суму.
+//
+// «Нова ціль» і «Тренування» лишаються посиланнями: там не два поля, а екран
+// (горизонт і категорія в цілі, вправи з підходами в тренуванні), і стиснути
+// його до аркуша означало б зробити другу, гіршу форму замість наявної.
+//
+// Категорії, палітра, набір полів і сам вигляд вікна — ті самі, що в бюджеті:
+// класи .modal-overlay / .modal і файл ../categories-default.js спільні. Якби
+// форма тут була «своя», вона розійшлася б із розділом при першій же правці.
+let quickKind = null;        // 'expense' | 'task' — що саме записуємо
+let quickTxType = 'expense'; // усередині грошового запису: витрата чи дохід
+let quickCategory = null;
+// Категорії з профілю. null означає «профіль ще не приїхав або своїх немає» —
+// тоді беруться стандартні за мовою сторінки, як і в бюджеті.
+let quickProfileCats = { expense: null, income: null };
+
+function quickCatList(type) {
+  const own = quickProfileCats[type];
+  if (own && own.length) return own;
+  return defaultCategoryList(type, currentLang, CATEGORY_PALETTE.length);
+}
+
+// Колір категорії — той самий, що в бюджеті: інакше «Їжа» була б зеленою в
+// розділі й іншою на головній. Категорія без colorIndex (стара, заведена до
+// палітри) отримує стабільний колір з власного id.
+function quickCatColor(type, id) {
+  const cat = quickCatList(type).find((c) => c.id === id);
+  if (cat && typeof cat.colorIndex === 'number') {
+    return CATEGORY_PALETTE[cat.colorIndex % CATEGORY_PALETTE.length].text;
+  }
+  let h = 0;
+  for (let i = 0; i < String(id).length; i++) h = (h * 31 + String(id).charCodeAt(i)) >>> 0;
+  return CATEGORY_PALETTE[h % CATEGORY_PALETTE.length].text;
+}
+
+function renderQuickCats() {
+  const host = document.getElementById('quickCats');
+  if (!host) return;
+  const list = quickCatList(quickTxType);
+  if (!list.some((c) => c.id === quickCategory)) quickCategory = list[0] ? list[0].id : null;
+  host.innerHTML = list.map((c) => `<button type="button" class="cat-choice${c.id === quickCategory ? ' selected' : ''}"
+    data-cat="${escapeHtml(c.id)}"
+    style="${c.id === quickCategory ? `background:${quickCatColor(quickTxType, c.id)};` : ''}">${escapeHtml(c.label)}</button>`).join('');
+  host.querySelectorAll('.cat-choice').forEach((btn) => {
+    btn.addEventListener('click', () => { quickCategory = btn.dataset.cat; renderQuickCats(); });
+  });
+}
+
+function isQuickOpen() {
+  const overlay = document.getElementById('quickOverlay');
+  return !!overlay && overlay.classList.contains('show');
+}
+
+// Свої категорії лежать у профілі й прилітають окремо від сторінки — форму
+// могли відкрити раніше. Тоді її треба перемалювати, інакше людина побачила
+// б стандартні сім замість власних (той самий випадок, що описано у
+// refreshOpenTxForm у budget/app.js). Знімок гарда оновлюємо, лише якщо у
+// формі ще нічого не чіпали: підміна, якої людина не робила, не має
+// рахуватись за незбережену зміну.
+function setQuickCategories(profile) {
+  quickProfileCats.expense = Array.isArray(profile.categoriesExpense) && profile.categoriesExpense.length
+    ? profile.categoriesExpense : null;
+  quickProfileCats.income = Array.isArray(profile.categoriesIncome) && profile.categoriesIncome.length
+    ? profile.categoriesIncome : null;
+  if (quickKind !== 'expense' || !isQuickOpen()) return;
+  const wasClean = !quickGuard.isDirty();
+  renderQuickCats();
+  if (wasClean) quickGuard.arm();
+}
+
+function applyQuickTranslations() {
+  document.getElementById('quickTypeExpense').textContent = t('quickTypeExpense');
+  document.getElementById('quickTypeIncome').textContent = t('quickTypeIncome');
+  document.getElementById('quickAmountLabel').textContent = t('quickAmount');
+  document.getElementById('quickCatLabel').textContent = t('quickCat');
+  document.getElementById('quickDateLabel').textContent = t('quickDate');
+  document.getElementById('quickNoteLabel').textContent = t('quickNote');
+  document.getElementById('quickTaskTitleLabel').textContent = t('quickTitleField');
+  document.getElementById('quickTaskDateLabel').textContent = t('quickDate');
+  document.getElementById('quickTaskTimeLabel').textContent = t('quickTime');
+  document.getElementById('quickTaskNotesLabel').textContent = t('quickNote');
+  document.getElementById('quickCloseBtn').setAttribute('aria-label', t('quickClose'));
+  if (isQuickOpen()) applyQuickMode();
+}
+
+// Заголовок, кнопка й видимі поля — усе, що відрізняє два записи один від
+// одного. Винесено окремо, бо перемикач «витрата / дохід» міняє те саме, що
+// й відкриття форми, і двома копіями це розійшлося б.
+function applyQuickMode() {
+  const isTask = quickKind === 'task';
+  const title = isTask ? t('quickTaskTitle')
+    : t(quickTxType === 'income' ? 'quickIncomeTitle' : 'quickExpenseTitle');
+  // На грошовому записі заголовок ховається за перемикачем: він каже те саме,
+  // тільки ще й дозволяє це змінити. Ім'я вікна лишається в aria-label — для
+  // тих, хто його не бачить, а чує.
+  document.getElementById('quickTitle').textContent = isTask ? title : '';
+  document.getElementById('quickTitle').style.display = isTask ? 'block' : 'none';
+  document.getElementById('quickTypeToggle').style.display = isTask ? 'none' : 'flex';
+  document.getElementById('quickModal').setAttribute('aria-label', title);
+  document.getElementById('quickExpenseFields').style.display = isTask ? 'none' : 'block';
+  document.getElementById('quickTaskFields').style.display = isTask ? 'block' : 'none';
+  document.getElementById('quickTypeExpense').classList.toggle('active', !isTask && quickTxType === 'expense');
+  document.getElementById('quickTypeIncome').classList.toggle('active', !isTask && quickTxType === 'income');
+  const submit = document.getElementById('quickSubmitBtn');
+  submit.textContent = isTask ? t('quickSaveTask') : t('quickSave');
+  submit.style.background = isTask ? 'var(--accent)'
+    : (quickTxType === 'income' ? 'var(--income)' : 'var(--expense)');
+}
+
+function openQuick(kind) {
+  quickKind = kind;
+  quickTxType = 'expense';
+  const today = todayISO();
+  document.getElementById('quickAmount').value = '';
+  document.getElementById('quickNote').value = '';
+  document.getElementById('quickDate').value = today;
+  // Гроші заднім числом записують, наперед — ні: витрати, якої ще не було,
+  // у бюджеті бути не може. Та сама межа, що у формі бюджету.
+  document.getElementById('quickDate').max = today;
+  document.getElementById('quickTaskTitle').value = '';
+  document.getElementById('quickTaskNotes').value = '';
+  // Завдання за замовчуванням — на сьогодні: саме його записують з головної,
+  // і порожня дата означала б «колись», тобто справу, яка нікуди не потрапить.
+  document.getElementById('quickTaskDate').value = today;
+  document.getElementById('quickTaskTime').value = '';
+  quickCategory = null;
+  renderQuickCats();
+  setQuickError('');
+  applyQuickMode();
+  // Знімок — після заповнення полів і до показу: інакше щойно відкрита форма
+  // вважалась би зміненою ще до першої літери.
+  quickGuard.arm();
+  document.getElementById('quickOverlay').classList.add('show');
+  const first = document.getElementById(kind === 'task' ? 'quickTaskTitle' : 'quickAmount');
+  setTimeout(() => { try { first.focus(); } catch (err) { /* поле сховане */ } }, 50);
+}
+
+function setQuickError(text) {
+  const el = document.getElementById('quickError');
+  el.textContent = text;
+  el.style.display = text ? 'block' : 'none';
+}
+
+function switchQuickType(type) {
+  if (quickKind !== 'expense' || quickTxType === type) return;
+  quickTxType = type;
+  quickCategory = null;
+  renderQuickCats();
+  applyQuickMode();
+}
+
+// ---- Незбережене у швидкому записі ----
+// Вікно закривається тапом повз нього — на телефоні промахнутись легко, а
+// набране нікуди не пишеться, доки не натиснуто «Зберегти». Гард той самий,
+// що в модулях (../unsaved-guard.js): своя копія логіки тут розійшлася б із
+// їхньою при першій же правці.
+const quickGuard = UnsavedGuard.create({
+  overlay: 'quickOverlay',
+  snapshot: () => JSON.stringify({
+    kind: quickKind,
+    type: quickTxType,
+    category: quickCategory,
+    amount: document.getElementById('quickAmount').value.trim(),
+    note: document.getElementById('quickNote').value.trim(),
+    date: document.getElementById('quickDate').value,
+    title: document.getElementById('quickTaskTitle').value.trim(),
+    notes: document.getElementById('quickTaskNotes').value.trim(),
+    taskDate: document.getElementById('quickTaskDate').value,
+    taskTime: document.getElementById('quickTaskTime').value,
+  }),
+  save: () => submitQuick(),
+  texts: () => ({
+    title: t('unsavedTitle'), sub: t('unsavedSub'),
+    save: t('unsavedSave'), discard: t('unsavedDiscard'), keep: t('unsavedKeep'),
+  }),
+});
+
+async function submitQuick() {
+  const uid = auth.currentUser && auth.currentUser.uid;
+  if (!uid) return;
+  const userRef = db.collection('users').doc(uid);
+  const btn = document.getElementById('quickSubmitBtn');
+
+  let write;
+  if (quickKind === 'task') {
+    const title = document.getElementById('quickTaskTitle').value.trim();
+    if (!title) { setQuickError(t('quickTitleError')); return; }
+    write = () => userRef.collection('tasks').add({
+      title,
+      notes: document.getElementById('quickTaskNotes').value.trim(),
+      done: false,
+      completedAt: null,
+      // Пріоритет, теги, підзадачі, оцінка й повторення лишаються порожніми —
+      // рівно те, що записує повна форма, якої не чіпали. Для них треба вже
+      // не запис, а обдумування, і живуть вони в самому розділі.
+      priority: null,
+      tags: [],
+      dueDate: document.getElementById('quickTaskDate').value || null,
+      dueTime: document.getElementById('quickTaskTime').value || null,
+      estimateMin: null,
+      recurrence: null,
+      reminderAt: null,
+      notifiedAt: null,
+      subtasks: [],
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+  } else {
+    const raw = document.getElementById('quickAmount').value;
+    const num = parseFloat(raw.replace(',', '.'));
+    if (!raw || isNaN(num) || num <= 0) { setQuickError(t('quickAmountError')); return; }
+    if (!quickCategory) { setQuickError(t('quickSaveError')); return; }
+    write = () => userRef.collection('transactions').add({
+      type: quickTxType,
+      amount: Math.round(num * 100) / 100,
+      category: quickCategory,
+      note: document.getElementById('quickNote').value.trim(),
+      date: document.getElementById('quickDate').value || todayISO(),
+    });
+  }
+
+  setQuickError('');
+  btn.disabled = true;
+  try {
+    await write();
+    quickGuard.close();
+    // Перечитуємо ЛИШЕ той розділ, якого торкнувся запис: повне перезавантаження
+    // головної на секунду стерло б і плитки, і рядок під датою — тобто показало
+    // б порожній екран у відповідь на вдале збереження.
+    if (quickKind === 'task') loadTasksSection(userRef);
+    else loadBudgetSection(userRef);
+  } catch (err) {
+    console.error('quick save:', err);
+    setQuickError(t('quickSaveError'));
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+document.getElementById('quickCloseBtn').addEventListener('click', () => quickGuard.requestClose());
+document.getElementById('quickSubmitBtn').addEventListener('click', () => submitQuick());
+document.getElementById('quickTypeToggle').addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-qtype]');
+  if (btn) switchQuickType(btn.dataset.qtype);
+});
+// Enter у будь-якому однорядковому полі — те саме, що кнопка: форма з двох
+// полів не має вимагати тягнутись до неї мишею.
+document.getElementById('quickModal').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && e.target.tagName === 'INPUT') { e.preventDefault(); submitQuick(); }
 });
 
 // ---- Календар ----
@@ -1147,40 +1470,50 @@ function formatFullDate(iso) {
   return `${weekday}, ${dayMonth}`;
 }
 
-async function loadHomeSummary(uid) {
-  const userRef = db.collection('users').doc(uid);
+// Бюджет і завдання читаються окремими функціями, а не всередині
+// loadHomeSummary: форма швидкого запису дописує рівно один із цих розділів і
+// має перечитати саме його. Перезавантажувати всю головну заради однієї
+// витрати означало б на секунду стерти плитки й рядок під датою — тобто
+// показати порожній екран у відповідь на вдале збереження.
+
+// Бюджет: лише поточний місяць.
+// Профіль читаємо тим самим запитом, що вже потрібен для валюти, — окремого
+// звернення заради категорій форми не робимо.
+function loadBudgetSection(userRef) {
   const today = todayISO();
   const monthFrom = HomeSummary.monthStart(today);
-  // Календар показує дні попереду, тож завдання читаються і наперед. Межі
-  // беремо по сітці МІСЯЦЯ, а не тижня: на широкому екрані малюється саме
-  // вона, і на неї ж перемальовується сторінка, якщо вікно розтягнути вже
-  // після завантаження. Ширше на кілька днів — дешевше за другий запит.
-  const cal = HomeSummary.monthCalendar([], today);
-  const taskFrom = monthFrom < cal.from ? monthFrom : cal.from;
-  const taskTo = today > cal.to ? today : cal.to;
-  homeData = { transactions: null, tasks: null, goals: null, workouts: null };
-
-  // Бюджет: лише поточний місяць.
-  // План витрат читаємо з профілю тим самим запитом, що вже потрібен для мови
-  // й теми, — окремого звернення заради одного числа не робимо.
   const txPromise = userRef.collection('transactions').where('date', '>=', monthFrom).where('date', '<=', today).get();
-  Promise.all([txPromise, userRef.get()])
+  return Promise.all([txPromise, userRef.get()])
     .then(([snap, profileDoc]) => {
       homeData.transactions = snap.docs.map((d) => d.data());
       const profile = profileDoc.data() || {};
       homeCurrency = typeof profile.currency === 'string' ? profile.currency : '';
+      setQuickCategories(profile);
       renderBudgetTile();
     })
     .catch((err) => console.error('homeSummary budget:', err));
+}
 
-  // Завдання: від початку місяця до сьогодні — один діапазон по одному полю,
-  // тож складений індекс не потрібен. Борги давніші за місяць сюди не
-  // потраплять: для них у самому модулі є «розбір минулих днів».
-  userRef.collection('tasks').where('dueDate', '>=', taskFrom).where('dueDate', '<=', taskTo).get()
+// Завдання: від початку місяця до сьогодні — один діапазон по одному полю,
+// тож складений індекс не потрібен. Борги давніші за місяць сюди не
+// потраплять: для них у самому модулі є «розбір минулих днів».
+//
+// Календар показує дні попереду, тож завдання читаються і наперед. Межі
+// беремо по сітці МІСЯЦЯ, а не тижня: на широкому екрані малюється саме
+// вона, і на неї ж перемальовується сторінка, якщо вікно розтягнути вже
+// після завантаження. Ширше на кілька днів — дешевше за другий запит.
+function loadTasksSection(userRef) {
+  const today = todayISO();
+  const monthFrom = HomeSummary.monthStart(today);
+  const cal = HomeSummary.monthCalendar([], today);
+  const taskFrom = monthFrom < cal.from ? monthFrom : cal.from;
+  const taskTo = today > cal.to ? today : cal.to;
+  return userRef.collection('tasks').where('dueDate', '>=', taskFrom).where('dueDate', '<=', taskTo).get()
     .then((snap) => {
       const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
       homeData.tasks = docs;
       renderToday();
+      renderCalendar();
       renderLine();
       const sum = HomeSummary.tasksSummary(docs, today);
       // Велике число — скільки СПЛАНОВАНО на сьогодні, разом із уже
@@ -1195,6 +1528,20 @@ async function loadHomeSummary(uid) {
         planned ? '' : t('capTasksEmpty'), null, t('prefixPlanned'));
     })
     .catch((err) => console.error('homeSummary tasks:', err));
+}
+
+async function loadHomeSummary(uid) {
+  const userRef = db.collection('users').doc(uid);
+  const today = todayISO();
+  const monthFrom = HomeSummary.monthStart(today);
+  // Календар показує дні попереду, тож завдання читаються і наперед. Межі
+  // беремо по сітці МІСЯЦЯ, а не тижня: на широкому екрані малюється саме
+  // вона, і на неї ж перемальовується сторінка, якщо вікно розтягнути вже
+  // після завантаження. Ширше на кілька днів — дешевше за другий запит.
+  homeData = { transactions: null, tasks: null, goals: null, workouts: null };
+
+  loadBudgetSection(userRef);
+  loadTasksSection(userRef);
 
   // Цілі: їх завжди небагато, тож читаємо всі.
   userRef.collection('goals').get()

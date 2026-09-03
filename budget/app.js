@@ -378,16 +378,10 @@ function plural(n, forms) {
 // EXPENSE_CATEGORY_IDS / INCOME_CATEGORY_IDS / CAT_LABELS живуть у
 // categories-default.js у корені — їх читає ще й експорт на головному екрані.
 
-const CATEGORY_PALETTE = [
-  { text: '#3E7C59', bg: '#EAF5EF' },
-  { text: '#3D6E9E', bg: '#EAF1F8' },
-  { text: '#A8792B', bg: '#FBF3E7' },
-  { text: '#B6584A', bg: '#FBEEEC' },
-  { text: '#7A5C9E', bg: '#F3EFF8' },
-  { text: '#4C7A83', bg: '#EAF3F4' },
-  { text: '#8A6A45', bg: '#F6F0E9' },
-  { text: '#5B7A9D', bg: '#EAF0F5' },
-];
+// Палітра приїжджає з ../categories-default.js — там, де й самі категорії:
+// форму витрати відкриває тепер не лише бюджет, а й головна, і копія масиву
+// тут означала б ту саму категорію різного кольору на двох екранах.
+const CATEGORY_PALETTE = window.CATEGORY_PALETTE;
 
 function defaultCategories(type) {
   return defaultCategoryList(type, currentLang, CATEGORY_PALETTE.length);

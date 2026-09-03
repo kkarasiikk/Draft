@@ -16,6 +16,23 @@
 (function (root) {
   'use strict';
 
+  // Палітра категорій. Лежить тут, а не в budget/app.js, з тієї ж причини,
+  // що й самі категорії: споживачів більше одного. Форма витрати живе тепер
+  // не лише в бюджеті, а й на головній, і дві копії масиву розʼїхались би
+  // при першій же правці — та сама категорія була б різного кольору залежно
+  // від того, з якого екрана її відкрили. Довжина масиву — це той самий
+  // paletteSize, який приймає defaultCategoryList нижче.
+  var CATEGORY_PALETTE = [
+    { text: '#3E7C59', bg: '#EAF5EF' },
+    { text: '#3D6E9E', bg: '#EAF1F8' },
+    { text: '#A8792B', bg: '#FBF3E7' },
+    { text: '#B6584A', bg: '#FBEEEC' },
+    { text: '#7A5C9E', bg: '#F3EFF8' },
+    { text: '#4C7A83', bg: '#EAF3F4' },
+    { text: '#8A6A45', bg: '#F6F0E9' },
+    { text: '#5B7A9D', bg: '#EAF0F5' },
+  ];
+
   var EXPENSE_CATEGORY_IDS = ['food', 'transport', 'housing', 'fun', 'health', 'clothes', 'other'];
   var INCOME_CATEGORY_IDS = ['salary', 'freelance', 'gift', 'other'];
   var CAT_LABELS = {
@@ -61,12 +78,14 @@
   root.GOAL_CATEGORY_IDS = GOAL_CATEGORY_IDS;
   root.GOAL_CAT_LABELS = GOAL_CAT_LABELS;
   root.defaultGoalCategoryList = defaultGoalCategoryList;
+  root.CATEGORY_PALETTE = CATEGORY_PALETTE;
   root.EXPENSE_CATEGORY_IDS = EXPENSE_CATEGORY_IDS;
   root.INCOME_CATEGORY_IDS = INCOME_CATEGORY_IDS;
   root.CAT_LABELS = CAT_LABELS;
   root.defaultCategoryList = defaultCategoryList;
   if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
+      CATEGORY_PALETTE: CATEGORY_PALETTE,
       EXPENSE_CATEGORY_IDS: EXPENSE_CATEGORY_IDS,
       INCOME_CATEGORY_IDS: INCOME_CATEGORY_IDS,
       CAT_LABELS: CAT_LABELS,

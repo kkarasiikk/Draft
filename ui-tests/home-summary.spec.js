@@ -476,14 +476,21 @@ test.describe('Швидкий запис', () => {
     await expect(page.locator('.add-row[disabled]')).toHaveCount(0);
   });
 
-  test('чотири рядки ведуть одразу у форму створення', async ({ page }) => {
+  // Куди рядок веде — не косметика, а межа: витрата й завдання пишуться
+  // просто тут (див. home-quick-add.spec.js), а ціль і тренування ведуть у
+  // свій розділ, бо там не форма, а екран.
+  test('витрата й завдання нікуди не ведуть — форма відкривається тут', async ({ page }) => {
+    await openHub(page, {});
+    await page.click('#addFab');
+    await expect(page.locator('[data-quick="expense"]')).not.toHaveAttribute('href', /./);
+    await expect(page.locator('[data-quick="task"]')).not.toHaveAttribute('href', /./);
+  });
+
+  test('ціль і тренування ведуть одразу у форму створення в розділі', async ({ page }) => {
     await openHub(page, {});
     await page.click('#addFab');
     const hrefs = await page.locator('.add-row[href]').evaluateAll((els) => els.map((e) => e.getAttribute('href')));
-    expect(hrefs).toEqual([
-      'budget/index.html#new', 'tasks/index.html#new',
-      'goals/index.html#new', 'workout/index.html#new',
-    ]);
+    expect(hrefs).toEqual(['goals/index.html#new', 'workout/index.html#new']);
   });
 
   test('ціль можна завести з головної, навіть коли жодної немає', async ({ page }) => {
