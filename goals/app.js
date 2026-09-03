@@ -115,6 +115,8 @@ const T = {
     lapseRestart: 'Почати відлік заново', lapseEdit: 'Змінити ціль', lapsePause: 'На паузу',
     gridLabel: 'Останні вісім тижнів', gridDone: 'був крок', gridBlocked: 'сказав, що завадило',
     monthPrev: 'Попередній місяць', monthNext: 'Наступний місяць',
+    pickGoalTitle: 'Обери ціль зліва',
+    pickGoalSub: 'Тут буде все про неї: навіщо, темп, віхи, серія і щоденник.',
     emptyMonthNamed: (m) => `Немає цілей на ${m}`,
     carriedFrom: (m) => `з ${m}`,
     horizonHintMonth: (m) => `Ціль піде в ${m}.`,
@@ -223,6 +225,8 @@ const T = {
     lapseRestart: 'Начать отсчёт заново', lapseEdit: 'Изменить цель', lapsePause: 'На паузу',
     gridLabel: 'Последние восемь недель', gridDone: 'был шаг', gridBlocked: 'сказал, что помешало',
     monthPrev: 'Предыдущий месяц', monthNext: 'Следующий месяц',
+    pickGoalTitle: 'Выбери цель слева',
+    pickGoalSub: 'Здесь будет всё о ней: зачем, темп, вехи, серия и дневник.',
     emptyMonthNamed: (m) => `Нет целей на ${m}`,
     carriedFrom: (m) => `с ${m}`,
     horizonHintMonth: (m) => `Цель пойдёт в ${m}.`,
@@ -331,6 +335,8 @@ const T = {
     lapseRestart: 'Zacznij liczyć od nowa', lapseEdit: 'Zmień cel', lapsePause: 'Wstrzymaj',
     gridLabel: 'Ostatnie osiem tygodni', gridDone: 'był krok', gridBlocked: 'powiedziałeś, co przeszkodziło',
     monthPrev: 'Poprzedni miesiąc', monthNext: 'Następny miesiąc',
+    pickGoalTitle: 'Wybierz cel po lewej',
+    pickGoalSub: 'Tu będzie wszystko o nim: po co, tempo, kamienie milowe, seria i dziennik.',
     emptyMonthNamed: (m) => `Brak celów na ${m}`,
     carriedFrom: (m) => `z ${m}`,
     horizonHintMonth: (m) => `Cel trafi do ${m}.`,
@@ -439,6 +445,8 @@ const T = {
     lapseRestart: 'Start the count over', lapseEdit: 'Change the goal', lapsePause: 'Pause',
     gridLabel: 'Last eight weeks', gridDone: 'a step happened', gridBlocked: 'said what got in the way',
     monthPrev: 'Previous month', monthNext: 'Next month',
+    pickGoalTitle: 'Pick a goal on the left',
+    pickGoalSub: 'Everything about it lands here: why, pace, milestones, streak and journal.',
     emptyMonthNamed: (m) => `No goals for ${m}`,
     carriedFrom: (m) => `from ${m}`,
     horizonHintMonth: (m) => `This goal goes to ${m}.`,
@@ -614,6 +622,7 @@ function applyTranslations() {
   window.SideNav.setLang(currentLang);
   document.title = `${t('pageTitle')} · Life`;
   document.getElementById('openNewGoalBtn').setAttribute('aria-label', t('fabNewGoalLabel'));
+  renderDetailPlaceholder();
   document.getElementById('bnMonthLabel').textContent = t('bnMonth');
   document.getElementById('bnYearLabel').textContent = t('bnYear');
   document.getElementById('goalModalTitle').textContent = editingGoalId ? t('editGoalTitle') : t('newGoalTitle');
@@ -908,18 +917,54 @@ function computeBadges(list) {
 }
 
 // ---- Рендер: дашборд ----
+// Чи обрана ціль обрана САМИМ екраном, а не людиною. Різниця потрібна лише
+// в одному місці: коли вікно звужується до однієї колонки, вибір, якого
+// людина не робила, не має відкривати їй екран цілі.
+let autoSelectedGoal = false;
+
+// На широкому екрані права колонка не має зустрічати порожнечею: перша ціль
+// зі списку обирається сама. Це не вибір за людину — це рівно те, що вона
+// зробила б першим кліком, і будь-який наступний клік його скасовує.
+// Порожня підказка лишається для випадку, коли обирати нема з чого.
+function autoSelectFirstGoal() {
+  if (!isSplitView() || activeDetailGoalId) return;
+  const first = goalsInDisplayOrder(visibleGoals())[0];
+  if (!first) return;
+  activeDetailGoalId = first.id;
+  autoSelectedGoal = true;
+  subscribeToActions(first.id);
+  setScreen('detail');
+}
+
 function renderCurrentScreen() {
+  autoSelectFirstGoal();
   if (currentScreen === 'detail' && activeDetailGoalId) {
     const goal = goals.find((g) => g.id === activeDetailGoalId);
-    if (goal) { renderGoalDetail(goal); return; }
+    if (goal) {
+      renderGoalDetail(goal);
+      // На широкому екрані список нікуди не подівся й лишається живим: там
+      // видно, яку саме ціль показує права колонка, і туди ж приїжджають
+      // зміни, зроблені в деталях (віха, серія, статус).
+      if (isSplitView()) renderDashboard();
+      return;
+    }
     // Ціль зникла (видалена з іншого пристрою) — повертаємось на дашборд.
-    currentScreen = 'dashboard';
     activeDetailGoalId = null;
     stopActions();
-    document.getElementById('goalDetailScreen').style.display = 'none';
-    document.getElementById('dashboardScreen').style.display = '';
+    setScreen('dashboard');
   }
+  // Права колонка без обраної цілі не порожня: вона каже, що з нею робити.
+  if (isSplitView()) renderDetailPlaceholder();
   renderDashboard();
+}
+
+// Порожня права колонка каже, що з нею робити. Підказка — окремий елемент
+// поруч із деталями, а не замість них: блоків деталей півтора десятка, і
+// перемальовувати їх щоразу заради двох рядків тексту було б і повільно, і
+// крихко (усі id усередині зникали б і поверталися).
+function renderDetailPlaceholder() {
+  document.getElementById('pickGoalTitle').textContent = t('pickGoalTitle');
+  document.getElementById('pickGoalSub').textContent = t('pickGoalSub');
 }
 
 function renderDashboard() {
@@ -1034,8 +1079,11 @@ function goalCardHtml(goal) {
   const statusBadge = goal.status !== 'active'
     ? `<span class="goal-card-status-badge">${escapeHtml(goal.status === 'done' ? t('statusDone') : t('statusArchived'))}</span>`
     : '';
+  // Обрана ціль підсвічена: у режимі двох колонок інакше не видно, чию саме
+  // сторінку показує права колонка.
+  const selected = goal.id === activeDetailGoalId ? ' selected' : '';
   return `
-    <div class="card goal-card" data-open-goal="${goal.id}">
+    <div class="card goal-card${selected}" data-open-goal="${goal.id}">
       <div class="goal-card-top">
         <div>
           <span class="category-chip ${categoryColorClass(goal.category)}">${escapeHtml(categoryLabel(goal.category))}</span>
@@ -1100,9 +1148,38 @@ function renderMonthHeader() {
   });
 }
 
-function renderGoalsList() {
+/** Цілі, які зараз у списку: горизонт плюс обраний статус. */
+function visibleGoals() {
   const scoped = goalsOfHorizon();
-  const list = statusFilter ? scoped.filter((g) => g.status === statusFilter) : scoped;
+  return statusFilter ? scoped.filter((g) => g.status === statusFilter) : scoped;
+}
+
+/** Порядок груп — той самий, що в списку категорій, а не алфавітний: людина
+ *  сама його й склала. Категорія, якої в списку вже немає (стара ціль), стає
+ *  власною групою в кінці, а не зникає. */
+function goalGroups(list) {
+  const order = goalCategories.map((c) => c.id);
+  const seen = [];
+  list.forEach((g) => {
+    const id = g.category || '';
+    if (seen.indexOf(id) === -1) seen.push(id);
+  });
+  seen.sort((a, b) => {
+    const ia = order.indexOf(a), ib = order.indexOf(b);
+    return (ia === -1 ? order.length : ia) - (ib === -1 ? order.length : ib);
+  });
+  return seen.map((id) => ({ id, goals: list.filter((g) => (g.category || '') === id) }));
+}
+
+/** Цілі в тому порядку, в якому вони стоять на екрані. У двох колонках список
+ *  згрупований, тож «перша» там — перша у ПЕРШІЙ групі, а не в сирому списку. */
+function goalsInDisplayOrder(list) {
+  if (!isSplitView()) return list;
+  return goalGroups(list).reduce((acc, g) => acc.concat(g.goals), []);
+}
+
+function renderGoalsList() {
+  const list = visibleGoals();
   const el = document.getElementById('goalsList');
   if (!list.length) {
     // Порожній екран питає рівно те, заради чого сюди зайшли, — а це різні
@@ -1112,28 +1189,49 @@ function renderGoalsList() {
     el.innerHTML = `<div class="empty-state"><div class="title">${escapeHtml(title)}</div><div>${escapeHtml(sub)}</div></div>`;
     return;
   }
-  el.innerHTML = list.map(goalCardHtml).join('');
+  // У вузькій колонці двох-колонкового вигляду категорія стає РОЗДІЛЬНИКОМ:
+  // порожні категорії при цьому просто не малюються — на відміну від
+  // колонки-стопки на кожну, де п'ять із восьми стояли б порожніми, а
+  // місячний вид дав би колонки заввишки в одну картку. На телефоні список
+  // лишається суцільним: там групи лише додали б прокрутки.
+  el.innerHTML = isSplitView()
+    ? goalGroups(list).map((grp) =>
+      `<div class="goal-group-label">${escapeHtml(categoryLabel(grp.id))}</div>${grp.goals.map(goalCardHtml).join('')}`).join('')
+    : list.map(goalCardHtml).join('');
   el.querySelectorAll('[data-open-goal]').forEach((card) => {
     card.addEventListener('click', () => showGoalDetail(card.dataset.openGoal));
   });
 }
 
 // ---- Навігація між екранами ----
+// Який екран видно, вирішує CSS за атрибутом data-screen. Раніше це робив
+// інлайновий style — і саме він не давав широкому екрану показати список і
+// деталі ПОРУЧ: інлайновий display перебиває будь-який медіазапит.
+function setScreen(name) {
+  currentScreen = name;
+  document.getElementById('screens').dataset.screen = name;
+}
+
+// Поріг той самий, що в CSS (1240px): інакше сторінка й скрипт розходились би
+// в тому, яка зараз розкладка.
+const SPLIT_SCREEN = '(min-width:1240px)';
+function isSplitView() {
+  return typeof window.matchMedia === 'function' && window.matchMedia(SPLIT_SCREEN).matches;
+}
+
 function showGoalDetail(id) {
   activeDetailGoalId = id;
-  currentScreen = 'detail';
+  autoSelectedGoal = false;
   subscribeToActions(id);
   document.getElementById('journalInput').value = '';
-  document.getElementById('dashboardScreen').style.display = 'none';
-  document.getElementById('goalDetailScreen').style.display = 'block';
+  setScreen('detail');
   renderCurrentScreen();
 }
 function showDashboard() {
-  currentScreen = 'dashboard';
   activeDetailGoalId = null;
+  autoSelectedGoal = false;
   stopActions();
-  document.getElementById('goalDetailScreen').style.display = 'none';
-  document.getElementById('dashboardScreen').style.display = '';
+  setScreen('dashboard');
   renderCurrentScreen();
 }
 document.getElementById('detailBackBtn').addEventListener('click', showDashboard);
@@ -1145,6 +1243,20 @@ function selectHorizon(next) {
   document.getElementById('bnYear').classList.toggle('active', horizon === 'year');
   showDashboard();
 }
+// Розкладка живе за медіазапитом, а список за нього ЗНАЄ (групи за
+// категоріями є лише у двох колонках). Тож перетин порогу — це не лише
+// справа CSS: сторінку треба перемалювати, інакше після зміни ширини вона
+// малює список для іншої розкладки.
+if (typeof window.matchMedia === 'function') {
+  const splitQuery = window.matchMedia(SPLIT_SCREEN);
+  const onSplitChange = () => {
+    if (!isSplitView() && autoSelectedGoal) { showDashboard(); return; }
+    renderCurrentScreen();
+  };
+  if (typeof splitQuery.addEventListener === 'function') splitQuery.addEventListener('change', onSplitChange);
+  else if (typeof splitQuery.addListener === 'function') splitQuery.addListener(onSplitChange);
+}
+
 document.getElementById('bnMonth').addEventListener('click', () => selectHorizon('month'));
 document.getElementById('bnYear').addEventListener('click', () => selectHorizon('year'));
 
