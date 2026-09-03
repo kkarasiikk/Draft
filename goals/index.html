@@ -351,6 +351,14 @@
   .goal-card-meta{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-top:10px;font-size:12px;color:var(--ink-muted);position:relative;}
   .goal-streak-flame{color:var(--expense);font-weight:700;}
   .goal-card-deadline.overdue{color:var(--expense);font-weight:600;}
+  /* Обрана ціль у списку. Без цього на широкому екрані не видно, чию саме
+     сторінку показує права колонка. */
+  .goal-card.selected{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent);}
+  /* Категорія як роздільник у списку: групування, у якому порожні категорії
+     просто не малюються — на відміну від колонки-стопки на кожну. */
+  .goal-group-label{font-size:11.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+    color:var(--ink-muted);margin:22px 2px 10px;}
+  .goal-group-label:first-child{margin-top:2px;}
   .empty-state{text-align:center;padding:48px 20px;color:var(--ink-muted);}
   .empty-state .title{font-family:'Inter',sans-serif;font-size:17px;font-weight:600;color:var(--ink-soft);margin-bottom:6px;}
 
@@ -384,7 +392,15 @@
   .bn-fab:active{transform:scale(.92);}
 
   /* ---- Деталі цілі ---- */
-  #goalDetailScreen{display:none;padding:16px 20px 40px;}
+  /* Який екран видно — каже data-screen на контейнері, а не інлайновий
+     style із JS. Так широкий екран може показати обидва ПОРУЧ: інлайновий
+     display перебив би медіазапит. На телефоні поведінка та сама, що й була. */
+  #goalDetailScreen{padding:16px 20px 40px;}
+  .screens[data-screen="dashboard"] #goalDetailScreen{display:none;}
+  .screens[data-screen="detail"] #dashboardScreen{display:none;}
+  /* Підказка «обери ціль» має сенс лише поруч зі списком: на телефоні
+     порожньої правої колонки не буває — там екран деталей просто закритий. */
+  .detail-placeholder{display:none;}
   .detail-header{display:flex;align-items:center;gap:8px;margin-bottom:16px;}
   .cal-nav-btn{display:flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;
     border-radius:50%;border:1px solid var(--border);background:var(--glass-btn-bg);color:var(--ink-soft);
@@ -633,6 +649,56 @@
     .modal-overlay{align-items:center;}
     .modal{border-radius:18px;max-height:88vh;}
   }
+
+  /* ---- Дві колонки: список і деталі поруч ----
+     Поріг той самий, що й на головній. Доти екрани міняються (вище), бо в
+     вужчому вікні колонка списку стискає довгі назви цілей до однієї літери,
+     а деталі — це графік, віхи й щоденник, яким теж потрібна ширина.
+
+     Головне тут не порожнеча з боків, а те, що клік по цілі більше НЕ ховає
+     список: щоб глянути сусідню ціль, доводилось тиснути «назад» і шукати її
+     заново. Порівнювати цілі — саме те, заради чого в розділ і заходять.
+
+     Ширина пари обмежена: щоденник і «навіщо» — це суцільний текст, і рядок
+     на пів екрана читається гірше, ніж короткий. */
+  @media (min-width:1240px){
+    .screens{display:grid;grid-template-columns:minmax(320px,380px) minmax(0,1fr);
+      gap:28px;max-width:1240px;margin:0 auto;align-items:start;}
+    /* Обидва екрани видно завжди — data-screen на широкому нічого не ховає. */
+    .screens[data-screen="dashboard"] #goalDetailScreen,
+    .screens[data-screen="detail"] #dashboardScreen{display:block;}
+    .content, #goalDetailScreen{max-width:none;margin:0;}
+    .content{padding:20px 0 40px;}
+    #goalDetailScreen{padding:20px 0 40px;}
+    /* Список лишається на місці, поки гортаєш деталі: інакше довга сторінка
+       цілі забирала б список за верхній край, і повертатись до нього
+       доводилось би прокруткою вгору. */
+    #dashboardScreen{position:sticky;top:20px;max-height:calc(100vh - 40px);
+      overflow-y:auto;overscroll-behavior:contain;
+      scrollbar-width:thin;scrollbar-color:var(--card-border-hover) transparent;}
+    #dashboardScreen::-webkit-scrollbar{width:5px;}
+    #dashboardScreen::-webkit-scrollbar-track{background:transparent;}
+    #dashboardScreen::-webkit-scrollbar-thumb{background:var(--card-border-hover);border-radius:999px;}
+    /* «Назад» тут нікуди не веде — список і так перед очима. А без стрілки
+       зліва центрований заголовок висів би без опори: у колонці він
+       вирівнюється по лівому краю, як і все під ним. */
+    #detailBackBtn{display:none;}
+    /* Назва цілі тут переноситься, а не обрізається трьома крапками: у
+       колонці на неї є місце, а обрізана назва — це саме те, заради чого в
+       ціль і заходять, лише без кінця. */
+    #goalDetailScreen .detail-header{align-items:flex-start;}
+    #goalDetailScreen .detail-title{text-align:left;white-space:normal;overflow:visible;
+      font-size:20px;line-height:1.3;}
+    #goalDetailScreen .detail-badges-row{justify-content:flex-start;}
+    .screens[data-screen="dashboard"] .detail-placeholder{display:block;text-align:center;
+      padding:72px 20px;color:var(--ink-muted);}
+    .screens[data-screen="dashboard"] #detailBody{display:none;}
+    .detail-placeholder .title{font-family:'Inter',sans-serif;font-size:17px;font-weight:600;
+      color:var(--ink-soft);margin-bottom:6px;}
+    /* Картки у вузькій колонці: менше повітря, інакше в екран влазять три. */
+    #goalsList .card{padding:16px 18px;margin-bottom:12px;border-radius:18px;}
+    #goalsList .goal-card-title{font-size:15px;}
+  }
 </style>
 </head>
 <body>
@@ -680,6 +746,11 @@
     </div>
   </div>
 
+  <!-- Обидва екрани — діти одного контейнера, і що з них видно, вирішує
+       не JS інлайновим style, а атрибут data-screen плюс CSS. Інакше
+       широкий екран не міг би показати їх ПОРУЧ: інлайновий display
+       перебиває будь-який медіазапит. -->
+  <div class="screens" id="screens" data-screen="dashboard">
   <div id="dashboardScreen">
   <div class="content">
     <div id="monthHeader"></div>
@@ -693,30 +764,16 @@
 
   
 
-<button type="button" class="bn-fab" id="openNewGoalBtn" aria-label="Нова ціль">
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-  </button>
-
-<!-- Дві вкладки — два горизонти планування. Вкладки «Головна» тут більше
-     немає: на хаб веде напис Life у шапці, той самий, що й у решті модулів,
-     тож виходу це не забирає, а місце в меню звільняє під те, заради чого
-     в розділ і заходять. -->
-<nav class="bottom-nav" id="bottomNav">
-    <div class="bn-side">
-      <button type="button" class="bn-item active" id="bnMonth" data-horizon="month">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="2.5"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg>
-        <span id="bnMonthLabel">Місяць</span>
-      </button>
-    </div>
-    <div class="bn-side">
-      <button type="button" class="bn-item" id="bnYear" data-horizon="year">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3.5 12h17M12 3.2a15 15 0 0 1 0 17.6M12 3.2a15 15 0 0 0 0 17.6"/></svg>
-        <span id="bnYearLabel">Рік</span>
-      </button>
-    </div>
-  </nav>
 
   <div id="goalDetailScreen">
+    <!-- Права колонка, поки ціль не обрана. Стоїть ПОРУЧ із деталями, а не
+         замість них: інакше кожен показ підказки зносив би півтора десятка
+         блоків разом з їхніми id. -->
+    <div class="detail-placeholder" id="detailPlaceholder">
+      <div class="title" id="pickGoalTitle"></div>
+      <div id="pickGoalSub"></div>
+    </div>
+    <div id="detailBody">
     <div class="detail-header">
       <button type="button" id="detailBackBtn" class="cal-nav-btn" aria-label="Назад">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
@@ -747,7 +804,32 @@
       <button type="button" class="journal-add-btn" id="journalAddBtn">+</button>
     </div>
     <div id="journalList"></div>
+    </div><!-- /detailBody -->
   </div>
+  </div><!-- /screens -->
+
+<button type="button" class="bn-fab" id="openNewGoalBtn" aria-label="Нова ціль">
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+  </button>
+
+<!-- Дві вкладки — два горизонти планування. Вкладки «Головна» тут більше
+     немає: на хаб веде напис Life у шапці, той самий, що й у решті модулів,
+     тож виходу це не забирає, а місце в меню звільняє під те, заради чого
+     в розділ і заходять. -->
+<nav class="bottom-nav" id="bottomNav">
+    <div class="bn-side">
+      <button type="button" class="bn-item active" id="bnMonth" data-horizon="month">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="2.5"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg>
+        <span id="bnMonthLabel">Місяць</span>
+      </button>
+    </div>
+    <div class="bn-side">
+      <button type="button" class="bn-item" id="bnYear" data-horizon="year">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3.5 12h17M12 3.2a15 15 0 0 1 0 17.6M12 3.2a15 15 0 0 0 0 17.6"/></svg>
+        <span id="bnYearLabel">Рік</span>
+      </button>
+    </div>
+  </nav>
 </div>
 </div>
 

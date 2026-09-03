@@ -66,11 +66,14 @@ test.describe('Дві вкладки: місяць і рік', () => {
     await expect(page.locator('#topbarHomeLink')).toHaveAttribute('href', '../index.html');
   });
 
+  // Селектор саме `#goalsList .empty-state`, а не будь-який на сторінці:
+  // у двох колонках (типовий екран тестів — 1280px) праворуч стоять деталі
+  // цілі, і в них є свої порожні стани — «ще немає віх», «ще нема нотаток».
   test('порожній екран питає різне на різних вкладках', async ({ page }) => {
     await openGoals(page, [yearly]);
-    await expect(page.locator('.empty-state .title')).toContainText(/немає цілей на/i);
+    await expect(page.locator('#goalsList .empty-state .title')).toContainText(/немає цілей на/i);
     await page.click('#bnYear');
-    await expect(page.locator('.empty-state')).toHaveCount(0);
+    await expect(page.locator('#goalsList .empty-state')).toHaveCount(0);
   });
 
   test('вкладка показує рівно свої цілі, скільки б їх не було', async ({ page }) => {
