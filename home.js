@@ -37,7 +37,7 @@ const LOCALE_MAP = { uk: 'uk-UA', ru: 'ru-RU', pl: 'pl-PL', en: 'en-US' };
 const STRINGS = {
   uk: {
     themeLabel: 'Тема', themeLight: 'Світла', themeDark: 'Темна', themeSystem: 'Системна',
-    amountsLabel: 'Сума витрат', amountsShow: 'Показувати', amountsHide: 'Ховати',
+    amountsShow: 'Показати суму', amountsHide: 'Сховати суму',
     langLabel: 'Мова', logout: 'Вийти', exportLabel: 'Експорт даних',
     settingsLabel: 'Налаштування',
     exportBusy: 'Готую файл…', exportError: 'Не вдалося зібрати файл. Спробуй ще раз.',
@@ -53,7 +53,6 @@ const STRINGS = {
     budgetTitle: 'Бюджет', budgetSub: 'витрати й доходи',
     sumLoading: '…',
     sumBudget: (s) => `цього місяця ${s}`,
-    sumTasksOpen: (n) => `${n} ${plural(n, { one: 'справа', few: 'справи', many: 'справ', other: 'справи' })} на сьогодні`,
     sumStreak: (n) => `серія ${n} ${plural(n, { one: 'день', few: 'дні', many: 'днів', other: 'дня' })}`,
     sumGoalsPending: (n) => `${n} без кроку сьогодні`,
     sumWorkoutToday: 'сьогодні тренувався',
@@ -89,9 +88,11 @@ const STRINGS = {
     todayEmpty: 'На сьогодні нічого не чекає.',
     todayMore: (n) => `Ще ${n} у завданнях →`,
     todayAt: (hhmm) => `до ${hhmm}`,
-    lineGoals: (n) => `${n} ${plural(n, { one: 'ціль', few: 'цілі', many: 'цілей', other: 'цілі' })} без кроку`,
-    lineWorkout: (n) => `${n} ${plural(n, { one: 'день', few: 'дні', many: 'днів', other: 'дня' })} без залу`,
-    lineFree: 'Сьогодні нічого не чекає.',
+    lineTasks: (n) => `${n} ${plural(n, { one: 'заплановане завдання', few: 'заплановані завдання', many: 'запланованих завдань', other: 'запланованого завдання' })}`,
+    lineBoth: (n) => `На сьогодні маєш ${t('lineTasks', n)} та тренування.`,
+    lineTasksOnly: (n) => `На сьогодні маєш ${t('lineTasks', n)}, а тренування немає.`,
+    lineWorkoutOnly: 'На сьогодні маєш тренування, а завдань не заплановано.',
+    lineNothing: 'На сьогодні нічого не заплановано.',
     goalsTitle: 'Цілі', goalsSub: 'довгострокові',
     tasksTitle: 'Завдання', tasksSub: 'на кожен день',
     workoutTitle: 'Тренування', workoutSub: 'сесії й рекорди',
@@ -112,7 +113,7 @@ const STRINGS = {
   },
   ru: {
     themeLabel: 'Тема', themeLight: 'Светлая', themeDark: 'Тёмная', themeSystem: 'Системная',
-    amountsLabel: 'Сумма расходов', amountsShow: 'Показывать', amountsHide: 'Скрывать',
+    amountsShow: 'Показать сумму', amountsHide: 'Скрыть сумму',
     langLabel: 'Язык', logout: 'Выйти', exportLabel: 'Экспорт данных',
     settingsLabel: 'Настройки',
     exportBusy: 'Готовлю файл…', exportError: 'Не удалось собрать файл. Попробуй ещё раз.',
@@ -128,7 +129,6 @@ const STRINGS = {
     budgetTitle: 'Бюджет', budgetSub: 'расходы и доходы',
     sumLoading: '…',
     sumBudget: (s) => `в этом месяце ${s}`,
-    sumTasksOpen: (n) => `${n} ${plural(n, { one: 'дело', few: 'дела', many: 'дел', other: 'дела' })} на сегодня`,
     sumStreak: (n) => `серия ${n} ${plural(n, { one: 'день', few: 'дня', many: 'дней', other: 'дня' })}`,
     sumGoalsPending: (n) => `${n} без шага сегодня`,
     sumWorkoutToday: 'сегодня тренировался',
@@ -164,9 +164,11 @@ const STRINGS = {
     todayEmpty: 'На сегодня ничего не ждёт.',
     todayMore: (n) => `Ещё ${n} в задачах →`,
     todayAt: (hhmm) => `до ${hhmm}`,
-    lineGoals: (n) => `${n} ${plural(n, { one: 'цель', few: 'цели', many: 'целей', other: 'цели' })} без шага`,
-    lineWorkout: (n) => `${n} ${plural(n, { one: 'день', few: 'дня', many: 'дней', other: 'дня' })} без зала`,
-    lineFree: 'Сегодня ничего не ждёт.',
+    lineTasks: (n) => `${n} ${plural(n, { one: 'запланированная задача', few: 'запланированные задачи', many: 'запланированных задач', other: 'запланированной задачи' })}`,
+    lineBoth: (n) => `На сегодня у тебя ${t('lineTasks', n)} и тренировка.`,
+    lineTasksOnly: (n) => `На сегодня у тебя ${t('lineTasks', n)}, а тренировки нет.`,
+    lineWorkoutOnly: 'На сегодня у тебя тренировка, а задач не запланировано.',
+    lineNothing: 'На сегодня ничего не запланировано.',
     goalsTitle: 'Цели', goalsSub: 'долгосрочные',
     tasksTitle: 'Задачи', tasksSub: 'на каждый день',
     workoutTitle: 'Тренировки', workoutSub: 'сессии и рекорды',
@@ -187,7 +189,7 @@ const STRINGS = {
   },
   pl: {
     themeLabel: 'Motyw', themeLight: 'Jasny', themeDark: 'Ciemny', themeSystem: 'Systemowy',
-    amountsLabel: 'Kwota wydatków', amountsShow: 'Pokazuj', amountsHide: 'Ukrywaj',
+    amountsShow: 'Pokaż kwotę', amountsHide: 'Ukryj kwotę',
     langLabel: 'Język', logout: 'Wyloguj', exportLabel: 'Eksport danych',
     settingsLabel: 'Ustawienia',
     exportBusy: 'Przygotowuję plik…', exportError: 'Nie udało się zebrać pliku. Spróbuj ponownie.',
@@ -203,7 +205,6 @@ const STRINGS = {
     budgetTitle: 'Budżet', budgetSub: 'wydatki i dochody',
     sumLoading: '…',
     sumBudget: (s) => `w tym miesiącu ${s}`,
-    sumTasksOpen: (n) => `${n} ${plural(n, { one: 'zadanie', few: 'zadania', many: 'zadań', other: 'zadania' })} na dziś`,
     sumStreak: (n) => `seria ${n} ${plural(n, { one: 'dzień', few: 'dni', many: 'dni', other: 'dnia' })}`,
     sumGoalsPending: (n) => `${n} bez kroku dziś`,
     sumWorkoutToday: 'dziś trenowałeś',
@@ -239,9 +240,11 @@ const STRINGS = {
     todayEmpty: 'Na dziś nic nie czeka.',
     todayMore: (n) => `Jeszcze ${n} w zadaniach →`,
     todayAt: (hhmm) => `do ${hhmm}`,
-    lineGoals: (n) => `${n} ${plural(n, { one: 'cel', few: 'cele', many: 'celów', other: 'celu' })} bez kroku`,
-    lineWorkout: (n) => `${n} ${plural(n, { one: 'dzień', few: 'dni', many: 'dni', other: 'dnia' })} bez siłowni`,
-    lineFree: 'Na dziś nic nie czeka.',
+    lineTasks: (n) => `${n} ${plural(n, { one: 'zaplanowane zadanie', few: 'zaplanowane zadania', many: 'zaplanowanych zadań', other: 'zaplanowanego zadania' })}`,
+    lineBoth: (n) => `Na dziś masz ${t('lineTasks', n)} i trening.`,
+    lineTasksOnly: (n) => `Na dziś masz ${t('lineTasks', n)}, a treningu nie ma.`,
+    lineWorkoutOnly: 'Na dziś masz trening, a zadań nie zaplanowano.',
+    lineNothing: 'Na dziś nic nie zaplanowano.',
     goalsTitle: 'Cele', goalsSub: 'długoterminowe',
     tasksTitle: 'Zadania', tasksSub: 'na każdy dzień',
     workoutTitle: 'Treningi', workoutSub: 'sesje i rekordy',
@@ -262,7 +265,7 @@ const STRINGS = {
   },
   en: {
     themeLabel: 'Theme', themeLight: 'Light', themeDark: 'Dark', themeSystem: 'System',
-    amountsLabel: 'Spending amount', amountsShow: 'Show', amountsHide: 'Hide',
+    amountsShow: 'Show the amount', amountsHide: 'Hide the amount',
     langLabel: 'Language', logout: 'Log out', exportLabel: 'Export data',
     settingsLabel: 'Settings',
     exportBusy: 'Preparing the file…', exportError: 'Could not build the file. Try again.',
@@ -278,7 +281,6 @@ const STRINGS = {
     budgetTitle: 'Budget', budgetSub: 'spending & income',
     sumLoading: '…',
     sumBudget: (s) => `this month ${s}`,
-    sumTasksOpen: (n) => `${n} ${plural(n, { one: 'task', other: 'tasks' })} today`,
     sumStreak: (n) => `${n}-day streak`,
     sumGoalsPending: (n) => `${n} with no step today`,
     sumWorkoutToday: 'trained today',
@@ -314,9 +316,11 @@ const STRINGS = {
     todayEmpty: 'Nothing waiting today.',
     todayMore: (n) => `${n} more in Tasks →`,
     todayAt: (hhmm) => `by ${hhmm}`,
-    lineGoals: (n) => `${n} ${plural(n, { one: 'goal', other: 'goals' })} without a step`,
-    lineWorkout: (n) => `${n} ${plural(n, { one: 'day', other: 'days' })} without the gym`,
-    lineFree: 'Nothing waiting today.',
+    lineTasks: (n) => `${n} ${plural(n, { one: 'planned task', other: 'planned tasks' })}`,
+    lineBoth: (n) => `Today you have ${t('lineTasks', n)} and a workout.`,
+    lineTasksOnly: (n) => `Today you have ${t('lineTasks', n)}, and no workout.`,
+    lineWorkoutOnly: 'Today you have a workout, and no tasks planned.',
+    lineNothing: 'Nothing planned for today.',
     goalsTitle: 'Goals', goalsSub: 'long-term',
     tasksTitle: 'Tasks', tasksSub: 'day to day',
     workoutTitle: 'Workouts', workoutSub: 'sessions & records',
@@ -378,7 +382,6 @@ function applyTranslations() {
   document.getElementById('htmlRoot').setAttribute('lang', currentLang);
   document.getElementById('themeMenuLabel').textContent = t('themeLabel');
   document.getElementById('langMenuLabel').textContent = t('langLabel');
-  document.getElementById('amountsMenuLabel').textContent = t('amountsLabel');
   document.getElementById('exportLabel').textContent = t('exportLabel');
   document.getElementById('logoutLabel').textContent = t('logout');
   // Назви розділів у колонці живуть у side-nav.js — одні на пʼять сторінок.
@@ -526,26 +529,30 @@ function renderThemePicker() {
     btn.addEventListener('click', () => setTheme(btn.dataset.themeChoice));
   });
 }
-function renderAmountsPicker() {
-  const picker = document.getElementById('amountsPicker');
-  if (!picker) return;
-  const options = [
-    { hide: false, label: t('amountsShow') },
-    { hide: true, label: t('amountsHide') },
-  ];
-  picker.innerHTML = options
-    .map((o) => `<button type="button" class="theme-choice${o.hide === hideAmounts ? ' selected' : ''}" data-hide-amounts="${o.hide}">${o.label}</button>`)
-    .join('');
-  picker.querySelectorAll('[data-hide-amounts]').forEach((btn) => {
-    btn.addEventListener('click', () => setHideAmounts(btn.dataset.hideAmounts === 'true'));
-  });
+// Око на самій плитці, а не рядок у меню налаштувань. Перемикач був там, і
+// його ніхто не знаходив: ховати суму хочеться в ту саму секунду, коли до
+// тебе підходять, а не після подорожі в меню.
+const EYE_OPEN = '<path d="M2 12s3.6-6.4 10-6.4S22 12 22 12s-3.6 6.4-10 6.4S2 12 2 12Z"/><circle cx="12" cy="12" r="2.7"/>';
+const EYE_OFF = '<path d="M3 3l18 18"/><path d="M10.7 6.1A9.9 9.9 0 0 1 12 6c6.4 0 10 6 10 6a17.3 17.3 0 0 1-3.3 3.9"/>'
+  + '<path d="M6.6 8A16.9 16.9 0 0 0 2 12s3.6 6 10 6c1.2 0 2.3-.2 3.3-.5"/><path d="M9.9 10.1a2.8 2.8 0 0 0 4 4"/>';
+
+function renderAmountsToggle() {
+  const btn = document.getElementById('hideAmountsBtn');
+  if (!btn) return;
+  // Значок показує ДІЮ, а не стан: коли сума видна, око перекреслене —
+  // «сховати». Інакше довелось би гадати, що саме він означає.
+  btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+    stroke-linecap="round" stroke-linejoin="round">${hideAmounts ? EYE_OPEN : EYE_OFF}</svg>`;
+  btn.setAttribute('aria-label', t(hideAmounts ? 'amountsShow' : 'amountsHide'));
+  btn.setAttribute('title', t(hideAmounts ? 'amountsShow' : 'amountsHide'));
+  btn.setAttribute('aria-pressed', hideAmounts ? 'true' : 'false');
 }
 
 function setHideAmounts(hide) {
   hideAmounts = !!hide;
   try { localStorage.setItem('financeAppHideAmounts', hideAmounts ? '1' : '0'); }
   catch (err) { /* приватний режим — сховати на цей сеанс однаково вийде */ }
-  renderAmountsPicker();
+  renderAmountsToggle();
   // Плитка малюється з даних, які вже прийшли: перезапитувати базу заради
   // перемикача не треба.
   renderBudgetTile();
@@ -627,8 +634,10 @@ setAuthMode('login');
 applyTheme();
 renderThemePicker();
 renderLangPicker();
-renderAmountsPicker();
+renderAmountsToggle();
 applyTranslations();
+
+document.getElementById('hideAmountsBtn').addEventListener('click', () => setHideAmounts(!hideAmounts));
 
 document.getElementById('authForm').addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -1099,22 +1108,24 @@ function renderLine() {
   const dateEl = document.getElementById('todayDate');
   if (dateEl) dateEl.textContent = capitalizeFirst(formatFullDate(today));
 
-  const parts = [];
-  if (homeData.tasks) {
-    const open = homeData.tasks.filter((x) => x && !x.done && x.dueDate === today).length;
-    if (open) parts.push(t('sumTasksOpen', open));
-  }
-  if (homeData.goals && window.GoalStreak) {
-    const pending = window.GoalStreak.eveningQueue(homeData.goals, today).length;
-    if (pending) parts.push(t('lineGoals', pending));
-  }
-  if (homeData.workouts) {
-    const sum = HomeSummary.workoutSummary(homeData.workouts, today);
-    if (sum.daysAgo !== null && sum.daysAgo > 0) parts.push(t('lineWorkout', sum.daysAgo));
-  }
-  // Нічого не чекає — так і кажемо. Порожній рядок виглядав би як помилка
-  // завантаження, а не як вільний день.
-  lineEl.textContent = parts.length ? capitalizeFirst(parts.join(', ')) + '.' : t('lineFree');
+  // Поки не приїхало і те, й те — мовчимо. Сказати «а тренування немає» до
+  // того, як тренування прочитались, означало б збрехати на пів секунди, а
+  // потім себе виправити; рядок читають одним поглядом, і встигне лишитись
+  // саме перша версія. Раніше тут ще був окремий шматок про цілі — він пішов
+  // разом із перебудовою рядка на одне речення; «11 без кроку» лишилось на
+  // плитці цілей, де воно й доречне.
+  if (!homeData.tasks || !homeData.workouts) { lineEl.textContent = ''; return; }
+
+  // Рахуємо ЗАПЛАНОВАНЕ на сьогодні, разом із уже зробленим, — те саме
+  // число, що й на плитці завдань. Інакше рядок і плитка казали б різне про
+  // один день.
+  const planned = homeData.tasks.filter((x) => x && x.dueDate === today).length;
+  const hasWorkout = !!HomeSummary.workoutToday(homeData.workouts, today);
+
+  if (planned && hasWorkout) lineEl.textContent = t('lineBoth', planned);
+  else if (planned) lineEl.textContent = t('lineTasksOnly', planned);
+  else if (hasWorkout) lineEl.textContent = t('lineWorkoutOnly');
+  else lineEl.textContent = t('lineNothing');
 }
 
 function capitalizeFirst(str) {
@@ -1438,7 +1449,7 @@ auth.onAuthStateChanged((user) => {
         renderThemePicker();
         renderLangPicker();
         // Підписи «Показувати / Ховати» теж мовні.
-        renderAmountsPicker();
+        renderAmountsToggle();
       }
     }).catch(() => {});
   } else {

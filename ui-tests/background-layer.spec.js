@@ -6,8 +6,13 @@
 // меню — у `.app-menu` тоді був backdrop-filter, і він змушував браузер
 // перезібрати композицію. Звідси й враження, що тло «вмикає» бургер.
 //
-// Градієнта й backdrop-filter уже немає, але сама пастка з порядком малювання
-// нікуди не поділась — саме її тут і стережемо.
+// Градієнта немає, пастка з порядком малювання лишилась — її стереже друга
+// половина файлу (в `body` не має бути власного тла).
+//
+// А backdrop-filter повернувся, але вже свідомо й в іншому місці: підкладка
+// меню налаштувань розмиває сторінку під собою. Тож перша половина файлу
+// перевіряє протилежне до того, що перевіряла колись: тло під відкритим меню
+// МАЄ змінитись, бо саме заради цього підкладку й зробили.
 const { test, expect } = require('@playwright/test');
 const { openModule } = require('./helpers');
 
@@ -33,7 +38,7 @@ async function openHome(page, theme) {
 }
 
 for (const theme of ['light', 'dark']) {
-  test(`${theme}: тло не залежить від того, відкрите меню чи ні`, async ({ page }) => {
+  test(`${theme}: відкрите меню затемнює сторінку під собою`, async ({ page }) => {
     await openHome(page, theme);
     const closed = await page.screenshot({ clip: STRIP });
 
@@ -43,9 +48,52 @@ for (const theme of ['light', 'dark']) {
     const opened = await page.screenshot({ clip: STRIP });
 
     expect(opened.equals(closed),
-      'світло стрибнуло при відкритті меню — тло знову чимось перекрите').toBe(true);
+      'сторінка під меню лишилась такою самою — підкладки не видно').toBe(false);
+  });
+
+  test(`${theme}: закрите меню повертає тло таким, яким воно було`, async ({ page }) => {
+    await openHome(page, theme);
+    const before = await page.screenshot({ clip: STRIP });
+
+    await page.click('#menuBtn');
+    await page.waitForSelector('#appMenuOverlay.show');
+    await page.waitForTimeout(350);
+    await page.click('#menuBtn');
+    await page.waitForTimeout(350);
+    const after = await page.screenshot({ clip: STRIP });
+
+    expect(after.equals(before),
+      'після закриття меню тло не повернулось — щось лишилось поверх нього').toBe(true);
   });
 }
+
+// Розмиття — не косметика, а те, заради чого підкладку й міняли: без нього
+// світла картка на світлій сторінці зливалася з нею, і межу було видно лише
+// по тонкій рамці.
+test('підкладка меню і затемнює, і розмиває', async ({ page }) => {
+  await openHome(page, 'light');
+  await page.click('#menuBtn');
+  await page.waitForSelector('#appMenuOverlay.show');
+  const style = await page.locator('#appMenuOverlay').evaluate((el) => {
+    const cs = getComputedStyle(el);
+    return { bg: cs.backgroundColor, blur: cs.backdropFilter || cs.webkitBackdropFilter };
+  });
+  expect(style.bg).not.toBe('rgba(0, 0, 0, 0)');
+  expect(style.blur).toMatch(/blur/);
+});
+
+// Кругла кнопка «+» лежить високо (z-index 70), і без окремої турботи вона
+// світилася б поверх розмиття, ніби вона не в цій сцені.
+test('«+» не світиться поверх розмиття', async ({ page }) => {
+  await openHome(page, 'light');
+  await page.click('#menuBtn');
+  await page.waitForSelector('#appMenuOverlay.show');
+  const [fab, overlay] = await page.evaluate(() => [
+    Number(getComputedStyle(document.getElementById('addFab')).zIndex),
+    Number(getComputedStyle(document.getElementById('appMenuOverlay')).zIndex),
+  ]);
+  expect(overlay).toBeGreaterThan(fab);
+});
 
 // Той самий шар — і та сама пастка — на кожній сторінці застосунку.
 const PAGES = [

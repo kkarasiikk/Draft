@@ -417,21 +417,42 @@ test.describe('Календар тижня', () => {
   });
 });
 
+// Рядок під датою — одне речення про день: скільки завдань заплановано і чи
+// є тренування. Раніше це був перелік через кому, у якому третім пунктом
+// стояли «11 цілей без кроку» й «1 день без залу» — тобто не про сьогодні, а
+// про те, чого не зроблено.
 test.describe('Рядок під датою', () => {
-  test('називає, що чекає, одним реченням', async ({ page }) => {
-    await openHub(page, {
-      tasks: [{ id: 't1', title: 'Справа', done: false, dueDate: iso() }],
-      goals: [{ id: 'g1', title: 'Ціль', status: 'active', category: 'finance', checkins: [], milestones: [] }],
-    });
-    await expect(page.locator('#todayLine')).toContainText('на сьогодні');
-    await expect(page.locator('#todayLine')).toContainText('без кроку');
+  const line = (page) => page.locator('#todayLine');
+  const workout = (name) => ({ id: 'w', date: iso(), name: name || 'Ноги',
+    exercises: [{ sets: [{ weight: 0, reps: 0 }] }] });
+  const task = (id, done) => ({ id, title: 'Справа ' + id, done, dueDate: iso() });
+
+  test('завдання й тренування — одним реченням', async ({ page }) => {
+    await openHub(page, { tasks: [task('a'), task('b'), task('c')], workouts: [workout()] });
+    await expect(line(page)).toHaveText('На сьогодні маєш 3 заплановані завдання та тренування.');
   });
 
-  test('коли нічого не чекає — так і каже, а не мовчить', async ({ page }) => {
-    await openHub(page, { tasks: [], goals: [], workouts: [{ id: 'w', date: iso(), exercises: [] }] });
-    await expect(page.locator('#todayLine')).toHaveText('Сьогодні нічого не чекає.');
+  // Рахуємо заплановане, разом із уже зробленим — те саме число, що й на
+  // плитці. Інакше рядок і плитка казали б різне про один день.
+  test('виконане з числа не зникає', async ({ page }) => {
+    await openHub(page, { tasks: [task('a'), task('b', true)], workouts: [] });
+    await expect(line(page)).toContainText('2 заплановані завдання');
   });
 
+  test('без тренування речення це й каже', async ({ page }) => {
+    await openHub(page, { tasks: [task('a')], workouts: [] });
+    await expect(line(page)).toHaveText('На сьогодні маєш 1 заплановане завдання, а тренування немає.');
+  });
+
+  test('саме тренування без завдань', async ({ page }) => {
+    await openHub(page, { tasks: [], workouts: [workout()] });
+    await expect(line(page)).toHaveText('На сьогодні маєш тренування, а завдань не заплановано.');
+  });
+
+  test('порожній день — так і каже, а не мовчить', async ({ page }) => {
+    await openHub(page, { tasks: [], workouts: [] });
+    await expect(line(page)).toHaveText('На сьогодні нічого не заплановано.');
+  });
 });
 
 // ---- «+»: одна кнопка на всі чотири розділи ----
