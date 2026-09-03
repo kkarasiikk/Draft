@@ -439,16 +439,31 @@ function setLang(lang) {
 // вони ще вміщаються без гортання. На широкому екрані та сама стеля лишала
 // півсторінки порожньою, тож там їх десять, а решта ховається за рядком
 // «ще N» — посиланням у розділ, а не мовчазним обрізанням.
+//
+// Але десять рядків вимагають не лише ширини, а й ВИСОТИ. На ноутбуці з
+// невисоким вікном (1366x768, або 1920x1080 при масштабі 125%) картка з
+// десятьма справами виштовхувала плитки за край, і сторінка починала
+// гортатись — тобто ламала те, заради чого розкладку й робили. Тому там
+// стеля менша, а решта так само йде за посилання. Поріг висоти той самий,
+// що в CSS (820px), інакше сторінка й скрипт розходились би в тому, яка
+// зараз розкладка.
 const TODAY_TASK_LIMIT = 4;
 const TODAY_TASK_LIMIT_WIDE = 10;
+const TODAY_TASK_LIMIT_SHORT = 7;
 const WIDE_SCREEN = '(min-width:880px)';
+const TALL_SCREEN = '(min-height:820px)';
+
+function matchesMedia(query) {
+  return typeof window.matchMedia === 'function' && window.matchMedia(query).matches;
+}
 
 function isWideScreen() {
-  return typeof window.matchMedia === 'function' && window.matchMedia(WIDE_SCREEN).matches;
+  return matchesMedia(WIDE_SCREEN);
 }
 
 function todayTaskLimit() {
-  return isWideScreen() ? TODAY_TASK_LIMIT_WIDE : TODAY_TASK_LIMIT;
+  if (!isWideScreen()) return TODAY_TASK_LIMIT;
+  return matchesMedia(TALL_SCREEN) ? TODAY_TASK_LIMIT_WIDE : TODAY_TASK_LIMIT_SHORT;
 }
 
 let homeData = { transactions: null, tasks: null, goals: null, workouts: null };
@@ -816,7 +831,8 @@ function renderToday() {
   // Невиконане згори: закреслене вже нікуди не поспішає.
   mine.sort((a, b) => (a.done === b.done ? 0 : (a.done ? 1 : -1)));
 
-  // Стелю бере todayTaskLimit(): 4 на телефоні, 10 на широкому екрані.
+  // Стелю бере todayTaskLimit(): 4 на телефоні, 7 у низькому вікні, 10 на
+  // просторому широкому екрані.
   const limit = todayTaskLimit();
   const html = mine.slice(0, limit).map((task) => `
       <div class="today-row${task.done ? ' checked' : ''}">
@@ -1034,13 +1050,15 @@ function renderCalendar() {
 }
 
 // Розкладка міняється не лише при завантаженні: вікно на компʼютері
-// розтягують і звужують. Перемальовуємо з тих самих даних — у базу за цим
-// ходити не треба.
+// розтягують і звужують — і по ширині, і по висоті. Перемальовуємо з тих
+// самих даних — у базу за цим ходити не треба.
 if (typeof window.matchMedia === 'function') {
-  const mq = window.matchMedia(WIDE_SCREEN);
   const onChange = () => { renderCalendar(); renderToday(); };
-  if (typeof mq.addEventListener === 'function') mq.addEventListener('change', onChange);
-  else if (typeof mq.addListener === 'function') mq.addListener(onChange);
+  [WIDE_SCREEN, TALL_SCREEN].forEach((query) => {
+    const mq = window.matchMedia(query);
+    if (typeof mq.addEventListener === 'function') mq.addEventListener('change', onChange);
+    else if (typeof mq.addListener === 'function') mq.addListener(onChange);
+  });
 }
 
 // ---- Рядок під датою ----

@@ -27,7 +27,10 @@ async function openHub(page, seed) {
 }
 
 test.describe('Широкий екран', () => {
-  test.use({ viewport: { width: 1280, height: 800 } });
+  // Висота теж має значення: стеля списку в десять рядків вимагає простору
+  // по вертикалі (див. «Низьке вікно ноутбука» нижче), тож тут вікно
+  // свідомо високе.
+  test.use({ viewport: { width: 1280, height: 900 } });
 
   test('календар показує весь місяць, а не сім днів', async ({ page }) => {
     await openHub(page);
@@ -187,5 +190,41 @@ test.describe('Ноутбук', () => {
     const over = await page.evaluate(() =>
       document.documentElement.scrollWidth - document.documentElement.clientWidth);
     expect(over).toBeLessThanOrEqual(0);
+  });
+});
+
+// Головна має вміщатись в один екран — заради цього її й розкладали. Але
+// вміст має свою мінімальну висоту, і на ноутбуці з невисоким вікном
+// (1366x768, або 1920x1080 при масштабі 125%) вона вилазила за край на
+// кілька десятків пікселів: рівно стільки, щоб зʼявилась смуга прокрутки.
+test.describe('Низьке вікно ноутбука', () => {
+  const noScroll = async (page) => page.evaluate(() =>
+    document.documentElement.scrollHeight - window.innerHeight);
+
+  for (const [w, h] of [[1536, 692], [1366, 640], [1280, 700], [1920, 768]]) {
+    test(`${w}x${h}: сторінка вміщається без прокрутки`, async ({ page }) => {
+      await page.setViewportSize({ width: w, height: h });
+      await openHub(page, manyTasks(6));
+      expect(await noScroll(page)).toBeLessThanOrEqual(0);
+    });
+
+    test(`${w}x${h}: і з чотирнадцятьма справами теж`, async ({ page }) => {
+      await page.setViewportSize({ width: w, height: h });
+      await openHub(page, manyTasks(14));
+      expect(await noScroll(page)).toBeLessThanOrEqual(0);
+    });
+  }
+
+  test('у низькому вікні стеля списку менша, решта — за посиланням', async ({ page }) => {
+    await page.setViewportSize({ width: 1536, height: 692 });
+    await openHub(page, manyTasks(14));
+    await expect(page.locator('#todayList .today-row')).toHaveCount(7);
+    await expect(page.locator('.today-more')).toHaveText('Ще 7 у завданнях →');
+  });
+
+  test('на просторому екрані стеля лишається десять', async ({ page }) => {
+    await page.setViewportSize({ width: 1536, height: 900 });
+    await openHub(page, manyTasks(14));
+    await expect(page.locator('#todayList .today-row')).toHaveCount(10);
   });
 });
