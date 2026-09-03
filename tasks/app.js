@@ -2467,12 +2467,35 @@ document.getElementById('addSubtaskBtn').addEventListener('click', addEmptySubta
 // список, а не змушує спершу знайти потрібний розділ. Хеш прибираємо, щоб
 // оновлення сторінки не відкривало форму вдруге, а «назад» вело туди,
 // звідки прийшли.
+// Календар на головній — не картинка: тап по числу веде сюди, на той самий
+// день (#day=YYYY-MM-DD). Дату перевіряємо, а не віримо адресному рядку:
+// туди можна написати будь-що, а selectedDate потім живе в усіх запитах.
+const DAY_HASH_RE = /^#day=(\d{4}-\d{2}-\d{2})$/;
+
 function openFromHash(open) {
+  // Форма дати збігається — це ще не дата: «2026-13-45» теж збігається, а
+  // parseISODate тихо переллє її в лютий наступного року. Тому звіряємо
+  // зворотним перетворенням: справжній день переживає його без змін.
+  const day = DAY_HASH_RE.exec(location.hash);
+  if (day && isoDateShift(day[1], 0) === day[1]) {
+    clearHash();
+    // Той самий setTimeout, що й для форми: даємо першому снапшоту
+    // домалювати тиждень, інакше день обереться на порожньому списку.
+    setTimeout(() => selectDate(day[1]), 0);
+    return;
+  }
   if (location.hash !== '#new') return;
-  try { history.replaceState(null, '', location.pathname + location.search); } catch (err) { /* file:// */ }
+  clearHash();
   // Даємо підписці домалювати перший кадр: форма читає категорії, шаблони
   // й решту того, що приїжджає першим снапшотом.
   setTimeout(open, 0);
+}
+
+// Хеш прибираємо одразу: інакше оновлення сторінки відкривало б те саме
+// вдруге, а «назад» вело б не туди, звідки прийшли.
+function clearHash() {
+  try { history.replaceState(null, '', location.pathname + location.search); }
+  catch (err) { /* file:// */ }
 }
 
 // Автофокус на першому полі форми — але не за будь-яку ціну.

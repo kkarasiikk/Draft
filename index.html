@@ -325,8 +325,16 @@
      починався б із дірки, і число стояло б не під своїм днем тижня. Але
      читаються вони тихіше: це не цей місяць. */
   .cal-day.other-month{opacity:.38;}
+  /* День — посилання в розділ завдань на цей день, тож знімаємо з нього
+     все, чим браузер малює посилання, і лишаємо палець/курсор. */
   .cal-day{display:flex;flex-direction:column;align-items:stretch;gap:3px;padding:7px 3px 6px;
-    border-radius:13px;background:transparent;min-width:0;}
+    border-radius:13px;background:transparent;min-width:0;
+    text-decoration:none;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+  .cal-day:active{transform:scale(.94);}
+  @media (hover:hover){
+    .cal-day:hover{background:var(--surface-flat);}
+    .cal-day.today:hover{background:var(--accent);}
+  }
   .cal-dow{font-size:10.5px;font-weight:500;color:var(--ink-muted);text-transform:lowercase;text-align:center;}
   .cal-num{font-size:15px;font-weight:600;color:var(--ink-soft);line-height:1.1;text-align:center;}
   .cal-day.past .cal-num{color:var(--ink-muted);}

@@ -1052,18 +1052,25 @@ function renderCalendar() {
     ? cal.days.slice(0, 7).map((d) => `<div class="cal-dow-head">${escapeHtml(dow.format(new Date(d.date + 'T00:00:00')))}</div>`).join('')
     : '';
 
+  // Кожен день — посилання в розділ завдань на цей самий день (#day=…).
+  // Саме посилання, а не кнопка з обробником: так працює середня кнопка миші,
+  // «відкрити в новій вкладці» й клавіатура, і нічого з цього не треба
+  // писати руками.
+  const dayName = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long' });
   const cells = cal.days.map((d) => {
     const cls = ['cal-day'];
     if (d.today) cls.push('today');
     if (d.past) cls.push('past');
     if (d.otherMonth) cls.push('other-month');
     const dot = d.hasTasks ? (d.allDone ? ' all-done' : ' has') : '';
+    const at = new Date(d.date + 'T00:00:00');
     return `
-      <div class="${cls.join(' ')}">
-        ${wide ? '' : `<span class="cal-dow">${escapeHtml(dow.format(new Date(d.date + 'T00:00:00')))}</span>`}
+      <a class="${cls.join(' ')}" href="tasks/index.html#day=${escapeHtml(d.date)}"
+         aria-label="${escapeHtml(dayName.format(at))}">
+        ${wide ? '' : `<span class="cal-dow">${escapeHtml(dow.format(at))}</span>`}
         <span class="cal-num">${d.dayNum}</span>
         <span class="cal-dot${dot}"></span>
-      </div>`;
+      </a>`;
   }).join('');
 
   weekEl.className = wide ? 'cal-grid' : 'cal-week';
