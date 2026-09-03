@@ -75,10 +75,24 @@
     };
   }
 
+  // Скільки документів заглушка вже створила — з цього робиться id, щоб два
+  // записи в одну колекцію не виявились одним документом.
+  let generated = 0;
+
   function colRef(name) {
     const ref = {
+      // Доданий документ лягає і в сід: наступне читання тієї ж колекції має
+      // його побачити. Без цього не перевірити головного — що сторінка після
+      // збереження перечитує розділ і показує новий підсумок, а не той, з
+      // яким відкрилась.
+      add: (p) => {
+        const id = 'generated' + (generated++ ? '-' + generated : '');
+        calls.add.push({ col: name, payload: p });
+        if (!seed[name]) seed[name] = [];
+        seed[name].push({ id, ...p });
+        return Promise.resolve({ id });
+      },
       doc: (id) => docRef(name, id),
-      add: (p) => { calls.add.push({ col: name, payload: p }); return Promise.resolve({ id: 'generated' }); },
       onSnapshot: (cb) => { setTimeout(() => cb(snapOf(seed[name])), 0); return () => {}; },
       get: () => Promise.resolve(snapOf(seed[name])),
       where: () => ref, orderBy: () => ref, limit: () => ref,

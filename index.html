@@ -206,6 +206,87 @@
   .export-save-btn:active:not(:disabled){transform:scale(.98);}
   .export-error{font-size:13px;color:var(--expense);margin-top:10px;min-height:16px;line-height:1.4;}
 
+  /* ---- Форма швидкого запису просто тут ----
+     Рядки «Витрата» й «Завдання» більше нікуди не ведуть: форма відкривається
+     на самій головній. Перехід у розділ заради двох полів коштував повного
+     перезавантаження сторінки — і назад на головну доводилось вертатись
+     руками, хоч людина нікуди йти й не збиралась.
+
+     Класи ті самі, що в модулях (.modal-overlay / .modal / .confirm-modal), і
+     це не косметика: за ними стежать scroll-lock.js (замок прокрутки під
+     шаром) та unsaved-guard.js (питання про незбережене). Заразом людина
+     бачить рівно те вікно, до якого звикла в розділі.
+
+     На телефоні — аркуш знизу, на комп'ютері — вікно по центру: та сама
+     різниця, що в бюджеті й завданнях. */
+  .modal-overlay{position:fixed;inset:0;z-index:75;display:none;
+    align-items:flex-end;justify-content:center;background:var(--overlay);}
+  .modal-overlay.show{display:flex;}
+  .modal{background:var(--surface);border-radius:26px 26px 0 0;width:100%;max-width:480px;
+    padding:20px 20px calc(28px + env(safe-area-inset-bottom));
+    max-height:85vh;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;
+    /* Вікно гортається лише вгору-вниз: без цього палець возив його вбік. */
+    touch-action:pan-y;box-shadow:var(--glass-shadow);
+    scrollbar-width:thin;scrollbar-color:var(--card-border-hover) transparent;}
+  .modal::-webkit-scrollbar{width:5px;}
+  .modal::-webkit-scrollbar-track{background:transparent;}
+  .modal::-webkit-scrollbar-thumb{background:var(--card-border-hover);border-radius:999px;}
+  .modal-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px;}
+  .modal-title{font-family:'Inter',sans-serif;font-size:18px;font-weight:700;color:var(--ink);}
+  .close-btn{background:none;border:none;cursor:pointer;color:var(--ink-muted);padding:4px;display:flex;flex-shrink:0;}
+  .type-toggle{display:flex;gap:4px;background:var(--bg);border:1px solid var(--border);
+    border-radius:12px;padding:3px;flex:1;margin-right:10px;}
+  .type-toggle-btn{flex:1;border:none;background:none;cursor:pointer;padding:8px 6px;border-radius:9px;
+    font-family:'Inter',sans-serif;font-size:14px;font-weight:600;color:var(--ink-muted);
+    transition:background .15s ease,color .15s ease;}
+  .type-toggle-btn.active[data-qtype="expense"]{background:var(--expense);color:#fff;}
+  .type-toggle-btn.active[data-qtype="income"]{background:var(--income);color:#fff;}
+  label.field-label{font-size:12px;color:var(--ink-muted);font-weight:500;display:block;margin-top:2px;}
+  .amount-input{width:100%;font-family:'Inter',sans-serif;font-size:26px;font-weight:700;border:none;
+    border-bottom:2px solid var(--border);padding:8px 0;margin-bottom:16px;outline:none;
+    background:transparent;color:var(--ink);font-variant-numeric:tabular-nums;}
+  .amount-input:focus{border-bottom-color:var(--accent);}
+  .cat-picker{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;margin-bottom:16px;}
+  .cat-choice{padding:7px 13px;border-radius:20px;font-size:13px;cursor:pointer;
+    font-family:'Inter',sans-serif;border:1px solid var(--border);background:transparent;color:var(--ink-soft);}
+  .cat-choice.selected{color:#fff;font-weight:600;border-color:transparent;}
+  /* .amount-input свідомо НЕ виключено: у бюджеті це правило перекриває його
+     рамку так само (специфічність input[type=text] вища за клас), і сума там
+     виглядає полем із великою цифрою. Зробити тут «як задумано» означало б,
+     що та сама форма має два різні вигляди залежно від екрана. */
+  .modal input[type=text], .modal input[type=date], .modal input[type=time]{
+    width:100%;font-family:'Inter',sans-serif;font-size:16px;background:transparent;color:var(--ink);
+    border:1px solid var(--border);border-radius:8px;padding:9px 12px;
+    margin-top:6px;margin-bottom:16px;outline:none;}
+  .modal input:focus{border-color:var(--accent);}
+  /* Календарик і годинник малює сам браузер, і в темній темі вони лишались
+     білою плямою: color-scheme — єдиний спосіб сказати йому про тему. */
+  [data-theme="dark"] .modal input[type=date], [data-theme="dark"] .modal input[type=time]{color-scheme:dark;}
+  /* Дата й час стоять поруч: разом вони одна відповідь на «коли», і в два
+     рядки форма ставала вдвічі довшою за свій зміст. */
+  .quick-when{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .form-error{color:var(--expense);font-size:13px;margin-bottom:8px;}
+  .submit-btn{width:100%;margin-top:4px;padding:13px 0;border-radius:10px;border:none;cursor:pointer;
+    color:#fff;font-size:15px;font-weight:600;font-family:'Inter',sans-serif;background:var(--accent);}
+  .submit-btn:disabled{opacity:.55;cursor:default;}
+
+  /* Питання «зберегти зміни?» від ../unsaved-guard.js. Сам діалог модуль
+     будує собі сам, а класи бере зі сторінки — тож вони мусять бути тут.
+     Вище за форму: інакше питання про форму ховалось би під нею. */
+  .confirm-modal{position:fixed;inset:0;background:rgba(34,38,43,.32);display:none;
+    align-items:center;justify-content:center;z-index:90;padding:20px;}
+  .confirm-modal.show{display:flex;}
+  .confirm-box{background:var(--surface);border-radius:22px;padding:22px;max-width:340px;width:100%;
+    box-shadow:var(--glass-shadow);}
+  .confirm-title{font-family:'Inter',sans-serif;font-size:16.5px;font-weight:700;margin-bottom:6px;color:var(--ink);}
+  .confirm-sub{font-size:13.5px;color:var(--ink-muted);margin-bottom:18px;}
+  .confirm-actions{display:flex;gap:8px;}
+  .confirm-actions button{flex:1;padding:10px 0;border-radius:8px;cursor:pointer;
+    font-family:'Inter',sans-serif;font-size:14px;}
+  .btn-cancel{border:1px solid var(--glass-btn-border);background:var(--glass-btn-bg);color:var(--ink-soft);
+    transition:background .35s, transform .35s;}
+  .btn-cancel:hover{background:var(--glass-btn-bg-hover);transform:translateY(-3px);}
+
   /* «+» і шторка швидкого запису. Одна кнопка на всі чотири розділи: щоб
      записати витрату, більше не треба спершу знайти потрібний розділ. */
   .add-fab{position:fixed;right:20px;bottom:calc(20px + env(safe-area-inset-bottom));z-index:70;
@@ -466,6 +547,11 @@
        Відступи ті самі, що й поля сторінки, тож кнопка сідає на її кут. */
     .add-fab{right:40px;bottom:40px;}
     .add-menu{left:auto;right:40px;bottom:112px;top:auto;width:360px;max-width:none;margin:0;}
+
+    /* Форма швидкого запису — по центру, як і в розділах: аркуш знизу має
+       сенс під великим пальцем, а не під мишею. */
+    .modal-overlay{align-items:center;}
+    .modal{border-radius:18px;max-height:88vh;padding:20px 20px 24px;}
   }
 
   /* ---- Дві колонки ----
@@ -710,11 +796,63 @@
           <div id="addChoices"></div>
         </div>
       </div>
+
+      <!-- Форма швидкого запису. Одне вікно на два види запису: полів у них
+           різні, але вікно, кнопка й місце помилки — ті самі, і два майже
+           однакових <div> лише розходились би при кожній правці. -->
+      <div class="modal-overlay" id="quickOverlay">
+        <div class="modal" role="dialog" aria-modal="true" id="quickModal" aria-label="Швидкий запис">
+          <div class="modal-head">
+            <div class="modal-title" id="quickTitle"></div>
+            <!-- Витрата чи дохід — тим самим перемикачем, що й у бюджеті:
+                 запис однією дією не має залежати від того, звідки почали. -->
+            <div class="type-toggle" id="quickTypeToggle" style="display:none;">
+              <button type="button" class="type-toggle-btn" id="quickTypeExpense" data-qtype="expense"></button>
+              <button type="button" class="type-toggle-btn" id="quickTypeIncome" data-qtype="income"></button>
+            </div>
+            <button type="button" class="close-btn" id="quickCloseBtn" aria-label="Закрити">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
+          </div>
+
+          <div id="quickExpenseFields">
+            <label class="field-label" for="quickAmount" id="quickAmountLabel"></label>
+            <input class="amount-input" id="quickAmount" type="text" inputmode="decimal" placeholder="0.00">
+            <label class="field-label" id="quickCatLabel"></label>
+            <div class="cat-picker" id="quickCats"></div>
+            <label class="field-label" for="quickDate" id="quickDateLabel"></label>
+            <input type="date" id="quickDate">
+            <label class="field-label" for="quickNote" id="quickNoteLabel"></label>
+            <input type="text" id="quickNote">
+          </div>
+
+          <div id="quickTaskFields">
+            <label class="field-label" for="quickTaskTitle" id="quickTaskTitleLabel"></label>
+            <input type="text" id="quickTaskTitle">
+            <div class="quick-when">
+              <div>
+                <label class="field-label" for="quickTaskDate" id="quickTaskDateLabel"></label>
+                <input type="date" id="quickTaskDate">
+              </div>
+              <div>
+                <label class="field-label" for="quickTaskTime" id="quickTaskTimeLabel"></label>
+                <input type="time" id="quickTaskTime">
+              </div>
+            </div>
+            <label class="field-label" for="quickTaskNotes" id="quickTaskNotesLabel"></label>
+            <input type="text" id="quickTaskNotes">
+          </div>
+
+          <div class="form-error" id="quickError" style="display:none;" role="alert" aria-live="assertive"></div>
+          <button type="button" class="submit-btn" id="quickSubmitBtn"></button>
+        </div>
+      </div>
     </div>
   </div>
 
   <script defer src="budget/firebase-config.js"></script>
   <script defer src="categories-default.js"></script>
+  <script defer src="unsaved-guard.js"></script>
   <script defer src="export-data.js"></script>
   <script defer src="goals/streak.js"></script>
   <script defer src="goals/review.js"></script>
