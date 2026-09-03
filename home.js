@@ -53,7 +53,6 @@ const STRINGS = {
     budgetTitle: 'Бюджет', budgetSub: 'витрати й доходи',
     sumLoading: '…',
     sumBudget: (s) => `цього місяця ${s}`,
-    sumTasksOpen: (n) => `${n} ${plural(n, { one: 'справа', few: 'справи', many: 'справ', other: 'справи' })} на сьогодні`,
     sumStreak: (n) => `серія ${n} ${plural(n, { one: 'день', few: 'дні', many: 'днів', other: 'дня' })}`,
     sumGoalsPending: (n) => `${n} без кроку сьогодні`,
     sumWorkoutToday: 'сьогодні тренувався',
@@ -89,9 +88,11 @@ const STRINGS = {
     todayEmpty: 'На сьогодні нічого не чекає.',
     todayMore: (n) => `Ще ${n} у завданнях →`,
     todayAt: (hhmm) => `до ${hhmm}`,
-    lineGoals: (n) => `${n} ${plural(n, { one: 'ціль', few: 'цілі', many: 'цілей', other: 'цілі' })} без кроку`,
-    lineWorkout: (n) => `${n} ${plural(n, { one: 'день', few: 'дні', many: 'днів', other: 'дня' })} без залу`,
-    lineFree: 'Сьогодні нічого не чекає.',
+    lineTasks: (n) => `${n} ${plural(n, { one: 'заплановане завдання', few: 'заплановані завдання', many: 'запланованих завдань', other: 'запланованого завдання' })}`,
+    lineBoth: (n) => `На сьогодні маєш ${t('lineTasks', n)} та тренування.`,
+    lineTasksOnly: (n) => `На сьогодні маєш ${t('lineTasks', n)}, а тренування немає.`,
+    lineWorkoutOnly: 'На сьогодні маєш тренування, а завдань не заплановано.',
+    lineNothing: 'На сьогодні нічого не заплановано.',
     goalsTitle: 'Цілі', goalsSub: 'довгострокові',
     tasksTitle: 'Завдання', tasksSub: 'на кожен день',
     workoutTitle: 'Тренування', workoutSub: 'сесії й рекорди',
@@ -128,7 +129,6 @@ const STRINGS = {
     budgetTitle: 'Бюджет', budgetSub: 'расходы и доходы',
     sumLoading: '…',
     sumBudget: (s) => `в этом месяце ${s}`,
-    sumTasksOpen: (n) => `${n} ${plural(n, { one: 'дело', few: 'дела', many: 'дел', other: 'дела' })} на сегодня`,
     sumStreak: (n) => `серия ${n} ${plural(n, { one: 'день', few: 'дня', many: 'дней', other: 'дня' })}`,
     sumGoalsPending: (n) => `${n} без шага сегодня`,
     sumWorkoutToday: 'сегодня тренировался',
@@ -164,9 +164,11 @@ const STRINGS = {
     todayEmpty: 'На сегодня ничего не ждёт.',
     todayMore: (n) => `Ещё ${n} в задачах →`,
     todayAt: (hhmm) => `до ${hhmm}`,
-    lineGoals: (n) => `${n} ${plural(n, { one: 'цель', few: 'цели', many: 'целей', other: 'цели' })} без шага`,
-    lineWorkout: (n) => `${n} ${plural(n, { one: 'день', few: 'дня', many: 'дней', other: 'дня' })} без зала`,
-    lineFree: 'Сегодня ничего не ждёт.',
+    lineTasks: (n) => `${n} ${plural(n, { one: 'запланированная задача', few: 'запланированные задачи', many: 'запланированных задач', other: 'запланированной задачи' })}`,
+    lineBoth: (n) => `На сегодня у тебя ${t('lineTasks', n)} и тренировка.`,
+    lineTasksOnly: (n) => `На сегодня у тебя ${t('lineTasks', n)}, а тренировки нет.`,
+    lineWorkoutOnly: 'На сегодня у тебя тренировка, а задач не запланировано.',
+    lineNothing: 'На сегодня ничего не запланировано.',
     goalsTitle: 'Цели', goalsSub: 'долгосрочные',
     tasksTitle: 'Задачи', tasksSub: 'на каждый день',
     workoutTitle: 'Тренировки', workoutSub: 'сессии и рекорды',
@@ -203,7 +205,6 @@ const STRINGS = {
     budgetTitle: 'Budżet', budgetSub: 'wydatki i dochody',
     sumLoading: '…',
     sumBudget: (s) => `w tym miesiącu ${s}`,
-    sumTasksOpen: (n) => `${n} ${plural(n, { one: 'zadanie', few: 'zadania', many: 'zadań', other: 'zadania' })} na dziś`,
     sumStreak: (n) => `seria ${n} ${plural(n, { one: 'dzień', few: 'dni', many: 'dni', other: 'dnia' })}`,
     sumGoalsPending: (n) => `${n} bez kroku dziś`,
     sumWorkoutToday: 'dziś trenowałeś',
@@ -239,9 +240,11 @@ const STRINGS = {
     todayEmpty: 'Na dziś nic nie czeka.',
     todayMore: (n) => `Jeszcze ${n} w zadaniach →`,
     todayAt: (hhmm) => `do ${hhmm}`,
-    lineGoals: (n) => `${n} ${plural(n, { one: 'cel', few: 'cele', many: 'celów', other: 'celu' })} bez kroku`,
-    lineWorkout: (n) => `${n} ${plural(n, { one: 'dzień', few: 'dni', many: 'dni', other: 'dnia' })} bez siłowni`,
-    lineFree: 'Na dziś nic nie czeka.',
+    lineTasks: (n) => `${n} ${plural(n, { one: 'zaplanowane zadanie', few: 'zaplanowane zadania', many: 'zaplanowanych zadań', other: 'zaplanowanego zadania' })}`,
+    lineBoth: (n) => `Na dziś masz ${t('lineTasks', n)} i trening.`,
+    lineTasksOnly: (n) => `Na dziś masz ${t('lineTasks', n)}, a treningu nie ma.`,
+    lineWorkoutOnly: 'Na dziś masz trening, a zadań nie zaplanowano.',
+    lineNothing: 'Na dziś nic nie zaplanowano.',
     goalsTitle: 'Cele', goalsSub: 'długoterminowe',
     tasksTitle: 'Zadania', tasksSub: 'na każdy dzień',
     workoutTitle: 'Treningi', workoutSub: 'sesje i rekordy',
@@ -278,7 +281,6 @@ const STRINGS = {
     budgetTitle: 'Budget', budgetSub: 'spending & income',
     sumLoading: '…',
     sumBudget: (s) => `this month ${s}`,
-    sumTasksOpen: (n) => `${n} ${plural(n, { one: 'task', other: 'tasks' })} today`,
     sumStreak: (n) => `${n}-day streak`,
     sumGoalsPending: (n) => `${n} with no step today`,
     sumWorkoutToday: 'trained today',
@@ -314,9 +316,11 @@ const STRINGS = {
     todayEmpty: 'Nothing waiting today.',
     todayMore: (n) => `${n} more in Tasks →`,
     todayAt: (hhmm) => `by ${hhmm}`,
-    lineGoals: (n) => `${n} ${plural(n, { one: 'goal', other: 'goals' })} without a step`,
-    lineWorkout: (n) => `${n} ${plural(n, { one: 'day', other: 'days' })} without the gym`,
-    lineFree: 'Nothing waiting today.',
+    lineTasks: (n) => `${n} ${plural(n, { one: 'planned task', other: 'planned tasks' })}`,
+    lineBoth: (n) => `Today you have ${t('lineTasks', n)} and a workout.`,
+    lineTasksOnly: (n) => `Today you have ${t('lineTasks', n)}, and no workout.`,
+    lineWorkoutOnly: 'Today you have a workout, and no tasks planned.',
+    lineNothing: 'Nothing planned for today.',
     goalsTitle: 'Goals', goalsSub: 'long-term',
     tasksTitle: 'Tasks', tasksSub: 'day to day',
     workoutTitle: 'Workouts', workoutSub: 'sessions & records',
@@ -1099,22 +1103,24 @@ function renderLine() {
   const dateEl = document.getElementById('todayDate');
   if (dateEl) dateEl.textContent = capitalizeFirst(formatFullDate(today));
 
-  const parts = [];
-  if (homeData.tasks) {
-    const open = homeData.tasks.filter((x) => x && !x.done && x.dueDate === today).length;
-    if (open) parts.push(t('sumTasksOpen', open));
-  }
-  if (homeData.goals && window.GoalStreak) {
-    const pending = window.GoalStreak.eveningQueue(homeData.goals, today).length;
-    if (pending) parts.push(t('lineGoals', pending));
-  }
-  if (homeData.workouts) {
-    const sum = HomeSummary.workoutSummary(homeData.workouts, today);
-    if (sum.daysAgo !== null && sum.daysAgo > 0) parts.push(t('lineWorkout', sum.daysAgo));
-  }
-  // Нічого не чекає — так і кажемо. Порожній рядок виглядав би як помилка
-  // завантаження, а не як вільний день.
-  lineEl.textContent = parts.length ? capitalizeFirst(parts.join(', ')) + '.' : t('lineFree');
+  // Поки не приїхало і те, й те — мовчимо. Сказати «а тренування немає» до
+  // того, як тренування прочитались, означало б збрехати на пів секунди, а
+  // потім себе виправити; рядок читають одним поглядом, і встигне лишитись
+  // саме перша версія. Раніше тут ще був окремий шматок про цілі — він пішов
+  // разом із перебудовою рядка на одне речення; «11 без кроку» лишилось на
+  // плитці цілей, де воно й доречне.
+  if (!homeData.tasks || !homeData.workouts) { lineEl.textContent = ''; return; }
+
+  // Рахуємо ЗАПЛАНОВАНЕ на сьогодні, разом із уже зробленим, — те саме
+  // число, що й на плитці завдань. Інакше рядок і плитка казали б різне про
+  // один день.
+  const planned = homeData.tasks.filter((x) => x && x.dueDate === today).length;
+  const hasWorkout = !!HomeSummary.workoutToday(homeData.workouts, today);
+
+  if (planned && hasWorkout) lineEl.textContent = t('lineBoth', planned);
+  else if (planned) lineEl.textContent = t('lineTasksOnly', planned);
+  else if (hasWorkout) lineEl.textContent = t('lineWorkoutOnly');
+  else lineEl.textContent = t('lineNothing');
 }
 
 function capitalizeFirst(str) {
