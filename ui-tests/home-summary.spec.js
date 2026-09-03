@@ -70,11 +70,13 @@ test.describe('Плитки', () => {
       { id: 'b', dueDate: iso(), done: false },
       { id: 'c', dueDate: iso(), done: true },
     ] });
+    // Одним рядком: слово перед числом і слово після — «Заплановано 3 завдання».
+    await expect(page.locator('#tasksPre')).toHaveText('Заплановано');
     await expect(stat(page, 'tasks')).toHaveText('3');
-    await expect(page.locator('#tasksUnit')).toHaveText('заплановано');
-    await expect(cap(page, 'tasks')).toHaveText('завдання на сьогодні');
+    await expect(page.locator('#tasksUnit')).toHaveText('завдання');
     // І все: скільки з них уже закрито, плитка не рахує — по галочки людина
     // йде в сам розділ, а тут вона дивиться, чим зайнятий день.
+    await expect(cap(page, 'tasks')).toHaveText('');
     await expect(note(page, 'tasks')).toBeHidden();
   });
 
@@ -91,8 +93,10 @@ test.describe('Плитки', () => {
 
   test('порожній день не просто «нуль», а питання', async ({ page }) => {
     await openHub(page, { tasks: [] });
+    await expect(page.locator('#tasksPre')).toHaveText('Заплановано');
     await expect(stat(page, 'tasks')).toHaveText('0');
-    await expect(cap(page, 'tasks')).toHaveText('завдань на сьогодні — маєш вихідний, чи просто не записано?');
+    await expect(page.locator('#tasksUnit')).toHaveText('завдань');
+    await expect(cap(page, 'tasks')).toHaveText('Маєш вихідний, чи просто не записано?');
     await expect(note(page, 'tasks')).toBeHidden();
   });
 
@@ -149,19 +153,21 @@ test.describe('Плитки', () => {
   // Плитка відповідає на «що в мене сьогодні», а коли сьогодні нічого — на
   // «а коли наступне». «Скільки днів тому» звідси пішло: воно казало про
   // минуле, а плитка потрібна для того, що попереду.
-  test('заплановане на сьогодні — один рядок', async ({ page }) => {
+  test('сьогоднішнє тренування — один рядок, і «є» в ньому жирне', async ({ page }) => {
     await openHub(page, { workouts: [{ id: 'w1', date: T, name: 'Ноги',
       exercises: [{ sets: [{ weight: 0, reps: 0 }] }] }] });
-    await expect(cap(page, 'workout')).toHaveText('Сьогодні маєш заплановане тренування');
+    await expect(cap(page, 'workout')).toHaveText('Сьогодні є тренування');
+    await expect(cap(page, 'workout').locator('b')).toHaveText('є');
   });
 
-  // «Заплановане» кажемо лише про те, до чого ще не бралися: у розпочатому
-  // тренуванні це вже неправда.
-  test('розпочате тренування вже не «заплановане»', async ({ page }) => {
+  // Підпис один на обидва випадки: «сьогодні є тренування» правда і про
+  // заплановане, і про розпочате. Різниця лишається в числі.
+  test('розпочате тренування каже те саме, але рахує підходи', async ({ page }) => {
     await openHub(page, { workouts: [{ id: 'w1', date: T, name: 'Ноги', exercises: [
       { sets: [{ weight: 60, reps: 8 }, { weight: 0, reps: 0 }] },
     ] }] });
-    await expect(cap(page, 'workout')).toHaveText('Сьогодні маєш тренування');
+    await expect(cap(page, 'workout')).toHaveText('Сьогодні є тренування');
+    await expect(stat(page, 'workout')).toHaveText('1/2');
   });
 
   test('без тренування сьогодні плитка каже, коли наступне', async ({ page }) => {
@@ -198,7 +204,7 @@ test.describe('Плитки', () => {
       { id: 'w1', date: T, name: 'Fullbody СБ', exercises: [{ sets: [{ weight: 0, reps: 0 }] }] },
       { id: 'plan', date: iso(5), name: 'Ноги', exercises: [{ sets: [{ weight: 0, reps: 0 }] }] },
     ] });
-    await expect(cap(page, 'workout')).toHaveText('Сьогодні маєш заплановане тренування');
+    await expect(cap(page, 'workout')).toHaveText('Сьогодні є тренування');
   });
 
   test('тренування наперед — це план, а не зроблене', async ({ page }) => {
