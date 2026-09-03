@@ -61,14 +61,21 @@ test.describe('Плитки', () => {
     await expect(note(page, 'budget')).toBeHidden();
   });
 
-  test('завдання показують, скільки на сьогодні', async ({ page }) => {
+  // Велике число — скільки СПЛАНОВАНО, разом із уже виконаним. Раніше тут
+  // стояло невиконане, і число падало з кожною галочкою: плитка ніби
+  // забувала про зроблене.
+  test('завдання показують, скільки заплановано на сьогодні', async ({ page }) => {
     await openHub(page, { tasks: [
       { id: 'a', dueDate: iso(), done: false },
       { id: 'b', dueDate: iso(), done: false },
       { id: 'c', dueDate: iso(), done: true },
     ] });
-    await expect(stat(page, 'tasks')).toHaveText('2');
-    await expect(cap(page, 'tasks')).toContainText('1');
+    await expect(stat(page, 'tasks')).toHaveText('3');
+    await expect(page.locator('#tasksUnit')).toHaveText('заплановано');
+    await expect(cap(page, 'tasks')).toHaveText('завдання на сьогодні');
+    // І все: скільки з них уже закрито, плитка не рахує — по галочки людина
+    // йде в сам розділ, а тут вона дивиться, чим зайнятий день.
+    await expect(note(page, 'tasks')).toBeHidden();
   });
 
   // Раніше тут був рядок «N боргів». Невиконане з минулих днів лишається у
@@ -82,18 +89,35 @@ test.describe('Плитки', () => {
     await expect(note(page, 'tasks')).toBeHidden();
   });
 
-  test('порожній день так і каже', async ({ page }) => {
+  test('порожній день не просто «нуль», а питання', async ({ page }) => {
     await openHub(page, { tasks: [] });
-    await expect(cap(page, 'tasks')).toHaveText('на сьогодні вільно');
+    await expect(stat(page, 'tasks')).toHaveText('0');
+    await expect(cap(page, 'tasks')).toHaveText('завдань на сьогодні — маєш вихідний, чи просто не записано?');
     await expect(note(page, 'tasks')).toBeHidden();
   });
 
-  test('цілі показують серію', async ({ page }) => {
+  // Плитка рахує цілі ПОТОЧНОГО МІСЯЦЯ — тієї вкладки, на якій відкривається
+  // розділ, — і бере правило з goals/review.js, а не своє друге.
+  const monthGoal = (over) => Object.assign({
+    status: 'active', horizon: 'month', month: iso().slice(0, 7),
+    checkins: [], milestones: [], blockers: [],
+  }, over);
+
+  test('цілі рахують місяць, а не серію', async ({ page }) => {
     await openHub(page, { goals: [
-      { id: 'g1', status: 'active', checkins: [iso(-2), iso(-1), iso()], blockers: [] },
+      monthGoal({ id: 'g1', title: 'Перша', checkins: [iso(-2), iso(-1), iso()] }),
+      monthGoal({ id: 'g2', title: 'Друга' }),
     ] });
-    await expect(stat(page, 'goals')).toHaveText('3');
-    await expect(cap(page, 'goals')).toContainText('серія');
+    await expect(stat(page, 'goals')).toHaveText('2');
+    await expect(page.locator('#goalsUnit')).toHaveText('на цей місяць');
+  });
+
+  test('річні цілі в число місяця не потрапляють', async ({ page }) => {
+    await openHub(page, { goals: [
+      monthGoal({ id: 'g1', title: 'Місячна' }),
+      monthGoal({ id: 'g2', title: 'Річна', horizon: 'year', month: null }),
+    ] });
+    await expect(stat(page, 'goals')).toHaveText('1');
   });
 
   test('цілі без кроку сьогодні — окремим рядком', async ({ page }) => {
@@ -104,45 +128,85 @@ test.describe('Плитки', () => {
     await expect(note(page, 'goals')).toContainText('2 без кроку');
   });
 
-  test('цілі: без серії плитка називає найтерміновішу', async ({ page }) => {
+  // Під числом — одна ціль, і на кожне відкриття головної інша: раніше тут
+  // стояла найтерміновіша, і з десятка цілей на очі місяцями потрапляла та
+  // сама. Перевіряємо не «яка саме», а що вона зі списку.
+  test('під числом стоїть одна з цілей місяця', async ({ page }) => {
     await openHub(page, { goals: [
-      { title: 'Далека', status: 'active', targetDate: iso(300), targetValue: 10, currentValue: 1, milestones: [], checkins: [] },
-      { title: 'Близька', status: 'active', targetDate: iso(10), targetValue: 10, currentValue: 8, milestones: [], checkins: [] },
+      monthGoal({ id: 'g1', title: 'Перша' }),
+      monthGoal({ id: 'g2', title: 'Друга' }),
+      monthGoal({ id: 'g3', title: 'Третя' }),
     ] });
-    await expect(cap(page, 'goals')).toHaveText('Близька');
+    await expect(cap(page, 'goals')).toHaveText(/^(Перша|Друга|Третя)$/);
   });
 
-  test('тренування показують, коли востаннє й що це було', async ({ page }) => {
-    await openHub(page, { workouts: [{ id: 'w1', date: iso(-3), name: 'Ноги' }] });
-    await expect(stat(page, 'workout')).toHaveText('3');
-    await expect(cap(page, 'workout')).toContainText('Ноги');
+  test('коли цілей на місяць немає, плитка так і каже', async ({ page }) => {
+    await openHub(page, { goals: [monthGoal({ id: 'g1', title: 'Річна', horizon: 'year', month: null })] });
+    await expect(stat(page, 'goals')).toHaveText('0');
+    await expect(cap(page, 'goals')).toHaveText('цілей на цей місяць ще немає');
+  });
+
+  // Плитка відповідає на «що в мене сьогодні», а коли сьогодні нічого — на
+  // «а коли наступне». «Скільки днів тому» звідси пішло: воно казало про
+  // минуле, а плитка потрібна для того, що попереду.
+  test('заплановане на сьогодні — один рядок', async ({ page }) => {
+    await openHub(page, { workouts: [{ id: 'w1', date: T, name: 'Ноги',
+      exercises: [{ sets: [{ weight: 0, reps: 0 }] }] }] });
+    await expect(cap(page, 'workout')).toHaveText('Сьогодні маєш заплановане тренування');
+  });
+
+  // «Заплановане» кажемо лише про те, до чого ще не бралися: у розпочатому
+  // тренуванні це вже неправда.
+  test('розпочате тренування вже не «заплановане»', async ({ page }) => {
+    await openHub(page, { workouts: [{ id: 'w1', date: T, name: 'Ноги', exercises: [
+      { sets: [{ weight: 60, reps: 8 }, { weight: 0, reps: 0 }] },
+    ] }] });
+    await expect(cap(page, 'workout')).toHaveText('Сьогодні маєш тренування');
+  });
+
+  test('без тренування сьогодні плитка каже, коли наступне', async ({ page }) => {
+    await openHub(page, { workouts: [
+      { id: 'w1', date: iso(-3), name: 'Ноги' },
+      { id: 'p', date: iso(1), name: 'Груди', exercises: [{ sets: [{ weight: 0, reps: 0 }] }] },
+    ] });
+    await expect(stat(page, 'workout')).toHaveText('—');
+    await expect(cap(page, 'workout')).toHaveText('Сьогодні тренувань немає\nНаступне — завтра');
+  });
+
+  test('післязавтра теж словом, а не датою', async ({ page }) => {
+    await openHub(page, { workouts: [
+      { id: 'p', date: iso(2), name: 'Груди', exercises: [{ sets: [{ weight: 0, reps: 0 }] }] },
+    ] });
+    await expect(cap(page, 'workout')).toContainText('Наступне — післязавтра');
+  });
+
+  test('далі за післязавтра — датою: «через сім днів» треба рахувати в голові', async ({ page }) => {
+    await openHub(page, { workouts: [
+      { id: 'p', date: iso(7), name: 'Груди', exercises: [{ sets: [{ weight: 0, reps: 0 }] }] },
+    ] });
+    await expect(cap(page, 'workout')).toContainText(/Наступне — \d+ \p{L}+/u);
   });
 
   // План на наступний тиждень записують тими самими документами, що й
   // зроблене, тож найсвіжішим записом виявлявся план — і плитка казала
   // «-4 дні тому», а рядок стану про зал мовчав.
-  test('план на майбутнє не витісняє останнє тренування', async ({ page }) => {
+  // План на наступний тиждень записують тими самими документами, що й
+  // зроблене, тож найсвіжішим записом виявлявся план — і рядок стану про зал
+  // мовчав. Сьогоднішнє тренування план не витісняє.
+  test('план на майбутнє не витісняє сьогоднішнє тренування', async ({ page }) => {
     await openHub(page, { workouts: [
-      { id: 'w1', date: iso(-4), name: 'Fullbody СБ' },
+      { id: 'w1', date: T, name: 'Fullbody СБ', exercises: [{ sets: [{ weight: 0, reps: 0 }] }] },
       { id: 'plan', date: iso(5), name: 'Ноги', exercises: [{ sets: [{ weight: 0, reps: 0 }] }] },
     ] });
-    await expect(stat(page, 'workout')).toHaveText('4');
-    await expect(cap(page, 'workout')).toContainText('Fullbody СБ');
-  });
-
-  test('самі лише плани попереду — тренувань ще не було', async ({ page }) => {
-    await openHub(page, { workouts: [
-      { id: 'plan', date: iso(5), name: 'Ноги', exercises: [{ sets: [{ weight: 0, reps: 0 }] }] },
-    ] });
-    await expect(stat(page, 'workout')).toHaveText('—');
-    await expect(cap(page, 'workout')).toHaveText('тренувань ще немає');
+    await expect(cap(page, 'workout')).toHaveText('Сьогодні маєш заплановане тренування');
   });
 
   test('тренування наперед — це план, а не зроблене', async ({ page }) => {
     await openHub(page, { workouts: [{ date: T, name: '', exercises: [
       { sets: [{ weight: 0, reps: 0 }, { weight: 0, reps: 0 }] },
     ] }] });
-    await expect(cap(page, 'workout')).toContainText(/заплановано/i);
+    await expect(stat(page, 'workout')).toHaveText('1');
+    await expect(page.locator('#workoutUnit')).toHaveText('вправ');
   });
 
   test('тренування в процесі рахує зроблені підходи', async ({ page }) => {
@@ -152,11 +216,14 @@ test.describe('Плитки', () => {
     await expect(stat(page, 'workout')).toHaveText('2/4');
   });
 
-  test('порожня база — це не нулі, а чесне «ще немає»', async ({ page }) => {
+  // Порожня база — це не нулі, а запрошення: плитка не звітує, а каже, що
+  // сюди можна класти.
+  test('порожня база кличе, а не звітує', async ({ page }) => {
     await openHub(page, {});
-    await expect(cap(page, 'workout')).toHaveText('тренувань ще немає');
-    await expect(cap(page, 'goals')).toHaveText('цілей ще немає');
     await expect(stat(page, 'workout')).toHaveText('—');
+    await expect(cap(page, 'workout'))
+      .toHaveText('Сьогодні тренувань немає\nСюди можеш додавати власні тренування, та слідкувати за їх прогресом.');
+    await expect(cap(page, 'goals')).toHaveText('цілей на цей місяць ще немає');
   });
 });
 

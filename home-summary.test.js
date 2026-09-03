@@ -141,31 +141,6 @@ describe('monthStart', () => {
 // що тут перевіряється, — коли кільця бути НЕ повинно: без знаменника воно
 // показувало б відсоток невідомо від чого.
 
-describe('tasksRing — скільки з сьогоднішнього закрито', () => {
-  const T = '2026-08-27';
-
-  test('рахує частку виконаного за сьогодні', () => {
-    const r = HomeSummary.tasksRing([
-      { dueDate: T, done: true }, { dueDate: T, done: true },
-      { dueDate: T, done: false }, { dueDate: T, done: false },
-    ], T);
-    expect(r).toMatchObject({ done: 2, total: 4, pct: 50 });
-  });
-
-  test('невиконане з минулого в знаменник не входить — це інший день', () => {
-    const r = HomeSummary.tasksRing([
-      { dueDate: T, done: true },
-      { dueDate: '2026-08-20', done: false },
-    ], T);
-    expect(r.total).toBe(1);
-    expect(r.pct).toBe(100);
-  });
-
-  test('порожній день — нуль, а не ділення на нуль', () => {
-    expect(HomeSummary.tasksRing([], T)).toMatchObject({ done: 0, total: 0, pct: 0 });
-  });
-});
-
 describe('workoutToday — що сьогодні в залі', () => {
   const T = '2026-08-27';
   const w = (over = {}) => ({ date: T, name: '', exercises: [], ...over });
@@ -195,49 +170,6 @@ describe('workoutToday — що сьогодні в залі', () => {
       exercises: [{ sets: [{ weight: 0, reps: 12 }] }],
     })], T);
     expect(r.setsDone).toBe(1);
-  });
-});
-
-describe('featuredGoal — яку ціль показати', () => {
-  const T = '2026-08-27';
-  const g = (over = {}) => ({ title: 'ціль', status: 'active', milestones: [], ...over });
-
-  test('без активних цілей показувати нічого', () => {
-    expect(HomeSummary.featuredGoal([g({ status: 'done' })], T)).toBeNull();
-  });
-
-  test('виграє найближчий дедлайн', () => {
-    const r = HomeSummary.featuredGoal([
-      g({ title: 'далека', targetDate: '2026-12-01' }),
-      g({ title: 'близька', targetDate: '2026-09-01' }),
-    ], T);
-    expect(r.title).toBe('близька');
-    expect(r.daysLeft).toBe(5);
-  });
-
-  test('ціль без дедлайну поступається цілі з дедлайном', () => {
-    const r = HomeSummary.featuredGoal([
-      g({ title: 'без дати' }),
-      g({ title: 'з датою', targetDate: '2026-11-01' }),
-    ], T);
-    expect(r.title).toBe('з датою');
-  });
-
-  test('серед цілей без дедлайну виграє та, де більше пройдено', () => {
-    const ms = (done, total) => Array.from({ length: total }, (_, i) => ({ done: i < done }));
-    const r = HomeSummary.featuredGoal([
-      g({ title: 'початок', milestones: ms(1, 10) }),
-      g({ title: 'майже', milestones: ms(9, 10) }),
-    ], T);
-    expect(r.title).toBe('майже');
-    expect(r.pct).toBe(90);
-  });
-
-  test('прогрес рахується віхами — числової мети в застосунку немає', () => {
-    expect(HomeSummary.goalPct({ milestones: [{ done: true }, { done: false }] })).toBe(50);
-    expect(HomeSummary.goalPct({ milestones: [] })).toBe(0);
-    // Число, що лишилось у старому документі, кільце не малює.
-    expect(HomeSummary.goalPct({ targetValue: 4, currentValue: 3 })).toBe(0);
   });
 });
 
@@ -381,5 +313,62 @@ describe('monthCalendar — місяць повними тижнями', () => {
     const m = H.monthCalendar([], '2027-02-10');
     expect(m.days).toHaveLength(28);
     expect(m.days.every((d) => !d.otherMonth)).toBe(true);
+  });
+});
+
+describe('pickGoal — одна ціль на плитці', () => {
+  const goals = [{ title: 'Перша' }, { title: 'Друга' }, { title: 'Третя' }];
+
+  test('бере ціль за випадковим числом, а не завжди першу', () => {
+    expect(H.pickGoal(goals, 0).title).toBe('Перша');
+    expect(H.pickGoal(goals, 0.5).title).toBe('Друга');
+    expect(H.pickGoal(goals, 0.99).title).toBe('Третя');
+  });
+
+  test('одиниця на межі не виходить за список', () => {
+    // Math.random() одиниці не дає, але параметром прийти може.
+    expect(H.pickGoal(goals, 1).title).toBe('Третя');
+  });
+
+  test('цілі без назви не показуються — підпис був би порожнім', () => {
+    expect(H.pickGoal([{ title: '' }, { title: 'Є назва' }], 0).title).toBe('Є назва');
+  });
+
+  test('порожній список — нема чого показувати', () => {
+    expect(H.pickGoal([], 0.5)).toBeNull();
+    expect(H.pickGoal(null, 0.5)).toBeNull();
+  });
+
+  test('без числа працює від Math.random і завжди повертає ціль зі списку', () => {
+    const titles = goals.map((g) => g.title);
+    for (let i = 0; i < 50; i++) expect(titles).toContain(H.pickGoal(goals).title);
+  });
+});
+
+describe('nextDayKind — як назвати день наступного тренування', () => {
+  const T = '2026-09-02';
+
+  test('завтра й післязавтра — словами', () => {
+    expect(H.nextDayKind('2026-09-03', T)).toBe('tomorrow');
+    expect(H.nextDayKind('2026-09-04', T)).toBe('dayAfter');
+  });
+
+  test('далі — датою: «через сім днів» треба рахувати в голові', () => {
+    expect(H.nextDayKind('2026-09-05', T)).toBe('date');
+    expect(H.nextDayKind('2026-10-01', T)).toBe('date');
+  });
+
+  test('сьогодні й минуле — не «наступне»', () => {
+    expect(H.nextDayKind(T, T)).toBeNull();
+    expect(H.nextDayKind('2026-09-01', T)).toBeNull();
+  });
+
+  test('без дати нема відповіді', () => {
+    expect(H.nextDayKind(null, T)).toBeNull();
+    expect(H.nextDayKind(undefined, T)).toBeNull();
+  });
+
+  test('межа місяця рахується днями, а не числами', () => {
+    expect(H.nextDayKind('2026-10-01', '2026-09-30')).toBe('tomorrow');
   });
 });

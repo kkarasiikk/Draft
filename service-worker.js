@@ -10,7 +10,7 @@ LifeSW({
   files: [
     './', './index.html', './home.js', './home-summary.js', './export-data.js',
     './side-nav.js', './side-nav.css', './scroll-lock.js', './boot-guard.js',
-    './goals/streak.js', './categories-default.js',
+    './goals/streak.js', './goals/review.js', './categories-default.js',
     './manifest.json',
     './budget/firebase-config.js',
     './budget/icon-192.png', './budget/icon-512.png',

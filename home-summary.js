@@ -105,17 +105,6 @@
     return { pending: digest.pending, streak: best, active: active };
   }
 
-  /** Кільце завдань: скільки з сьогоднішніх уже закрито. */
-  function tasksRing(tasks, todayIso) {
-    var s = tasksSummary(tasks, todayIso);
-    var total = s.done + s.open;
-    return {
-      done: s.done,
-      total: total,
-      pct: total ? Math.round((s.done / total) * 100) : 0,
-    };
-  }
-
   /**
    * Тренування на сьогодні.
    *
@@ -153,42 +142,61 @@
   }
 
   /**
-   * Яку ціль показати на плитці. Одну — бо плитка не список.
+   * Одна ціль для підпису плитки — випадкова, а не «найтерміновіша».
    *
-   * Беремо найтерміновішу: серед активних ту, до дедлайну якої лишилось
-   * найменше. Без дедлайну ціль не термінова за визначенням, тож такі йдуть
-   * після — і серед них виграє та, у якій більший прогрес: показати майже
-   * пройдений шлях корисніше, ніж щойно початий.
+   * Плитка показує одну ціль із багатьох, і колись це була найближча за
+   * дедлайном. Виходило, що з десятка цілей на очі місяцями потрапляла та
+   * сама. Тепер вибір випадковий: щоразу, коли головна відкривається,
+   * нагадує про іншу — саме заради цього плитка ціль і показує.
+   *
+   * @param {Array} goals
+   * @param {number} [rnd] число [0,1) — параметром, щоб тест не залежав
+   *   від Math.random
    */
-  function featuredGoal(goals, todayIso, progressFn) {
-    var active = (goals || []).filter(function (g) { return g && g.status === 'active'; });
-    if (!active.length) return null;
-
-    var pctOf = progressFn || goalPct;
-    var best = null;
-    active.forEach(function (g) {
-      var left = typeof g.targetDate === 'string' && g.targetDate
-        ? Math.round((new Date(g.targetDate + 'T00:00:00') - new Date(todayIso + 'T00:00:00')) / 86400000)
-        : null;
-      var cand = { goal: g, daysLeft: left, pct: pctOf(g) };
-      if (!best) { best = cand; return; }
-      var a = cand.daysLeft, b = best.daysLeft;
-      if (a !== null && b === null) { best = cand; return; }
-      if (a === null && b !== null) return;
-      if (a !== null && b !== null) { if (a < b) best = cand; return; }
-      if (cand.pct > best.pct) best = cand;
-    });
-    return best && { title: best.goal.title || '', pct: best.pct, daysLeft: best.daysLeft };
+  function pickGoal(goals, rnd) {
+    var list = (goals || []).filter(function (g) { return g && g.title; });
+    if (!list.length) return null;
+    var r = typeof rnd === 'number' ? rnd : Math.random();
+    var i = Math.floor(r * list.length);
+    // r === 1 не буває в Math.random(), але параметром прийти може.
+    if (i >= list.length) i = list.length - 1;
+    if (i < 0) i = 0;
+    return list[i];
   }
 
-  /** Прогрес цілі у відсотках — те саме правило, що й на сторінці цілей:
-   *  міряється віхами. Числової мети в застосунку немає: число, якщо воно
-   *  потрібне, людина пише в самій назві цілі. */
-  function goalPct(goal) {
-    var milestones = (goal && goal.milestones) || [];
-    if (!milestones.length) return 0;
-    var done = milestones.filter(function (m) { return m && m.done; }).length;
-    return Math.round((done / milestones.length) * 100);
+  /**
+   * Найближче заплановане тренування — найраніше з тих, що ПІСЛЯ сьогодні.
+   *
+   * Запит уже звужений (`date > today`, за зростанням, один документ), але
+   * вибір робиться ще раз тут: межа має триматись і тоді, коли записи
+   * прийшли іншим шляхом. Те саме правило, що й у workoutSummary з
+   * протилежного боку — план не тренування, а тренування не план.
+   */
+  function nextWorkout(workouts, todayIso) {
+    var best = null;
+    (workouts || []).forEach(function (w) {
+      if (!w || typeof w.date !== 'string' || w.date <= todayIso) return;
+      if (!best || w.date < best.date) best = w;
+    });
+    return best;
+  }
+
+  /**
+   * Як назвати день наступного тренування: «завтра», «післязавтра» чи датою.
+   *
+   * Словами — лише два найближчі дні: далі вони перестають щось означати
+   * («через сім днів» треба перерахувати в голові), і дата коротша.
+   *
+   * @returns {'tomorrow'|'dayAfter'|'date'|null} null — дата не в майбутньому
+   */
+  function nextDayKind(dateIso, todayIso) {
+    if (typeof dateIso !== 'string' || dateIso <= todayIso) return null;
+    var a = new Date(todayIso + 'T00:00:00');
+    var b = new Date(dateIso + 'T00:00:00');
+    var days = Math.round((b - a) / 86400000);
+    if (days === 1) return 'tomorrow';
+    if (days === 2) return 'dayAfter';
+    return 'date';
   }
 
   /** Сім днів, що закінчуються сьогоднішнім: від найранішого до сьогодні. */
@@ -307,11 +315,11 @@
     isoOf: isoOf,
     weekDays: weekDays,
     weekCalendar: weekCalendar,
+    pickGoal: pickGoal,
+    nextWorkout: nextWorkout,
+    nextDayKind: nextDayKind,
     monthCalendar: monthCalendar,
-    tasksRing: tasksRing,
     workoutToday: workoutToday,
-    featuredGoal: featuredGoal,
-    goalPct: goalPct,
     monthStart: monthStart,
     budgetSummary: budgetSummary,
     tasksSummary: tasksSummary,
