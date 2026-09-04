@@ -71,7 +71,13 @@ const T = {
     addSubtaskBtn: '+ Додати підзадачу', removeSubtaskAria: 'Прибрати підзадачу',
     estimateLabel: 'Скільки часу займе', estimatePlaceholder: 'хв',
     estimateShort: (min) => (min >= 60 ? `~${Math.floor(min / 60)} год${min % 60 ? ' ' + (min % 60) + ' хв' : ''}` : `~${min} хв`),
-    bnWeek: 'Тиждень', bnMonth: 'Календар', bnHome: 'Головна',
+    bnDay: 'День', bnWeek: 'Тиждень', bnMonth: 'Календар',
+    planPlaceholder: 'Що зробити цього тижня?',
+    planEmpty: 'Порожньо. Сюди пишуться ідеї та плани на тиждень — те, що треба зробити, але не конкретного дня.',
+    planNothing: 'Напиши хоча б назву',
+    planCarried: 'з минулого тижня',
+    planBackWeek: 'Вернутись у цей тиждень',
+    planThisWeek: 'Цей тиждень',
     quickAddFabLabel: 'Додати', quickAddTitle: 'Швидке додавання',
     quickAddPlaceholder: 'Купити молоко завтра о 18',
     quickAddHint: 'Дату, час, #тег, ~тривалість, пріоритет (!1 !2 !3) і повторення («щодня», «щосуботи», «кожні 3 дні») можна писати прямо в рядку.',
@@ -153,7 +159,13 @@ const T = {
     addSubtaskBtn: '+ Добавить подзадачу', removeSubtaskAria: 'Убрать подзадачу',
     estimateLabel: 'Сколько времени займёт', estimatePlaceholder: 'мин',
     estimateShort: (min) => (min >= 60 ? `~${Math.floor(min / 60)} ч${min % 60 ? ' ' + (min % 60) + ' мин' : ''}` : `~${min} мин`),
-    bnWeek: 'Неделя', bnMonth: 'Календарь', bnHome: 'Главная',
+    bnDay: 'День', bnWeek: 'Неделя', bnMonth: 'Календарь',
+    planPlaceholder: 'Что сделать на этой неделе?',
+    planEmpty: 'Пусто. Сюда пишутся идеи и планы на неделю — то, что надо сделать, но не в конкретный день.',
+    planNothing: 'Напиши хотя бы название',
+    planCarried: 'с прошлой недели',
+    planBackWeek: 'Вернуться на эту неделю',
+    planThisWeek: 'Эта неделя',
     quickAddFabLabel: 'Добавить', quickAddTitle: 'Быстрое добавление',
     quickAddPlaceholder: 'Купить молоко завтра в 18',
     quickAddHint: 'Дату, время, #тег, ~длительность, приоритет (!1 !2 !3) и повтор («ежедневно», «по субботам», «каждые 3 дня») можно писать прямо в строке.',
@@ -233,7 +245,13 @@ const T = {
     addSubtaskBtn: '+ Dodaj podzadanie', removeSubtaskAria: 'Usuń podzadanie',
     estimateLabel: 'Ile czasu zajmie', estimatePlaceholder: 'min',
     estimateShort: (min) => (min >= 60 ? `~${Math.floor(min / 60)} godz${min % 60 ? ' ' + (min % 60) + ' min' : ''}` : `~${min} min`),
-    bnWeek: 'Tydzień', bnMonth: 'Kalendarz', bnHome: 'Główna',
+    bnDay: 'Dzień', bnWeek: 'Tydzień', bnMonth: 'Kalendarz',
+    planPlaceholder: 'Co zrobić w tym tygodniu?',
+    planEmpty: 'Pusto. Tu zapisujesz pomysły i plany na tydzień — to, co trzeba zrobić, ale nie konkretnego dnia.',
+    planNothing: 'Wpisz przynajmniej nazwę',
+    planCarried: 'z zeszłego tygodnia',
+    planBackWeek: 'Wróć do tego tygodnia',
+    planThisWeek: 'Ten tydzień',
     quickAddFabLabel: 'Dodaj', quickAddTitle: 'Szybkie dodawanie',
     quickAddPlaceholder: 'Kupić mleko jutro o 18',
     quickAddHint: 'Datę, godzinę, #tag, ~czas trwania, priorytet (!1 !2 !3) i powtarzanie („codziennie", „co sobotę") możesz wpisać w tej samej linii.',
@@ -313,7 +331,13 @@ const T = {
     addSubtaskBtn: '+ Add subtask', removeSubtaskAria: 'Remove subtask',
     estimateLabel: 'How long will it take', estimatePlaceholder: 'min',
     estimateShort: (min) => (min >= 60 ? `~${Math.floor(min / 60)}h${min % 60 ? ' ' + (min % 60) + 'm' : ''}` : `~${min}m`),
-    bnWeek: 'Week', bnMonth: 'Calendar', bnHome: 'Home',
+    bnDay: 'Day', bnWeek: 'Week', bnMonth: 'Calendar',
+    planPlaceholder: 'What to do this week?',
+    planEmpty: 'Empty. This is where ideas and weekly plans go — things to do, just not on a particular day.',
+    planNothing: 'Type at least a title',
+    planCarried: 'from last week',
+    planBackWeek: 'Back to this week',
+    planThisWeek: 'This week',
     quickAddFabLabel: 'Add', quickAddTitle: 'Quick add',
     quickAddPlaceholder: 'Buy milk tomorrow at 6pm',
     quickAddHint: 'Date, time, #tag, ~duration, priority (!1 !2 !3) and repetition ("daily", "every friday", "every 3 days") can go right in the line.',
@@ -459,7 +483,8 @@ function applyTranslations() {
   document.getElementById('saveAsTemplateBtn').textContent = t('saveAsTemplate');
   document.getElementById('bnWeekLabel').textContent = t('bnWeek');
   document.getElementById('bnMonthLabel').textContent = t('bnMonth');
-  document.getElementById('bnHomeLabel').textContent = t('bnHome');
+  document.getElementById('bnDayLabel').textContent = t('bnDay');
+  document.getElementById('planInput').placeholder = t('planPlaceholder');
   document.getElementById('openQuickAdd').setAttribute('aria-label', t('quickAddFabLabel'));
   document.getElementById('quickAddTitle').textContent = t('quickAddTitle');
   document.getElementById('quickAddInput').placeholder = t('quickAddPlaceholder');
@@ -718,13 +743,16 @@ function renderTagFilterRow() {
   });
 }
 
-function taskRowHtml(task) {
+function taskRowHtml(task, extraMeta) {
   const checkedClass = task.done ? ' checked' : '';
   const prioClass = task.priority ? ` priority-${task.priority}` : '';
   const doneRowClass = task.done ? ' done' : '';
   const subtasks = task.subtasks || [];
   const subDone = subtasks.filter((s) => s.done).length;
-  const metaParts = [];
+  // Додаткова позначка від того, хто малює список: вкладка тижня так каже,
+  // що пункт приїхав із давнішого. Йде в той самий рядок підписів, а не
+  // окремим блоком під карткою: інакше вона висіла б між рядками нічия.
+  const metaParts = extraMeta ? [extraMeta] : [];
   if (task.dueTime) metaParts.push(`<span class="task-time">${escapeHtml(task.dueTime)}</span>`);
   if (task.priority) metaParts.push(`<span class="priority-chip ${task.priority}">${priorityLabel(task.priority)}</span>`);
   if (subtasks.length) metaParts.push(`<span class="task-progress">${subDone}/${subtasks.length}</span>`);
@@ -1129,7 +1157,11 @@ function renderMonthGrid() {
 
 function renderNoDateSection() {
   const el = document.getElementById('noDateSection');
-  const undated = tasks.filter(matchesFilters).filter((tsk) => !tsk.dueDate);
+  // Пункти тижня сюди не потрапляють: дата в них не забута, а свідомо не
+  // потрібна, і живуть вони на своїй вкладці. Без цієї межі кожен запис із
+  // «Тижня» дублювався б унизу дня.
+  const undated = tasks.filter(matchesFilters)
+    .filter((tsk) => !tsk.dueDate && !tsk.weekStart);
   if (!undated.length) { el.innerHTML = ''; return; }
   el.innerHTML = dayGroupHtml(t('noDateLabel'), undated);
 
@@ -1618,23 +1650,146 @@ function playSlide(el, direction) {
 // Головний екран — тиждень: рядок із семи днів, під ним завдання обраного дня.
 // Місяць живе окремим екраном і потрібен лише для планування на далекі дати,
 // тож не займає місце там, де людина буває щодня.
-let currentScreen = 'week'; // 'week' | 'month'
+let currentScreen = 'day'; // 'day' | 'week' | 'month'
 let selectedDate = todayISO();
 
 function renderCurrentScreen() {
   if (currentScreen === 'month') renderCalendar();
-  else renderWeekScreen();
+  else if (currentScreen === 'week') renderWeekPlanScreen();
+  else renderDayScreen();
 }
 
-// Два екрани й одна нижня панель: тримаємо перемикання в одному місці,
+// Три екрани й одна нижня панель: тримаємо перемикання в одному місці,
 // щоб підсвічена вкладка не розʼїжджалась із тим, що насправді видно.
+//
+// Плаваючий «+» ховається на вкладці тижня: він створює завдання НА ДЕНЬ, а
+// там пишуть те, у чого дня якраз і немає. Записати туди є чим — рядок стоїть
+// просто над списком.
 function showScreenChrome(screen) {
-  document.getElementById('weekScreen').style.display = screen === 'week' ? '' : 'none';
+  document.getElementById('dayScreen').style.display = screen === 'day' ? '' : 'none';
+  document.getElementById('weekPlanScreen').style.display = screen === 'week' ? 'block' : 'none';
   document.getElementById('monthScreen').style.display = screen === 'month' ? 'block' : 'none';
+  document.getElementById('openQuickAdd').style.display = screen === 'week' ? 'none' : '';
   document.querySelectorAll('#bottomNav [data-screen]').forEach((btn) => {
     btn.classList.toggle('active', btn.dataset.screen === screen);
   });
 }
+
+// ---- Вкладка «Тиждень» ----
+// Ідеї та плани без конкретного дня. Пункт лежить у тій самій колекції
+// `tasks`, лише з полем weekStart замість dueDate (див. week-plan.js), тож
+// галочка, підзадачі, теги й форма редагування працюють ті самі — окрема
+// сутність вимагала б своєї копії всього цього.
+let planWeek = null; // понеділок показаного тижня; null — поточний
+
+function planWeekIso() {
+  return planWeek || WeekPlan.weekStartOf(todayISO());
+}
+
+function planAtThisWeek() {
+  return planWeekIso() === WeekPlan.weekStartOf(todayISO());
+}
+
+function planWeekLabel(weekStartIso) {
+  const locale = LOCALE_MAP[currentLang] || 'uk-UA';
+  const from = parseISODate(weekStartIso);
+  const to = parseISODate(WeekPlan.weekEndOf(weekStartIso));
+  // Місяць пишемо біля обох чисел лише коли вони різні: «31 серпня — 6
+  // вересня», але «7 — 13 вересня».
+  const sameMonth = from.getMonth() === to.getMonth();
+  const day = new Intl.DateTimeFormat(locale, { day: 'numeric' });
+  const dayMonth = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long' });
+  return `${sameMonth ? day.format(from) : dayMonth.format(from)} — ${dayMonth.format(to)}`;
+}
+
+function shiftPlanWeek(delta) {
+  planWeek = WeekPlan.shiftWeeks(planWeekIso(), delta);
+  renderWeekPlanScreen();
+}
+
+function renderWeekPlanScreen() {
+  const weekIso = planWeekIso();
+  const label = document.getElementById('planLabel');
+  label.textContent = planAtThisWeek() ? t('planThisWeek') : planWeekLabel(weekIso);
+  label.classList.toggle('current', planAtThisWeek());
+  label.title = planAtThisWeek() ? '' : t('planBackWeek');
+
+  const list = WeekPlan.plansOfWeek(tasks, weekIso, {
+    currentWeekStart: WeekPlan.weekStartOf(todayISO()),
+  });
+  const el = document.getElementById('planList');
+  if (!list.length) {
+    el.innerHTML = `<div class="empty-state"><div>${escapeHtml(t('planEmpty'))}</div></div>`;
+    return;
+  }
+  // Рядок той самий, що й у дні: галочка, підзаголовки, свайп. Приїхалий із
+  // давнішого тижня підписуємо — інакше він виглядав би як щойно записаний.
+  el.innerHTML = `<div class="day-card">${sortTasks(list).map((task) => taskRowHtml(task,
+    WeekPlan.isCarried(task, weekIso)
+      ? `<span class="plan-carried">${escapeHtml(t('planCarried'))}</span>` : null))
+    .join('')}</div>`;
+
+  el.querySelectorAll('[data-toggle]').forEach((btn) => {
+    btn.addEventListener('click', (e) => { e.stopPropagation(); toggleDone(btn.dataset.toggle); });
+  });
+  el.querySelectorAll('[data-open]').forEach((elx) => {
+    elx.addEventListener('click', () => openTaskForm(tasks.find((tsk) => tsk.id === elx.dataset.open)));
+  });
+}
+
+async function addWeekPlan() {
+  const input = document.getElementById('planInput');
+  const errorEl = document.getElementById('planError');
+  const title = input.value.trim();
+  if (!title) { errorEl.textContent = t('planNothing'); return; }
+  const uidCur = auth.currentUser && auth.currentUser.uid;
+  if (!uidCur) return;
+  errorEl.textContent = '';
+
+  const btn = document.getElementById('planAddBtn');
+  btn.disabled = true;
+  try {
+    // Пишемо в ТОЙ тиждень, який зараз на екрані: людина могла перегорнути
+    // вперед і планувати наступний.
+    await db.collection('users').doc(uidCur).collection('tasks').add({
+      title,
+      notes: '',
+      done: false,
+      completedAt: null,
+      priority: null,
+      tags: [],
+      // Дня немає — у цьому вся суть вкладки.
+      dueDate: null,
+      dueTime: null,
+      weekStart: planWeekIso(),
+      estimateMin: null,
+      recurrence: null,
+      reminderAt: null,
+      notifiedAt: null,
+      subtasks: [],
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+    input.value = '';
+  } catch (err) {
+    console.error('addWeekPlan:', err);
+    errorEl.textContent = writeErrorMessage(err);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+document.getElementById('planAddBtn').addEventListener('click', addWeekPlan);
+document.getElementById('planInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') { e.preventDefault(); addWeekPlan(); }
+});
+document.getElementById('planPrevBtn').addEventListener('click', () => shiftPlanWeek(-1));
+document.getElementById('planNextBtn').addEventListener('click', () => shiftPlanWeek(1));
+document.getElementById('planLabel').addEventListener('click', () => {
+  if (planAtThisWeek()) return;
+  planWeek = null;
+  renderWeekPlanScreen();
+});
 
 function showMonthScreen() {
   currentScreen = 'month';
@@ -1647,20 +1802,26 @@ function showMonthScreen() {
   renderCalendar();
 }
 
-function showWeekScreen() {
+function showDayScreen() {
+  currentScreen = 'day';
+  showScreenChrome('day');
+  renderDayScreen();
+}
+
+function showWeekPlanScreen() {
   currentScreen = 'week';
   showScreenChrome('week');
-  renderWeekScreen();
+  renderWeekPlanScreen();
 }
 
 function selectDate(iso) {
   selectedDate = iso;
-  if (currentScreen === 'month') showWeekScreen(); else renderWeekScreen();
+  if (currentScreen === 'day') renderDayScreen(); else showDayScreen();
 }
 
 let swipeInited = false;
 
-function renderWeekScreen() {
+function renderDayScreen() {
   if (!swipeInited) {
     initRowSwipe(document.getElementById('dayList'));
     initRowSwipe(document.getElementById('noDateSection'));
@@ -1786,7 +1947,8 @@ document.querySelectorAll('#bottomNav [data-screen]').forEach((btn) => {
   btn.addEventListener('click', () => {
     const screen = btn.dataset.screen;
     if (screen === 'month') showMonthScreen();
-    else showWeekScreen();
+    else if (screen === 'week') showWeekPlanScreen();
+    else showDayScreen();
   });
 });
 function shiftWeek(delta) {
@@ -2567,4 +2729,4 @@ applyTheme();
 applyTranslations();
 renderAuthLangRow();
 setAuthMode('login');
-showWeekScreen();
+showDayScreen();

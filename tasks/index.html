@@ -318,6 +318,30 @@
   }
   .week-head{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
   .week-label{flex:1;text-align:center;font-size:14.5px;font-weight:700;color:var(--ink);}
+  /* Назва тижня на вкладці планів — кнопка «вернутись у цей тиждень». Поки
+     тиждень і так поточний, вертатись нікуди: вона лишається назвою. */
+  .plan-label{background:none;border:none;padding:4px 0;cursor:pointer;
+    font-family:'Inter',sans-serif;-webkit-tap-highlight-color:transparent;}
+  .plan-label.current{cursor:default;}
+  .plan-label:not(.current){color:var(--accent);}
+  /* Рядок «записати думку». Стоїть над списком, а не за плаваючим «+»: уся
+     суть вкладки — записати, поки думка є. */
+  .plan-add-row{display:flex;gap:8px;margin-bottom:6px;}
+  .plan-add-row input{flex:1;min-width:0;font-family:'Inter',sans-serif;font-size:15px;
+    border:1px solid var(--border);border-radius:12px;padding:11px 13px;outline:none;
+    background:var(--surface);color:var(--ink);}
+  .plan-add-row input:focus{border-color:var(--accent);}
+  .plan-add-btn{flex-shrink:0;width:44px;border:none;border-radius:12px;cursor:pointer;
+    background:var(--accent);color:#fff;font-size:22px;line-height:1;font-family:'Inter',sans-serif;}
+  .plan-add-btn:active{transform:scale(.96);}
+  .plan-error{color:var(--expense);font-size:13px;min-height:18px;margin-bottom:6px;}
+  .plan-error:empty{min-height:0;}
+  /* Позначка на пункті, що приїхав із давнішого тижня. Не докір, а факт:
+     інакше він виглядав би як щойно записаний. Стоїть серед решти підписів
+     рядка — тими самими плашками, що час, пріоритет і теги. */
+  .plan-carried{font-size:11px;font-weight:600;color:var(--ink-muted);
+    background:var(--control-bg);border-radius:999px;padding:2px 8px;}
+
   .week-viewport{overflow:hidden;margin-bottom:18px;}
   .week-track{display:flex;width:300%;transform:translate3d(-33.3333%,0,0);}
   .week-track.animating{transition:transform .22s cubic-bezier(.22,.61,.36,1);}
@@ -553,10 +577,6 @@
     .wrap{max-width:none;margin:0;padding:26px 40px 0 278px;}
     .app-topbar-brand{display:none;}
     .app-topbar{padding:2px 0 0;}
-    /* «Головна» в нижній панелі — та сама дія, що й перший рядок бічної
-       колонки. На телефоні колонки немає, тож вкладка потрібна; тут вона
-       вже друга кнопка на одне й те саме. */
-    #bnHome{display:none;}
     .content{max-width:960px;margin:0 auto;padding:20px 4px 40px;}
     #dayViewScreen{max-width:960px;margin:0 auto;padding:20px 4px 40px;}
     .cal-day{min-height:100px;padding:8px 6px;}
@@ -631,8 +651,8 @@
     </div>
   </div>
 
-  <!-- ---- Головний екран: тиждень + завдання обраного дня ---- -->
-  <div id="weekScreen">
+  <!-- ---- Екран ДНЯ: смуга тижня згори + завдання обраного дня ---- -->
+  <div id="dayScreen">
   <div class="content">
 
     <div id="weekSwipeArea" class="swipe-area">
@@ -654,6 +674,36 @@
     <div class="day-heading" id="dayHeading"></div>
     <div id="dayList"></div>
     <div id="noDateSection"></div>
+  </div>
+  </div>
+
+  <!-- ---- Екран ТИЖНЯ: ідеї та плани без конкретного дня ----
+       Не «завдання на понеділок», а «зробити цього тижня»: намір, ідея,
+       справа без години. У базі це те саме завдання, лише з полем weekStart
+       замість dueDate — див. week-plan.js. -->
+  <div id="weekPlanScreen" style="display:none;">
+  <div class="content">
+    <div class="week-head">
+      <button type="button" id="planPrevBtn" class="cal-nav-btn" aria-label="Попередній тиждень">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <!-- Назва тижня — кнопка «вернутись у цей тиждень»: той самий жест, що
+           в календарі цілей, тренувань і на головній. -->
+      <button type="button" class="week-label plan-label" id="planLabel"></button>
+      <button type="button" id="planNextBtn" class="cal-nav-btn" aria-label="Наступний тиждень">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
+    </div>
+
+    <!-- Рядок додавання стоїть просто тут, а не за плаваючим «+»: уся суть
+         вкладки — записати думку, поки вона є. -->
+    <div class="plan-add-row">
+      <input type="text" id="planInput" maxlength="200" autocomplete="off">
+      <button type="button" class="plan-add-btn" id="planAddBtn" aria-label="Додати">+</button>
+    </div>
+    <div class="plan-error" id="planError" role="alert" aria-live="assertive"></div>
+
+    <div id="planList"></div>
   </div>
   </div>
 
@@ -681,19 +731,23 @@
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
   </button>
 
+<!-- Три вкладки — три горизонти: день, тиждень, календар. Вкладки «Головна»
+     тут більше немає: на хаб веде напис Life у шапці, той самий, що й у решті
+     модулів, тож виходу це не забирає, а місце звільняє під те, заради чого в
+     розділ і заходять. -->
 <nav class="bottom-nav" id="bottomNav">
-    <button type="button" class="bn-item active" data-screen="week" id="bnWeek">
+    <button type="button" class="bn-item active" data-screen="day" id="bnDay">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg>
+      <span id="bnDayLabel">День</span>
+    </button>
+    <button type="button" class="bn-item" data-screen="week" id="bnWeek">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M7.5 14.5h9"/></svg>
       <span id="bnWeekLabel">Тиждень</span>
     </button>
     <button type="button" class="bn-item" data-screen="month" id="bnMonth">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>
       <span id="bnMonthLabel">Календар</span>
     </button>
-    <a class="bn-item" href="../index.html" id="bnHome">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 10v10h14V10"/></svg>
-      <span id="bnHomeLabel">Головна</span>
-    </a>
 </nav>
 
 <!-- ---- Нагадування ---- -->
@@ -821,6 +875,7 @@
 <script defer src="../unsaved-guard.js"></script>
 <script defer src="../goals/streak.js"></script>
 <script defer src="quick-parse.js"></script>
+<script defer src="week-plan.js"></script>
 <script defer src="now-queue.js"></script>
 <script defer src="recurrence.js"></script>
 <script defer src="reminders.js"></script>
