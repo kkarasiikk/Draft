@@ -14,8 +14,8 @@ LifeSW({
     './goals/streak.js', './goals/review.js', './categories-default.js',
     './manifest.json',
     './budget/firebase-config.js',
-    './budget/icon-192.png', './budget/icon-512.png',
-    './budget/icon-192-maskable.png', './budget/icon-512-maskable.png',
+    './icons/icon-192.png', './icons/icon-512.png',
+    './icons/icon-192-maskable.png', './icons/icon-512-maskable.png',
   ],
   // Сторінка жорстко залежить від Firebase SDK (firebase.initializeApp() —
   // перший рядок home.js), тож без цих файлів офлайн-запуск падав би з
