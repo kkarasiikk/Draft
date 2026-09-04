@@ -8,7 +8,7 @@
 // звернень у window.__fbCalls, щоб тест міг перевірити, що збереження таки
 // дійшло до бази.
 (function () {
-  const calls = { add: [], update: [], set: [], delete: [] };
+  const calls = { add: [], update: [], set: [], delete: [], get: [] };
   window.__fbCalls = calls;
 
   // Дані, які «вже є в базі»: тест підкладає їх через window.__fbSeed
@@ -79,7 +79,13 @@
   // записи в одну колекцію не виявились одним документом.
   let generated = 0;
 
-  function colRef(name) {
+  // `where` не фільтрує (сід і так той, що потрібен тесту), але ЗАПАМʼЯТОВУЄ
+  // умови: інакше не перевірити, що сторінка попросила в бази саме той
+  // діапазон, який показує. Календар на головній гортається за межі
+  // прочитаного, і без цього запису тест не відрізнив би «дочитали» від
+  // «намалювали порожньо».
+  function colRef(name, constraints) {
+    const cons = constraints || [];
     const ref = {
       // Доданий документ лягає і в сід: наступне читання тієї ж колекції має
       // його побачити. Без цього не перевірити головного — що сторінка після
@@ -94,8 +100,12 @@
       },
       doc: (id) => docRef(name, id),
       onSnapshot: (cb) => { setTimeout(() => cb(snapOf(seed[name])), 0); return () => {}; },
-      get: () => Promise.resolve(snapOf(seed[name])),
-      where: () => ref, orderBy: () => ref, limit: () => ref,
+      get: () => {
+        calls.get.push({ col: name, where: cons.slice() });
+        return Promise.resolve(snapOf(seed[name]));
+      },
+      where: (field, op, value) => colRef(name, cons.concat([[field, op, value]])),
+      orderBy: () => ref, limit: () => ref,
     };
     return ref;
   }

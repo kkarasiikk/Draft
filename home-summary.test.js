@@ -254,6 +254,50 @@ describe('weekCalendar — календарний тиждень', () => {
 });
 
 
+describe('Якір: який період малюємо, коли календар погортали', () => {
+  const WED = '2026-08-26';   // середа
+  const task = (dueDate, done = false) => ({ title: 'x', dueDate, done });
+
+  test('без якоря — той самий тиждень, що й був: сьогоднішній', () => {
+    expect(H.weekCalendar([], WED)).toEqual(H.weekCalendar([], WED, WED));
+  });
+
+  test('якір веде тиждень, а «сьогодні» лишається справжнім', () => {
+    // Гортання НЕ підмінює сьогодні: інакше в сусідньому тижні виділеним
+    // виявився б не той день, і сторінка брехала б про дату.
+    const w = H.weekCalendar([], WED, '2026-09-02');
+    expect(w.from).toBe('2026-08-31');
+    expect(w.to).toBe('2026-09-06');
+    expect(w.days.some((d) => d.today)).toBe(false);
+    expect(w.days.every((d) => d.past === (d.date < WED))).toBe(true);
+  });
+
+  test('крапки в погортаному тижні — з тих самих завдань', () => {
+    const w = H.weekCalendar([task('2026-09-03')], WED, '2026-09-02');
+    expect(w.days.find((d) => d.date === '2026-09-03').hasTasks).toBe(true);
+  });
+
+  test('якір веде й місяць', () => {
+    const m = H.monthCalendar([], '2026-08-26', '2026-10-15');
+    expect(m.days.filter((d) => !d.otherMonth)).toHaveLength(31);
+    expect(m.days.some((d) => d.today)).toBe(false);
+  });
+
+  test('shiftDays гортає тиждень і переходить через межу місяця', () => {
+    expect(H.shiftDays('2026-08-26', 7)).toBe('2026-09-02');
+    expect(H.shiftDays('2026-09-02', -7)).toBe('2026-08-26');
+    expect(H.shiftDays('2026-12-31', 1)).toBe('2027-01-01');
+  });
+
+  test('shiftMonths тримається першого числа, а не «того ж числа»', () => {
+    // 31 січня + 1 місяць мусить дати лютий. Наївний setMonth дав би 2 чи
+    // 3 березня — і гортання перескакувало б цілий місяць.
+    expect(H.shiftMonths('2026-01-31', 1)).toBe('2026-02-01');
+    expect(H.shiftMonths('2026-03-15', -1)).toBe('2026-02-01');
+    expect(H.shiftMonths('2026-12-10', 1)).toBe('2027-01-01');
+  });
+});
+
 describe('monthCalendar — місяць повними тижнями', () => {
   // Вересень 2026 починається у вівторок і закінчується в середу, тож у
   // сітці є хвости обох сусідніх місяців.
