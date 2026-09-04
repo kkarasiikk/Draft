@@ -114,7 +114,9 @@
 
     var aside = document.createElement('aside');
     aside.className = 'side-nav';
-    aside.innerHTML = '<span class="side-brand">Life</span>' + rows +
+    // Логотип — той самий знак, що на іконці застосунку (див. README).
+    // Вектором і в currentColor, тож колір бере від теми.
+    aside.innerHTML = '<span class="side-brand"><svg class="brand-mark" viewBox="35 9 497 276" fill="none" stroke="currentColor" stroke-width="30" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Life"><path d="M62 91 V195 H138 L163 97 L190 259 L214 195 H504"/><path d="M302 257 V141 Q302 93 358 107"/><path d="M504 195 A52 52 0 1 0 477.05 240.57"/><circle cx="163" cy="43.5" r="22.5" fill="currentColor" stroke="none"/></svg></span>' + rows +
       '<span class="side-grow"></span>' + bottom;
     host.parentNode.replaceChild(aside, host);
     mounted = aside;

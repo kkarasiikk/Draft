@@ -158,8 +158,11 @@
      позначка «де я» замість іконки з дрібним підписом. */
   .app-topbar{display:flex;align-items:center;gap:10px;padding:calc(18px + env(safe-area-inset-top)) 20px 10px;}
   .topbar-actions{margin-left:auto;display:flex;gap:8px;align-items:center;}
-  .app-topbar-brand{font-family:'Inter',sans-serif;font-size:30px;font-weight:900;letter-spacing:-0.04em;
-    line-height:1;color:var(--ink);text-decoration:none;}
+  .app-topbar-brand{display:flex;color:var(--ink);text-decoration:none;}
+  /* Логотип — той самий знак, що на іконці застосунку: слово «Life» однією
+     лінією кардіограми. Вектором і в currentColor, тож у світлій темі він
+     темний, у темній білий, і другого файлу для цього не треба. */
+  .brand-mark{height:46px;width:auto;display:block;}
   .item-menu-overlay{position:fixed;inset:0;z-index:55;display:none;}
   .item-menu-overlay.show{display:block;}
   .content{padding:14px 20px 0;}
@@ -578,7 +581,13 @@
 <div class="wrap" id="wrap">
   <div id="sideNavHost"></div>
   <div class="app-topbar">
-    <a href="../index.html" class="app-topbar-brand" id="topbarHomeLink" aria-label="На головну">Life</a>
+    <a href="../index.html" class="app-topbar-brand" id="topbarHomeLink" aria-label="На головну"><svg class="brand-mark" viewBox="35 9 497 276" fill="none" stroke="currentColor"
+      stroke-width="30" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M62 91 V195 H138 L163 97 L190 259 L214 195 H504"/>
+      <path d="M302 257 V141 Q302 93 358 107"/>
+      <path d="M504 195 A52 52 0 1 0 477.05 240.57"/>
+      <circle cx="163" cy="43.5" r="22.5" fill="currentColor" stroke="none"/>
+    </svg></a>
     <div class="topbar-actions">
       <button class="ai-topbar-btn" id="aiChatBtn" aria-label="AI-помічник">AI</button>
     </div>
