@@ -949,7 +949,6 @@ function goalCardHtml(goal) {
         </div>
         ${statusBadge}
       </div>
-      ${prog ? `<div class="goal-mini-progress"><div class="goal-mini-progress-fill" style="width:${prog.pct}%"></div></div>` : ''}
       ${metaParts.length ? `<div class="goal-card-meta">${metaParts.join('')}</div>` : ''}
     </div>`;
 }
@@ -1243,6 +1242,21 @@ async function restartGoal(goalId) {
 }
 
 // Намір «якщо ситуація — то дія». Порожню половину зберігаємо як є: людина
+// createdAt приходить із Firestore як Timestamp; тим, хто рахує вік цілі
+// (ретроспектива, довга перерва, місяць «свого» місяця), потрібен день, від
+// якого вести відлік. Якщо поля ще немає (щойно створений документ до
+// підтвердження сервером) — review.js сам візьме найраніший слід у даних.
+function createdIso(goal) {
+  // Після перезапуску відлік цілі ведеться від нього, а не від заведення:
+  // саме в цьому й полягає «почати заново».
+  if (goal && typeof goal.restartedAt === 'string' && goal.restartedAt.length === 10) {
+    return goal.restartedAt;
+  }
+  const ts = goal && goal.createdAt;
+  if (ts && typeof ts.toDate === 'function') return Streak.isoOf(ts.toDate());
+  return null;
+}
+
 // ---- Що заважає найчастіше ----
 // Щовечора застосунок питає «що завадило» і зберігає відповідь. Рахунок за
 // частотою вже вмів goals/streak.js (blockerStats), але показувати його було
