@@ -49,6 +49,9 @@ function bootSw(opts = {}) {
 
   const cache = {
     addAll: () => Promise.resolve(),
+    // Свій match: ядро читає саме через нього, а не через глобальний
+    // caches.match(). Різниця не косметична — див. тест про чужий кеш нижче.
+    match: (req) => Promise.resolve(cached[typeof req === 'string' ? req : req.url] || undefined),
     put: (req, resp) => {
       const url = typeof req === 'string' ? req : req.url;
       // Справжній Cache вичитує тіло — клон, зроблений запізно, тут і впаде.
@@ -69,7 +72,11 @@ function bootSw(opts = {}) {
       open: () => (opts.openDelay
         ? new Promise((res) => setTimeout(() => res(cache), opts.openDelay))
         : Promise.resolve(cache)),
-      match: (req) => Promise.resolve(cached[typeof req === 'string' ? req : req.url] || undefined),
+      // Глобальний caches.match() перебирає ВСІ кеші походження. Тут він
+      // навмисно віддає вміст ЧУЖОГО кеша: якщо ядро колись знову почне ним
+      // користуватись, тести побачать чуже замість свого.
+      match: (req) => Promise.resolve(
+        (opts.otherCache || {})[typeof req === 'string' ? req : req.url] || undefined),
       keys: () => Promise.resolve(opts.cacheKeys || []),
       delete: (k) => { (calls.deleted = calls.deleted || []).push(k); return Promise.resolve(true); },
     },
@@ -155,6 +162,34 @@ describe('що SW бере на себе, а що лишає браузеру', 
   // cache.put() на таких схемах просто кидає виняток.
   test('chrome-extension:// та інші схеми обходить', () => {
     expect(bootSw().takes('chrome-extension://abcdef/inject.js')).toBe(false);
+  });
+});
+
+describe('кеш свій, а не спільний', () => {
+  // Файли в корені (side-nav.js, categories-default.js, home-summary.js…)
+  // лежать у кешах УСІХ пʼятьох воркерів. Глобальний caches.match() перебирає
+  // всі кеші походження в порядку створення, тож бюджет міг отримати
+  // /side-nav.js із кеша цілей — а той оновлюється лише тоді, коли людина
+  // заходить у цілі. Спільний файл так лишався старим ще довго після того,
+  // як оновився сам розділ.
+  const SHARED = 'https://example.test/side-nav.js';
+
+  test('чужий кеш не виграє: своє порожнє означає мережу, а не чуже', async () => {
+    const sw = bootSw({
+      cached: {},
+      otherCache: { [SHARED]: response({ body: 'старе з чужого кеша' }) },
+      network: () => response({ body: 'свіже з мережі' }),
+    });
+    const r = await sw.handle(SHARED);
+    expect(r.body).toBe('свіже з мережі');
+  });
+
+  test('своє виграє в чужого, навіть коли обидва є', async () => {
+    const sw = bootSw({
+      cached: { [SHARED]: response({ body: 'своє' }) },
+      otherCache: { [SHARED]: response({ body: 'чуже' }) },
+    });
+    expect((await sw.handle(SHARED)).body).toBe('своє');
   });
 });
 
