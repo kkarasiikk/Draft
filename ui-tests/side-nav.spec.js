@@ -63,7 +63,10 @@ test.describe('Комп’ютер', () => {
       test(`${name}: логотип у шапці сховано — він уже в колонці`, async ({ page }) => {
         await openModule(page, path, { ready });
         await expect(page.locator('.app-topbar-brand')).toBeHidden();
-        await expect(page.locator('.side-brand')).toHaveText('Life');
+        // Логотип тепер знак, а не текст, тож питаємо його доступну назву:
+        // саме її почує людина з читалкою екрана замість напису «Life».
+        await expect(page.locator('.side-brand .brand-mark')).toBeVisible();
+        await expect(page.locator('.side-brand .brand-mark')).toHaveAttribute('aria-label', 'Life');
       });
     }
   }
