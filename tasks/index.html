@@ -326,6 +326,14 @@
   .plan-label:not(.current){color:var(--accent);}
   /* Рядок «записати думку». Стоїть над списком, а не за плаваючим «+»: уся
      суть вкладки — записати, поки думка є. */
+  /* Перемикач «План / Нотатка» — той самий вигляд, що у вкладок фільтра
+     статусу в цілях: два слова, одне підсвічене. */
+  .plan-kind{display:flex;gap:6px;margin-bottom:10px;}
+  .plan-kind-btn{border:1px solid var(--border);background:transparent;color:var(--ink-muted);
+    font-family:'Inter',sans-serif;font-size:13px;font-weight:600;padding:7px 14px;
+    border-radius:999px;cursor:pointer;transition:background .15s,color .15s,border-color .15s;}
+  .plan-kind-btn.active{background:var(--accent);color:#fff;border-color:transparent;}
+
   .plan-add-row{display:flex;gap:8px;margin-bottom:6px;}
   .plan-add-row input{flex:1;min-width:0;font-family:'Inter',sans-serif;font-size:15px;
     border:1px solid var(--border);border-radius:12px;padding:11px 13px;outline:none;
@@ -341,6 +349,16 @@
      рядка — тими самими плашками, що час, пріоритет і теги. */
   .plan-carried{font-size:11px;font-weight:600;color:var(--ink-muted);
     background:var(--control-bg);border-radius:999px;padding:2px 8px;}
+
+  /* Нотатки. Без галочки — її на нотатці нема що ставити, — і тому це не
+     рядок списку, а картка тексту: видно, що з нею нічого «робити» не треба. */
+  .plan-notes-label{font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;
+    color:var(--ink-muted);font-family:'Inter',sans-serif;font-weight:600;
+    margin:22px 0 8px;padding-left:2px;}
+  .plan-note{background:var(--surface);border:1px solid var(--border);border-radius:16px;
+    padding:13px 15px;margin-bottom:8px;cursor:pointer;font-size:14.5px;line-height:1.45;
+    color:var(--ink);white-space:pre-wrap;word-break:break-word;}
+  .plan-note:hover{border-color:var(--accent);}
 
   .week-viewport{overflow:hidden;margin-bottom:18px;}
   .week-track{display:flex;width:300%;transform:translate3d(-33.3333%,0,0);}
@@ -696,7 +714,13 @@
     </div>
 
     <!-- Рядок додавання стоїть просто тут, а не за плаваючим «+»: уся суть
-         вкладки — записати думку, поки вона є. -->
+         вкладки — записати думку, поки вона є.
+         Перемикач над ним каже, ЩО саме записуєш: план виконують, нотатку
+         читають, і галочка на нотатці не означала б нічого. -->
+    <div class="plan-kind" id="planKind">
+      <button type="button" class="plan-kind-btn active" data-kind="plan" id="planKindPlan"></button>
+      <button type="button" class="plan-kind-btn" data-kind="note" id="planKindNote"></button>
+    </div>
     <div class="plan-add-row">
       <input type="text" id="planInput" maxlength="200" autocomplete="off">
       <button type="button" class="plan-add-btn" id="planAddBtn" aria-label="Додати">+</button>
@@ -704,6 +728,7 @@
     <div class="plan-error" id="planError" role="alert" aria-live="assertive"></div>
 
     <div id="planList"></div>
+    <div id="planNotes"></div>
   </div>
   </div>
 

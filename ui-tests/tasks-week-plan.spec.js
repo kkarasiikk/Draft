@@ -34,6 +34,8 @@ const SEED = {
     task({ id: 'w1', title: 'Ідея на тиждень', weekStart: THIS_WEEK }),
     task({ id: 'w2', title: 'Борг з минулого', weekStart: PREV_WEEK }),
     task({ id: 'w3', title: 'Закрите минулого', weekStart: PREV_WEEK, done: true }),
+    task({ id: 'note1', title: 'Телефон майстра 555', weekStart: THIS_WEEK, kind: 'note' }),
+    task({ id: 'note2', title: 'Думка минулого тижня', weekStart: PREV_WEEK, kind: 'note' }),
   ],
 };
 
@@ -187,6 +189,83 @@ test.describe('Запис на тиждень', () => {
     await expect(page.locator('#openQuickAdd')).toBeHidden();
     await page.click('#bnDay');
     await expect(page.locator('#openQuickAdd')).toBeVisible();
+  });
+});
+
+test.describe('Нотатки на тижні', () => {
+  const notes = (page) => page.locator('.plan-note').allTextContents();
+
+  test('нотатки стоять окремо від планів — і без галочки', async ({ page }) => {
+    // Галочка на нотатці не означала б нічого: її не виконують, а читають.
+    await openTasks(page);
+    await page.click('#bnWeek');
+    expect(await notes(page)).toEqual(['Телефон майстра 555']);
+    await expect(page.locator('.plan-note .task-check')).toHaveCount(0);
+    expect(await titles(page), 'нотатка не лізе у список планів')
+      .not.toContain('Телефон майстра 555');
+  });
+
+  test('нотатка НЕ переїжджає в новий тиждень', async ({ page }) => {
+    // Незроблений план — борг, а незабута думка — запис на своєму місці.
+    await openTasks(page);
+    await page.click('#bnWeek');
+    expect(await notes(page)).not.toContain('Думка минулого тижня');
+    await page.click('#planPrevBtn');
+    expect(await notes(page)).toEqual(['Думка минулого тижня']);
+  });
+
+  test('перемикач каже, що саме записуєш, і міняє підказку в полі', async ({ page }) => {
+    await openTasks(page);
+    await page.click('#bnWeek');
+    await expect(page.locator('#planKindPlan')).toHaveClass(/active/);
+    await expect(page.locator('#planInput')).toHaveAttribute('placeholder', 'Що зробити цього тижня?');
+    await page.click('#planKindNote');
+    await expect(page.locator('#planKindNote')).toHaveClass(/active/);
+    await expect(page.locator('#planKindPlan')).not.toHaveClass(/active/);
+    await expect(page.locator('#planInput')).toHaveAttribute('placeholder', 'Що записати на памʼять?');
+  });
+
+  test('нотатка пишеться з kind, план — без нього', async ({ page }) => {
+    const lastAdd = (page_) => page_.evaluate(() => window.__fbCalls.add.slice(-1)[0]);
+    await openTasks(page);
+    await page.click('#bnWeek');
+
+    await page.click('#planKindNote');
+    await page.fill('#planInput', 'Записати думку');
+    await page.click('#planAddBtn');
+    await expect.poll(async () => (await lastAdd(page)).payload.title).toBe('Записати думку');
+    expect((await lastAdd(page)).payload).toMatchObject({ kind: 'note', weekStart: THIS_WEEK, dueDate: null });
+
+    await page.click('#planKindPlan');
+    await page.fill('#planInput', 'Зробити діло');
+    await page.click('#planAddBtn');
+    await expect.poll(async () => (await lastAdd(page)).payload.title).toBe('Зробити діло');
+    expect((await lastAdd(page)).payload.kind, 'план нотаткою не стає').toBe(null);
+  });
+
+  test('тиждень із самими нотатками — не порожній тиждень', async ({ page }) => {
+    await openTasks(page, {
+      profile: {},
+      tasks: [task({ id: 'n', title: 'Сама лише думка', weekStart: THIS_WEEK, kind: 'note' })],
+    });
+    await page.click('#bnWeek');
+    await expect(page.locator('#planList .empty-state')).toHaveCount(0);
+    expect(await notes(page)).toEqual(['Сама лише думка']);
+  });
+
+  test('коли немає нічого — порожній екран на місці', async ({ page }) => {
+    await openTasks(page, { profile: {}, tasks: [] });
+    await page.click('#bnWeek');
+    await expect(page.locator('#planList .empty-state')).toHaveCount(1);
+    expect(await notes(page)).toEqual([]);
+  });
+
+  test('тап по нотатці відкриває ту саму форму — є де виправити й видалити', async ({ page }) => {
+    await openTasks(page);
+    await page.click('#bnWeek');
+    await page.click('.plan-note');
+    await expect(page.locator('#taskFormOverlay')).toHaveClass(/show/);
+    await expect(page.locator('#taskTitleInput')).toHaveValue('Телефон майстра 555');
   });
 });
 

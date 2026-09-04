@@ -72,7 +72,10 @@ const T = {
     estimateLabel: 'Скільки часу займе', estimatePlaceholder: 'хв',
     estimateShort: (min) => (min >= 60 ? `~${Math.floor(min / 60)} год${min % 60 ? ' ' + (min % 60) + ' хв' : ''}` : `~${min} хв`),
     bnDay: 'День', bnWeek: 'Тиждень', bnMonth: 'Календар',
+    planKindPlan: 'План', planKindNote: 'Нотатка',
     planPlaceholder: 'Що зробити цього тижня?',
+    planNotePlaceholder: 'Що записати на памʼять?',
+    planNotesLabel: 'Нотатки',
     planEmpty: 'Порожньо. Сюди пишуться ідеї та плани на тиждень — те, що треба зробити, але не конкретного дня.',
     planNothing: 'Напиши хоча б назву',
     planCarried: 'з минулого тижня',
@@ -160,7 +163,10 @@ const T = {
     estimateLabel: 'Сколько времени займёт', estimatePlaceholder: 'мин',
     estimateShort: (min) => (min >= 60 ? `~${Math.floor(min / 60)} ч${min % 60 ? ' ' + (min % 60) + ' мин' : ''}` : `~${min} мин`),
     bnDay: 'День', bnWeek: 'Неделя', bnMonth: 'Календарь',
+    planKindPlan: 'План', planKindNote: 'Заметка',
     planPlaceholder: 'Что сделать на этой неделе?',
+    planNotePlaceholder: 'Что записать на память?',
+    planNotesLabel: 'Заметки',
     planEmpty: 'Пусто. Сюда пишутся идеи и планы на неделю — то, что надо сделать, но не в конкретный день.',
     planNothing: 'Напиши хотя бы название',
     planCarried: 'с прошлой недели',
@@ -246,7 +252,10 @@ const T = {
     estimateLabel: 'Ile czasu zajmie', estimatePlaceholder: 'min',
     estimateShort: (min) => (min >= 60 ? `~${Math.floor(min / 60)} godz${min % 60 ? ' ' + (min % 60) + ' min' : ''}` : `~${min} min`),
     bnDay: 'Dzień', bnWeek: 'Tydzień', bnMonth: 'Kalendarz',
+    planKindPlan: 'Plan', planKindNote: 'Notatka',
     planPlaceholder: 'Co zrobić w tym tygodniu?',
+    planNotePlaceholder: 'Co zapisać na pamięć?',
+    planNotesLabel: 'Notatki',
     planEmpty: 'Pusto. Tu zapisujesz pomysły i plany na tydzień — to, co trzeba zrobić, ale nie konkretnego dnia.',
     planNothing: 'Wpisz przynajmniej nazwę',
     planCarried: 'z zeszłego tygodnia',
@@ -332,7 +341,10 @@ const T = {
     estimateLabel: 'How long will it take', estimatePlaceholder: 'min',
     estimateShort: (min) => (min >= 60 ? `~${Math.floor(min / 60)}h${min % 60 ? ' ' + (min % 60) + 'm' : ''}` : `~${min}m`),
     bnDay: 'Day', bnWeek: 'Week', bnMonth: 'Calendar',
+    planKindPlan: 'Plan', planKindNote: 'Note',
     planPlaceholder: 'What to do this week?',
+    planNotePlaceholder: 'Something to remember?',
+    planNotesLabel: 'Notes',
     planEmpty: 'Empty. This is where ideas and weekly plans go — things to do, just not on a particular day.',
     planNothing: 'Type at least a title',
     planCarried: 'from last week',
@@ -484,7 +496,9 @@ function applyTranslations() {
   document.getElementById('bnWeekLabel').textContent = t('bnWeek');
   document.getElementById('bnMonthLabel').textContent = t('bnMonth');
   document.getElementById('bnDayLabel').textContent = t('bnDay');
-  document.getElementById('planInput').placeholder = t('planPlaceholder');
+  document.getElementById('planKindPlan').textContent = t('planKindPlan');
+  document.getElementById('planKindNote').textContent = t('planKindNote');
+  applyPlanPlaceholder();
   document.getElementById('openQuickAdd').setAttribute('aria-label', t('quickAddFabLabel'));
   document.getElementById('quickAddTitle').textContent = t('quickAddTitle');
   document.getElementById('quickAddInput').placeholder = t('quickAddPlaceholder');
@@ -1686,6 +1700,23 @@ function showScreenChrome(screen) {
 // галочка, підзадачі, теги й форма редагування працюють ті самі — окрема
 // сутність вимагала б своєї копії всього цього.
 let planWeek = null; // понеділок показаного тижня; null — поточний
+// Що зараз пишемо: план чи нотатку. План виконують, нотатку читають — і
+// галочка на нотатці не означала б нічого, тому це різні речі, а не одна з
+// прапорцем «необовʼязково».
+let planKind = 'plan'; // 'plan' | 'note'
+
+function applyPlanPlaceholder() {
+  document.getElementById('planInput').placeholder =
+    t(planKind === 'note' ? 'planNotePlaceholder' : 'planPlaceholder');
+}
+
+function setPlanKind(kind) {
+  planKind = kind === 'note' ? 'note' : 'plan';
+  document.querySelectorAll('#planKind [data-kind]').forEach((btn) => {
+    btn.classList.toggle('active', btn.dataset.kind === planKind);
+  });
+  applyPlanPlaceholder();
+}
 
 function planWeekIso() {
   return planWeek || WeekPlan.weekStartOf(todayISO());
@@ -1722,23 +1753,45 @@ function renderWeekPlanScreen() {
   const list = WeekPlan.plansOfWeek(tasks, weekIso, {
     currentWeekStart: WeekPlan.weekStartOf(todayISO()),
   });
+  const notes = WeekPlan.notesOfWeek(tasks, weekIso);
   const el = document.getElementById('planList');
-  if (!list.length) {
+  // Порожній екран показуємо, лише коли порожньо ЗОВСІМ: тиждень із самими
+  // нотатками — це не порожній тиждень.
+  if (!list.length && !notes.length) {
     el.innerHTML = `<div class="empty-state"><div>${escapeHtml(t('planEmpty'))}</div></div>`;
-    return;
+  } else if (!list.length) {
+    el.innerHTML = '';
+  } else {
+    // Рядок той самий, що й у дні: галочка, підзаголовки, свайп. Приїхалий із
+    // давнішого тижня підписуємо — інакше він виглядав би як щойно записаний.
+    el.innerHTML = `<div class="day-card">${sortTasks(list).map((task) => taskRowHtml(task,
+      WeekPlan.isCarried(task, weekIso)
+        ? `<span class="plan-carried">${escapeHtml(t('planCarried'))}</span>` : null))
+      .join('')}</div>`;
   }
-  // Рядок той самий, що й у дні: галочка, підзаголовки, свайп. Приїхалий із
-  // давнішого тижня підписуємо — інакше він виглядав би як щойно записаний.
-  el.innerHTML = `<div class="day-card">${sortTasks(list).map((task) => taskRowHtml(task,
-    WeekPlan.isCarried(task, weekIso)
-      ? `<span class="plan-carried">${escapeHtml(t('planCarried'))}</span>` : null))
-    .join('')}</div>`;
+
+  renderWeekNotes(notes);
 
   el.querySelectorAll('[data-toggle]').forEach((btn) => {
     btn.addEventListener('click', (e) => { e.stopPropagation(); toggleDone(btn.dataset.toggle); });
   });
   el.querySelectorAll('[data-open]').forEach((elx) => {
     elx.addEventListener('click', () => openTaskForm(tasks.find((tsk) => tsk.id === elx.dataset.open)));
+  });
+}
+
+// Нотатки — не рядки списку, а картки тексту: без галочки й без смуг свайпу.
+// Галочка на нотатці не означала б нічого, а «на завтра» — тим паче: нотатка
+// нікуди не переноситься, вона просто лежить у своєму тижні.
+function renderWeekNotes(notes) {
+  const el = document.getElementById('planNotes');
+  if (!notes.length) { el.innerHTML = ''; return; }
+  const sorted = notes.slice().sort((a, b) => (a.title || '').localeCompare(b.title || ''));
+  el.innerHTML = `<div class="plan-notes-label">${escapeHtml(t('planNotesLabel'))}</div>`
+    + sorted.map((note) => `
+      <div class="plan-note" data-note="${escapeHtml(note.id)}">${escapeHtml(note.title || '')}</div>`).join('');
+  el.querySelectorAll('[data-note]').forEach((elx) => {
+    elx.addEventListener('click', () => openTaskForm(tasks.find((tsk) => tsk.id === elx.dataset.note)));
   });
 }
 
@@ -1767,6 +1820,10 @@ async function addWeekPlan() {
       dueDate: null,
       dueTime: null,
       weekStart: planWeekIso(),
+      // Нотатку від плану відрізняє лише це поле: усе інше в них однакове, і
+      // заводити заради нього другу колекцію означало б дублювати форму,
+      // видалення й підписку на дані.
+      kind: planKind === 'note' ? 'note' : null,
       estimateMin: null,
       recurrence: null,
       reminderAt: null,
@@ -1784,6 +1841,9 @@ async function addWeekPlan() {
   }
 }
 
+document.querySelectorAll('#planKind [data-kind]').forEach((btn) => {
+  btn.addEventListener('click', () => setPlanKind(btn.dataset.kind));
+});
 document.getElementById('planAddBtn').addEventListener('click', addWeekPlan);
 document.getElementById('planInput').addEventListener('keydown', (e) => {
   if (e.key === 'Enter') { e.preventDefault(); addWeekPlan(); }
