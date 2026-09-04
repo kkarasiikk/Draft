@@ -319,27 +319,18 @@
   .week-head{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
   .week-label{flex:1;text-align:center;font-size:14.5px;font-weight:700;color:var(--ink);}
   /* ---- Тижневик ---- */
-  /* Маленький підпис місяця над смугою — і кнопка «вернутись у цей тиждень».
-     Поки тиждень і так поточний, вертатись нікуди: він лишається підписом. */
-  .plan-month{display:block;background:none;border:none;padding:2px 0;margin-bottom:8px;
-    font-family:'Inter',sans-serif;font-size:12.5px;font-weight:600;text-transform:capitalize;
-    color:var(--ink-muted);cursor:pointer;-webkit-tap-highlight-color:transparent;}
-  .plan-month.current{cursor:default;}
-  .plan-month:not(.current){color:var(--accent);}
+  /* Назва тижня — така сама, як у вкладці «День» (клас .week-label), тільки
+     ще й кнопка «вернутись у цей тиждень». Поки тиждень поточний, вона
+     нічим не відрізняється від напису там; догортав далі — підсвітилась. */
+  .plan-label{background:none;border:none;cursor:pointer;font-family:'Inter',sans-serif;
+    -webkit-tap-highlight-color:transparent;padding:2px 0;}
+  .plan-label.current{cursor:default;}
+  .plan-label:not(.current){color:var(--accent);}
 
-  /* Сім днів тижня — тією самою смугою, що у вкладці «День» і на головній:
-     класи .week-strip / .week-day спільні, тож нових розмірів і кольорів тут
-     не заводиться. Своя, третя за рахунком смуга виглядала майже так само —
-     і саме це «майже» читалось як недоробка. */
-  .plan-week{display:flex;align-items:center;gap:6px;margin-bottom:20px;}
-  .plan-week-strip{flex:1;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;}
-  /* Обраного дня тут немає — обирати нема чого. Зате СЬОГОДНІ виділене
-     заливкою, як у календарі на головній, а не лише кольором цифри. */
-  #planWeekStrip .week-day.today{background:var(--accent);border-color:transparent;}
-  #planWeekStrip .week-day.today .week-day-num,
-  #planWeekStrip .week-day.today .week-day-name{color:#fff;}
-  #planWeekStrip .week-day.today .week-day-dot.has{background:#fff;}
-  #planWeekStrip .week-day.today .week-day-dot.all-done{border-color:rgba(255,255,255,.8);}
+  /* Смуга днів тут — буквально та сама, що у вкладці «День»: ті самі
+     .week-viewport / .week-track / .week-strip, той самий код, що їх малює.
+     Своя, третя за рахунком смуга виглядала майже так само — і саме це
+     «майже» читалось як недоробка, тож власних розмірів тут не заводиться. */
 
   /* Назва вкладки великими буквами — те, заради чого сюди й заходять. */
   .plan-title{font-family:'Inter',sans-serif;font-size:30px;font-weight:800;letter-spacing:-.02em;
@@ -723,20 +714,29 @@
        замість dueDate — див. week-plan.js. -->
   <div id="weekPlanScreen" style="display:none;">
   <div class="content">
-    <!-- Тиждень показує сам себе — сімома днями, а не рядком «31 серпня —
-         6 вересня». Числа під днями тижня кажуть те саме, тільки одразу й
-         без читання. Назва місяця лишається маленьким підписом: без неї
-         сім чисел не кажуть, який це тиждень, коли гортаєш далеко. Вона ж
-         вертає в поточний тиждень. -->
-    <button type="button" class="plan-month" id="planLabel"></button>
-    <div class="plan-week">
+    <!-- Шапка тижня — точно та сама, що у вкладці «День»: стрілки навколо
+         назви діапазону, під ними доріжка з трьох тижнів, яка так само
+         гортається пальцем. Розмітка й код спільні (.week-head, .week-viewport,
+         .week-track, initWeekDrag) — спершу тут стрілки тиснулись по боках
+         самої смуги, місяць був маленьким підписом згори, а пальцем вона не
+         рухалась узагалі: виходив третій вигляд того самого календаря.
+
+         Назва тут ще й кнопка «вернутись у цей тиждень». Поки тиждень
+         поточний, вона нічим не відрізняється від напису в «Дні»; щойно
+         догортав далі — підсвічується, бо є куди вертатись. -->
+    <div id="planSwipeArea" class="swipe-area">
+    <div class="week-head">
       <button type="button" id="planPrevBtn" class="cal-nav-btn" aria-label="Попередній тиждень">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
       </button>
-      <div class="plan-week-strip" id="planWeekStrip"></div>
+      <button type="button" class="week-label plan-label" id="planLabel"></button>
       <button type="button" id="planNextBtn" class="cal-nav-btn" aria-label="Наступний тиждень">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
       </button>
+    </div>
+    <div class="week-viewport">
+      <div class="week-track" id="planWeekTrack"></div>
+    </div>
     </div>
 
     <h2 class="plan-title" id="planTitle">Тижневик</h2>
