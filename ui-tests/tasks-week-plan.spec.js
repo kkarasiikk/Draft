@@ -190,6 +190,39 @@ test.describe('Запис на тиждень', () => {
   });
 });
 
+test.describe('Під завданням немає нічого зайвого', () => {
+  // Тут була справжня помилка: taskRowHtml отримав другий аргумент (позначка
+  // «з минулого тижня»), а викликався через .map(taskRowHtml) — і map віддавав
+  // туди ІНДЕКС. Під кожним завданням дня зʼявлялась його порядкова цифра,
+  // крім першого: нуль хибний, тож саме він і виглядав нормально.
+  const rowExtras = (page, selector) => page.locator(selector).evaluateAll((rows) =>
+    rows.map((row) => {
+      const meta = row.querySelector('.task-meta');
+      return meta ? meta.textContent.trim() : '';
+    }));
+
+  test('у списку дня під назвами не зʼявляються номери', async ({ page }) => {
+    await openTasks(page, {
+      profile: {},
+      tasks: [1, 2, 3, 4].map((n) => task({
+        id: 'd' + n, title: 'Завдання ' + n, dueDate: iso(),
+      })),
+    });
+    const extras = await rowExtras(page, '#dayList .task-row');
+    expect(extras, 'жодних порядкових цифр під назвами').toEqual(['', '', '', '']);
+  });
+
+  test('у списку тижня — теж, крім чесної позначки про переїзд', async ({ page }) => {
+    await openTasks(page);
+    await page.click('#bnWeek');
+    const extras = await rowExtras(page, '#planList .task-row');
+    extras.forEach((text) => {
+      expect(text === '' || text === 'з минулого тижня',
+        `зайвий підпис під рядком: "${text}"`).toBe(true);
+    });
+  });
+});
+
 test.describe('Пункт тижня — звичайне завдання', () => {
   test('на екрані дня в «без дати» він не дублюється', async ({ page }) => {
     await openTasks(page);
