@@ -68,6 +68,8 @@ const STRINGS = {
     addGoalStep: 'Крок до цілі',
     addGoalStepHint: (n) => `${n} ${plural(n, { one: 'ціль', few: 'цілі', many: 'цілей', other: 'цілі' })} без кроку`,
     addGoalStepNone: 'сьогодні всі відмічені', addGoalStepNoGoals: 'цілей ще немає',
+    calPrev: 'Попередній період', calNext: 'Наступний період',
+    calBackToday: 'Вернутись у сьогодні',
     quickClose: 'Закрити',
     quickExpenseTitle: 'Нова витрата', quickIncomeTitle: 'Новий дохід',
     quickTaskTitle: 'Нове завдання',
@@ -158,6 +160,8 @@ const STRINGS = {
     addGoalStep: 'Шаг к цели',
     addGoalStepHint: (n) => `${n} ${plural(n, { one: 'цель', few: 'цели', many: 'целей', other: 'цели' })} без шага`,
     addGoalStepNone: 'сегодня все отмечены', addGoalStepNoGoals: 'целей ещё нет',
+    calPrev: 'Предыдущий период', calNext: 'Следующий период',
+    calBackToday: 'Вернуться в сегодня',
     quickClose: 'Закрыть',
     quickExpenseTitle: 'Новый расход', quickIncomeTitle: 'Новый доход',
     quickTaskTitle: 'Новая задача',
@@ -248,6 +252,8 @@ const STRINGS = {
     addGoalStep: 'Krok do celu',
     addGoalStepHint: (n) => `${n} ${plural(n, { one: 'cel', few: 'cele', many: 'celów', other: 'celu' })} bez kroku`,
     addGoalStepNone: 'dziś wszystkie odhaczone', addGoalStepNoGoals: 'nie ma jeszcze celów',
+    calPrev: 'Poprzedni okres', calNext: 'Następny okres',
+    calBackToday: 'Wróć do dziś',
     quickClose: 'Zamknij',
     quickExpenseTitle: 'Nowy wydatek', quickIncomeTitle: 'Nowy przychód',
     quickTaskTitle: 'Nowe zadanie',
@@ -338,6 +344,8 @@ const STRINGS = {
     addGoalStep: 'Step toward a goal',
     addGoalStepHint: (n) => `${n} ${plural(n, { one: 'goal', other: 'goals' })} without a step`,
     addGoalStepNone: 'all marked today', addGoalStepNoGoals: 'no goals yet',
+    calPrev: 'Previous period', calNext: 'Next period',
+    calBackToday: 'Back to today',
     quickClose: 'Close',
     quickExpenseTitle: 'New expense', quickIncomeTitle: 'New income',
     quickTaskTitle: 'New task',
@@ -456,6 +464,8 @@ function applyTranslations() {
   document.getElementById('tasksSub').textContent = t('tasksSub');
   document.getElementById('workoutTitle').textContent = t('workoutTitle');
   document.getElementById('workoutSub').textContent = t('workoutSub');
+  document.getElementById('calPrev').setAttribute('aria-label', t('calPrev'));
+  document.getElementById('calNext').setAttribute('aria-label', t('calNext'));
   applyQuickTranslations();
   document.getElementById('authSub').textContent = t('authSub');
   document.getElementById('authEmailLabel').textContent = t('emailLabel');
@@ -533,6 +543,17 @@ let homeData = { transactions: null, tasks: null, goals: null, workouts: null };
 // тут, а не в замиканні запиту: плитку перемальовує ще й перемикач сум.
 // Валюта з профілю — той самий документ, що вже читається заради мови й теми.
 let homeCurrency = '';
+
+// Якір календаря — день, тиждень (чи місяць) якого зараз намальовано.
+// null означає «сьогоднішній», тобто стан, з якого сторінка відкривається.
+//
+// Якір навмисно окремий від «сьогодні»: гортання не має підмінювати дату,
+// інакше в сусідньому тижні виділеним виявився б не той день, а рядок під
+// датою й плитки почали б рахувати чужий день.
+//
+// Лежить тут, а не в секції календаря нижче: applyTranslations() малює
+// календар ще до того, як виконається код тієї секції.
+let calAnchor = null;
 
 const THEME_CHOICES = ['light', 'dark', 'system'];
 // Ховати суму витрат на плитці «Бюджет».
@@ -1357,25 +1378,64 @@ document.getElementById('quickModal').addEventListener('keydown', (e) => {
 // у місяці. На широкому екрані — весь місяць: смуга з семи днів лишала
 // півсторінки порожньою, а місяць відповідає на те саме питання й заразом
 // показує, що попереду.
+function calAnchorIso() {
+  return calAnchor || todayISO();
+}
+
+/** Чи стоїть календар на сьогоднішньому періоді. */
+function calAtToday() {
+  const today = todayISO();
+  const anchor = calAnchorIso();
+  if (anchor === today) return true;
+  return isWideScreen()
+    ? anchor.slice(0, 7) === today.slice(0, 7)
+    : HomeSummary.weekCalendar([], today).from === HomeSummary.weekCalendar([], today, anchor).from;
+}
+
+// Гортання на крок уперед або назад. Крок — те, що зараз намальовано: на
+// телефоні тиждень, на широкому екрані місяць.
+function shiftCalendar(delta) {
+  const anchor = calAnchorIso();
+  calAnchor = isWideScreen()
+    ? HomeSummary.shiftMonths(anchor, delta)
+    : HomeSummary.shiftDays(anchor, delta * 7);
+  renderCalendar();
+  ensureTasksForCalendar();
+}
+
+function resetCalendar() {
+  if (calAtToday()) return;
+  calAnchor = null;
+  renderCalendar();
+}
+
 function renderCalendar() {
   const monthEl = document.getElementById('calMonth');
   const weekEl = document.getElementById('calWeek');
   if (!monthEl || !weekEl) return;
 
   const today = todayISO();
+  const anchor = calAnchorIso();
   const locale = LOCALE_MAP[currentLang] || 'uk-UA';
-  const month = new Intl.DateTimeFormat(locale, { month: 'long' });
   const wide = isWideScreen();
   const cal = wide
-    ? HomeSummary.monthCalendar(homeData.tasks || [], today)
-    : HomeSummary.weekCalendar(homeData.tasks || [], today);
+    ? HomeSummary.monthCalendar(homeData.tasks || [], today, anchor)
+    : HomeSummary.weekCalendar(homeData.tasks || [], today, anchor);
 
-  // Підпис — це місяць СЬОГОДНІШНЬОГО дня, а не країв сітки. Тиждень на межі
-  // місяців підписувався обома назвами («серпень — вересень»), і в сітці
-  // місяця хвости сусідніх місяців є завжди, тож обидва варіанти по краях
-  // однаково брехали б. 31 серпня це ще серпень, 1 вересня — вже вересень,
-  // хай навіть у тому самому рядку стоять числа обох.
-  monthEl.textContent = month.format(new Date(today + 'T00:00:00'));
+  // Підпис — це місяць ЯКОРЯ, а не країв сітки. Тиждень на межі місяців
+  // підписувався обома назвами («серпень — вересень»), і в сітці місяця
+  // хвости сусідніх місяців є завжди, тож обидва варіанти по краях однаково
+  // брехали б. 31 серпня це ще серпень, 1 вересня — вже вересень, хай навіть
+  // у тому самому рядку стоять числа обох. Поки не гортали, якір і є
+  // сьогодні — тобто підпис лишився той самий, що й був.
+  //
+  // Рік дописується, лише коли він не цей: «січень» за півроку вперед нічого
+  // не каже про те, який це січень, а «вересень 2026» щодня — зайве слово.
+  const sameYear = anchor.slice(0, 4) === today.slice(0, 4);
+  const month = new Intl.DateTimeFormat(locale, sameYear ? { month: 'long' } : { month: 'long', year: 'numeric' });
+  monthEl.textContent = month.format(new Date(anchor + 'T00:00:00'));
+  monthEl.classList.toggle('current', calAtToday());
+  monthEl.title = calAtToday() ? '' : t('calBackToday');
 
   const dow = new Intl.DateTimeFormat(locale, { weekday: 'short' });
   // У місяці день тижня стоїть один раз шапкою над стовпчиком, а не в кожній
@@ -1409,11 +1469,60 @@ function renderCalendar() {
   weekEl.innerHTML = head + cells;
 }
 
+// ---- Гортання календаря ----
+// Пальцем — свайп по самій сітці, мишею — дві стрілки в шапці. Тап по назві
+// місяця вертає в сьогодні: той самий жест, що в календарі цілей і
+// тренувань, тож звідки завгодно є дорога назад одним дотиком.
+document.getElementById('calPrev').addEventListener('click', () => shiftCalendar(-1));
+document.getElementById('calNext').addEventListener('click', () => shiftCalendar(1));
+document.getElementById('calMonth').addEventListener('click', resetCalendar);
+
+// Поріг у 40px і вимога, щоб жест був радше горизонтальним, ніж
+// вертикальним: інакше кожна спроба прогорнути сторінку пальцем по календарю
+// перекидала б тиждень.
+const SWIPE_MIN = 40;
+(function enableCalendarSwipe() {
+  const el = document.getElementById('calWeek');
+  if (!el) return;
+  let x0 = null, y0 = null, swiped = false;
+  // Клітинка — посилання, і після свайпу браузер ще може видати по ній клік.
+  // Гасимо саме той один клік, що йде одразу за жестом: інакше гортання
+  // час від часу відкривало б розділ завдань замість сусіднього тижня.
+  el.addEventListener('click', (e) => {
+    if (!swiped) return;
+    swiped = false;
+    e.preventDefault();
+    e.stopPropagation();
+  }, true);
+  el.addEventListener('touchstart', (e) => {
+    if (e.touches.length !== 1) { x0 = null; return; }
+    x0 = e.touches[0].clientX;
+    y0 = e.touches[0].clientY;
+  }, { passive: true });
+  el.addEventListener('touchend', (e) => {
+    if (x0 === null || !e.changedTouches.length) return;
+    const dx = e.changedTouches[0].clientX - x0;
+    const dy = e.changedTouches[0].clientY - y0;
+    x0 = null;
+    if (Math.abs(dx) < SWIPE_MIN || Math.abs(dx) <= Math.abs(dy)) return;
+    swiped = true;
+    // Тягнемо вміст пальцем: рух ліворуч показує те, що попереду.
+    shiftCalendar(dx < 0 ? 1 : -1);
+  }, { passive: true });
+})();
+
 // Розкладка міняється не лише при завантаженні: вікно на компʼютері
 // розтягують і звужують — і по ширині, і по висоті. Перемальовуємо з тих
 // самих даних — у базу за цим ходити не треба.
 if (typeof window.matchMedia === 'function') {
-  const onChange = () => { renderCalendar(); renderToday(); };
+  const onChange = () => {
+    // Крок гортання інший (тиждень проти місяця), тож якір, поставлений у
+    // одній розкладці, в іншій означав би не те. Вертаємось у сьогодні —
+    // це єдиний період, який у обох розкладках означає одне й те саме.
+    calAnchor = null;
+    renderCalendar();
+    renderToday();
+  };
   [WIDE_SCREEN, TALL_SCREEN].forEach((query) => {
     const mq = window.matchMedia(query);
     if (typeof mq.addEventListener === 'function') mq.addEventListener('change', onChange);
@@ -1470,6 +1579,49 @@ function formatFullDate(iso) {
   return `${weekday}, ${dayMonth}`;
 }
 
+// Який діапазон дат уже прочитано в homeData.tasks. Потрібен саме тому, що
+// календар гортається: у сусідньому тижні крапки взялися б нізвідки, і день
+// із трьома справами виглядав би порожнім — тобто сторінка тихо брехала б.
+let loadedTaskRange = null;
+
+// Дочитує завдання для періоду, який зараз показує календар. Читається лише
+// те, чого ще немає: гортання туди-сюди не має щоразу перечитувати місяць.
+// Прочитане ДОДАЄТЬСЯ, а не заміщає — інакше крок назад стирав би крапки
+// там, звідки щойно прийшли.
+function ensureTasksForCalendar() {
+  const uid = auth.currentUser && auth.currentUser.uid;
+  if (!uid || !loadedTaskRange) return Promise.resolve();
+  const today = todayISO();
+  const anchor = calAnchorIso();
+  const cal = isWideScreen()
+    ? HomeSummary.monthCalendar([], today, anchor)
+    : HomeSummary.weekCalendar([], today, anchor);
+
+  let from = null, to = null;
+  if (cal.from < loadedTaskRange.from) { from = cal.from; to = HomeSummary.shiftDays(loadedTaskRange.from, -1); }
+  else if (cal.to > loadedTaskRange.to) { from = HomeSummary.shiftDays(loadedTaskRange.to, 1); to = cal.to; }
+  else return Promise.resolve();
+
+  const known = loadedTaskRange;
+  loadedTaskRange = { from: from < known.from ? from : known.from, to: to > known.to ? to : known.to };
+  return db.collection('users').doc(uid).collection('tasks')
+    .where('dueDate', '>=', from).where('dueDate', '<=', to).get()
+    .then((snap) => {
+      const seen = {};
+      (homeData.tasks || []).forEach((task) => { seen[task.id] = true; });
+      const add = snap.docs.map((d) => ({ id: d.id, ...d.data() })).filter((task) => !seen[task.id]);
+      if (!add.length) return;
+      homeData.tasks = (homeData.tasks || []).concat(add);
+      renderCalendar();
+    })
+    .catch((err) => {
+      // Не вдалося дочитати — не вдаємо, що діапазон у нас є: наступне
+      // гортання спробує знову, а не покаже порожній тиждень назавжди.
+      loadedTaskRange = known;
+      console.error('homeSummary tasks range:', err);
+    });
+}
+
 // Бюджет і завдання читаються окремими функціями, а не всередині
 // loadHomeSummary: форма швидкого запису дописує рівно один із цих розділів і
 // має перечитати саме його. Перезавантажувати всю головну заради однієї
@@ -1511,6 +1663,7 @@ function loadTasksSection(userRef) {
   return userRef.collection('tasks').where('dueDate', '>=', taskFrom).where('dueDate', '<=', taskTo).get()
     .then((snap) => {
       const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      loadedTaskRange = { from: taskFrom, to: taskTo };
       homeData.tasks = docs;
       renderToday();
       renderCalendar();

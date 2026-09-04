@@ -270,9 +270,18 @@
     };
   }
 
-  function weekCalendar(tasks, todayIso) {
+  /**
+   * Тиждень пн—нд, у якому лежить `anchorIso`.
+   *
+   * Якір відділено від «сьогодні» саме тому, що календар гортається: який
+   * тиждень малювати — питання якоря, а `today`/`past` у клітинках лишаються
+   * питанням справжньої дати. Без цього поділу гортання довелось би робити
+   * підміною «сьогодні», і в іншому тижні виділеним виявився б не той день.
+   * Без якоря — той самий тиждень, що й був: сьогоднішній.
+   */
+  function weekCalendar(tasks, todayIso, anchorIso) {
     var byDay = tasksByDay(tasks);
-    var monday = mondayOf(new Date(todayIso + 'T00:00:00'));
+    var monday = mondayOf(new Date((anchorIso || todayIso) + 'T00:00:00'));
 
     var days = [];
     for (var i = 0; i < 7; i++) {
@@ -281,6 +290,21 @@
       days.push(calendarDay(d, byDay, todayIso, null));
     }
     return { from: days[0].date, to: days[6].date, days: days };
+  }
+
+  /** Зсув дати на кілька днів. Календар гортається саме так: тиждень — це
+   *  ±7 днів, і рахувати їх у кожному місці окремо означало б розійтись. */
+  function shiftDays(iso, delta) {
+    var d = new Date(iso + 'T00:00:00');
+    d.setDate(d.getDate() + delta);
+    return isoOf(d);
+  }
+
+  /** Зсув на кілька місяців із прив'язкою до першого числа: 31 січня + 1
+   *  місяць має дати лютий, а не 2 чи 3 березня. */
+  function shiftMonths(iso, delta) {
+    var d = new Date(iso + 'T00:00:00');
+    return isoOf(new Date(d.getFullYear(), d.getMonth() + delta, 1));
   }
 
   /**
@@ -293,12 +317,14 @@
    * порожньою, а місяць відповідає на те саме питання («на які дні щось
    * є») і заразом показує, що попереду.
    */
-  function monthCalendar(tasks, todayIso) {
+  function monthCalendar(tasks, todayIso, anchorIso) {
     var byDay = tasksByDay(tasks);
-    var today = new Date(todayIso + 'T00:00:00');
-    var monthNum = today.getMonth();
-    var first = new Date(today.getFullYear(), monthNum, 1);
-    var last = new Date(today.getFullYear(), monthNum + 1, 0);
+    // Якір вирішує, ЯКИЙ місяць малюємо; `today` у клітинках лишається
+    // справжнім сьогодні — див. коментар до weekCalendar.
+    var anchor = new Date((anchorIso || todayIso) + 'T00:00:00');
+    var monthNum = anchor.getMonth();
+    var first = new Date(anchor.getFullYear(), monthNum, 1);
+    var last = new Date(anchor.getFullYear(), monthNum + 1, 0);
 
     var cursor = mondayOf(first);
     var days = [];
@@ -315,6 +341,8 @@
     isoOf: isoOf,
     weekDays: weekDays,
     weekCalendar: weekCalendar,
+    shiftDays: shiftDays,
+    shiftMonths: shiftMonths,
     pickGoal: pickGoal,
     nextWorkout: nextWorkout,
     nextDayKind: nextDayKind,
