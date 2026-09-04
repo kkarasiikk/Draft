@@ -226,10 +226,22 @@ test.describe('Тижневик: тиждень, назва, групи', () => 
     expect(await titles(page)).not.toContain('Ідея на тиждень');
   });
 
-  test('велика назва вкладки на місці', async ({ page }) => {
+  test('велика назва вкладки — «Записи»', async ({ page }) => {
     await openTasks(page);
     await page.click('#bnWeek');
-    await expect(page.locator('#planTitle')).toHaveText('Тижневик');
+    await expect(page.locator('#planTitle')).toHaveText('Записи');
+  });
+
+  test('порожня вкладка сама каже, що сюди писати', async ({ page }) => {
+    // Порожній екран — єдине місце, де можна пояснити, чим ця вкладка
+    // відрізняється від «Дня»; тому текст мусить назвати і «+», і тиждень,
+    // і те, що конкретний день тут ні до чого.
+    await openTasks(page, { profile: {}, tasks: [] });
+    await page.click('#bnWeek');
+    const text = await page.locator('#planList .empty-state').textContent();
+    expect(text).toContain('«+»');
+    expect(text).toMatch(/тижня/);
+    expect(text).toMatch(/не конкретного дня/);
   });
 
   test('підпис — той самий діапазон дат, що у вкладці «День»', async ({ page }) => {
