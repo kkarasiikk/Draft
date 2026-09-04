@@ -33,6 +33,40 @@ describe('межі тижня', () => {
   });
 });
 
+describe('нотатки — не плани', () => {
+  const note = (weekStart, over = {}) => ({ title: 'Думка', weekStart, kind: 'note', ...over });
+  const opts = { currentWeekStart: THIS_WEEK };
+
+  test('нотатка не потрапляє в плани — її не виконують, а читають', () => {
+    const list = W.plansOfWeek([plan(THIS_WEEK), note(THIS_WEEK)], THIS_WEEK, opts);
+    expect(list).toHaveLength(1);
+    expect(W.isNote(list[0])).toBe(false);
+  });
+
+  test('нотатки того ж тижня — окремим списком', () => {
+    const list = W.notesOfWeek([plan(THIS_WEEK), note(THIS_WEEK)], THIS_WEEK);
+    expect(list).toHaveLength(1);
+    expect(list[0].kind).toBe('note');
+  });
+
+  test('нотатка НЕ переїжджає в новий тиждень', () => {
+    // Незроблений план — борг, а незабута думка — запис на своєму місці.
+    // Інакше вкладка поступово стала б стрічкою всього написаного за рік.
+    expect(W.notesOfWeek([note(PREV_WEEK)], THIS_WEEK)).toHaveLength(0);
+    expect(W.notesOfWeek([note(PREV_WEEK)], PREV_WEEK)).toHaveLength(1);
+  });
+
+  test('нотатка не тягнеться в плани навіть із минулого тижня', () => {
+    expect(W.plansOfWeek([note(PREV_WEEK)], THIS_WEEK, opts)).toHaveLength(0);
+  });
+
+  test('звичайне завдання нотаткою не вважається', () => {
+    expect(W.isNote(plan(THIS_WEEK))).toBe(false);
+    expect(W.isNote(null)).toBe(false);
+    expect(W.isNote({ kind: 'plan' })).toBe(false);
+  });
+});
+
 describe('що показує вкладка тижня', () => {
   const opts = { currentWeekStart: THIS_WEEK };
 

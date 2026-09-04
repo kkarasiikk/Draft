@@ -39,8 +39,14 @@
     return isoOf(d);
   }
 
+  /** Нотатка — не план: її не виконують, а читають. Тому в неї немає галочки
+   *  і вона не переїжджає між тижнями (див. нижче). */
+  function isNote(task) {
+    return !!(task && task.kind === 'note');
+  }
+
   /**
-   * Пункти, які показує вкладка тижня.
+   * ПЛАНИ, які показує вкладка тижня.
    *
    * Незакритий пункт із МИНУЛОГО тижня переїжджає в поточний: саме про нього
    * треба памʼятати найбільше, а лишившись у своєму тижні, він тихо зникав би
@@ -54,9 +60,23 @@
   function plansOfWeek(tasks, weekStartIso, opts) {
     var isCurrent = !!(opts && opts.currentWeekStart === weekStartIso);
     return (tasks || []).filter(function (task) {
-      if (!task || typeof task.weekStart !== 'string') return false;
+      if (!task || typeof task.weekStart !== 'string' || isNote(task)) return false;
       if (task.weekStart === weekStartIso) return true;
       return isCurrent && task.weekStart < weekStartIso && !task.done;
+    });
+  }
+
+  /**
+   * НОТАТКИ того ж тижня.
+   *
+   * Переїзду тут немає свідомо: нотатка — це те, що ти думав ТОГО тижня, і
+   * тягнути її за собою означало б поступово перетворити вкладку на стрічку
+   * всього написаного за рік. Незроблений план — борг, а незабута думка —
+   * запис на своєму місці.
+   */
+  function notesOfWeek(tasks, weekStartIso) {
+    return (tasks || []).filter(function (task) {
+      return isNote(task) && task.weekStart === weekStartIso;
     });
   }
 
@@ -71,6 +91,8 @@
     weekEndOf: weekEndOf,
     shiftWeeks: shiftWeeks,
     plansOfWeek: plansOfWeek,
+    notesOfWeek: notesOfWeek,
+    isNote: isNote,
     isCarried: isCarried,
   };
   root.WeekPlan = api;
