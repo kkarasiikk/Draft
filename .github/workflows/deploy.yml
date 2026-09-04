@@ -61,6 +61,9 @@ jobs:
           # Теки з розробки.
           rm -rf _site/ui-tests _site/load-test _site/.github
 
+          # Генератор іконок: потрібен, щоб їх перерахувати, а не браузеру.
+          rm -f _site/icons/build.html
+
           # Cloud Functions і серверні конфіги. ВАЖЛИВО: тут лише КОРЕНЕВІ
           # шляхи — фронтендний tasks/reminders.js лишається, бо до Cloud
           # Function reminders.js стосунку не має.

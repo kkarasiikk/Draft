@@ -1,0 +1,91 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Генератор іконок Life</title></head><body>
+<p style="font:14px system-ui;max-width:46em;line-height:1.5">
+Генератор іконок застосунку. Відкрий цю сторінку в браузері й виконай у консолі
+<code>copy(JSON.stringify(OUT))</code> — або, як це робиться насправді, запусти її
+через Playwright і збережи <code>window.OUT</code> у файли
+<code>icons/icon-192.png</code>, <code>icon-512.png</code> та обидва
+<code>-maskable</code>. Знак описаний тут кодом, а не намальований у редакторі:
+так його можна перерахувати, а не перемальовувати.
+</p>
+<script>
+// Логотип Life: усе слово — одна лінія кардіограми. «L» стікає ніжкою в
+// лінію, хвиля пульсу працює як «i» (звідси й крапка над нею), з тієї ж
+// лінії росте «f» — вона ж його поперечка, — а «e» петлею випускає лінію
+// хвостом.
+const W = 560, H = 285, SHIFT = 45;
+const midY = 150 + SHIFT, capTop = 46 + SHIFT, desc = 212 + SHIFT;
+const Lx = 62, fx = 302, ecx = 452, er = 52;
+const SW = 30, TOP = 52 + SHIFT, BOT = 214 + SHIFT, DOT = 0.75, GAP = 16;
+const INK = '#ffffff', BG = '#17171B';
+
+function build(ctx) {
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.lineWidth = SW; ctx.strokeStyle = INK;
+  ctx.beginPath();
+  ctx.moveTo(Lx, capTop); ctx.lineTo(Lx, midY);      // «L»
+  ctx.lineTo(138, midY);
+  ctx.lineTo(163, TOP);                              // хвиля пульсу — вона ж «i»
+  ctx.lineTo(190, BOT);
+  ctx.lineTo(214, midY);
+  ctx.lineTo(ecx + er, midY);                        // і далі поперечкою до «e»
+  ctx.stroke();
+  ctx.beginPath();                                   // «f»
+  ctx.moveTo(fx, desc); ctx.lineTo(fx, 96 + SHIFT);
+  ctx.quadraticCurveTo(fx, 48 + SHIFT, fx + 56, 62 + SHIFT);
+  ctx.stroke();
+  ctx.beginPath();                                   // «e»
+  ctx.arc(ecx, midY, er, 0, Math.PI * 0.34, true);
+  ctx.stroke();
+  ctx.fillStyle = INK; ctx.beginPath();              // крапка над «i»
+  ctx.arc(163, TOP - SW / 2 - GAP - SW * DOT, SW * DOT, 0, Math.PI * 2); ctx.fill();
+}
+
+// Знак центрується за СОБОЮ, а не за умовним боксом: бокс має запас під
+// крапку згори, тож центрування по ньому зсувало малюнок униз і праворуч.
+// Міряємо межі прямо на пікселях — тоді ніяких «на око» тут не лишається, і
+// мірка сама виправиться, якщо колись зміниться форма.
+//
+// Саме межі, а не центр мас: масу тягнуть донизу довга горизонталь і виносний
+// елемент «f», і поправка на неї піднімає слово помітно вище, ніж треба.
+// Око ж читає смугу від верху «L» до основної лінії, а її середина майже
+// збігається із серединою меж.
+function anchor() {
+  const S = 1000, k = S / W;
+  const c = document.createElement('canvas');
+  c.width = S; c.height = Math.round(H * k);
+  const ctx = c.getContext('2d'); ctx.scale(k, k); build(ctx);
+  const d = ctx.getImageData(0, 0, c.width, c.height).data;
+  let x0 = 1e9, y0 = 1e9, x1 = -1, y1 = -1;
+  for (let y = 0; y < c.height; y++) for (let x = 0; x < c.width; x++) {
+    if (d[(y * c.width + x) * 4 + 3] > 128) {
+      if (x < x0) x0 = x; if (x > x1) x1 = x;
+      if (y < y0) y0 = y; if (y > y1) y1 = y;
+    }
+  }
+  return { x: (x0 + x1) / 2 / k, y: (y0 + y1) / 2 / k, w: (x1 - x0) / k, h: (y1 - y0) / k };
+}
+const A = anchor();
+
+// maskable: тло на весь квадрат (систему саме воно й обріже), знак
+// стискаємо в безпечне коло — інакше Android зріже «L» та хвіст «e».
+function make(S, maskable) {
+  const c = document.createElement('canvas'); c.width = c.height = S;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = BG;
+  if (maskable) ctx.fillRect(0, 0, S, S);
+  else { ctx.beginPath(); ctx.roundRect(0, 0, S, S, S * 0.2237); ctx.fill(); }
+  ctx.save();
+  // Частка плитки, яку займає знак. Рахується від ЙОГО ширини, а не від
+  // умовного боксу, тож розмір не поповзе, якщо колись зміниться форма.
+  const k = (S * (maskable ? 0.589 : 0.724)) / A.w;
+  ctx.translate(S / 2 - A.x * k, S / 2 - A.y * k);
+  ctx.scale(k, k);
+  build(ctx); ctx.restore();
+  return c.toDataURL('image/png');
+}
+window.ANCHOR = A;
+window.OUT = {
+  'icon-192': make(192, false), 'icon-512': make(512, false),
+  'icon-192-maskable': make(192, true), 'icon-512-maskable': make(512, true),
+};
+window.READY = true;
+</script></body></html>
