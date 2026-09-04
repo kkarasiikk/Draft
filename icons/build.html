@@ -16,7 +16,10 @@ const W = 560, H = 285, SHIFT = 45;
 const midY = 150 + SHIFT, capTop = 46 + SHIFT, desc = 212 + SHIFT;
 const Lx = 62, fx = 302, ecx = 452, er = 52;
 const SW = 30, TOP = 52 + SHIFT, BOT = 214 + SHIFT, DOT = 0.75, GAP = 16;
-const INK = '#ffffff', BG = '#17171B';
+// Фон — чистий чорний, а не майже чорний: серед кольорових сусідів на
+// робочому столі саме він читається як «глибокий», а #17171B поруч із ними
+// виглядав присірено.
+const INK = '#ffffff', BG = '#000000';
 
 function build(ctx) {
   ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.lineWidth = SW; ctx.strokeStyle = INK;
