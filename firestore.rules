@@ -13,7 +13,7 @@ rules_version = '2';
 //   users/{uid}/pages/{id}            -- {title, content, createdAt, updatedAt}
 //   users/{uid}/tasks/{id}            -- {title, notes, done, completedAt,
 //                                         priority, tags, dueDate, dueTime,
-//                                         weekStart, kind, estimateMin, recurrence, subtasks,
+//                                         weekStart, weekCat, estimateMin, recurrence, subtasks,
 //                                         reminderAt, notifiedAt, goalId,
 //                                         createdAt, updatedAt}
 //   users/{uid}/taskTemplates/{id}    -- {title, notes, priority, tags,
@@ -65,6 +65,9 @@ service cloud.firestore {
                // Категорії цілей: [{id, label, colorIndex}]. Форму елементів,
                // як і в categoriesIncome/Expense поруч, гарантує клієнт.
                (!('categoriesGoals' in d) || d.categoriesGoals is list) &&
+               // Категорії тижневика: [{id, label}]. Форму елементів, як і в
+               // категоріях бюджету й цілей поруч, гарантує клієнт.
+               (!('categoriesWeek' in d) || d.categoriesWeek is list) &&
                // Вбудовані вправи, які людина прибрала зі списку вибору:
                // масив id з бібліотеки (workout/exercises.js). Самі вправи
                // лежать у файлі, тож «видалити» їх нема звідки — цей перелік
@@ -179,8 +182,15 @@ service cloud.firestore {
                  // намір «зробити цього тижня» (див. tasks/week-plan.js).
                  (!('weekStart' in d) || d.weekStart == null ||
                    (d.weekStart is string && d.weekStart.size() == 10)) &&
-                 // Нотатка на тижні: її не виконують, а читають, тож галочки
-                 // в неї немає. Від плану відрізняється лише цим полем.
+                 // Категорія запису в тижневику: id зі списку в профілі
+                 // (categoriesWeek). Незнайомий id нічого не ламає — такий
+                 // запис просто йде в групу без назви.
+                 (!('weekCat' in d) || d.weekCat == null ||
+                   (d.weekCat is string && d.weekCat.size() <= 64)) &&
+                 // Поле лишилось від короткого періоду, коли записи тижня
+                 // ділились на «плани» й «нотатки». Застосунок його більше не
+                 // пише — правило стоїть заради документів, у яких воно вже
+                 // лежить: без нього такий документ не можна було б і змінити.
                  (!('kind' in d) || d.kind == null || d.kind == 'note') &&
                  // Оцінка тривалості у хвилинах — від 1 хвилини до доби.
                  (!('estimateMin' in d) || d.estimateMin == null ||
@@ -200,7 +210,7 @@ service cloud.firestore {
                  d.subtasks is list && d.subtasks.size() <= 50 &&
                  d.createdAt is timestamp && d.updatedAt is timestamp &&
                  d.keys().hasOnly(['title', 'notes', 'done', 'completedAt', 'priority', 'tags',
-                   'dueDate', 'dueTime', 'weekStart', 'kind', 'estimateMin', 'recurrence', 'subtasks',
+                   'dueDate', 'dueTime', 'weekStart', 'weekCat', 'kind', 'estimateMin', 'recurrence', 'subtasks',
                    'reminderAt', 'notifiedAt', 'goalId', 'createdAt', 'updatedAt']);
         }
         allow read, delete: if isOwner(uid);

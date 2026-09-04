@@ -1,10 +1,15 @@
-// ---- Плани на тиждень ----
-// Пункт, який треба зробити «цього тижня», але не в конкретний день: ідея,
-// намір, справа без години. У базі це звичайне завдання, тільки замість
-// `dueDate` в нього стоїть `weekStart` — понеділок свого тижня. Окрема
-// колекція тут була б зайвою: галочка, підзадачі, теги й форма редагування
-// потрібні йому ті самі, що й денному завданню, а дві майже однакові сутності
-// довелося б синхронізувати вручну.
+// ---- Тижневик ----
+// Запис, який належить тижню, а не дню: план, намір, ідея, телефон майстра.
+// У базі це звичайне завдання, тільки замість `dueDate` в нього стоїть
+// `weekStart` — понеділок свого тижня, — а `weekCat` каже, у якій він
+// категорії. Окрема колекція тут була б зайвою: галочка, підзадачі, теги й
+// форма редагування потрібні йому ті самі, що й денному завданню, а дві майже
+// однакові сутності довелося б синхронізувати вручну.
+//
+// Галочка є в КОЖНОГО запису, і це свідомо. Спершу тут були два види —
+// «план» із галочкою і «нотатка» без неї, — але межа між ними виявилась
+// вигаданою: та сама думка сьогодні просто думка, а завтра справа. Тепер
+// відмітити можна будь-що, а можна не відмічати ніколи.
 //
 // Файл підключається і як звичайний <script> у браузері (кладе WeekPlan у
 // window), і як CommonJS-модуль у Jest — тому тут немає ні import, ні export.
@@ -39,12 +44,6 @@
     return isoOf(d);
   }
 
-  /** Нотатка — не план: її не виконують, а читають. Тому в неї немає галочки
-   *  і вона не переїжджає між тижнями (див. нижче). */
-  function isNote(task) {
-    return !!(task && task.kind === 'note');
-  }
-
   /**
    * ПЛАНИ, які показує вкладка тижня.
    *
@@ -60,24 +59,39 @@
   function plansOfWeek(tasks, weekStartIso, opts) {
     var isCurrent = !!(opts && opts.currentWeekStart === weekStartIso);
     return (tasks || []).filter(function (task) {
-      if (!task || typeof task.weekStart !== 'string' || isNote(task)) return false;
+      if (!task || typeof task.weekStart !== 'string') return false;
       if (task.weekStart === weekStartIso) return true;
       return isCurrent && task.weekStart < weekStartIso && !task.done;
     });
   }
 
   /**
-   * НОТАТКИ того ж тижня.
+   * Записи, розкладені по категоріях — у порядку самих категорій.
    *
-   * Переїзду тут немає свідомо: нотатка — це те, що ти думав ТОГО тижня, і
-   * тягнути її за собою означало б поступово перетворити вкладку на стрічку
-   * всього написаного за рік. Незроблений план — борг, а незабута думка —
-   * запис на своєму місці.
+   * Категорії людина заводить сама («Дім», «Робота», «Ідеї»…), тож порядок
+   * груп — той, у якому вона їх склала, а не алфавітний. Порожні групи не
+   * малюються зовсім: список категорій — це не звіт про те, скільки їх є.
+   *
+   * Запис без категорії (або з такою, яку вже видалили) не зникає, а йде в
+   * окрему групу в кінці: втратити написане через прибрану категорію було б
+   * найгіршим, що ця вкладка може зробити.
    */
-  function notesOfWeek(tasks, weekStartIso) {
-    return (tasks || []).filter(function (task) {
-      return isNote(task) && task.weekStart === weekStartIso;
+  function groupByCategory(entries, categories) {
+    var known = {};
+    (categories || []).forEach(function (cat) { if (cat && cat.id) known[cat.id] = true; });
+
+    var groups = [];
+    (categories || []).forEach(function (cat) {
+      if (!cat || !cat.id) return;
+      var list = (entries || []).filter(function (e) { return e && e.weekCat === cat.id; });
+      if (list.length) groups.push({ id: cat.id, label: cat.label || cat.id, items: list });
     });
+
+    var rest = (entries || []).filter(function (e) {
+      return e && (!e.weekCat || !known[e.weekCat]);
+    });
+    if (rest.length) groups.push({ id: null, label: null, items: rest });
+    return groups;
   }
 
   /** Чи приїхав пункт із давнішого тижня — тоді про це варто сказати. */
@@ -91,8 +105,7 @@
     weekEndOf: weekEndOf,
     shiftWeeks: shiftWeeks,
     plansOfWeek: plansOfWeek,
-    notesOfWeek: notesOfWeek,
-    isNote: isNote,
+    groupByCategory: groupByCategory,
     isCarried: isCarried,
   };
   root.WeekPlan = api;

@@ -33,37 +33,51 @@ describe('межі тижня', () => {
   });
 });
 
-describe('нотатки — не плани', () => {
-  const note = (weekStart, over = {}) => ({ title: 'Думка', weekStart, kind: 'note', ...over });
-  const opts = { currentWeekStart: THIS_WEEK };
+describe('групи за категоріями', () => {
+  const CATS = [
+    { id: 'home', label: 'Дім' },
+    { id: 'work', label: 'Робота' },
+    { id: 'ideas', label: 'Ідеї' },
+  ];
+  const entry = (title, weekCat) => ({ title, weekStart: THIS_WEEK, weekCat, done: false });
 
-  test('нотатка не потрапляє в плани — її не виконують, а читають', () => {
-    const list = W.plansOfWeek([plan(THIS_WEEK), note(THIS_WEEK)], THIS_WEEK, opts);
-    expect(list).toHaveLength(1);
-    expect(W.isNote(list[0])).toBe(false);
+  test('порядок груп — той, у якому людина склала категорії, а не алфавітний', () => {
+    const groups = W.groupByCategory(
+      [entry('a', 'ideas'), entry('b', 'home'), entry('c', 'work')], CATS);
+    expect(groups.map((g) => g.id)).toEqual(['home', 'work', 'ideas']);
   });
 
-  test('нотатки того ж тижня — окремим списком', () => {
-    const list = W.notesOfWeek([plan(THIS_WEEK), note(THIS_WEEK)], THIS_WEEK);
-    expect(list).toHaveLength(1);
-    expect(list[0].kind).toBe('note');
+  test('порожні категорії не малюються — список категорій не звіт про них', () => {
+    const groups = W.groupByCategory([entry('a', 'work')], CATS);
+    expect(groups).toHaveLength(1);
+    expect(groups[0].label).toBe('Робота');
   });
 
-  test('нотатка НЕ переїжджає в новий тиждень', () => {
-    // Незроблений план — борг, а незабута думка — запис на своєму місці.
-    // Інакше вкладка поступово стала б стрічкою всього написаного за рік.
-    expect(W.notesOfWeek([note(PREV_WEEK)], THIS_WEEK)).toHaveLength(0);
-    expect(W.notesOfWeek([note(PREV_WEEK)], PREV_WEEK)).toHaveLength(1);
+  test('запис без категорії не зникає, а йде окремою групою в кінці', () => {
+    const groups = W.groupByCategory([entry('a', 'home'), entry('b', null)], CATS);
+    expect(groups.map((g) => g.id)).toEqual(['home', null]);
+    expect(groups[1].items.map((e) => e.title)).toEqual(['b']);
   });
 
-  test('нотатка не тягнеться в плани навіть із минулого тижня', () => {
-    expect(W.plansOfWeek([note(PREV_WEEK)], THIS_WEEK, opts)).toHaveLength(0);
+  test('видалена категорія не забирає з собою написане', () => {
+    // Найгірше, що ця вкладка могла б зробити, — втратити запис через
+    // прибрану категорію. Він просто переходить у групу без назви.
+    const groups = W.groupByCategory([entry('a', 'gone')], CATS);
+    expect(groups).toHaveLength(1);
+    expect(groups[0].id).toBe(null);
+    expect(groups[0].items[0].title).toBe('a');
   });
 
-  test('звичайне завдання нотаткою не вважається', () => {
-    expect(W.isNote(plan(THIS_WEEK))).toBe(false);
-    expect(W.isNote(null)).toBe(false);
-    expect(W.isNote({ kind: 'plan' })).toBe(false);
+  test('без категорій узагалі все лягає в одну групу', () => {
+    const groups = W.groupByCategory([entry('a', 'home'), entry('b', 'work')], []);
+    expect(groups).toHaveLength(1);
+    expect(groups[0].id).toBe(null);
+    expect(groups[0].items).toHaveLength(2);
+  });
+
+  test('порожній вхід не падає', () => {
+    expect(W.groupByCategory(null, CATS)).toEqual([]);
+    expect(W.groupByCategory([], null)).toEqual([]);
   });
 });
 
