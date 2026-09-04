@@ -31,11 +31,11 @@ const SEED = {
   tasks: [
     task({ id: 'd1', title: 'Денне завдання', dueDate: iso() }),
     task({ id: 'n1', title: 'Зовсім без дати' }),
-    task({ id: 'w1', title: 'Ідея на тиждень', weekStart: THIS_WEEK }),
-    task({ id: 'w2', title: 'Борг з минулого', weekStart: PREV_WEEK }),
+    task({ id: 'w1', title: 'Ідея на тиждень', weekStart: THIS_WEEK, weekCat: 'ideas' }),
+    task({ id: 'w2', title: 'Борг з минулого', weekStart: PREV_WEEK, weekCat: 'work' }),
     task({ id: 'w3', title: 'Закрите минулого', weekStart: PREV_WEEK, done: true }),
-    task({ id: 'note1', title: 'Телефон майстра 555', weekStart: THIS_WEEK, kind: 'note' }),
-    task({ id: 'note2', title: 'Думка минулого тижня', weekStart: PREV_WEEK, kind: 'note' }),
+    task({ id: 'w4', title: 'Розібрати шафу', weekStart: THIS_WEEK, weekCat: 'home' }),
+    task({ id: 'w5', title: 'Нічия справа', weekStart: THIS_WEEK }),
   ],
 };
 
@@ -119,153 +119,187 @@ test.describe('Вкладка тижня', () => {
     expect(list).not.toContain('Ідея на тиждень');
   });
 
-  test('назва тижня вертає в поточний', async ({ page }) => {
+  test('підпис місяця вертає в поточний тиждень', async ({ page }) => {
     await openTasks(page);
     await page.click('#bnWeek');
-    await expect(page.locator('#planLabel')).toHaveText('Цей тиждень');
     await expect(page.locator('#planLabel')).toHaveClass(/current/);
+    const start = await titles(page);
     await page.click('#planPrevBtn');
     await expect(page.locator('#planLabel')).not.toHaveClass(/current/);
     await page.click('#planLabel');
-    await expect(page.locator('#planLabel')).toHaveText('Цей тиждень');
+    await expect(page.locator('#planLabel')).toHaveClass(/current/);
+    expect(await titles(page)).toEqual(start);
   });
 });
 
-test.describe('Запис на тиждень', () => {
-  const lastAdd = (page) => page.evaluate(() => window.__fbCalls.add.slice(-1)[0]);
-
-  test('пункт пишеться з тижнем і БЕЗ дня — у цьому вся суть вкладки', async ({ page }) => {
+test.describe('Тижневик: тиждень, назва, групи', () => {
+  test('зверху — сім днів тижня, а не рядок із датами', async ({ page }) => {
     await openTasks(page);
     await page.click('#bnWeek');
-    await page.fill('#planInput', 'Розібрати шафу');
-    await page.click('#planAddBtn');
-    await expect.poll(async () => (await lastAdd(page)).payload.title).toBe('Розібрати шафу');
-    const add = await lastAdd(page);
-    expect(add.col).toBe('tasks');
-    expect(add.payload).toMatchObject({
-      title: 'Розібрати шафу', dueDate: null, dueTime: null,
-      weekStart: THIS_WEEK, done: false, tags: [], subtasks: [],
+    await expect(page.locator('.plan-day')).toHaveCount(7);
+    // Виділений лише сьогоднішній: тут нічого не обирають, це підпис до
+    // вкладки, а не смуга вибору дня.
+    await expect(page.locator('.plan-day.today')).toHaveCount(1);
+  });
+
+  test('тап по числу веде у вкладку «День» на цю дату', async ({ page }) => {
+    await openTasks(page);
+    await page.click('#bnWeek');
+    await page.locator('.plan-day').nth(2).click();
+    await expect(page.locator('#dayScreen')).toBeVisible();
+    await expect(page.locator('#bnDay')).toHaveClass(/active/);
+  });
+
+  test('велика назва вкладки на місці', async ({ page }) => {
+    await openTasks(page);
+    await page.click('#bnWeek');
+    await expect(page.locator('#planTitle')).toHaveText('Тижневик');
+  });
+
+  test('підпис — місяць, і рік у ньому лише коли він не цей', async ({ page }) => {
+    await openTasks(page);
+    await page.click('#bnWeek');
+    await expect(page.locator('#planLabel')).not.toHaveText(/\d{4}/);
+    for (let i = 0; i < 60; i++) await page.click('#planNextBtn');
+    await expect(page.locator('#planLabel')).toHaveText(/\d{4}/);
+  });
+
+  test('записи стоять групами за категоріями, порожніх груп немає', async ({ page }) => {
+    await openTasks(page);
+    await page.click('#bnWeek');
+    // Порядок — той, у якому складено категорії, а не алфавітний.
+    expect(await page.locator('.plan-group-label').allTextContents())
+      .toEqual(['Дім', 'Робота', 'Ідеї', 'Без категорії']);
+  });
+
+  test('запис без категорії не зникає — йде окремою групою в кінці', async ({ page }) => {
+    await openTasks(page);
+    await page.click('#bnWeek');
+    const last = page.locator('.plan-group').last();
+    await expect(last).toContainText('Нічия справа');
+  });
+});
+
+test.describe('Тижневик: запис через «+»', () => {
+  const lastAdd = (page) => page.evaluate(() => window.__fbCalls.add.slice(-1)[0]);
+
+  test('«+» у куті відкриває форму запису, а не завдання на день', async ({ page }) => {
+    await openTasks(page);
+    await page.click('#bnWeek');
+    await expect(page.locator('#openQuickAdd'), 'кнопка та сама, що в решті вкладок').toBeVisible();
+    await page.click('#openQuickAdd');
+    await expect(page.locator('#planFormOverlay')).toHaveClass(/show/);
+    await expect(page.locator('#quickAddOverlay')).not.toHaveClass(/show/);
+  });
+
+  test('на вкладці дня той самий «+» відкриває швидке додавання завдання', async ({ page }) => {
+    await openTasks(page);
+    await page.click('#openQuickAdd');
+    await expect(page.locator('#quickAddOverlay')).toHaveClass(/show/);
+    await expect(page.locator('#planFormOverlay')).not.toHaveClass(/show/);
+  });
+
+  test('запис пишеться з тижнем, категорією і БЕЗ дня', async ({ page }) => {
+    await openTasks(page);
+    await page.click('#bnWeek');
+    await page.click('#openQuickAdd');
+    await page.fill('#planText', 'Купити фарбу');
+    await page.click('[data-plan-cat="home"]');
+    await page.click('#planSaveBtn');
+    await expect.poll(async () => (await lastAdd(page)).payload.title).toBe('Купити фарбу');
+    expect((await lastAdd(page)).payload).toMatchObject({
+      weekStart: THIS_WEEK, weekCat: 'home', dueDate: null, dueTime: null, done: false,
     });
   });
 
-  test('пишеться в ТОЙ тиждень, який на екрані', async ({ page }) => {
-    await openTasks(page);
-    await page.click('#bnWeek');
-    await page.click('#planNextBtn');
-    await page.fill('#planInput', 'Наступного тижня');
-    await page.click('#planAddBtn');
-    await expect.poll(async () => (await lastAdd(page)).payload.weekStart)
-      .toBe(mondayOf(iso(7)));
-  });
-
-  test('Enter у полі — те саме, що кнопка', async ({ page }) => {
-    await openTasks(page);
-    await page.click('#bnWeek');
-    await page.fill('#planInput', 'З клавіатури');
-    await page.press('#planInput', 'Enter');
-    await expect.poll(async () => (await lastAdd(page)).payload.title).toBe('З клавіатури');
-  });
-
-  test('порожній рядок не зберігається, а каже чому', async ({ page }) => {
+  test('порожній текст не зберігається, а каже чому', async ({ page }) => {
     await openTasks(page, { profile: {}, tasks: [] });
     await page.click('#bnWeek');
-    await page.click('#planAddBtn');
-    await expect(page.locator('#planError')).toHaveText('Напиши хоча б назву');
+    await page.click('#openQuickAdd');
+    await page.click('#planSaveBtn');
+    await expect(page.locator('#planError')).toHaveText('Напиши хоча б слово');
     expect(await page.evaluate(() => window.__fbCalls.add.length)).toBe(0);
   });
 
-  test('поле очищається після запису — щоб одразу писати наступне', async ({ page }) => {
+  test('тап по запису відкриває його ж — із текстом і категорією', async ({ page }) => {
     await openTasks(page);
     await page.click('#bnWeek');
-    await page.fill('#planInput', 'Перше');
-    await page.click('#planAddBtn');
-    await expect(page.locator('#planInput')).toHaveValue('');
-  });
-
-  test('плаваючий «+» тут схований — він створює завдання НА ДЕНЬ', async ({ page }) => {
-    await openTasks(page);
-    await expect(page.locator('#openQuickAdd')).toBeVisible();
-    await page.click('#bnWeek');
-    await expect(page.locator('#openQuickAdd')).toBeHidden();
-    await page.click('#bnDay');
-    await expect(page.locator('#openQuickAdd')).toBeVisible();
+    await page.click('[data-open="w4"]');
+    await expect(page.locator('#planFormOverlay')).toHaveClass(/show/);
+    await expect(page.locator('#planText')).toHaveValue('Розібрати шафу');
+    await expect(page.locator('[data-plan-cat="home"]')).toHaveClass(/selected/);
   });
 });
 
-test.describe('Нотатки на тижні', () => {
-  const notes = (page) => page.locator('.plan-note').allTextContents();
+test.describe('Тижневик: свої категорії', () => {
+  const lastSet = (page) => page.evaluate(() => window.__fbCalls.set.slice(-1)[0]);
 
-  test('нотатки стоять окремо від планів — і без галочки', async ({ page }) => {
-    // Галочка на нотатці не означала б нічого: її не виконують, а читають.
-    await openTasks(page);
+  async function openCats(page) {
     await page.click('#bnWeek');
-    expect(await notes(page)).toEqual(['Телефон майстра 555']);
-    await expect(page.locator('.plan-note .task-check')).toHaveCount(0);
-    expect(await titles(page), 'нотатка не лізе у список планів')
-      .not.toContain('Телефон майстра 555');
+    await page.click('#openQuickAdd');
+    await page.click('[data-plan-cats-edit]');
+  }
+
+  test('останній чип — «Змінити», і він відкриває керування', async ({ page }) => {
+    await openTasks(page);
+    await openCats(page);
+    await expect(page.locator('#planCatsOverlay')).toHaveClass(/show/);
+    await expect(page.locator('.plan-cat-row')).toHaveCount(3);
   });
 
-  test('нотатка НЕ переїжджає в новий тиждень', async ({ page }) => {
-    // Незроблений план — борг, а незабута думка — запис на своєму місці.
+  test('нова категорія лягає в профіль і одразу зʼявляється чипом', async ({ page }) => {
     await openTasks(page);
-    await page.click('#bnWeek');
-    expect(await notes(page)).not.toContain('Думка минулого тижня');
-    await page.click('#planPrevBtn');
-    expect(await notes(page)).toEqual(['Думка минулого тижня']);
+    await openCats(page);
+    await page.fill('#planCatInput', 'Проєкт');
+    await page.click('#planCatAddBtn');
+    await expect.poll(async () => {
+      const set = await lastSet(page);
+      return set && set.payload.categoriesWeek.map((c) => c.label);
+    }).toEqual(['Дім', 'Робота', 'Ідеї', 'Проєкт']);
+    await expect(page.locator('#planCatPicker')).toContainText('Проєкт');
   });
 
-  test('перемикач каже, що саме записуєш, і міняє підказку в полі', async ({ page }) => {
+  test('категорія з тією ж назвою не заводиться двічі', async ({ page }) => {
     await openTasks(page);
-    await page.click('#bnWeek');
-    await expect(page.locator('#planKindPlan')).toHaveClass(/active/);
-    await expect(page.locator('#planInput')).toHaveAttribute('placeholder', 'Що зробити цього тижня?');
-    await page.click('#planKindNote');
-    await expect(page.locator('#planKindNote')).toHaveClass(/active/);
-    await expect(page.locator('#planKindPlan')).not.toHaveClass(/active/);
-    await expect(page.locator('#planInput')).toHaveAttribute('placeholder', 'Що записати на памʼять?');
+    await openCats(page);
+    await page.fill('#planCatInput', 'дім');
+    await page.click('#planCatAddBtn');
+    await expect(page.locator('#planCatsError')).toHaveText('Така категорія вже є');
+    await expect(page.locator('.plan-cat-row')).toHaveCount(3);
   });
 
-  test('нотатка пишеться з kind, план — без нього', async ({ page }) => {
-    const lastAdd = (page_) => page_.evaluate(() => window.__fbCalls.add.slice(-1)[0]);
+  test('порожня назва теж не заводиться', async ({ page }) => {
     await openTasks(page);
-    await page.click('#bnWeek');
-
-    await page.click('#planKindNote');
-    await page.fill('#planInput', 'Записати думку');
-    await page.click('#planAddBtn');
-    await expect.poll(async () => (await lastAdd(page)).payload.title).toBe('Записати думку');
-    expect((await lastAdd(page)).payload).toMatchObject({ kind: 'note', weekStart: THIS_WEEK, dueDate: null });
-
-    await page.click('#planKindPlan');
-    await page.fill('#planInput', 'Зробити діло');
-    await page.click('#planAddBtn');
-    await expect.poll(async () => (await lastAdd(page)).payload.title).toBe('Зробити діло');
-    expect((await lastAdd(page)).payload.kind, 'план нотаткою не стає').toBe(null);
+    await openCats(page);
+    await page.click('#planCatAddBtn');
+    await expect(page.locator('#planCatsError')).toHaveText('Напиши назву');
   });
 
-  test('тиждень із самими нотатками — не порожній тиждень', async ({ page }) => {
+  test('прибрана категорія нічого не стирає — її записи стають без категорії', async ({ page }) => {
+    // Найгірше, що ця вкладка могла б зробити, — втратити написане через
+    // прибрану категорію.
+    await openTasks(page);
+    await openCats(page);
+    await page.locator('.plan-cat-row', { hasText: 'Дім' }).locator('.plan-cat-del').click();
+    await expect.poll(async () => {
+      const set = await lastSet(page);
+      return set && set.payload.categoriesWeek.map((c) => c.label);
+    }).toEqual(['Робота', 'Ідеї']);
+    await page.click('#planCatsClose');
+    await page.click('#planFormClose');
+    await expect(page.locator('#planList')).toContainText('Розібрати шафу');
+    expect(await page.locator('.plan-group-label').allTextContents())
+      .not.toContain('Дім');
+  });
+
+  test('свої категорії з профілю витісняють стандартні', async ({ page }) => {
     await openTasks(page, {
-      profile: {},
-      tasks: [task({ id: 'n', title: 'Сама лише думка', weekStart: THIS_WEEK, kind: 'note' })],
+      profile: { categoriesWeek: [{ id: 'proj', label: 'Проєкт' }] },
+      tasks: [task({ id: 'p1', title: 'Запис', weekStart: THIS_WEEK, weekCat: 'proj' })],
     });
     await page.click('#bnWeek');
-    await expect(page.locator('#planList .empty-state')).toHaveCount(0);
-    expect(await notes(page)).toEqual(['Сама лише думка']);
-  });
-
-  test('коли немає нічого — порожній екран на місці', async ({ page }) => {
-    await openTasks(page, { profile: {}, tasks: [] });
-    await page.click('#bnWeek');
-    await expect(page.locator('#planList .empty-state')).toHaveCount(1);
-    expect(await notes(page)).toEqual([]);
-  });
-
-  test('тап по нотатці відкриває ту саму форму — є де виправити й видалити', async ({ page }) => {
-    await openTasks(page);
-    await page.click('#bnWeek');
-    await page.click('.plan-note');
-    await expect(page.locator('#taskFormOverlay')).toHaveClass(/show/);
-    await expect(page.locator('#taskTitleInput')).toHaveValue('Телефон майстра 555');
+    await expect.poll(() => page.locator('.plan-group-label').allTextContents())
+      .toEqual(['Проєкт']);
   });
 });
 
@@ -319,11 +353,14 @@ test.describe('Пункт тижня — звичайне завдання', () 
     expect(upd.payload.done).toBe(true);
   });
 
-  test('тап відкриває ту саму повну форму', async ({ page }) => {
+  test('тап відкриває форму тижневика, а не повну форму завдання', async ({ page }) => {
+    // У запису тижня немає ні дати, ні часу, ні повторення — показувати їх
+    // означало б питати про те, чого в нього не буває.
     await openTasks(page);
     await page.click('#bnWeek');
     await page.click('#planList [data-open="w1"]');
-    await expect(page.locator('#taskFormOverlay')).toHaveClass(/show/);
-    await expect(page.locator('#taskTitleInput')).toHaveValue('Ідея на тиждень');
+    await expect(page.locator('#planFormOverlay')).toHaveClass(/show/);
+    await expect(page.locator('#taskFormOverlay')).not.toHaveClass(/show/);
+    await expect(page.locator('#planText')).toHaveValue('Ідея на тиждень');
   });
 });
