@@ -4,7 +4,7 @@
 // Раніше числа нічого не робили: побачив крапку на четвергу — і йди шукай той
 // четвер у розділі руками.
 const { test, expect } = require('@playwright/test');
-const { openModule } = require('./helpers');
+const { openModule, calendarFrame } = require('./helpers');
 
 const iso = (shift = 0) => {
   const d = new Date();
@@ -59,7 +59,9 @@ test.describe('Телефон: смуга тижня теж клікабельн
 
   test('дні тижня ведуть у завдання так само', async ({ page }) => {
     await openHub(page);
-    await expect(page.locator('.cal-week .cal-day')).toHaveCount(7);
+    // Смуга гортається, тож клітинок намальовано більше, ніж видно; сім — це
+    // те, що в кадрі.
+    expect((await calendarFrame(page)).count).toBe(7);
     await expect(page.locator('.cal-day.today')).toHaveAttribute('href', `tasks/index.html#day=${T}`);
   });
 });

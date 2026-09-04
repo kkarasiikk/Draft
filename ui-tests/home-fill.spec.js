@@ -5,7 +5,7 @@
 // межі залежать від ширини: тиждень / місяць і 4 / 10 справ, а те, що не
 // вмістилось, веде в розділ завдань, а не зникає мовчки.
 const { test, expect } = require('@playwright/test');
-const { openModule } = require('./helpers');
+const { openModule, calendarFrame } = require('./helpers');
 
 const iso = (shift = 0) => {
   const d = new Date();
@@ -85,7 +85,9 @@ test.describe('Телефон', () => {
     await openHub(page);
     await expect(page.locator('.cal-week')).toBeVisible();
     await expect(page.locator('.cal-grid')).toHaveCount(0);
-    await expect(page.locator('.cal-week .cal-day')).toHaveCount(7);
+    // Клітинок намальовано більше, ніж видно: смуга гортається, і запас з
+    // обох боків — це те, у що можна догорнути. У КАДРІ ж рівно сім.
+    expect((await calendarFrame(page)).count).toBe(7);
   });
 
   test('стеля лишається на чотирьох справах', async ({ page }) => {
@@ -109,14 +111,14 @@ test.describe('Назва місяця над календарем', () => {
       await page.clock.install({ time: atNoon('2026-08-31') });
       await openHub(page);
       // Той самий тиждень: 31 серпня — 6 вересня.
-      await expect(page.locator('.cal-week .cal-day').first().locator('.cal-num')).toHaveText('31');
+      expect((await calendarFrame(page)).days[0]).toBe('2026-08-31');
       await expect(page.locator('#calMonth')).toHaveText('серпень');
     });
 
     test('наступного дня той самий тиждень підписаний вереснем', async ({ page }) => {
       await page.clock.install({ time: atNoon('2026-09-01') });
       await openHub(page);
-      await expect(page.locator('.cal-week .cal-day').first().locator('.cal-num')).toHaveText('31');
+      expect((await calendarFrame(page)).days[0]).toBe('2026-08-31');
       await expect(page.locator('#calMonth')).toHaveText('вересень');
     });
   });

@@ -3,7 +3,7 @@
 // Головна — екран, з якого заходять щоразу, а показувала вона лише назви
 // розділів. Перевіряємо, що кожна плитка каже те, заради чого в розділ ідуть.
 const { test, expect } = require('@playwright/test');
-const { openModule } = require('./helpers');
+const { openModule, calendarFrame } = require('./helpers');
 
 // Тут перевіряється телефонна розкладка — та, з якою головну відкривають
 // щодня. Комп'ютерна переставляє ті самі блоки й має власний файл.
@@ -339,10 +339,13 @@ test.describe('Календар тижня', () => {
     d.setDate(d.getDate() + n);
     return d.toISOString().slice(0, 10);
   };
-
-  test('сім днів і назва місяця над ними', async ({ page }) => {
+  // Смуга гортається, тож клітинок намальовано більше, ніж видно, і звертатись
+  // до них за порядковим номером означало б рахувати запас. День адресуємо
+  // датою — тим, чим він і є.
+  const day = (page, n) => page.locator(`.cal-day[href$="#day=${dayOffset(n)}"]`);
+  test('у кадрі сім днів, і над ними є назва місяця', async ({ page }) => {
     await openHub(page, { tasks: [] });
-    await expect(page.locator('.cal-day')).toHaveCount(7);
+    expect((await calendarFrame(page)).count).toBe(7);
     await expect(page.locator('#calMonth')).not.toHaveText('');
   });
 
@@ -357,8 +360,8 @@ test.describe('Календар тижня', () => {
   test('у дні зі справами стоїть крапка, у порожньому — ні', async ({ page }) => {
     // Вівторок цього тижня — другий день у смузі.
     await openHub(page, { tasks: [{ id: 'a', dueDate: dayOffset(1), title: 'Пошта', done: false }] });
-    await expect(page.locator('.cal-day').nth(1).locator('.cal-dot')).toHaveClass(/has/);
-    await expect(page.locator('.cal-day').nth(0).locator('.cal-dot')).not.toHaveClass(/has|all-done/);
+    await expect(day(page, 1).locator('.cal-dot')).toHaveClass(/has/);
+    await expect(day(page, 0).locator('.cal-dot')).not.toHaveClass(/has|all-done/);
   });
 
   test('назв справ у смузі немає', async ({ page }) => {
@@ -368,7 +371,7 @@ test.describe('Календар тижня', () => {
 
   test('крапка стоїть і на майбутньому дні — тиждень дивиться вперед', async ({ page }) => {
     await openHub(page, { tasks: [{ id: 'a', dueDate: dayOffset(6), title: 'Звіт', done: false }] });
-    await expect(page.locator('.cal-day').nth(6).locator('.cal-dot')).toHaveClass(/has/);
+    await expect(day(page, 6).locator('.cal-dot')).toHaveClass(/has/);
   });
 
   test('день, де все закрито, виглядає інакше за день, де ще є що робити', async ({ page }) => {
@@ -376,8 +379,8 @@ test.describe('Календар тижня', () => {
       { id: 'a', dueDate: dayOffset(0), title: 'Готово', done: true },
       { id: 'b', dueDate: dayOffset(1), title: 'Робити', done: false },
     ] });
-    await expect(page.locator('.cal-day').nth(0).locator('.cal-dot')).toHaveClass(/all-done/);
-    await expect(page.locator('.cal-day').nth(1).locator('.cal-dot')).toHaveClass(/has/);
+    await expect(day(page, 0).locator('.cal-dot')).toHaveClass(/all-done/);
+    await expect(day(page, 1).locator('.cal-dot')).toHaveClass(/has/);
   });
 
   test('день з відкритим і закритим лишається днем, де є що робити', async ({ page }) => {
@@ -385,14 +388,14 @@ test.describe('Календар тижня', () => {
       { id: 'a', dueDate: dayOffset(1), title: 'Закрите', done: true },
       { id: 'b', dueDate: dayOffset(1), title: 'Відкрите', done: false },
     ] });
-    await expect(page.locator('.cal-day').nth(1).locator('.cal-dot')).toHaveClass(/has/);
+    await expect(day(page, 1).locator('.cal-dot')).toHaveClass(/has/);
   });
 
   test('десять справ у дні — та сама одна крапка', async ({ page }) => {
     await openHub(page, { tasks: Array.from({ length: 10 }, (_, n) => (
       { id: 't' + n, dueDate: dayOffset(2), title: 'Справа ' + n, done: false }
     )) });
-    await expect(page.locator('.cal-day').nth(2).locator('.cal-dot')).toHaveCount(1);
+    await expect(day(page, 2).locator('.cal-dot')).toHaveCount(1);
   });
 
   test('порожній день не робить смугу нижчою — числа не стрибають', async ({ page }) => {
@@ -402,18 +405,16 @@ test.describe('Календар тижня', () => {
     expect(new Set(heights).size).toBe(1);
   });
 
-  test('тиждень починається з понеділка, а не з сьогодні', async ({ page }) => {
+  test('смуга відкривається з понеділка, а не з сьогодні', async ({ page }) => {
+    // Гортанням її можна почати з будь-якого дня, але ПОЧАТКОВИЙ вигляд —
+    // календарний тиждень: день має стояти там, де він у місяці.
     await openHub(page, { tasks: [] });
-    const nums = await page.locator('.cal-num').allTextContents();
-    const first = new Date(monday() + 'T00:00:00').getDate();
-    expect(Number(nums[0])).toBe(first);
+    expect((await calendarFrame(page)).days[0]).toBe(monday());
   });
 
-  test('числа йдуть підряд, без розривів', async ({ page }) => {
+  test('числа в кадрі йдуть підряд, без розривів', async ({ page }) => {
     await openHub(page, { tasks: [] });
-    const nums = (await page.locator('.cal-num').allTextContents()).map(Number);
-    const dates = nums.map((n, i) => new Date(dayOffset(i) + 'T00:00:00').getDate());
-    expect(nums).toEqual(dates);
+    expect((await calendarFrame(page)).days).toEqual([0, 1, 2, 3, 4, 5, 6].map(dayOffset));
   });
 });
 

@@ -133,4 +133,27 @@ async function checksOutUnsavedGuard({ page, overlay, open, dirty, closeBtn }) {
   expect(await dialog.shown(page)).toBe(false);
 }
 
-module.exports = { openModule, isShown, tapBackdrop, dialog, checksOutUnsavedGuard };
+/**
+ * Що зараз у кадрі смуги днів на головній.
+ *
+ * Смуга гортається, тож клітинок намальовано більше, ніж видно (запас у обидва
+ * боки), і звертатись до них за порядковим номером означало б рахувати той
+ * запас у кожному тесті окремо. Тут це рахується один раз — з позиції
+ * прокрутки, тобто так само, як це робить сама сторінка.
+ * @returns {Promise<{count:number, days:string[], total:number}>}
+ */
+function calendarFrame(page) {
+  return page.evaluate(() => {
+    const el = document.getElementById('calWeek');
+    const cells = Array.from(el.children);
+    const step = cells[1].offsetLeft - cells[0].offsetLeft;
+    const i = Math.round(el.scrollLeft / step);
+    return {
+      total: cells.length,
+      count: Math.round(el.clientWidth / step),
+      days: cells.slice(i, i + 7).map((c) => c.getAttribute('href').split('#day=')[1]),
+    };
+  });
+}
+
+module.exports = { openModule, isShown, tapBackdrop, dialog, checksOutUnsavedGuard, calendarFrame };

@@ -440,11 +440,26 @@
     -webkit-tap-highlight-color:transparent;transition:background .15s, color .15s;}
   .cal-arrow:hover{background:var(--glass-btn-bg-hover);color:var(--ink-soft);}
   .cal-arrow:active{transform:scale(.92);}
-  /* Гортання пальцем по горизонталі. touch-action:pan-y лишає сторінці
-     вертикальну прокрутку: без нього браузер віддавав би жест нам цілком і
-     сторінка переставала б гортатись пальцем по календарю. */
-  .cal-week, .cal-grid{touch-action:pan-y;}
-  .cal-week{display:grid;grid-template-columns:repeat(7, 1fr);gap:4px;}
+  /* Місяць гортається нашим власним свайпом (крок — цілий місяць), тож
+     горизонтальний жест над ним забираємо собі, а вертикальний лишаємо
+     сторінці. Смузі днів нижче це не потрібно: вона гортається сама. */
+  .cal-grid{touch-action:pan-y;}
+
+  /* Смуга днів гортається ВІЛЬНО, по днях — це справжня прокрутка браузера,
+     а не наш перерахунок тижнями. Тягнеш пальцем — смуга їде за ним і стає
+     рівно на день (scroll-snap). Короткий рух дає день-два, довгий — тиждень
+     і далі; календарний тиждень пн—нд лишається лише початковим станом.
+     Своя прокрутка тут не писалась би краще за браузерну: інерція, кінетика
+     й повага до системних налаштувань уже є в ній. */
+  .cal-week{display:flex;gap:4px;overflow-x:auto;overscroll-behavior-x:contain;
+    scroll-snap-type:x mandatory;
+    /* Смуга — не список для читання, а стрічка: власна смуга гортання під
+       нею лише з'їдала б висоту й шуміла. */
+    scrollbar-width:none;-ms-overflow-style:none;}
+  .cal-week::-webkit-scrollbar{display:none;}
+  /* Сім днів у ширину екрана: клітинка — рівно сьома частина за вирахуванням
+     шести проміжків. Стискатись їй не можна, інакше в кадр лізло б вісім. */
+  .cal-week .cal-day{flex:0 0 calc((100% - 24px) / 7);scroll-snap-align:start;}
   /* Місяць. Дні тижня стоять шапкою над стовпчиками — один раз, а не в
      кожній із тридцяти клітинок. */
   .cal-grid{display:grid;grid-template-columns:repeat(7, 1fr);gap:4px;}

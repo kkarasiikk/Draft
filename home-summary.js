@@ -292,6 +292,30 @@
     return { from: days[0].date, to: days[6].date, days: days };
   }
 
+  /**
+   * Смуга з `count` днів поспіль, починаючи з `fromIso`.
+   *
+   * Це не те саме, що weekCalendar: там тиждень КАЛЕНДАРНИЙ (пн—нд, число
+   * стоїть під своїм днем тижня), а тут смуга починається з будь-якого дня.
+   * Потрібна саме тому, що календар гортається по днях: перший видимий день
+   * може бути середою, і підганяти його до понеділка означало б не показати
+   * того, до чого людина догорнула.
+   *
+   * День тижня від цього не губиться — на телефоні кожна клітинка підписана
+   * своїм («ср 9»), тож смуга лишається чесною, з якого б дня не починалась.
+   */
+  function dayStrip(tasks, todayIso, fromIso, count) {
+    var byDay = tasksByDay(tasks);
+    var cursor = new Date(fromIso + 'T00:00:00');
+    var days = [];
+    for (var i = 0; i < count; i++) {
+      days.push(calendarDay(cursor, byDay, todayIso, null));
+      cursor = new Date(cursor);
+      cursor.setDate(cursor.getDate() + 1);
+    }
+    return { from: days[0].date, to: days[days.length - 1].date, days: days };
+  }
+
   /** Зсув дати на кілька днів. Календар гортається саме так: тиждень — це
    *  ±7 днів, і рахувати їх у кожному місці окремо означало б розійтись. */
   function shiftDays(iso, delta) {
@@ -341,6 +365,7 @@
     isoOf: isoOf,
     weekDays: weekDays,
     weekCalendar: weekCalendar,
+    dayStrip: dayStrip,
     shiftDays: shiftDays,
     shiftMonths: shiftMonths,
     pickGoal: pickGoal,
