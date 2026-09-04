@@ -8,7 +8,6 @@ const L = {
   colDate: 'Дата', colType: 'Тип', colCategory: 'Категорія', colAmount: 'Сума', colCurrency: 'Валюта',
   colNote: 'Нотатка', colGoal: 'Ціль', colName: 'Назва', colCreated: 'Створено', colUpdated: 'Оновлено',
   colTitle: 'Заголовок', colContent: 'Зміст', colStatus: 'Статус', colDeadline: 'Дедлайн',
-  colMilestones: 'Віхи',
   colCheckins: 'Чекінів', colWhy: 'Навіщо', colDone: 'Виконано', colTime: 'Час', colPriority: 'Пріоритет',
   colTags: 'Теги', colEstimate: 'Хвилин', colRepeat: 'Повтор', colSubtasks: 'Підзадачі',
   colCompleted: 'Завершено', colExercise: 'Вправа', colMuscle: 'Група', colSets: 'Підходів',
@@ -91,9 +90,8 @@ describe('бюджет', () => {
 });
 
 describe('цілі', () => {
-  test('віхи складаються в один стовпець із позначками', () => {
+  test('ціль іде рядком: назва, статус, відмітки', () => {
     const row = sheet(['goals'], L.sheetLifeGoals).rows[0];
-    expect(row[L.colMilestones]).toBe('10 км ✓; 21 км');
     expect(row[L.colCheckins]).toBe(2);
     expect(row[L.colStatus]).toBe('Активна');
   });
@@ -185,6 +183,8 @@ describe('toJson', () => {
   test('віддає сирі документи обраних розділів', () => {
     const out = E.toJson(['goals', 'workout'], DATA);
     expect(Object.keys(out.sections).sort()).toEqual(['goals', 'workout']);
+    // JSON віддає документи СИРИМИ, тож спадщина в них лишається як є:
+    // резервна копія має бути копією, а не переказом.
     expect(out.sections.goals[0].milestones).toHaveLength(2);
     expect(out.exportedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);
   });

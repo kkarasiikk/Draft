@@ -37,7 +37,6 @@
       rescued: (a) => `Серію врятовано: ${a.title} — ${a.streak} дн.`,
       readiness: (a) => `Самопочуття: ${{ ready: 'повний сил', ok: 'так собі', low: 'розбитий' }[a.level] || a.level}`,
       blocker: (a) => `Завадило: ${a.reason} · ${a.title}`,
-      milestone: (a) => `Віха: ${a.title}${a.goal ? ' · ' + a.goal : ''}`,
       savingsGoal: (a) => `Скарбничка: ${a.name}`,
       savings: (a) => `${a.type === 'withdraw' ? 'Знято' : 'Відкладено'}: ${a.amount} ${a.currency || ''} · ${a.goal}`.trim(),
       renamed: (a) => `Перейменовано: ${a.from} → ${a.to}`,
@@ -73,7 +72,6 @@
       rescued: (a) => `Серия спасена: ${a.title} — ${a.streak} дн.`,
       readiness: (a) => `Самочувствие: ${{ ready: 'полон сил', ok: 'так себе', low: 'разбит' }[a.level] || a.level}`,
       blocker: (a) => `Помешало: ${a.reason} · ${a.title}`,
-      milestone: (a) => `Веха: ${a.title}${a.goal ? ' · ' + a.goal : ''}`,
       savingsGoal: (a) => `Копилка: ${a.name}`,
       savings: (a) => `${a.type === 'withdraw' ? 'Снято' : 'Отложено'}: ${a.amount} ${a.currency || ''} · ${a.goal}`.trim(),
       renamed: (a) => `Переименовано: ${a.from} → ${a.to}`,
@@ -109,7 +107,6 @@
       rescued: (a) => `Seria uratowana: ${a.title} — ${a.streak} dni`,
       readiness: (a) => `Samopoczucie: ${{ ready: 'pełen sił', ok: 'tak sobie', low: 'rozbity' }[a.level] || a.level}`,
       blocker: (a) => `Przeszkodziło: ${a.reason} · ${a.title}`,
-      milestone: (a) => `Kamień milowy: ${a.title}${a.goal ? ' · ' + a.goal : ''}`,
       savingsGoal: (a) => `Skarbonka: ${a.name}`,
       savings: (a) => `${a.type === 'withdraw' ? 'Wypłacono' : 'Odłożono'}: ${a.amount} ${a.currency || ''} · ${a.goal}`.trim(),
       renamed: (a) => `Zmieniono nazwę: ${a.from} → ${a.to}`,
@@ -145,7 +142,6 @@
       rescued: (a) => `Streak rescued: ${a.title} — ${a.streak} days`,
       readiness: (a) => `Readiness: ${{ ready: 'fresh', ok: 'so-so', low: 'wrecked' }[a.level] || a.level}`,
       blocker: (a) => `Got in the way: ${a.reason} · ${a.title}`,
-      milestone: (a) => `Milestone: ${a.title}${a.goal ? ' · ' + a.goal : ''}`,
       savingsGoal: (a) => `Savings pot: ${a.name}`,
       savings: (a) => `${a.type === 'withdraw' ? 'Withdrew' : 'Set aside'}: ${a.amount} ${a.currency || ''} · ${a.goal}`.trim(),
       renamed: (a) => `Renamed: ${a.from} → ${a.to}`,
@@ -712,7 +708,6 @@
     if (a.kind === 'streak_rescued') return t('rescued')(a);
     if (a.kind === 'readiness_logged') return t('readiness')(a);
     if (a.kind === 'blocker_logged') return t('blocker')(a);
-    if (a.kind === 'milestone_done') return t('milestone')(a);
     if (a.kind === 'savings_goal_added') return t('savingsGoal')(a);
     if (a.kind === 'savings_entry') return t('savings')(a);
     if (a.kind === 'renamed') return t('renamed')(a);

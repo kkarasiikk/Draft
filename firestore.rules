@@ -333,8 +333,16 @@ service cloud.firestore {
         // Як і з tasks/subtasks та workouts/exercises: форму КОЖНОГО елемента
         // milestones/checkins/journal тут не перевіряємо — лише що це список
         // і не задовгий. Форму окремих елементів гарантує клієнтський код
-        // (goals/app.js: submit-handler форми, toggleMilestone, toggleTodayCheckin,
+        // (goals/app.js: submit-handler форми, toggleTodayCheckin,
         // addJournalEntry).
+        //
+        // СПАДЩИНА: milestones. Віх у застосунку більше немає — ні форми, ні
+        // показу, ні інструментів помічника. Поле лишається ОБОВʼЯЗКОВИМ
+        // навмисно: правило вже розкладене на бойовій базі, і послабити його
+        // можна лише окремим деплоєм правил. Клієнт і помічник пишуть його
+        // далі — тим, що вже лежить у документі, або порожнім списком у нової
+        // цілі. Так стара розмітка приймає нові записи, а чужі дані не
+        // стираються правкою назви.
         function isValidLifeGoal(d) {
           return isNonEmptyString(d.title, 200) &&
                  // Категорії цілей редагуються (профіль, categoriesGoals), тож

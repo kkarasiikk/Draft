@@ -39,20 +39,13 @@ const T = {
     catSaveError: 'Не вдалося зберегти. Спробуй ще раз.',
     catInUseConfirm: (n, target) => `${n} ${n === 1 ? 'ціль перейде' : 'цілей перейде'} в «${target}». Видалити категорію?`,
     whyLabel: 'Навіщо тобі це?', whyPlaceholder: 'Чому ця ціль важлива саме для тебе (необов’язково)',
-    milestonesLabel: 'Віхи', milestonePlaceholder: 'Наприклад: пройти перші 5 уроків',
-    milestoneDateLabel: 'Коли планую (необовʼязково)', milestoneReorderAria: 'Перетягнути; ↑/↓ з клавіатури',
-    milestoneOverdue: (n) => `прострочено на ${n} дн.`, milestoneDue: (d) => `до ${d}`,
-    addMilestoneBtn: '+ Додати віху',
-    breakdownBtn: 'Запропонувати віхи', breakdownWorking: 'Думаю…',
-    breakdownError: 'Не вдалося розбити ціль. Спробуй ще раз або сформулюй її конкретніше.',
-    breakdownNoTitle: 'Спершу введи назву цілі.',
     titleRequiredError: 'Введи назву цілі',
     saveBtn: 'Зберегти', deleteBtn: 'Видалити', cancelBtn: 'Скасувати', deleteConfirmBtn: 'Видалити',
     unsavedTitle: 'Зберегти зміни?',
     unsavedSub: 'Є незбережені зміни. Якщо вийти зараз, вони пропадуть.',
     unsavedSave: 'Зберегти', unsavedDiscard: 'Не зберігати', unsavedKeep: 'Продовжити редагування',
     confirmDeleteTitle: 'Видалити ціль?',
-    confirmDeleteSub: 'Цю дію не можна скасувати. Усі віхи, нотатки й серія теж зникнуть.',
+    confirmDeleteSub: 'Цю дію не можна скасувати. Нотатки й серія теж зникнуть.',
     fabNewGoalLabel: 'Нова ціль', bnMonth: 'Місяць', bnYear: 'Рік',
     horizonLabel: 'Горизонт', horizonMonth: 'Місячна', horizonYear: 'Річна',
     horizonHint: 'Місячна — що робиш цього місяця. Річна — куди йдеш загалом.',
@@ -60,18 +53,7 @@ const T = {
     emptyYearTitle: 'Немає річних цілей', emptyYearSub: 'Куди ти йдеш цього року?',
     statusAll: 'Усі', statusActive: 'Активні', statusDone: 'Завершені', statusArchived: 'Архів',
     statusPaused: 'На паузі', pauseBtn: 'Поставити на паузу', resumeBtn: 'Повернути в роботу',
-    archiveBtn: 'Перенести в архів',
-    paceAhead: 'Випереджаєш графік', paceOnTrack: 'У графіку',
-    paceBehind: 'Не встигаєш таким темпом', paceOverdue: 'Дедлайн минув',
-    paceUnknown: 'Даних для прогнозу ще замало',
-    paceProjected: (d) => `Таким темпом — приблизно ${d}`,
-    paceLate: (n) => `На ${n} дн. пізніше за дедлайн`,
-    paceTimeVsWork: (t, p) => `Часу минуло ${t}%, зроблено ${p}%`,
-    paceDaysLeft: (n) => `${n} дн. до дедлайну`,
-    noMilestonesYet: 'Ще немає віх — додай перший крок у редагуванні цілі',
-    allMilestonesDoneMsg: '🎉 Усі віхи пройдено!',
-    markGoalDoneBtn: 'Позначити ціль виконаною',
-    nextStopBadge: 'Наступна зупинка',
+    archiveBtn: 'Перенести в архів', markGoalDoneBtn: 'Виконано',
     checkinBtnLabel: 'Зробив крок сьогодні', checkinBtnLabelDone: 'Зроблено сьогодні',
     rescueMsg: (n) => `Вчора пропущено. Серія на ${n} дн. ще ціла — врятувати?`,
     rescueBtn: 'Врятувати серію',
@@ -81,25 +63,15 @@ const T = {
     actionsEmpty: 'Ще немає щоденних дій — додай перший крок нижче.',
     actionOverdue: 'прострочено',
     rescueWait: (n) => `Серія обірвалась. Наступний рятунок буде доступний через ${n} дн.`,
-    parentLabel: 'Служить річній цілі', parentNone: 'Сама по собі',
-    parentHint: 'Рік — напрямок, місяць — крок до нього. На річній цілі буде видно, що на неї працює.',
-    parentEmpty: 'Річних цілей ще немає — заведи одну на вкладці «Рік».',
-    childrenTitle: (n) => `Цього місяця над цим працюють: ${n}`,
     blockersTitle: 'Що заважає найчастіше',
     reason_noTime: 'Не було часу', reason_forgot: 'Забув(ла)', reason_tired: 'Втома',
     reason_mood: 'Не було настрою', reason_other: 'Інше',
     journalPlaceholder: 'Що сьогодні зробив(ла) для цієї цілі?',
     journalEmpty: 'Ще нема нотаток', journalSectionLabel: 'Щоденник',
     badge_streak7: '🔥 Серія 7 днів', badge_firstDone: '🏆 Перша ціль завершена',
-    badge_firstStep: '🌱 Перший крок', badge_perfect: '💯 Ціль без прогалин',
+    badge_firstStep: '🌱 Перший крок',
     dashboardEmptyTitle: 'Ще немає цілей', dashboardEmptySub: 'Додай першу ціль кнопкою внизу.',
     daysLeftLabel: (n) => `${n} дн. до дедлайну`, overdueLabel: 'Прострочено',
-    milestonesCountSuffix: 'віх',
-    milestoneToTask: 'У завдання', milestoneInTasks: 'У завданнях',
-    chartLabel: 'Шлях', chartRequired: 'щоб устигнути',
-    measureTitle: 'Як ти зрозумієш, що дійшов?',
-    measureSub: 'У цілі немає ні числа, ні кроків — виміряти її нічим.',
-    measureBtn: 'Додати мірило',
     lapseTitle: (n) => `Тебе не було ${n} дн.`,
     lapseNeverTitle: (n) => `Ціль стоїть ${n} дн. без жодного кроку`,
     lapseSub: 'Це буває. Питання не в тому, чому так вийшло, а в тому, куди повертатись.',
@@ -107,7 +79,7 @@ const T = {
     gridLabel: 'Останні вісім тижнів', gridDone: 'був крок', gridBlocked: 'сказав, що завадило',
     monthPrev: 'Попередній місяць', monthNext: 'Наступний місяць',
     pickGoalTitle: 'Обери ціль зліва',
-    pickGoalSub: 'Тут буде все про неї: навіщо, темп, віхи, серія і щоденник.',
+    pickGoalSub: 'Тут буде все про неї: навіщо, темп, серія і щоденник.',
     emptyMonthNamed: (m) => `Немає цілей на ${m}`,
     carriedFrom: (m) => `з ${m}`,
     horizonHintMonth: (m) => `Ціль піде в ${m}.`,
@@ -149,20 +121,13 @@ const T = {
     catSaveError: 'Не удалось сохранить. Попробуй ещё раз.',
     catInUseConfirm: (n, target) => `${n} ${n === 1 ? 'цель перейдёт' : 'целей перейдёт'} в «${target}». Удалить категорию?`,
     whyLabel: 'Зачем тебе это?', whyPlaceholder: 'Почему эта цель важна именно для тебя (необязательно)',
-    milestonesLabel: 'Вехи', milestonePlaceholder: 'Например: пройти первые 5 уроков',
-    milestoneDateLabel: 'Когда планирую (необязательно)', milestoneReorderAria: 'Перетащить; ↑/↓ с клавиатуры',
-    milestoneOverdue: (n) => `просрочено на ${n} дн.`, milestoneDue: (d) => `до ${d}`,
-    addMilestoneBtn: '+ Добавить веху',
-    breakdownBtn: 'Предложить вехи', breakdownWorking: 'Думаю…',
-    breakdownError: 'Не удалось разбить цель. Попробуй ещё раз или сформулируй её конкретнее.',
-    breakdownNoTitle: 'Сначала введи название цели.',
     titleRequiredError: 'Введи название цели',
     saveBtn: 'Сохранить', deleteBtn: 'Удалить', cancelBtn: 'Отмена', deleteConfirmBtn: 'Удалить',
     unsavedTitle: 'Сохранить изменения?',
     unsavedSub: 'Есть несохранённые изменения. Если выйти сейчас, они пропадут.',
     unsavedSave: 'Сохранить', unsavedDiscard: 'Не сохранять', unsavedKeep: 'Продолжить редактирование',
     confirmDeleteTitle: 'Удалить цель?',
-    confirmDeleteSub: 'Это действие нельзя отменить. Все вехи, заметки и серия тоже исчезнут.',
+    confirmDeleteSub: 'Это действие нельзя отменить. Заметки и серия тоже исчезнут.',
     fabNewGoalLabel: 'Новая цель', bnMonth: 'Месяц', bnYear: 'Год',
     horizonLabel: 'Горизонт', horizonMonth: 'Месячная', horizonYear: 'Годовая',
     horizonHint: 'Месячная — что делаешь в этом месяце. Годовая — куда идёшь в целом.',
@@ -170,18 +135,7 @@ const T = {
     emptyYearTitle: 'Нет годовых целей', emptyYearSub: 'Куда ты идёшь в этом году?',
     statusAll: 'Все', statusActive: 'Активные', statusDone: 'Завершённые', statusArchived: 'Архив',
     statusPaused: 'На паузе', pauseBtn: 'Поставить на паузу', resumeBtn: 'Вернуть в работу',
-    archiveBtn: 'Перенести в архив',
-    paceAhead: 'Опережаешь график', paceOnTrack: 'В графике',
-    paceBehind: 'Не успеваешь таким темпом', paceOverdue: 'Дедлайн прошёл',
-    paceUnknown: 'Данных для прогноза пока мало',
-    paceProjected: (d) => `Таким темпом — примерно ${d}`,
-    paceLate: (n) => `На ${n} дн. позже дедлайна`,
-    paceTimeVsWork: (t, p) => `Времени прошло ${t}%, сделано ${p}%`,
-    paceDaysLeft: (n) => `${n} дн. до дедлайна`,
-    noMilestonesYet: 'Ещё нет вех — добавь первый шаг в редактировании цели',
-    allMilestonesDoneMsg: '🎉 Все вехи пройдены!',
-    markGoalDoneBtn: 'Отметить цель выполненной',
-    nextStopBadge: 'Следующая остановка',
+    archiveBtn: 'Перенести в архив', markGoalDoneBtn: 'Выполнено',
     checkinBtnLabel: 'Сделал шаг сегодня', checkinBtnLabelDone: 'Сделано сегодня',
     rescueMsg: (n) => `Вчера пропущено. Серия на ${n} дн. ещё цела — спасти?`,
     rescueBtn: 'Спасти серию',
@@ -191,25 +145,15 @@ const T = {
     actionsEmpty: 'Ещё нет ежедневных действий — добавь первый шаг ниже.',
     actionOverdue: 'просрочено',
     rescueWait: (n) => `Серия оборвалась. Следующее спасение будет доступно через ${n} дн.`,
-    parentLabel: 'Служит годовой цели', parentNone: 'Сама по себе',
-    parentHint: 'Год — направление, месяц — шаг к нему. На годовой цели будет видно, что на неё работает.',
-    parentEmpty: 'Годовых целей ещё нет — заведи одну на вкладке «Год».',
-    childrenTitle: (n) => `В этом месяце над этим работают: ${n}`,
     blockersTitle: 'Что мешает чаще всего',
     reason_noTime: 'Не было времени', reason_forgot: 'Забыл(а)', reason_tired: 'Усталость',
     reason_mood: 'Не было настроения', reason_other: 'Другое',
     journalPlaceholder: 'Что сегодня сделал(а) для этой цели?',
     journalEmpty: 'Ещё нет заметок', journalSectionLabel: 'Дневник',
     badge_streak7: '🔥 Серия 7 дней', badge_firstDone: '🏆 Первая цель завершена',
-    badge_firstStep: '🌱 Первый шаг', badge_perfect: '💯 Цель без пропусков',
+    badge_firstStep: '🌱 Первый шаг',
     dashboardEmptyTitle: 'Пока нет целей', dashboardEmptySub: 'Добавь первую цель кнопкой внизу.',
     daysLeftLabel: (n) => `${n} дн. до дедлайна`, overdueLabel: 'Просрочено',
-    milestonesCountSuffix: 'вех',
-    milestoneToTask: 'В задачи', milestoneInTasks: 'В задачах',
-    chartLabel: 'Путь', chartRequired: 'чтобы успеть',
-    measureTitle: 'Как ты поймёшь, что дошёл?',
-    measureSub: 'В цели нет ни числа, ни шагов — измерить её нечем.',
-    measureBtn: 'Добавить мерило',
     lapseTitle: (n) => `Тебя не было ${n} дн.`,
     lapseNeverTitle: (n) => `Цель стоит ${n} дн. без единого шага`,
     lapseSub: 'Так бывает. Вопрос не в том, почему так вышло, а в том, куда возвращаться.',
@@ -217,7 +161,7 @@ const T = {
     gridLabel: 'Последние восемь недель', gridDone: 'был шаг', gridBlocked: 'сказал, что помешало',
     monthPrev: 'Предыдущий месяц', monthNext: 'Следующий месяц',
     pickGoalTitle: 'Выбери цель слева',
-    pickGoalSub: 'Здесь будет всё о ней: зачем, темп, вехи, серия и дневник.',
+    pickGoalSub: 'Здесь будет всё о ней: зачем, темп, серия и дневник.',
     emptyMonthNamed: (m) => `Нет целей на ${m}`,
     carriedFrom: (m) => `с ${m}`,
     horizonHintMonth: (m) => `Цель пойдёт в ${m}.`,
@@ -259,20 +203,13 @@ const T = {
     catSaveError: 'Nie udało się zapisać. Spróbuj ponownie.',
     catInUseConfirm: (n, target) => `${n} ${n === 1 ? 'cel przejdzie' : 'celów przejdzie'} do «${target}». Usunąć kategorię?`,
     whyLabel: 'Po co ci to?', whyPlaceholder: 'Dlaczego ten cel jest dla ciebie ważny (opcjonalnie)',
-    milestonesLabel: 'Kamienie milowe', milestonePlaceholder: 'Np.: ukończyć pierwsze 5 lekcji',
-    milestoneDateLabel: 'Planowana data (opcjonalnie)', milestoneReorderAria: 'Przeciągnij; ↑/↓ z klawiatury',
-    milestoneOverdue: (n) => `spóźnione o ${n} dni`, milestoneDue: (d) => `do ${d}`,
-    addMilestoneBtn: '+ Dodaj kamień milowy',
-    breakdownBtn: 'Zaproponuj kamienie milowe', breakdownWorking: 'Myślę…',
-    breakdownError: 'Nie udało się rozbić celu. Spróbuj ponownie albo sformułuj go konkretniej.',
-    breakdownNoTitle: 'Najpierw wpisz nazwę celu.',
     titleRequiredError: 'Wpisz nazwę celu',
     saveBtn: 'Zapisz', deleteBtn: 'Usuń', cancelBtn: 'Anuluj', deleteConfirmBtn: 'Usuń',
     unsavedTitle: 'Zapisać zmiany?',
     unsavedSub: 'Są niezapisane zmiany. Jeśli teraz wyjdziesz, przepadną.',
     unsavedSave: 'Zapisz', unsavedDiscard: 'Nie zapisuj', unsavedKeep: 'Wróć do edycji',
     confirmDeleteTitle: 'Usunąć cel?',
-    confirmDeleteSub: 'Tej czynności nie można cofnąć. Wszystkie kamienie milowe, notatki i seria też znikną.',
+    confirmDeleteSub: 'Tej czynności nie można cofnąć. Notatki i seria też znikną.',
     fabNewGoalLabel: 'Nowy cel', bnMonth: 'Miesiąc', bnYear: 'Rok',
     horizonLabel: 'Horyzont', horizonMonth: 'Miesięczny', horizonYear: 'Roczny',
     horizonHint: 'Miesięczny — co robisz w tym miesiącu. Roczny — dokąd zmierzasz ogólnie.',
@@ -280,18 +217,7 @@ const T = {
     emptyYearTitle: 'Brak celów rocznych', emptyYearSub: 'Dokąd zmierzasz w tym roku?',
     statusAll: 'Wszystkie', statusActive: 'Aktywne', statusDone: 'Ukończone', statusArchived: 'Archiwum',
     statusPaused: 'Wstrzymane', pauseBtn: 'Wstrzymaj', resumeBtn: 'Wznów',
-    archiveBtn: 'Przenieś do archiwum',
-    paceAhead: 'Wyprzedzasz plan', paceOnTrack: 'Zgodnie z planem',
-    paceBehind: 'W tym tempie nie zdążysz', paceOverdue: 'Termin minął',
-    paceUnknown: 'Za mało danych na prognozę',
-    paceProjected: (d) => `W tym tempie — około ${d}`,
-    paceLate: (n) => `${n} dni po terminie`,
-    paceTimeVsWork: (t, p) => `Czasu minęło ${t}%, zrobione ${p}%`,
-    paceDaysLeft: (n) => `${n} dni do terminu`,
-    noMilestonesYet: 'Jeszcze brak kamieni milowych — dodaj pierwszy krok w edycji celu',
-    allMilestonesDoneMsg: '🎉 Wszystkie kamienie milowe osiągnięte!',
-    markGoalDoneBtn: 'Oznacz cel jako ukończony',
-    nextStopBadge: 'Następny przystanek',
+    archiveBtn: 'Przenieś do archiwum', markGoalDoneBtn: 'Ukończony',
     checkinBtnLabel: 'Zrobiłem krok dzisiaj', checkinBtnLabelDone: 'Zrobione dzisiaj',
     rescueMsg: (n) => `Wczoraj wypadło. Seria ${n} dni jest jeszcze cała — uratować?`,
     rescueBtn: 'Uratuj serię',
@@ -301,25 +227,15 @@ const T = {
     actionsEmpty: 'Brak codziennych działań — dodaj pierwszy krok poniżej.',
     actionOverdue: 'po terminie',
     rescueWait: (n) => `Seria się urwała. Kolejny ratunek będzie dostępny za ${n} dni.`,
-    parentLabel: 'Służy celowi rocznemu', parentNone: 'Sam w sobie',
-    parentHint: 'Rok to kierunek, miesiąc to krok do niego. Na celu rocznym będzie widać, co na niego pracuje.',
-    parentEmpty: 'Nie ma jeszcze celów rocznych — dodaj jeden na zakładce «Rok».',
-    childrenTitle: (n) => `W tym miesiącu pracuje nad tym: ${n}`,
     blockersTitle: 'Co przeszkadza najczęściej',
     reason_noTime: 'Brak czasu', reason_forgot: 'Zapomniałem', reason_tired: 'Zmęczenie',
     reason_mood: 'Brak nastroju', reason_other: 'Inne',
     journalPlaceholder: 'Co dziś zrobiłeś(aś) dla tego celu?',
     journalEmpty: 'Jeszcze brak notatek', journalSectionLabel: 'Dziennik',
     badge_streak7: '🔥 Seria 7 dni', badge_firstDone: '🏆 Pierwszy ukończony cel',
-    badge_firstStep: '🌱 Pierwszy krok', badge_perfect: '💯 Cel bez przerw',
+    badge_firstStep: '🌱 Pierwszy krok',
     dashboardEmptyTitle: 'Jeszcze brak celów', dashboardEmptySub: 'Dodaj pierwszy cel przyciskiem poniżej.',
     daysLeftLabel: (n) => `${n} dni do terminu`, overdueLabel: 'Po terminie',
-    milestonesCountSuffix: 'kam.',
-    milestoneToTask: 'Do zadań', milestoneInTasks: 'W zadaniach',
-    chartLabel: 'Droga', chartRequired: 'żeby zdążyć',
-    measureTitle: 'Po czym poznasz, że doszedłeś?',
-    measureSub: 'Cel nie ma ani liczby, ani kroków — nie ma czym go zmierzyć.',
-    measureBtn: 'Dodaj miarę',
     lapseTitle: (n) => `Nie było cię ${n} dni`,
     lapseNeverTitle: (n) => `Cel stoi ${n} dni bez żadnego kroku`,
     lapseSub: 'Tak bywa. Pytanie nie brzmi dlaczego, tylko dokąd wracasz.',
@@ -327,7 +243,7 @@ const T = {
     gridLabel: 'Ostatnie osiem tygodni', gridDone: 'był krok', gridBlocked: 'powiedziałeś, co przeszkodziło',
     monthPrev: 'Poprzedni miesiąc', monthNext: 'Następny miesiąc',
     pickGoalTitle: 'Wybierz cel po lewej',
-    pickGoalSub: 'Tu będzie wszystko o nim: po co, tempo, kamienie milowe, seria i dziennik.',
+    pickGoalSub: 'Tu będzie wszystko o nim: po co, tempo, seria i dziennik.',
     emptyMonthNamed: (m) => `Brak celów na ${m}`,
     carriedFrom: (m) => `z ${m}`,
     horizonHintMonth: (m) => `Cel trafi do ${m}.`,
@@ -369,20 +285,13 @@ const T = {
     catSaveError: 'Could not save. Try again.',
     catInUseConfirm: (n, target) => `${n} ${n === 1 ? 'goal moves' : 'goals move'} to “${target}”. Delete the category?`,
     whyLabel: 'Why do you want this?', whyPlaceholder: 'Why this goal matters to you (optional)',
-    milestonesLabel: 'Milestones', milestonePlaceholder: 'E.g.: finish the first 5 lessons',
-    milestoneDateLabel: 'Planned date (optional)', milestoneReorderAria: 'Drag to reorder; ↑/↓ from the keyboard',
-    milestoneOverdue: (n) => `${n} days overdue`, milestoneDue: (d) => `by ${d}`,
-    addMilestoneBtn: '+ Add milestone',
-    breakdownBtn: 'Suggest milestones', breakdownWorking: 'Thinking…',
-    breakdownError: 'Could not break this goal down. Try again or make it more specific.',
-    breakdownNoTitle: 'Give the goal a name first.',
     titleRequiredError: 'Enter a goal title',
     saveBtn: 'Save', deleteBtn: 'Delete', cancelBtn: 'Cancel', deleteConfirmBtn: 'Delete',
     unsavedTitle: 'Save changes?',
     unsavedSub: 'There are unsaved changes. Leaving now discards them.',
     unsavedSave: 'Save', unsavedDiscard: "Don't save", unsavedKeep: 'Keep editing',
     confirmDeleteTitle: 'Delete goal?',
-    confirmDeleteSub: 'This action cannot be undone. Milestones, notes and streak will be lost too.',
+    confirmDeleteSub: 'This action cannot be undone. Notes and streak will be lost too.',
     fabNewGoalLabel: 'New goal', bnMonth: 'Month', bnYear: 'Year',
     horizonLabel: 'Horizon', horizonMonth: 'Monthly', horizonYear: 'Yearly',
     horizonHint: 'Monthly — what you are moving this month. Yearly — where you are heading overall.',
@@ -390,18 +299,7 @@ const T = {
     emptyYearTitle: 'No yearly goals', emptyYearSub: 'Where are you heading this year?',
     statusAll: 'All', statusActive: 'Active', statusDone: 'Done', statusArchived: 'Archived',
     statusPaused: 'Paused', pauseBtn: 'Pause this goal', resumeBtn: 'Resume',
-    archiveBtn: 'Move to archive',
-    paceAhead: 'Ahead of schedule', paceOnTrack: 'On track',
-    paceBehind: 'Not on pace to finish in time', paceOverdue: 'Deadline has passed',
-    paceUnknown: 'Not enough history to forecast yet',
-    paceProjected: (d) => `At this pace — around ${d}`,
-    paceLate: (n) => `${n} days past the deadline`,
-    paceTimeVsWork: (t, p) => `${t}% of the time gone, ${p}% done`,
-    paceDaysLeft: (n) => `${n} days to the deadline`,
-    noMilestonesYet: 'No milestones yet — add the first step by editing the goal',
-    allMilestonesDoneMsg: '🎉 All milestones reached!',
-    markGoalDoneBtn: 'Mark goal as done',
-    nextStopBadge: 'Next stop',
+    archiveBtn: 'Move to archive', markGoalDoneBtn: 'Done',
     checkinBtnLabel: 'I took a step today', checkinBtnLabelDone: 'Done for today',
     rescueMsg: (n) => `You missed yesterday. A ${n}-day streak is still savable — rescue it?`,
     rescueBtn: 'Rescue the streak',
@@ -411,25 +309,15 @@ const T = {
     actionsEmpty: 'No daily actions yet — add the first step below.',
     actionOverdue: 'overdue',
     rescueWait: (n) => `The streak broke. The next rescue unlocks in ${n} days.`,
-    parentLabel: 'Serves a yearly goal', parentNone: 'Stands alone',
-    parentHint: 'The year is the direction, the month is a step toward it. The yearly goal will show what feeds it.',
-    parentEmpty: 'No yearly goals yet — add one on the Year tab.',
-    childrenTitle: (n) => `Working on this: ${n}`,
     blockersTitle: 'What gets in the way most',
     reason_noTime: 'No time', reason_forgot: 'Forgot', reason_tired: 'Too tired',
     reason_mood: 'Not in the mood', reason_other: 'Other',
     journalPlaceholder: 'What did you do for this goal today?',
     journalEmpty: 'No notes yet', journalSectionLabel: 'Journal',
     badge_streak7: '🔥 7-day streak', badge_firstDone: '🏆 First goal completed',
-    badge_firstStep: '🌱 First step', badge_perfect: '💯 Goal with no gaps',
+    badge_firstStep: '🌱 First step',
     dashboardEmptyTitle: 'No goals yet', dashboardEmptySub: 'Add your first goal with the button below.',
     daysLeftLabel: (n) => `${n}d left`, overdueLabel: 'Overdue',
-    milestonesCountSuffix: 'milestones',
-    milestoneToTask: 'To tasks', milestoneInTasks: 'In tasks',
-    chartLabel: 'Path', chartRequired: 'to be on time',
-    measureTitle: 'How will you know you got there?',
-    measureSub: 'This goal has no number and no steps — nothing to measure it by.',
-    measureBtn: 'Add a measure',
     lapseTitle: (n) => `You were away ${n} days`,
     lapseNeverTitle: (n) => `This goal has stood ${n} days without a single step`,
     lapseSub: 'It happens. The question is not why, but where you come back to.',
@@ -437,7 +325,7 @@ const T = {
     gridLabel: 'Last eight weeks', gridDone: 'a step happened', gridBlocked: 'said what got in the way',
     monthPrev: 'Previous month', monthNext: 'Next month',
     pickGoalTitle: 'Pick a goal on the left',
-    pickGoalSub: 'Everything about it lands here: why, pace, milestones, streak and journal.',
+    pickGoalSub: 'Everything about it lands here: why, pace, streak and journal.',
     emptyMonthNamed: (m) => `No goals for ${m}`,
     carriedFrom: (m) => `from ${m}`,
     horizonHintMonth: (m) => `This goal goes to ${m}.`,
@@ -624,9 +512,6 @@ function applyTranslations() {
   document.getElementById('addGoalCatBtn').setAttribute('aria-label', t('addCatAria'));
   document.getElementById('whyLabel').textContent = t('whyLabel');
   document.getElementById('goalWhyInput').placeholder = t('whyPlaceholder');
-  document.getElementById('milestonesLabel').textContent = t('milestonesLabel');
-  document.getElementById('addMilestoneBtn').textContent = t('addMilestoneBtn');
-  document.getElementById('breakdownBtnLabel').textContent = t('breakdownBtn');
   document.getElementById('deleteGoalBtn').textContent = t('deleteBtn');
   document.getElementById('goalSubmitBtn').textContent = t('saveBtn');
   document.getElementById('goalTitleInput').placeholder = t('titlePlaceholder');
@@ -645,7 +530,6 @@ function applyTranslations() {
   setAuthMode(authMode);
   if (document.getElementById('goalFormOverlay').classList.contains('show')) {
     renderCategoryPicker();
-    renderMilestonesEditor();
   }
   renderCurrentScreen();
 }
@@ -806,8 +690,6 @@ function horizonOf(goal) {
 let viewMonth = todayISO().slice(0, 7);
 let editingGoalId = null;
 let formCategory = 'other';
-let formMilestones = [];
-let formParentGoalId = null;
 let formHorizon = 'month';
 let pendingDeleteId = null;
 // Яка ціль у вечірньому підсумку зараз питає «що завадило».
@@ -864,16 +746,6 @@ function subscribeToGoals(uid) {
 }
 
 // ---- Обчислення (завжди похідні від живих даних, нічого не кешується) ----
-// Прогрес міряється віхами. Раніше поруч жило друге джерело — числова мета
-// («10 км»), — і воно було головним. Його більше немає: число, якщо воно
-// комусь потрібне, стоїть у самій назві цілі, а віхи лишаються тим, чим і
-// були, — кроками, про кожен з яких можна сказати «пройдено» або «ні».
-function progressOf(goal) {
-  const milestones = goal.milestones || [];
-  if (!milestones.length) return null;
-  const done = milestones.filter((m) => m.done).length;
-  return { done, total: milestones.length, pct: Math.round((done / milestones.length) * 100) };
-}
 // Серія, рятунок і вечірня черга живуть у goals/streak.js — тим самим
 // модулем користується AI-помічник на сервері. Правило «коли рятунок
 // доступний» мусить бути одне: інакше в чаті пишеться одне, а на сторінці
@@ -903,7 +775,6 @@ function computeBadges(list) {
   if (list.some((g) => computeStreak(g.checkins) >= 7)) badges.push('badge_streak7');
   if (list.filter((g) => g.status === 'done').length >= 1) badges.push('badge_firstDone');
   if (list.some((g) => (g.checkins || []).length >= 1)) badges.push('badge_firstStep');
-  if (list.some((g) => { const p = progressOf(g); return p && p.pct === 100; })) badges.push('badge_perfect');
   return badges;
 }
 
@@ -935,7 +806,7 @@ function renderCurrentScreen() {
       renderGoalDetail(goal);
       // На широкому екрані список нікуди не подівся й лишається живим: там
       // видно, яку саме ціль показує права колонка, і туди ж приїжджають
-      // зміни, зроблені в деталях (віха, серія, статус).
+      // зміни, зроблені в деталях (серія, статус).
       if (isSplitView()) renderDashboard();
       return;
     }
@@ -1038,7 +909,6 @@ function renderRetro() {
 }
 
 function goalCardHtml(goal) {
-  const prog = progressOf(goal);
   const streak = computeStreak(goal.checkins);
   const metaParts = [];
   if (streak > 0) metaParts.push(`<span class="goal-streak-flame">🔥 ${streak}</span>`);
@@ -1055,9 +925,6 @@ function goalCardHtml(goal) {
     if (sp && sp.days !== null) {
       metaParts.push(`<span class="goal-card-days">${escapeHtml(sp.days === 0 ? t('goalSpanSameDay') : t('goalSpanDays', sp.days))}</span>`);
     }
-  }
-  if (prog) {
-    metaParts.push(`<span>${prog.done}/${prog.total} ${escapeHtml(t('milestonesCountSuffix'))}</span>`);
   }
   // Ціль, перенесена з минулого місяця, має про це сказати: інакше липнева
   // серед серпневих виглядала б як щойно заведена.
@@ -1082,7 +949,6 @@ function goalCardHtml(goal) {
         </div>
         ${statusBadge}
       </div>
-      ${prog ? `<div class="goal-mini-progress"><div class="goal-mini-progress-fill" style="width:${prog.pct}%"></div></div>` : ''}
       ${metaParts.length ? `<div class="goal-card-meta">${metaParts.join('')}</div>` : ''}
     </div>`;
 }
@@ -1266,11 +1132,7 @@ function renderGoalDetail(goal) {
     ? `<div class="why-block">“${escapeHtml(goal.why)}”</div>` : '';
 
   renderLapseBanner(goal);
-  renderPaceBlock(goal);
-  renderMeasureBanner(goal);
-  renderChartBlock(goal);
 
-  renderJourney(goal);
   renderActionsBlock(goal.id);
 
   // Рятунок серії показуємо тільки тоді, коли є що рятувати: вчора
@@ -1302,60 +1164,9 @@ function renderGoalDetail(goal) {
   document.getElementById('streakToggleBtn').addEventListener('click', () => toggleTodayCheckin(goal.id));
 
   renderCheckinGrid(goal);
-  renderLadder(goal);
   renderBlockers(goal);
   renderPauseRow(goal);
   renderJournalList(goal);
-}
-
-// ---- Темп: чи встигаєш до дедлайну ----
-// Рахує goals/review.js — тут лише слова навколо його чисел. Головне рішення
-// модуля видно й тут: поки історії мало, показуємо чесне «даних замало», а не
-// прогноз упевненим тоном. Порада без підстав гірша за мовчання.
-function renderPaceBlock(goal) {
-  const el = document.getElementById('detailPaceBlock');
-  const p = Review.pace(goal, todayISO(), { startIso: createdIso(goal) });
-  if (!p) { el.innerHTML = ''; return; }
-
-  const VERDICT = { ahead: 'paceAhead', onTrack: 'paceOnTrack', behind: 'paceBehind',
-    overdue: 'paceOverdue', unknown: 'paceUnknown' };
-  const lines = [];
-
-  if (p.verdict === 'overdue') {
-    lines.push(t('paceLate', Math.abs(p.daysLeft)));
-  } else {
-    if (p.enough && p.projectedDate) {
-      lines.push(t('paceProjected', formatDateShort(p.projectedDate)));
-      if (p.diffDays > 0) lines.push(t('paceLate', p.diffDays));
-    } else {
-      lines.push(t('paceTimeVsWork', p.timePct, p.pct));
-    }
-    if (p.daysLeft >= 0) lines.push(t('paceDaysLeft', p.daysLeft));
-  }
-
-  el.innerHTML = `
-    <div class="pace ${p.verdict}">
-      <div class="pace-head"><span class="pace-dot"></span>${escapeHtml(t(VERDICT[p.verdict] || 'paceUnknown'))}</div>
-      <div class="pace-sub">${escapeHtml(lines.join(' · '))}</div>
-    </div>`;
-}
-
-// «Вивчити польську» без числа, без віх і без дати можна завести — і вона
-// висітиме роками, бо перевірити її нічим. Питаємо не одразу (ціль має право
-// побути безформною) і питаємо один раз, спокійно: тут не докір, а
-// пропущений крок постановки.
-function renderMeasureBanner(goal) {
-  const el = document.getElementById('detailMeasureBlock');
-  if (!el) return;
-  const need = Review.needsMeasure(goal, todayISO(), { startIso: createdIso(goal) });
-  if (!need) { el.innerHTML = ''; return; }
-  el.innerHTML = `
-    <div class="measure-banner">
-      <div class="measure-title">${escapeHtml(t('measureTitle'))}</div>
-      <div class="measure-sub">${escapeHtml(t('measureSub'))}</div>
-      <button type="button" id="measureFixBtn">${escapeHtml(t('measureBtn'))}</button>
-    </div>`;
-  document.getElementById('measureFixBtn').addEventListener('click', () => openGoalForm(goal));
 }
 
 // Сітка відміток. Серія показує лише ПОТОЧНИЙ ланцюг — і однаково виглядає
@@ -1431,116 +1242,19 @@ async function restartGoal(goalId) {
 }
 
 // Намір «якщо ситуація — то дія». Порожню половину зберігаємо як є: людина
-// ---- Графік прогресу ----
-// Темп КАЖЕ підсумок («не встигаєш»), а лінія ПОКАЗУЄ форму шляху: де був
-// ривок, де три тижні пусто, чи рухаюсь я саме зараз. Дані ті самі —
-// progressLog і дати віх, — просто досі ніхто не складав їх у лінію.
-//
-// Малюємо самі, без бібліотеки: це десяток точок і дві полілінії, а Chart.js
-// заради них тягнув би 200 КБ у модуль, який його більше ніде не використовує.
-const CHART_W = 300;
-const CHART_H = 78;
-
-function renderChartBlock(goal) {
-  const el = document.getElementById('detailChartBlock');
-  if (!el) return;
-  const series = Review.progressSeries(goal, todayISO(), { startIso: createdIso(goal) });
-  if (!series) { el.innerHTML = ''; return; }
-
-  const spanDays = Math.max(1, Streak.daysBetween(series.from, series.to));
-  // Верх шкали — мета, але перебір понад неї не має вилазити за рамку.
-  const top = Math.max(series.max || 0, series.current) || 1;
-  const x = (iso) => (Streak.daysBetween(series.from, iso) / spanDays) * CHART_W;
-  const y = (v) => CHART_H - (Math.max(0, Math.min(top, v)) / top) * CHART_H;
-
-  const pts = series.points.map((pt) => `${x(pt.date).toFixed(1)},${y(pt.value).toFixed(1)}`);
-  const line = pts.join(' ');
-  // Заливка під лінією: та сама ламана, замкнена по низу.
-  const area = `${x(series.from).toFixed(1)},${CHART_H} ${line} ${x(series.points.at(-1).date).toFixed(1)},${CHART_H}`;
-  const required = series.required
-    ? series.required.map((pt) => `${x(pt.date).toFixed(1)},${y(pt.value).toFixed(1)}`).join(' ')
-    : null;
-  const last = series.points.at(-1);
-
-  const nowLabel = `${series.current} / ${series.max}`;
-
-  el.innerHTML = `
-    <div class="chart">
-      <div class="chart-head">
-        <span class="chart-label">${escapeHtml(t('chartLabel'))}</span>
-        <span class="chart-now">${nowLabel}</span>
-      </div>
-      <svg viewBox="0 0 ${CHART_W} ${CHART_H}" preserveAspectRatio="none" role="img"
-           aria-label="${escapeHtml(t('chartLabel'))}">
-        <line class="chart-axis" x1="0" y1="${CHART_H}" x2="${CHART_W}" y2="${CHART_H}"/>
-        <polygon class="chart-area" points="${area}"/>
-        ${required ? `<polyline class="chart-required" points="${required}"/>` : ''}
-        <polyline class="chart-line" points="${line}"/>
-        <circle class="chart-dot" cx="${x(last.date).toFixed(1)}" cy="${y(last.value).toFixed(1)}" r="3"/>
-      </svg>
-      <div class="chart-foot">
-        <span>${escapeHtml(formatDateShort(series.from))}</span>
-        ${required ? `<span class="chart-legend"><i></i>${escapeHtml(t('chartRequired'))}</span>` : ''}
-        <span>${escapeHtml(formatDateShort(series.to))}</span>
-      </div>
-    </div>`;
-}
-
-// createdAt приходить із Firestore як Timestamp; темпу потрібен день, від
-// якого рахувати «скільки часу вже минуло». Якщо поля ще немає (щойно
-// створений документ до підтвердження сервером) — review.js сам візьме
-// найраніший слід у даних.
+// createdAt приходить із Firestore як Timestamp; тим, хто рахує вік цілі
+// (ретроспектива, довга перерва, місяць «свого» місяця), потрібен день, від
+// якого вести відлік. Якщо поля ще немає (щойно створений документ до
+// підтвердження сервером) — review.js сам візьме найраніший слід у даних.
 function createdIso(goal) {
   // Після перезапуску відлік цілі ведеться від нього, а не від заведення:
-  // саме в цьому й полягає «почати заново». Одна точка — і темп, і графік,
-  // і «нема чим міряти», і сама перерва рахуються від неї.
+  // саме в цьому й полягає «почати заново».
   if (goal && typeof goal.restartedAt === 'string' && goal.restartedAt.length === 10) {
     return goal.restartedAt;
   }
   const ts = goal && goal.createdAt;
   if (ts && typeof ts.toDate === 'function') return Streak.isoOf(ts.toDate());
   return null;
-}
-
-// ---- Драбина: місяць -> рік ----
-// Річна ціль показує, що на неї працює; місячна — кому вона служить. Обидва
-// боки клікабельні, бо звʼязок без переходу — це напис, а не звʼязок.
-//
-// Прогрес дитини рахуємо тим самим правилом, що й усюди (progressOf), а не
-// власним: два способи міряти той самий шлях розійшлися б.
-function renderLadder(goal) {
-  const parentEl = document.getElementById('detailParentBlock');
-  const childrenEl = document.getElementById('detailChildrenBlock');
-
-  const parent = goal.parentGoalId ? goals.find((g) => g.id === goal.parentGoalId) : null;
-  parentEl.innerHTML = parent
-    ? `<button type="button" class="parent-link" id="parentLinkBtn">
-         <span class="parent-link-arrow">↑</span>${escapeHtml(parent.title || '')}
-       </button>`
-    : '';
-  if (parent) {
-    document.getElementById('parentLinkBtn').addEventListener('click', () => showGoalDetail(parent.id));
-  }
-
-  // Діти є лише в річної цілі, і показуємо їх навіть закритими: закрита
-  // місячна ціль — це якраз доказ, що рік рухається.
-  const children = goals.filter((g) => g.parentGoalId === goal.id);
-  if (!children.length) { childrenEl.innerHTML = ''; return; }
-  childrenEl.innerHTML = `
-    <div class="children-block">
-      <div class="children-title">${escapeHtml(t('childrenTitle', children.length))}</div>
-      ${children.map((c) => {
-        const prog = progressOf(c);
-        const done = c.status === 'done';
-        return `<div class="child-row${done ? ' done' : ''}" data-child="${escapeHtml(c.id)}">
-          <span class="child-title">${escapeHtml(c.title || '')}</span>
-          <span class="child-pct">${done ? '✓' : (prog ? prog.pct + '%' : '')}</span>
-        </div>`;
-      }).join('')}
-    </div>`;
-  childrenEl.querySelectorAll('[data-child]').forEach((row) => {
-    row.addEventListener('click', () => showGoalDetail(row.dataset.child));
-  });
 }
 
 // ---- Що заважає найчастіше ----
@@ -1573,15 +1287,22 @@ function renderBlockers(goal) {
 // фільтр «Архів» лишився й далі показує складене туди раніше, тож кнопка
 // переїхала сюди — інакше застосунок умів би показувати архів, але не вмів
 // би нічого туди покласти.
+// «Виконано» стоїть тут, поруч із паузою й архівом, бо це така сама зміна
+// статусу. Раніше воно жило в банері «усі віхи пройдено» — тобто ціль без
+// віх завершити було нічим, хоч фільтр «Завершені» в застосунку є.
 function renderPauseRow(goal) {
   const el = document.getElementById('detailPauseRow');
   if (goal.status === 'done' || goal.status === 'archived') { el.innerHTML = ''; return; }
   const paused = goal.status === 'paused';
   el.innerHTML = `
     <div class="pause-row">
+      <button type="button" class="pause-btn primary" id="markDoneBtn">${escapeHtml(t('markGoalDoneBtn'))}</button>
       <button type="button" class="pause-btn" id="pauseToggleBtn">${escapeHtml(paused ? t('resumeBtn') : t('pauseBtn'))}</button>
       <button type="button" class="pause-btn" id="archiveGoalBtn">${escapeHtml(t('archiveBtn'))}</button>
     </div>`;
+  document.getElementById('markDoneBtn').addEventListener('click', () => {
+    setGoalStatus(goal.id, 'done');
+  });
   document.getElementById('pauseToggleBtn').addEventListener('click', () => {
     setGoalStatus(goal.id, paused ? 'active' : 'paused');
   });
@@ -1601,10 +1322,6 @@ function subscribeToActions(goalId) {
       goalActions = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
       if (currentScreen === 'detail' && activeDetailGoalId === goalId) {
         renderActionsBlock(goalId);
-        // Маршрут теж: кнопка «у завдання» на віхі показує, чи завдання вже
-        // є, а знає про це саме цей список.
-        const goal = goals.find((g) => g.id === goalId);
-        if (goal) renderJourney(goal);
       }
     }, (err) => console.error('actions:', err));
 }
@@ -1724,90 +1441,6 @@ async function markGoalCheckin(goalId) {
   }).catch((err) => console.error('markGoalCheckin:', err));
 }
 
-function journeyHtml(goal) {
-  const milestones = goal.milestones || [];
-  if (!milestones.length) {
-    return `<div class="empty-state" style="padding:24px 10px;"><div>${escapeHtml(t('noMilestonesYet'))}</div></div>`;
-  }
-  const nextIdx = milestones.findIndex((m) => !m.done);
-  const allDone = nextIdx === -1;
-  let html = '';
-  if (allDone && goal.status === 'active') {
-    html += `<div class="all-done-banner"><span>${escapeHtml(t('allMilestonesDoneMsg'))}</span><button type="button" id="markDoneBtn">${escapeHtml(t('markGoalDoneBtn'))}</button></div>`;
-  }
-  html += '<div class="journey" role="list">' + milestones.map((m, i) => {
-    const isNext = i === nextIdx;
-    const cls = ['journey-stop'];
-    if (m.done) cls.push('done');
-    if (isNext) cls.push('next');
-    return `
-      <div class="${cls.join(' ')}" role="listitem">
-        <button type="button" class="journey-node" data-toggle-milestone="${m.id}" aria-label="toggle">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
-        </button>
-        <div class="journey-label">${escapeHtml(m.title)}${isNext ? `<span class="journey-next-badge">${escapeHtml(t('nextStopBadge'))}</span>` : ''}${milestoneDueHtml(m)}</div>
-        ${milestoneTaskBtnHtml(m)}
-      </div>`;
-  }).join('') + '</div>';
-  return html;
-}
-// Дата віхи, якщо вона є. Прострочену показуємо окремим кольором: це те
-// саме, що застосунок робить із дедлайном цілі, тільки на крок нижче —
-// «мала бути три тижні тому» помітно конкретніше за просто невиконаний пункт.
-// У вже пройденій віхі дата ні до чого: там питання закрите.
-function milestoneDueHtml(m) {
-  if (!m || m.done || !m.date) return '';
-  const left = Streak.daysBetween(todayISO(), m.date);
-  const overdue = left < 0;
-  const text = overdue ? t('milestoneOverdue', Math.abs(left)) : t('milestoneDue', formatDateShort(m.date));
-  return `<span class="journey-due${overdue ? ' overdue' : ''}">${escapeHtml(text)}</span>`;
-}
-
-function renderJourney(goal) {
-  document.getElementById('detailJourneyBlock').innerHTML = journeyHtml(goal);
-  wireJourneyEvents(goal);
-}
-
-// Віха — це те, що треба зробити, але зробити її можна тільки «колись»:
-// підсвічена «наступна зупинка» ні до чого не веде. Кнопка переносить її в
-// завдання на дату самої віхи, і крок нарешті потрапляє туди, куди людина
-// дивиться щодня.
-//
-// Завдання вже створене впізнаємо за назвою: у віхи немає власного id
-// всередині завдання, а заводити ще одне поле заради кнопки — забагато.
-// Збіг назв усередині однієї цілі означає, що це та сама справа.
-function milestoneTask(m) {
-  if (!m || !m.title) return null;
-  return goalActions.find((a) => a && !a.done && a.title === m.title) || null;
-}
-
-function milestoneTaskBtnHtml(m) {
-  if (!m || m.done) return '';
-  const existing = milestoneTask(m);
-  if (existing) {
-    return `<span class="journey-task-mark" title="${escapeHtml(t('milestoneInTasks'))}">${escapeHtml(t('milestoneInTasks'))}</span>`;
-  }
-  return `<button type="button" class="journey-task-btn" data-milestone-task="${m.id}">${escapeHtml(t('milestoneToTask'))}</button>`;
-}
-
-function wireJourneyEvents(goal) {
-  const block = document.getElementById('detailJourneyBlock');
-  block.querySelectorAll('[data-toggle-milestone]').forEach((btn) => {
-    btn.addEventListener('click', () => toggleMilestone(goal.id, btn.dataset.toggleMilestone));
-  });
-  block.querySelectorAll('[data-milestone-task]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const m = (goal.milestones || []).find((x) => x.id === btn.dataset.milestoneTask);
-      if (!m || milestoneTask(m)) return;
-      // Дата віхи — це план, і саме на неї завдання й ставимо. Без дати
-      // ставимо на сьогодні: завдання без дати нікуди не спливе.
-      addAction(goal.id, m.title, m.date || todayISO());
-    });
-  });
-  const markDoneBtn = document.getElementById('markDoneBtn');
-  if (markDoneBtn) markDoneBtn.addEventListener('click', () => setGoalStatus(goal.id, 'done'));
-}
-
 function renderJournalList(goal) {
   const entries = [...(goal.journal || [])].sort((a, b) => b.createdAt - a.createdAt);
   const el = document.getElementById('journalList');
@@ -1858,25 +1491,6 @@ async function logBlocker(goalId, reason) {
   await db.collection('users').doc(auth.currentUser.uid).collection('goals').doc(goalId).update({
     blockers: result.blockers, updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
   }).catch((err) => console.error('logBlocker:', err));
-}
-
-async function toggleMilestone(goalId, milestoneId) {
-  const goal = goals.find((g) => g.id === goalId);
-  if (!goal || !auth.currentUser) return;
-  // doneAt — день, коли віху реально закрили. Без нього тижневий огляд не
-  // може сказати «цього тижня зроблено дві віхи»: у самій віхі стоїть лише
-  // done, і вчорашня галочка не відрізняється від торішньої.
-  const next = (goal.milestones || []).map((m) => {
-    if (m.id !== milestoneId) return m;
-    const done = !m.done;
-    const updated = { ...m, done };
-    if (done) updated.doneAt = todayISO();
-    else delete updated.doneAt;
-    return updated;
-  });
-  await db.collection('users').doc(auth.currentUser.uid).collection('goals').doc(goalId).update({
-    milestones: next, updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-  }).catch((err) => console.error('toggleMilestone:', err));
 }
 
 async function toggleTodayCheckin(goalId) {
@@ -1942,47 +1556,7 @@ function renderHorizonPicker() {
   picker.querySelectorAll('[data-horizon]').forEach((btn) => {
     btn.addEventListener('click', () => {
       formHorizon = btn.dataset.horizon;
-      // Річна ціль нікому не служить — звʼязок при перемиканні знімається,
-      // інакше він тихо лишився б у записі й спливав при поверненні назад.
-      if (formHorizon !== 'month') formParentGoalId = null;
       renderHorizonPicker();
-      renderParentPicker();
-    });
-  });
-}
-
-// Драбина: рік — напрямок, місяці — кроки до нього. Без цього поля дві
-// вкладки лишались просто двома списками, які нічого одне про одного не знають.
-//
-// Пікер показуємо тільки на МІСЯЧНІЙ цілі: підпорядковувати річну ціль комусь
-// ні до чого, а вибір «служить самій собі» був би безглуздим.
-function renderParentPicker() {
-  const block = document.getElementById('parentBlock');
-  if (formHorizon !== 'month') { block.style.display = 'none'; return; }
-
-  const candidates = goals.filter((g) =>
-    horizonOf(g) === 'year' && (g.status === 'active' || g.status === 'paused') && g.id !== editingGoalId);
-  if (!candidates.length) {
-    // Річних цілей ще немає — не показуємо порожній вибір, а пояснюємо, чому.
-    block.style.display = 'block';
-    document.getElementById('parentLabel').textContent = t('parentLabel');
-    document.getElementById('parentPicker').innerHTML = '';
-    document.getElementById('parentHint').textContent = t('parentEmpty');
-    return;
-  }
-
-  block.style.display = 'block';
-  document.getElementById('parentLabel').textContent = t('parentLabel');
-  document.getElementById('parentHint').textContent = t('parentHint');
-  const options = [[null, t('parentNone')]].concat(candidates.map((g) => [g.id, g.title || '']));
-  const picker = document.getElementById('parentPicker');
-  picker.innerHTML = options.map(([id, label]) =>
-    `<button type="button" class="choice${formParentGoalId === id ? ' selected' : ''}" data-parent="${id === null ? '' : escapeHtml(id)}">${escapeHtml(label)}</button>`
-  ).join('');
-  picker.querySelectorAll('[data-parent]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      formParentGoalId = btn.dataset.parent || null;
-      renderParentPicker();
     });
   });
 }
@@ -2162,188 +1736,6 @@ function closeCatManage() {
   document.getElementById('catManageOverlay').classList.remove('show');
 }
 
-function renderMilestonesEditor() {
-  const el = document.getElementById('milestonesEditor');
-  el.innerHTML = formMilestones.map((m, i) => `
-    <div class="milestone-editor-row" data-idx="${i}" data-mid="${escapeHtml(m.id)}">
-      <button type="button" class="milestone-drag" data-drag-milestone="${escapeHtml(m.id)}"
-        aria-label="${escapeHtml(t('milestoneReorderAria'))}" title="${escapeHtml(t('milestoneReorderAria'))}">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 8h16M4 16h16"/></svg>
-      </button>
-      <div class="milestone-fields">
-        <input type="text" data-milestone-title="${i}" value="${escapeHtml(m.title)}" placeholder="${escapeHtml(t('milestonePlaceholder'))}" maxlength="200">
-        <input type="date" class="milestone-date" data-milestone-date="${i}" value="${escapeHtml(m.date || '')}" title="${escapeHtml(t('milestoneDateLabel'))}">
-      </div>
-      <button type="button" class="milestone-remove-btn" data-remove-milestone="${i}" aria-label="remove">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
-      </button>
-    </div>`).join('');
-  el.querySelectorAll('[data-milestone-title]').forEach((input) => {
-    input.addEventListener('input', () => {
-      const idx = Number(input.dataset.milestoneTitle);
-      if (formMilestones[idx]) formMilestones[idx].title = input.value;
-    });
-  });
-  // Дата віхи необовʼязкова. Коли вона є, віха перестає бути просто галочкою
-  // й починає годувати темп: «мала бути три тижні тому» — це вже відповідь
-  // на «чи встигаю», а не просто невиконаний пункт.
-  el.querySelectorAll('[data-milestone-date]').forEach((input) => {
-    input.addEventListener('change', () => {
-      const idx = Number(input.dataset.milestoneDate);
-      if (formMilestones[idx]) formMilestones[idx].date = input.value || '';
-    });
-  });
-  el.querySelectorAll('[data-remove-milestone]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const idx = Number(btn.dataset.removeMilestone);
-      formMilestones.splice(idx, 1);
-      renderMilestonesEditor();
-    });
-  });
-  attachMilestoneDrag(el);
-}
-
-// ---- Порядок віх: перетягування ----
-// Віхи — це кроки в тому порядку, у якому їх робитимуть, і переставити їх
-// хочеться саме тоді, коли список уже набраний. Підхід той самий, що й із
-// вправами у workout/app.js: pointer events (HTML5 drag-and-drop на тач-екранах
-// не працює), під час жесту нічого не перемальовується — рядок ведемо
-// transform'ом, сусідні зсуваємо, а масив переставляємо один раз на
-// відпусканні. Перемальовування на кожен рух гасило б фокус у полях.
-const MS_ROW_GAP = 8;
-let msDrag = null;
-
-function beginMilestoneDrag(e, handle) {
-  if (msDrag) return;
-  const host = document.getElementById('milestonesEditor');
-  const rows = [...host.querySelectorAll('.milestone-editor-row')];
-  const rowEl = handle.closest('.milestone-editor-row');
-  const from = rows.indexOf(rowEl);
-  if (from < 0 || rows.length < 2) return;
-
-  e.preventDefault();
-  msDrag = {
-    pointerId: e.pointerId, rows,
-    rects: rows.map((r) => r.getBoundingClientRect()),
-    from, to: from, startY: e.clientY,
-  };
-  rowEl.classList.add('dragging');
-  handle.setPointerCapture(e.pointerId);
-}
-
-function moveMilestoneDrag(e) {
-  if (!msDrag || e.pointerId !== msDrag.pointerId) return;
-  const { rows, rects, from } = msDrag;
-  const dy = e.clientY - msDrag.startY;
-  rows[from].style.transform = `translateY(${dy}px)`;
-
-  const center = rects[from].top + rects[from].height / 2 + dy;
-  let to = from;
-  rects.forEach((r, i) => {
-    if (i === from) return;
-    const mid = r.top + r.height / 2;
-    if (i > from && center > mid) to = Math.max(to, i);
-    if (i < from && center < mid) to = Math.min(to, i);
-  });
-  msDrag.to = to;
-
-  const shift = rects[from].height + MS_ROW_GAP;
-  rows.forEach((r, i) => {
-    if (i === from) return;
-    let offset = 0;
-    if (from < i && i <= to) offset = -shift;
-    else if (from > i && i >= to) offset = shift;
-    r.style.transform = offset ? `translateY(${offset}px)` : '';
-  });
-}
-
-function endMilestoneDrag(e) {
-  if (!msDrag || (e && e.pointerId !== msDrag.pointerId)) return;
-  const { from, to } = msDrag;
-  msDrag = null;
-  if (from !== to) formMilestones.splice(to, 0, formMilestones.splice(from, 1)[0]);
-  // Перемальовуємо в будь-якому разі — це заразом прибирає transform'и,
-  // класи й перенумеровує індекси в data-атрибутах.
-  renderMilestonesEditor();
-}
-
-function attachMilestoneDrag(root) {
-  root.querySelectorAll('[data-drag-milestone]').forEach((handle) => {
-    handle.addEventListener('pointerdown', (e) => beginMilestoneDrag(e, handle));
-    handle.addEventListener('pointermove', moveMilestoneDrag);
-    handle.addEventListener('pointerup', endMilestoneDrag);
-    // Скасований жест (системний свайп, вхідний дзвінок) має лишити список
-    // таким, як був, а не завмерти на півдорозі.
-    handle.addEventListener('pointercancel', endMilestoneDrag);
-    // З клавіатури те саме: на компʼютері швидше за мишу, а для доступності —
-    // єдиний спосіб узагалі.
-    handle.addEventListener('keydown', (e) => {
-      if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
-      e.preventDefault();
-      const id = handle.dataset.dragMilestone;
-      const from = formMilestones.findIndex((m) => m.id === id);
-      const to = from + (e.key === 'ArrowUp' ? -1 : 1);
-      if (from < 0 || to < 0 || to >= formMilestones.length) return;
-      formMilestones.splice(to, 0, formMilestones.splice(from, 1)[0]);
-      renderMilestonesEditor();
-      const next = document.querySelector(`[data-drag-milestone="${id}"]`);
-      if (next) next.focus();
-    });
-  });
-}
-// ---- Розбиття цілі на віхи ----
-// Віхи ДОДАЮТЬСЯ до вже написаних, а не замінюють їх: людина могла почати
-// сама, і стерти її текст підказкою було б грубо. Дублі відсіюємо за назвою.
-document.getElementById('breakdownBtn').addEventListener('click', async () => {
-  const btn = document.getElementById('breakdownBtn');
-  const label = document.getElementById('breakdownBtnLabel');
-  const errorEl = document.getElementById('goalFormError');
-  const noteEl = document.getElementById('breakdownNote');
-  const title = goalTitleValue();
-  if (!title) { errorEl.textContent = t('breakdownNoTitle'); return; }
-
-  btn.disabled = true;
-  label.textContent = t('breakdownWorking');
-  errorEl.textContent = '';
-  noteEl.textContent = '';
-  try {
-    const res = await firebase.functions().httpsCallable('goalBreakdown')({
-      title,
-      category: formCategory,
-      why: document.getElementById('goalWhyInput').value.trim(),
-      // Дедлайн той самий, що ціль отримає при збереженні: кінець її місяця.
-      targetDate: Review.deadlineForMonth(
-        formHorizon === 'month' ? (existingMonthKey() || viewMonth) : null) || '',
-    });
-    const have = new Set(formMilestones.map((m) => (m.title || '').trim().toLowerCase()));
-    (res.data.milestones || []).forEach((mTitle) => {
-      const clean = (mTitle || '').trim();
-      if (!clean || have.has(clean.toLowerCase())) return;
-      have.add(clean.toLowerCase());
-      formMilestones.push({ id: uid4(), title: clean, done: false });
-    });
-    formMilestones = formMilestones.slice(0, 50);
-    renderMilestonesEditor();
-    noteEl.textContent = res.data.note || '';
-  } catch (err) {
-    console.error('goalBreakdown:', err);
-    // Показуємо текст із сервера лише там, де він написаний для людини.
-    // На мережевій помилці прилетіло б технічне «internal» — краще своє.
-    const spoken = ['invalid-argument', 'resource-exhausted', 'unavailable'];
-    errorEl.textContent = err && spoken.includes(err.code) && err.message ? err.message : t('breakdownError');
-  } finally {
-    btn.disabled = false;
-    label.textContent = t('breakdownBtn');
-  }
-});
-
-document.getElementById('addMilestoneBtn').addEventListener('click', () => {
-  formMilestones.push({ id: uid4(), title: '', done: false });
-  renderMilestonesEditor();
-  const inputs = document.querySelectorAll('[data-milestone-title]');
-  if (inputs.length) inputs[inputs.length - 1].focus();
-});
-
 // ---- Поля, що ростуть під текст ----
 // Назва цілі й «навіщо тобі це» — textarea, і сама вона рости не вміє:
 // лишається заввишки rows і ховає решту за власною смугою гортання. Обидва
@@ -2395,16 +1787,11 @@ function openGoalForm(existingGoal) {
   // показувала б невибраний рядок, а зберігала б щось третє.
   const wantCategory = existingGoal ? existingGoal.category : fallbackCategoryId();
   formCategory = findGoalCategory(wantCategory) ? wantCategory : fallbackCategoryId();
-  formMilestones = existingGoal ? (existingGoal.milestones || []).map((m) => ({ ...m })) : [];
   // Нова ціль народжується на тій вкладці, з якої її заводять: людина щойно
   // дивилась на місяць — значить, і думає про місяць.
   formHorizon = existingGoal ? horizonOf(existingGoal) : horizon;
-  formParentGoalId = existingGoal ? existingGoal.parentGoalId || null : null;
   renderHorizonPicker();
-  renderParentPicker();
   renderCategoryPicker();
-  renderMilestonesEditor();
-  document.getElementById('breakdownNote').textContent = '';
   goalGuard.arm();
   document.getElementById('goalFormOverlay').classList.add('show');
   // Саме після show: у схованому вікні scrollHeight дорівнює нулю, і поля
@@ -2414,7 +1801,7 @@ function openGoalForm(existingGoal) {
 }
 
 // ---- Незбережені зміни ----
-// Ціль описують довго: навіщо вона, віхи (а їх ще й AI підказує).
+// Ціль описують довго: назва й «навіщо» пишуться абзацами.
 // Спільна логіка — в ../unsaved-guard.js.
 const goalGuard = UnsavedGuard.create({
   overlay: 'goalFormOverlay',
@@ -2422,9 +1809,7 @@ const goalGuard = UnsavedGuard.create({
     title: goalTitleValue(),
     why: document.getElementById('goalWhyInput').value.trim(),
     horizon: formHorizon,
-    parentGoalId: formParentGoalId,
     category: formCategory,
-    milestones: formMilestones.map((m) => [(m.title || '').trim(), !!m.done]),
   }),
   save: () => saveGoalForm(),
   texts: () => ({
@@ -2480,18 +1865,6 @@ async function saveGoalForm() {
   const uidCur = auth.currentUser && auth.currentUser.uid;
   if (!uidCur) return;
 
-  const cleanMilestones = formMilestones
-    // date (план) і doneAt (факт) переносимо як є: форма їх не редагує
-    // напряму — інакше редагування назви стирало б і те, й те.
-    .map((m) => {
-      const out = { id: m.id, title: (m.title || '').trim(), done: !!m.done };
-      if (m.date) out.date = m.date;
-      if (m.doneAt) out.doneAt = m.doneAt;
-      return out;
-    })
-    .filter((m) => m.title)
-    .slice(0, 50);
-
   const month = formHorizon === 'month' ? (existingMonthKey() || viewMonth) : null;
 
   const payload = {
@@ -2507,8 +1880,13 @@ async function saveGoalForm() {
     // Місяць ціль отримує той, який зараз дивляться, — це й написано у формі.
     // Наявній місячній цілі свій місяць лишаємо: правка не має її переносити.
     month,
-    parentGoalId: formHorizon === 'month' ? formParentGoalId || null : null,
-    milestones: cleanMilestones,
+    // СПАДЩИНА. Віх у застосунку більше немає, але правила Firestore досі
+    // вимагають це поле в кожній цілі, тож воно пишеться далі — і пишеться
+    // тим, що вже лежить у документі: правка назви не має стирати те, що
+    // людина колись записала.
+    milestones: (editingGoalId
+      ? (goals.find((g) => g.id === editingGoalId) || {}).milestones
+      : null) || [],
     updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
   };
 

@@ -262,7 +262,6 @@ describe('goalsDigest: що сказати про цілі ввечері', () =
   test('порожній список нічого не вигадує', () => {
     expect(S.goalsDigest([], '2026-08-26')).toEqual({
       pending: 0, streak: 0, streakTitle: null, deadline: null, deadlineTitle: null,
-      milestone: null,
     });
   });
 });
@@ -337,7 +336,7 @@ describe('trainingGoals — куди зарахувати тренування',
 describe('deadlineWarnDays — «ось-ось» у кожної цілі своє', () => {
   const TODAY = '2026-08-27';
   const g = (start, target) => ({
-    status: 'active', targetDate: target, checkins: [], milestones: [],
+    status: 'active', targetDate: target, checkins: [],
     __start: start,
   });
   const opts = { startIsoOf: (x) => x.__start };
@@ -382,7 +381,7 @@ describe('goalsDigest: поріг дедлайну масштабується', 
     // Ціль на 8 місяців: поріг 24 дні, до дедлайну 20.
     const d = S.goalsDigest([{
       title: 'Вивчити польську', status: 'active', start: '2026-01-01',
-      targetDate: '2026-09-16', checkins: [], milestones: [],
+      targetDate: '2026-09-16', checkins: [],
     }], TODAY, opts);
     expect(d.deadlineTitle).toBe('Вивчити польську');
     expect(d.deadline).toBe(20);
@@ -391,54 +390,9 @@ describe('goalsDigest: поріг дедлайну масштабується', 
   test('коротка ціль за 20 днів ще мовчить — там це не терміново', () => {
     const d = S.goalsDigest([{
       title: 'Здати звіт', status: 'active', start: '2026-08-20',
-      targetDate: '2026-09-16', checkins: [], milestones: [],
+      targetDate: '2026-09-16', checkins: [],
     }], TODAY, opts);
     expect(d.deadline).toBeNull();
-  });
-});
-
-describe('milestoneAlert — прострочена віха теж момент', () => {
-  const TODAY = '2026-08-27';
-  const goal = (milestones, over = {}) => ({
-    title: 'Пробігти 100 км', status: 'active', checkins: [], milestones, ...over,
-  });
-
-  test('прострочена віха знаходиться, з назвою цілі', () => {
-    const a = S.milestoneAlert([goal([{ id: 'm1', title: 'Перші 10 км', done: false, date: '2026-08-20' }])], TODAY);
-    expect(a.title).toBe('Перші 10 км');
-    expect(a.goalTitle).toBe('Пробігти 100 км');
-    expect(a.days).toBe(-7);
-  });
-
-  test('віха на сьогодні теж сигнал', () => {
-    const a = S.milestoneAlert([goal([{ id: 'm1', title: 'Сьогодні', done: false, date: TODAY }])], TODAY);
-    expect(a.days).toBe(0);
-  });
-
-  test('віха попереду — це ще не сигнал, а шум', () => {
-    expect(S.milestoneAlert([goal([{ id: 'm1', title: 'Потім', done: false, date: '2026-09-10' }])], TODAY)).toBeNull();
-  });
-
-  test('виконану віху не згадуємо', () => {
-    expect(S.milestoneAlert([goal([{ id: 'm1', title: 'a', done: true, date: '2026-08-01' }])], TODAY)).toBeNull();
-  });
-
-  test('віха без дати сигналом бути не може — строку немає', () => {
-    expect(S.milestoneAlert([goal([{ id: 'm1', title: 'a', done: false }])], TODAY)).toBeNull();
-  });
-
-  test('пауза й архів мовчать', () => {
-    const ms = [{ id: 'm1', title: 'a', done: false, date: '2026-08-01' }];
-    expect(S.milestoneAlert([goal(ms, { status: 'paused' })], TODAY)).toBeNull();
-    expect(S.milestoneAlert([goal(ms, { status: 'archived' })], TODAY)).toBeNull();
-  });
-
-  test('з кількох береться найпростроченіша', () => {
-    const a = S.milestoneAlert([goal([
-      { id: 'm1', title: 'Пізніша', done: false, date: '2026-08-25' },
-      { id: 'm2', title: 'Найдавніша', done: false, date: '2026-07-01' },
-    ])], TODAY);
-    expect(a.title).toBe('Найдавніша');
   });
 });
 

@@ -20,23 +20,10 @@
   // цілі губиться в середньому; коротше — кожен вихідний виглядає застоєм.
   var REVIEW_PERIOD_DAYS = 7;
 
-  // Скільки днів історії треба, щоб узагалі говорити про темп. Два записи за
-  // три дні — це не темп, це збіг; прогноз на них збрехав би впевненим тоном.
-  var MIN_HISTORY_DAYS = 7;
-
   // Скільки днів мовчання роблять паузу «перервою», а не звичайним
   // пропуском. Два тижні: тиждень без кроку буває в кожної живої цілі, а от
   // три — це вже не збій ритму, це вихід із нього.
   var LAPSE_DAYS = 14;
-
-  // Скільки днів ціль має право побути безформною. Питати одразу — це
-  // допит на порозі; не питати ніколи — лишити список бажань замість цілей.
-  var MEASURE_GRACE_DAYS = 7;
-
-  // Наскільки прогрес може відставати від часу, і це ще «в графіку». Рівно
-  // нуль означав би, що будь-який день відпочинку робить людину боржником.
-  var BEHIND_GAP_PCT = 15;
-  var AHEAD_GAP_PCT = 10;
 
   // Арифметика дат живе в streak.js — другої копії «що таке локальний день»
   // у проєкті бути не повинно. У браузері модуль уже в window, у Jest
@@ -47,14 +34,6 @@
       try { api = require('./streak.js'); } catch (err) { api = null; }
     }
     return api;
-  }
-
-  function num(v) {
-    var n = Number(v);
-    return Number.isFinite(n) ? n : 0;
-  }
-  function clampPct(n) {
-    return Math.max(0, Math.min(100, Math.round(n)));
   }
 
   /**
@@ -110,102 +89,8 @@
     ((goal && goal.checkins) || []).forEach(function (d) {
       if (typeof d === 'string') dates.push(d);
     });
-    ((goal && goal.milestones) || []).forEach(function (m) {
-      if (m && m.done && typeof m.doneAt === 'string') dates.push(m.doneAt);
-    });
     dates.sort();
     return dates.length ? dates[dates.length - 1] : null;
-  }
-
-  /** Прогрес цілі у відсотках плюс сирі числа. Дзеркалить progressOf зі
-   *  сторінки. Міряється віхами: числової мети в застосунку більше немає —
-   *  число, якщо воно комусь потрібне, живе в самій назві цілі. */
-  function progressPct(goal) {
-    var milestones = (goal && goal.milestones) || [];
-    if (!milestones.length) return null;
-    var done = milestones.filter(function (m) { return m && m.done; }).length;
-    return {
-      pct: clampPct((done / milestones.length) * 100),
-      done: done,
-      total: milestones.length,
-      remaining: milestones.length - done,
-    };
-  }
-
-  /**
-   * Чи встигаєш до дедлайну.
-   *
-   * Повертає null, коли говорити нема про що: немає дедлайну (тоді темп ні з
-   * чим порівнювати), ціль уже закрита або в архіві, або в ній немає жодного
-   * способу міряти прогрес.
-   *
-   * `verdict` навмисно окремо від чисел: сторінці треба слово, а помічнику —
-   * цифри, і хай обидва беруть їх звідси, а не рахують самі.
-   *
-   * @param {Object} goal
-   * @param {string} todayIso
-   * @param {{startIso?: string}} [opts] коли ціль заведено (createdAt); без
-   *   нього беремо найраніший слід у самих даних
-   */
-  function pace(goal, todayIso, opts) {
-    if (!goal || !goal.targetDate) return null;
-    if (goal.status === 'done' || goal.status === 'archived') return null;
-
-    var S = streak();
-    if (!S) return null;
-
-    var prog = progressPct(goal);
-    if (!prog) return null;
-
-    var daysLeft = S.daysBetween(todayIso, goal.targetDate);
-    var startIso = (opts && opts.startIso) || earliestSignal(goal) || todayIso;
-    // Дедлайн у минулому або старт пізніше за дедлайн — ділити нема на що.
-    var totalDays = Math.max(1, S.daysBetween(startIso, goal.targetDate));
-    var elapsed = Math.max(0, S.daysBetween(startIso, todayIso));
-    var timePct = clampPct((elapsed / totalDays) * 100);
-
-    var out = {
-      pct: prog.pct,
-      timePct: timePct,
-      daysLeft: daysLeft,
-      overdue: daysLeft < 0,
-      // «Є прогноз із конкретною датою». Такий прогноз давала лише числова
-      // мета — по журналу «скільки на день»; без неї дати взяти нізвідки, тож
-      // поле лишається завжди false, а висновок несе verdict.
-      enough: false,
-      projectedDate: null,
-      diffDays: null,
-      verdict: 'unknown',
-    };
-
-    // Прострочене — це вже не прогноз, а факт. Прогнозувати тут означало б
-    // ховати головне за арифметикою.
-    if (daysLeft < 0 && prog.pct < 100) {
-      out.verdict = 'overdue';
-      return out;
-    }
-    if (prog.pct >= 100) {
-      out.verdict = 'ahead';
-      return out;
-    }
-
-    // Порівнюємо частку пройденого шляху з часткою витраченого часу. Раніше
-    // поруч жив другий, точніший шлях — по журналу числового прогресу, з
-    // прогнозом конкретної дати. Числової мети більше немає, а з нею пішов і
-    // він: лишився цей, який не потребує ЖОДНИХ додаткових даних.
-    //
-    // Але не з першого дня: у щойно заведеної цілі часу минуло 0%, і будь-яка
-    // закрита віха читалась би як «випереджаєш графік». Це той самий поріг, що
-    // й для числового темпу, — поки історії мало, застосунок мовчить.
-    if (elapsed < MIN_HISTORY_DAYS) return out;
-
-    // enough лишається false: воно означає рівно «є прогноз із датою», а
-    // запасний шлях дати не дає — він порівнює частки. Висновок несе verdict.
-    var gap = timePct - prog.pct;
-    if (gap > BEHIND_GAP_PCT) out.verdict = 'behind';
-    else if (gap < -AHEAD_GAP_PCT) out.verdict = 'ahead';
-    else out.verdict = 'onTrack';
-    return out;
   }
 
   /**
@@ -223,10 +108,6 @@
       return typeof d === 'string' && d >= from && d <= todayIso;
     }).length;
 
-    var milestonesDone = ((goal && goal.milestones) || []).filter(function (m) {
-      return m && m.done && typeof m.doneAt === 'string' && m.doneAt >= from && m.doneAt <= todayIso;
-    }).length;
-
     // Записи щоденника мають createdAt у мілісекундах (serverTimestamp
     // усередині елемента масиву Firestore заборонений), тож день доводиться
     // діставати з Date, а не порівнювати рядки.
@@ -239,9 +120,8 @@
     return {
       from: from,
       checkins: checkins,
-      milestonesDone: milestonesDone,
       journal: journal,
-      moved: checkins > 0 || milestonesDone > 0,
+      moved: checkins > 0,
     };
   }
 
@@ -315,9 +195,6 @@
     (goal.progressLog || []).forEach(function (e) {
       if (e && typeof e.date === 'string') marks.push(e.date);
     });
-    (goal.milestones || []).forEach(function (m) {
-      if (m && m.done && typeof m.doneAt === 'string') marks.push(m.doneAt);
-    });
     (goal.blockers || []).forEach(function (b) {
       if (b && typeof b.date === 'string') marks.push(b.date);
     });
@@ -341,115 +218,6 @@
     var days = S.daysBetween(from, todayIso);
     if (days < LAPSE_DAYS) return null;
     return { days: days, lastIso: last, everMoved: last !== null };
-  }
-
-  /**
-   * Ціль, у якій немає жодного способу зрозуміти, що ти дійшов.
-   *
-   * «Вивчити польську» без числа, без віх і без дати можна завести — і вона
-   * висітиме роками, бо перевірити її нічим: progressPct поверне null, темп
-   * теж, і застосунок промовчить назавжди. Це рівно та межа, що відділяє
-   * список бажань від цілей.
-   *
-   * Мовчимо перші MEASURE_GRACE_DAYS днів: ціль має право побути безформною,
-   * поки думка не вляглась. Мовчимо й про паузу — пауза саме тим і є, що про
-   * ціль свідомо не питають.
-   *
-   * @param {Object} goal
-   * @param {string} todayIso
-   * @param {{startIso?: string}} [opts] день заведення цілі (createdAt)
-   */
-  function needsMeasure(goal, todayIso, opts) {
-    if (!goal || goal.status !== 'active') return null;
-    // Є число або є віхи — міряти вже є чим, питання зняте.
-    if (progressPct(goal)) return null;
-    var S = streak();
-    if (!S) return null;
-    var startIso = (opts && opts.startIso) || earliestSignal(goal);
-    // Невідомо, коли ціль завели, — тоді невідомо й чи настав час питати.
-    if (!startIso) return null;
-    var age = S.daysBetween(startIso, todayIso);
-    if (age < MEASURE_GRACE_DAYS) return null;
-    return { daysOld: age, hasDeadline: !!goal.targetDate };
-  }
-
-
-  /**
-   * Ряд накопиченого прогресу — щоб шлях було ВИДНО, а не лише названо.
-   *
-   * Темп уже каже «не встигаєш», але не каже, ЯКИЙ шлях був: де ривок, де три
-   * тижні пусто, чи прискорився я саме зараз. Усе це вже лежить у
-   * датах закритих віх — бракувало тільки того, хто складе це в лінію.
-   *
-   * `required` — де прогрес мав би бути, щоб устигнути рівним темпом. Це не
-   * докір, а система координат: без неї сама по собі зростаюча крива нічого
-   * не каже.
-   *
-   * Повертає null, коли малювати нема чого: менше двох різних днів у
-   * історії — це не лінія, а крапка, і графік із неї збрехав би формою.
-   *
-   * @param {Object} goal
-   * @param {string} todayIso
-   * @param {{startIso?: string}} [opts] день заведення цілі (createdAt)
-   */
-  function progressSeries(goal, todayIso, opts) {
-    var S = streak();
-    if (!S) return null;
-    var prog = progressPct(goal);
-    if (!prog) return null;
-
-    var startIso = (opts && opts.startIso) || earliestSignal(goal);
-    var byDay = {};
-
-    ((goal && goal.milestones) || []).forEach(function (m) {
-      if (!m || !m.done || typeof m.doneAt !== 'string' || m.doneAt > todayIso) return;
-      byDay[m.doneAt] = (byDay[m.doneAt] || 0) + 1;
-    });
-
-    var days = Object.keys(byDay).sort();
-    if (!days.length) return null;
-
-    // Віхи рахуються від нуля: закрита віха — це подія з датою, і нічого
-    // «набраного до журналу» тут не буває.
-    var baseline = 0;
-
-    var from = startIso && startIso < days[0] ? startIso : days[0];
-    var points = [{ date: from, value: baseline }];
-    var running = baseline;
-    days.forEach(function (d) {
-      running = Math.round((running + byDay[d]) * 100) / 100;
-      points.push({ date: d, value: running });
-    });
-    // Сьогоднішня крапка, якщо останній рух був раніше: інакше лінія
-    // обривається на минулому тижні й мовчить про паузу, яка триває.
-    if (points[points.length - 1].date < todayIso) {
-      points.push({ date: todayIso, value: running });
-    }
-
-    // Одна крапка — це не лінія. Двічі той самий день теж: форми немає.
-    var distinct = {};
-    points.forEach(function (pt) { distinct[pt.date] = true; });
-    if (Object.keys(distinct).length < 2) return null;
-
-    var max = prog.total;
-    var to = goal.targetDate && goal.targetDate > todayIso ? goal.targetDate : todayIso;
-    if (to < points[points.length - 1].date) to = points[points.length - 1].date;
-
-    // Лінія «щоб устигнути» має сенс лише коли є куди встигати: без дедлайну
-    // рівного темпу нізвідки взяти.
-    var required = null;
-    if (goal.targetDate && goal.targetDate > from) {
-      required = [{ date: from, value: baseline }, { date: goal.targetDate, value: max }];
-    }
-
-    return {
-      from: from,
-      to: to,
-      max: max,
-      current: running,
-      points: points,
-      required: required,
-    };
   }
 
   /**
@@ -524,7 +292,6 @@
         doneIso: doneIso,
         startIso: sp ? sp.startIso : null,
         days: sp ? sp.days : null,
-        progress: progressPct(g),
       });
     });
 
@@ -560,15 +327,9 @@
 
   var api = {
     REVIEW_PERIOD_DAYS: REVIEW_PERIOD_DAYS,
-    MIN_HISTORY_DAYS: MIN_HISTORY_DAYS,
-    MEASURE_GRACE_DAYS: MEASURE_GRACE_DAYS,
     LAPSE_DAYS: LAPSE_DAYS,
     deadlineForMonth: deadlineForMonth,
-    progressPct: progressPct,
-    pace: pace,
     weekMovement: weekMovement,
-    progressSeries: progressSeries,
-    needsMeasure: needsMeasure,
     lapse: lapse,
     monthKeyOf: monthKeyOf,
     goalsOfMonth: goalsOfMonth,
