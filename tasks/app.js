@@ -752,7 +752,12 @@ function taskRowHtml(task, extraMeta) {
   // Додаткова позначка від того, хто малює список: вкладка тижня так каже,
   // що пункт приїхав із давнішого. Йде в той самий рядок підписів, а не
   // окремим блоком під карткою: інакше вона висіла б між рядками нічия.
-  const metaParts = extraMeta ? [extraMeta] : [];
+  //
+  // Перевіряємо, що це саме РЯДОК. Функцію легко віддати прямо в map — і тоді
+  // другим аргументом прилітає індекс: у списку дня під кожним завданням
+  // зʼявлялась його порядкова цифра (крім першого — нуль хибний). Виклик у
+  // map тепер обгорнутий, а ця перевірка ловить наступний такий випадок.
+  const metaParts = typeof extraMeta === 'string' && extraMeta ? [extraMeta] : [];
   if (task.dueTime) metaParts.push(`<span class="task-time">${escapeHtml(task.dueTime)}</span>`);
   if (task.priority) metaParts.push(`<span class="priority-chip ${task.priority}">${priorityLabel(task.priority)}</span>`);
   if (subtasks.length) metaParts.push(`<span class="task-progress">${subDone}/${subtasks.length}</span>`);
@@ -791,7 +796,7 @@ function dayGroupHtml(label, list) {
   return `
     <div class="day-group">
       <div class="day-label">${escapeHtml(label)}</div>
-      <div class="day-card">${sortTasks(list).map(taskRowHtml).join('')}</div>
+      <div class="day-card">${sortTasks(list).map((task) => taskRowHtml(task)).join('')}</div>
     </div>`;
 }
 
@@ -1933,7 +1938,7 @@ function renderSelectedDay() {
     return;
   }
   // Одна картка на день: виконане вже стоїть у кінці (див. sortTasks).
-  listEl.innerHTML = `<div class="day-card">${dayTasks.map(taskRowHtml).join('')}</div>`;
+  listEl.innerHTML = `<div class="day-card">${dayTasks.map((task) => taskRowHtml(task)).join('')}</div>`;
 
   listEl.querySelectorAll('[data-toggle]').forEach((btn) => {
     btn.addEventListener('click', (e) => { e.stopPropagation(); toggleDone(btn.dataset.toggle); });
