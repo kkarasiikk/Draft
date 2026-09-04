@@ -54,13 +54,6 @@ const TEXTS = {
           ? `«${g.deadlineTitle}» прострочено`
           : `«${g.deadlineTitle}» через ${g.deadline} ${plural(g.deadline, "день", "дні", "днів")}`);
       }
-      // Прострочена віха — теж момент, коли ще можна щось зробити; досі її
-      // бачив лише той, хто сам відкрив ціль.
-      if (g.milestone) {
-        parts.push(g.milestone.days < 0
-          ? `віха «${g.milestone.title}» мала бути ${Math.abs(g.milestone.days)} ${plural(Math.abs(g.milestone.days), "день", "дні", "днів")} тому`
-          : `віха «${g.milestone.title}» — сьогодні`);
-      }
       return { title, body: parts.length ? parts.join(" · ") : "Усе заплановане зроблено." };
     },
   },

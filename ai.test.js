@@ -509,28 +509,23 @@ describe("executeTool", () => {
   describe("дії з цілями", () => {
     async function seedGoal(extra) {
       return mockCurrent.collection("users").doc("uid1").collection("goals").add({
-        title: "Марафон", status: "active", checkins: [],
-        milestones: [{ id: "m1", title: "10 км", done: false }, { id: "m2", title: "21 км", done: false }],
+        title: "Марафон", status: "active", checkins: [], milestones: [],
         ...extra,
       });
     }
     const today = () => new Date().toISOString().slice(0, 10);
 
-    test("add_goal створює ціль із віхами й типовими полями", async () => {
+    test("add_goal створює ціль із типовими полями", async () => {
       const r = await ai.executeTool("uid1", "add_goal", {
         title: "Пробігти марафон", category: "health", why: "хочу дожити до 90",
-        milestones: ["10 км", "21 км"],
       }, ctx);
-      expect(r.output).toMatchObject({ ok: true, milestones: 2 });
+      expect(r.output).toMatchObject({ ok: true });
 
       const doc = await mockCurrent.collection("users").doc("uid1").collection("goals").doc(r.output.id).get();
-      const g = doc.data();
-      expect(g).toMatchObject({
+      expect(doc.data()).toMatchObject({
         title: "Пробігти марафон", category: "health", why: "хочу дожити до 90",
         status: "active", checkins: [], journal: [],
       });
-      expect(g.milestones.map((m) => [m.title, m.done])).toEqual([["10 км", false], ["21 км", false]]);
-      expect(new Set(g.milestones.map((m) => m.id)).size).toBe(2);
     });
 
     // Правила Firestore вимагають ці поля незалежно від того, що сказала
@@ -583,17 +578,6 @@ describe("executeTool", () => {
       expect(r.output.alreadyDone).toBe(true);
       const doc = await mockCurrent.collection("users").doc("uid1").collection("goals").doc(ref.id).get();
       expect(doc.data().checkins).toEqual([today()]);
-    });
-
-    test("complete_milestone закриває саме вказану віху", async () => {
-      const ref = await seedGoal();
-      const r = await ai.executeTool("uid1", "complete_milestone", { goalId: ref.id, milestoneId: "m2" }, ctx);
-      expect(r.output).toMatchObject({ ok: true, milestonesDone: 1, milestonesTotal: 2 });
-      const doc = await mockCurrent.collection("users").doc("uid1").collection("goals").doc(ref.id).get();
-      expect(doc.data().milestones).toEqual([
-        { id: "m1", title: "10 км", done: false },
-        { id: "m2", title: "21 км", done: true },
-      ]);
     });
 
     // ---- Дедлайн, виведений із місяця ----
@@ -930,24 +914,23 @@ describe("executeTool", () => {
       expect(doc.data().exercises[0].sets).toEqual([{ weight: 85, reps: 5 }]);
     });
 
-    test("edit_goal зберігає чекіни, журнал і пройдені віхи", async () => {
-      const add = await ai.executeTool("uid1", "add_goal",
-        { title: "Марафон", milestones: ["10 км", "21 км"] }, ctx);
+    // Спадщина в документі — це чужі дані, і правка назви не має права їх
+    // зачепити: віх у застосунку більше немає, але записане колись лишається.
+    test("edit_goal зберігає чекіни, журнал і спадщину", async () => {
+      const add = await ai.executeTool("uid1", "add_goal", { title: "Марафон" }, ctx);
       const col = mockCurrent.collection("users").doc("uid1").collection("goals");
-      const created = (await col.doc(add.output.id).get()).data();
       await col.doc(add.output.id).update({
         checkins: ["2026-08-18"], journal: [{ id: "j1", text: "перший забіг" }],
-        milestones: created.milestones.map((m) => (m.title === "10 км" ? { ...m, done: true } : m)),
+        milestones: [{ id: "m1", title: "10 км", done: true }],
       });
 
       await ai.executeTool("uid1", "edit_goal",
-        { id: add.output.id, title: "Марафон за 4 години", milestones: ["10 км", "21 км", "30 км"] }, ctx);
+        { id: add.output.id, title: "Марафон за 4 години" }, ctx);
       const g = (await col.doc(add.output.id).get()).data();
       expect(g.title).toBe("Марафон за 4 години");
       expect(g.checkins).toEqual(["2026-08-18"]);
       expect(g.journal).toEqual([{ id: "j1", text: "перший забіг" }]);
-      expect(g.milestones.map((m) => [m.title, m.done]))
-        .toEqual([["10 км", true], ["21 км", false], ["30 км", false]]);
+      expect(g.milestones).toEqual([{ id: "m1", title: "10 км", done: true }]);
     });
 
     // Числа в старому документі правка не воскрешає й не чіпає: застосунок
@@ -1030,28 +1013,26 @@ describe("executeTool", () => {
 
   // ---- Цілі й заощадження ----
   describe("цілі й заощадження", () => {
-    test("goals_progress рахує виконані віхи", async () => {
+    test("goals_progress рахує відмітки", async () => {
       await mockCurrent.collection("users").doc("uid1").collection("goals").add({
         title: "Вивчити польську", status: "active", targetDate: "2026-12-31",
-        milestones: [{ id: "a", title: "A1", done: true }, { id: "b", title: "A2", done: false }],
-        checkins: ["2026-08-01", "2026-08-02"],
+        milestones: [], checkins: ["2026-08-01", "2026-08-02"],
       });
       const r = await ai.executeTool("uid1", "goals_progress", {}, ctx);
       expect(r.output.goals[0]).toMatchObject({
         title: "Вивчити польську", status: "active", targetDate: "2026-12-31",
-        milestonesDone: 1, milestonesTotal: 2, checkins: 2, checkedInToday: false,
+        checkins: 2, checkedInToday: false,
       });
     });
 
-    // Без id адресувати goal_checkin і complete_milestone нічим — модель
-    // могла б хіба вгадувати, а вгадані id мовчки нічого не зроблять.
-    test("goals_progress віддає id цілі та id віх", async () => {
+    // Без id адресувати goal_checkin нічим — модель могла б хіба вгадувати,
+    // а вгадані id мовчки нічого не зроблять.
+    test("goals_progress віддає id цілі", async () => {
       const ref = await mockCurrent.collection("users").doc("uid1").collection("goals").add({
-        title: "Марафон", status: "active", milestones: [{ id: "m1", title: "10 км", done: false }], checkins: [],
+        title: "Марафон", status: "active", milestones: [], checkins: [],
       });
       const r = await ai.executeTool("uid1", "goals_progress", {}, ctx);
       expect(r.output.goals[0].id).toBe(ref.id);
-      expect(r.output.goals[0].milestones).toEqual([{ id: "m1", title: "10 км", done: false }]);
     });
 
     test("savings_summary віднімає зняття, а не додає", async () => {
@@ -1373,112 +1354,3 @@ describe("handleAiChat", () => {
 });
 
 // ---- Розбиття цілі на віхи ----
-describe("handleGoalBreakdown", () => {
-  const authedCtx = { auth: { uid: "uid1" } };
-  const reply = (input) => ({
-    messages: {
-      create: jest.fn().mockResolvedValue({
-        content: [{ type: "tool_use", name: "propose_milestones", id: "t1", input }],
-      }),
-    },
-  });
-
-  test("кидає unauthenticated без auth", async () => {
-    await expect(ai.handleGoalBreakdown({ title: "Марафон" }, {})).rejects.toThrow(/вхід/);
-  });
-
-  test("кидає invalid-argument без назви цілі", async () => {
-    await expect(ai.handleGoalBreakdown({ title: "   " }, authedCtx)).rejects.toThrow(/назви/);
-  });
-
-  test("повертає віхи назвами, придатними для форми", async () => {
-    resetDb({ "users/uid1": { lang: "uk" } });
-    const fake = reply({
-      milestones: [{ title: "Пробігти 5 км" }, { title: "Пробігти 10 км" }, { title: "Пробігти 21 км" }],
-      note: "Дистанція росте поступово.",
-    });
-    const res = await ai.handleGoalBreakdown({ title: "Пробігти марафон" }, authedCtx, { anthropicClient: fake });
-    expect(res.milestones).toEqual(["Пробігти 5 км", "Пробігти 10 км", "Пробігти 21 км"]);
-    expect(res.note).toBe("Дистанція росте поступово.");
-  });
-
-  // Форма приймає лише список назв, тож інструмент має бути ПРИМУСОВИЙ:
-  // без цього модель час від часу відповідала б звичайним текстом.
-  test("інструмент викликається примусово й одним запитом", async () => {
-    resetDb({ "users/uid1": { lang: "uk" } });
-    const fake = reply({ milestones: [{ title: "A" }, { title: "Б" }, { title: "В" }] });
-    await ai.handleGoalBreakdown({ title: "Ціль" }, authedCtx, { anthropicClient: fake });
-    expect(fake.messages.create).toHaveBeenCalledTimes(1);
-    const args = fake.messages.create.mock.calls[0][0];
-    expect(args.tool_choice).toEqual({ type: "tool", name: "propose_milestones" });
-    expect(args.tools.map((t) => t.name)).toEqual(["propose_milestones"]);
-  });
-
-  test("контекст цілі потрапляє в запит, а мова — у системний промпт", async () => {
-    resetDb({ "users/uid1": { lang: "pl" } });
-    const fake = reply({ milestones: [{ title: "A" }, { title: "Б" }, { title: "В" }] });
-    await ai.handleGoalBreakdown({
-      title: "Пробігти марафон", category: "health", why: "хочу дожити до 90",
-      // Дедлайн форма надсилає вже виведеним із місяця цілі.
-      targetDate: "2027-04-30",
-    }, authedCtx, { anthropicClient: fake });
-    const args = fake.messages.create.mock.calls[0][0];
-    const prompt = args.messages[0].content;
-    expect(prompt).toContain("Пробігти марафон");
-    expect(prompt).toContain("хочу дожити до 90");
-    expect(prompt).toContain("2027-04-30");
-    expect(args.system).toContain("польською");
-  });
-
-  // Куца відповідь — це не привід підсунути «Крок 1, Крок 2» власного
-  // виробництва: краще сказати, що не вийшло.
-  test("менше трьох віх — чесна помилка, а не вигадані кроки", async () => {
-    resetDb({ "users/uid1": { lang: "uk" } });
-    const fake = reply({ milestones: [{ title: "Єдиний крок" }] });
-    await expect(ai.handleGoalBreakdown({ title: "Ціль" }, authedCtx, { anthropicClient: fake }))
-      .rejects.toThrow(/Не вийшло розбити/);
-  });
-
-  test("відповідь без виклику інструмента теж помилка", async () => {
-    resetDb({ "users/uid1": { lang: "uk" } });
-    const fake = { messages: { create: jest.fn().mockResolvedValue({ content: [{ type: "text", text: "ось план" }] }) } };
-    await expect(ai.handleGoalBreakdown({ title: "Ціль" }, authedCtx, { anthropicClient: fake }))
-      .rejects.toThrow(/Не вийшло розбити/);
-  });
-
-  test("модель береться з профілю", async () => {
-    resetDb({ "users/uid1": { lang: "uk", aiModel: "opus" } });
-    const fake = reply({ milestones: [{ title: "A" }, { title: "Б" }, { title: "В" }] });
-    await ai.handleGoalBreakdown({ title: "Ціль" }, authedCtx, { anthropicClient: fake });
-    expect(fake.messages.create.mock.calls[0][0].model).toBe(ai.MODELS.opus);
-  });
-});
-
-describe("sanitizeBreakdown", () => {
-  test("обрізає нумерацію, пробіли й довгі назви", () => {
-    const r = ai.sanitizeBreakdown({ milestones: [
-      { title: "1. Перший крок" }, { title: "  2) Другий крок  " }, { title: "я".repeat(300) },
-    ] });
-    expect(r.milestones[0]).toBe("Перший крок");
-    expect(r.milestones[1]).toBe("Другий крок");
-    expect(r.milestones[2].length).toBe(200);
-  });
-
-  test("викидає порожні й повторені", () => {
-    const r = ai.sanitizeBreakdown({ milestones: [
-      { title: "Крок" }, { title: "  " }, { title: "КРОК" }, { title: null }, "Крок другий",
-    ] });
-    expect(r.milestones).toEqual(["Крок", "Крок другий"]);
-  });
-
-  test("більше семи віх не пропускає", () => {
-    const many = Array.from({ length: 12 }, (_, i) => ({ title: `Крок ${i + 1}` }));
-    expect(ai.sanitizeBreakdown({ milestones: many }).milestones.length).toBe(7);
-  });
-
-  test("сміття замість відповіді дає порожній список, а не падіння", () => {
-    expect(ai.sanitizeBreakdown(undefined).milestones).toEqual([]);
-    expect(ai.sanitizeBreakdown({ milestones: "ні" }).milestones).toEqual([]);
-    expect(ai.sanitizeBreakdown({ milestones: [] }).note).toBe("");
-  });
-});

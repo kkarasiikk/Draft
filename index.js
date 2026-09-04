@@ -126,5 +126,4 @@ exports.walletSync = functions
 exports.aiChat = require("./ai").aiChat;
 // Один прохід «ціль -> віхи» для форми цілі. Живе поруч із чатом, бо ділить
 // з ним і ключ, і обмеження частоти.
-exports.goalBreakdown = require("./ai").goalBreakdown;
 exports.taskReminders = require("./reminders").taskReminders;

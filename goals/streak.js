@@ -280,25 +280,6 @@
     return min;
   }
 
-  /** Найпростроченіша (або найближча) віха серед активних цілей. */
-  function milestoneAlert(goals, todayIso) {
-    var best = null;
-    (goals || []).forEach(function (g) {
-      if (!g || g.status !== 'active') return;
-      (g.milestones || []).forEach(function (m) {
-        if (!m || m.done || typeof m.date !== 'string') return;
-        var left = daysBetween(todayIso, m.date);
-        // Віха має сенс як сигнал лише коли вона вже прострочена або
-        // настає сьогодні: попереджати про кожну наперед — це шум.
-        if (left > 0) return;
-        if (!best || left < best.days) {
-          best = { days: left, title: m.title || '', goalTitle: g.title || '' };
-        }
-      });
-    });
-    return best;
-  }
-
   function goalsDigest(goals, todayIso, opts) {
     var queue = eveningQueue(goals, todayIso);
 
@@ -324,17 +305,12 @@
       if (deadline === null || left < deadline) { deadline = left; deadlineTitle = g.title || null; }
     });
 
-    var milestone = milestoneAlert(goals, todayIso);
-
     return {
       pending: queue.length,
       streak: streak,
       streakTitle: streakTitle,
       deadline: deadline,
       deadlineTitle: deadlineTitle,
-      // Прострочена віха — теж момент, коли ще можна щось зробити, і досі
-      // вона лишалась видною тільки тому, хто сам відкрив ціль.
-      milestone: milestone,
     };
   }
 
@@ -343,7 +319,6 @@
     daysToDeadline: daysToDeadline,
     goalsDigest: goalsDigest,
     deadlineWarnDays: deadlineWarnDays,
-    milestoneAlert: milestoneAlert,
     isoOf: isoOf,
     parseISO: parseISO,
     shift: shift,

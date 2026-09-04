@@ -115,7 +115,6 @@
   function goalsSheets(d, L) {
     return [
       { key: 'goals', name: L.sheetLifeGoals, rows: (d.goals || []).map(function (g) {
-        var milestones = g.milestones || [];
         var row = {};
         row[L.colTitle] = g.title || '';
         row[L.colCategory] = g.category || '';
@@ -123,9 +122,6 @@
         // Дедлайн ціль отримує з місяця, а не окремим полем: у місячної це
         // кінець її місяця, у річної його немає.
         row[L.colDeadline] = g.targetDate || '';
-        row[L.colMilestones] = milestones.map(function (m) {
-          return (m.title || '') + (m.done ? ' ✓' : '');
-        }).join('; ');
         row[L.colCheckins] = (g.checkins || []).length;
         row[L.colWhy] = g.why || '';
         return row;

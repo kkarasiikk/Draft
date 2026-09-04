@@ -249,7 +249,7 @@ const tools = [
   },
   {
     name: "goals_progress",
-    description: "Довгострокові цілі: статус, виконані віхи, дата дедлайну, темп. " +
+    description: "Довгострокові цілі: статус, дата дедлайну, серія відміток. " +
       "Плюс retrospective — що закрито за останній рік і скільки кожна ціль зайняла.",
     input_schema: { type: "object", properties: {} },
   },
@@ -310,8 +310,7 @@ const tools = [
   {
     name: "add_goal",
     description:
-      "Створити довгострокову ціль. Віхи (milestones) — це проміжні кроки на шляху до неї; якщо людина їх назвала, " +
-      "перелічи, якщо ні — лиши список порожнім, додати можна й потім. Це саме довгострокова ціль, а не завдання " +
+      "Створити довгострокову ціль. Це саме довгострокова ціль, а не завдання " +
       "на день: «купити молоко» -> add_task, «пробігти марафон до весни» -> add_goal.",
     input_schema: {
       type: "object",
@@ -326,13 +325,6 @@ const tools = [
           description: "Горизонт: month — що людина робить цього місяця, year — куди йде загалом. " +
             "За замовчуванням year" },
         month: { type: "string", description: "Місяць місячної цілі, YYYY-MM. Лише для horizon month; за замовчуванням поточний" },
-        parentGoalId: { type: "string",
-          description: "id РІЧНОЇ цілі, якій служить ця місячна (з goals_progress). Лише для horizon month" },
-        milestones: {
-          type: "array",
-          description: "Проміжні кроки, по порядку (необов'язково)",
-          items: { type: "string" },
-        },
       },
       required: ["title"],
     },
@@ -372,19 +364,6 @@ const tools = [
         reason: { type: "string", description: "Коротко, кількома словами: «не було часу», «втома», «забув»" },
       },
       required: ["id", "reason"],
-    },
-  },
-  {
-    name: "complete_milestone",
-    description:
-      "Позначити віху цілі виконаною. id цілі й id віхи бери з goals_progress.",
-    input_schema: {
-      type: "object",
-      properties: {
-        goalId: { type: "string", description: "id цілі" },
-        milestoneId: { type: "string", description: "id віхи" },
-      },
-      required: ["goalId", "milestoneId"],
     },
   },
   {
@@ -505,9 +484,7 @@ const tools = [
   {
     name: "edit_goal",
     description:
-      "Змінити довгострокову ціль: формулювання, сферу, дедлайн, статус або список віх. Якщо передаєш milestones — " +
-      "це повний новий список, уже виконані віхи лишаться виконаними за збігом назви. Щоб закрити одну віху, " +
-      "краще complete_milestone. id бери з goals_progress.",
+      "Змінити довгострокову ціль: формулювання, сферу, дедлайн або статус. id бери з goals_progress.",
     input_schema: {
       type: "object",
       properties: {
@@ -516,11 +493,9 @@ const tools = [
         category: { type: "string", description: "ID категорії цілі зі списку в контексті" },
         why: { type: "string" },
         horizon: { type: "string", enum: ["month", "year"], description: "Перенести ціль між вкладками «Місяць» і «Рік»" },
-        parentGoalId: { type: "string", description: "Привʼязати місячну ціль до річної; null відвʼязує" },
         status: { type: "string", enum: ["active", "done", "archived", "paused"],
           description: "paused — ціль жива, але свідомо відкладена (відпустка, зміна обставин): " +
             "серія не рветься й ціль не тисне" },
-        milestones: { type: "array", items: { type: "string" }, description: "Повний новий список віх" },
       },
       required: ["id"],
     },
@@ -678,7 +653,6 @@ async function executeTool(uid, name, input, ctx) {
   if (name === "goal_checkin") return goalCheckin(uid, input);
   if (name === "rescue_streak") return rescueStreak(uid, input, ctx);
   if (name === "log_blocker") return logBlocker(uid, input, ctx);
-  if (name === "complete_milestone") return completeMilestone(uid, input);
 
   return { output: { ok: false, error: "unknown tool" }, isError: true };
 }
@@ -1305,20 +1279,12 @@ async function editGoal(uid, input, ctx) {
   const found = await loadForEdit(uid, "goals", input.id, "ціль не знайдена");
   if (found.error) return found.error;
 
-  const patch = pickPatch(input, ["title", "category", "why", "month", "status", "milestones", "horizon", "parentGoalId"]);
+  const patch = pickPatch(input, ["title", "category", "why", "month", "status", "horizon"]);
   if (!Object.keys(patch).length) return { output: { ok: false, error: "нічого міняти" }, isError: true };
 
   const merged = { ...found.data, ...patch };
   const result = sanitizeGoalInput(merged, ctx);
   if (result.error) return { output: { ok: false, error: result.error }, isError: true };
-
-  // Віхи приходять новим списком, і sanitize позначає їх усі невиконаними.
-  // Повертаємо галочки тим, чия назва збіглася: інакше правка формулювання
-  // цілі мовчки скидала б уже пройдений шлях.
-  const doneTitles = new Set((found.data.milestones || []).filter((m) => m.done).map((m) => m.title));
-  const milestones = patch.milestones
-    ? result.value.milestones.map((m) => (doneTitles.has(m.title) ? { ...m, done: true } : m))
-    : (found.data.milestones || []);
 
   const value = {
     ...result.value,
@@ -1328,14 +1294,16 @@ async function editGoal(uid, input, ctx) {
     // сусідньої правки: зміни статусу, дедлайну, назви.
     category: "category" in patch ? result.value.category : (found.data.category || result.value.category),
     status: ["active", "done", "archived", "paused"].includes(patch.status) ? patch.status : (found.data.status || "active"),
-    milestones,
+    // СПАДЩИНА. Віх у застосунку більше немає, але правила Firestore досі
+    // вимагають це поле, тож переносимо те, що вже лежить у документі.
+    milestones: found.data.milestones || [],
     checkins: found.data.checkins || [],
     journal: found.data.journal || [],
     updatedAt: admin.firestore.FieldValue.serverTimestamp(),
   };
   await found.ref.update(value);
   return {
-    output: { ok: true, title: value.title, status: value.status, milestones: milestones.length },
+    output: { ok: true, title: value.title, status: value.status },
     action: { kind: "goal_edited", title: value.title },
   };
 }
@@ -1344,17 +1312,11 @@ async function editGoal(uid, input, ctx) {
 // Порожні поля тут не «необов'язкові дрібниці», а обов'язкова частина
 // документа: правила Firestore вимагають why, milestones, checkins і journal
 // незалежно від того, чи людина щось про них сказала. Форма на сторінці
-// підставляє те саме.
+// підставляє те саме. Віхи серед них — спадщина: у застосунку їх більше
+// немає, але правило лишилось, тож поле пишеться порожнім списком.
 function sanitizeGoalInput(input, ctx) {
   const title = typeof input.title === "string" ? input.title.trim().slice(0, 200) : "";
   if (!title) return { error: "title обов'язковий" };
-
-  const milestones = (Array.isArray(input.milestones) ? input.milestones : [])
-    .map((m) => (typeof m === "string" ? m : (m && m.title)))
-    .map((titleText) => (typeof titleText === "string" ? titleText.trim().slice(0, 200) : ""))
-    .filter(Boolean)
-    .slice(0, 50)
-    .map((titleText, i) => ({ id: `ai${Date.now().toString(36)}${i}`, title: titleText, done: false }));
 
   // Горизонт вирішує, на якій із двох вкладок ціль зʼявиться. За
   // замовчуванням річна: розділ і задумувався як довгостроковий, а місячну
@@ -1380,11 +1342,8 @@ function sanitizeGoalInput(input, ctx) {
       // без нього — рік це напрямок, а не строк. Той самий модуль, що й на
       // сторінці: два обчислення кінця місяця розійшлися б.
       targetDate: goalReview.deadlineForMonth(month),
-      // Річна ціль нікому не служить: драбина йде лише знизу вгору.
-      parentGoalId: horizon === "month" && typeof input.parentGoalId === "string"
-        ? input.parentGoalId : null,
       status: "active",
-      milestones,
+      milestones: [],
       checkins: [],
       journal: [],
     },
@@ -1400,12 +1359,11 @@ async function addGoal(uid, input, ctx) {
   return {
     // id повертаємо в тому ж раунді: інакше, щоб одразу відзначити чекін по
     // щойно створеній цілі, моделі довелося б окремо ходити в goals_progress.
-    output: { ok: true, id: ref.id, milestones: result.value.milestones.length },
+    output: { ok: true, id: ref.id },
     action: {
       kind: "goal_added",
       title: result.value.title,
       targetDate: result.value.targetDate,
-      milestones: result.value.milestones.length,
     },
   };
 }
@@ -1480,31 +1438,6 @@ async function logBlocker(uid, input, ctx) {
   };
 }
 
-async function completeMilestone(uid, input) {
-  const goalId = typeof input.goalId === "string" ? input.goalId : "";
-  const milestoneId = typeof input.milestoneId === "string" ? input.milestoneId : "";
-  const ref = userCol(uid, "goals").doc(goalId);
-  const doc = await ref.get();
-  if (!doc.exists) return { output: { ok: false, error: "ціль не знайдена" }, isError: true };
-
-  const goal = doc.data() || {};
-  const milestones = goal.milestones || [];
-  const target = milestones.find((m) => m.id === milestoneId);
-  if (!target) return { output: { ok: false, error: "віха не знайдена" }, isError: true };
-
-  if (!target.done) {
-    await ref.update({
-      milestones: milestones.map((m) => (m.id === milestoneId ? { ...m, done: true } : m)),
-      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-    });
-  }
-  const doneCount = milestones.filter((m) => m.done || m.id === milestoneId).length;
-  return {
-    output: { ok: true, alreadyDone: !!target.done, milestonesDone: doneCount, milestonesTotal: milestones.length },
-    action: { kind: "milestone_done", goal: goal.title || "", title: target.title || "" },
-  };
-}
-
 async function goalsProgress(uid) {
   const snap = await userCol(uid, "goals").get();
   const todayIso = new Date().toISOString().slice(0, 10);
@@ -1528,24 +1461,19 @@ async function goalsProgress(uid) {
       retrospective: goalReview.retrospective(allGoals, todayIso, { days: 365, startIsoOf }),
       goals: snap.docs.map((d) => {
         const g = d.data() || {};
-        const milestones = g.milestones || [];
         const today = new Date().toISOString().slice(0, 10);
         return {
-          // id потрібні, щоб було чим адресувати goal_checkin і
-          // complete_milestone — без них модель могла б хіба вгадувати.
+          // id потрібен, щоб було чим адресувати goal_checkin —
+          // без нього модель могла б хіба вгадувати.
           id: d.id,
           title: g.title || "",
           status: g.status || "active",
           // Старі цілі поля не мають: вони заводились як довгострокові.
           horizon: g.horizon === "month" ? "month" : "year",
-          parentGoalId: g.parentGoalId || null,
           // Місяць місячної цілі; у старих документів — місяць заведення.
           month: g.horizon === "month"
             ? goalReview.monthKeyOf(g, { startIso: startIsoOf(g) }) : null,
           targetDate: g.targetDate || null,
-          milestones: milestones.map((m) => ({ id: m.id, title: m.title || "", done: !!m.done })),
-          milestonesDone: milestones.filter((m) => m.done).length,
-          milestonesTotal: milestones.length,
           checkins: (g.checkins || []).length,
           checkedInToday: (g.checkins || []).includes(today),
           // Серію рахуємо тут, а не залишаємо моделі рахувати з дат:
@@ -1553,17 +1481,9 @@ async function goalsProgress(uid) {
           streak: goalStreak.computeStreak(g.checkins, today),
           rescue: goalStreak.rescueState(g, today),
           blockers: goalStreak.blockerStats(g),
-          // Темп рахуємо тут, а не лишаємо моделі ділити дати в голові:
-          // саме на ньому тримається відповідь «чи встигаю», і вона мусить
-          // збігатися з тим, що людина бачить на екрані цілі.
-          pace: goalReview.pace({ ...g, id: d.id }, today,
-            { startIso: g.createdAt && typeof g.createdAt.toDate === "function"
-              ? goalStreak.isoOf(g.createdAt.toDate()) : null }),
           weekMovement: goalReview.weekMovement({ ...g, id: d.id }, today),
           // Довга перерва: скільки днів без жодного сліду.
           lapse: goalReview.lapse({ ...g, id: d.id }, today, { startIso: startIsoOf(g) }),
-          // Ціль, у якій немає ні числа, ні віх: перевірити її нічим.
-          needsMeasure: goalReview.needsMeasure({ ...g, id: d.id }, today, { startIso: startIsoOf(g) }),
         };
       }),
     },
@@ -1584,17 +1504,14 @@ function buildSystemPrompt(ctx) {
     "ТРЕНУВАННЯ. '4 по 8 на 60 кг' означає чотири однакові підходи по 8 повторень з вагою 60 — перелічи їх усі, а не один. Вправу з бібліотеки завжди передавай через libId (жим лежачи -> benchPress, присідання -> squat, станова -> deadlift і так далі): рекорди рахуються саме за ним, і без libId запис не склеїться з попередніми тренуваннями тієї ж вправи. Для планки й інших вправ з власною вагою став weight 0. Якщо людина каже 'запиши тренування' без жодної вправи — спитай, які саме вправи були.",
     "ТРЕНЕР. Про прогрес говори числами з training_analysis, а не враженнями: «жим виріс зі 101 до 114, це +13% за місяць». nextSuggestion — це та сама вага, яку застосунок уже показує людині у формі, тож не пропонуй іншу, не пояснивши, чому. Формулюй обережно: «схоже, що…», «схоже, варто…», а не «тобі потрібно» — ти бачиш цифри, але не бачиш, як людина почувається, скільки спала і що в неї в житті. Не вигадуй даних, яких у застосунку немає: сну, пульсу, калорій, техніки виконання — їх ніхто не записує, і будувати на них висновки не можна. Єдине джерело про відновлення — readinessToday, яке людина ставить сама; якщо вона в розмові каже, що розбита чи навпаки повна сил, запиши це через log_readiness, і план на сьогодні підлаштується. Якщо enough=false — так і скажи, що для висновку ще замало тренувань, і не видавай тренд за наявними двома записами. Пропуски й просідання не коментуй докірливо: просів обсяг — це привід запитати, що заважало, а не дорікнути.",
     "",
-    "ТЕМП ЦІЛЕЙ. У goals_progress кожна ціль має pace — це вже порахований застосунком прогноз, той самий, що людина бачить на екрані. verdict: onTrack (у графіку), ahead (випереджає), behind (таким темпом не встигне), overdue (дедлайн минув), unknown. Якщо enough=false — історії ще замало, так і скажи, а не вигадуй прогноз; projectedDate й diffDays у цьому разі порожні. Свою арифметику з дат не вигадуй: інакше в чаті прозвучить одне, а на екрані стоятиме інше. Про відставання говори як про факт із числами («з пʼяти віх закрито одну, а місяць уже минув на дві третини»), а не докором. Дедлайн окремим полем не задається: у місячної цілі це кінець її місяця, у річної його немає зовсім. Тому «зсунути дедлайн» тут неможливо — якщо ціль явно не встигає, доречно запропонувати перенести її на інший місяць (edit_goal month) або поставити на паузу: і те, й те чесніше за мовчазне накопичення провини. weekMovement каже, що зрушило за тиждень; коли moved=false, це привід спитати, що заважає, і записати через log_blocker.",
     "ГОРИЗОНТ ЦІЛЕЙ. Розділ поділений на дві вкладки: «Місяць» (що людина робить саме цього місяця) і «Рік» (куди йде загалом). Місячна ціль належить конкретному місяцю (поле month, YYYY-MM): за замовчуванням поточному, але якщо людина каже «на вересень» — постав той. У add_goal це поле horizon; за замовчуванням year. Якщо з формулювання видно масштаб — «цього місяця прочитати дві книжки» це month, «вивчити польську» це year — став його сам, не перепитуючи. Перенести ціль між вкладками можна через edit_goal horizon, а на інший місяць — через edit_goal month; дедлайн їде за місяцем сам.",
-    "ДРАБИНА ЦІЛЕЙ. Місячна ціль може служити річній (parentGoalId): рік — напрямок, місяці — кроки до нього. Коли людина заводить місячну ціль, а серед річних є та, якій ця місячна очевидно служить («цього місяця пробігти 20 км» при річній «пробігти 200 км»), — привʼязуй сам, не перепитуючи; id бери з goals_progress. Річна ціль нікому не служить, тож parentGoalId у неї завжди порожній.",
-    "ПЕРЕРВА Й ПОВЕРНЕННЯ. lapse не порожнє означає, що ціль стоїть без жодного сліду два тижні або довше (days — скільки саме). Так помирає більшість довгих цілей: пропуск, провина, і застосунок більше не відкривають. Тому тут особливо важливо НЕ докоряти й не питати «чому так вийшло»: питання не в цьому, а в тому, куди повертатись. Назви факт спокійно й запропонуй один із трьох виходів — почати відлік заново (сторінка має кнопку, вона ставить restartedAt), перенести ціль на інший місяць чи зменшити список віх (edit_goal), поставити на паузу. Якщо людина сама каже, що закинула ціль, — це той самий випадок, навіть коли lapse ще порожнє. Ніколи не пропонуй архів першим: архів — це для того, чого людина більше не хоче, а не для того, від чого вона просто відстала.",
-    "ЦІЛЬ, ЯКУ НЕМА ЧИМ МІРЯТИ. needsMeasure не порожнє означає, що в цілі немає жодної віхи: перевірити, чи людина дійшла, нічим. Це не докір, а пропущений крок постановки — спитай, як вона зрозуміє, що дійшла, і запропонуй кілька віх (edit_goal milestones). Сам дедлайн питання не знімає: він каже КОЛИ, а не чи ти дійшов. Поле зʼявляється лише через тиждень після заведення — свіжу ціль не чіпай.",
+    "ПЕРЕРВА Й ПОВЕРНЕННЯ. lapse не порожнє означає, що ціль стоїть без жодного сліду два тижні або довше (days — скільки саме). Так помирає більшість довгих цілей: пропуск, провина, і застосунок більше не відкривають. Тому тут особливо важливо НЕ докоряти й не питати «чому так вийшло»: питання не в цьому, а в тому, куди повертатись. Назви факт спокійно й запропонуй один із трьох виходів — почати відлік заново (сторінка має кнопку, вона ставить restartedAt), перенести ціль на інший місяць (edit_goal), поставити на паузу. Якщо людина сама каже, що закинула ціль, — це той самий випадок, навіть коли lapse ще порожнє. Ніколи не пропонуй архів першим: архів — це для того, чого людина більше не хоче, а не для того, від чого вона просто відстала.",
     "РЕТРОСПЕКТИВА. У goals_progress є retrospective: що закрито за останній рік, скільки кожна ціль зайняла (days), типова тривалість (medianDays), найшвидша й найдовша. Питають «що я зробив цього року», «скільки цілей закрив» — бери числа звідти, а не рахуй дати сам: те саме людина бачить на екрані у фільтрі «Завершені». Ціль, закрита до появи поля completedAt, датується останнім слідом у даних — тоді days може бути приблизним, і краще сказати «близько», ніж вдавати точність. Коли days порожній, дня заведення цілі просто немає — так і скажи, а не вигадуй тривалість. Це привід похвалити: закрита довга ціль — рідкість, і озирнутись на неї важливіше, ніж одразу питати про наступну.",
     "ПАУЗА. Коли людина каже, що зараз не до цілі — їде, хворіє, змінились обставини — це edit_goal зі status 'paused', а НЕ архів. На паузі серія не рветься, а ціль лишається живою. Архів — це для того, чого людина більше не хоче.",
     "",
-    "ЦІЛІ. Шлях до цілі міряється ВІХАМИ — проміжними кроками, про кожен з яких можна сказати «пройдено» або «ні»; від їх частки й рахується відсоток. Окремої числової мети в застосунку немає: якщо число важливе («пробігти 100 км»), воно стоїть у самій назві цілі, а кроки до нього — у віхах. Не пропонуй завести число окремим полем: такого поля немає. add_goal створює довгострокову ціль — не плутай із завданням: «купити молоко» це add_task, «вивчити польську до літа» це add_goal. goal_checkin відзначає сьогоднішній день у серії, complete_milestone закриває віху. Якщо людина каже, що вчора пропустила, — подивись поле rescue: коли available true, запропонуй rescue_streak (дописує вчорашній день, доступно раз на тиждень). Коли каже, що сьогодні не вийшло, — спитай, що завадило, і запиши через log_blocker її словами. Не докоряй за пропуски: у полі blockers видно, що заважає найчастіше, і корисніше запропонувати, як це обійти. Обидва беруть id, тож спершу виклич goals_progress і візьми id звідти — вгадувати id не можна. Якщо назва цілі збігається з кількома — перепитай, з якою саме. Щоденну дію з цілі («щодня бігати по 3 км») створюй через add_task із goalId — це звичайне завдання, просто привʼязане: коли його виконають, день у серії цілі відмітиться сам, окремий goal_checkin не потрібен. Так само й з віхою: коли людина каже, що береться за конкретний крок цілі, заведи add_task із назвою віхи, її goalId і dueDate на дату віхи — на екрані цілі та сама кнопка стоїть біля кожної невиконаної віхи.",
+    "ЦІЛІ. Ціль рухається ВІДМІТКАМИ: кожен день, коли людина зробила крок, — це чекін, і з них складається серія. Окремої числової мети чи списку проміжних кроків у застосунку немає: якщо число важливе («пробігти 100 км»), воно стоїть у самій назві цілі. Не пропонуй завести ні число, ні віхи окремим полем: таких полів немає. add_goal створює довгострокову ціль — не плутай із завданням: «купити молоко» це add_task, «вивчити польську до літа» це add_goal. goal_checkin відзначає сьогоднішній день у серії. Якщо людина каже, що вчора пропустила, — подивись поле rescue: коли available true, запропонуй rescue_streak (дописує вчорашній день, доступно раз на тиждень). Коли каже, що сьогодні не вийшло, — спитай, що завадило, і запиши через log_blocker її словами. Не докоряй за пропуски: у полі blockers видно, що заважає найчастіше, і корисніше запропонувати, як це обійти. Інструменти беруть id, тож спершу виклич goals_progress і візьми id звідти — вгадувати id не можна. Якщо назва цілі збігається з кількома — перепитай, з якою саме. Щоденну дію з цілі («щодня бігати по 3 км») створюй через add_task із goalId — це звичайне завдання, просто привʼязане: коли його виконають, день у серії цілі відмітиться сам, окремий goal_checkin не потрібен.",
     "",
-    "ВИПРАВЛЯТИ. Помічник уміє міняти вже записане, але не вміє нічого видаляти — так і кажи, якщо просять видалити, і поясни, що це робиться в самому розділі. Перед будь-якою правкою знайди запис інструментом читання (query_transactions, list_tasks, workout_history, goals_progress, savings_summary) і візьми звідти id — вгадувати id не можна. У edit_* передавай ТІЛЬКИ ті поля, які змінюються. Виняток — exercises у edit_workout і milestones у edit_goal: там треба надіслати повний новий список, тож спершу прочитай наявний. Якщо під опис підходить кілька записів — перепитай, який саме.",
+    "ВИПРАВЛЯТИ. Помічник уміє міняти вже записане, але не вміє нічого видаляти — так і кажи, якщо просять видалити, і поясни, що це робиться в самому розділі. Перед будь-якою правкою знайди запис інструментом читання (query_transactions, list_tasks, workout_history, goals_progress, savings_summary) і візьми звідти id — вгадувати id не можна. У edit_* передавай ТІЛЬКИ ті поля, які змінюються. Виняток — exercises у edit_workout: там треба надіслати повний новий список, тож спершу прочитай наявний. Якщо під опис підходить кілька записів — перепитай, який саме.",
     "",
     "ЗАОЩАДЖЕННЯ. Це скарбнички, окремі від витрат: add_savings_goal створює, add_savings_entry кладе (deposit) або знімає (withdraw). Гроші, відкладені у скарбничку, — не витрата, тож add_transaction тут ні до чого. id цілі бери з savings_summary. Питають «скільки я зберіг за липень» чи «скільки поклав цього місяця» — це не загальний залишок (total), а зміна САМЕ за той місяць: передай month у savings_summary і бери число з period, а не з total.",
     "",
@@ -1704,135 +1621,11 @@ async function handleAiChat(data, context, deps = {}) {
   return { reply: "Забагато кроків для цього запиту — спробуй сформулювати простіше.", actions };
 }
 
-// ---- Розбиття цілі на віхи ----
-// Окремий виклик, а не інструмент чату: тут не потрібна ні розмова, ні
-// доступ до даних — лише один прохід «текст цілі -> список кроків». Так
-// дешевше (кілька сотень токенів замість усього системного промпта) і
-// відповідь приходить у гарантованій формі.
-//
-// Форму гарантує ПРИМУСОВИЙ виклик інструмента (tool_choice), а не
-// output_config: у версії SDK, на якій живе проєкт (0.32), структурованих
-// відповідей ще немає, а примусовий інструмент працює скрізь однаково.
-const BREAKDOWN_TOOL = {
-  name: "propose_milestones",
-  description: "Повернути віхи — послідовні перевіряються кроки до цілі.",
-  input_schema: {
-    type: "object",
-    properties: {
-      milestones: {
-        type: "array",
-        description: "Від 3 до 7 віх у порядку виконання",
-        items: {
-          type: "object",
-          properties: { title: { type: "string", description: "Один крок, коротко: «Пройти перші 10 уроків»" } },
-          required: ["title"],
-        },
-      },
-      note: { type: "string", description: "Одне речення про логіку розбиття; можна лишити порожнім" },
-    },
-    required: ["milestones"],
-  },
-};
-
-const MIN_MILESTONES = 3;
-const MAX_MILESTONES = 7;
-
-function buildBreakdownPrompt(goal, ctx) {
-  const lines = [`Ціль: ${goal.title}`];
-  if (goal.category) lines.push(`Категорія: ${goal.category}`);
-  if (goal.why) lines.push(`Навіщо це людині: ${goal.why}`);
-  if (goal.targetDate) lines.push(`Дедлайн: ${goal.targetDate} (сьогодні ${ctx.today})`);
-  lines.push("", `Розклади цю ціль на ${MIN_MILESTONES}–${MAX_MILESTONES} віх.`);
-  return lines.join("\n");
-}
-
-const BREAKDOWN_SYSTEM =
-  "Ти допомагаєш розкласти довгострокову ціль на віхи в особистому застосунку.\n" +
-  "Віха — це перевіряний рубіж, про який можна сказати «пройдено» або «ні»: «Пробігти 10 км без зупинки», " +
-  "а не «Більше бігати». Віхи йдуть у порядку виконання, від найближчої до останньої, і разом покривають шлях до цілі.\n" +
-  "Не вигадуй обставин, яких тобі не сказали: ні поточного рівня людини, ні її розкладу, ні бюджету. " +
-  "Якщо ціль сформульована надто загально — все одно дай кроки, але найзагальніші й безпечні.\n" +
-  "Дати став лише тоді, коли названо дедлайн, і лише як орієнтир у назві віхи.\n" +
-  "Пиши мовою, яку задано нижче. Кожна віха — до 80 символів, без нумерації на початку.";
-
-const LANG_NAMES_FOR_MODEL = { uk: "українською", ru: "російською", pl: "польською", en: "англійською" };
-
-/** Витягує віхи з примусового виклику інструмента й доводить їх до того
- *  вигляду, який приймають правила Firestore і форма цілі. */
-function sanitizeBreakdown(input) {
-  const seen = new Set();
-  const milestones = (Array.isArray(input && input.milestones) ? input.milestones : [])
-    .map((m) => (typeof m === "string" ? m : (m && m.title)))
-    .map((title) => (typeof title === "string" ? title.trim().replace(/^\d+[.)]\s*/, "").slice(0, 200) : ""))
-    .filter((title) => {
-      if (!title) return false;
-      const key = title.toLowerCase();
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    })
-    .slice(0, MAX_MILESTONES);
-  const note = typeof (input && input.note) === "string" ? input.note.trim().slice(0, 300) : "";
-  return { milestones, note };
-}
-
-async function handleGoalBreakdown(data, context, deps = {}) {
-  const uid = context.auth && context.auth.uid;
-  if (!uid) throw new functions.https.HttpsError("unauthenticated", "Потрібен вхід.");
-
-  const title = typeof data.title === "string" ? data.title.trim().slice(0, 200) : "";
-  if (!title) throw new functions.https.HttpsError("invalid-argument", "Спершу назви ціль.");
-
-  await enforceRateLimit(uid);
-
-  const profileSnap = await db.collection("users").doc(uid).get();
-  const profile = profileSnap.data() || {};
-  const lang = typeof profile.lang === "string" ? profile.lang : "uk";
-  const ctx = { today: new Date().toISOString().slice(0, 10) };
-  // Форма надсилає id категорії, а в промпт має піти назва: «gcat_m1x8» не
-  // каже моделі нічого, а «Здоровʼя» каже. Невідомий id лишається порожнім —
-  // краще без категорії, ніж із вигаданою.
-  const goalCategories = goalCategoriesOf(profile, lang);
-  const categoryLabel = (goalCategories.find((c) => c && c.id === data.category) || {}).label || "";
-
-  const goal = {
-    title,
-    category: categoryLabel,
-    why: typeof data.why === "string" ? data.why.trim().slice(0, 1000) : "",
-    targetDate: typeof data.targetDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(data.targetDate) ? data.targetDate : "",
-  };
-
-  const anthropic = deps.anthropicClient || new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-  const resp = await anthropic.messages.create({
-    // Модель — та сама, яку людина обрала для помічника: платить за неї вона,
-    // тож і вибір її.
-    model: modelIdFor(profile),
-    max_tokens: 1024,
-    system: `${BREAKDOWN_SYSTEM}\nМова відповіді: ${LANG_NAMES_FOR_MODEL[lang] || LANG_NAMES_FOR_MODEL.uk}.`,
-    messages: [{ role: "user", content: buildBreakdownPrompt(goal, ctx) }],
-    tools: [BREAKDOWN_TOOL],
-    tool_choice: { type: "tool", name: BREAKDOWN_TOOL.name },
-  });
-
-  const call = (resp.content || []).find((b) => b.type === "tool_use" && b.name === BREAKDOWN_TOOL.name);
-  const result = sanitizeBreakdown(call && call.input);
-  if (result.milestones.length < MIN_MILESTONES) {
-    // Порожня або куца відповідь — краще чесно сказати, ніж підсунути
-    // «Крок 1, Крок 2» власного виробництва.
-    throw new functions.https.HttpsError("unavailable", "Не вийшло розбити цю ціль. Спробуй сформулювати її конкретніше.");
-  }
-  return result;
-}
-
 // AI-функції платні за викликом (токени Anthropic), тож стеля інстансів тут
 // важливіша за все. Разом із лімітом 30 повідомлень / 10 хв на юзера й
 // обовʼязковою автентифікацією кількох інстансів вистачає з головою, а
 // зациклений клієнт чи витік токена не зможе розкрутити рахунок на API.
 const AI_MAX_INSTANCES = 5;
-
-exports.goalBreakdown = functions
-  .runWith({ secrets: ["ANTHROPIC_API_KEY"], timeoutSeconds: 60, maxInstances: AI_MAX_INSTANCES })
-  .https.onCall((data, context) => handleGoalBreakdown(data, context));
 
 exports.aiChat = functions
   .runWith({ secrets: ["ANTHROPIC_API_KEY"], timeoutSeconds: 60, maxInstances: AI_MAX_INSTANCES })
@@ -1842,9 +1635,6 @@ exports.aiChat = functions
 // На деплой не впливає: Cloud Functions бере на облік тільки те, що визначено
 // як `exports.<name> = onCall(...)` — інші поля module.exports ігноруються.
 module.exports.handleAiChat = handleAiChat;
-module.exports.handleGoalBreakdown = handleGoalBreakdown;
-module.exports.sanitizeBreakdown = sanitizeBreakdown;
-module.exports.buildBreakdownPrompt = buildBreakdownPrompt;
 module.exports.sanitizeTransactionInput = sanitizeTransactionInput;
 module.exports.executeTool = executeTool;
 module.exports.buildSystemPrompt = buildSystemPrompt;
