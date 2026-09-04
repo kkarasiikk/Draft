@@ -298,6 +298,49 @@ describe('Якір: який період малюємо, коли календ�
   });
 });
 
+describe('dayStrip — смуга днів, що гортається', () => {
+  const WED = '2026-08-26';   // середа
+  const task = (dueDate, done = false) => ({ title: 'x', dueDate, done });
+
+  test('починається саме з того дня, який попросили, а не з понеділка', () => {
+    // У цьому вся різниця з weekCalendar: смуга гортається по днях, і
+    // підганяти початок до понеділка означало б не показати того, до чого
+    // людина догорнула.
+    const st = H.dayStrip([], WED, WED, 7);
+    expect(st.from).toBe(WED);
+    expect(st.to).toBe('2026-09-01');
+    expect(st.days).toHaveLength(7);
+  });
+
+  test('дні йдуть поспіль і переходять через межу місяця', () => {
+    const st = H.dayStrip([], WED, '2026-08-30', 4);
+    expect(st.days.map((d) => d.date)).toEqual([
+      '2026-08-30', '2026-08-31', '2026-09-01', '2026-09-02',
+    ]);
+    expect(st.days.map((d) => d.dayNum)).toEqual([30, 31, 1, 2]);
+  });
+
+  test('сьогодні лишається сьогодні, хоч би з якого дня смуга починалась', () => {
+    const st = H.dayStrip([], WED, '2026-08-24', 7);
+    expect(st.days.filter((d) => d.today).map((d) => d.date)).toEqual([WED]);
+    expect(st.days.every((d) => d.past === (d.date < WED))).toBe(true);
+  });
+
+  test('крапки — з тих самих завдань, що й у решті календаря', () => {
+    const st = H.dayStrip([task('2026-08-28'), task('2026-08-29', true)], WED, WED, 7);
+    const at = (iso) => st.days.find((d) => d.date === iso);
+    expect(at('2026-08-28').hasTasks).toBe(true);
+    expect(at('2026-08-28').allDone).toBe(false);
+    expect(at('2026-08-29').allDone).toBe(true);
+    expect(at('2026-08-27').hasTasks).toBe(false);
+  });
+
+  test('хвостів сусіднього місяця тут не буває — смуга не сітка', () => {
+    const st = H.dayStrip([], WED, '2026-08-30', 4);
+    expect(st.days.every((d) => d.otherMonth === false)).toBe(true);
+  });
+});
+
 describe('monthCalendar — місяць повними тижнями', () => {
   // Вересень 2026 починається у вівторок і закінчується в середу, тож у
   // сітці є хвости обох сусідніх місяців.

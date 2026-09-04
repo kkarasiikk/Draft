@@ -555,6 +555,15 @@ let homeCurrency = '';
 // календар ще до того, як виконається код тієї секції.
 let calAnchor = null;
 
+// Смуга днів малюється з запасом у обидва боки, а видно з неї сім. Запас —
+// це те, що дає гортати далі, ніж екран: браузер везе вміст сам, а ми лише
+// зсуваємо вікно, коли людина підходить до краю. Лежать тут, поруч із
+// якорем, з тієї ж причини: applyTranslations() малює календар ще до того,
+// як виконається код секції календаря нижче.
+const STRIP_VISIBLE = 7;       // днів у кадрі
+const STRIP_PAD = 28;          // днів запасу з кожного боку (4 тижні)
+const STRIP_DAYS = STRIP_PAD * 2 + STRIP_VISIBLE;
+
 const THEME_CHOICES = ['light', 'dark', 'system'];
 // Ховати суму витрат на плитці «Бюджет».
 //
@@ -1382,25 +1391,40 @@ function calAnchorIso() {
   return calAnchor || todayISO();
 }
 
-/** Чи стоїть календар на сьогоднішньому періоді. */
-function calAtToday() {
-  const today = todayISO();
-  const anchor = calAnchorIso();
-  if (anchor === today) return true;
-  return isWideScreen()
-    ? anchor.slice(0, 7) === today.slice(0, 7)
-    : HomeSummary.weekCalendar([], today).from === HomeSummary.weekCalendar([], today, anchor).from;
+/** Понеділок тижня, у якому лежить дата: з нього починається смуга при
+ *  відкритті сторінки, і в нього ж вертає тап по назві місяця. */
+function weekStartOf(iso) {
+  return HomeSummary.weekCalendar([], iso).from;
 }
 
-// Гортання на крок уперед або назад. Крок — те, що зараз намальовано: на
-// телефоні тиждень, на широкому екрані місяць.
+/** Перший видимий день. На телефоні це просто якір; поки не гортали — це
+ *  понеділок цього тижня, тобто рівно той вигляд, що й був. */
+function stripFromIso() {
+  return calAnchor || weekStartOf(todayISO());
+}
+
+/** Чи стоїть календар на сьогоднішньому періоді. Аргумент потрібен, поки
+ *  смуга ще їде: там якір читається з позиції прокрутки, а не з calAnchor. */
+function calAtToday(anchorIso) {
+  const today = todayISO();
+  const anchor = anchorIso || calAnchor;
+  if (!anchor) return true;
+  return isWideScreen()
+    ? anchor.slice(0, 7) === today.slice(0, 7)
+    : anchor === weekStartOf(today);
+}
+
+// Крок гортання кнопкою. На широкому екрані намальовано місяць — крок місяць.
+// На телефоні намальовано смугу днів, і крок там ОДИН ДЕНЬ: тиждень стрибком
+// не давав спинитись на потрібному дні, а смуга саме для цього й гортається.
 function shiftCalendar(delta) {
-  const anchor = calAnchorIso();
-  calAnchor = isWideScreen()
-    ? HomeSummary.shiftMonths(anchor, delta)
-    : HomeSummary.shiftDays(anchor, delta * 7);
-  renderCalendar();
-  ensureTasksForCalendar();
+  if (isWideScreen()) {
+    calAnchor = HomeSummary.shiftMonths(calAnchorIso(), delta);
+    renderCalendar();
+    ensureTasksForCalendar();
+    return;
+  }
+  scrollStripBy(delta);
 }
 
 function resetCalendar() {
@@ -1409,33 +1433,61 @@ function resetCalendar() {
   renderCalendar();
 }
 
+// Підпис відповідає на питання «який зараз місяць», і поки сьогодні в кадрі,
+// відповідь одна: місяць СЬОГОДНІШНЬОГО дня. 31 серпня — це ще серпень, хай
+// навіть у тій самій смузі стоять шість вересневих чисел; завтра та сама
+// смуга підпишеться вереснем. Підписувати краєм («серпень», бо смуга з нього
+// починається) чи обома назвами («серпень — вересень») означало б відповідати
+// не на те питання.
+//
+// Коли ж сьогодні догортали за кадр, питання міняється — тепер воно про те,
+// що ВИДНО, — і відповідає на нього місяць середини смуги: він називає той
+// місяць, якого в кадрі більше, і не потребує рахунку.
+//
+// На широкому екрані намальовано цілий місяць, тож рахувати нема чого — це
+// він і є.
+//
+// Рік дописується, лише коли він не цей: «січень» за півроку вперед нічого
+// не каже про те, який це січень, а «вересень 2026» щодня — зайве слово.
+//
+// Окремо від решти календаря саме тому, що смуга гортається по днях: підпис
+// міняється на кожен день, а перемальовувати заради нього всю смугу означало
+// б збивати позицію прокрутки просто під пальцем.
+function renderCalendarHead(anchorOverride) {
+  const monthEl = document.getElementById('calMonth');
+  if (!monthEl) return;
+  const today = todayISO();
+  const wide = isWideScreen();
+  const first = anchorOverride || (wide ? calAnchorIso() : stripFromIso());
+  const todayInFrame = !wide && today >= first
+    && today <= HomeSummary.shiftDays(first, STRIP_VISIBLE - 1);
+  let labelDay = first;
+  if (!wide) labelDay = todayInFrame ? today : HomeSummary.shiftDays(first, Math.floor(STRIP_VISIBLE / 2));
+  const locale = LOCALE_MAP[currentLang] || 'uk-UA';
+  const sameYear = labelDay.slice(0, 4) === today.slice(0, 4);
+  const month = new Intl.DateTimeFormat(locale, sameYear ? { month: 'long' } : { month: 'long', year: 'numeric' });
+  monthEl.textContent = month.format(new Date(labelDay + 'T00:00:00'));
+  const atToday = calAtToday(anchorOverride);
+  monthEl.classList.toggle('current', atToday);
+  monthEl.title = atToday ? '' : t('calBackToday');
+}
+
 function renderCalendar() {
   const monthEl = document.getElementById('calMonth');
   const weekEl = document.getElementById('calWeek');
   if (!monthEl || !weekEl) return;
 
   const today = todayISO();
-  const anchor = calAnchorIso();
   const locale = LOCALE_MAP[currentLang] || 'uk-UA';
   const wide = isWideScreen();
+  // На телефоні малюємо смугу з запасом (див. STRIP_PAD): видно з неї сім
+  // днів, а решта — те, у що можна догорнути, не чекаючи перемальовування.
+  const anchor = wide ? calAnchorIso() : stripFromIso();
   const cal = wide
     ? HomeSummary.monthCalendar(homeData.tasks || [], today, anchor)
-    : HomeSummary.weekCalendar(homeData.tasks || [], today, anchor);
+    : HomeSummary.dayStrip(homeData.tasks || [], today, stripRange(anchor).from, STRIP_DAYS);
 
-  // Підпис — це місяць ЯКОРЯ, а не країв сітки. Тиждень на межі місяців
-  // підписувався обома назвами («серпень — вересень»), і в сітці місяця
-  // хвости сусідніх місяців є завжди, тож обидва варіанти по краях однаково
-  // брехали б. 31 серпня це ще серпень, 1 вересня — вже вересень, хай навіть
-  // у тому самому рядку стоять числа обох. Поки не гортали, якір і є
-  // сьогодні — тобто підпис лишився той самий, що й був.
-  //
-  // Рік дописується, лише коли він не цей: «січень» за півроку вперед нічого
-  // не каже про те, який це січень, а «вересень 2026» щодня — зайве слово.
-  const sameYear = anchor.slice(0, 4) === today.slice(0, 4);
-  const month = new Intl.DateTimeFormat(locale, sameYear ? { month: 'long' } : { month: 'long', year: 'numeric' });
-  monthEl.textContent = month.format(new Date(anchor + 'T00:00:00'));
-  monthEl.classList.toggle('current', calAtToday());
-  monthEl.title = calAtToday() ? '' : t('calBackToday');
+  renderCalendarHead();
 
   const dow = new Intl.DateTimeFormat(locale, { weekday: 'short' });
   // У місяці день тижня стоїть один раз шапкою над стовпчиком, а не в кожній
@@ -1467,6 +1519,76 @@ function renderCalendar() {
 
   weekEl.className = wide ? 'cal-grid' : 'cal-week';
   weekEl.innerHTML = head + cells;
+  // Смуга намальована з запасом ліворуч, тож ставимо її так, щоб першим
+  // видимим був саме якір. Без прокрутки — це відновлення позиції, а не
+  // рух: анімувати тут нічого.
+  if (!wide) scrollStripToAnchor();
+}
+
+// ---- Смуга днів: позиція й гортання ----
+// Ширина клітинки береться з самої розмітки, а не рахується наново з
+// відсотків і проміжків: два способи міряти те саме розійшлися б, щойно
+// хтось поправить gap у CSS.
+function stripStep(el) {
+  const cells = el.children;
+  if (cells.length < 2) return 0;
+  return cells[1].offsetLeft - cells[0].offsetLeft;
+}
+
+let stripSettling = false;
+
+function scrollStripToAnchor() {
+  const el = document.getElementById('calWeek');
+  const step = stripStep(el);
+  if (!step) return;
+  // Прапорець тримає обробник прокрутки: наше власне встановлення позиції не
+  // має читатись як «людина погортала».
+  stripSettling = true;
+  el.scrollLeft = STRIP_PAD * step;
+  requestAnimationFrame(() => { stripSettling = false; });
+}
+
+/** Крок кнопкою — рівно один день, з анімацією браузера. */
+function scrollStripBy(delta) {
+  const el = document.getElementById('calWeek');
+  const step = stripStep(el);
+  if (!step) return;
+  el.scrollBy({ left: delta * step, behavior: 'smooth' });
+}
+
+// Куди догорнули — те й показуємо. Перший видимий день стає якорем: від нього
+// залежить підпис місяця й те, чи горить «вернутись у сьогодні».
+//
+// Вікно з запасом кінцеве, тож коли людина підходить до його краю, смугу
+// перемальовуємо навколо нового якоря й вертаємо в те саме місце. Робимо це
+// лише після того, як прокрутка спинилась: перемальовування посеред інерції
+// обірвало б рух пальця.
+/** Перший видимий день за поточною позицією прокрутки. Читається, поки смуга
+ *  ще їде, тож нічого не змінює — лише рахує. */
+function stripAnchorAtScroll() {
+  const el = document.getElementById('calWeek');
+  const step = stripStep(el);
+  if (!step) return stripFromIso();
+  const index = Math.round(el.scrollLeft / step);
+  return HomeSummary.shiftDays(HomeSummary.shiftDays(stripFromIso(), -STRIP_PAD), index);
+}
+
+function onStripSettled() {
+  if (isWideScreen() || !stripStep(document.getElementById('calWeek'))) return;
+  const nextAnchor = stripAnchorAtScroll();
+  // Сьогоднішній тиждень — це порожній якір: тоді підпис знову звичайний, а
+  // «вернутись у сьогодні» гасне саме собою.
+  const next = nextAnchor === weekStartOf(todayISO()) ? null : nextAnchor;
+  if (next === calAnchor) return;
+
+  calAnchor = next;
+  // Перемальовуємо смугу навколо нового якоря й вертаємо її в те саме місце.
+  // Робимо це ЩОРАЗУ, як прокрутка спинилась, а не лише біля краю: інакше
+  // запас з'їдався б за кілька жестів, і наступний рух упирався б у стіну
+  // посеред гортання. Видимого стрибка немає — вміст зсувається рівно на
+  // стільки ж, на скільки й позиція прокрутки, і в тому самому кадрі.
+  renderCalendar();
+  ensureTasksForCalendar();
 }
 
 // ---- Гортання календаря ----
@@ -1478,24 +1600,45 @@ document.getElementById('calNext').addEventListener('click', () => shiftCalendar
 document.getElementById('calMonth').addEventListener('click', resetCalendar);
 
 // Поріг у 40px і вимога, щоб жест був радше горизонтальним, ніж
-// вертикальним: інакше кожна спроба прогорнути сторінку пальцем по календарю
-// перекидала б тиждень.
+// вертикальним: інакше кожна спроба прогорнути сторінку пальцем по місяцю
+// перекидала б його.
 const SWIPE_MIN = 40;
-(function enableCalendarSwipe() {
+
+(function enableCalendarScroll() {
   const el = document.getElementById('calWeek');
   if (!el) return;
-  let x0 = null, y0 = null, swiped = false;
-  // Клітинка — посилання, і після свайпу браузер ще може видати по ній клік.
-  // Гасимо саме той один клік, що йде одразу за жестом: інакше гортання
-  // час від часу відкривало б розділ завдань замість сусіднього тижня.
+
+  // ---- Смуга днів: слухаємо БРАУЗЕРНУ прокрутку ----
+  // Своя інерція тут не писалась би краще за браузерну, тож смуга просто
+  // гортається сама, а ми чекаємо, поки вона спиниться, і читаємо, куди
+  // догорнули. `scrollend` є не всюди, тож поруч стоїть таймер спокою.
+  let idle = null;
+  el.addEventListener('scroll', () => {
+    if (stripSettling || isWideScreen()) return;
+    // Підпис має йти за пальцем, а не з'являтись після зупинки.
+    renderCalendarHead(stripAnchorAtScroll());
+    clearTimeout(idle);
+    idle = setTimeout(onStripSettled, 120);
+  }, { passive: true });
+
+  // Клітинка — посилання, і після гортання браузер ще може видати по ній
+  // клік. Гасимо той один клік, що йде одразу за рухом: гортання не має
+  // відкривати розділ завдань.
+  let downAt = null;
+  el.addEventListener('pointerdown', () => { downAt = el.scrollLeft; }, { passive: true });
   el.addEventListener('click', (e) => {
-    if (!swiped) return;
-    swiped = false;
+    if (downAt === null || Math.abs(el.scrollLeft - downAt) <= 4) return;
+    downAt = null;
     e.preventDefault();
     e.stopPropagation();
   }, true);
+
+  // ---- Місяць на широкому екрані: свайп власним обробником ----
+  // Сітка місяця не гортається — вона перемальовується цілком, і крок там
+  // місяць. Тому жест тут наш, а не браузерний.
+  let x0 = null, y0 = null;
   el.addEventListener('touchstart', (e) => {
-    if (e.touches.length !== 1) { x0 = null; return; }
+    if (!isWideScreen() || e.touches.length !== 1) { x0 = null; return; }
     x0 = e.touches[0].clientX;
     y0 = e.touches[0].clientY;
   }, { passive: true });
@@ -1505,7 +1648,6 @@ const SWIPE_MIN = 40;
     const dy = e.changedTouches[0].clientY - y0;
     x0 = null;
     if (Math.abs(dx) < SWIPE_MIN || Math.abs(dx) <= Math.abs(dy)) return;
-    swiped = true;
     // Тягнемо вміст пальцем: рух ліворуч показує те, що попереду.
     shiftCalendar(dx < 0 ? 1 : -1);
   }, { passive: true });
@@ -1579,6 +1721,12 @@ function formatFullDate(iso) {
   return `${weekday}, ${dayMonth}`;
 }
 
+/** Межі намальованої смуги (разом із запасом) для першого видимого дня. */
+function stripRange(fromIso) {
+  const from = HomeSummary.shiftDays(fromIso, -STRIP_PAD);
+  return { from, to: HomeSummary.shiftDays(from, STRIP_DAYS - 1) };
+}
+
 // Який діапазон дат уже прочитано в homeData.tasks. Потрібен саме тому, що
 // календар гортається: у сусідньому тижні крапки взялися б нізвідки, і день
 // із трьома справами виглядав би порожнім — тобто сторінка тихо брехала б.
@@ -1593,23 +1741,36 @@ function ensureTasksForCalendar() {
   if (!uid || !loadedTaskRange) return Promise.resolve();
   const today = todayISO();
   const anchor = calAnchorIso();
+  // На телефоні беремо весь намальований запас, а не сім видимих днів:
+  // крапки мають бути готові ДО того, як людина до них догорне, інакше вони
+  // проявлялися б із запізненням просто під пальцем.
   const cal = isWideScreen()
     ? HomeSummary.monthCalendar([], today, anchor)
-    : HomeSummary.weekCalendar([], today, anchor);
+    : stripRange(stripFromIso());
 
-  let from = null, to = null;
-  if (cal.from < loadedTaskRange.from) { from = cal.from; to = HomeSummary.shiftDays(loadedTaskRange.from, -1); }
-  else if (cal.to > loadedTaskRange.to) { from = HomeSummary.shiftDays(loadedTaskRange.to, 1); to = cal.to; }
-  else return Promise.resolve();
+  // Бракувати може з обох боків одразу, тож пропусків тут до двох.
+  const gaps = [];
+  if (cal.from < loadedTaskRange.from) gaps.push([cal.from, HomeSummary.shiftDays(loadedTaskRange.from, -1)]);
+  if (cal.to > loadedTaskRange.to) gaps.push([HomeSummary.shiftDays(loadedTaskRange.to, 1), cal.to]);
+  if (!gaps.length) return Promise.resolve();
 
   const known = loadedTaskRange;
-  loadedTaskRange = { from: from < known.from ? from : known.from, to: to > known.to ? to : known.to };
-  return db.collection('users').doc(uid).collection('tasks')
-    .where('dueDate', '>=', from).where('dueDate', '<=', to).get()
-    .then((snap) => {
+  loadedTaskRange = {
+    from: cal.from < known.from ? cal.from : known.from,
+    to: cal.to > known.to ? cal.to : known.to,
+  };
+  const col = db.collection('users').doc(uid).collection('tasks');
+  return Promise.all(gaps.map(([from, to]) =>
+    col.where('dueDate', '>=', from).where('dueDate', '<=', to).get()))
+    .then((snaps) => {
       const seen = {};
       (homeData.tasks || []).forEach((task) => { seen[task.id] = true; });
-      const add = snap.docs.map((d) => ({ id: d.id, ...d.data() })).filter((task) => !seen[task.id]);
+      const add = [];
+      snaps.forEach((snap) => snap.docs.forEach((d) => {
+        if (seen[d.id]) return;
+        seen[d.id] = true;
+        add.push({ id: d.id, ...d.data() });
+      }));
       if (!add.length) return;
       homeData.tasks = (homeData.tasks || []).concat(add);
       renderCalendar();
@@ -1658,8 +1819,13 @@ function loadTasksSection(userRef) {
   const today = todayISO();
   const monthFrom = HomeSummary.monthStart(today);
   const cal = HomeSummary.monthCalendar([], today);
-  const taskFrom = monthFrom < cal.from ? monthFrom : cal.from;
-  const taskTo = today > cal.to ? today : cal.to;
+  // Смуга днів на телефоні малюється з запасом у обидва боки, і читати його
+  // окремим запитом сенсу немає: перший же рух пальцем показував би дні без
+  // крапок, доки той запит летить. Тому беремо все одразу — це той самий
+  // один запит, лише ширшою межею.
+  const strip = stripRange(weekStartOf(today));
+  const taskFrom = [monthFrom, cal.from, strip.from].sort()[0];
+  const taskTo = [today, cal.to, strip.to].sort().pop();
   return userRef.collection('tasks').where('dueDate', '>=', taskFrom).where('dueDate', '<=', taskTo).get()
     .then((snap) => {
       const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
