@@ -1,15 +1,6 @@
-// ---- Service Worker ----
-// Реєструємо тут, а не інлайн у <script> в index.html, щоб CSP міг
-// забороняти інлайн-скрипти (script-src без 'unsafe-inline') без винятків.
-if ('serviceWorker' in navigator) {
-  // updateViaCache:'none' — щоб і сам воркер, і його importScripts('sw-core.js')
-  // бралися з мережі, а не з HTTP-кешу браузера. За замовчуванням ('imports')
-  // імпорти віддаються з кешу, і оболонка, яку тримає sw-core, лишалась би
-  // старою навіть після деплою: саме в цьому файлі живе версія збірки.
-  window.addEventListener('load', () => navigator.serviceWorker
-    .register('service-worker.js', { updateViaCache: 'none' })
-    .catch(() => {}));
-}
+// Реєстрація Service Worker переїхала у спільний ./sw-register.js: ці рядки
+// лежали пʼятьма копіями, а тепер разом із ними живе й перезавантаження
+// сторінки після деплою (див. довгий коментар там).
 
 // ---- Firebase ----
 firebase.initializeApp(firebaseConfig);

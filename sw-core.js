@@ -109,11 +109,29 @@ self.LifeSW = function LifeSW(config) {
     return caches.open(CACHE_NAME).then((cache) => cache.put(request, copy)).catch(() => {});
   }
 
+  /**
+   * Шукає у СВОЄМУ кеші, а не в усіх.
+   *
+   * Тут була справжня причина «оновив — змін не бачу». Глобальний
+   * caches.match() перебирає ВСІ кеші походження в порядку створення, тож
+   * попадання в life-<розділ>-<старий SHA> вигравало в свіжого кеша: новий
+   * воркер уже стояв до роботи, а сторінці однаково їхали вчорашні файли.
+   *
+   * Старий кеш мав би зникнути в activate — але він встигає воскреснути:
+   * попередній воркер ще живий і доробляє свої fetch-обробники, а кожен
+   * put() у ньому створює кеш під старою назвою заново. Виходило, що
+   * оболонка могла лишитись старою назавжди, і рятувало лише
+   * перевстановлення застосунку.
+   */
+  function matchOwn(request) {
+    return caches.open(CACHE_NAME).then((cache) => cache.match(request));
+  }
+
   self.addEventListener('fetch', (event) => {
     if (!shouldHandle(event.request)) return;
 
     event.respondWith(
-      caches.match(event.request).then((cached) => {
+      matchOwn(event.request).then((cached) => {
         // Оновлення у фоні: сторінка вже отримала свою відповідь із кешу, а
         // свіжа версія ляже туди для наступного разу.
         const fromNetwork = fetch(event.request).then((response) => {
