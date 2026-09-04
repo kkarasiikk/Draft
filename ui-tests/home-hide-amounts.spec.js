@@ -63,7 +63,24 @@ test('тап по оку не відкриває бюджет', async ({ page })
   await expect(page.locator('#homeScreen')).toBeVisible();
 });
 
-// Значок показує ДІЮ, а не стан: коли сума видна, він пропонує сховати.
+// Значок показує СТАН: сума видна — око звичайне, схована — перекреслене.
+// Спершу він показував дію («перекреслене» = натисни, щоб сховати), і
+// читалось це рівно навпаки: сума на місці, а око вже закреслене, ніби її й
+// немає. Що станеться після натискання, каже підпис — його читає і той, хто
+// значка не бачить.
+const crossed = (page) => page.locator('#hideAmountsBtn').evaluate((el) =>
+  // Перекреслена версія малюється діагоналлю через усе око.
+  el.innerHTML.includes('M3 3l18 18'));
+
+test('око показує стан суми, а не дію', async ({ page }) => {
+  await openHub(page);
+  await expect(page.locator('#budgetStat')).not.toHaveText('•••');
+  expect(await crossed(page), 'сума видна — око не перекреслене').toBe(false);
+  await toggle(page);
+  await expect(page.locator('#budgetStat')).toHaveText('•••');
+  expect(await crossed(page), 'сума схована — око перекреслене').toBe(true);
+});
+
 test('підказка на оку каже, що буде далі', async ({ page }) => {
   await openHub(page);
   await expect(eye(page)).toHaveAttribute('aria-label', 'Сховати суму');

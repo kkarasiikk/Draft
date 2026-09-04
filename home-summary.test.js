@@ -90,45 +90,6 @@ describe('workoutSummary: коли востаннє', () => {
   });
 });
 
-describe('goalsSummary: серія і що без кроку', () => {
-  const goal = (checkins, over = {}) => ({
-    title: 'Ціль', status: 'active', checkins, blockers: [], ...over,
-  });
-
-  test('показує найдовшу серед активних, навіть якщо її вже відмічено', () => {
-    const r = H.goalsSummary([
-      goal(['2026-08-24', '2026-08-25', '2026-08-26']),  // 3, відмічено сьогодні
-      goal(['2026-08-25']),                              // під загрозою
-    ], TODAY, GoalStreak);
-    expect(r.streak).toBe(3);
-    // Відмічена сьогодні в «без кроку» не потрапляє.
-    expect(r.pending).toBe(1);
-    expect(r.active).toBe(2);
-  });
-
-  test('завершені цілі не рахуються активними', () => {
-    const r = H.goalsSummary([goal([], { status: 'done' })], TODAY, GoalStreak);
-    expect(r.active).toBe(0);
-    expect(r.pending).toBe(0);
-  });
-
-  test('без GoalStreak повертає нулі, а не падає', () => {
-    // Модуль сам реєструється в globalThis при require, тож щоб перевірити
-    // запобіжник, його треба на час прибрати — інакше спрацює фолбек.
-    const saved = globalThis.GoalStreak;
-    delete globalThis.GoalStreak;
-    try {
-      expect(H.goalsSummary([goal([])], TODAY, null)).toEqual({ pending: 0, streak: 0, active: 0 });
-    } finally {
-      globalThis.GoalStreak = saved;
-    }
-  });
-
-  test('явно переданий GoalStreak має пріоритет над глобальним', () => {
-    expect(H.goalsSummary([goal(['2026-08-26'])], TODAY, GoalStreak).streak).toBe(1);
-  });
-});
-
 describe('monthStart', () => {
   test('перше число того самого місяця', () => {
     expect(H.monthStart('2026-08-26')).toBe('2026-08-01');

@@ -434,7 +434,10 @@
      лишається назвою й не вдає з себе кнопку. */
   .cal-month.current{cursor:default;}
   .cal-month:not(.current){color:var(--accent);}
-  .cal-nav{display:flex;gap:2px;}
+  /* На телефоні стрілок немає: смуга гортається пальцем, і два значки в
+     шапці лише повторювали б жест, який і так під рукою. На компʼютері вони
+     лишаються — там намальовано місяць, свайпнути мишею нічим. */
+  .cal-nav{display:none;gap:2px;}
   .cal-arrow{display:flex;align-items:center;justify-content:center;width:26px;height:26px;
     border:none;background:none;border-radius:8px;color:var(--ink-muted);cursor:pointer;
     -webkit-tap-highlight-color:transparent;transition:background .15s, color .15s;}
@@ -563,6 +566,7 @@
       background:var(--surface);border:1px solid var(--border);border-radius:22px;
       padding:18px 18px 14px;}
     .cal-head{margin-bottom:14px;padding-left:0;}
+    .cal-nav{display:flex;}
     .cal-month{font-size:15px;font-weight:700;color:var(--ink);}
     .cal-month:not(.current){color:var(--accent);}
     .cal-arrow{width:30px;height:30px;}
