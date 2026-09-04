@@ -136,16 +136,43 @@ test.describe('Тижневик: тиждень, назва, групи', () => 
   test('зверху — сім днів тижня, а не рядок із датами', async ({ page }) => {
     await openTasks(page);
     await page.click('#bnWeek');
-    await expect(page.locator('.plan-day')).toHaveCount(7);
+    await expect(page.locator('#planWeekStrip .week-day')).toHaveCount(7);
     // Виділений лише сьогоднішній: тут нічого не обирають, це підпис до
     // вкладки, а не смуга вибору дня.
-    await expect(page.locator('.plan-day.today')).toHaveCount(1);
+    await expect(page.locator('#planWeekStrip .week-day.today')).toHaveCount(1);
+    await expect(page.locator('#planWeekStrip .week-day.selected')).toHaveCount(0);
+  });
+
+  test('смуга та сама, що у вкладці «День» — ті самі класи, а не схожа копія', async ({ page }) => {
+    // Спершу тут була своя, третя за рахунком смуга: трохи інші розміри, без
+    // крапок. Виглядала майже так само — і саме це «майже» читалось як
+    // недоробка.
+    await openTasks(page);
+    const dayCell = await page.locator('#weekTrack .week-strip:not(.adjacent) .week-day').first()
+      .evaluate((el) => Array.from(el.querySelectorAll('span')).map((s) => s.className));
+    await page.click('#bnWeek');
+    const planCell = await page.locator('#planWeekStrip .week-day').first()
+      .evaluate((el) => Array.from(el.querySelectorAll('span')).map((s) => s.className));
+    expect(planCell).toEqual(dayCell);
+  });
+
+  test('крапка означає те саме, що скрізь: є справи / усе закрито', async ({ page }) => {
+    await openTasks(page, {
+      profile: {},
+      tasks: [
+        task({ id: 'a', title: 'Є що робити', dueDate: THIS_WEEK }),
+        task({ id: 'b', title: 'Усе закрито', dueDate: iso(0), done: true }),
+      ],
+    });
+    await page.click('#bnWeek');
+    await expect(page.locator('#planWeekStrip .week-day-dot.has')).toHaveCount(1);
+    await expect(page.locator('#planWeekStrip .week-day-dot.all-done')).toHaveCount(1);
   });
 
   test('тап по числу веде у вкладку «День» на цю дату', async ({ page }) => {
     await openTasks(page);
     await page.click('#bnWeek');
-    await page.locator('.plan-day').nth(2).click();
+    await page.locator('#planWeekStrip .week-day').nth(2).click();
     await expect(page.locator('#dayScreen')).toBeVisible();
     await expect(page.locator('#bnDay')).toHaveClass(/active/);
   });

@@ -1758,22 +1758,41 @@ function shiftPlanWeek(delta) {
   renderWeekPlanScreen();
 }
 
-// Тиждень показує сам себе — сімома днями. Виділений лише сьогоднішній: тут
-// нічого не обирають, це підпис до вкладки, а не смуга вибору дня. Тап по
-// числу веде у вкладку «День» на цю дату — те саме, що робить календар на
-// головній.
+// Тиждень показує сам себе — сімома днями, і рівно тими самими, що у вкладці
+// «День» і на головній: день тижня, число, крапка завантаженості. Спершу тут
+// була своя, третя за рахунком смуга — трохи інші розміри, без крапок; вона
+// виглядала майже так само, і саме це «майже» й читалось як недоробка. Тепер
+// класи ті самі (.week-strip / .week-day), тож і вигляд один на всі місця.
+//
+// Крапка означає те саме, що скрізь: на цей день щось заплановано, порожнє
+// кільце — усе вже зроблено. Обраного дня тут немає (нема чого обирати),
+// зате виділене СЬОГОДНІ — заливкою, як у календарі на головній.
+//
+// Тап по числу веде у вкладку «День» на цю дату.
 function renderPlanWeekStrip(weekIso) {
   const locale = LOCALE_MAP[currentLang] || 'uk-UA';
-  const dow = new Intl.DateTimeFormat(locale, { weekday: 'short' });
+  const nameFmt = new Intl.DateTimeFormat(locale, { weekday: 'short' });
   const today = todayISO();
+  // Той самий фільтр за тегами, що й у смузі дня: крапки мусять означати те
+  // саме, що там, інакше два тижні поруч показували б різне.
+  const filtered = tasks.filter(matchesFilters);
+  const midMonth = isoDateShift(weekIso, 3).slice(0, 7);
+
   let html = '';
   for (let i = 0; i < 7; i++) {
     const iso = isoDateShift(weekIso, i);
     const at = parseISODate(iso);
+    const stats = dayStats(filtered, iso);
+    const dotClass = stats.allDone ? ' all-done' : (stats.total ? ' has' : '');
+    const cls = ['week-day'];
+    if (iso === today) cls.push('today');
+    // Хвіст сусіднього місяця читається тихіше — як і в смузі дня.
+    if (iso.slice(0, 7) !== midMonth) cls.push('other-month');
     html += `
-      <button type="button" class="plan-day${iso === today ? ' today' : ''}" data-plan-day="${iso}">
-        <span class="plan-day-dow">${escapeHtml(dow.format(at))}</span>
-        <span class="plan-day-num">${at.getDate()}</span>
+      <button type="button" class="${cls.join(' ')}" data-plan-day="${iso}">
+        <span class="week-day-name">${escapeHtml(nameFmt.format(at).replace('.', ''))}</span>
+        <span class="week-day-num">${at.getDate()}</span>
+        <span class="week-day-dot${dotClass}"></span>
       </button>`;
   }
   const el = document.getElementById('planWeekStrip');
