@@ -45,6 +45,14 @@ async function openTasks(page, seed = SEED) {
 
 const titles = (page) => page.locator('#planList .task-title').allTextContents();
 
+// Стрілки в тижневику, як і в «Дні», спершу докочують доріжку й лише тоді
+// перемальовують тиждень — тож чекаємо не на клік, а на зміну підпису.
+async function planShift(page, selector) {
+  const before = await page.locator('#planLabel').textContent();
+  await page.click(selector);
+  await expect(page.locator('#planLabel')).not.toHaveText(before);
+}
+
 test.use({ viewport: { width: 390, height: 844 } });
 
 test.describe('Нижня панель', () => {
@@ -112,19 +120,19 @@ test.describe('Вкладка тижня', () => {
   test('назад — той тиждень, який був, а не звалище незробленого', async ({ page }) => {
     await openTasks(page);
     await page.click('#bnWeek');
-    await page.click('#planPrevBtn');
+    await planShift(page, '#planPrevBtn');
     const list = await titles(page);
     expect(list).toContain('Борг з минулого');
     expect(list, 'закрите лишилось у своєму тижні').toContain('Закрите минулого');
     expect(list).not.toContain('Ідея на тиждень');
   });
 
-  test('підпис місяця вертає в поточний тиждень', async ({ page }) => {
+  test('підпис вертає в поточний тиждень', async ({ page }) => {
     await openTasks(page);
     await page.click('#bnWeek');
     await expect(page.locator('#planLabel')).toHaveClass(/current/);
     const start = await titles(page);
-    await page.click('#planPrevBtn');
+    await planShift(page, '#planPrevBtn');
     await expect(page.locator('#planLabel')).not.toHaveClass(/current/);
     await page.click('#planLabel');
     await expect(page.locator('#planLabel')).toHaveClass(/current/);
@@ -136,11 +144,11 @@ test.describe('Тижневик: тиждень, назва, групи', () => 
   test('зверху — сім днів тижня, а не рядок із датами', async ({ page }) => {
     await openTasks(page);
     await page.click('#bnWeek');
-    await expect(page.locator('#planWeekStrip .week-day')).toHaveCount(7);
-    // Виділений лише сьогоднішній: тут нічого не обирають, це підпис до
-    // вкладки, а не смуга вибору дня.
-    await expect(page.locator('#planWeekStrip .week-day.today')).toHaveCount(1);
-    await expect(page.locator('#planWeekStrip .week-day.selected')).toHaveCount(0);
+    await expect(page.locator('#planWeekTrack .week-strip:not(.adjacent) .week-day')).toHaveCount(7);
+    // Обирати тут нема чого, тож заливкою позначене СЬОГОДНІ — рівно тим
+    // самим класом, яким у «Дні» позначений обраний день.
+    await expect(page.locator('#planWeekTrack .week-strip:not(.adjacent) .week-day.today')).toHaveCount(1);
+    await expect(page.locator('#planWeekTrack .week-strip:not(.adjacent) .week-day.selected')).toHaveCount(1);
   });
 
   test('смуга та сама, що у вкладці «День» — ті самі класи, а не схожа копія', async ({ page }) => {
@@ -151,7 +159,7 @@ test.describe('Тижневик: тиждень, назва, групи', () => 
     const dayCell = await page.locator('#weekTrack .week-strip:not(.adjacent) .week-day').first()
       .evaluate((el) => Array.from(el.querySelectorAll('span')).map((s) => s.className));
     await page.click('#bnWeek');
-    const planCell = await page.locator('#planWeekStrip .week-day').first()
+    const planCell = await page.locator('#planWeekTrack .week-strip:not(.adjacent) .week-day').first()
       .evaluate((el) => Array.from(el.querySelectorAll('span')).map((s) => s.className));
     expect(planCell).toEqual(dayCell);
   });
@@ -165,16 +173,57 @@ test.describe('Тижневик: тиждень, назва, групи', () => 
       ],
     });
     await page.click('#bnWeek');
-    await expect(page.locator('#planWeekStrip .week-day-dot.has')).toHaveCount(1);
-    await expect(page.locator('#planWeekStrip .week-day-dot.all-done')).toHaveCount(1);
+    await expect(page.locator('#planWeekTrack .week-strip:not(.adjacent) .week-day-dot.has')).toHaveCount(1);
+    await expect(page.locator('#planWeekTrack .week-strip:not(.adjacent) .week-day-dot.all-done')).toHaveCount(1);
   });
 
   test('тап по числу веде у вкладку «День» на цю дату', async ({ page }) => {
     await openTasks(page);
     await page.click('#bnWeek');
-    await page.locator('#planWeekStrip .week-day').nth(2).click();
+    await page.locator('#planWeekTrack .week-strip:not(.adjacent) .week-day').nth(2).click();
     await expect(page.locator('#dayScreen')).toBeVisible();
     await expect(page.locator('#bnDay')).toHaveClass(/active/);
+  });
+
+  test('шапка зібрана так само, як у «Дні»: стрілки навколо підпису, доріжка під ними', async ({ page }) => {
+    // Скріншот, з якого почалась ця зміна, обводив саме шапку цілком. Тому
+    // перевіряємо не «схоже», а той самий каркас: ті самі класи в тому ж
+    // порядку, і три тижні в доріжці — попередній, цей, наступний.
+    const classNames = (el) => Array.from(el.children).map((c) => c.className);
+    await openTasks(page);
+    const dayHead = await page.locator('#weekSwipeArea .week-head').evaluate(classNames);
+    await page.click('#bnWeek');
+    const planHead = await page.locator('#planSwipeArea .week-head').evaluate(classNames);
+    // Підпис у тижневику ще й кнопка «вернутись у цей тиждень» — звідси
+    // додатковий клас; решта шапки збігається один в один.
+    expect(planHead.map((c) => c.replace(' plan-label', '').replace(/ current$/, '')))
+      .toEqual(dayHead);
+    await expect(page.locator('#planSwipeArea .week-viewport .week-track')).toHaveCount(1);
+    await expect(page.locator('#planWeekTrack .week-strip')).toHaveCount(3);
+    await expect(page.locator('#planWeekTrack .week-strip.adjacent')).toHaveCount(2);
+  });
+
+  test('тиждень гортається пальцем, як і в «Дні»', async ({ page }) => {
+    // Стрілки були й до цього; гортання — ні, і саме воно робить шапку тією
+    // самою, а не схожою.
+    await openTasks(page);
+    await page.click('#bnWeek');
+    await expect(page.locator('#planLabel')).toHaveClass(/current/);
+    const before = await page.locator('#planLabel').textContent();
+
+    // Міряємо саме вікно, а не доріжку: доріжка втричі ширша за екран і
+    // здебільшого лежить за його межами.
+    const box = await page.locator('#planSwipeArea .week-viewport').boundingBox();
+    const y = box.y + box.height / 2;
+    await page.mouse.move(box.x + box.width - 30, y);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 30, y, { steps: 12 });
+    await page.mouse.up();
+
+    await expect(page.locator('#planLabel')).not.toHaveText(before);
+    await expect(page.locator('#planLabel')).not.toHaveClass(/current/);
+    // Уперед — отже наступний тиждень, і записи цього тижня туди не поїхали.
+    expect(await titles(page)).not.toContain('Ідея на тиждень');
   });
 
   test('велика назва вкладки на місці', async ({ page }) => {
@@ -183,12 +232,13 @@ test.describe('Тижневик: тиждень, назва, групи', () => 
     await expect(page.locator('#planTitle')).toHaveText('Тижневик');
   });
 
-  test('підпис — місяць, і рік у ньому лише коли він не цей', async ({ page }) => {
+  test('підпис — той самий діапазон дат, що у вкладці «День»', async ({ page }) => {
+    // Раніше тут стояла назва місяця: два способи назвати один тиждень
+    // розходились на межі місяців («вересень» проти «31 серпня – 6 вересня»).
     await openTasks(page);
+    const dayLabel = await page.locator('#weekLabel').textContent();
     await page.click('#bnWeek');
-    await expect(page.locator('#planLabel')).not.toHaveText(/\d{4}/);
-    for (let i = 0; i < 60; i++) await page.click('#planNextBtn');
-    await expect(page.locator('#planLabel')).toHaveText(/\d{4}/);
+    expect(await page.locator('#planLabel').textContent()).toBe(dayLabel);
   });
 
   test('записи стоять групами за категоріями, порожніх груп немає', async ({ page }) => {

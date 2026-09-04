@@ -1758,62 +1758,42 @@ function shiftPlanWeek(delta) {
   renderWeekPlanScreen();
 }
 
-// Тиждень показує сам себе — сімома днями, і рівно тими самими, що у вкладці
-// «День» і на головній: день тижня, число, крапка завантаженості. Спершу тут
-// була своя, третя за рахунком смуга — трохи інші розміри, без крапок; вона
-// виглядала майже так само, і саме це «майже» й читалось як недоробка. Тепер
-// класи ті самі (.week-strip / .week-day), тож і вигляд один на всі місця.
+// Тиждень показує сам себе тією самою шапкою, що й вкладка «День»: стрілки
+// навколо назви діапазону, під ними смуга з семи днів, і гортається вона так
+// само пальцем. Спершу тут була своя, третя за рахунком смуга — трохи інші
+// розміри, без крапок, стрілки по боках; вона виглядала майже так само, і
+// саме це «майже» й читалось як недоробка. Тепер це буквально той самий код:
+// weekStripHtml, той самий .week-track і той самий initWeekDrag.
 //
-// Крапка означає те саме, що скрізь: на цей день щось заплановано, порожнє
-// кільце — усе вже зроблено. Обраного дня тут немає (нема чого обирати),
-// зате виділене СЬОГОДНІ — заливкою, як у календарі на головній.
-//
-// Тап по числу веде у вкладку «День» на цю дату.
+// Різниця лише в тому, що обирати тут нема чого, тож заливкою виділене
+// СЬОГОДНІ — рівно так, як у «Дні» виглядає обраний день.
 function renderPlanWeekStrip(weekIso) {
-  const locale = LOCALE_MAP[currentLang] || 'uk-UA';
-  const nameFmt = new Intl.DateTimeFormat(locale, { weekday: 'short' });
-  const today = todayISO();
-  // Той самий фільтр за тегами, що й у смузі дня: крапки мусять означати те
-  // саме, що там, інакше два тижні поруч показували б різне.
-  const filtered = tasks.filter(matchesFilters);
-  const midMonth = isoDateShift(weekIso, 3).slice(0, 7);
+  const opts = {
+    selectedIso: todayISO(),
+    monthIso: isoDateShift(weekIso, 3),
+    attr: 'data-plan-day',
+  };
+  const track = document.getElementById('planWeekTrack');
+  track.innerHTML =
+    weekStripHtml(weekDaysOf(WeekPlan.shiftWeeks(weekIso, -1)), false, opts) +
+    weekStripHtml(weekDaysOf(weekIso), true, opts) +
+    weekStripHtml(weekDaysOf(WeekPlan.shiftWeeks(weekIso, 1)), false, opts);
+  setTrackOffset('planWeekTrack', 0, false);
 
-  let html = '';
-  for (let i = 0; i < 7; i++) {
-    const iso = isoDateShift(weekIso, i);
-    const at = parseISODate(iso);
-    const stats = dayStats(filtered, iso);
-    const dotClass = stats.allDone ? ' all-done' : (stats.total ? ' has' : '');
-    const cls = ['week-day'];
-    if (iso === today) cls.push('today');
-    // Хвіст сусіднього місяця читається тихіше — як і в смузі дня.
-    if (iso.slice(0, 7) !== midMonth) cls.push('other-month');
-    html += `
-      <button type="button" class="${cls.join(' ')}" data-plan-day="${iso}">
-        <span class="week-day-name">${escapeHtml(nameFmt.format(at).replace('.', ''))}</span>
-        <span class="week-day-num">${at.getDate()}</span>
-        <span class="week-day-dot${dotClass}"></span>
-      </button>`;
-  }
-  const el = document.getElementById('planWeekStrip');
-  el.innerHTML = html;
-  el.querySelectorAll('[data-plan-day]').forEach((btn) => {
+  track.querySelectorAll('[data-plan-day]').forEach((btn) => {
     btn.addEventListener('click', () => { selectDate(btn.dataset.planDay); });
   });
 }
 
 function renderWeekPlanScreen() {
   const weekIso = planWeekIso();
-  const locale = LOCALE_MAP[currentLang] || 'uk-UA';
   const label = document.getElementById('planLabel');
-  // Підпис — місяць середини тижня: сім чисел на межі місяців належать двом,
-  // і край однаково брехав би. Рік дописується, лише коли він не цей: «січень»
-  // за півроку вперед не каже, який це січень, а «вересень 2026» щодня —
-  // зайве слово. Те саме правило, що в календарі на головній.
-  const mid = isoDateShift(weekIso, 3);
-  const sameYear = mid.slice(0, 4) === todayISO().slice(0, 4);
-  const month = new Intl.DateTimeFormat(locale, sameYear ? { month: 'long' } : { month: 'long', year: 'numeric' });
-  label.textContent = month.format(parseISODate(mid));
+  // Підпис — той самий діапазон, що у вкладці «День» («31 серпня – 6 вересня»),
+  // і рахує його та сама функція: два способи назвати один тиждень розійшлися
+  // б на межі місяців.
+  const days = [];
+  for (let i = 0; i < 7; i++) days.push(isoDateShift(weekIso, i));
+  label.textContent = weekLabelText(days);
   label.classList.toggle('current', planAtThisWeek());
   label.title = planAtThisWeek() ? '' : t('planBackWeek');
 
@@ -1991,8 +1971,6 @@ function addPlanCategory() {
   savePlanCategories(planCategories.concat([{ id, label }]));
 }
 
-document.getElementById('planPrevBtn').addEventListener('click', () => shiftPlanWeek(-1));
-document.getElementById('planNextBtn').addEventListener('click', () => shiftPlanWeek(1));
 document.getElementById('planLabel').addEventListener('click', () => {
   if (planAtThisWeek()) return;
   planWeek = null;
@@ -2059,11 +2037,20 @@ function renderDayScreen() {
 // Доріжка з трьох тижнів: попередній, поточний, наступний. Сусідні
 // відрендерені наперед саме для того, щоб числа могли їхати за пальцем —
 // інакше в'їжджати було б нічому.
-function weekStripHtml(days, isCurrent) {
+// opts дає двом вкладкам говорити про свій тиждень своїми словами:
+//   selectedIso — який день залито (у «Дні» обраний, у тижневику сьогодні),
+//   monthIso    — чий це місяць, щоб приглушити хвіст сусіднього,
+//   attr        — за яким атрибутом вкладка потім ловить тап по числу.
+// Усе інше — розміри, крапки, кольори — спільне, і навмисно: три майже
+// однакові смуги вже були, і кожна відрізнялась дрібницею.
+function weekStripHtml(days, isCurrent, opts) {
+  const o = opts || {};
+  const selectedIso = o.selectedIso || selectedDate;
+  const monthRef = (o.monthIso || selectedDate).slice(0, 7);
+  const attr = o.attr || 'data-week-day';
   const locale = LOCALE_MAP[currentLang] || 'uk-UA';
   const today = todayISO();
   const nameFmt = new Intl.DateTimeFormat(locale, { weekday: 'short' });
-  const selMonth = selectedDate.slice(0, 7);
   const filtered = tasks.filter(matchesFilters);
 
   const cells = days.map((iso) => {
@@ -2071,11 +2058,11 @@ function weekStripHtml(days, isCurrent) {
     const stats = dayStats(filtered, iso);
     const dotClass = stats.allDone ? ' all-done' : (stats.total ? ' has' : '');
     const cls = ['week-day'];
-    if (isCurrent && iso === selectedDate) cls.push('selected');
+    if (isCurrent && iso === selectedIso) cls.push('selected');
     if (iso === today) cls.push('today');
-    if (iso.slice(0, 7) !== selMonth) cls.push('other-month');
+    if (iso.slice(0, 7) !== monthRef) cls.push('other-month');
     return `
-      <button type="button" class="${cls.join(' ')}"${isCurrent ? ` data-week-day="${iso}"` : ' tabindex="-1"'}>
+      <button type="button" class="${cls.join(' ')}"${isCurrent ? ` ${attr}="${iso}"` : ' tabindex="-1"'}>
         <span class="week-day-name">${escapeHtml(nameFmt.format(d).replace('.', ''))}</span>
         <span class="week-day-num">${d.getDate()}</span>
         <span class="week-day-dot${dotClass}"></span>
@@ -2083,6 +2070,7 @@ function weekStripHtml(days, isCurrent) {
   }).join('');
   return `<div class="week-strip${isCurrent ? '' : ' adjacent'}">${cells}</div>`;
 }
+
 
 function renderWeekStrip() {
   const days = weekDaysOf(selectedDate);
@@ -2093,7 +2081,7 @@ function renderWeekStrip() {
     weekStripHtml(weekDaysOf(isoDateShift(selectedDate, -7)), false) +
     weekStripHtml(days, true) +
     weekStripHtml(weekDaysOf(isoDateShift(selectedDate, 7)), false);
-  setTrackOffset(0, false);
+  setTrackOffset('weekTrack', 0, false);
 
   track.querySelectorAll('[data-week-day]').forEach((btn) => {
     btn.addEventListener('click', () => selectDate(btn.dataset.weekDay));
@@ -2101,8 +2089,8 @@ function renderWeekStrip() {
 }
 
 // Зсув доріжки: 0 — поточний тиждень по центру, dxPx — «недотягнутий» рух пальця.
-function setTrackOffset(dxPx, animated) {
-  const track = document.getElementById('weekTrack');
+function setTrackOffset(trackId, dxPx, animated) {
+  const track = document.getElementById(trackId);
   if (!track) return;
   track.classList.toggle('animating', !!animated);
   track.style.transform = `translate3d(calc(-33.3333% + ${Math.round(dxPx)}px), 0, 0)`;
@@ -2180,15 +2168,15 @@ function shiftWeek(delta) {
 
 // Гортання тижня стрілками — той самий рух, що й пальцем: доріжка доїжджає
 // до сусіднього тижня, і вже тоді перемальовується на нього.
-function animateWeekTo(delta) {
-  const track = document.getElementById('weekTrack');
+function animateTrackTo(trackId, delta, onShift) {
+  const track = document.getElementById(trackId);
   const width = track ? track.offsetWidth / 3 : 0;
-  slideWeekTo(-delta * width, () => shiftWeek(delta));
+  slideTrackTo(trackId, -delta * width, () => onShift(delta));
 }
 
 // Доводить доріжку до кінця й після анімації віддає керування колбеку.
-function slideWeekTo(targetPx, done) {
-  const track = document.getElementById('weekTrack');
+function slideTrackTo(trackId, targetPx, done) {
+  const track = document.getElementById(trackId);
   if (!track) { done(); return; }
   let finished = false;
   const finish = () => {
@@ -2202,16 +2190,22 @@ function slideWeekTo(targetPx, done) {
   // Запобіжник: якщо transitionend не прийде (вкладка у фоні, вимкнені
   // анімації), тиждень усе одно має перемкнутись.
   setTimeout(finish, 320);
-  setTrackOffset(targetPx, true);
+  setTrackOffset(trackId, targetPx, true);
 }
 
-document.getElementById('weekPrevBtn').addEventListener('click', () => animateWeekTo(-1));
-document.getElementById('weekNextBtn').addEventListener('click', () => animateWeekTo(1));
-initWeekDrag(document.getElementById('weekSwipeArea'));
+document.getElementById('weekPrevBtn').addEventListener('click', () => animateTrackTo('weekTrack', -1, shiftWeek));
+document.getElementById('weekNextBtn').addEventListener('click', () => animateTrackTo('weekTrack', 1, shiftWeek));
+initWeekDrag('weekSwipeArea', 'weekTrack', shiftWeek);
+
+document.getElementById('planPrevBtn').addEventListener('click', () => animateTrackTo('planWeekTrack', -1, shiftPlanWeek));
+document.getElementById('planNextBtn').addEventListener('click', () => animateTrackTo('planWeekTrack', 1, shiftPlanWeek));
+initWeekDrag('planSwipeArea', 'planWeekTrack', shiftPlanWeek);
 
 // Перетягування тижня: числа рухаються разом із пальцем, а на відпусканні
 // доріжка або доїжджає до сусіднього тижня, або повертається назад.
-function initWeekDrag(area) {
+function initWeekDrag(areaId, trackId, onShift) {
+  const area = document.getElementById(areaId);
+  if (!area) return;
   const MIN_DISTANCE = 45;   // менше — це тап із дрібним зсувом, а не гортання
   const AXIS_LOCK = 8;       // після цих пікселів стає ясно, куди веде рух
   let startX = 0, startY = 0, dragging = false, decided = false, horizontal = false;
@@ -2238,7 +2232,7 @@ function initWeekDrag(area) {
       horizontal = Math.abs(dx) > Math.abs(dy);
       if (!horizontal) { reset(); return; }
     }
-    setTrackOffset(dx, false);
+    setTrackOffset(trackId, dx, false);
   });
 
   const release = (e) => {
@@ -2247,20 +2241,20 @@ function initWeekDrag(area) {
     reset();
     if (!dx) return;
     swallowNextClick(area);
-    const width = document.getElementById('weekTrack').offsetWidth / 3;
+    const width = document.getElementById(trackId).offsetWidth / 3;
     if (Math.abs(dx) >= MIN_DISTANCE) {
       const delta = dx < 0 ? 1 : -1;
-      slideWeekTo(-delta * width, () => shiftWeek(delta));
+      slideTrackTo(trackId, -delta * width, () => onShift(delta));
     } else {
       // Недотягнули — доріжка вертається на місце.
-      slideWeekTo(0, () => {});
+      slideTrackTo(trackId, 0, () => {});
     }
   };
   area.addEventListener('pointerup', release);
   area.addEventListener('pointercancel', () => {
     if (!dragging) return;
     reset();
-    slideWeekTo(0, () => {});
+    slideTrackTo(trackId, 0, () => {});
   });
 }
 
