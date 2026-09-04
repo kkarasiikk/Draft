@@ -14,19 +14,20 @@ test('вкладки «Статистика» немає, а сам екран �
   await expect(page.locator('#bottomNav')).not.toContainText('Статистика');
 });
 
-test('лишились рівно дві вкладки екранів плюс «Головна»', async ({ page }) => {
+// Три вкладки — три горизонти: день, тиждень, календар. «Головна» звідси
+// пішла разом із появою третьої: на хаб веде напис Life у шапці, той самий,
+// що й у решті модулів, тож виходу це не забирає (див. tasks-week-plan.spec.js).
+test('лишились рівно три вкладки екранів, і жодної «Головної»', async ({ page }) => {
   await openModule(page, 'tasks/index.html');
-  await expect(page.locator('#bottomNav [data-screen]')).toHaveCount(2);
+  await expect(page.locator('#bottomNav [data-screen]')).toHaveCount(3);
+  await expect(page.locator('#bnDay')).toBeVisible();
   await expect(page.locator('#bnWeek')).toBeVisible();
   await expect(page.locator('#bnMonth')).toBeVisible();
-  // «Головна» в розмітці є завжди, але на широкому екрані її ховають:
-  // те саме робить перший рядок бічної колонки.
-  await expect(page.locator('#bnHome')).toHaveCount(1);
+  await expect(page.locator('#bnHome')).toHaveCount(0);
 });
 
 // Панель була поділена на дві групи заради кнопки «+» посередині; та давно
-// живе окремо, і після видалення однієї вкладки права половина лишилась би
-// порожньою — а на широкому екрані, де «Головна» схована, порожньою цілком.
+// живе окремо, і без цього права половина лишалась би порожньою.
 test('на телефоні три кнопки стоять рівним рядком', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await openModule(page, 'tasks/index.html');
@@ -38,29 +39,28 @@ test('на телефоні три кнопки стоять рівним ряд
   expect(Math.max(...widths) - Math.min(...widths)).toBeLessThan(2);
 });
 
-test('на широкому екрані дві кнопки, що лишились, заповнюють панель', async ({ page }) => {
+test('на широкому екрані ті самі три кнопки заповнюють панель', async ({ page }) => {
   await openModule(page, 'tasks/index.html');
-  await expect(page.locator('#bnHome')).toBeHidden();
   const { panel, items } = await page.evaluate(() => ({
     panel: document.getElementById('bottomNav').getBoundingClientRect().width,
     items: Array.from(document.querySelectorAll('#bottomNav .bn-item'))
       .map((el) => el.getBoundingClientRect().width).filter((w) => w > 0),
   }));
-  expect(items).toHaveLength(2);
+  expect(items).toHaveLength(3);
   expect(Math.max(...items) - Math.min(...items)).toBeLessThan(2);
-  // Разом вони займають майже всю панель — порожньої половини немає.
-  expect(items[0] + items[1]).toBeGreaterThan(panel - 30);
+  // Разом вони займають майже всю панель — порожньої частини немає.
+  expect(items.reduce((a, b) => a + b, 0)).toBeGreaterThan(panel - 30);
 });
 
-test('перемикання «Тиждень» ↔ «Календар» працює й далі', async ({ page }) => {
+test('перемикання «День» ↔ «Календар» працює й далі', async ({ page }) => {
   await openModule(page, 'tasks/index.html');
   await page.click('#bnMonth');
   await expect(page.locator('#monthScreen')).toBeVisible();
-  await expect(page.locator('#weekScreen')).toBeHidden();
+  await expect(page.locator('#dayScreen')).toBeHidden();
   await expect(page.locator('#bnMonth')).toHaveClass(/active/);
 
-  await page.click('#bnWeek');
-  await expect(page.locator('#weekScreen')).toBeVisible();
+  await page.click('#bnDay');
+  await expect(page.locator('#dayScreen')).toBeVisible();
   await expect(page.locator('#monthScreen')).toBeHidden();
-  await expect(page.locator('#bnWeek')).toHaveClass(/active/);
+  await expect(page.locator('#bnDay')).toHaveClass(/active/);
 });

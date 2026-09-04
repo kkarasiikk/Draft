@@ -13,7 +13,7 @@ rules_version = '2';
 //   users/{uid}/pages/{id}            -- {title, content, createdAt, updatedAt}
 //   users/{uid}/tasks/{id}            -- {title, notes, done, completedAt,
 //                                         priority, tags, dueDate, dueTime,
-//                                         estimateMin, recurrence, subtasks,
+//                                         weekStart, estimateMin, recurrence, subtasks,
 //                                         reminderAt, notifiedAt, goalId,
 //                                         createdAt, updatedAt}
 //   users/{uid}/taskTemplates/{id}    -- {title, notes, priority, tags,
@@ -174,6 +174,11 @@ service cloud.firestore {
                  d.tags is list && d.tags.size() <= 20 &&
                  (d.dueDate == null || (d.dueDate is string && d.dueDate.size() == 10)) &&
                  (d.dueTime == null || (d.dueTime is string && d.dueTime.size() == 5)) &&
+                 // Пункт вкладки «Тиждень»: понеділок свого тижня замість
+                 // дня. Дня в нього немає свідомо — це не забута дата, а
+                 // намір «зробити цього тижня» (див. tasks/week-plan.js).
+                 (!('weekStart' in d) || d.weekStart == null ||
+                   (d.weekStart is string && d.weekStart.size() == 10)) &&
                  // Оцінка тривалості у хвилинах — від 1 хвилини до доби.
                  (!('estimateMin' in d) || d.estimateMin == null ||
                    (d.estimateMin is number && d.estimateMin > 0 && d.estimateMin <= 1440)) &&
@@ -192,7 +197,7 @@ service cloud.firestore {
                  d.subtasks is list && d.subtasks.size() <= 50 &&
                  d.createdAt is timestamp && d.updatedAt is timestamp &&
                  d.keys().hasOnly(['title', 'notes', 'done', 'completedAt', 'priority', 'tags',
-                   'dueDate', 'dueTime', 'estimateMin', 'recurrence', 'subtasks',
+                   'dueDate', 'dueTime', 'weekStart', 'estimateMin', 'recurrence', 'subtasks',
                    'reminderAt', 'notifiedAt', 'goalId', 'createdAt', 'updatedAt']);
         }
         allow read, delete: if isOwner(uid);

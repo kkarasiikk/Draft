@@ -110,8 +110,12 @@ test.describe('Телефон', () => {
     });
   }
 
-  test('«Головна» в нижній панелі завдань лишається', async ({ page }) => {
+  test('на хаб із завдань веде напис Life — вкладка «Головна» більше не потрібна', async ({ page }) => {
+    // Панель завдань стала трьома горизонтами (день, тиждень, календар), і
+    // «Головна» звідти пішла. Вихід від цього не зник: той самий напис Life
+    // у шапці, що й у решті модулів — і на телефоні, де бічної колонки немає.
     await openModule(page, 'tasks/index.html', { ready: '#appScreen' });
-    await expect(page.locator('#bnHome')).toBeVisible();
+    await expect(page.locator('#bnHome')).toHaveCount(0);
+    await expect(page.locator('#topbarHomeLink')).toHaveAttribute('href', '../index.html');
   });
 });

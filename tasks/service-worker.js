@@ -5,7 +5,7 @@ importScripts('../sw-core.js');
 LifeSW({
   name: 'tasks',
   files: [
-    './', './index.html', './app.js', './quick-parse.js', './now-queue.js',
+    './', './index.html', './app.js', './quick-parse.js', './week-plan.js', './now-queue.js',
     './recurrence.js', './reminders.js', './push.js',
     '../boot-guard.js', '../side-nav.js', '../side-nav.css', '../scroll-lock.js', '../unsaved-guard.js',
     '../sw-register.js',
