@@ -124,12 +124,15 @@ test.describe('Плитки', () => {
     await expect(stat(page, 'goals')).toHaveText('1');
   });
 
-  test('цілі без кроку сьогодні — окремим рядком', async ({ page }) => {
+  test('«без кроку» під ціллю більше не дописується', async ({ page }) => {
+    // На плитці вже є число цілей і назва однієї з них; третій рядок із
+    // четвертим числом читався як докір, а не як підказка.
     await openHub(page, { goals: [
       { id: 'g1', status: 'active', checkins: [], blockers: [] },
       { id: 'g2', status: 'active', checkins: [], blockers: [] },
     ] });
-    await expect(note(page, 'goals')).toContainText('2 без кроку');
+    await expect(note(page, 'goals')).toBeHidden();
+    await expect(page.locator('#goalsCard')).not.toContainText('без кроку');
   });
 
   // Під числом — одна ціль, і на кожне відкриття головної інша: раніше тут

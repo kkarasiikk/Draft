@@ -84,7 +84,6 @@ const STRINGS = {
     unitThisMonth: 'на цей місяць',
     unitSets: 'підходів', unitExercises: 'вправ',
     capSpent: 'витрачено за поточний місяць',
-    capNoStep: (n) => `${n} без кроку`,
     capTasksEmpty: 'Маєш вихідний, чи просто не записано?',
     capGoalsMonthNone: 'цілей на цей місяць ще немає',
     capWorkoutToday: 'Сьогодні *є* тренування',
@@ -176,7 +175,6 @@ const STRINGS = {
     unitThisMonth: 'на этот месяц',
     unitSets: 'подходов', unitExercises: 'упражнений',
     capSpent: 'потрачено за текущий месяц',
-    capNoStep: (n) => `${n} без шага`,
     capTasksEmpty: 'У тебя выходной или просто не записано?',
     capGoalsMonthNone: 'целей на этот месяц пока нет',
     capWorkoutToday: 'Сегодня *есть* тренировка',
@@ -268,7 +266,6 @@ const STRINGS = {
     unitThisMonth: 'na ten miesiąc',
     unitSets: 'serii', unitExercises: 'ćwiczeń',
     capSpent: 'wydano w tym miesiącu',
-    capNoStep: (n) => `${n} bez kroku`,
     capTasksEmpty: 'Masz wolne czy po prostu nie zapisane?',
     capGoalsMonthNone: 'nie ma jeszcze celów na ten miesiąc',
     capWorkoutToday: 'Dziś *jest* trening',
@@ -360,7 +357,6 @@ const STRINGS = {
     unitThisMonth: 'this month',
     unitSets: 'sets', unitExercises: 'exercises',
     capSpent: 'spent this month',
-    capNoStep: (n) => `${n} without a step`,
     capTasksEmpty: 'A day off, or just nothing written down?',
     capGoalsMonthNone: 'no goals for this month yet',
     capWorkoutToday: 'There *is* a workout today',
@@ -617,10 +613,13 @@ const EYE_OFF = '<path d="M3 3l18 18"/><path d="M10.7 6.1A9.9 9.9 0 0 1 12 6c6.4
 function renderAmountsToggle() {
   const btn = document.getElementById('hideAmountsBtn');
   if (!btn) return;
-  // Значок показує ДІЮ, а не стан: коли сума видна, око перекреслене —
-  // «сховати». Інакше довелось би гадати, що саме він означає.
+  // Значок показує СТАН: сума видна — око звичайне, сума схована —
+  // перекреслене. Спершу тут стояла дія («перекреслене» = натисни, щоб
+  // сховати), і читалось це рівно навпаки: сума на місці, а око вже
+  // закреслене, ніби її й немає. Що станеться після натискання, каже
+  // підпис — його читає і той, хто значка не бачить.
   btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
-    stroke-linecap="round" stroke-linejoin="round">${hideAmounts ? EYE_OPEN : EYE_OFF}</svg>`;
+    stroke-linecap="round" stroke-linejoin="round">${hideAmounts ? EYE_OFF : EYE_OPEN}</svg>`;
   btn.setAttribute('aria-label', t(hideAmounts ? 'amountsShow' : 'amountsHide'));
   btn.setAttribute('title', t(hideAmounts ? 'amountsShow' : 'amountsHide'));
   btn.setAttribute('aria-pressed', hideAmounts ? 'true' : 'false');
@@ -1405,17 +1404,14 @@ function calAtToday(anchorIso) {
     : anchor === weekStartOf(today);
 }
 
-// Крок гортання кнопкою. На широкому екрані намальовано місяць — крок місяць.
-// На телефоні намальовано смугу днів, і крок там ОДИН ДЕНЬ: тиждень стрибком
-// не давав спинитись на потрібному дні, а смуга саме для цього й гортається.
+// Крок гортання стрілками — місяць. Стрілки живуть лише на широкому екрані,
+// де намальовано місяць і свайпнути мишею нічим; на телефоні їх немає зовсім
+// (див. .cal-nav в index.html): смуга гортається пальцем, і два значки в
+// шапці лише повторювали б жест, який і так під рукою.
 function shiftCalendar(delta) {
-  if (isWideScreen()) {
-    calAnchor = HomeSummary.shiftMonths(calAnchorIso(), delta);
-    renderCalendar();
-    ensureTasksForCalendar();
-    return;
-  }
-  scrollStripBy(delta);
+  calAnchor = HomeSummary.shiftMonths(calAnchorIso(), delta);
+  renderCalendar();
+  ensureTasksForCalendar();
 }
 
 function resetCalendar() {
@@ -1537,14 +1533,6 @@ function scrollStripToAnchor() {
   stripSettling = true;
   el.scrollLeft = STRIP_PAD * step;
   requestAnimationFrame(() => { stripSettling = false; });
-}
-
-/** Крок кнопкою — рівно один день, з анімацією браузера. */
-function scrollStripBy(delta) {
-  const el = document.getElementById('calWeek');
-  const step = stripStep(el);
-  if (!step) return;
-  el.scrollBy({ left: delta * step, behavior: 'smooth' });
 }
 
 // Куди догорнули — те й показуємо. Перший видимий день стає якорем: від нього
@@ -1861,7 +1849,6 @@ async function loadHomeSummary(uid) {
       renderToday();
       renderCalendar();
       renderLine();
-      const sum = HomeSummary.goalsSummary(docs, today);
       // Рахуємо цілі ПОТОЧНОГО МІСЯЦЯ — тієї самої вкладки, на якій розділ
       // відкривається. Правило бере goals/review.js, а не своє друге: інакше
       // плитка й розділ рахували б по-різному, і число на головній нічого не
@@ -1876,9 +1863,11 @@ async function loadHomeSummary(uid) {
       // Раніше тут стояла найтерміновіша, і з десятка цілей на очі місяцями
       // потрапляла та сама.
       const shown = HomeSummary.pickGoal(monthGoals);
+      // Під ціллю більше нічого не дописуємо. Тут стояло «N без кроку» — і на
+      // плитці, де вже є число цілей і назва однієї з них, третій рядок із
+      // четвертим числом читався як докір, а не як підказка.
       setStat('goals', String(monthGoals.length), t('unitThisMonth'),
-        shown ? shown.title : t('capGoalsMonthNone'),
-        sum.pending ? t('capNoStep', sum.pending) : null);
+        shown ? shown.title : t('capGoalsMonthNone'), null);
     })
     .catch((err) => console.error('homeSummary goals:', err));
 

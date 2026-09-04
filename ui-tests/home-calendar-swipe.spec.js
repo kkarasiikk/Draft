@@ -144,15 +144,13 @@ test.describe('Телефон: смуга гортається по днях', (
 test.describe('Стрілки й назва місяця', () => {
   test.use({ viewport: PHONE });
 
-  test('стрілка зсуває рівно на один день', async ({ page }) => {
+  test('стрілок тут немає — жест і так під рукою', async ({ page }) => {
+    // Два значки в шапці лише повторювали б те, що вже робить палець. На
+    // компʼютері вони лишаються: там намальовано місяць, і свайпнути мишею
+    // нічим (див. describe нижче).
     await openHub(page);
-    const before = await visible(page);
-    await page.click('#calNext');
-    await page.waitForTimeout(400);
-    expect(dayDiff((await visible(page))[0], before[0])).toBe(1);
-    await page.click('#calPrev');
-    await page.waitForTimeout(400);
-    expect(await visible(page)).toEqual(before);
+    await expect(page.locator('#calNext')).toBeHidden();
+    await expect(page.locator('#calPrev')).toBeHidden();
   });
 
   test('назва місяця вертає в сьогоднішній тиждень', async ({ page }) => {
@@ -210,6 +208,7 @@ test.describe('Компʼютер: намальовано місяць — кр�
 
   test('стрілка гортає цілий місяць', async ({ page }) => {
     await openHub(page);
+    await expect(page.locator('#calNext')).toBeVisible();
     const start = await label(page).textContent();
     await page.click('#calNext');
     await expect(label(page)).not.toHaveText(start);

@@ -85,27 +85,6 @@
   }
 
   /**
-   * Цілі: найдовша активна серія і скільки сьогодні без кроку.
-   * Серію рахує GoalStreak — своя друга реалізація розійшлася б із першою.
-   */
-  function goalsSummary(goals, todayIso, streakApi) {
-    var api = streakApi || root.GoalStreak;
-    if (!api) return { pending: 0, streak: 0, active: 0 };
-    var digest = api.goalsDigest(goals, todayIso);
-    var active = (goals || []).filter(function (g) { return g && g.status === 'active'; }).length;
-
-    // Найдовша серед УСІХ активних цілей, а не лише тих, що під загрозою:
-    // відмічена сьогодні серія — це добра новина, її й показуємо.
-    var best = 0;
-    (goals || []).forEach(function (g) {
-      if (!g || g.status !== 'active') return;
-      var n = api.computeStreak(g.checkins, todayIso);
-      if (n > best) best = n;
-    });
-    return { pending: digest.pending, streak: best, active: active };
-  }
-
-  /**
    * Тренування на сьогодні.
    *
    * Модуль тренувань дозволяє записати сесію наперед: вправи є, підходи
@@ -377,7 +356,6 @@
     budgetSummary: budgetSummary,
     tasksSummary: tasksSummary,
     workoutSummary: workoutSummary,
-    goalsSummary: goalsSummary,
   };
   root.HomeSummary = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
