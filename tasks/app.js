@@ -2921,7 +2921,7 @@ auth.onAuthStateChanged((user) => {
     // повідомлення побачив би тільки SW. Показуємо самі.
     listenForegroundPush((data) => {
       if (!('Notification' in window) || Notification.permission !== 'granted') return;
-      new Notification(data.title || 'Life', { body: data.body || '', icon: '../budget/icon-192.png' });
+      new Notification(data.title || 'Life', { body: data.body || '', icon: '../icons/icon-192.png' });
     });
   } else {
     if (unsubscribeTasks) { unsubscribeTasks(); unsubscribeTasks = null; }

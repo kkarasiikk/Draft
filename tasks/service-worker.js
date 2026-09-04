@@ -12,8 +12,8 @@ LifeSW({
     '../ai-chat.js', '../ai-chat.css', '../goals/streak.js',
     './manifest.json',
     '../budget/firebase-config.js',
-    '../budget/icon-192.png', '../budget/icon-512.png',
-    '../budget/icon-192-maskable.png', '../budget/icon-512-maskable.png',
+    '../icons/icon-192.png', '../icons/icon-512.png',
+    '../icons/icon-192-maskable.png', '../icons/icon-512-maskable.png',
   ],
   external: [
     'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js',

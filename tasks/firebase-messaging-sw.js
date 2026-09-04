@@ -18,8 +18,8 @@ messaging.onBackgroundMessage((payload) => {
   const title = data.title || 'Life';
   self.registration.showNotification(title, {
     body: data.body || '',
-    icon: '../budget/icon-192.png',
-    badge: '../budget/icon-192.png',
+    icon: '../icons/icon-192.png',
+    badge: '../icons/icon-192.png',
     // tag склеює повторні сповіщення про те саме завдання в одне,
     // замість стосу однакових карток у центрі сповіщень.
     tag: data.tag || 'life-tasks',
