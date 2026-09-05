@@ -6,7 +6,8 @@ LifeSW({
   name: 'goals',
   files: [
     './', './index.html', './app.js', './streak.js', './review.js',
-    '../boot-guard.js', '../side-nav.js', '../side-nav.css', '../scroll-lock.js', '../unsaved-guard.js',
+    '../boot-guard.js', '../side-nav.js', '../side-nav.css', '../settings.js', '../settings.css',
+    '../scroll-lock.js', '../unsaved-guard.js',
     '../sw-register.js',
     '../ai-chat.js', '../ai-chat.css', '../categories-default.js',
     './manifest.json',

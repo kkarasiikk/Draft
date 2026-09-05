@@ -1,0 +1,140 @@
+/*  Вікно налаштувань — стилі, спільні для всіх пʼятьох сторінок.
+    Розмітку малює settings.js; тут — лише вигляд і поведінка на ширині.
+
+    Кольори, рамки й тіні беруться зі змінних теми сторінки: свого набору
+    тут немає навмисно, інакше вікно світлішало б окремо від решти.
+
+    ГОЛОВНЕ РІШЕННЯ: одне вікно, дві розкладки. На комп'ютері зліва стоїть
+    колонка вкладок, справа — параметри обраної; на телефоні колонка зайняла
+    б половину ширини, тож там спершу список розділів, а тап по ньому
+    відкриває панель із кнопкою «назад». Це не два різні екрани: розмітка
+    та сама, різниця лише в тому, що видно. */
+
+/* Вище за круглу кнопку «+» головної (70) і за меню, що тут стояло до
+   нього (80): вікно налаштувань перекриває сторінку цілком, і кнопка, яка
+   світилася б поверх нього, читалась би як частина вікна.
+
+   Розмиття — не косметика. Світла картка на світлій сторінці зливалася з
+   нею, і межу було видно лише по тонкій рамці; розмиття прибирає з-під
+   вікна деталі, тож воно читається як окремий шар. Успадковане від меню,
+   яке тут стояло до нього, — і з тієї самої причини. */
+.settings-overlay{position:fixed;inset:0;background:var(--overlay);z-index:90;
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+  display:none;align-items:center;justify-content:center;padding:0;}
+.settings-overlay.show{display:flex;}
+
+.settings-window{background:var(--surface);width:100%;height:100%;
+  display:flex;flex-direction:column;overflow:hidden;
+  border:0;border-radius:0;position:relative;}
+
+/* ---- Шапка ---- */
+.settings-head{display:flex;align-items:center;gap:10px;flex-shrink:0;
+  padding:calc(14px + env(safe-area-inset-top)) 16px 12px;border-bottom:1px solid var(--border);}
+.settings-title{font-family:'Inter',sans-serif;font-size:18px;font-weight:700;color:var(--ink);
+  flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.settings-close{border:none;background:none;color:var(--ink-muted);cursor:pointer;
+  display:flex;padding:8px;border-radius:10px;flex-shrink:0;}
+.settings-close:hover{background:var(--glass-btn-bg-hover);color:var(--ink);}
+/* Кнопка «назад» живе лише в телефонній розкладці — на широкому екрані
+   вкладки й панель видно одночасно, і вертатись нема звідки. */
+.settings-back{border:none;background:none;color:var(--ink);cursor:pointer;
+  display:none;padding:8px;border-radius:10px;flex-shrink:0;margin-left:-6px;}
+.settings-back:hover{background:var(--glass-btn-bg-hover);}
+
+.settings-body{flex:1;min-height:0;display:flex;}
+
+/* ---- Колонка вкладок ---- */
+.settings-tabs{flex-shrink:0;overflow-y:auto;padding:12px 10px 16px;
+  display:flex;flex-direction:column;gap:2px;}
+.settings-group-label{font-size:11px;letter-spacing:.05em;text-transform:uppercase;
+  color:var(--ink-muted);font-family:'Inter',sans-serif;font-weight:600;
+  padding:14px 12px 6px;}
+.settings-group-label:first-child{padding-top:4px;}
+.settings-tab{display:flex;align-items:center;gap:11px;width:100%;padding:10px 12px;
+  border:none;background:none;border-radius:11px;cursor:pointer;text-align:left;
+  font-family:'Inter',sans-serif;font-size:13.5px;font-weight:600;color:var(--ink-soft);
+  transition:background .18s, color .18s;}
+.settings-tab svg{flex-shrink:0;stroke:currentColor;}
+.settings-tab:hover{background:var(--glass-btn-bg-hover);}
+.settings-tab.current{background:var(--glass-btn-bg);color:var(--ink);}
+/* Стрілка вправо стоїть тільки в телефонному списку: там вкладка — це
+   перехід, а не перемикач. */
+.settings-tab-arrow{margin-left:auto;color:var(--ink-muted);display:none;}
+
+/* ---- Панель параметрів ---- */
+.settings-pane{flex:1;min-width:0;overflow-y:auto;padding:18px 16px calc(24px + env(safe-area-inset-bottom));}
+.settings-pane-title{display:none;}
+.settings-section{margin-bottom:26px;}
+.settings-section:last-child{margin-bottom:0;}
+.settings-label{display:block;font-size:12px;letter-spacing:.03em;text-transform:uppercase;
+  color:var(--ink-muted);font-family:'Inter',sans-serif;font-weight:600;margin-bottom:8px;}
+.settings-hint{font-size:12.5px;line-height:1.5;color:var(--ink-muted);margin-top:8px;}
+.settings-error{font-size:12.5px;line-height:1.5;color:var(--expense);margin-top:8px;min-height:0;}
+.settings-error:empty{display:none;}
+
+/* Ряд кнопок-варіантів: тема, мова, валюта, години нагадувань. */
+.settings-choices{display:flex;flex-wrap:wrap;gap:6px;}
+.settings-choice{border:1px solid var(--border);background:transparent;color:var(--ink-muted);
+  font-family:'Inter',sans-serif;font-size:13px;font-weight:600;padding:9px 14px;
+  border-radius:10px;cursor:pointer;white-space:nowrap;transition:background .18s, color .18s;}
+.settings-choice:hover{background:var(--glass-btn-bg-hover);}
+.settings-choice.selected{border-color:transparent;background:var(--accent-light);color:var(--accent);}
+
+/* Список категорій: крапка кольору, поле назви, хрестик. */
+.settings-cat-row{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+.settings-cat-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;background:var(--ink-muted);}
+.settings-cat-input{flex:1;min-width:0;margin:0;border:1px solid var(--border);background:var(--bg);
+  color:var(--ink);font-family:'Inter',sans-serif;font-size:14px;padding:9px 12px;border-radius:10px;}
+.settings-cat-input:focus{outline:none;border-color:var(--accent);}
+.settings-cat-del{flex-shrink:0;border:none;background:none;color:var(--ink-muted);cursor:pointer;
+  display:flex;padding:6px;border-radius:8px;}
+.settings-cat-del:hover{background:var(--glass-btn-bg-hover);color:var(--expense);}
+.settings-cat-add{display:flex;gap:8px;margin-top:10px;}
+.settings-cat-add input{flex:1;min-width:0;margin:0;border:1px solid var(--border);background:var(--bg);
+  color:var(--ink);font-family:'Inter',sans-serif;font-size:14px;padding:9px 12px;border-radius:10px;}
+.settings-cat-add input:focus{outline:none;border-color:var(--accent);}
+.settings-cat-add button{flex-shrink:0;border:none;background:var(--accent);color:#fff;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;width:38px;border-radius:10px;}
+
+/* Рядок-дія: веде в розділ або запускає щось (експорт, вихід). */
+.settings-action{display:flex;align-items:center;gap:12px;width:100%;padding:13px 14px;
+  border:1px solid var(--border);background:transparent;border-radius:14px;cursor:pointer;
+  text-align:left;text-decoration:none;color:var(--ink);font-family:'Inter',sans-serif;
+  margin-bottom:8px;transition:background .18s;}
+.settings-action:hover{background:var(--glass-btn-bg-hover);}
+.settings-action-icon{flex-shrink:0;display:flex;color:var(--ink-muted);}
+.settings-action-text{display:flex;flex-direction:column;gap:2px;min-width:0;}
+.settings-action-title{font-size:14px;font-weight:600;color:var(--ink);}
+.settings-action-sub{font-size:12.5px;line-height:1.45;color:var(--ink-muted);}
+.settings-action.danger .settings-action-title{color:var(--expense);}
+.settings-action.danger .settings-action-icon{color:var(--expense);}
+
+/* Проста пара «підпис — значення»: пошта акаунта. */
+.settings-value{font-size:14px;color:var(--ink);word-break:break-all;}
+
+/* ---- Телефон: спершу список розділів, потім панель ---- */
+@media (max-width:719px){
+  .settings-tabs{width:100%;padding:8px 10px calc(16px + env(safe-area-inset-bottom));}
+  .settings-tab-arrow{display:block;}
+  .settings-pane{display:none;}
+  /* Панель відкрита — список ховається, і навпаки. Клас на вікні, а не на
+     кожному блоці: інакше стан довелось би тримати у двох місцях. */
+  .settings-window.at-pane .settings-tabs{display:none;}
+  .settings-window.at-pane .settings-pane{display:block;}
+  .settings-window.at-pane .settings-back{display:flex;}
+}
+
+/* ---- Комп'ютер: колонка й панель поруч, вікно не на весь екран ---- */
+@media (min-width:720px){
+  .settings-overlay{padding:32px;}
+  .settings-window{width:min(920px,100%);height:min(680px,100%);
+    border:1px solid var(--border);border-radius:22px;}
+  .settings-head{padding:16px 20px 14px;}
+  .settings-tabs{width:232px;border-right:1px solid var(--border);}
+  .settings-pane{padding:22px 26px 28px;}
+  /* Назва вкладки над її параметрами. На телефоні цю роль грає заголовок
+     вікна, а тут він мусить лишатись «Налаштування»: інакше зникла б
+     єдина підказка, у якому саме вікні ти стоїш. */
+  .settings-pane-title{display:block;font-family:'Inter',sans-serif;font-size:16px;
+    font-weight:700;color:var(--ink);margin-bottom:18px;}
+}

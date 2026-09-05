@@ -36,24 +36,18 @@ const T = {
     todayLabel: 'Сьогодні', tomorrowLabel: 'Завтра', yesterdayLabel: 'Вчора',
     monthHintText: 'Тап по дню — і його завдання відкриються у тижні, готові до додавання.',
     swipeDone: 'Виконано', swipeTomorrow: 'Завтра',
-    remindersTitle: 'Нагадування', remindersMenu: 'Нагадування',
     reminderLabel: 'Нагадати', reminderNone: 'Не треба',
     reminderOnTime: 'У час завдання',
     reminderBefore: (min) => (min >= 60 ? `За ${min / 60} год` : `За ${min} хв`),
     reminderAtHour: (h) => `О ${String(h).padStart(2, '0')}:00`,
     reminderNeedsDate: 'Щоб нагадати, завданню потрібна дата.',
-    reminderOff: 'Не треба',
-    remindMorning: 'Ранковий огляд дня', remindEvening: 'Вечірній підсумок',
-    remindHint: 'Ранковий пуш показує план на день, вечірній — що лишилось незакритим. Нагадування під конкретне завдання вмикається в самому завданні.',
-    pushEnable: 'Увімкнути сповіщення', pushDisable: 'Вимкнути на цьому пристрої',
-    pushOn: 'Сповіщення увімкнені на цьому пристрої.',
     pushOff: 'Сповіщення вимкнені. Увімкни — і застосунок нагадає про завдання й пришле огляд дня.',
     pushDenied: 'Браузер заблокував сповіщення для цього сайту. Дозволь їх у налаштуваннях сайту й спробуй ще раз.',
     pushIosInstall: 'На iPhone сповіщення працюють лише для застосунку, доданого на домашній екран: «Поділитися» → «На домашній екран», далі відкрий Life звідти.',
     pushUnsupported: 'Цей браузер не вміє push-сповіщень.',
     pushNoKey: 'Не налаштований ключ Web Push (FCM_VAPID_KEY).',
     pushFailed: 'Не вдалося увімкнути сповіщення. Перевір інтернет і спробуй ще раз.',
-    templatesTitle: 'Шаблони', templatesMenu: 'Шаблони',
+    templatesTitle: 'Шаблони',
     saveAsTemplate: 'Зберегти як шаблон', templateSaved: 'Збережено ✓',
     templateEmpty: 'Шаблонів ще немає. Відкрий будь-яке завдання і натисни «Зберегти як шаблон» — далі його можна буде завести одним тапом.',
     templateLimit: (n) => `Більше ${n} шаблонів — це вже список завдань. Видали зайві в меню «Шаблони».`,
@@ -66,11 +60,7 @@ const T = {
     planFormTitle: 'Новий запис', planFormEdit: 'Запис',
     planTextPlaceholder: 'Що записати?',
     planCatLabel: 'Категорія', planCatNone: 'Без категорії',
-    planCatsTitle: 'Категорії', planCatsEdit: 'Змінити',
-    planCatPlaceholder: 'Назва категорії',
-    planCatsHint: 'Категорії — твої: заводь і прибирай, як зручно. Прибрана категорія нічого не стирає — її записи просто стають без категорії.',
-    planCatExists: 'Така категорія вже є',
-    planCatNothing: 'Напиши назву',
+    planCatsEdit: 'Змінити',
     planSave: 'Зберегти',
     quickAddFabLabel: 'Додати', quickAddTitle: 'Швидке додавання',
     quickAddPlaceholder: 'Купити молоко завтра о 18',
@@ -118,24 +108,18 @@ const T = {
     todayLabel: 'Сегодня', tomorrowLabel: 'Завтра', yesterdayLabel: 'Вчера',
     monthHintText: 'Тап по дню — и его задачи откроются в неделе, готовые к добавлению.',
     swipeDone: 'Выполнено', swipeTomorrow: 'Завтра',
-    remindersTitle: 'Напоминания', remindersMenu: 'Напоминания',
     reminderLabel: 'Напомнить', reminderNone: 'Не надо',
     reminderOnTime: 'В момент задачи',
     reminderBefore: (min) => (min >= 60 ? `За ${min / 60} ч` : `За ${min} мин`),
     reminderAtHour: (h) => `В ${String(h).padStart(2, '0')}:00`,
     reminderNeedsDate: 'Чтобы напомнить, задаче нужна дата.',
-    reminderOff: 'Не надо',
-    remindMorning: 'Утренний обзор дня', remindEvening: 'Вечерний итог',
-    remindHint: 'Утренний пуш показывает план на день, вечерний — что осталось незакрытым. Напоминание под конкретную задачу включается в самой задаче.',
-    pushEnable: 'Включить уведомления', pushDisable: 'Выключить на этом устройстве',
-    pushOn: 'Уведомления включены на этом устройстве.',
     pushOff: 'Уведомления выключены. Включи — и приложение напомнит о задачах и пришлёт обзор дня.',
     pushDenied: 'Браузер заблокировал уведомления для этого сайта. Разреши их в настройках сайта и попробуй снова.',
     pushIosInstall: 'На iPhone уведомления работают только для приложения, добавленного на домашний экран: «Поделиться» → «На экран Домой», затем открой Life оттуда.',
     pushUnsupported: 'Этот браузер не умеет push-уведомлений.',
     pushNoKey: 'Не настроен ключ Web Push (FCM_VAPID_KEY).',
     pushFailed: 'Не удалось включить уведомления. Проверь интернет и попробуй ещё раз.',
-    templatesTitle: 'Шаблоны', templatesMenu: 'Шаблоны',
+    templatesTitle: 'Шаблоны',
     saveAsTemplate: 'Сохранить как шаблон', templateSaved: 'Сохранено ✓',
     templateEmpty: 'Шаблонов пока нет. Открой любую задачу и нажми «Сохранить как шаблон» — дальше её можно будет завести одним тапом.',
     templateLimit: (n) => `Больше ${n} шаблонов — это уже список задач. Удали лишние в меню «Шаблоны».`,
@@ -148,11 +132,7 @@ const T = {
     planFormTitle: 'Новая запись', planFormEdit: 'Запись',
     planTextPlaceholder: 'Что записать?',
     planCatLabel: 'Категория', planCatNone: 'Без категории',
-    planCatsTitle: 'Категории', planCatsEdit: 'Изменить',
-    planCatPlaceholder: 'Название категории',
-    planCatsHint: 'Категории твои: заводи и убирай, как удобно. Убранная категория ничего не стирает — её записи просто становятся без категории.',
-    planCatExists: 'Такая категория уже есть',
-    planCatNothing: 'Напиши название',
+    planCatsEdit: 'Изменить',
     planSave: 'Сохранить',
     quickAddFabLabel: 'Добавить', quickAddTitle: 'Быстрое добавление',
     quickAddPlaceholder: 'Купить молоко завтра в 18',
@@ -198,24 +178,18 @@ const T = {
     todayLabel: 'Dziś', tomorrowLabel: 'Jutro', yesterdayLabel: 'Wczoraj',
     monthHintText: 'Dotknij dnia — jego zadania otworzą się w widoku tygodnia, gotowe do uzupełnienia.',
     swipeDone: 'Zrobione', swipeTomorrow: 'Jutro',
-    remindersTitle: 'Przypomnienia', remindersMenu: 'Przypomnienia',
     reminderLabel: 'Przypomnij', reminderNone: 'Nie trzeba',
     reminderOnTime: 'O godzinie zadania',
     reminderBefore: (min) => (min >= 60 ? `${min / 60} godz. wcześniej` : `${min} min wcześniej`),
     reminderAtHour: (h) => `O ${String(h).padStart(2, '0')}:00`,
     reminderNeedsDate: 'Żeby przypomnieć, zadanie potrzebuje daty.',
-    reminderOff: 'Nie trzeba',
-    remindMorning: 'Poranny przegląd dnia', remindEvening: 'Wieczorne podsumowanie',
-    remindHint: 'Poranny push pokazuje plan dnia, wieczorny — co zostało niezamknięte. Przypomnienie o konkretnym zadaniu włącza się w samym zadaniu.',
-    pushEnable: 'Włącz powiadomienia', pushDisable: 'Wyłącz na tym urządzeniu',
-    pushOn: 'Powiadomienia włączone na tym urządzeniu.',
     pushOff: 'Powiadomienia wyłączone. Włącz je — aplikacja przypomni o zadaniach i przyśle przegląd dnia.',
     pushDenied: 'Przeglądarka zablokowała powiadomienia dla tej strony. Zezwól na nie w ustawieniach strony i spróbuj ponownie.',
     pushIosInstall: 'Na iPhone powiadomienia działają tylko dla aplikacji dodanej do ekranu głównego: „Udostępnij" → „Do ekranu początkowego", potem otwórz Life stamtąd.',
     pushUnsupported: 'Ta przeglądarka nie obsługuje powiadomień push.',
     pushNoKey: 'Brak klucza Web Push (FCM_VAPID_KEY).',
     pushFailed: 'Nie udało się włączyć powiadomień. Sprawdź internet i spróbuj ponownie.',
-    templatesTitle: 'Szablony', templatesMenu: 'Szablony',
+    templatesTitle: 'Szablony',
     saveAsTemplate: 'Zapisz jako szablon', templateSaved: 'Zapisano ✓',
     templateEmpty: 'Nie ma jeszcze szablonów. Otwórz dowolne zadanie i naciśnij „Zapisz jako szablon" — potem założysz je jednym tapnięciem.',
     templateLimit: (n) => `Więcej niż ${n} szablonów to już lista zadań. Usuń zbędne w menu „Szablony".`,
@@ -228,11 +202,7 @@ const T = {
     planFormTitle: 'Nowy wpis', planFormEdit: 'Wpis',
     planTextPlaceholder: 'Co zapisać?',
     planCatLabel: 'Kategoria', planCatNone: 'Bez kategorii',
-    planCatsTitle: 'Kategorie', planCatsEdit: 'Zmień',
-    planCatPlaceholder: 'Nazwa kategorii',
-    planCatsHint: 'Kategorie są twoje: dodawaj i usuwaj, jak wygodnie. Usunięta kategoria niczego nie kasuje — jej wpisy po prostu zostają bez kategorii.',
-    planCatExists: 'Taka kategoria już jest',
-    planCatNothing: 'Wpisz nazwę',
+    planCatsEdit: 'Zmień',
     planSave: 'Zapisz',
     quickAddFabLabel: 'Dodaj', quickAddTitle: 'Szybkie dodawanie',
     quickAddPlaceholder: 'Kupić mleko jutro o 18',
@@ -278,24 +248,18 @@ const T = {
     todayLabel: 'Today', tomorrowLabel: 'Tomorrow', yesterdayLabel: 'Yesterday',
     monthHintText: 'Tap a day — its tasks open in the week view, ready to add to.',
     swipeDone: 'Done', swipeTomorrow: 'Tomorrow',
-    remindersTitle: 'Reminders', remindersMenu: 'Reminders',
     reminderLabel: 'Remind me', reminderNone: 'No need',
     reminderOnTime: 'At task time',
     reminderBefore: (min) => (min >= 60 ? `${min / 60} h before` : `${min} min before`),
     reminderAtHour: (h) => `At ${String(h).padStart(2, '0')}:00`,
     reminderNeedsDate: 'A task needs a date before it can remind you.',
-    reminderOff: 'Off',
-    remindMorning: 'Morning look at the day', remindEvening: 'Evening wrap-up',
-    remindHint: 'The morning push shows the plan for the day, the evening one shows what is still open. Per-task reminders are set inside the task itself.',
-    pushEnable: 'Turn notifications on', pushDisable: 'Turn off on this device',
-    pushOn: 'Notifications are on for this device.',
     pushOff: 'Notifications are off. Turn them on and the app will remind you about tasks and send a look at your day.',
     pushDenied: 'The browser blocked notifications for this site. Allow them in site settings and try again.',
     pushIosInstall: 'On iPhone, notifications only work for the app added to the home screen: Share → Add to Home Screen, then open Life from there.',
     pushUnsupported: 'This browser has no push notifications.',
     pushNoKey: 'Web Push key (FCM_VAPID_KEY) is not configured.',
     pushFailed: 'Could not turn notifications on. Check your connection and try again.',
-    templatesTitle: 'Templates', templatesMenu: 'Templates',
+    templatesTitle: 'Templates',
     saveAsTemplate: 'Save as template', templateSaved: 'Saved ✓',
     templateEmpty: 'No templates yet. Open any task and hit "Save as template" — after that you can create it with one tap.',
     templateLimit: (n) => `More than ${n} templates is a task list of its own. Remove some in the "Templates" menu.`,
@@ -308,11 +272,7 @@ const T = {
     planFormTitle: 'New entry', planFormEdit: 'Entry',
     planTextPlaceholder: 'What to write down?',
     planCatLabel: 'Category', planCatNone: 'No category',
-    planCatsTitle: 'Categories', planCatsEdit: 'Edit',
-    planCatPlaceholder: 'Category name',
-    planCatsHint: 'The categories are yours: add and remove them as you like. Removing one erases nothing — its entries simply become uncategorised.',
-    planCatExists: 'That category already exists',
-    planCatNothing: 'Type a name',
+    planCatsEdit: 'Edit',
     planSave: 'Save',
     quickAddFabLabel: 'Add', quickAddTitle: 'Quick add',
     quickAddPlaceholder: 'Buy milk tomorrow at 6pm',
@@ -367,9 +327,16 @@ function plural(n, forms) {
 }
 
 // ---- Тема ----
+// Вибір лежить у localStorage під тим самим ключем, що й на решті сторінок:
+// зміна у вікні налаштувань підхоплюється скрізь.
+const THEME_CHOICES = ['light', 'dark', 'system'];
 const darkMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-function resolveTheme() {
+function themeChoiceNow() {
   const choice = localStorage.getItem('financeAppTheme') || 'system';
+  return THEME_CHOICES.includes(choice) ? choice : 'system';
+}
+function resolveTheme() {
+  const choice = themeChoiceNow();
   if (choice === 'system') return darkMediaQuery.matches ? 'dark' : 'light';
   return choice;
 }
@@ -388,7 +355,7 @@ function applyTheme() {
   }
 }
 darkMediaQuery.addEventListener('change', () => {
-  if ((localStorage.getItem('financeAppTheme') || 'system') === 'system') applyTheme();
+  if (themeChoiceNow() === 'system') applyTheme();
 });
 
 function renderAuthLangRow() {
@@ -410,6 +377,7 @@ function setLang(lang) {
   }
   applyTranslations();
   renderAuthLangRow();
+  AppSettings.setLang(lang);
   renderCurrentScreen();
 }
 
@@ -446,16 +414,8 @@ function applyTranslations() {
   document.getElementById('rememberMeLabel').textContent = t('rememberMe');
   document.getElementById('forgotPasswordLink').textContent = t('forgotPassword');
   document.getElementById('monthHint').textContent = t('monthHintText');
-  document.getElementById('remindersTitle').textContent = t('remindersTitle');
-  document.getElementById('remindersMenuLabel').textContent = t('remindersMenu');
   document.getElementById('reminderLabel').textContent = t('reminderLabel');
-  document.getElementById('remindMorningLabel').textContent = t('remindMorning');
-  document.getElementById('remindEveningLabel').textContent = t('remindEvening');
-  document.getElementById('remindHint').textContent = t('remindHint');
-  document.getElementById('enablePushBtn').textContent = t('pushEnable');
-  document.getElementById('disablePushBtn').textContent = t('pushDisable');
   document.getElementById('templatesTitle').textContent = t('templatesTitle');
-  document.getElementById('templatesMenuLabel').textContent = t('templatesMenu');
   document.getElementById('saveAsTemplateBtn').textContent = t('saveAsTemplate');
   document.getElementById('bnWeekLabel').textContent = t('bnWeek');
   document.getElementById('bnMonthLabel').textContent = t('bnMonth');
@@ -464,9 +424,6 @@ function applyTranslations() {
   document.getElementById('planTitle').textContent = t('planTitle');
   document.getElementById('planText').placeholder = t('planTextPlaceholder');
   document.getElementById('planCatLabel').textContent = t('planCatLabel');
-  document.getElementById('planCatsTitle').textContent = t('planCatsTitle');
-  document.getElementById('planCatInput').placeholder = t('planCatPlaceholder');
-  document.getElementById('planCatsHint').textContent = t('planCatsHint');
   document.getElementById('planSaveBtn').textContent = t('planSave');
   document.getElementById('openQuickAdd').setAttribute('aria-label', t('quickAddFabLabel'));
   document.getElementById('quickAddTitle').textContent = t('quickAddTitle');
@@ -570,15 +527,52 @@ document.getElementById('forgotPasswordLink').addEventListener('click', async ()
   }
 });
 
-// ---- Меню розділу ----
-// Тема, мова й вихід живуть на головному екрані — тут лише те, що
-// стосується самих завдань.
-document.getElementById('pageMenuBtn').addEventListener('click', () => {
-  document.getElementById('appMenuOverlay').classList.add('show');
+// ---- Вікно налаштувань ----
+// «⋮» у шапці відкриває спільне вікно (../settings.js) одразу на вкладці
+// «Завдання»: там і нагадування, і категорії тижневика, які раніше жили
+// двома окремими екранами цього розділу.
+//
+// push передається сюди, бо служба, яка приймає сповіщення, живе саме в
+// цьому розділі (firebase-messaging-sw.js): з інших сторінок вікно показує
+// стан, але вмикати дозвіл відсилає туди, де воно справді працює.
+function setTheme(choice) {
+  if (!THEME_CHOICES.includes(choice)) return;
+  localStorage.setItem('financeAppTheme', choice);
+  if (auth.currentUser) {
+    db.collection('users').doc(auth.currentUser.uid).set({ theme: choice }, { merge: true }).catch(() => {});
+  }
+  applyTheme();
+}
+AppSettings.init({
+  db, auth,
+  base: '../',
+  lang: currentLang,
+  theme: themeChoiceNow,
+  onTheme: setTheme,
+  onLang: setLang,
+  onLogout: () => auth.signOut(),
+  actions: { taskTemplates: () => openTemplatesManager() },
+  push: {
+    support: pushSupport,
+    permission: pushPermission,
+    stateText: (support, permission) =>
+      support === 'ios-needs-install' ? t('pushIosInstall') :
+      support === 'unsupported' ? t('pushUnsupported') :
+      permission === 'denied' ? t('pushDenied') : t('pushOff'),
+    enable: async () => {
+      const uidCur = auth.currentUser && auth.currentUser.uid;
+      const result = await enablePush(db, uidCur);
+      if (result.ok) return { ok: true };
+      return { ok: false, text:
+        result.reason === 'denied' ? t('pushDenied') :
+        result.reason === 'ios-needs-install' ? t('pushIosInstall') :
+        result.reason === 'no-vapid-key' ? t('pushNoKey') :
+        result.reason === 'unsupported' ? t('pushUnsupported') : t('pushFailed') };
+    },
+  },
 });
-document.getElementById('appMenuOverlay').addEventListener('click', (e) => {
-  if (e.target.id === 'appMenuOverlay') e.currentTarget.classList.remove('show');
-});
+document.getElementById('pageMenuBtn').addEventListener('click', () => AppSettings.open('tasks'));
+document.getElementById('sideSettingsBtn').addEventListener('click', () => AppSettings.open());
 
 // ---- Утиліти ----
 function todayISO() {
@@ -610,6 +604,7 @@ let unsubscribeTemplates = null;
 // назву в кожне завдання й потім ганятися за перейменуваннями.
 let goalTitles = {};
 let unsubscribeGoalTitles = null;
+let unsubscribeProfile = null;
 let editingTaskId = null;
 let quickAddDate = null;
 
@@ -632,11 +627,6 @@ function legacyTemplateFields() {
   return { priority: null, tags: [], estimateMin: null, subtasks: [] };
 }
 let formReminder = null;   // {offsetMin} | {atHour} | null — вибір у формі завдання
-let reminderSettings = { enabled: false, morningHour: 8, eveningHour: 20, tz: null };
-// Причина, з якої не вдалося увімкнути push. Живе в стані, а не просто в
-// тексті на екрані: будь-який наступний перемальовок затер би повідомлення
-// саме тоді, коли воно потрібне.
-let pushError = null;
 let pendingDeleteId = null;
 let calYear = new Date().getFullYear();
 let calMonth = new Date().getMonth(); // 0-based
@@ -1122,8 +1112,6 @@ function renderNoDateSection() {
 // (tasks/reminders.js), зберігає його в завданні й тримає токен пристрою.
 // Саму розсилку робить Cloud Function — браузер закритий саме тоді, коли
 // нагадування потрібне найбільше.
-const DIGEST_HOURS = [6, 7, 8, 9, 10, 21];
-const EVENING_HOURS = [18, 19, 20, 21, 22];
 
 function reminderOptionLabel(option) {
   if (!option) return t('reminderNone');
@@ -1187,117 +1175,6 @@ function reminderOptionFromTask(task) {
   }
   return null;
 }
-
-function hourPickerHtml(hours, selected, attr) {
-  return hours.map((h) =>
-    `<button type="button" class="hour-chip${selected === h ? ' selected' : ''}" ${attr}="${h}">${String(h).padStart(2, '0')}:00</button>`
-  ).join('') +
-    `<button type="button" class="hour-chip${selected === null ? ' selected' : ''}" ${attr}="off">${escapeHtml(t('reminderOff'))}</button>`;
-}
-
-function renderReminderSettings() {
-  const supported = pushSupport();
-  const permission = pushPermission();
-  const stateEl = document.getElementById('remindState');
-  const enableBtn = document.getElementById('enablePushBtn');
-  const settingsEl = document.getElementById('remindSettings');
-
-  const active = supported === 'ok' && permission === 'granted' && reminderSettings.enabled;
-  stateEl.className = 'remind-state' + (pushError || supported !== 'ok' || permission === 'denied' ? ' warn' : '');
-  stateEl.textContent =
-    pushError ? pushError :
-    supported === 'ios-needs-install' ? t('pushIosInstall') :
-    supported === 'unsupported' ? t('pushUnsupported') :
-    permission === 'denied' ? t('pushDenied') :
-    active ? t('pushOn') : t('pushOff');
-
-  enableBtn.style.display = active || supported !== 'ok' || permission === 'denied' ? 'none' : '';
-  settingsEl.style.display = active ? '' : 'none';
-  if (!active) return;
-
-  document.getElementById('remindMorningPicker').innerHTML =
-    hourPickerHtml(DIGEST_HOURS, reminderSettings.morningHour, 'data-morning');
-  document.getElementById('remindEveningPicker').innerHTML =
-    hourPickerHtml(EVENING_HOURS, reminderSettings.eveningHour, 'data-evening');
-
-  settingsEl.querySelectorAll('[data-morning]').forEach((btn) => {
-    btn.addEventListener('click', () => saveReminderSettings({
-      morningHour: btn.dataset.morning === 'off' ? null : Number(btn.dataset.morning),
-    }));
-  });
-  settingsEl.querySelectorAll('[data-evening]').forEach((btn) => {
-    btn.addEventListener('click', () => saveReminderSettings({
-      eveningHour: btn.dataset.evening === 'off' ? null : Number(btn.dataset.evening),
-    }));
-  });
-}
-
-async function saveReminderSettings(patch) {
-  const uidCur = auth.currentUser && auth.currentUser.uid;
-  if (!uidCur) return;
-  reminderSettings = {
-    ...reminderSettings,
-    ...patch,
-    // Таймзона потрібна серверу: він живе в UTC і без неї надіслав би
-    // «ранковий» дайджест серед ночі.
-    tz: Intl.DateTimeFormat().resolvedOptions().timeZone || null,
-  };
-  renderReminderSettings();
-  try {
-    await db.collection('users').doc(uidCur).set({ taskReminders: reminderSettings }, { merge: true });
-  } catch (err) {
-    console.error('saveReminderSettings:', err);
-    document.getElementById('remindState').textContent = writeErrorMessage(err);
-  }
-}
-
-async function loadReminderSettings(uid) {
-  try {
-    const doc = await db.collection('users').doc(uid).get();
-    const saved = doc.exists && doc.data() ? doc.data().taskReminders : null;
-    if (saved) reminderSettings = { ...reminderSettings, ...saved };
-  } catch (err) {
-    console.warn('loadReminderSettings:', err);
-  }
-}
-
-document.getElementById('remindersMenuBtn').addEventListener('click', () => {
-  document.getElementById('appMenuOverlay').classList.remove('show');
-  // Стара помилка не має зустрічати людину при наступному відкритті.
-  pushError = null;
-  renderReminderSettings();
-  document.getElementById('remindersOverlay').classList.add('show');
-});
-document.getElementById('closeReminders').addEventListener('click', () => {
-  document.getElementById('remindersOverlay').classList.remove('show');
-});
-document.getElementById('remindersOverlay').addEventListener('click', (e) => {
-  if (e.target.id === 'remindersOverlay') e.currentTarget.classList.remove('show');
-});
-document.getElementById('enablePushBtn').addEventListener('click', async () => {
-  const btn = document.getElementById('enablePushBtn');
-  const uidCur = auth.currentUser && auth.currentUser.uid;
-  btn.disabled = true;
-  const result = await enablePush(db, uidCur);
-  btn.disabled = false;
-  if (result.ok) {
-    pushError = null;
-    await saveReminderSettings({ enabled: true });
-  } else {
-    pushError =
-      result.reason === 'denied' ? t('pushDenied') :
-      result.reason === 'ios-needs-install' ? t('pushIosInstall') :
-      result.reason === 'no-vapid-key' ? t('pushNoKey') :
-      result.reason === 'unsupported' ? t('pushUnsupported') : t('pushFailed');
-  }
-  renderReminderSettings();
-});
-document.getElementById('disablePushBtn').addEventListener('click', async () => {
-  const uidCur = auth.currentUser && auth.currentUser.uid;
-  await disablePush(db, uidCur);
-  await saveReminderSettings({ enabled: false });
-  renderReminderSettings();
-});
 
 // ---- Шаблони завдань ----
 // Те саме завдання щотижня («поїздка», «тижневий огляд») набирати заново —
@@ -1406,11 +1283,12 @@ function renderTemplateManageList() {
 }
 
 document.getElementById('saveAsTemplateBtn').addEventListener('click', saveCurrentFormAsTemplate);
-document.getElementById('templatesMenuBtn').addEventListener('click', () => {
-  document.getElementById('appMenuOverlay').classList.remove('show');
+// Керування шаблонами відкривається з вікна налаштувань (вкладка
+// «Завдання»): це вміст, а не параметр, тож живе тут, а не там.
+function openTemplatesManager() {
   renderTemplateManageList();
   document.getElementById('templatesOverlay').classList.add('show');
-});
+}
 document.getElementById('closeTemplates').addEventListener('click', () => {
   document.getElementById('templatesOverlay').classList.remove('show');
 });
@@ -1605,17 +1483,10 @@ let editingPlanId = null; // який запис редагуємо; null — н
 let planCategories = [];
 let usingDefaultPlanCats = true;
 
-const PLAN_CAT_IDS = ['home', 'work', 'ideas'];
-const PLAN_CAT_LABELS = {
-  uk: { home: 'Дім', work: 'Робота', ideas: 'Ідеї' },
-  ru: { home: 'Дом', work: 'Работа', ideas: 'Идеи' },
-  pl: { home: 'Dom', work: 'Praca', ideas: 'Pomysły' },
-  en: { home: 'Home', work: 'Work', ideas: 'Ideas' },
-};
-
+// Стандартний набір лежить у ../categories-default.js разом із рештою
+// стандартних категорій: його читає і ця сторінка, і вікно налаштувань.
 function defaultPlanCategories() {
-  const labels = PLAN_CAT_LABELS[currentLang] || PLAN_CAT_LABELS.uk;
-  return PLAN_CAT_IDS.map((id) => ({ id, label: labels[id] || id }));
+  return defaultWeekCategoryList(currentLang);
 }
 
 function planWeekIso() {
@@ -1731,7 +1602,7 @@ function renderPlanCatPicker() {
   picker.querySelectorAll('[data-plan-cat]').forEach((btn) => {
     btn.addEventListener('click', () => { planCat = btn.dataset.planCat; renderPlanCatPicker(); });
   });
-  picker.querySelector('[data-plan-cats-edit]').addEventListener('click', openPlanCats);
+  picker.querySelector('[data-plan-cats-edit]').addEventListener('click', () => AppSettings.open('tasks'));
 }
 
 async function savePlanEntry() {
@@ -1785,61 +1656,6 @@ async function savePlanEntry() {
 // «Дім», «Робота», «Проєкт» — це поділ людини, а не наш, тож заводить і
 // прибирає їх вона сама. Прибрана категорія нічого не стирає: її записи
 // просто опиняються в групі без назви (див. groupByCategory).
-function openPlanCats() {
-  document.getElementById('planCatInput').value = '';
-  document.getElementById('planCatsError').textContent = '';
-  renderPlanCatsList();
-  document.getElementById('planCatsOverlay').classList.add('show');
-}
-
-function renderPlanCatsList() {
-  const el = document.getElementById('planCatsList');
-  el.innerHTML = planCategories.map((cat) => `
-    <div class="plan-cat-row">
-      <span class="plan-cat-name">${escapeHtml(cat.label)}</span>
-      <button type="button" class="plan-cat-del" data-del-cat="${escapeHtml(cat.id)}" aria-label="${escapeHtml(cat.label)}">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
-      </button>
-    </div>`).join('');
-  el.querySelectorAll('[data-del-cat]').forEach((btn) => {
-    btn.addEventListener('click', () => savePlanCategories(
-      planCategories.filter((cat) => cat.id !== btn.dataset.delCat)));
-  });
-}
-
-function savePlanCategories(next) {
-  const uidCur = auth.currentUser && auth.currentUser.uid;
-  if (!uidCur) return Promise.resolve();
-  planCategories = next;
-  usingDefaultPlanCats = false;
-  renderPlanCatsList();
-  renderPlanCatPicker();
-  renderWeekPlanScreen();
-  return db.collection('users').doc(uidCur)
-    .set({ categoriesWeek: next }, { merge: true })
-    .catch((err) => {
-      console.error('savePlanCategories:', err);
-      document.getElementById('planCatsError').textContent = writeErrorMessage(err);
-    });
-}
-
-function addPlanCategory() {
-  const input = document.getElementById('planCatInput');
-  const errorEl = document.getElementById('planCatsError');
-  const label = input.value.trim();
-  if (!label) { errorEl.textContent = t('planCatNothing'); return; }
-  if (planCategories.some((cat) => cat.label.toLowerCase() === label.toLowerCase())) {
-    errorEl.textContent = t('planCatExists');
-    return;
-  }
-  errorEl.textContent = '';
-  input.value = '';
-  // id генерований, а не з назви: перейменування не має осиротити записи, а
-  // дві категорії з однаковими літерами в різних регістрах — зіткнутись.
-  const id = 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-  savePlanCategories(planCategories.concat([{ id, label }]));
-}
-
 document.getElementById('planLabel').addEventListener('click', () => {
   if (planAtThisWeek()) return;
   planWeek = null;
@@ -1849,16 +1665,6 @@ document.getElementById('planSaveBtn').addEventListener('click', savePlanEntry);
 document.getElementById('planFormClose').addEventListener('click', closePlanForm);
 document.getElementById('planFormOverlay').addEventListener('click', (e) => {
   if (e.target.id === 'planFormOverlay') closePlanForm();
-});
-document.getElementById('planCatAddBtn').addEventListener('click', addPlanCategory);
-document.getElementById('planCatInput').addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') { e.preventDefault(); addPlanCategory(); }
-});
-document.getElementById('planCatsClose').addEventListener('click', () => {
-  document.getElementById('planCatsOverlay').classList.remove('show');
-});
-document.getElementById('planCatsOverlay').addEventListener('click', (e) => {
-  if (e.target.id === 'planCatsOverlay') e.currentTarget.classList.remove('show');
 });
 
 function showMonthScreen() {
@@ -2476,7 +2282,11 @@ auth.onAuthStateChanged((user) => {
   if (user) {
     document.getElementById('authScreen').style.display = 'none';
     document.getElementById('appScreen').style.display = 'block';
-    db.collection('users').doc(user.uid).get().then((doc) => {
+    // Підписка, а не разове читання. Категорії тижневика редагуються у вікні
+    // налаштувань, яке пише прямо в профіль, — з `get()` сторінка дізнавалась
+    // би про нову категорію лише після перезавантаження.
+    if (unsubscribeProfile) unsubscribeProfile();
+    unsubscribeProfile = db.collection('users').doc(user.uid).onSnapshot((doc) => {
       const data = doc.data();
       if (data && data.lang && LANGS.includes(data.lang) && data.lang !== currentLang) {
         currentLang = data.lang;
@@ -2486,17 +2296,19 @@ auth.onAuthStateChanged((user) => {
       }
       // Категорії тижневика. Доки їх не чіпали, у профілі їх немає — тоді
       // лишаються стандартні за мовою (їх виставив applyTranslations вище).
-      if (data && Array.isArray(data.categoriesWeek) && data.categoriesWeek.length) {
-        planCategories = data.categoriesWeek;
-        usingDefaultPlanCats = false;
+      const saved = data && Array.isArray(data.categoriesWeek) ? data.categoriesWeek : null;
+      const next = saved && saved.length ? saved : defaultPlanCategories();
+      usingDefaultPlanCats = !(saved && saved.length);
+      if (JSON.stringify(next) !== JSON.stringify(planCategories)) {
+        planCategories = next;
+        renderPlanCatPicker();
         if (currentScreen === 'week') renderWeekPlanScreen();
       }
-    }).catch(() => {});
+    }, (err) => console.error('subscribeToProfile:', err));
     subscribeToTasks(user.uid);
     subscribeToTemplates(user.uid);
     subscribeToGoalTitles(user.uid);
     openFromHash(() => openTaskForm(null));
-    loadReminderSettings(user.uid);
     // Коли вкладка відкрита, системного сповіщення браузер не показує —
     // повідомлення побачив би тільки SW. Показуємо самі.
     listenForegroundPush((data) => {
@@ -2507,6 +2319,7 @@ auth.onAuthStateChanged((user) => {
     if (unsubscribeTasks) { unsubscribeTasks(); unsubscribeTasks = null; }
     if (unsubscribeTemplates) { unsubscribeTemplates(); unsubscribeTemplates = null; }
     if (unsubscribeGoalTitles) { unsubscribeGoalTitles(); unsubscribeGoalTitles = null; }
+    if (unsubscribeProfile) { unsubscribeProfile(); unsubscribeProfile = null; }
     goalTitles = {};
     tasks = [];
     templates = [];

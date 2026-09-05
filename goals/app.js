@@ -31,13 +31,6 @@ const T = {
     titlePlaceholder: 'Назва цілі',
     categoryLabel: 'Категорія',
     catManageEdit: 'Змінити', catManageAria: 'Змінити категорії цілей',
-    catManageTitle: 'Категорії цілей', newCatPlaceholder: 'Нова категорія',
-    addCatAria: 'Додати категорію', deleteCatAria: 'Видалити категорію',
-    catManageHint: 'Список спільний для всіх цілей. Видалена категорія віддає свої цілі першій зі списку.',
-    catDuplicateError: 'Така категорія вже є.',
-    catLastError: 'Має лишитись хоча б одна категорія.',
-    catSaveError: 'Не вдалося зберегти. Спробуй ще раз.',
-    catInUseConfirm: (n, target) => `${n} ${n === 1 ? 'ціль перейде' : 'цілей перейде'} в «${target}». Видалити категорію?`,
     whyLabel: 'Навіщо тобі це?', whyPlaceholder: 'Чому ця ціль важлива саме для тебе (необов’язково)',
     titleRequiredError: 'Введи назву цілі',
     saveBtn: 'Зберегти', deleteBtn: 'Видалити', cancelBtn: 'Скасувати', deleteConfirmBtn: 'Видалити',
@@ -113,13 +106,6 @@ const T = {
     titlePlaceholder: 'Название цели',
     categoryLabel: 'Категория',
     catManageEdit: 'Изменить', catManageAria: 'Изменить категории целей',
-    catManageTitle: 'Категории целей', newCatPlaceholder: 'Новая категория',
-    addCatAria: 'Добавить категорию', deleteCatAria: 'Удалить категорию',
-    catManageHint: 'Список общий для всех целей. Удалённая категория отдаёт свои цели первой в списке.',
-    catDuplicateError: 'Такая категория уже есть.',
-    catLastError: 'Должна остаться хотя бы одна категория.',
-    catSaveError: 'Не удалось сохранить. Попробуй ещё раз.',
-    catInUseConfirm: (n, target) => `${n} ${n === 1 ? 'цель перейдёт' : 'целей перейдёт'} в «${target}». Удалить категорию?`,
     whyLabel: 'Зачем тебе это?', whyPlaceholder: 'Почему эта цель важна именно для тебя (необязательно)',
     titleRequiredError: 'Введи название цели',
     saveBtn: 'Сохранить', deleteBtn: 'Удалить', cancelBtn: 'Отмена', deleteConfirmBtn: 'Удалить',
@@ -195,13 +181,6 @@ const T = {
     titlePlaceholder: 'Nazwa celu',
     categoryLabel: 'Kategoria',
     catManageEdit: 'Zmień', catManageAria: 'Zmień kategorie celów',
-    catManageTitle: 'Kategorie celów', newCatPlaceholder: 'Nowa kategoria',
-    addCatAria: 'Dodaj kategorię', deleteCatAria: 'Usuń kategorię',
-    catManageHint: 'Lista jest wspólna dla wszystkich celów. Usunięta kategoria oddaje swoje cele pierwszej z listy.',
-    catDuplicateError: 'Taka kategoria już istnieje.',
-    catLastError: 'Musi zostać co najmniej jedna kategoria.',
-    catSaveError: 'Nie udało się zapisać. Spróbuj ponownie.',
-    catInUseConfirm: (n, target) => `${n} ${n === 1 ? 'cel przejdzie' : 'celów przejdzie'} do «${target}». Usunąć kategorię?`,
     whyLabel: 'Po co ci to?', whyPlaceholder: 'Dlaczego ten cel jest dla ciebie ważny (opcjonalnie)',
     titleRequiredError: 'Wpisz nazwę celu',
     saveBtn: 'Zapisz', deleteBtn: 'Usuń', cancelBtn: 'Anuluj', deleteConfirmBtn: 'Usuń',
@@ -277,13 +256,6 @@ const T = {
     titlePlaceholder: 'Goal title',
     categoryLabel: 'Category',
     catManageEdit: 'Edit', catManageAria: 'Edit goal categories',
-    catManageTitle: 'Goal categories', newCatPlaceholder: 'New category',
-    addCatAria: 'Add category', deleteCatAria: 'Delete category',
-    catManageHint: 'The list is shared by every goal. A deleted category hands its goals to the first one on the list.',
-    catDuplicateError: 'That category already exists.',
-    catLastError: 'At least one category must remain.',
-    catSaveError: 'Could not save. Try again.',
-    catInUseConfirm: (n, target) => `${n} ${n === 1 ? 'goal moves' : 'goals move'} to “${target}”. Delete the category?`,
     whyLabel: 'Why do you want this?', whyPlaceholder: 'Why this goal matters to you (optional)',
     titleRequiredError: 'Enter a goal title',
     saveBtn: 'Save', deleteBtn: 'Delete', cancelBtn: 'Cancel', deleteConfirmBtn: 'Delete',
@@ -438,9 +410,16 @@ function applyProfileCategories(data) {
 }
 
 // ---- Тема ----
+// Вибір лежить у localStorage під тим самим ключем, що й на решті сторінок:
+// зміна у вікні налаштувань підхоплюється скрізь.
+const THEME_CHOICES = ['light', 'dark', 'system'];
 const darkMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-function resolveTheme() {
+function themeChoiceNow() {
   const choice = localStorage.getItem('financeAppTheme') || 'system';
+  return THEME_CHOICES.includes(choice) ? choice : 'system';
+}
+function resolveTheme() {
+  const choice = themeChoiceNow();
   if (choice === 'system') return darkMediaQuery.matches ? 'dark' : 'light';
   return choice;
 }
@@ -459,7 +438,7 @@ function applyTheme() {
   }
 }
 darkMediaQuery.addEventListener('change', () => {
-  if ((localStorage.getItem('financeAppTheme') || 'system') === 'system') applyTheme();
+  if (themeChoiceNow() === 'system') applyTheme();
 });
 
 function renderAuthLangRow() {
@@ -483,6 +462,7 @@ function setLang(lang) {
   }
   applyTranslations();
   renderAuthLangRow();
+  AppSettings.setLang(lang);
 }
 
 // ---- Переклад статичних елементів ----
@@ -496,6 +476,30 @@ window.SideNav.mount(document.getElementById('sideNavHost'), {
   lang: currentLang,
 });
 
+// ---- Вікно налаштувань ----
+// Одне на всі пʼять сторінок (../settings.js). У шапці його відкриває
+// шестерня, у бічній колонці — рядок «Налаштування»: на телефоні колонки
+// немає, тож без кнопки в шапці вікно було б недосяжне з розділу.
+function setTheme(choice) {
+  if (!THEME_CHOICES.includes(choice)) return;
+  localStorage.setItem('financeAppTheme', choice);
+  if (auth.currentUser) {
+    db.collection('users').doc(auth.currentUser.uid).set({ theme: choice }, { merge: true }).catch(() => {});
+  }
+  applyTheme();
+}
+AppSettings.init({
+  db, auth,
+  base: '../',
+  lang: currentLang,
+  theme: themeChoiceNow,
+  onTheme: setTheme,
+  onLang: setLang,
+  onLogout: () => auth.signOut(),
+});
+document.getElementById('sideSettingsBtn').addEventListener('click', () => AppSettings.open());
+document.getElementById('pageSettingsBtn').addEventListener('click', () => AppSettings.open('goals'));
+
 function applyTranslations() {
   document.getElementById('htmlRoot').setAttribute('lang', currentLang);
   window.SideNav.setLang(currentLang);
@@ -506,10 +510,6 @@ function applyTranslations() {
   document.getElementById('bnYearLabel').textContent = t('bnYear');
   document.getElementById('goalModalTitle').textContent = editingGoalId ? t('editGoalTitle') : t('newGoalTitle');
   document.getElementById('categoryLabel').textContent = t('categoryLabel');
-  document.getElementById('catManageTitle').textContent = t('catManageTitle');
-  document.getElementById('catManageHint').textContent = t('catManageHint');
-  document.getElementById('newGoalCatInput').placeholder = t('newCatPlaceholder');
-  document.getElementById('addGoalCatBtn').setAttribute('aria-label', t('addCatAria'));
   document.getElementById('whyLabel').textContent = t('whyLabel');
   document.getElementById('goalWhyInput').placeholder = t('whyPlaceholder');
   document.getElementById('deleteGoalBtn').textContent = t('deleteBtn');
@@ -724,9 +724,6 @@ function subscribeToProfile(uid) {
       renderAuthLangRow();
     }
     if (!findGoalCategory(formCategory)) formCategory = fallbackCategoryId();
-    // Вікно керування може бути відкрите просто зараз — на другому пристрої
-    // чи в сусідній вкладці.
-    if (document.getElementById('catManageOverlay').classList.contains('show')) renderGoalCatManager();
     if (document.getElementById('goalFormOverlay').classList.contains('show')) renderCategoryPicker();
     renderCurrentScreen();
   }, (err) => console.error('subscribeToProfile:', err));
@@ -1575,165 +1572,7 @@ function renderCategoryPicker() {
   picker.querySelectorAll('[data-cat]').forEach((btn) => {
     btn.addEventListener('click', () => { formCategory = btn.dataset.cat; renderCategoryPicker(); });
   });
-  document.getElementById('editCategoriesBtn').addEventListener('click', openCatManage);
-}
-
-// ---- Керування категоріями ----
-// Той самий контракт, що й у категорій бюджету: правка одразу летить у
-// профіль, а не чекає на «зберегти». Категорії — не частина цілі, яку зараз
-// редагують; тримати їх у чернетці форми означало б, що скасування форми
-// скасовує ще й перейменування, зроблене для всіх цілей одразу.
-function saveGoalCategories(list) {
-  const uidCur = auth.currentUser && auth.currentUser.uid;
-  if (!uidCur) return Promise.reject(new Error('no-auth'));
-  // Показуємо новий список одразу, не чекаючи, поки долетить onSnapshot:
-  // інакше щойно набрана назва на мить зникала б із рядка.
-  goalCategories = list;
-  usingDefaultCategories = false;
-  return db.collection('users').doc(uidCur).set({ categoriesGoals: list }, { merge: true });
-}
-
-function newCategoryId() {
-  return 'gcat_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-}
-
-/** Найменш зайнятий слот палітри — щоб дві сусідні категорії не злились. */
-function freeColorIndex() {
-  const used = goalCategories.map((c) => c.colorIndex);
-  for (let i = 0; i < CATEGORY_SLOTS; i++) if (!used.includes(i)) return i;
-  return goalCategories.length % CATEGORY_SLOTS;
-}
-
-function addGoalCategory(label) {
-  const clean = label.trim().slice(0, 40);
-  if (!clean) return Promise.resolve();
-  if (goalCategories.some((c) => c.label.trim().toLowerCase() === clean.toLowerCase())) {
-    return Promise.reject(new Error('duplicate'));
-  }
-  return saveGoalCategories([...goalCategories, { id: newCategoryId(), label: clean, colorIndex: freeColorIndex() }]);
-}
-
-function renameGoalCategory(id, label) {
-  const clean = label.trim().slice(0, 40);
-  if (!clean) return Promise.resolve();
-  if (goalCategories.some((c) => c.id !== id && c.label.trim().toLowerCase() === clean.toLowerCase())) {
-    return Promise.reject(new Error('duplicate'));
-  }
-  // Перейменування не чіпає цілей: у них лежить id, а не назва — саме заради
-  // цього id взагалі й існує.
-  return saveGoalCategories(goalCategories.map((c) => (c.id === id ? { ...c, label: clean } : c)));
-}
-
-/** Скільки цілей носить цю категорію — рахуємо по всьому списку, а не по видимій вкладці. */
-function goalsInCategory(id) {
-  return goals.filter((g) => g && g.category === id);
-}
-
-function deleteGoalCategory(id) {
-  if (goalCategories.length <= 1) return Promise.reject(new Error('last'));
-  const list = goalCategories.filter((c) => c.id !== id);
-  // Цілі видаленої категорії переносимо на першу з тих, що лишились: інакше
-  // вони лишились би з «сирітським» id, і замість назви в чипі стояв би він.
-  const fallback = list[0].id;
-  const affected = goalsInCategory(id);
-  const uidCur = auth.currentUser && auth.currentUser.uid;
-  if (!uidCur) return Promise.reject(new Error('no-auth'));
-  const col = db.collection('users').doc(uidCur).collection('goals');
-  const batch = db.batch();
-  affected.forEach((g) => {
-    batch.update(col.doc(g.id), {
-      category: fallback,
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-    });
-  });
-  return batch.commit().then(() => saveGoalCategories(list));
-}
-
-function renderGoalCatManager() {
-  const container = document.getElementById('goalCatManageList');
-  if (!container) return;
-  container.innerHTML = goalCategories.map((cat) => `
-    <div class="cat-manage-row">
-      <span class="cat-manage-dot ${categoryColorClass(cat.id)}"></span>
-      <input type="text" class="cat-manage-input" maxlength="40" value="${escapeHtml(cat.label)}" data-id="${escapeHtml(cat.id)}">
-      <button type="button" class="cat-manage-del" data-id="${escapeHtml(cat.id)}" aria-label="${escapeHtml(t('deleteCatAria'))}">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-      </button>
-    </div>`).join('');
-
-  container.querySelectorAll('.cat-manage-input').forEach((input) => {
-    const commit = () => {
-      const cat = findGoalCategory(input.dataset.id);
-      if (!cat) return;
-      const val = input.value.trim();
-      // Порожнє поле — це не «прибрати назву», а промах: для видалення поруч
-      // стоїть хрестик. Повертаємо як було.
-      if (!val || val === cat.label) { input.value = cat.label; return; }
-      catManageError('');
-      renameGoalCategory(cat.id, val)
-        .then(() => refreshAfterCategoryChange())
-        .catch((err) => {
-          input.value = cat.label;
-          catManageError(err && err.message === 'duplicate' ? t('catDuplicateError') : t('catSaveError'));
-        });
-    };
-    input.addEventListener('blur', commit);
-    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') input.blur(); });
-  });
-
-  container.querySelectorAll('.cat-manage-del').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const cat = findGoalCategory(btn.dataset.id);
-      if (!cat) return;
-      if (goalCategories.length <= 1) { catManageError(t('catLastError')); return; }
-      const used = goalsInCategory(cat.id).length;
-      const target = goalCategories.filter((c) => c.id !== cat.id)[0];
-      if (used > 0 && !confirm(t('catInUseConfirm', used, target.label))) return;
-      catManageError('');
-      deleteGoalCategory(cat.id)
-        .then(() => refreshAfterCategoryChange())
-        .catch(() => catManageError(t('catSaveError')));
-    });
-  });
-}
-
-function catManageError(text) {
-  const el = document.getElementById('catManageError');
-  if (el) el.textContent = text;
-}
-
-/**
- * Перемалювати все, на що впливає список: рядки вікна, чипи форми і самі
- * картки цілей (у них теж стоїть назва категорії).
- */
-function refreshAfterCategoryChange() {
-  if (!findGoalCategory(formCategory)) formCategory = fallbackCategoryId();
-  renderGoalCatManager();
-  renderCategoryPicker();
-  renderCurrentScreen();
-}
-
-function addGoalCategoryFromInput() {
-  const input = document.getElementById('newGoalCatInput');
-  const label = input.value.trim();
-  if (!label) return;
-  catManageError('');
-  addGoalCategory(label)
-    .then(() => { input.value = ''; refreshAfterCategoryChange(); })
-    .catch((err) => {
-      catManageError(err && err.message === 'duplicate' ? t('catDuplicateError') : t('catSaveError'));
-    });
-}
-
-function openCatManage() {
-  catManageError('');
-  document.getElementById('newGoalCatInput').value = '';
-  renderGoalCatManager();
-  document.getElementById('catManageOverlay').classList.add('show');
-}
-
-function closeCatManage() {
-  document.getElementById('catManageOverlay').classList.remove('show');
+  document.getElementById('editCategoriesBtn').addEventListener('click', () => AppSettings.open('goals'));
 }
 
 // ---- Поля, що ростуть під текст ----
@@ -1816,17 +1655,6 @@ const goalGuard = UnsavedGuard.create({
     title: t('unsavedTitle'), sub: t('unsavedSub'),
     save: t('unsavedSave'), discard: t('unsavedDiscard'), keep: t('unsavedKeep'),
   }),
-});
-
-// Вікно категорій. Закривається хрестиком і тапом повз вікно — як усі шари
-// застосунку; питати «зберегти?» тут нема про що: кожна правка вже в базі.
-document.getElementById('closeCatManage').addEventListener('click', closeCatManage);
-document.getElementById('catManageOverlay').addEventListener('click', (e) => {
-  if (e.target === document.getElementById('catManageOverlay')) closeCatManage();
-});
-document.getElementById('addGoalCatBtn').addEventListener('click', addGoalCategoryFromInput);
-document.getElementById('newGoalCatInput').addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') { e.preventDefault(); addGoalCategoryFromInput(); }
 });
 
 document.getElementById('openNewGoalBtn').addEventListener('click', () => openGoalForm(null));

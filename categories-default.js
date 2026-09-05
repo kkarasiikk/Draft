@@ -56,6 +56,29 @@
     en: { health: 'Health', finance: 'Finance', learning: 'Learning', career: 'Career', relationships: 'Relationships', travel: 'Travel', creativity: 'Creativity', other: 'Other' },
   };
 
+  // Категорії тижневика («Дім», «Робота», «Ідеї»). Приїхали сюди з
+  // tasks/app.js тією ж дорогою, що й категорії цілей: відколи всі чотири
+  // списки редагуються з одного вікна налаштувань, стандартний набір мусить
+  // бути там, де його бачить і сторінка розділу, і саме вікно.
+  //
+  // Кольору тут немає навмисно: записи тижня групуються назвами, а не
+  // кольоровими мітками, і colorIndex був би полем, якого ніхто не читає.
+  var WEEK_CATEGORY_IDS = ['home', 'work', 'ideas'];
+  var WEEK_CAT_LABELS = {
+    uk: { home: 'Дім', work: 'Робота', ideas: 'Ідеї' },
+    ru: { home: 'Дом', work: 'Работа', ideas: 'Идеи' },
+    pl: { home: 'Dom', work: 'Praca', ideas: 'Pomysły' },
+    en: { home: 'Home', work: 'Work', ideas: 'Ideas' },
+  };
+
+  /** Стандартні категорії тижневика: [{ id, label }]. */
+  function defaultWeekCategoryList(lang) {
+    var labels = WEEK_CAT_LABELS[lang] || WEEK_CAT_LABELS.uk;
+    return WEEK_CATEGORY_IDS.map(function (id) {
+      return { id: id, label: labels[id] || id };
+    });
+  }
+
   /** Стандартні категорії цілей: [{ id, label, colorIndex }]. */
   function defaultGoalCategoryList(lang, paletteSize) {
     var labels = GOAL_CAT_LABELS[lang] || GOAL_CAT_LABELS.uk;
@@ -75,6 +98,9 @@
     });
   }
 
+  root.WEEK_CATEGORY_IDS = WEEK_CATEGORY_IDS;
+  root.WEEK_CAT_LABELS = WEEK_CAT_LABELS;
+  root.defaultWeekCategoryList = defaultWeekCategoryList;
   root.GOAL_CATEGORY_IDS = GOAL_CATEGORY_IDS;
   root.GOAL_CAT_LABELS = GOAL_CAT_LABELS;
   root.defaultGoalCategoryList = defaultGoalCategoryList;
@@ -90,6 +116,9 @@
       INCOME_CATEGORY_IDS: INCOME_CATEGORY_IDS,
       CAT_LABELS: CAT_LABELS,
       defaultCategoryList: defaultCategoryList,
+      WEEK_CATEGORY_IDS: WEEK_CATEGORY_IDS,
+      WEEK_CAT_LABELS: WEEK_CAT_LABELS,
+      defaultWeekCategoryList: defaultWeekCategoryList,
       GOAL_CATEGORY_IDS: GOAL_CATEGORY_IDS,
       GOAL_CAT_LABELS: GOAL_CAT_LABELS,
       defaultGoalCategoryList: defaultGoalCategoryList,

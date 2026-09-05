@@ -36,6 +36,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../side-nav.css">
+<link rel="stylesheet" href="../settings.css">
 <link rel="stylesheet" href="../ai-chat.css">
 <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -484,6 +485,14 @@
        широкий рядок чипів) не робив горизонтальної прокрутки. */
     touch-action:pan-y;overflow-x:hidden;}
   .modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+  /* Кнопка налаштувань у шапці. Та сама роль, що й «⋮» у завданнях: на
+     телефоні бічної колонки немає, і без неї вікно налаштувань із цього
+     розділу відкрити нічим. */
+  .topbar-icon-btn{flex-shrink:0;background:none;border:none;color:var(--ink-muted);
+    padding:6px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+    cursor:pointer;-webkit-tap-highlight-color:transparent;}
+  .topbar-icon-btn:hover{color:var(--ink);}
+  .topbar-icon-btn:active{transform:scale(.94);}
   .modal-title{font-family:'Inter',sans-serif;font-size:18px;font-weight:700;}
   .close-btn{background:none;border:none;cursor:pointer;color:var(--ink-muted);}
   label.field-label{font-size:12px;color:var(--ink-muted);font-weight:500;display:block;margin-top:2px;}
@@ -640,6 +649,9 @@
     </svg></a>
     <div class="topbar-actions">
       <button class="ai-topbar-btn" id="aiChatBtn" aria-label="AI-помічник">AI</button>
+      <button id="pageSettingsBtn" class="topbar-icon-btn" aria-label="Налаштування">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.1"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a1.9 1.9 0 1 1-2.7 2.7l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.03 1.56v.17a1.9 1.9 0 1 1-3.8 0v-.1a1.7 1.7 0 0 0-1.11-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a1.9 1.9 0 1 1-2.7-2.7l.06-.06A1.7 1.7 0 0 0 5 15a1.7 1.7 0 0 0-1.56-1.04H3.3a1.9 1.9 0 1 1 0-3.8h.1A1.7 1.7 0 0 0 5 9.05a1.7 1.7 0 0 0-.34-1.87l-.06-.06a1.9 1.9 0 1 1 2.7-2.7l.06.06a1.7 1.7 0 0 0 1.87.34H9.3a1.7 1.7 0 0 0 1.03-1.56V3.3a1.9 1.9 0 1 1 3.8 0v.1a1.7 1.7 0 0 0 1.03 1.56 1.7 1.7 0 0 0 1.87-.34l.06-.06a1.9 1.9 0 1 1 2.7 2.7l-.06.06A1.7 1.7 0 0 0 19.4 9v.09a1.7 1.7 0 0 0 1.56 1.03h.17a1.9 1.9 0 1 1 0 3.8h-.1A1.7 1.7 0 0 0 19.4 15z"/></svg>
+      </button>
     </div>
   </div>
 
@@ -766,26 +778,6 @@
      Живуть тут, а не в окремому екрані налаштувань: у розділі цілей такого
      екрана немає, а редагувати категорії хочеться рівно тоді, коли дивишся
      на них у формі. -->
-<div class="modal-overlay cat-manage-overlay" id="catManageOverlay">
-  <div class="modal" id="catManageModal">
-    <div class="modal-head">
-      <div class="modal-title" id="catManageTitle">Категорії цілей</div>
-      <button class="close-btn" id="closeCatManage" aria-label="Закрити">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-      </button>
-    </div>
-    <div class="cat-manage-list" id="goalCatManageList"></div>
-    <div class="cat-add-row">
-      <input type="text" id="newGoalCatInput" maxlength="40" placeholder="Нова категорія">
-      <button type="button" id="addGoalCatBtn" aria-label="Додати категорію">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
-      </button>
-    </div>
-    <div class="field-hint" id="catManageHint"></div>
-    <div class="form-error" id="catManageError"></div>
-  </div>
-</div>
-
 <!-- ---- Підтвердження видалення ---- -->
 <div class="confirm-modal" id="confirmOverlay">
   <div class="confirm-box">
@@ -804,6 +796,7 @@
 <script defer src="streak.js"></script>
 <script defer src="review.js"></script>
 <script defer src="../side-nav.js"></script>
+<script defer src="../settings.js"></script>
 <script defer src="../sw-register.js"></script>
 <script defer src="app.js"></script>
 <script defer src="../ai-chat.js"></script>

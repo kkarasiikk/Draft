@@ -41,6 +41,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="side-nav.css">
+<link rel="stylesheet" href="settings.css">
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -132,48 +133,6 @@
   .menu-btn-lines span:nth-child(1){top:0;}
   .menu-btn-lines span:nth-child(2){top:7px;}
   .menu-btn-lines span:nth-child(3){top:14px;}
-  .menu-btn.open .menu-btn-lines span:nth-child(1){top:7px; transform:rotate(45deg);}
-  .menu-btn.open .menu-btn-lines span:nth-child(2){opacity:0; transform:scaleX(0);}
-  .menu-btn.open .menu-btn-lines span:nth-child(3){top:7px; transform:rotate(-45deg);}
-  /* Меню налаштувань — по центру екрана, з розмитим тлом.
-     Раніше воно спливало з-під кнопки на прозорій підкладці й зливалося зі
-     сторінкою: світла картка на світлому тлі, і межу видно лише по тонкій
-     рамці. Розмиття прибирає з-під нього деталі, тож картка читається як
-     окремий шар, а не як частина сторінки.
-     z-index вищий за «+» (70): інакше кругла кнопка світилася б поверх
-     розмиття, ніби вона не в цій сцені. */
-  .app-menu-overlay{position:fixed;inset:0;z-index:80;display:none;
-    align-items:center;justify-content:center;padding:20px;
-    background:var(--overlay);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);}
-  .app-menu-overlay.show{display:flex;}
-  .app-menu{position:relative;background:var(--surface);
-    border:1px solid var(--border);border-radius:18px;
-    box-shadow:0 18px 50px rgba(20,20,30,.22), var(--glass-shadow);
-    padding:16px;min-width:240px;max-width:min(300px, calc(100vw - 40px));
-    transform:translateY(8px) scale(.98);opacity:0;
-    transition:transform .16s ease, opacity .16s ease;}
-  .app-menu-overlay.show .app-menu{transform:none;opacity:1;}
-  @media (prefers-reduced-motion: reduce){ .app-menu{transition:none;} }
-  /* Бургер лишається над розмиттям: він перетворюється на «×», і другий
-     дотик має закривати те, що відкрив перший. */
-  .menu-btn{position:relative;z-index:81;}
-  .app-menu-label{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-muted);margin:0 0 6px;padding:0 2px;}
-  .app-menu-divider{height:1px;background:var(--border);margin:12px 0;}
-  .theme-picker, .lang-picker{display:flex;flex-wrap:wrap;gap:4px;}
-  .theme-choice, .lang-choice{
-    border:none;background:var(--glass-btn-bg);color:var(--ink-muted);font-family:'Inter',sans-serif;
-    font-size:12px;font-weight:600;padding:6px 11px;border-radius:999px;cursor:pointer;
-    transition:background .25s, color .25s, transform .15s;
-  }
-  .theme-choice:active, .lang-choice:active{transform:scale(.92);}
-  .theme-choice.selected, .lang-choice.selected{background:var(--accent);color:#fff;}
-  .app-menu-item{display:flex;align-items:center;gap:10px;width:100%;padding:9px 10px;border:none;
-    background:none;border-radius:8px;cursor:pointer;font-family:'Inter',sans-serif;font-size:13.5px;
-    color:var(--ink-soft);text-align:left;margin-top:2px;transition:background .2s, transform .15s;}
-  .app-menu-item:hover{background:var(--glass-btn-bg-hover);}
-  .app-menu-item:active{transform:scale(.97);}
-  .app-menu-item svg{stroke:currentColor;flex-shrink:0;}
-
   /* ---- Діалог експорту ---- */
   .export-overlay{position:fixed;inset:0;z-index:60;display:none;align-items:flex-end;justify-content:center;
     background:var(--overlay);}
@@ -711,7 +670,7 @@
   }
 
   @media (prefers-reduced-motion: reduce){
-    a.tile, .icon-btn, .theme-choice{transition:none;}
+    a.tile, .icon-btn{transition:none;}
     .spinner{animation:none;opacity:.55;}
   }
 </style>
@@ -772,30 +731,6 @@
         </button>
       </div>
 
-
-      <div class="app-menu-overlay" id="appMenuOverlay">
-        <div class="app-menu" id="appMenu">
-          <div class="app-menu-label" id="themeMenuLabel">Тема</div>
-          <div class="theme-picker" id="themePicker"></div>
-
-          <div class="app-menu-divider"></div>
-
-          <div class="app-menu-label" id="langMenuLabel">Мова</div>
-          <div class="lang-picker" id="langPicker"></div>
-
-
-          <div class="app-menu-divider"></div>
-
-          <button class="app-menu-item" id="exportBtn">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 19h16"/></svg>
-        <span id="exportLabel">Експорт даних</span>
-      </button>
-      <button class="app-menu-item" id="logoutBtn">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
-            <span id="logoutLabel">Вийти</span>
-          </button>
-        </div>
-      </div>
 
       <div class="export-overlay" id="exportOverlay">
         <div class="export-sheet">
@@ -971,6 +906,7 @@
   <script defer src="goals/streak.js"></script>
   <script defer src="goals/review.js"></script>
   <script defer src="side-nav.js"></script>
+  <script defer src="settings.js"></script>
   <script defer src="home-summary.js"></script>
   <script defer src="sw-register.js"></script>
   <script defer src="home.js"></script>

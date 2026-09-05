@@ -51,9 +51,14 @@
 
   // Два рядки внизу колонки. Вони не розділи, а дії над усім застосунком,
   // тож відділені рискою й приглушені.
+  //
+  // `hash` є лише в того рядка, який із розділу нічого відкрити не може:
+  // діалог експорту живе на головній, бо там і код, що збирає файл. Вікно
+  // налаштувань — навпаки, спільне (../settings.js) і стоїть на кожній
+  // сторінці, тож цей рядок скрізь лишається кнопкою.
   var BOTTOM = [
     { key: 'export', id: 'sideExportBtn', hash: '#export' },
-    { key: 'settings', id: 'sideSettingsBtn', hash: '#settings' },
+    { key: 'settings', id: 'sideSettingsBtn' },
   ];
 
   var current = 'home';
@@ -100,9 +105,9 @@
     var bottom = '<div class="side-divider"></div>' + BOTTOM.map(function (row) {
       var body = icon(row.key) + '<span id="sideLabel-' + row.key + '">' +
         escapeHtml(labelOf(row.key)) + '</span>';
-      // На головній це кнопки: діалог експорту й меню налаштувань живуть
-      // саме там, і сторінка навішує на них обробники за цими id.
-      if (current === 'home') {
+      // Кнопка там, де сторінка справді може це відкрити: налаштування —
+      // скрізь, експорт — лише на головній. Обробник вішає сторінка за цим id.
+      if (!row.hash || current === 'home') {
         return '<button type="button" class="side-link side-quiet" id="' + row.id + '">' + body + '</button>';
       }
       // З розділу — посилання на головну з хешем, який одразу відкриє

@@ -37,14 +37,20 @@ async function openForm(page) {
   await expect(page.locator('#goalFormOverlay')).toHaveClass(/show/);
 }
 
+// Керування категоріями переїхало у спільне вікно налаштувань
+// (../settings.js), вкладка «Цілі». «Змінити» в рядку категорій відкриває
+// саме його — форма цілі при цьому лишається під ним.
 async function openManager(page) {
   await openForm(page);
   await page.click('#editCategoriesBtn');
-  await expect(page.locator('#catManageOverlay')).toHaveClass(/show/);
+  await expect(page.locator('#settingsOverlay')).toHaveClass(/show/);
+  await expect(page.locator('.settings-tab.current')).toHaveText('Цілі');
 }
 
 const catChips = (page) => page.locator('#categoryPicker .category-choice');
-const manageRows = (page) => page.locator('#goalCatManageList .cat-manage-row');
+const manageRows = (page) => page.locator('[data-cat-kind="goals"] .settings-cat-row');
+const newCatInput = '[data-cat-kind="goals"] [data-cat-new]';
+const addCatBtn = '[data-cat-kind="goals"] [data-cat-add]';
 const lastSet = (page) => page.evaluate(() => {
   const sets = window.__fbCalls.set.filter((c) => c.col === 'users' && c.payload && c.payload.categoriesGoals);
   return sets.length ? sets[sets.length - 1].payload.categoriesGoals : null;
@@ -100,7 +106,7 @@ test.describe('Вікно категорій', () => {
     const order = await page.$$eval('#categoryPicker > button', (els) => els.map((e) => e.className));
     expect(order[order.length - 1]).toContain('category-edit-chip');
     await page.click('#editCategoriesBtn');
-    await expect(page.locator('#catManageOverlay')).toHaveClass(/show/);
+    await expect(page.locator('#settingsOverlay')).toHaveClass(/show/);
     await expect(manageRows(page)).toHaveCount(8);
   });
 
@@ -116,13 +122,13 @@ test.describe('Вікно категорій', () => {
   test('хрестик і тап повз вікно закривають його, а форму лишають', async ({ page }) => {
     await openGoals(page);
     await openManager(page);
-    await page.click('#closeCatManage');
-    await expect(page.locator('#catManageOverlay')).not.toHaveClass(/show/);
+    await page.click('#settingsClose');
+    await expect(page.locator('#settingsOverlay')).not.toHaveClass(/show/);
     await expect(page.locator('#goalFormOverlay')).toHaveClass(/show/);
 
     await page.click('#editCategoriesBtn');
-    await page.click('#catManageOverlay', { position: { x: 6, y: 6 } });
-    await expect(page.locator('#catManageOverlay')).not.toHaveClass(/show/);
+    await page.click('#settingsOverlay', { position: { x: 6, y: 6 } });
+    await expect(page.locator('#settingsOverlay')).not.toHaveClass(/show/);
     await expect(page.locator('#goalFormOverlay')).toHaveClass(/show/);
   });
 });
@@ -131,17 +137,17 @@ test.describe('Додати', () => {
   test('нова категорія пишеться в профіль і одразу зʼявляється чипом', async ({ page }) => {
     await openGoals(page, { profile: { categoriesGoals: ownCategories } });
     await openManager(page);
-    await page.fill('#newGoalCatInput', 'Хобі');
-    await page.click('#addGoalCatBtn');
+    await page.fill(newCatInput, 'Хобі');
+    await page.click(addCatBtn);
 
     await expect(manageRows(page)).toHaveCount(4);
     const saved = await lastSet(page);
     expect(saved.map((c) => c.label)).toEqual(['Тіло', 'Робота', 'Інше', 'Хобі']);
     // id генерується, а не береться з назви: назву ще перейменують, а цілі
     // тримаються саме за id.
-    expect(saved[3].id).toMatch(/^gcat_/);
+    expect(saved[3].id).toMatch(/^cat_/);
 
-    await page.click('#closeCatManage');
+    await page.click('#settingsClose');
     await expect(catChips(page)).toHaveCount(4);
     await expect(catChips(page).last()).toHaveText('Хобі');
   });
@@ -149,17 +155,17 @@ test.describe('Додати', () => {
   test('Enter у полі працює як кнопка, і поле очищається', async ({ page }) => {
     await openGoals(page, { profile: { categoriesGoals: ownCategories } });
     await openManager(page);
-    await page.fill('#newGoalCatInput', 'Хобі');
-    await page.press('#newGoalCatInput', 'Enter');
+    await page.fill(newCatInput, 'Хобі');
+    await page.press(newCatInput, 'Enter');
     await expect(manageRows(page)).toHaveCount(4);
-    await expect(page.locator('#newGoalCatInput')).toHaveValue('');
+    await expect(page.locator(newCatInput)).toHaveValue('');
   });
 
   test('порожнє поле нічого не створює', async ({ page }) => {
     await openGoals(page, { profile: { categoriesGoals: ownCategories } });
     await openManager(page);
-    await page.fill('#newGoalCatInput', '   ');
-    await page.click('#addGoalCatBtn');
+    await page.fill(newCatInput, '   ');
+    await page.click(addCatBtn);
     await expect(manageRows(page)).toHaveCount(3);
     expect(await lastSet(page)).toBeNull();
   });
@@ -167,10 +173,10 @@ test.describe('Додати', () => {
   test('назва, що вже є, не дублюється — і про це сказано', async ({ page }) => {
     await openGoals(page, { profile: { categoriesGoals: ownCategories } });
     await openManager(page);
-    await page.fill('#newGoalCatInput', 'робота');
-    await page.click('#addGoalCatBtn');
+    await page.fill(newCatInput, 'робота');
+    await page.click(addCatBtn);
     await expect(manageRows(page)).toHaveCount(3);
-    await expect(page.locator('#catManageError')).toHaveText('Така категорія вже є.');
+    await expect(page.locator('.settings-error')).toHaveText('Така категорія вже є.');
     expect(await lastSet(page)).toBeNull();
   });
 });
@@ -182,7 +188,7 @@ test.describe('Перейменувати', () => {
       goals: [goal({ category: 'gcat_body' })],
     });
     await openManager(page);
-    const input = manageRows(page).first().locator('.cat-manage-input');
+    const input = manageRows(page).first().locator('.settings-cat-input');
     await input.fill('Здоровʼя і сон');
     await input.blur();
 
@@ -201,10 +207,10 @@ test.describe('Перейменувати', () => {
     });
     await expect(page.locator('[data-open-goal="g1"] .category-chip')).toHaveText('Тіло');
     await openManager(page);
-    const input = manageRows(page).first().locator('.cat-manage-input');
+    const input = manageRows(page).first().locator('.settings-cat-input');
     await input.fill('Здоровʼя і сон');
     await input.blur();
-    await page.click('#closeCatManage');
+    await page.click('#settingsClose');
     await page.click('#closeGoalForm');
     await expect(page.locator('[data-open-goal="g1"] .category-chip')).toHaveText('Здоровʼя і сон');
   });
@@ -212,7 +218,7 @@ test.describe('Перейменувати', () => {
   test('порожня назва повертається як була — для видалення поруч є хрестик', async ({ page }) => {
     await openGoals(page, { profile: { categoriesGoals: ownCategories } });
     await openManager(page);
-    const input = manageRows(page).first().locator('.cat-manage-input');
+    const input = manageRows(page).first().locator('.settings-cat-input');
     await input.fill('');
     await input.blur();
     await expect(input).toHaveValue('Тіло');
@@ -222,11 +228,11 @@ test.describe('Перейменувати', () => {
   test('чужа вже зайнята назва відхиляється, а поле відкочується', async ({ page }) => {
     await openGoals(page, { profile: { categoriesGoals: ownCategories } });
     await openManager(page);
-    const input = manageRows(page).first().locator('.cat-manage-input');
+    const input = manageRows(page).first().locator('.settings-cat-input');
     await input.fill('Робота');
     await input.blur();
     await expect(input).toHaveValue('Тіло');
-    await expect(page.locator('#catManageError')).toHaveText('Така категорія вже є.');
+    await expect(page.locator('.settings-error')).toHaveText('Така категорія вже є.');
   });
 });
 
@@ -238,7 +244,7 @@ test.describe('Видалити', () => {
     });
     await openManager(page);
     // Друга — «Робота», у ній цілей немає.
-    await manageRows(page).nth(1).locator('.cat-manage-del').click();
+    await manageRows(page).nth(1).locator('[data-cat-del]').click();
     await expect(manageRows(page)).toHaveCount(2);
     const saved = await lastSet(page);
     expect(saved.map((c) => c.id)).toEqual(['gcat_body', 'other']);
@@ -251,7 +257,7 @@ test.describe('Видалити', () => {
     });
     page.on('dialog', (d) => d.accept());
     await openManager(page);
-    await manageRows(page).nth(1).locator('.cat-manage-del').click();
+    await manageRows(page).nth(1).locator('[data-cat-del]').click();
 
     await expect(manageRows(page)).toHaveCount(2);
     const moved = await page.evaluate(() => window.__fbCalls.update
@@ -272,7 +278,7 @@ test.describe('Видалити', () => {
     const asked = [];
     page.on('dialog', (d) => { asked.push(d.message()); d.dismiss(); });
     await openManager(page);
-    await manageRows(page).nth(1).locator('.cat-manage-del').click();
+    await manageRows(page).nth(1).locator('[data-cat-del]').click();
 
     await expect(manageRows(page)).toHaveCount(3);
     expect(asked).toHaveLength(1);
@@ -287,9 +293,9 @@ test.describe('Видалити', () => {
       profile: { categoriesGoals: [{ id: 'gcat_only', label: 'Єдина', colorIndex: 0 }] },
     });
     await openManager(page);
-    await manageRows(page).first().locator('.cat-manage-del').click();
+    await manageRows(page).first().locator('[data-cat-del]').click();
     await expect(manageRows(page)).toHaveCount(1);
-    await expect(page.locator('#catManageError')).toHaveText('Має лишитись хоча б одна категорія.');
+    await expect(page.locator('.settings-error')).toHaveText('Останню категорію прибрати не можна.');
     expect(await lastSet(page)).toBeNull();
   });
 
@@ -300,8 +306,8 @@ test.describe('Видалити', () => {
     await expect(catChips(page).nth(1)).toHaveClass(/selected/);
 
     await page.click('#editCategoriesBtn');
-    await manageRows(page).nth(1).locator('.cat-manage-del').click();
-    await page.click('#closeCatManage');
+    await manageRows(page).nth(1).locator('[data-cat-del]').click();
+    await page.click('#settingsClose');
 
     // Порожній вибір зберіг би ціль невідомо куди — тож обраною стає запасна.
     await expect(catChips(page)).toHaveCount(2);

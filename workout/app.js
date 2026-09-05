@@ -358,9 +358,16 @@ function plural(n, forms) {
 function muscleLabel(muscle) { return t(`muscle_${muscle}`); }
 
 // ---- Тема ----
+// Вибір лежить у localStorage під тим самим ключем, що й на решті сторінок:
+// зміна у вікні налаштувань підхоплюється скрізь.
+const THEME_CHOICES = ['light', 'dark', 'system'];
 const darkMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-function resolveTheme() {
+function themeChoiceNow() {
   const choice = localStorage.getItem('financeAppTheme') || 'system';
+  return THEME_CHOICES.includes(choice) ? choice : 'system';
+}
+function resolveTheme() {
+  const choice = themeChoiceNow();
   if (choice === 'system') return darkMediaQuery.matches ? 'dark' : 'light';
   return choice;
 }
@@ -379,7 +386,7 @@ function applyTheme() {
   }
 }
 darkMediaQuery.addEventListener('change', () => {
-  if ((localStorage.getItem('financeAppTheme') || 'system') === 'system') applyTheme();
+  if (themeChoiceNow() === 'system') applyTheme();
 });
 
 function renderAuthLangRow() {
@@ -414,6 +421,31 @@ window.SideNav.mount(document.getElementById('sideNavHost'), {
   base: '../',
   lang: currentLang,
 });
+
+// ---- Вікно налаштувань ----
+// Одне на всі пʼять сторінок (../settings.js). У шапці його відкриває
+// шестерня, у бічній колонці — рядок «Налаштування»: на телефоні колонки
+// немає, тож без кнопки в шапці вікно було б недосяжне з розділу.
+function setTheme(choice) {
+  if (!THEME_CHOICES.includes(choice)) return;
+  localStorage.setItem('financeAppTheme', choice);
+  if (auth.currentUser) {
+    db.collection('users').doc(auth.currentUser.uid).set({ theme: choice }, { merge: true }).catch(() => {});
+  }
+  applyTheme();
+}
+AppSettings.init({
+  db, auth,
+  base: '../',
+  lang: currentLang,
+  theme: themeChoiceNow,
+  onTheme: setTheme,
+  onLang: setLang,
+  onLogout: () => auth.signOut(),
+  actions: { workoutTemplates: () => openTemplatesManager() },
+});
+document.getElementById('sideSettingsBtn').addEventListener('click', () => AppSettings.open());
+document.getElementById('pageSettingsBtn').addEventListener('click', () => AppSettings.open('workout'));
 
 function applyTranslations() {
   document.getElementById('htmlRoot').setAttribute('lang', currentLang);

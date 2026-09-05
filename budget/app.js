@@ -87,8 +87,6 @@ const T = {
     confirmTitle: 'Видалити запис?', confirmSub: 'Цю дію не можна скасувати.', confirmTitleLogout: 'Вийти з акаунту?', confirmSubLogout: 'Доведеться увійти знову, щоб побачити свої дані.',
     cancelBtn: 'Скасувати', deleteBtn: 'Видалити',
     recTitle: 'Регулярні операції',
-    recSettingsLabel: 'Регулярні операції',
-    recSettingsDesc: 'Оренда, підписки, зарплата — щоб не вбивати їх щомісяця руками.',
     recRulesLabel: 'Правила',
     recAddBtn: 'Додати регулярну операцію',
     recFormTitle: 'Регулярна операція',
@@ -105,16 +103,8 @@ const T = {
     unsavedTitle: 'Зберегти зміни?',
     unsavedSub: 'Є незбережені зміни. Якщо вийти зараз, вони пропадуть.',
     unsavedSave: 'Зберегти', unsavedDiscard: 'Не зберігати', unsavedKeep: 'Продовжити редагування',
-    settingsTitle: 'Налаштування', themeLabel: 'Тема', themeLight: 'Світла', themeDark: 'Темна', themeSystem: 'Як в системі',
-    langLabel: 'Мова', currencyLabel: 'Валюта', categoriesTitle: 'Категорії',
-    expenseCatManageLabel: 'Категорії витрат', incomeCatManageLabel: 'Категорії доходів',
-    newCatPlaceholder: 'Нова категорія', addCatAria: 'Додати категорію', deleteCatAria: 'Видалити категорію',
-    catLastError: 'Має залишитися хоча б одна категорія',
-    catDuplicateError: 'Категорія з такою назвою вже існує',
-    catInUseConfirm: 'Ця категорія використовується у {count} записах. Їх буде перенесено в іншу категорію. Видалити її?',
+    settingsTitle: 'Налаштування',
     chooseFileBtn: 'Обрати файл',
-    exportDataLabel: 'Дані',
-    importCsvBtn: 'Імпортувати транзакції з CSV', importDataDesc: 'Колонки: дата (РРРР-ММ-ДД), тип (дохід/витрата), категорія, сума, нотатка.',
     importConfirm: 'Знайдено рядків: {total}. Буде додано записів: {ok}, нових категорій: {newCats}. Пропущено через помилки: {skipped}. Продовжити?',
     importSuccess: 'Імпортовано записів: {count}', importNoValidRows: 'У файлі не знайдено жодного коректного рядка',
     importParseError: 'Не вдалося прочитати файл. Перевір, що це коректний CSV.',
@@ -162,8 +152,6 @@ const T = {
     confirmTitle: 'Удалить запись?', confirmSub: 'Это действие нельзя отменить.', confirmTitleLogout: 'Выйти из аккаунта?', confirmSubLogout: 'Придётся войти снова, чтобы увидеть свои данные.',
     cancelBtn: 'Отмена', deleteBtn: 'Удалить',
     recTitle: 'Регулярные операции',
-    recSettingsLabel: 'Регулярные операции',
-    recSettingsDesc: 'Аренда, подписки, зарплата — чтобы не вбивать их каждый месяц руками.',
     recRulesLabel: 'Правила',
     recAddBtn: 'Добавить регулярную операцию',
     recFormTitle: 'Регулярная операция',
@@ -180,16 +168,8 @@ const T = {
     unsavedTitle: 'Сохранить изменения?',
     unsavedSub: 'Есть несохранённые изменения. Если выйти сейчас, они пропадут.',
     unsavedSave: 'Сохранить', unsavedDiscard: 'Не сохранять', unsavedKeep: 'Продолжить редактирование',
-    settingsTitle: 'Настройки', themeLabel: 'Тема', themeLight: 'Светлая', themeDark: 'Тёмная', themeSystem: 'Как в системе',
-    langLabel: 'Язык', currencyLabel: 'Валюта', categoriesTitle: 'Категории',
-    expenseCatManageLabel: 'Категории расходов', incomeCatManageLabel: 'Категории доходов',
-    newCatPlaceholder: 'Новая категория', addCatAria: 'Добавить категорию', deleteCatAria: 'Удалить категорию',
-    catLastError: 'Должна остаться хотя бы одна категория',
-    catDuplicateError: 'Категория с таким названием уже существует',
-    catInUseConfirm: 'Эта категория используется в {count} записях. Они будут перенесены в другую категорию. Удалить её?',
+    settingsTitle: 'Настройки',
     chooseFileBtn: 'Выбрать файл',
-    exportDataLabel: 'Данные',
-    importCsvBtn: 'Импортировать транзакции из CSV', importDataDesc: 'Колонки: дата (ГГГГ-ММ-ДД), тип (доход/расход), категория, сумма, заметка.',
     importConfirm: 'Найдено строк: {total}. Будет добавлено записей: {ok}, новых категорий: {newCats}. Пропущено из-за ошибок: {skipped}. Продолжить?',
     importSuccess: 'Импортировано записей: {count}', importNoValidRows: 'В файле не найдено ни одной корректной строки',
     importParseError: 'Не удалось прочитать файл. Проверь, что это корректный CSV.',
@@ -237,8 +217,6 @@ const T = {
     confirmTitle: 'Usunąć wpis?', confirmSub: 'Tej czynności nie można cofnąć.', confirmTitleLogout: 'Wylogować się?', confirmSubLogout: 'Aby zobaczyć swoje dane, trzeba będzie zalogować się ponownie.',
     cancelBtn: 'Anuluj', deleteBtn: 'Usuń',
     recTitle: 'Operacje cykliczne',
-    recSettingsLabel: 'Operacje cykliczne',
-    recSettingsDesc: 'Czynsz, subskrypcje, wypłata — żeby nie wpisywać ich co miesiąc ręcznie.',
     recRulesLabel: 'Reguły',
     recAddBtn: 'Dodaj operację cykliczną',
     recFormTitle: 'Operacja cykliczna',
@@ -255,16 +233,8 @@ const T = {
     unsavedTitle: 'Zapisać zmiany?',
     unsavedSub: 'Są niezapisane zmiany. Jeśli teraz wyjdziesz, przepadną.',
     unsavedSave: 'Zapisz', unsavedDiscard: 'Nie zapisuj', unsavedKeep: 'Wróć do edycji',
-    settingsTitle: 'Ustawienia', themeLabel: 'Motyw', themeLight: 'Jasny', themeDark: 'Ciemny', themeSystem: 'Jak w systemie',
-    langLabel: 'Język', currencyLabel: 'Waluta', categoriesTitle: 'Kategorie',
-    expenseCatManageLabel: 'Kategorie wydatków', incomeCatManageLabel: 'Kategorie przychodów',
-    newCatPlaceholder: 'Nowa kategoria', addCatAria: 'Dodaj kategorię', deleteCatAria: 'Usuń kategorię',
-    catLastError: 'Musi zostać przynajmniej jedna kategoria',
-    catDuplicateError: 'Kategoria o takiej nazwie już istnieje',
-    catInUseConfirm: 'Ta kategoria jest używana w {count} wpisach. Zostaną przeniesione do innej kategorii. Usunąć ją?',
+    settingsTitle: 'Ustawienia',
     chooseFileBtn: 'Wybierz plik',
-    exportDataLabel: 'Dane',
-    importCsvBtn: 'Importuj transakcje z CSV', importDataDesc: 'Kolumny: data (RRRR-MM-DD), typ (przychód/wydatek), kategoria, kwota, notatka.',
     importConfirm: 'Znaleziono wierszy: {total}. Zostanie dodanych wpisów: {ok}, nowych kategorii: {newCats}. Pominięto z powodu błędów: {skipped}. Kontynuować?',
     importSuccess: 'Zaimportowano wpisów: {count}', importNoValidRows: 'W pliku nie znaleziono żadnego poprawnego wiersza',
     importParseError: 'Nie udało się odczytać pliku. Sprawdź, czy to poprawny plik CSV.',
@@ -312,8 +282,6 @@ const T = {
     confirmTitle: 'Delete entry?', confirmSub: 'This action cannot be undone.', confirmTitleLogout: 'Log out?', confirmSubLogout: "You'll need to sign in again to see your data.",
     cancelBtn: 'Cancel', deleteBtn: 'Delete',
     recTitle: 'Recurring',
-    recSettingsLabel: 'Recurring',
-    recSettingsDesc: 'Rent, subscriptions, salary — so you do not retype them every month.',
     recRulesLabel: 'Rules',
     recAddBtn: 'Add a recurring entry',
     recFormTitle: 'Recurring entry',
@@ -330,16 +298,8 @@ const T = {
     unsavedTitle: 'Save changes?',
     unsavedSub: 'There are unsaved changes. Leaving now discards them.',
     unsavedSave: 'Save', unsavedDiscard: "Don't save", unsavedKeep: 'Keep editing',
-    settingsTitle: 'Settings', themeLabel: 'Theme', themeLight: 'Light', themeDark: 'Dark', themeSystem: 'System',
-    langLabel: 'Language', currencyLabel: 'Currency', categoriesTitle: 'Categories',
-    expenseCatManageLabel: 'Expense categories', incomeCatManageLabel: 'Income categories',
-    newCatPlaceholder: 'New category', addCatAria: 'Add category', deleteCatAria: 'Delete category',
-    catLastError: 'At least one category must remain',
-    catDuplicateError: 'A category with this name already exists',
-    catInUseConfirm: 'This category is used in {count} entries. They will be moved to another category. Delete it anyway?',
+    settingsTitle: 'Settings',
     chooseFileBtn: 'Choose file',
-    exportDataLabel: 'Data',
-    importCsvBtn: 'Import transactions from CSV', importDataDesc: 'Columns: date (YYYY-MM-DD), type (income/expense), category, amount, note.',
     importConfirm: 'Found rows: {total}. Will add entries: {ok}, new categories: {newCats}. Skipped due to errors: {skipped}. Continue?',
     importSuccess: 'Imported entries: {count}', importNoValidRows: 'No valid rows found in the file',
     importParseError: 'Could not read the file. Make sure it is a valid CSV.',
@@ -1008,18 +968,45 @@ function refreshDatePickersLang() {
 // ---- Переклад статичних елементів ----
 // ---- Бічна колонка розділів (лише широкий екран) ----
 // Розмітку й назви розділів тримає ../side-nav.js — одні на всі пʼять
-// сторінок. Експорту й теми тут немає навмисно: вони живуть на головній,
-// і кнопка, яка веде на іншу сторінку щось зробити, — це не кнопка.
+// сторінок. Експорт лишається посиланням на головну: файл збирає тамтешній
+// код. Налаштування — кнопка: вікно спільне й стоїть тут-таки.
 window.SideNav.mount(document.getElementById('sideNavHost'), {
   current: 'budget',
   base: '../',
   lang: currentLang,
 });
 
+// ---- Вікно налаштувань ----
+// Валюта й категорії витрат жили в окремому вікні цього розділу; тепер
+// вони — вкладка «Гроші» спільного вікна (../settings.js). Регулярні
+// операції й імпорт CSV лишились тут: це не параметри, а вміст, — але
+// рядки, що їх відкривають, стоять у тій самій вкладці.
+function setTheme(choice) {
+  if (!THEME_CHOICES.includes(choice)) return;
+  themeChoice = choice;
+  localStorage.setItem('financeAppTheme', choice);
+  if (auth.currentUser) {
+    db.collection('users').doc(auth.currentUser.uid).set({ theme: choice }, { merge: true }).catch(() => {});
+  }
+  applyTheme();
+  refreshChartsForTheme();
+}
+AppSettings.init({
+  db, auth,
+  base: '../',
+  lang: currentLang,
+  theme: () => themeChoice,
+  onTheme: setTheme,
+  onLang: setLang,
+  onLogout: () => auth.signOut(),
+  actions: {
+    recurring: () => openRecurringScreen(),
+    import: () => document.getElementById('importCsvInput').click(),
+  },
+});
+document.getElementById('sideSettingsBtn').addEventListener('click', () => AppSettings.open());
+
 function applyStaticTranslations() {
-  document.getElementById('recSettingsLabel').textContent = t('recSettingsLabel');
-  document.getElementById('openRecurringLabel').textContent = t('recSettingsLabel');
-  document.getElementById('openRecurringDesc').textContent = t('recSettingsDesc');
   document.getElementById('recurringTitle').textContent = t('recTitle');
   document.getElementById('addRecurringBtn').textContent = t('recAddBtn');
   document.getElementById('recFormTitle').textContent = t('recFormTitle');
@@ -1061,7 +1048,6 @@ function applyStaticTranslations() {
   document.getElementById('confirmSub').textContent = t('confirmSub');
   document.getElementById('cancelDelete').textContent = t('cancelBtn');
   document.getElementById('confirmDelete').textContent = t('deleteBtn');
-  document.getElementById('categoriesTitle').textContent = t('settingsTitle');
   document.getElementById('bnStats').setAttribute('aria-label', t('tabStats'));
   document.getElementById('categoriesBtn').setAttribute('aria-label', t('settingsTitle'));
   document.getElementById('statsSettingsTitle').textContent = t('statsSettingsTitle');
@@ -1087,17 +1073,7 @@ function applyStaticTranslations() {
   document.getElementById('savingsTotalModeLabel').textContent = t('savingsTotalModeLabel');
   renderSavingsTotalModePicker();
   renderSavingsTotalCurrencySelect();
-  document.getElementById('settingsCurrencyLabel').textContent = t('currencyLabel');
-  document.getElementById('exportDataLabel').textContent = t('exportDataLabel');
-  document.getElementById('importCsvBtnLabel').textContent = t('importCsvBtn');
-  document.getElementById('importDataDesc').textContent = t('importDataDesc');
   document.getElementById('searchInput').setAttribute('placeholder', t('searchPlaceholder'));
-  document.getElementById('expenseCatManageLabel').textContent = t('expenseCatManageLabel');
-  document.getElementById('incomeCatManageLabel').textContent = t('incomeCatManageLabel');
-  document.getElementById('newExpenseCatInput').placeholder = t('newCatPlaceholder');
-  document.getElementById('newIncomeCatInput').placeholder = t('newCatPlaceholder');
-  document.getElementById('addExpenseCatBtn').setAttribute('aria-label', t('addCatAria'));
-  document.getElementById('addIncomeCatBtn').setAttribute('aria-label', t('addCatAria'));
   const cur = CURRENCIES[currentCurrency] || CURRENCIES.UAH;
   document.getElementById('amountLabel').textContent = t('amountLabel', { symbol: cur.symbol });
   document.getElementById('editEntryLabel').textContent = t('menuEdit');
@@ -1122,9 +1098,7 @@ function applyStaticTranslations() {
   document.getElementById('savingsAmountLabel').textContent = t('amountLabelPlain');
   document.getElementById('savingsDateLabel').textContent = t('dateLabel');
   document.getElementById('savingsNoteLabel').textContent = t('noteLabel');
-  renderCurrencyPicker();
   renderSavingsTrendCurrencySelect();
-  renderCategoryManager();
   renderAuthLangRow();
   if (typeof currentTab !== 'undefined') updateHeaderSectionTitle();
   refreshDatePickersLang();
@@ -1139,15 +1113,6 @@ function renderAuthLangRow() {
 }
 
 
-
-function renderCurrencyPicker() {
-  const picker = document.getElementById('currencyPicker');
-  picker.innerHTML = CURRENCY_CODES.map(c => `<button type="button" class="cat-choice${c === currentCurrency ? ' selected' : ''}"
-    data-cur="${c}" style="${c === currentCurrency ? 'background:var(--accent);' : ''}">${c} ${CURRENCIES[c].symbol}</button>`).join('');
-  picker.querySelectorAll('.cat-choice').forEach(btn => {
-    btn.addEventListener('click', () => setCurrency(btn.dataset.cur));
-  });
-}
 
 function renderSavingsTrendCurrencySelect() {
   const select = document.getElementById('savingsTrendCurrencySelect');
@@ -1198,57 +1163,6 @@ function renderSavingsTotalCurrencySelect() {
 // colorIndex (NaN як індекс) валила весь обробник снапшота профілю разом
 // із перемальовуванням сторінки. catPair() такий випадок уже вміє: колір
 // виводиться з id.
-function renderCategoryManager() {
-  ['expense', 'income'].forEach(type => {
-    const list = type === 'income' ? categoriesIncome : categoriesExpense;
-    const container = document.getElementById(type === 'income' ? 'incomeCatManageList' : 'expenseCatManageList');
-    if (!container) return;
-    container.innerHTML = list.map(c => `
-      <div class="cat-manage-row">
-        <span class="cat-manage-dot" style="background:${catColor(type, c.id)}"></span>
-        <input type="text" class="cat-manage-input" value="${escapeHtml(c.label)}" data-id="${c.id}" data-type="${type}">
-        <button type="button" class="cat-manage-del" data-id="${c.id}" data-type="${type}" aria-label="${t('deleteCatAria')}">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-        </button>
-      </div>`).join('');
-    container.querySelectorAll('.cat-manage-input').forEach(input => {
-      const commit = () => {
-        const id = input.dataset.id, ty = input.dataset.type;
-        const src = ty === 'income' ? categoriesIncome : categoriesExpense;
-        const cat = src.find(c => c.id === id);
-        if (!cat) return;
-        const val = input.value.trim();
-        if (!val || val === cat.label) { input.value = cat.label; return; }
-        renameCategory(ty, id, val).catch((err) => {
-          input.value = cat.label;
-          if (err && err.message === 'duplicate') alert(t('catDuplicateError'));
-        });
-      };
-      input.addEventListener('blur', commit);
-      input.addEventListener('keydown', (e) => { if (e.key === 'Enter') input.blur(); });
-    });
-    container.querySelectorAll('.cat-manage-del').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const id = btn.dataset.id, ty = btn.dataset.type;
-        const src = ty === 'income' ? categoriesIncome : categoriesExpense;
-        if (src.length <= 1) { alert(t('catLastError')); return; }
-        const used = transactions.filter(tx => tx.type === ty && tx.category === id).length;
-        if (used > 0 && !confirm(t('catInUseConfirm', { count: used }))) return;
-        try { await deleteCategory(ty, id); } catch (e) { console.error(e); alert(t('err_generic')); }
-      });
-    });
-  });
-}
-
-function addCategoryFromInput(type) {
-  const input = document.getElementById(type === 'income' ? 'newIncomeCatInput' : 'newExpenseCatInput');
-  const label = input.value.trim();
-  if (!label) return;
-  addCategory(type, label).then(() => { input.value = ''; }).catch((err) => {
-    if (err && err.message === 'duplicate') alert(t('catDuplicateError'));
-  });
-}
-
 function setLang(lang) {
   if (!LANGS.includes(lang)) return;
   currentLang = lang;
@@ -1259,9 +1173,12 @@ function setLang(lang) {
     db.collection('users').doc(auth.currentUser.uid).set({ lang }, { merge: true }).catch(() => {});
   }
   applyStaticTranslations();
+  AppSettings.setLang(lang);
   render();
 }
 
+// Валюту міняють у вікні налаштувань; тут вона лишається входом для
+// снапшота профілю та імпорту.
 function setCurrency(cur) {
   if (!CURRENCY_CODES.includes(cur)) return;
   currentCurrency = cur;
@@ -1619,47 +1536,6 @@ function saveCategoriesList(type, list) {
   const field = type === 'income' ? 'categoriesIncome' : 'categoriesExpense';
   return db.collection('users').doc(uid).set({ [field]: list }, { merge: true });
 }
-function addCategory(type, label) {
-  label = label.trim();
-  if (!label) return Promise.resolve();
-  const current = type === 'income' ? categoriesIncome : categoriesExpense;
-  if (current.some(c => c.label.trim().toLowerCase() === label.toLowerCase())) {
-    return Promise.reject(new Error('duplicate'));
-  }
-  const usedColors = current.map(c => c.colorIndex);
-  let colorIndex = current.length % CATEGORY_PALETTE.length;
-  for (let i = 0; i < CATEGORY_PALETTE.length; i++) { if (!usedColors.includes(i)) { colorIndex = i; break; } }
-  const id = 'cat_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-  const list = [...current, { id, label, colorIndex }];
-  return saveCategoriesList(type, list);
-}
-function renameCategory(type, id, label) {
-  label = label.trim();
-  if (!label) return Promise.resolve();
-  const current = type === 'income' ? categoriesIncome : categoriesExpense;
-  if (current.some(c => c.id !== id && c.label.trim().toLowerCase() === label.toLowerCase())) {
-    return Promise.reject(new Error('duplicate'));
-  }
-  const list = current.map(c => c.id === id ? { ...c, label } : c);
-  return saveCategoriesList(type, list);
-}
-function deleteCategory(type, id) {
-  const current = type === 'income' ? categoriesIncome : categoriesExpense;
-  if (current.length <= 1) return Promise.reject(new Error('last'));
-  const list = current.filter(c => c.id !== id);
-  // Транзакції, що використовували видалену категорію, переносимо на першу
-  // з категорій, що залишилися, — інакше вони лишаться з "сирітським" id,
-  // який в інтерфейсі показувався б замість людяної назви.
-  const fallbackId = list[0].id;
-  const affected = transactions.filter(tx => tx.type === type && tx.category === id);
-  const uid = auth.currentUser.uid;
-  const batch = db.batch();
-  affected.forEach(tx => {
-    batch.update(db.collection('users').doc(uid).collection('transactions').doc(tx.id), { category: fallbackId });
-  });
-  return batch.commit().then(() => saveCategoriesList(type, list));
-}
-
 // ---- Обчислення на основі поточного місяця ----
 function getTargetDate() {
   const now = new Date();
@@ -2904,10 +2780,6 @@ const recGuard = UnsavedGuard.create({
 });
 
 document.getElementById('recBanner').addEventListener('click', openRecurringScreen);
-document.getElementById('openRecurringBtn').addEventListener('click', () => {
-  document.getElementById('categoriesOverlay').classList.remove('show');
-  openRecurringScreen();
-});
 document.getElementById('closeRecurring').addEventListener('click', () => {
   document.getElementById('recurringOverlay').classList.remove('show');
 });
@@ -3214,7 +3086,6 @@ document.getElementById('savingsToggleWithdraw').addEventListener('click', () =>
 document.getElementById('savingsToggleDeposit').addEventListener('click', () => switchSavingsFormType('deposit'));
 document.getElementById('closeSavingsForm').addEventListener('click', () => savingsGuard.requestClose());
 document.getElementById('savingsSubmitBtn').addEventListener('click', submitSavingsForm);
-document.getElementById('importCsvBtn').addEventListener('click', () => document.getElementById('importCsvInput').click());
 document.getElementById('importCsvInput').addEventListener('change', (e) => {
   const file = e.target.files && e.target.files[0];
   e.target.value = '';
@@ -3222,10 +3093,6 @@ document.getElementById('importCsvInput').addEventListener('change', (e) => {
 });
 document.getElementById('closeCategoryTx').addEventListener('click', () => document.getElementById('categoryTxOverlay').classList.remove('show'));
 document.getElementById('categoryTxOverlay').addEventListener('click', (e) => { if (e.target.id === 'categoryTxOverlay') e.currentTarget.classList.remove('show'); });
-document.getElementById('addExpenseCatBtn').addEventListener('click', () => addCategoryFromInput('expense'));
-document.getElementById('addIncomeCatBtn').addEventListener('click', () => addCategoryFromInput('income'));
-document.getElementById('newExpenseCatInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') addCategoryFromInput('expense'); });
-document.getElementById('newIncomeCatInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') addCategoryFromInput('income'); });
 document.getElementById('categoriesBtn').addEventListener('click', () => {
   if (currentTab === 'stats') {
     document.getElementById('statsSettingsOverlay').classList.add('show');
@@ -3234,11 +3101,9 @@ document.getElementById('categoriesBtn').addEventListener('click', () => {
   } else if (currentTab === 'notes') {
     document.getElementById('notesSettingsOverlay').classList.add('show');
   } else {
-    document.getElementById('categoriesOverlay').classList.add('show');
+    AppSettings.open('budget');
   }
 });
-document.getElementById('closeCategories').addEventListener('click', () => document.getElementById('categoriesOverlay').classList.remove('show'));
-document.getElementById('categoriesOverlay').addEventListener('click', (e) => { if (e.target.id === 'categoriesOverlay') e.currentTarget.classList.remove('show'); });
 
 document.getElementById('closeStatsSettings').addEventListener('click', () => document.getElementById('statsSettingsOverlay').classList.remove('show'));
 document.getElementById('statsSettingsOverlay').addEventListener('click', (e) => { if (e.target.id === 'statsSettingsOverlay') e.currentTarget.classList.remove('show'); });

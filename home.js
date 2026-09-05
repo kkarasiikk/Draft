@@ -27,9 +27,7 @@ const LOCALE_MAP = { uk: 'uk-UA', ru: 'ru-RU', pl: 'pl-PL', en: 'en-US' };
 
 const STRINGS = {
   uk: {
-    themeLabel: 'Тема', themeLight: 'Світла', themeDark: 'Темна', themeSystem: 'Системна',
     amountsShow: 'Показати суму', amountsHide: 'Сховати суму',
-    langLabel: 'Мова', logout: 'Вийти', exportLabel: 'Експорт даних',
     settingsLabel: 'Налаштування',
     exportBusy: 'Готую файл…', exportError: 'Не вдалося зібрати файл. Спробуй ще раз.',
     exportModalTitle: 'Експорт даних', exportWhat: 'Що зберегти', exportFormat: 'Формат',
@@ -119,9 +117,7 @@ const STRINGS = {
     err_resetGeneric: 'Не вдалося надіслати лист. Спробуй пізніше.',
   },
   ru: {
-    themeLabel: 'Тема', themeLight: 'Светлая', themeDark: 'Тёмная', themeSystem: 'Системная',
     amountsShow: 'Показать сумму', amountsHide: 'Скрыть сумму',
-    langLabel: 'Язык', logout: 'Выйти', exportLabel: 'Экспорт данных',
     settingsLabel: 'Настройки',
     exportBusy: 'Готовлю файл…', exportError: 'Не удалось собрать файл. Попробуй ещё раз.',
     exportModalTitle: 'Экспорт данных', exportWhat: 'Что сохранить', exportFormat: 'Формат',
@@ -211,9 +207,7 @@ const STRINGS = {
     err_resetGeneric: 'Не удалось отправить письмо. Попробуй позже.',
   },
   pl: {
-    themeLabel: 'Motyw', themeLight: 'Jasny', themeDark: 'Ciemny', themeSystem: 'Systemowy',
     amountsShow: 'Pokaż kwotę', amountsHide: 'Ukryj kwotę',
-    langLabel: 'Język', logout: 'Wyloguj', exportLabel: 'Eksport danych',
     settingsLabel: 'Ustawienia',
     exportBusy: 'Przygotowuję plik…', exportError: 'Nie udało się zebrać pliku. Spróbuj ponownie.',
     exportModalTitle: 'Eksport danych', exportWhat: 'Co zapisać', exportFormat: 'Format',
@@ -303,9 +297,7 @@ const STRINGS = {
     err_resetGeneric: 'Nie udało się wysłać wiadomości. Spróbuj później.',
   },
   en: {
-    themeLabel: 'Theme', themeLight: 'Light', themeDark: 'Dark', themeSystem: 'System',
     amountsShow: 'Show the amount', amountsHide: 'Hide the amount',
-    langLabel: 'Language', logout: 'Log out', exportLabel: 'Export data',
     settingsLabel: 'Settings',
     exportBusy: 'Preparing the file…', exportError: 'Could not build the file. Try again.',
     exportModalTitle: 'Export data', exportWhat: 'What to save', exportFormat: 'Format',
@@ -435,10 +427,6 @@ window.SideNav.mount(document.getElementById('sideNavHost'), {
 
 function applyTranslations() {
   document.getElementById('htmlRoot').setAttribute('lang', currentLang);
-  document.getElementById('themeMenuLabel').textContent = t('themeLabel');
-  document.getElementById('langMenuLabel').textContent = t('langLabel');
-  document.getElementById('exportLabel').textContent = t('exportLabel');
-  document.getElementById('logoutLabel').textContent = t('logout');
   // Назви розділів у колонці живуть у side-nav.js — одні на пʼять сторінок.
   window.SideNav.setLang(currentLang);
   document.getElementById('todayTitle').textContent = t('todayTitle');
@@ -467,16 +455,6 @@ function applyTranslations() {
   setAuthMode(authMode);
 }
 
-function renderLangPicker() {
-  const picker = document.getElementById('langPicker');
-  if (!picker) return;
-  picker.innerHTML = LANGS
-    .map((l) => `<button type="button" class="lang-choice${l === currentLang ? ' selected' : ''}" data-lang="${l}">${LANG_NAMES[l]}</button>`)
-    .join('');
-  picker.querySelectorAll('.lang-choice').forEach((btn) => {
-    btn.addEventListener('click', () => setLang(btn.dataset.lang));
-  });
-}
 function setLang(lang) {
   if (!LANGS.includes(lang)) return;
   currentLang = lang;
@@ -485,7 +463,9 @@ function setLang(lang) {
     db.collection('users').doc(auth.currentUser.uid).set({ lang }, { merge: true }).catch(() => {});
   }
   applyTranslations();
-  renderLangPicker();
+  // Вікно налаштувань малює свої підписи саме́ — до init() виклик безпечний
+  // і нічого не робить.
+  AppSettings.setLang(lang);
 }
 
 // ---- Тема (світла / темна / як в системі) ----
@@ -592,21 +572,6 @@ function applyTheme() {
     if (bar) meta.setAttribute('content', bar);
   }
 }
-function renderThemePicker() {
-  const picker = document.getElementById('themePicker');
-  if (!picker) return;
-  const options = [
-    { key: 'light', label: t('themeLight') },
-    { key: 'dark', label: t('themeDark') },
-    { key: 'system', label: t('themeSystem') },
-  ];
-  picker.innerHTML = options
-    .map((o) => `<button type="button" class="theme-choice${o.key === themeChoice ? ' selected' : ''}" data-theme-choice="${o.key}">${o.label}</button>`)
-    .join('');
-  picker.querySelectorAll('.theme-choice').forEach((btn) => {
-    btn.addEventListener('click', () => setTheme(btn.dataset.themeChoice));
-  });
-}
 // Око на самій плитці, а не рядок у меню налаштувань. Перемикач був там, і
 // його ніхто не знаходив: ховати суму хочеться в ту саму секунду, коли до
 // тебе підходять, а не після подорожі в меню.
@@ -653,45 +618,31 @@ function setTheme(choice) {
     db.collection('users').doc(auth.currentUser.uid).set({ theme: choice }, { merge: true }).catch(() => {});
   }
   applyTheme();
-  renderThemePicker();
 }
 darkMediaQuery.addEventListener('change', () => {
   if (themeChoice === 'system') applyTheme();
 });
 
-// ---- Гамбургер-меню (тема / мова / вихід) ----
-// На телефоні меню відкриває гамбургер, на комп'ютері — «Налаштування» в
-// бічній колонці. Кнопки різні, меню одне.
-function toggleAppMenu() {
-  const overlay = document.getElementById('appMenuOverlay');
-  const isOpen = overlay.classList.toggle('show');
-  document.getElementById('menuBtn').classList.toggle('open', isOpen);
-}
-document.getElementById('menuBtn').addEventListener('click', toggleAppMenu);
-document.getElementById('sideSettingsBtn').addEventListener('click', toggleAppMenu);
-document.getElementById('appMenuOverlay').addEventListener('click', (e) => {
-  if (e.target.id === 'appMenuOverlay') {
-    e.currentTarget.classList.remove('show');
-    document.getElementById('menuBtn').classList.remove('open');
-  }
+// ---- Вікно налаштувань ----
+// Тема, мова, категорії, нагадування, експорт і вихід живуть в одному вікні
+// (../settings.js), спільному для всіх пʼятьох сторінок. На телефоні його
+// відкриває гамбургер, на комп'ютері — «Налаштування» в бічній колонці:
+// кнопки різні, вікно одне.
+AppSettings.init({
+  db, auth,
+  base: '',
+  lang: currentLang,
+  theme: () => themeChoice,
+  onTheme: setTheme,
+  onLang: setLang,
+  onExport: openExportDialog,
+  onLogout: () => auth.signOut(),
 });
-
-// ---- Вхід / реєстрація ----
-let authMode = 'login';
-
-function authErrorMessage(code) {
-  const map = {
-    'auth/invalid-email': t('err_invalidEmail'),
-    'auth/missing-password': t('err_missingPassword'),
-    'auth/weak-password': t('err_weakPassword'),
-    'auth/email-already-in-use': t('err_emailInUse'),
-    'auth/invalid-credential': t('err_invalidCred'),
-    'auth/wrong-password': t('err_invalidCred'),
-    'auth/user-not-found': t('err_userNotFound'),
-    'auth/too-many-requests': t('err_tooMany'),
-  };
-  return map[code] || t('err_generic');
+function openSettings(tab) {
+  AppSettings.open(tab);
 }
+document.getElementById('menuBtn').addEventListener('click', () => openSettings());
+document.getElementById('sideSettingsBtn').addEventListener('click', () => openSettings());
 
 function setAuthMode(mode) {
   authMode = mode;
@@ -713,8 +664,6 @@ setAuthMode('login');
 // Виконуємо після того, як authMode і setAuthMode вже визначені, бо
 // applyTranslations() всередині повторно викликає setAuthMode(authMode).
 applyTheme();
-renderThemePicker();
-renderLangPicker();
 renderAmountsToggle();
 applyTranslations();
 
@@ -2020,8 +1969,6 @@ function openExportDialog() {
   document.getElementById('exportModalError').textContent = '';
   document.getElementById('exportSaveBtn').disabled = false;
   renderExportOptions();
-  document.getElementById('appMenuOverlay').classList.remove('show');
-  document.getElementById('menuBtn').classList.remove('open');
   document.getElementById('exportOverlay').classList.add('show');
 }
 
@@ -2029,7 +1976,6 @@ function closeExportDialog() {
   document.getElementById('exportOverlay').classList.remove('show');
 }
 
-document.getElementById('exportBtn').addEventListener('click', openExportDialog);
 document.getElementById('sideExportBtn').addEventListener('click', openExportDialog);
 
 // Колонка розділів веде сюди з хешем: у розділі кнопки «Експорт даних» і
@@ -2045,7 +1991,7 @@ function openFromHash() {
   // Даємо сторінці домалювати перший кадр — інакше діалог відкривається
   // над ще порожнім екраном.
   setTimeout(() => {
-    if (hash === '#export') openExportDialog(); else toggleAppMenu();
+    if (hash === '#export') openExportDialog(); else openSettings();
   }, 0);
 }
 openFromHash();
@@ -2099,10 +2045,6 @@ document.getElementById('exportSaveBtn').addEventListener('click', async () => {
   btn.disabled = false;
 });
 
-document.getElementById('logoutBtn').addEventListener('click', () => {
-  auth.signOut();
-});
-
 auth.onAuthStateChanged((user) => {
   document.getElementById('authLoading').style.display = 'none';
   if (user) {
@@ -2127,8 +2069,6 @@ auth.onAuthStateChanged((user) => {
       }
       if (changed) {
         applyTranslations();
-        renderThemePicker();
-        renderLangPicker();
         // Підписи «Показувати / Ховати» теж мовні.
         renderAmountsToggle();
       }
