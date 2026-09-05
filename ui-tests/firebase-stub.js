@@ -32,21 +32,60 @@
     return out;
   }
 
-  function snapOf(list) {
+  // colName потрібне, щоб у документа був `ref`: код, який переносить записи
+  // з видаленої категорії, пише саме через нього (batch.update(doc.ref, …)),
+  // і без цього поля бачив би undefined.
+  function snapOf(list, colName) {
     return {
       docs: (list || []).map((d) => {
         const doc = revive(d);
-        return { id: d.id, data: () => doc };
+        return { id: d.id, data: () => doc, ref: docRef(colName, d.id) };
       }),
       empty: !(list && list.length),
     };
   }
+
+  // Хто саме слухає документ профілю. Справжній Firestore віддає локальне
+  // відлуння запису одразу, не чекаючи на сервер, — і сторінки на це
+  // розраховують: вікно налаштувань пише категорії в профіль, а список
+  // категорій у розділі перемальовується від снапшота. Без цього списку
+  // заглушка мовчала б, і перевірялося б не те, що бачить людина.
+  const profileWatchers = [];
 
   function docRef(colName, id) {
     // Документ профілю: те, що підклав тест, або порожньо.
     const profileDoc = () => (colName === 'users' && seed.profile
       ? { exists: true, id, data: () => seed.profile }
       : { exists: false, id, data: () => ({}) });
+    // Запис у профіль міняє те, що віддадуть наступні читання, і будить
+    // підписників — рівно як merge у справжній базі.
+    //
+    // arrayUnion / arrayRemove доводиться розуміти: сторінка тренувань пише
+    // ними перелік схованих вправ, і якби заглушка поклала в поле сам
+    // маркер, наступний снапшот віддав би не масив — і список вправ
+    // «забув» би щойно приховану.
+    const applyFieldValue = (prev, next) => {
+      if (!next || typeof next !== 'object') return next;
+      const base = Array.isArray(prev) ? prev.slice() : [];
+      if (Array.isArray(next.__arrayUnion)) {
+        next.__arrayUnion.forEach((v) => { if (base.indexOf(v) === -1) base.push(v); });
+        return base;
+      }
+      if (Array.isArray(next.__arrayRemove)) {
+        return base.filter((v) => next.__arrayRemove.indexOf(v) === -1);
+      }
+      if (typeof next.__increment === 'number') return (typeof prev === 'number' ? prev : 0) + next.__increment;
+      return next;
+    };
+    const applyProfileWrite = (payload, merge) => {
+      if (colName !== 'users' || !payload) return;
+      const base = merge ? Object.assign({}, seed.profile || {}) : {};
+      Object.keys(payload).forEach((key) => {
+        base[key] = applyFieldValue(base[key], payload[key]);
+      });
+      seed.profile = base;
+      profileWatchers.slice().forEach((cb) => cb(profileDoc()));
+    };
     return {
       id,
       // Ім'я колекції потрібне пакетному запису: у batch.update() приїжджає
@@ -55,8 +94,16 @@
       // Профіль користувача теж треба вміти підкласти: від нього залежать, до
       // прикладу, план витрат на місяць і кільце на плитці бюджету.
       get: () => Promise.resolve(profileDoc()),
-      set: (p) => { calls.set.push({ col: colName, id, payload: p }); return Promise.resolve(); },
-      update: (p) => { calls.update.push({ col: colName, id, payload: p }); return Promise.resolve(); },
+      set: (p, opts) => {
+        calls.set.push({ col: colName, id, payload: p });
+        applyProfileWrite(p, !!(opts && opts.merge));
+        return Promise.resolve();
+      },
+      update: (p) => {
+        calls.update.push({ col: colName, id, payload: p });
+        applyProfileWrite(p, true);
+        return Promise.resolve();
+      },
       delete: () => { calls.delete.push({ col: colName, id }); return Promise.resolve(); },
       collection: (name) => colRef(name),
       // Раніше підписка на документ завжди віддавала порожнечу, і сід профілю
@@ -70,6 +117,13 @@
       // не відтворити — заглушка віддає все в тому ж такті.
       onSnapshot: (cb) => {
         setTimeout(() => cb(profileDoc()), window.__fbProfileDelay || 0);
+        if (colName === 'users') {
+          profileWatchers.push(cb);
+          return () => {
+            const i = profileWatchers.indexOf(cb);
+            if (i !== -1) profileWatchers.splice(i, 1);
+          };
+        }
         return () => {};
       },
     };
@@ -99,10 +153,10 @@
         return Promise.resolve({ id });
       },
       doc: (id) => docRef(name, id),
-      onSnapshot: (cb) => { setTimeout(() => cb(snapOf(seed[name])), 0); return () => {}; },
+      onSnapshot: (cb) => { setTimeout(() => cb(snapOf(seed[name], name)), 0); return () => {}; },
       get: () => {
         calls.get.push({ col: name, where: cons.slice() });
-        return Promise.resolve(snapOf(seed[name]));
+        return Promise.resolve(snapOf(seed[name], name));
       },
       where: (field, op, value) => colRef(name, cons.concat([[field, op, value]])),
       orderBy: () => ref, limit: () => ref,

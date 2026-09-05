@@ -36,15 +36,14 @@ test.describe('Комп’ютер', () => {
       await expect(rows).toHaveCount(2);
       await expect(rows.nth(0)).toHaveText('Експорт даних');
       await expect(rows.nth(1)).toHaveText('Налаштування');
+      // Вікно налаштувань спільне й стоїть на кожній сторінці, тож цей рядок
+      // скрізь кнопка. Експорт — інша річ: файл збирає код головної, тож із
+      // розділу це посилання туди.
+      await expect(page.locator('button#sideSettingsBtn')).toHaveCount(1);
       if (path === 'index.html') {
-        // На головній обидва відкривають своє просто тут.
         await expect(page.locator('button#sideExportBtn')).toHaveCount(1);
-        await expect(page.locator('button#sideSettingsBtn')).toHaveCount(1);
       } else {
-        // З розділу — посилання на головну з хешем: діалог експорту й меню
-        // налаштувань живуть саме там.
         await expect(rows.nth(0)).toHaveAttribute('href', homeHref + '#export');
-        await expect(rows.nth(1)).toHaveAttribute('href', homeHref + '#settings');
       }
     });
 

@@ -22,6 +22,7 @@
     '.task-menu-overlay.show',
     '.picker-overlay.show',
     '.export-overlay.show',
+    '.settings-overlay.show',
     '.aic-overlay.show',
   ].join(',');
 

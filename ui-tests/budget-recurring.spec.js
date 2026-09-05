@@ -63,8 +63,8 @@ test.describe('Регулярні операції', () => {
   test('нове правило зберігається з коректним числом місяця', async ({ page }) => {
     await openModule(page, 'budget/index.html');
     await page.click('#categoriesBtn');
-    await page.waitForSelector('#categoriesOverlay.show');
-    await page.click('#openRecurringBtn');
+    await page.waitForSelector('#settingsOverlay.show');
+    await page.click('[data-action="recurring"]');
     await page.waitForSelector('#recurringOverlay.show');
     await page.click('#addRecurringBtn');
     await page.waitForSelector('#recurringFormOverlay.show');
@@ -91,7 +91,8 @@ test.describe('Регулярні операції', () => {
   test('сума нижче нуля не зберігається', async ({ page }) => {
     await openModule(page, 'budget/index.html');
     await page.click('#categoriesBtn');
-    await page.click('#openRecurringBtn');
+    await page.waitForSelector('#settingsOverlay.show');
+    await page.click('[data-action="recurring"]');
     await page.waitForSelector('#recurringOverlay.show');
     await page.click('#addRecurringBtn');
     await page.waitForSelector('#recurringFormOverlay.show');

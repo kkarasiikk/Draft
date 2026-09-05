@@ -323,45 +323,54 @@ test.describe('Тижневик: запис через «+»', () => {
 test.describe('Тижневик: свої категорії', () => {
   const lastSet = (page) => page.evaluate(() => window.__fbCalls.set.slice(-1)[0]);
 
+  // Керування категоріями переїхало у спільне вікно налаштувань
+  // (../settings.js), вкладка «Завдання»: чип «Змінити» відкриває саме його.
   async function openCats(page) {
     await page.click('#bnWeek');
     await page.click('#openQuickAdd');
     await page.click('[data-plan-cats-edit]');
+    await expect(page.locator('#settingsOverlay')).toHaveClass(/show/);
   }
+
+  const catRows = (page) => page.locator('[data-cat-kind="week"] .settings-cat-row');
+  const catInput = '[data-cat-kind="week"] [data-cat-new]';
+  const catAdd = '[data-cat-kind="week"] [data-cat-add]';
 
   test('останній чип — «Змінити», і він відкриває керування', async ({ page }) => {
     await openTasks(page);
     await openCats(page);
-    await expect(page.locator('#planCatsOverlay')).toHaveClass(/show/);
-    await expect(page.locator('.plan-cat-row')).toHaveCount(3);
+    await expect(page.locator('.settings-tab.current')).toHaveText('Завдання');
+    await expect(catRows(page)).toHaveCount(3);
   });
 
   test('нова категорія лягає в профіль і одразу зʼявляється чипом', async ({ page }) => {
     await openTasks(page);
     await openCats(page);
-    await page.fill('#planCatInput', 'Проєкт');
-    await page.click('#planCatAddBtn');
+    await page.fill(catInput, 'Проєкт');
+    await page.click(catAdd);
     await expect.poll(async () => {
       const set = await lastSet(page);
       return set && set.payload.categoriesWeek.map((c) => c.label);
     }).toEqual(['Дім', 'Робота', 'Ідеї', 'Проєкт']);
+    await page.click('#settingsClose');
     await expect(page.locator('#planCatPicker')).toContainText('Проєкт');
   });
 
   test('категорія з тією ж назвою не заводиться двічі', async ({ page }) => {
     await openTasks(page);
     await openCats(page);
-    await page.fill('#planCatInput', 'дім');
-    await page.click('#planCatAddBtn');
-    await expect(page.locator('#planCatsError')).toHaveText('Така категорія вже є');
-    await expect(page.locator('.plan-cat-row')).toHaveCount(3);
+    await page.fill(catInput, 'дім');
+    await page.click(catAdd);
+    await expect(page.locator('.settings-error')).toHaveText('Така категорія вже є.');
+    await expect(catRows(page)).toHaveCount(3);
   });
 
-  test('порожня назва теж не заводиться', async ({ page }) => {
+  test('порожня назва нічого не заводить і не скаржиться', async ({ page }) => {
     await openTasks(page);
     await openCats(page);
-    await page.click('#planCatAddBtn');
-    await expect(page.locator('#planCatsError')).toHaveText('Напиши назву');
+    await page.click(catAdd);
+    await expect(catRows(page)).toHaveCount(3);
+    await expect(page.locator('.settings-error')).toHaveText('');
   });
 
   test('прибрана категорія нічого не стирає — її записи стають без категорії', async ({ page }) => {
@@ -369,12 +378,13 @@ test.describe('Тижневик: свої категорії', () => {
     // прибрану категорію.
     await openTasks(page);
     await openCats(page);
-    await page.locator('.plan-cat-row', { hasText: 'Дім' }).locator('.plan-cat-del').click();
+    await catRows(page).filter({ has: page.locator('input[value="Дім"]') })
+      .locator('[data-cat-del]').click();
     await expect.poll(async () => {
       const set = await lastSet(page);
       return set && set.payload.categoriesWeek.map((c) => c.label);
     }).toEqual(['Робота', 'Ідеї']);
-    await page.click('#planCatsClose');
+    await page.click('#settingsClose');
     await page.click('#planFormClose');
     await expect(page.locator('#planList')).toContainText('Розібрати шафу');
     expect(await page.locator('.plan-group-label').allTextContents())

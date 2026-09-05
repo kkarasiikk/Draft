@@ -7,7 +7,8 @@ LifeSW({
   files: [
     './', './index.html', './app.js', './quick-parse.js', './week-plan.js', './now-queue.js',
     './reminders.js', './push.js',
-    '../boot-guard.js', '../side-nav.js', '../side-nav.css', '../scroll-lock.js', '../unsaved-guard.js',
+    '../boot-guard.js', '../side-nav.js', '../side-nav.css', '../settings.js', '../settings.css',
+    '../categories-default.js', '../scroll-lock.js', '../unsaved-guard.js',
     '../sw-register.js',
     '../ai-chat.js', '../ai-chat.css', '../goals/streak.js',
     './manifest.json',

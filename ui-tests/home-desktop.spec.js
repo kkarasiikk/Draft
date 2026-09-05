@@ -109,11 +109,13 @@ test.describe('Дії без гамбургера', () => {
     expect(Math.abs((menu.x + menu.width) - (fab.x + fab.width))).toBeLessThan(30);
   });
 
-  test('«Налаштування» відкривають меню теми й мови', async ({ page }) => {
+  test('«Налаштування» відкривають спільне вікно на «Загальних»', async ({ page }) => {
     await openHub(page);
     await page.click('#sideSettingsBtn');
-    await expect(page.locator('#appMenuOverlay')).toHaveClass(/show/);
-    await expect(page.locator('#themePicker .theme-choice').first()).toBeVisible();
+    await expect(page.locator('#settingsOverlay')).toHaveClass(/show/);
+    await expect(page.locator('.settings-tab.current')).toHaveText('Загальні');
+    await expect(page.locator('[data-theme-choice]').first()).toBeVisible();
+    await expect(page.locator('[data-lang-choice]').first()).toBeVisible();
   });
 
   test('«Експорт даних» із колонки відкриває той самий діалог', async ({ page }) => {
@@ -147,7 +149,7 @@ test.describe('Шапка', () => {
   test('мова перемикає і дату, і підписи колонки', async ({ page }) => {
     await openHub(page);
     await page.click('#sideSettingsBtn');
-    await page.click('#langPicker .lang-choice[data-lang="en"]');
+    await page.click('[data-lang-choice="en"]');
     await expect(page.locator('#sideLabel-home')).toHaveText('Home');
     await expect(page.locator('#sideLabel-workout')).toHaveText('Workouts');
     await expect(page.locator('#sideLabel-settings')).toHaveText('Settings');
