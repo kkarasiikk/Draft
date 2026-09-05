@@ -957,15 +957,21 @@ function renderToday() {
   // Те, що не вмістилось, не зникає мовчки: рядок веде в розділ завдань, де
   // видно весь день. Лічильник у шапці каже, скільки справ усього, а цей
   // рядок — скільки з них лишилось за межею картки.
+  //
+  // Живе він ПОЗА списком: на низькому екрані список гортається всередині
+  // картки, і всередині нього рядок поїхав би з очей разом зі справами.
   const hidden = mine.length - limit;
-  const more = hidden > 0
-    ? `<a class="today-more" href="tasks/index.html">${escapeHtml(t('todayMore', hidden))}</a>`
-    : '';
+  const moreEl = document.getElementById('todayMore');
+  if (moreEl) {
+    moreEl.innerHTML = hidden > 0
+      ? `<a class="today-more" href="tasks/index.html">${escapeHtml(t('todayMore', hidden))}</a>`
+      : '';
+  }
 
   // Порожній список — теж відповідь, і ховати панель не треба: «нічого не
   // чекає» це новина, а не відсутність новин.
   panel.hidden = !homeData.tasks;
-  list.innerHTML = html ? html + more : `<div class="today-empty">${escapeHtml(t('todayEmpty'))}</div>`;
+  list.innerHTML = html || `<div class="today-empty">${escapeHtml(t('todayEmpty'))}</div>`;
   const countEl = document.getElementById('todayCount');
   if (countEl) countEl.textContent = mine.length ? t('todayCount', mine.length) : '';
 
