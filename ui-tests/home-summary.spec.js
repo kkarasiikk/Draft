@@ -156,21 +156,32 @@ test.describe('Плитки', () => {
   // Плитка відповідає на «що в мене сьогодні», а коли сьогодні нічого — на
   // «а коли наступне». «Скільки днів тому» звідси пішло: воно казало про
   // минуле, а плитка потрібна для того, що попереду.
-  test('сьогоднішнє тренування — один рядок, і «є» в ньому жирне', async ({ page }) => {
+  // Головне про сьогоднішнє тренування — ЯКЕ воно. Назву писала людина, і
+  // саме вона каже, що на неї чекає; число вправ на це не відповідає.
+  test('сьогоднішнє тренування називає себе, а не рахує вправи', async ({ page }) => {
     await openHub(page, { workouts: [{ id: 'w1', date: T, name: 'Ноги',
       exercises: [{ sets: [{ weight: 0, reps: 0 }] }] }] });
-    await expect(cap(page, 'workout')).toHaveText('Сьогодні є тренування');
-    await expect(cap(page, 'workout').locator('b')).toHaveText('є');
+    await expect(stat(page, 'workout')).toHaveText('Ноги');
+    await expect(cap(page, 'workout')).toHaveText('Сьогодні маєш заплановане тренування');
   });
 
-  // Підпис один на обидва випадки: «сьогодні є тренування» правда і про
-  // заплановане, і про розпочате. Різниця лишається в числі.
-  test('розпочате тренування каже те саме, але рахує підходи', async ({ page }) => {
+  // Розпочате тренування «запланованим» уже не назвеш — це була б неправда
+  // про те, що людина щойно робила. Тому підпис у цих двох випадків різний.
+  test('розпочате тренування каже, скільки підходів уже зроблено', async ({ page }) => {
     await openHub(page, { workouts: [{ id: 'w1', date: T, name: 'Ноги', exercises: [
       { sets: [{ weight: 60, reps: 8 }, { weight: 0, reps: 0 }] },
     ] }] });
-    await expect(cap(page, 'workout')).toHaveText('Сьогодні є тренування');
-    await expect(stat(page, 'workout')).toHaveText('1/2');
+    await expect(stat(page, 'workout')).toHaveText('Ноги');
+    await expect(cap(page, 'workout')).toHaveText('Зроблено 1 із 2 підходів');
+  });
+
+  // Безіменне тренування назвати нічим — тоді лишається старий вигляд із
+  // числом. Порожній рядок замість назви був би діркою в плитці.
+  test('тренування без назви лишається числом', async ({ page }) => {
+    await openHub(page, { workouts: [{ id: 'w1', date: T, name: '',
+      exercises: [{ sets: [{ weight: 0, reps: 0 }] }, { sets: [{ weight: 0, reps: 0 }] }] }] });
+    await expect(stat(page, 'workout')).toHaveText('2');
+    await expect(cap(page, 'workout')).toHaveText('Сьогодні маєш заплановане тренування');
   });
 
   test('без тренування сьогодні плитка каже, коли наступне', async ({ page }) => {
@@ -207,7 +218,7 @@ test.describe('Плитки', () => {
       { id: 'w1', date: T, name: 'Fullbody СБ', exercises: [{ sets: [{ weight: 0, reps: 0 }] }] },
       { id: 'plan', date: iso(5), name: 'Ноги', exercises: [{ sets: [{ weight: 0, reps: 0 }] }] },
     ] });
-    await expect(cap(page, 'workout')).toHaveText('Сьогодні є тренування');
+    await expect(stat(page, 'workout')).toHaveText('Fullbody СБ');
   });
 
   test('тренування наперед — це план, а не зроблене', async ({ page }) => {
