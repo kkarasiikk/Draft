@@ -86,7 +86,8 @@ const STRINGS = {
     capSpent: 'витрачено за поточний місяць',
     capTasksEmpty: 'Маєш вихідний, чи просто не записано?',
     capGoalsMonthNone: 'цілей на цей місяць ще немає',
-    capWorkoutToday: 'Сьогодні *є* тренування',
+    capWorkoutPlanned: 'Сьогодні маєш заплановане тренування',
+    capWorkoutProgress: (done, total) => `Зроблено ${done} із ${total} підходів`,
     capWorkoutNone: 'Сьогодні тренувань немає',
     capWorkoutNext: (when) => `Наступне — ${when}`,
     whenTomorrow: 'завтра', whenDayAfter: 'післязавтра',
@@ -177,7 +178,8 @@ const STRINGS = {
     capSpent: 'потрачено за текущий месяц',
     capTasksEmpty: 'У тебя выходной или просто не записано?',
     capGoalsMonthNone: 'целей на этот месяц пока нет',
-    capWorkoutToday: 'Сегодня *есть* тренировка',
+    capWorkoutPlanned: 'Сегодня у тебя запланирована тренировка',
+    capWorkoutProgress: (done, total) => `Сделано ${done} из ${total} подходов`,
     capWorkoutNone: 'Сегодня тренировок нет',
     capWorkoutNext: (when) => `Следующая — ${when}`,
     whenTomorrow: 'завтра', whenDayAfter: 'послезавтра',
@@ -268,7 +270,8 @@ const STRINGS = {
     capSpent: 'wydano w tym miesiącu',
     capTasksEmpty: 'Masz wolne czy po prostu nie zapisane?',
     capGoalsMonthNone: 'nie ma jeszcze celów na ten miesiąc',
-    capWorkoutToday: 'Dziś *jest* trening',
+    capWorkoutPlanned: 'Na dziś masz zaplanowany trening',
+    capWorkoutProgress: (done, total) => `Zrobione ${done} z ${total} serii`,
     capWorkoutNone: 'Dziś nie ma treningu',
     capWorkoutNext: (when) => `Następny — ${when}`,
     whenTomorrow: 'jutro', whenDayAfter: 'pojutrze',
@@ -359,7 +362,8 @@ const STRINGS = {
     capSpent: 'spent this month',
     capTasksEmpty: 'A day off, or just nothing written down?',
     capGoalsMonthNone: 'no goals for this month yet',
-    capWorkoutToday: 'There *is* a workout today',
+    capWorkoutPlanned: 'You have a workout planned today',
+    capWorkoutProgress: (done, total) => `${done} of ${total} sets done`,
     capWorkoutNone: 'No workout today',
     capWorkoutNext: (when) => `Next — ${when}`,
     whenTomorrow: 'tomorrow', whenDayAfter: 'the day after tomorrow',
@@ -876,6 +880,14 @@ function fillCaption(el, text) {
     b.textContent = part;
     el.appendChild(b);
   });
+}
+
+// Плитка може показувати не число, а назву — тоді в неї інший кегль. Клас
+// висить на рядку, а не на самому <b>, бо разом із кеглем міняється й те, як
+// рядок переносить довгий текст.
+function setStatAsName(key, on) {
+  const stat = document.getElementById(key + 'Stat');
+  if (stat && stat.parentElement) stat.parentElement.classList.toggle('as-name', !!on);
 }
 
 // prefix — слово ПЕРЕД числом («Заплановано 8 завдань»). Порожній елемент
@@ -1899,14 +1911,30 @@ async function loadHomeSummary(uid) {
 
       const todayWorkout = HomeSummary.workoutToday(docs, today);
       if (todayWorkout) {
+        // Головне про сьогоднішнє тренування — ЯКЕ воно, а не скільки в ньому
+        // вправ: назву людина писала сама, і саме вона каже, що на неї чекає.
+        // Число стояло тут доти, доки плитка відповідала на «скільки лишилось»,
+        // а вона відповідає на «що в мене сьогодні».
+        //
         // Записане наперед (підходи порожні) — це план, і казати про нього
-        // «зроблено» було б неправдою: його ще тільки роблять. Тому різниця
-        // лишається в числі (вправи проти підходів), а підпис один: «сьогодні
-        // є тренування» правда і про заплановане, і про розпочате.
-        setStat('workout', todayWorkout.planned
-          ? String(todayWorkout.exercises) : `${todayWorkout.setsDone}/${todayWorkout.setsTotal}`,
-          todayWorkout.planned ? t('unitExercises') : t('unitSets'),
-          t('capWorkoutToday'), null);
+        // «зроблено» було б неправдою: його ще тільки роблять. Тому підпис у
+        // цих двох випадків різний, а не спільний, як раніше.
+        const caption = todayWorkout.planned
+          ? t('capWorkoutPlanned')
+          : t('capWorkoutProgress', todayWorkout.setsDone, todayWorkout.setsTotal);
+        if (todayWorkout.name) {
+          setStat('workout', todayWorkout.name, '', caption, null);
+        } else {
+          // Безіменне тренування назвати нічим — тоді лишається старий вигляд:
+          // число вправ або підходів. Порожній рядок замість назви був би
+          // діркою в плитці.
+          setStat('workout', todayWorkout.planned
+            ? String(todayWorkout.exercises) : `${todayWorkout.setsDone}/${todayWorkout.setsTotal}`,
+            todayWorkout.planned ? t('unitExercises') : t('unitSets'), caption, null);
+        }
+        // Назва читається, а не охоплюється оком, тож і кегль у неї свій —
+        // числовий розганяв би її на три рядки.
+        setStatAsName('workout', !!todayWorkout.name);
         return;
       }
 
@@ -1924,6 +1952,7 @@ async function loadHomeSummary(uid) {
       } else {
         second = t('capWorkoutNext', t(kind === 'tomorrow' ? 'whenTomorrow' : 'whenDayAfter'));
       }
+      setStatAsName('workout', false);
       setStat('workout', '—', '', `${t('capWorkoutNone')}\n${second}`, null);
     })
     .catch((err) => console.error('homeSummary workout:', err));
