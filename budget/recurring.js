@@ -1,9 +1,8 @@
 // ---- Регулярні операції: які з них уже настали ----
 //
 // Оренда, підписки, зарплата повторюються щомісяця, і вбивати їх руками —
-// найнудніша частина ведення бюджету. Правило повторення тут те саме, що в
-// завданнях (`tasks/recurrence.js`): свій паралельний механізм означав би дві
-// реалізації «кожні N днів», які розійшлися б при першій же правці.
+// найнудніша частина ведення бюджету. Саме обчислення дати живе поруч, у
+// `budget/recurrence.js`.
 //
 // ГОЛОВНЕ РІШЕННЯ: настала операція НЕ записується сама.
 // Бюджет — це реальні гроші. Автоматично створена транзакція, якої насправді
@@ -28,12 +27,12 @@
   }
   function todayIso() { return isoOf(new Date()); }
 
-  // nextOccurrence живе в tasks/recurrence.js: у браузері він уже в window,
+  // nextOccurrence живе в budget/recurrence.js: у браузері він уже в window,
   // у Jest — підтягуємо через require.
   function nextOccurrence(rule, opts) {
     var fn = root.nextOccurrence;
     if (!fn && typeof require !== 'undefined') {
-      try { fn = require('../tasks/recurrence.js').nextOccurrence; } catch (err) { fn = null; }
+      try { fn = require('./recurrence.js').nextOccurrence; } catch (err) { fn = null; }
     }
     return fn ? fn(rule, opts) : null;
   }

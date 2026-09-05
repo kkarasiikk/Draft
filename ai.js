@@ -188,9 +188,6 @@ const tools = [
         title: { type: "string", description: "Назва завдання" },
         dueDate: { type: "string", description: "Дата YYYY-MM-DD, якщо названа" },
         dueTime: { type: "string", description: "Час HH:MM, якщо названий" },
-        priority: { type: "string", enum: ["low", "medium", "high"] },
-        estimateMin: { type: "number", description: "Скільки хвилин займе, якщо сказано" },
-        tags: { type: "array", items: { type: "string" }, description: "Теги без решітки" },
         notes: { type: "string", description: "Деталі, якщо є" },
         goalId: {
           type: "string",
@@ -427,7 +424,7 @@ const tools = [
   {
     name: "edit_task",
     description:
-      "Змінити вже створене завдання: назву, дату, час, пріоритет, оцінку тривалості, теги чи нотатки. " +
+      "Змінити вже створене завдання: назву, дату, час чи нотатку. " +
       "Передавай тільки те, що змінюється. Щоб позначити виконаним — complete_task. id бери з list_tasks.",
     input_schema: {
       type: "object",
@@ -435,11 +432,8 @@ const tools = [
         id: { type: "string", description: "id завдання з list_tasks" },
         title: { type: "string" },
         notes: { type: "string" },
-        priority: { type: "string", enum: ["low", "medium", "high"] },
-        tags: { type: "array", items: { type: "string" } },
         dueDate: { type: "string", description: "YYYY-MM-DD; null щоб прибрати дату" },
         dueTime: { type: "string", description: "HH:MM; тримається лише разом з датою" },
-        estimateMin: { type: "number", description: "Оцінка в хвилинах" },
       },
       required: ["id"],
     },
@@ -791,7 +785,6 @@ function sanitizeTaskInput(input) {
 
   const isDate = (v) => typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v);
   const isTime = (v) => typeof v === "string" && /^\d{2}:\d{2}$/.test(v);
-  const estimate = Number(input.estimateMin);
 
   return {
     value: {
@@ -799,17 +792,18 @@ function sanitizeTaskInput(input) {
       notes: typeof input.notes === "string" ? input.notes.slice(0, 5000) : "",
       done: false,
       completedAt: null,
-      priority: ["low", "medium", "high"].includes(input.priority) ? input.priority : null,
-      tags: Array.isArray(input.tags)
-        ? input.tags.filter((t) => typeof t === "string" && t.trim()).slice(0, 20).map((t) => t.trim().slice(0, 30))
-        : [],
       dueDate: isDate(input.dueDate) ? input.dueDate : null,
       // Час без дати нікуди не приткнути — клієнт показує його в рядку дня.
       dueTime: isDate(input.dueDate) && isTime(input.dueTime) ? input.dueTime : null,
-      estimateMin: Number.isFinite(estimate) && estimate > 0 ? Math.min(Math.round(estimate), 1440) : null,
-      recurrence: null,
       reminderAt: null,
       notifiedAt: null,
+      // СПАДЩИНА. Пріоритету, тегів, оцінки часу, повторення й підзадач у
+      // застосунку більше немає, але firestore.rules досі вимагають ці поля
+      // в кожному завданні — без них клієнтський запис відхилявся б.
+      priority: null,
+      tags: [],
+      estimateMin: null,
+      recurrence: null,
       subtasks: [],
       // Завдання може бути щоденною дією з цілі. Порожній рядок — це «нема
       // цілі», а не ціль з порожнім id, тож нормалізуємо в null.
@@ -850,8 +844,7 @@ async function listTasks(uid, input) {
       count: docs.length,
       items: docs.slice(0, limit).map((t) => ({
         id: t.id, title: t.title, done: !!t.done, dueDate: t.dueDate || null,
-        dueTime: t.dueTime || null, priority: t.priority || null, estimateMin: t.estimateMin || null,
-        goalId: t.goalId || null,
+        dueTime: t.dueTime || null, goalId: t.goalId || null,
       })),
     },
   };
@@ -1224,7 +1217,7 @@ async function editTask(uid, input) {
   const found = await loadForEdit(uid, "tasks", input.id, "завдання не знайдене");
   if (found.error) return found.error;
 
-  const patch = pickPatch(input, ["title", "notes", "priority", "tags", "dueDate", "dueTime", "estimateMin", "goalId"]);
+  const patch = pickPatch(input, ["title", "notes", "dueDate", "dueTime", "goalId"]);
   if (!Object.keys(patch).length) return { output: { ok: false, error: "нічого міняти" }, isError: true };
 
   const merged = { ...found.data, ...patch };
@@ -1232,22 +1225,26 @@ async function editTask(uid, input) {
   if (result.error) return { output: { ok: false, error: result.error }, isError: true };
 
   // sanitizeTaskInput складає документ як для НОВОГО завдання, тож повертаємо
-  // те, що воно обнуляє: виконаність, повторення й нагадування правкою
-  // тексту зачіпати не можна.
+  // те, що воно обнуляє: виконаність і нагадування правкою тексту зачіпати
+  // не можна. Спадкові поля повертаємо з тієї ж причини: правка назви не
+  // має стирати теги й підзадачі, записані до того, як їх прибрали.
   const value = {
     ...result.value,
     done: !!found.data.done,
     completedAt: found.data.completedAt || null,
-    recurrence: found.data.recurrence || null,
     reminderAt: found.data.reminderAt || null,
     notifiedAt: found.data.notifiedAt || null,
+    priority: found.data.priority || null,
+    tags: found.data.tags || [],
+    estimateMin: found.data.estimateMin || null,
+    recurrence: found.data.recurrence || null,
     subtasks: found.data.subtasks || [],
     goalId: "goalId" in patch ? result.value.goalId : (found.data.goalId || null),
     updatedAt: admin.firestore.FieldValue.serverTimestamp(),
   };
   await found.ref.update(value);
   return {
-    output: { ok: true, title: value.title, dueDate: value.dueDate, dueTime: value.dueTime, priority: value.priority },
+    output: { ok: true, title: value.title, dueDate: value.dueDate, dueTime: value.dueTime },
     action: { kind: "task_edited", title: value.title, dueDate: value.dueDate },
   };
 }

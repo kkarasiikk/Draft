@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Life">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="description" content="Life — щоденні завдання: підзадачі, теги, пріоритети.">
+<meta name="description" content="Life — щоденні завдання: день, тиждень, календар.">
 <meta http-equiv="Content-Security-Policy" content="
   default-src 'self';
   script-src 'self' https://www.gstatic.com https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/ https://cdnjs.cloudflare.com;
@@ -201,14 +201,11 @@
   .cal-day-tasks{display:flex;flex-direction:column;gap:2px;overflow:hidden;min-width:0;}
   .cal-chip{font-size:9.5px;font-weight:600;line-height:1.3;padding:2px 5px;border-radius:6px;white-space:nowrap;
     overflow:hidden;text-overflow:ellipsis;background:var(--accent-light);color:var(--accent);}
-  .cal-chip-high{background:var(--high-light);color:var(--high);}
-  .cal-chip-medium{background:var(--medium-light);color:var(--medium);}
-  .cal-chip-low{background:var(--low-light);color:var(--low);}
   .cal-chip-done{opacity:.5;text-decoration:line-through;}
   .cal-chip-more{font-size:9.5px;font-weight:600;color:var(--ink-muted);padding:1px 5px;cursor:pointer;}
   /* На телефоні в клітинку 44px влазить лише «Дз…» — тому там завдання
-     показуються крапками (колір = пріоритет), а назви лишаються на широких
-     екранах, де вони реально читаються. Кількість важливіша за уривок назви. */
+     показуються крапками, а назви лишаються на широких екранах, де вони
+     реально читаються. Кількість важливіша за уривок назви. */
   @media (max-width:599px){
     .cal-day-tasks{flex-direction:row;flex-wrap:wrap;gap:3px;align-items:center;justify-content:center;padding-top:2px;}
     .cal-chip{width:7px;height:7px;padding:0;border-radius:50%;font-size:0;line-height:0;overflow:hidden;flex-shrink:0;}
@@ -348,7 +345,7 @@
 
   /* Позначка на пункті, що приїхав із давнішого тижня. Не докір, а факт:
      інакше він виглядав би як щойно записаний. Стоїть серед решти підписів
-     рядка — тими самими плашками, що час, пріоритет і теги. */
+     рядка — тією самою плашкою, що й час. */
   .plan-carried{font-size:11px;font-weight:600;color:var(--ink-muted);
     background:var(--control-bg);border-radius:999px;padding:2px 8px;}
 
@@ -420,44 +417,25 @@
   .btn-secondary{border:1px solid var(--border);background:transparent;color:var(--ink-soft);font-weight:500;
     border-radius:10px;padding:13px 18px;font-size:15px;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap;}
 
-  /* ---- Пріоритет / теги / підзадачі у формі ---- */
-  .priority-picker{display:flex;gap:4px;margin-top:6px;margin-bottom:16px;}
-  .priority-choice{flex:1;min-width:0;border:1px solid var(--border);background:transparent;color:var(--ink-muted);
+  /* ---- Вибір нагадування у формі ---- */
+  /* Клас звався `priority-picker`: спершу ним малювався вибір пріоритету, а
+     нагадування лише позичило вигляд. Пріоритету більше немає, тож назва
+     каже те, що є — ряд кнопок-чипів. */
+  .chip-picker{display:flex;gap:4px;margin-top:6px;margin-bottom:16px;}
+  .chip-choice{flex:1;min-width:0;border:1px solid var(--border);background:transparent;color:var(--ink-muted);
     font-family:'Inter',sans-serif;font-size:12.5px;font-weight:600;padding:9px 4px;border-radius:8px;cursor:pointer;
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .priority-choice.selected{border-color:transparent;background:var(--accent-light);color:var(--accent);}
-  .priority-choice.selected[data-priority="high"]{background:var(--high-light);color:var(--high);}
-  .priority-choice.selected[data-priority="medium"]{background:var(--medium-light);color:var(--medium);}
-  .priority-choice.selected[data-priority="low"]{background:var(--low-light);color:var(--low);}
+  .chip-choice.selected{border-color:transparent;background:var(--accent-light);color:var(--accent);}
   /* Нагадування — до пʼяти варіантів із довшими підписами («У час завдання»),
-     а базовий .priority-picker розрахований на чотири рівні клітинки
-     пріоритету: набитий у той самий рядок текст обрізало б до «У час …».
-     Тут кнопки переносяться й сідають по своєму тексту, а не тиснуться. */
+     а базовий .chip-picker розрахований на рівні клітинки: набитий у той
+     самий рядок текст обрізало б до «У час …». Тут кнопки переносяться й
+     сідають по своєму тексту, а не тиснуться. */
   /* Клас звався `wrap` — і потрапляв під правила сторінкового .wrap, який
      задає ширину колонки вмісту. На комп'ютері це вже видно: вибір нагадувань
      усередині форми діставав ліве поле сторінки. Назва мусить казати, що
      вона робить, і не збігатися з чужою. */
-  .priority-picker.multiline{flex-wrap:wrap;}
-  .priority-picker.multiline .priority-choice{flex:0 1 auto;white-space:normal;}
-  /* Поле оцінки — вузьке: 4 цифри більше не треба, а повна ширина створює
-     враження, що туди мають писати щось довге. */
-  #taskEstimateInput{max-width:140px;}
-  .tags-editor{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;min-height:26px;}
-  .tag-edit-chip{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;padding:4px 6px 4px 10px;
-    border-radius:20px;background:var(--accent-light);color:var(--accent);}
-  .tag-edit-chip button{border:none;background:none;color:inherit;cursor:pointer;display:flex;padding:0;opacity:.75;}
-  .tag-edit-chip button:hover{opacity:1;}
-  .subtasks-editor{display:flex;flex-direction:column;gap:6px;margin-top:6px;}
-  .subtask-row{display:flex;align-items:center;gap:8px;}
-  .subtask-row input[type=text]{margin:0;flex:1;min-width:0;}
-  .subtask-check{flex-shrink:0;width:20px;height:20px;border-radius:50%;border:2px solid var(--border);
-    background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff;padding:0;}
-  .subtask-check svg{display:none;width:12px;height:12px;}
-  .subtask-check.checked{background:var(--income);border-color:var(--income);}
-  .subtask-check.checked svg{display:block;}
-  .subtask-remove{flex-shrink:0;border:none;background:none;color:var(--ink-muted);cursor:pointer;display:flex;padding:4px;}
-  .add-subtask-btn{margin-top:8px;margin-bottom:16px;border:none;background:none;color:var(--accent);
-    font-family:'Inter',sans-serif;font-size:13.5px;font-weight:600;cursor:pointer;padding:4px 0;}
+  .chip-picker.multiline{flex-wrap:wrap;}
+  .chip-picker.multiline .chip-choice{flex:0 1 auto;white-space:normal;}
 
   .day-group{margin-bottom:18px;}
   .day-label{display:flex;align-items:baseline;gap:6px;font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-muted);
@@ -491,25 +469,15 @@
   .task-check svg{display:none;width:13px;height:13px;}
   .task-check.checked{background:var(--income);border-color:var(--income);}
   .task-check.checked svg{display:block;}
-  .task-check.priority-high{border-color:var(--high);}
-  .task-check.priority-medium{border-color:var(--medium);}
-  .task-check.priority-low{border-color:var(--low);}
   .task-body{flex:1;min-width:0;}
   .task-title{font-size:14.5px;color:var(--ink);line-height:1.4;word-break:break-word;}
   .task-row.done .task-title{color:var(--ink-muted);text-decoration:line-through;}
   .task-meta{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:5px;}
   .task-time{font-size:11.5px;font-weight:600;color:var(--ink-muted);white-space:nowrap;}
-  .task-progress{font-size:11.5px;color:var(--ink-muted);white-space:nowrap;}
-  .tag-chip{font-size:10.5px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap;display:inline-block;
-    background:var(--accent-light);color:var(--accent);}
-  /* Мітка цілі, з якої прийшло завдання. Приглушена: це контекст, а не тег
-     і не пріоритет — по ній не фільтрують, її просто впізнають. */
+  /* Мітка цілі, з якої прийшло завдання. Приглушена: це контекст, по якому
+     не фільтрують — його просто впізнають. */
   .goal-chip{font-size:10.5px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap;display:inline-block;
     background:var(--glass-btn-bg);color:var(--ink-muted);}
-  .priority-chip{font-size:10.5px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap;display:inline-block;}
-  .priority-chip.high{background:var(--high-light);color:var(--high);}
-  .priority-chip.medium{background:var(--medium-light);color:var(--medium);}
-  .priority-chip.low{background:var(--low-light);color:var(--low);}
 
   .card{position:relative;background:var(--card-bg);    border:1px solid var(--card-border);border-radius:24px;padding:22px;margin-bottom:16px;overflow:hidden;
     transition:transform .35s, border-color .35s, box-shadow .35s;animation:cardIn .6s ease forwards;}
@@ -710,7 +678,6 @@
     </div>
     </div>
 
-    <div id="tagFilterRow" class="tag-filter-row"></div>
     <div class="day-heading" id="dayHeading"></div>
     <div id="dayList"></div>
     <div id="noDateSection"></div>
@@ -910,30 +877,12 @@
         </div>
       </div>
 
-      <label class="field-label" id="priorityLabel">Пріоритет</label>
-      <div class="priority-picker" id="taskPriorityPicker"></div>
-
-      <label class="field-label" id="estimateLabel">Скільки часу займе</label>
-      <input type="number" id="taskEstimateInput" min="1" max="1440" step="1" inputmode="numeric" placeholder="хв">
-
       <label class="field-label" id="reminderLabel">Нагадати</label>
-      <div class="priority-picker multiline" id="taskReminderPicker"></div>
-
-      <label class="field-label" id="recurrenceLabel">Повторювати</label>
-      <div class="priority-picker" id="taskRecurrencePicker"></div>
-      <div id="recurrenceOptions"></div>
-
-      <label class="field-label" id="tagsLabel">Теги</label>
-      <div class="tags-editor" id="taskTagsEditor"></div>
-      <input type="text" id="taskTagInput" maxlength="30" placeholder="Додати тег">
-
-      <label class="field-label" id="subtasksLabel">Підзадачі</label>
-      <div class="subtasks-editor" id="taskSubtasksEditor"></div>
-      <button type="button" class="add-subtask-btn" id="addSubtaskBtn">+ Додати підзадачу</button>
+      <div class="chip-picker multiline" id="taskReminderPicker"></div>
 
       <div class="form-error" id="taskFormError"></div>
       <!-- Шаблон народжується з уже набраного завдання, а не з окремого
-           редактора: так у ньому одразу правильні кроки й теги. -->
+           редактора: так у ньому одразу та сама назва й нотатка. -->
       <button type="button" class="link-btn" id="saveAsTemplateBtn">Зберегти як шаблон</button>
       <div class="modal-actions">
         <button type="button" class="btn-delete" id="deleteTaskBtn" style="display:none;">Видалити</button>
@@ -961,7 +910,6 @@
 <script defer src="quick-parse.js"></script>
 <script defer src="week-plan.js"></script>
 <script defer src="now-queue.js"></script>
-<script defer src="recurrence.js"></script>
 <script defer src="reminders.js"></script>
 <script defer src="push.js"></script>
 <script defer src="../side-nav.js"></script>

@@ -1326,17 +1326,17 @@ async function submitQuick() {
       notes: document.getElementById('quickTaskNotes').value.trim(),
       done: false,
       completedAt: null,
-      // Пріоритет, теги, підзадачі, оцінка й повторення лишаються порожніми —
-      // рівно те, що записує повна форма, якої не чіпали. Для них треба вже
-      // не запис, а обдумування, і живуть вони в самому розділі.
-      priority: null,
-      tags: [],
       dueDate: document.getElementById('quickTaskDate').value || null,
       dueTime: document.getElementById('quickTaskTime').value || null,
-      estimateMin: null,
-      recurrence: null,
       reminderAt: null,
       notifiedAt: null,
+      // СПАДЩИНА. Пріоритету, тегів, оцінки часу, повторення й підзадач у
+      // застосунку більше немає, але firestore.rules досі вимагають ці поля
+      // в кожному завданні — без них запис відхиляється.
+      priority: null,
+      tags: [],
+      estimateMin: null,
+      recurrence: null,
       subtasks: [],
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
