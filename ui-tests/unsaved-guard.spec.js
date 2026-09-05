@@ -88,12 +88,17 @@ test.describe('Завдання', () => {
     });
   });
 
-  test('підзадачі теж рахуються за зміни', async ({ page }) => {
+  // Раніше тут перевірялись підзадачі; їх прибрали разом із пріоритетом,
+  // тегами, оцінкою часу й повторенням. Нагадування — єдине поле форми, яке
+  // лишилось поза текстовими інпутами, тож саме воно й перевіряється: гард
+  // читає його зі стану, а не з DOM, і саме такий випадок легко загубити.
+  test('вибір нагадування теж рахується за зміни', async ({ page }) => {
     await openModule(page, 'tasks/index.html');
     await open(page)();
     await page.fill('#taskTitleInput', 'Прибирання');
-    await page.click('#addSubtaskBtn');
-    await page.fill('[data-sub-title]', 'Помити вікна');
+    // Нагадування пропонується лише завданню з датою.
+    await page.fill('#taskDueDate', '2026-09-20');
+    await page.click('#taskReminderPicker .chip-choice >> nth=1');
     await tapBackdrop(page, 'taskFormOverlay');
     expect(await dialog.shown(page)).toBe(true);
   });

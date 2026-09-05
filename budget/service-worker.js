@@ -8,9 +8,9 @@ LifeSW({
   // перейменування, — його теж треба прибрати.
   legacyPrefixes: ['moi-finansy-'],
   files: [
-    './', './index.html', './app.js', './recurring.js', './firebase-config.js',
+    './', './index.html', './app.js', './recurring.js', './recurrence.js', './firebase-config.js',
     '../boot-guard.js', '../side-nav.js', '../side-nav.css', '../scroll-lock.js', '../unsaved-guard.js', '../sw-register.js',
-    '../ai-chat.js', '../ai-chat.css', '../tasks/recurrence.js', '../categories-default.js',
+    '../ai-chat.js', '../ai-chat.css', '../categories-default.js',
     './manifest.json',
     '../icons/icon-192.png', '../icons/icon-512.png', '../icons/icon-192-maskable.png', '../icons/icon-512-maskable.png',
   ],

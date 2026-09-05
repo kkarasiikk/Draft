@@ -1,5 +1,5 @@
 // ---- Розбір рядка швидкого додавання завдання ----
-// Перетворює «Купити молоко завтра о 18 #дім ~15хв» на готові поля завдання.
+// Перетворює «Купити молоко завтра о 18» на готові поля завдання.
 // Свідомо БЕЗ звернень до AI: працює миттєво, офлайн і безкоштовно — саме там,
 // де користувач найчастіше додає завдання (на ходу, однією рукою).
 //
@@ -45,38 +45,15 @@
     { day: 7, words: 'неділя|неділю|неділі|воскресенье|воскресенья|niedziela|niedzielę|niedziele|sunday' },
   ];
 
-  // Повторення словами. Форми «щосуботи» / «по суботах» вирізаються ДО розбору
-  // дати — інакше parseDate побачив би в них назву дня тижня й зробив із
-  // повторюваного завдання одноразове.
-  var RECUR_WEEKDAYS = [
-    { day: 1, words: 'щопонеділка|щопонеділкам|по понеділках|по понедельникам|every monday|co poniedziałek|w każdy poniedziałek' },
-    { day: 2, words: 'щовівторка|по вівторках|по вторникам|every tuesday|co wtorek|w każdy wtorek' },
-    { day: 3, words: 'щосереди|по середах|по средам|every wednesday|co środę|co srode|w każdą środę' },
-    { day: 4, words: 'щочетверга|по четвергах|по четвергам|every thursday|co czwartek|w każdy czwartek' },
-    { day: 5, words: "щоп'ятниці|по п'ятницях|по пятницам|every friday|co piątek|w każdy piątek" },
-    { day: 6, words: 'щосуботи|по суботах|по субботам|every saturday|co sobotę|co sobote|w każdą sobotę' },
-    { day: 7, words: 'щонеділі|по неділях|по воскресеньям|every sunday|co niedzielę|w każdą niedzielę' },
-  ];
-  var RECUR_DAILY = 'щодня|щоденно|кожен день|кожного дня|каждый день|ежедневно|codziennie|daily|every day';
-  var RECUR_WEEKLY = 'щотижня|щотижнево|еженедельно|каждую неделю|co tydzień|co tydzien|weekly|every week';
-  var RECUR_MONTHLY = 'щомісяця|щомісячно|ежемесячно|каждый месяц|co miesiąc|co miesiac|monthly|every month';
-  // «Кожні N днів» — той самий маркер, але з числом.
-  var RECUR_EVERY_N = '(?:кожні|кожних|каждые|co|every)\\s+(\\d{1,3})\\s*(?:днів|дні|дня|дней|день|dni|days|day)';
-  // «Кожної суботи» / «every saturday» — маркер + назва дня тижня загальним
-  // списком, щоб не дублювати всі відмінки з WEEKDAYS.
-  var RECUR_MARKER = '(?:кожної|кожного|кожен|каждую|каждый|каждое|every|co|w każdy|w każdą)';
-
-  var MIN_UNITS = 'хвилин\\w*|хвилі?в?|хв|мин\\w*|мін|minut\\w*|minutes|minute|mins|min|m';
-  var HOUR_UNITS = 'годин\\w*|год|час[іао]?в?|godzin\\w*|godz|hours|hour|hrs|hr|h';
-
-  var PRIORITY_WORDS = {
-    high: 'терміново|термінове|важливо|важливе|срочно|важно|pilne|ważne|wazne|urgent|important',
-    low: 'колись|потім|когда-нибудь|kiedyś|kiedys|someday|later',
-  };
-
   // Прийменники, що лишаються «висіти» в кінці назви після вирізання дати/часу
   // («Зустріч на завтра» -> «Зустріч на»).
-  var TRAILING_FILLER = 'на|у|в|о|до|за|na|w|o|do|on|at|in|by|about';
+  //
+  // Слова-маркери повторення («кожної», «every») тут із тієї ж причини.
+  // Повторюваних завдань у застосунку більше немає, і «Прибирання кожної
+  // суботи» тепер читається як звичайне завдання на найближчу суботу — але
+  // без цього рядка від назви лишилось би «Прибирання кожної».
+  var TRAILING_FILLER = 'на|у|в|о|до|за|кожної|кожного|кожен|кожні|кожних|каждую|каждый|каждое|каждые|' +
+    'na|w|o|do|co|w każdy|w każdą|on|at|in|by|about|every';
 
   function pad2(n) {
     return String(n).padStart(2, '0');
@@ -95,101 +72,6 @@
   // визначенням не літера й не цифра, а зайві пробіли приберуться в cleanTitle.
   function cut(text, re) {
     return text.replace(re, ' ');
-  }
-
-  // «У цьому шматку рядка є що читати?» — літера або цифра. Порожнє місце
-  // й розділові знаки за текст не рахуються.
-  var ALNUM = /[\p{L}\p{N}]/u;
-
-  function parseTags(state) {
-    var tags = [];
-    // Тег — #слово; дублікати прибираємо, регістр лишаємо як ввели.
-    state.text = state.text.replace(/(^|\s)#([\p{L}\p{N}_-]+)/giu, function (m, pre, tag) {
-      if (!tags.some(function (t) { return t.toLowerCase() === tag.toLowerCase(); })) tags.push(tag);
-      return pre;
-    });
-    state.tags = tags;
-  }
-
-  function parsePriority(state) {
-    var priority = null;
-    // Числова форма (!1/!2/!3) і «окличні» (!!!/!!/!) — перевіряємо від
-    // найдовшої, інакше !!! з'їлося б як !.
-    var marks = [
-      { re: /(^|\s)!1(?=\s|$)/i, value: 'high' },
-      { re: /(^|\s)!2(?=\s|$)/i, value: 'medium' },
-      { re: /(^|\s)!3(?=\s|$)/i, value: 'low' },
-      { re: /(^|\s)!!!(?=\s|$)/, value: 'high' },
-      { re: /(^|\s)!!(?=\s|$)/, value: 'medium' },
-      { re: /(^|\s)!(?=\s|$)/, value: 'high' },
-    ];
-    for (var i = 0; i < marks.length; i++) {
-      if (marks[i].re.test(state.text)) {
-        priority = marks[i].value;
-        state.text = state.text.replace(marks[i].re, '$1');
-        break;
-      }
-    }
-    if (!priority) {
-      var keys = Object.keys(PRIORITY_WORDS);
-      for (var k = 0; k < keys.length; k++) {
-        var re = wordRe(PRIORITY_WORDS[keys[k]]);
-        if (re.test(state.text)) {
-          priority = keys[k];
-          state.text = cut(state.text, re);
-          break;
-        }
-      }
-    }
-    state.priority = priority;
-  }
-
-  function parseRecurrence(state) {
-    var rule = null;
-
-    // 1. «Кожні N днів» — перевіряємо першим: містить те саме слово-маркер,
-    // що й «кожної суботи», але з числом.
-    var everyNRe = wordRe(RECUR_EVERY_N);
-    var em = state.text.match(new RegExp(everyNRe.source, 'iu'));
-    if (em) {
-      var n = Number(em[1]);
-      if (n > 0 && n <= 365) {
-        rule = { type: 'daily', interval: n, weekdays: [], day: null, anchor: 'schedule' };
-        state.text = cut(state.text, everyNRe);
-      }
-    }
-
-    // 2. Конкретний день тижня: «щосуботи», «кожної суботи», «every friday».
-    if (!rule) {
-      for (var i = 0; i < RECUR_WEEKDAYS.length; i++) {
-        var directRe = wordRe(RECUR_WEEKDAYS[i].words);
-        var markerRe = wordRe(RECUR_MARKER + '\\s+(?:' + WEEKDAYS[i].words + ')');
-        var re = directRe.test(state.text) ? directRe : (markerRe.test(state.text) ? markerRe : null);
-        if (re) {
-          rule = { type: 'weekly', interval: 1, weekdays: [RECUR_WEEKDAYS[i].day], day: null, anchor: 'schedule' };
-          state.text = cut(state.text, re);
-          break;
-        }
-      }
-    }
-
-    // 3. Загальні «щодня / щотижня / щомісяця».
-    if (!rule) {
-      var generic = [
-        { re: wordRe(RECUR_DAILY), type: 'daily' },
-        { re: wordRe(RECUR_WEEKLY), type: 'weekly' },
-        { re: wordRe(RECUR_MONTHLY), type: 'monthly' },
-      ];
-      for (var g = 0; g < generic.length; g++) {
-        if (generic[g].re.test(state.text)) {
-          rule = { type: generic[g].type, interval: 1, weekdays: [], day: null, anchor: 'schedule' };
-          state.text = cut(state.text, generic[g].re);
-          break;
-        }
-      }
-    }
-
-    state.recurrence = rule;
   }
 
   function parseDate(state) {
@@ -329,56 +211,16 @@
     }
   }
 
-  function parseEstimate(state) {
-    // Час доби вже вирізаний раніше, тож «о 14 год» сюди не долетить і
-    // «год» лишається однозначною одиницею тривалості.
-    var hoursBody = '(\\d+(?:[.,]\\d+)?)\\s*(?:' + HOUR_UNITS + ')';
-    var minsBody = '(\\d+)\\s*(?:' + MIN_UNITS + ')';
-    // Одна позначка тривалості: години, хвилини або «1 год 30 хв» разом.
-    // Раніше години й хвилини шукались двома незалежними проходами — і
-    // «Робота 1 год і ще 30 хв» злипалось у 90 хвилин з двох різних місць
-    // речення. Тепер це один суміжний фрагмент.
-    var re = wordRe('(~)?\\s*(?:' + hoursBody + '(?:\\s*' + minsBody + ')?|' + minsBody + ')');
-    var m = state.text.match(re);
-    if (!m) {
-      state.estimateMin = null;
-      return;
-    }
-
-    // Тривалість — це позначка, дописана з краю фрази («Медитація 10 хв»,
-    // «30 хв на розтяжку»), а не будь-яке число з «хвилинами» всередині
-    // речення. У «Виділити 30 хвилин, посидіти в тишині» тривалість є
-    // частиною самої назви: вирізати її означає лишити «Виділити ,
-    // посидіти в тишині» — половину сенсу. Явне «~» знімає це питання
-    // й працює в будь-якому місці рядка.
-    var head = state.text.slice(0, m.index);
-    var tail = state.text.slice(m.index + m[0].length);
-    if (!m[1] && ALNUM.test(head) && ALNUM.test(tail)) {
-      state.estimateMin = null;
-      return;
-    }
-
-    var total = 0;
-    if (m[2]) total += Math.round(parseFloat(m[2].replace(',', '.')) * 60);
-    if (m[3]) total += Number(m[3]);
-    if (m[4]) total += Number(m[4]);
-
-    // Понад добу — це вже не оцінка часу на завдання, а помилка розбору;
-    // тоді й з назви нічого не вирізаємо, хай лишається як написали.
-    if (total > 0 && total <= 1440) {
-      state.estimateMin = total;
-      state.text = head + ' ' + tail;
-    } else {
-      state.estimateMin = null;
-    }
-  }
-
   function cleanTitle(text) {
     var title = text.replace(/\s+/g, ' ').trim();
     // Вирізана позначка лишає по собі пробіл там, де його не було:
     // «Зустріч завтра, о 18» -> «Зустріч ,». Підтягуємо розділовий знак
     // назад до слова, щоб назва не виглядала друкарською помилкою.
-    title = title.replace(/\s+([,;:.!?])/g, '$1');
+    //
+    // Тільки знак, що стоїть окремо (далі пробіл або кінець рядка): «!» тепер
+    // звичайний символ назви, а не позначка пріоритету, і «Дзвінок !1» не
+    // має злипатись у «Дзвінок!1».
+    title = title.replace(/\s+([,;:.!?])(?=\s|$)/g, '$1');
     title = title.replace(/^[-–—,;:.]+|[-–—,;:.]+$/g, '').trim();
     // Прибираємо прийменник, що лишився без свого слова («Зустріч на» -> «Зустріч»),
     // але тільки якщо після нього щось лишається — інакше зникне вся назва.
@@ -391,8 +233,7 @@
   /**
    * @param {string} input рядок, який ввела людина
    * @param {{now?: Date}} [opts] `now` підмінюється в тестах
-   * @returns {{title:string, dueDate:string|null, dueTime:string|null,
-   *            priority:string|null, tags:string[], estimateMin:number|null}}
+   * @returns {{title:string, dueDate:string|null, dueTime:string|null}}
    */
   function parseQuickTask(input, opts) {
     opts = opts || {};
@@ -401,31 +242,16 @@
       now: opts.now instanceof Date ? opts.now : new Date(),
     };
 
-    parseTags(state);
-    parsePriority(state);
-    // Повторення — до дати: «щосуботи» містить назву дня тижня, і без цього
-    // порядку воно перетворилось би на одноразове завдання на суботу.
-    parseRecurrence(state);
     parseDate(state);
     parseTime(state);
-    parseEstimate(state);
 
     // Час без дати сам по собі марний — це майже завжди «сьогодні».
     if (state.dueTime && !state.dueDate) state.dueDate = isoOf(startOfDay(state.now));
-
-    // Повторення «щомісяця» прив'язується до числа з дати завдання.
-    if (state.recurrence && state.recurrence.type === 'monthly' && state.dueDate) {
-      state.recurrence.day = Number(state.dueDate.split('-')[2]);
-    }
 
     return {
       title: cleanTitle(state.text),
       dueDate: state.dueDate,
       dueTime: state.dueTime,
-      priority: state.priority,
-      tags: state.tags,
-      estimateMin: state.estimateMin,
-      recurrence: state.recurrence,
     };
   }
 

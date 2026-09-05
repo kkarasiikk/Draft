@@ -6,7 +6,7 @@ LifeSW({
   name: 'tasks',
   files: [
     './', './index.html', './app.js', './quick-parse.js', './week-plan.js', './now-queue.js',
-    './recurrence.js', './reminders.js', './push.js',
+    './reminders.js', './push.js',
     '../boot-guard.js', '../side-nav.js', '../side-nav.css', '../scroll-lock.js', '../unsaved-guard.js',
     '../sw-register.js',
     '../ai-chat.js', '../ai-chat.css', '../goals/streak.js',

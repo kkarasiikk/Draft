@@ -181,16 +181,32 @@ describe("executeTool", () => {
   describe("завдання", () => {
     test("add_task записує коректний документ", async () => {
       const r = await ai.executeTool("uid1", "add_task", {
-        title: "Подзвонити мамі", dueDate: "2026-08-20", dueTime: "18:00", priority: "high", tags: ["дім"],
+        title: "Подзвонити мамі", dueDate: "2026-08-20", dueTime: "18:00",
       }, ctx);
       expect(r.output.ok).toBe(true);
       expect(r.action).toMatchObject({ kind: "task_added", title: "Подзвонити мамі" });
 
       const snap = await mockCurrent.collection("users").doc("uid1").collection("tasks").get();
       const doc = snap.docs[0].data();
-      expect(doc).toMatchObject({ title: "Подзвонити мамі", done: false, dueDate: "2026-08-20", dueTime: "18:00", priority: "high" });
-      expect(doc.subtasks).toEqual([]);
+      expect(doc).toMatchObject({ title: "Подзвонити мамі", done: false, dueDate: "2026-08-20", dueTime: "18:00" });
       expect(doc.completedAt).toBeNull();
+    });
+
+    // Пріоритету, тегів, оцінки часу, повторення й підзадач у застосунку
+    // більше немає, але firestore.rules досі вимагають ці поля — без них
+    // запис відхиляється. Модель більше не має їх у схемі; якщо вигадає
+    // сама, значення все одно не потрапить у документ.
+    test("спадкові поля пишуться порожніми й не приймають вигадане моделлю", async () => {
+      await ai.executeTool("uid1", "add_task", {
+        title: "Прибрати", priority: "high", tags: ["дім"], estimateMin: 30,
+      }, ctx);
+      const snap = await mockCurrent.collection("users").doc("uid1").collection("tasks").get();
+      const doc = snap.docs[0].data();
+      expect(doc.priority).toBeNull();
+      expect(doc.tags).toEqual([]);
+      expect(doc.estimateMin).toBeNull();
+      expect(doc.recurrence).toBeNull();
+      expect(doc.subtasks).toEqual([]);
     });
 
     test("час без дати не зберігається — його нікуди показати", async () => {

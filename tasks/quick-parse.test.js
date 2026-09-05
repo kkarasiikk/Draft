@@ -93,155 +93,54 @@ describe('parseQuickTask: час', () => {
   });
 });
 
-describe('parseQuickTask: пріоритет, теги, оцінка часу', () => {
-  test('!1 / !2 / !3', () => {
-    expect(parse('Терміновий дзвінок !1').priority).toBe('high');
-    expect(parse('Звичайна справа !2').priority).toBe('medium');
-    expect(parse('Колись потім !3').priority).toBe('low');
+describe('parseQuickTask: те, що більше не розбирається', () => {
+  // Пріоритет, теги, оцінка часу й повторення прибрані із завдань — тож
+  // рядок їх більше не з'їдає. Це не дрібниця: доки розбір лишався, «#дім»
+  // зникав із назви й не з'являвся ніде більше.
+  test('позначки пріоритету лишаються в назві', () => {
+    expect(parse('Терміновий дзвінок !1').title).toBe('Терміновий дзвінок !1');
+    expect(parse('Зробити !!!').title).toBe('Зробити !!!');
   });
 
-  test('!!! / !! / !', () => {
-    expect(parse('Здати звіт !!!').priority).toBe('high');
-    expect(parse('Здати звіт !!').priority).toBe('medium');
-    expect(parse('Здати звіт !').priority).toBe('high');
+  test('#тег лишається в назві', () => {
+    expect(parse('Полити квіти #дім').title).toBe('Полити квіти #дім');
   });
 
-  test('словами, різними мовами', () => {
-    expect(parse('Терміново оплатити рахунок').priority).toBe('high');
-    expect(parse('Pilne spotkanie').priority).toBe('high');
-    expect(parse('Urgent call').priority).toBe('high');
+  test('тривалість лишається в назві', () => {
+    expect(parse('Медитація 10 хв').title).toBe('Медитація 10 хв');
+    expect(parse('Розтяжка ~15хв').title).toBe('Розтяжка ~15хв');
   });
 
-  test('теги через #, без дублікатів', () => {
-    const r = parse('Купити подарунок #дім #сімʼя #дім');
-    expect(r.tags).toEqual(['дім', 'сімʼя']);
-    expect(r.title).toBe('Купити подарунок');
-  });
-
-  test('оцінка часу у хвилинах і годинах', () => {
-    expect(parse('Прибрати ~30хв').estimateMin).toBe(30);
-    expect(parse('Презентація 2 год').estimateMin).toBe(120);
-    expect(parse('Робота 1,5 год').estimateMin).toBe(90);
-    expect(parse('Дзвінок ~15m').estimateMin).toBe(15);
-  });
-
-  test('години і хвилини разом', () => {
-    expect(parse('Прибирання 1 год 30 хв').estimateMin).toBe(90);
-  });
-
-  test('нереалістична оцінка відкидається', () => {
-    expect(parse('Проєкт 50 годин').estimateMin).toBeNull();
-  });
-
-  test('час доби не плутається з оцінкою тривалості', () => {
-    const r = parse('Зустріч о 14 год ~40хв');
-    expect(r.dueTime).toBe('14:00');
-    expect(r.estimateMin).toBe(40);
-  });
-
-  test('тривалість усередині фрази лишається в назві', () => {
-    // Найболючіший випадок: «30 хвилин» тут — доповнення до дієслова, а не
-    // позначка. Вирізавши його, застосунок лишав «Виділити , посидіти в
-    // тишині» — назву без половини сенсу.
-    const r = parse('Виділити 30 хвилин, посидіти в тишині');
-    expect(r.title).toBe('Виділити 30 хвилин, посидіти в тишині');
-    expect(r.estimateMin).toBeNull();
-
-    expect(parse('Виділити 2 години на спорт').title).toBe('Виділити 2 години на спорт');
-    expect(parse('Zrobić 15 min rozgrzewki').estimateMin).toBeNull();
-  });
-
-  test('тривалість з краю фрази — це оцінка', () => {
-    expect(parse('Медитація 10 хв').estimateMin).toBe(10);
-    expect(parse('Медитація 10 хв').title).toBe('Медитація');
-    expect(parse('30 хв на медитацію').estimateMin).toBe(30);
-    // Позначки, вирізані раніше, не роблять тривалість «серединою»:
-    // після них у хвості лишаються тільки пробіли.
-    expect(parse('Медитація 10 хв щодня').estimateMin).toBe(10);
-  });
-
-  test('явне «~» робить оцінку з тривалості будь-де', () => {
-    const r = parse('Виділити ~30хв, посидіти в тишині');
-    expect(r.estimateMin).toBe(30);
-    expect(r.title).toBe('Виділити, посидіти в тишині');
-  });
-
-  test('відкинута оцінка не з\'їдає текст назви', () => {
-    expect(parse('Проєкт 50 годин').title).toBe('Проєкт 50 годин');
-  });
-});
-
-describe('parseQuickTask: повторення', () => {
-  test('щодня / ежедневно / codziennie / daily', () => {
-    ['Вітаміни щодня', 'Витамины ежедневно', 'Witaminy codziennie', 'Vitamins daily'].forEach((s) => {
-      expect(parse(s).recurrence).toEqual({ type: 'daily', interval: 1, weekdays: [], day: null, anchor: 'schedule' });
-    });
-  });
-
-  test('кожні N днів', () => {
-    expect(parse('Тренування кожні 3 дні').recurrence)
-      .toEqual({ type: 'daily', interval: 3, weekdays: [], day: null, anchor: 'schedule' });
-    expect(parse('Water plants every 5 days').recurrence.interval).toBe(5);
-  });
-
-  test('конкретний день тижня і не з\'їдає його як дату', () => {
-    const r = parse('Прибирання щосуботи');
-    expect(r.recurrence).toEqual({ type: 'weekly', interval: 1, weekdays: [6], day: null, anchor: 'schedule' });
-    // Найважливіше: «щосуботи» не має перетворитись на разове завдання на суботу.
-    expect(r.dueDate).toBeNull();
+  test('слова повторення не роблять із завдання серію, але й не калічать назву', () => {
+    expect(parse('Пробіжка щодня').title).toBe('Пробіжка щодня');
+    // «кожної суботи» -> звичайне завдання на найближчу суботу.
+    const r = parse('Прибирання кожної суботи');
     expect(r.title).toBe('Прибирання');
+    expect(r.dueDate).toBe('2026-08-22');
   });
 
-  test('«кожної п\'ятниці» через маркер + назву дня', () => {
-    expect(parse("Звіт кожної п'ятниці").recurrence.weekdays).toEqual([5]);
-    expect(parse('Take out trash every friday').recurrence.weekdays).toEqual([5]);
-    expect(parse('Уборка по субботам').recurrence.weekdays).toEqual([6]);
-  });
-
-  test('щомісяця бере число з дати завдання', () => {
-    const r = parse('Оплатити оренду щомісяця 01.09');
-    expect(r.dueDate).toBe('2026-09-01');
-    expect(r.recurrence.type).toBe('monthly');
-    expect(r.recurrence.day).toBe(1);
-  });
-
-  test('повторення поєднується з часом і тегом', () => {
-    const r = parse('Вітаміни щодня о 9 #здоровя');
-    expect(r.recurrence.type).toBe('daily');
-    expect(r.dueTime).toBe('09:00');
-    expect(r.tags).toEqual(['здоровя']);
-    expect(r.title).toBe('Вітаміни');
-  });
-
-  test('звичайне завдання не отримує повторення', () => {
-    expect(parse('Купити молоко завтра').recurrence).toBeNull();
+  test('розбір повертає рівно три поля', () => {
+    expect(Object.keys(parse('Подумати про відпустку')).sort())
+      .toEqual(['dueDate', 'dueTime', 'title']);
   });
 });
 
 describe('parseQuickTask: назва', () => {
   test('усе разом', () => {
-    const r = parse('Купити молоко завтра о 18 #дім ~15хв !1');
+    const r = parse('Купити молоко завтра о 18');
     expect(r).toEqual({
       title: 'Купити молоко',
       dueDate: '2026-08-19',
       dueTime: '18:00',
-      priority: 'high',
-      tags: ['дім'],
-      estimateMin: 15,
-      recurrence: null,
     });
   });
 
   test('англійською', () => {
-    const r = parse('Call the dentist tomorrow at 9:30 #health ~10m !2');
+    const r = parse('Call the dentist tomorrow at 9:30');
     expect(r).toEqual({
       title: 'Call the dentist',
       dueDate: '2026-08-19',
       dueTime: '09:30',
-      priority: 'medium',
-      tags: ['health'],
-      estimateMin: 10,
-      recurrence: null,
     });
   });
 
@@ -263,10 +162,6 @@ describe('parseQuickTask: назва', () => {
       title: 'Подумати про відпустку',
       dueDate: null,
       dueTime: null,
-      priority: null,
-      tags: [],
-      estimateMin: null,
-      recurrence: null,
     });
   });
 
