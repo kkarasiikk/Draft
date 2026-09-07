@@ -7,9 +7,9 @@ rules_version = '2';
 //   users/{uid}/transactions/{id}     -- {type, amount, category, note, date}
 //   users/{uid}/savings/{id}          -- {type, amount, currency, note, date, goalId}
 //   users/{uid}/savingsGoals/{id}     -- {name, createdAt}
-//   users/{uid}/recurringTx/{id}      -- {type, amount, category, note,
-//                                         recurrence, nextDate, active,
-//                                         createdAt, updatedAt}
+//   users/{uid}/recurringTx/{id}      -- СПАДЩИНА: правила регулярних
+//                                         операцій. Застосунок їх більше не
+//                                         створює й не читає.
 //   users/{uid}/pages/{id}            -- {title, content, createdAt, updatedAt}
 //   users/{uid}/tasks/{id}            -- {title, notes, done, completedAt,
 //                                         priority, tags, dueDate, dueTime,
@@ -95,6 +95,11 @@ service cloud.firestore {
                  isNonEmptyString(d.category, 100) &&
                  d.date is string && d.date.size() == 10 &&
                  d.note is string && d.note.size() <= 2000 &&
+                 // СПАДЩИНА. Транзакції, народжені з правила регулярної
+                 // операції, носили source: 'recurring'. Правил більше немає,
+                 // нових записів із цим полем не буває, але старі його носять
+                 // — а правило бачить документ ЦІЛКОМ, тож прибрати ключ
+                 // означало б відхиляти будь-яку їх правку.
                  (!('source' in d) || d.source is string) &&
                  (!('createdAt' in d) || d.createdAt is timestamp) &&
                  d.keys().hasOnly(['type', 'amount', 'category', 'note', 'date', 'source', 'createdAt']);
@@ -127,10 +132,14 @@ service cloud.firestore {
         allow create, update: if isOwner(uid) && isValidGoal(request.resource.data);
       }
 
-      // Регулярні операції (оренда, підписки, зарплата) — це ПРАВИЛО, а не
-      // транзакція: сама транзакція створюється лише тоді, коли людина
-      // підтвердила, що операція справді відбулась. Тому тут немає date —
-      // натомість nextDate каже, коли настане наступна.
+      // СПАДЩИНА. Регулярні операції (оренда, підписки, зарплата) були
+      // ПРАВИЛОМ, а не транзакцією: сама транзакція народжувалась лише тоді,
+      // коли людина підтвердила, що операція справді відбулась. Розділ їх
+      // більше не вміє — ні заводити, ні показувати.
+      //
+      // Правило лишається, щоб уже заведені документи можна було прочитати й
+      // видалити. Прибрати цей блок можна тільки разом із деплоєм правил, а
+      // сенсу в ньому мало: писати сюди однаково нікому.
       match /recurringTx/{ruleId} {
         function isValidRecurringTx(d) {
           return d.type in ['income', 'expense'] &&

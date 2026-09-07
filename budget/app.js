@@ -86,28 +86,11 @@ const T = {
     saveError: 'Не вдалося зберегти. Перевір інтернет-з’єднання',
     confirmTitle: 'Видалити запис?', confirmSub: 'Цю дію не можна скасувати.', confirmTitleLogout: 'Вийти з акаунту?', confirmSubLogout: 'Доведеться увійти знову, щоб побачити свої дані.',
     cancelBtn: 'Скасувати', deleteBtn: 'Видалити',
-    recTitle: 'Регулярні операції',
-    recRulesLabel: 'Правила',
-    recAddBtn: 'Додати регулярну операцію',
-    recFormTitle: 'Регулярна операція',
-    recEveryLabel: 'Повторювати', recNextLabel: 'Наступна',
-    recEveryWeek: 'Щотижня', recEveryMonth: 'Щомісяця', recEveryQuarter: 'Раз на 3 місяці', recEveryYear: 'Раз на рік',
-    recBanner: (n) => `${n} ${plural(n, { one: 'регулярна операція чекає', few: 'регулярні операції чекають', many: 'регулярних операцій чекають', other: 'регулярної операції чекає' })}`,
-    recDueHint: 'Ці операції за правилом уже настали. Записуємо лише те, що справді відбулось — підписку могли скасувати, а зарплату затримати.',
-    recPost: 'Записати', recSkip: 'Пропустити',
-    recNextOn: (d) => `Наступна: ${d}`,
-    recPaused: 'Вимкнено',
-    recEmpty: 'Регулярних операцій ще немає. Додай оренду чи підписку — і щомісяця лишиться тільки підтвердити.',
-    recAmountError: 'Вкажи суму, більшу за нуль',
-    recDateError: 'Вкажи дату наступної операції',
     unsavedTitle: 'Зберегти зміни?',
     unsavedSub: 'Є незбережені зміни. Якщо вийти зараз, вони пропадуть.',
     unsavedSave: 'Зберегти', unsavedDiscard: 'Не зберігати', unsavedKeep: 'Продовжити редагування',
     settingsTitle: 'Налаштування',
     chooseFileBtn: 'Обрати файл',
-    importConfirm: 'Знайдено рядків: {total}. Буде додано записів: {ok}, нових категорій: {newCats}. Пропущено через помилки: {skipped}. Продовжити?',
-    importSuccess: 'Імпортовано записів: {count}', importNoValidRows: 'У файлі не знайдено жодного коректного рядка',
-    importParseError: 'Не вдалося прочитати файл. Перевір, що це коректний CSV.',
   },
   ru: {
     appTitle: 'Life',
@@ -151,28 +134,11 @@ const T = {
     saveError: 'Не удалось сохранить. Проверь интернет-соединение',
     confirmTitle: 'Удалить запись?', confirmSub: 'Это действие нельзя отменить.', confirmTitleLogout: 'Выйти из аккаунта?', confirmSubLogout: 'Придётся войти снова, чтобы увидеть свои данные.',
     cancelBtn: 'Отмена', deleteBtn: 'Удалить',
-    recTitle: 'Регулярные операции',
-    recRulesLabel: 'Правила',
-    recAddBtn: 'Добавить регулярную операцию',
-    recFormTitle: 'Регулярная операция',
-    recEveryLabel: 'Повторять', recNextLabel: 'Следующая',
-    recEveryWeek: 'Еженедельно', recEveryMonth: 'Ежемесячно', recEveryQuarter: 'Раз в 3 месяца', recEveryYear: 'Раз в год',
-    recBanner: (n) => `${n} ${plural(n, { one: 'регулярная операция ждёт', few: 'регулярные операции ждут', many: 'регулярных операций ждут', other: 'регулярной операции ждёт' })}`,
-    recDueHint: 'Эти операции по правилу уже наступили. Записываем только то, что действительно было — подписку могли отменить, а зарплату задержать.',
-    recPost: 'Записать', recSkip: 'Пропустить',
-    recNextOn: (d) => `Следующая: ${d}`,
-    recPaused: 'Выключено',
-    recEmpty: 'Регулярных операций пока нет. Добавь аренду или подписку — и каждый месяц останется только подтвердить.',
-    recAmountError: 'Укажи сумму больше нуля',
-    recDateError: 'Укажи дату следующей операции',
     unsavedTitle: 'Сохранить изменения?',
     unsavedSub: 'Есть несохранённые изменения. Если выйти сейчас, они пропадут.',
     unsavedSave: 'Сохранить', unsavedDiscard: 'Не сохранять', unsavedKeep: 'Продолжить редактирование',
     settingsTitle: 'Настройки',
     chooseFileBtn: 'Выбрать файл',
-    importConfirm: 'Найдено строк: {total}. Будет добавлено записей: {ok}, новых категорий: {newCats}. Пропущено из-за ошибок: {skipped}. Продолжить?',
-    importSuccess: 'Импортировано записей: {count}', importNoValidRows: 'В файле не найдено ни одной корректной строки',
-    importParseError: 'Не удалось прочитать файл. Проверь, что это корректный CSV.',
   },
   pl: {
     appTitle: 'Life',
@@ -216,28 +182,11 @@ const T = {
     saveError: 'Nie udało się zapisać. Sprawdź połączenie z internetem',
     confirmTitle: 'Usunąć wpis?', confirmSub: 'Tej czynności nie można cofnąć.', confirmTitleLogout: 'Wylogować się?', confirmSubLogout: 'Aby zobaczyć swoje dane, trzeba będzie zalogować się ponownie.',
     cancelBtn: 'Anuluj', deleteBtn: 'Usuń',
-    recTitle: 'Operacje cykliczne',
-    recRulesLabel: 'Reguły',
-    recAddBtn: 'Dodaj operację cykliczną',
-    recFormTitle: 'Operacja cykliczna',
-    recEveryLabel: 'Powtarzaj', recNextLabel: 'Następna',
-    recEveryWeek: 'Co tydzień', recEveryMonth: 'Co miesiąc', recEveryQuarter: 'Co 3 miesiące', recEveryYear: 'Raz w roku',
-    recBanner: (n) => `${n} ${plural(n, { one: 'operacja cykliczna czeka', few: 'operacje cykliczne czekają', many: 'operacji cyklicznych czeka', other: 'operacji cyklicznych czeka' })}`,
-    recDueHint: 'Te operacje według reguły już nadeszły. Zapisujemy tylko to, co faktycznie się wydarzyło — subskrypcję można było anulować, a wypłatę opóźnić.',
-    recPost: 'Zapisz', recSkip: 'Pomiń',
-    recNextOn: (d) => `Następna: ${d}`,
-    recPaused: 'Wyłączone',
-    recEmpty: 'Nie ma jeszcze operacji cyklicznych. Dodaj czynsz albo subskrypcję — potem zostanie tylko potwierdzić.',
-    recAmountError: 'Podaj kwotę większą od zera',
-    recDateError: 'Podaj datę następnej operacji',
     unsavedTitle: 'Zapisać zmiany?',
     unsavedSub: 'Są niezapisane zmiany. Jeśli teraz wyjdziesz, przepadną.',
     unsavedSave: 'Zapisz', unsavedDiscard: 'Nie zapisuj', unsavedKeep: 'Wróć do edycji',
     settingsTitle: 'Ustawienia',
     chooseFileBtn: 'Wybierz plik',
-    importConfirm: 'Znaleziono wierszy: {total}. Zostanie dodanych wpisów: {ok}, nowych kategorii: {newCats}. Pominięto z powodu błędów: {skipped}. Kontynuować?',
-    importSuccess: 'Zaimportowano wpisów: {count}', importNoValidRows: 'W pliku nie znaleziono żadnego poprawnego wiersza',
-    importParseError: 'Nie udało się odczytać pliku. Sprawdź, czy to poprawny plik CSV.',
   },
   en: {
     appTitle: 'Life',
@@ -281,28 +230,11 @@ const T = {
     saveError: 'Could not save. Check your internet connection',
     confirmTitle: 'Delete entry?', confirmSub: 'This action cannot be undone.', confirmTitleLogout: 'Log out?', confirmSubLogout: "You'll need to sign in again to see your data.",
     cancelBtn: 'Cancel', deleteBtn: 'Delete',
-    recTitle: 'Recurring',
-    recRulesLabel: 'Rules',
-    recAddBtn: 'Add a recurring entry',
-    recFormTitle: 'Recurring entry',
-    recEveryLabel: 'Repeat', recNextLabel: 'Next',
-    recEveryWeek: 'Weekly', recEveryMonth: 'Monthly', recEveryQuarter: 'Every 3 months', recEveryYear: 'Yearly',
-    recBanner: (n) => `${n} recurring ${plural(n, { one: 'entry is', other: 'entries are' })} waiting`,
-    recDueHint: 'These are due by their rule. Only what actually happened gets recorded — a subscription may have been cancelled, a paycheck delayed.',
-    recPost: 'Record', recSkip: 'Skip',
-    recNextOn: (d) => `Next: ${d}`,
-    recPaused: 'Paused',
-    recEmpty: 'No recurring entries yet. Add rent or a subscription — after that each month is one tap to confirm.',
-    recAmountError: 'Enter an amount above zero',
-    recDateError: 'Enter the date of the next entry',
     unsavedTitle: 'Save changes?',
     unsavedSub: 'There are unsaved changes. Leaving now discards them.',
     unsavedSave: 'Save', unsavedDiscard: "Don't save", unsavedKeep: 'Keep editing',
     settingsTitle: 'Settings',
     chooseFileBtn: 'Choose file',
-    importConfirm: 'Found rows: {total}. Will add entries: {ok}, new categories: {newCats}. Skipped due to errors: {skipped}. Continue?',
-    importSuccess: 'Imported entries: {count}', importNoValidRows: 'No valid rows found in the file',
-    importParseError: 'Could not read the file. Make sure it is a valid CSV.',
   },
 };
 
@@ -410,166 +342,6 @@ function convertAmount(amount, fromCur, toCur) {
   const to = exchangeRates[toCur] || 1;
   return amount * from / to;
 }
-
-// Слова для розпізнавання типу транзакції в CSV незалежно від того, якою
-// мовою підписані колонки (працює завжди, а не лише для поточної мови UI).
-const IMPORT_EXPENSE_WORDS = ['витрата', 'витрати', 'expense', 'расход', 'расходы', 'wydatek', 'wydatki'];
-const IMPORT_INCOME_WORDS = ['дохід', 'доход', 'доходи', 'income', 'приход', 'przychod', 'przychód'];
-
-// Мінімальний, залежностей-незалежний CSV-парсер: підтримує кому й крапку з
-// комою як роздільник (визначається автоматично за заголовком), лапки для
-// полів з комами/переносами рядків, і "" як екранування лапки всередині поля.
-function parseCsv(text) {
-  text = text.replace(/^\uFEFF/, '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-  const delimiter = (text.split('\n')[0].split(';').length > text.split('\n')[0].split(',').length) ? ';' : ',';
-  const rows = [];
-  let row = [], field = '', inQuotes = false;
-  for (let i = 0; i < text.length; i++) {
-    const c = text[i];
-    if (inQuotes) {
-      if (c === '"') {
-        if (text[i + 1] === '"') { field += '"'; i++; } else { inQuotes = false; }
-      } else field += c;
-    } else if (c === '"') {
-      inQuotes = true;
-    } else if (c === delimiter) {
-      row.push(field); field = '';
-    } else if (c === '\n') {
-      row.push(field); rows.push(row); row = []; field = '';
-    } else {
-      field += c;
-    }
-  }
-  if (field.length || row.length) { row.push(field); rows.push(row); }
-  return rows.filter(r => r.some(cell => cell.trim() !== ''));
-}
-
-// Знаходить індекс колонки за списком можливих назв заголовка (без
-// урахування регістру та мови).
-function findColumn(header, names) {
-  const norm = header.map(h => h.trim().toLowerCase());
-  for (const name of names) {
-    const idx = norm.indexOf(name);
-    if (idx !== -1) return idx;
-  }
-  return -1;
-}
-
-function normalizeImportDate(raw) {
-  raw = (raw || '').trim();
-  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
-  const m = raw.match(/^(\d{1,2})[./](\d{1,2})[./](\d{4})$/);
-  if (m) return `${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`;
-  return null;
-}
-
-function normalizeImportAmount(raw) {
-  if (raw == null) return null;
-  const cleaned = String(raw).replace(/\s/g, '').replace(/,/g, '.').replace(/[^\d.-]/g, '');
-  const n = parseFloat(cleaned);
-  if (isNaN(n) || n === 0) return null;
-  return Math.abs(n);
-}
-
-function normalizeImportType(raw, amountRaw) {
-  const v = (raw || '').trim().toLowerCase();
-  if (v === 'income' || IMPORT_INCOME_WORDS.includes(v)) return 'income';
-  if (v === 'expense' || IMPORT_EXPENSE_WORDS.includes(v)) return 'expense';
-  if (!v && amountRaw != null) {
-    const n = parseFloat(String(amountRaw).replace(/\s/g, '').replace(/,/g, '.'));
-    if (!isNaN(n)) return n < 0 ? 'expense' : 'income';
-  }
-  return null;
-}
-
-// Читає файл CSV, показує підсумок і після підтвердження масово додає
-// транзакції (і, за потреби, нові категорії) у Firestore.
-async function importTransactionsFromCsv(file) {
-  let text;
-  try {
-    text = await file.text();
-  } catch (e) {
-    alert(t('importParseError'));
-    return;
-  }
-  let rows;
-  try {
-    rows = parseCsv(text);
-  } catch (e) {
-    alert(t('importParseError'));
-    return;
-  }
-  if (rows.length < 2) { alert(t('importNoValidRows')); return; }
-
-  const header = rows[0];
-  const dateIdx = findColumn(header, ['дата', 'date', 'data']);
-  const typeIdx = findColumn(header, ['тип', 'type', 'typ']);
-  const catIdx = findColumn(header, ['категорія', 'категория', 'category', 'kategoria']);
-  const amountIdx = findColumn(header, ['сума', 'сумма', 'amount', 'kwota']);
-  const noteIdx = findColumn(header, ['нотатка', 'заметка', 'note', 'notatka']);
-  if (dateIdx === -1 || amountIdx === -1) { alert(t('importParseError')); return; }
-
-  // Робочі копії списків категорій — нові категорії з файлу додаємо сюди й
-  // зберігаємо одним записом у профіль, замість одного запису на категорію.
-  const workingCats = { expense: categoriesExpense.map(c => ({ ...c })), income: categoriesIncome.map(c => ({ ...c })) };
-  const newCatsCount = { expense: 0, income: 0 };
-
-  function resolveCategoryId(type, label) {
-    label = (label || '').trim();
-    const list = workingCats[type];
-    if (!label) return list[0] ? list[0].id : null;
-    const existing = list.find(c => c.label.trim().toLowerCase() === label.toLowerCase());
-    if (existing) return existing.id;
-    const usedColors = list.map(c => c.colorIndex);
-    let colorIndex = list.length % CATEGORY_PALETTE.length;
-    for (let i = 0; i < CATEGORY_PALETTE.length; i++) { if (!usedColors.includes(i)) { colorIndex = i; break; } }
-    const id = 'cat_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6) + list.length;
-    list.push({ id, label, colorIndex });
-    newCatsCount[type]++;
-    return id;
-  }
-
-  const toImport = [];
-  let skipped = 0;
-  for (let i = 1; i < rows.length; i++) {
-    const r = rows[i];
-    const date = normalizeImportDate(r[dateIdx]);
-    const amount = normalizeImportAmount(r[amountIdx]);
-    const type = normalizeImportType(typeIdx !== -1 ? r[typeIdx] : null, r[amountIdx]);
-    if (!date || !amount || !type) { skipped++; continue; }
-    const categoryLabel = catIdx !== -1 ? r[catIdx] : '';
-    const category = resolveCategoryId(type, categoryLabel);
-    if (!category) { skipped++; continue; }
-    const note = (noteIdx !== -1 ? r[noteIdx] : '') || '';
-    toImport.push({ type, amount, category, note: note.slice(0, 2000), date });
-  }
-
-  if (!toImport.length) { alert(t('importNoValidRows')); return; }
-
-  const totalNewCats = newCatsCount.expense + newCatsCount.income;
-  const proceed = confirm(t('importConfirm', { total: rows.length - 1, ok: toImport.length, newCats: totalNewCats, skipped }));
-  if (!proceed) return;
-
-  try {
-    const uid = auth.currentUser.uid;
-    if (newCatsCount.expense) await saveCategoriesList('expense', workingCats.expense);
-    if (newCatsCount.income) await saveCategoriesList('income', workingCats.income);
-
-    // Firestore дозволяє максимум 500 операцій в одному batch — ріжемо на
-    // шматки по 400, щоб мати запас.
-    const col = db.collection('users').doc(uid).collection('transactions');
-    for (let i = 0; i < toImport.length; i += 400) {
-      const batch = db.batch();
-      toImport.slice(i, i + 400).forEach(tx => batch.set(col.doc(), tx));
-      await batch.commit();
-    }
-    alert(t('importSuccess', { count: toImport.length }));
-  } catch (e) {
-    console.error('CSV import failed', e);
-    alert(t('importParseError'));
-  }
-}
-
 
 // Курс НБУ кешується локально і може лежати без оновлення довго, якщо
 // застосунок офлайн. Позначаємо як "застарілий", коли кешу більше 2 днів,
@@ -699,12 +471,6 @@ let savingsFormCurrency = 'UAH';
 let editingSavingId = null;
 let savingsGoals = [];
 let unsubscribeSavingsGoals = null;
-let recurringRules = [];
-let unsubscribeRecurring = null;
-let editingRecId = null;
-let recFormType = 'expense';
-let recFormCategory = null;
-let recFormEvery = 'month'; // week | month | quarter | year
 let currentSavingsGoalId = null;
 let addButtonMode = 'entry'; // 'entry' | 'savings' | null — що робить «плюс» зараз
 let editingGoalId = null;
@@ -978,9 +744,8 @@ window.SideNav.mount(document.getElementById('sideNavHost'), {
 
 // ---- Вікно налаштувань ----
 // Валюта й категорії витрат жили в окремому вікні цього розділу; тепер
-// вони — вкладка «Гроші» спільного вікна (../settings.js). Регулярні
-// операції й імпорт CSV лишились тут: це не параметри, а вміст, — але
-// рядки, що їх відкривають, стоять у тій самій вкладці.
+// вони — вкладка «Гроші» спільного вікна (../settings.js), і нічого, крім
+// них, у розділу для того вікна немає.
 function setTheme(choice) {
   if (!THEME_CHOICES.includes(choice)) return;
   themeChoice = choice;
@@ -999,20 +764,10 @@ AppSettings.init({
   onTheme: setTheme,
   onLang: setLang,
   onLogout: () => auth.signOut(),
-  actions: {
-    recurring: () => openRecurringScreen(),
-    import: () => document.getElementById('importCsvInput').click(),
-  },
 });
 document.getElementById('sideSettingsBtn').addEventListener('click', () => AppSettings.open());
 
 function applyStaticTranslations() {
-  document.getElementById('recurringTitle').textContent = t('recTitle');
-  document.getElementById('addRecurringBtn').textContent = t('recAddBtn');
-  document.getElementById('recFormTitle').textContent = t('recFormTitle');
-  document.getElementById('recEveryLabel').textContent = t('recEveryLabel');
-  document.getElementById('recNextLabel').textContent = t('recNextLabel');
-  renderRecurringBanner();
   document.getElementById('htmlRoot').setAttribute('lang', currentLang);
   window.SideNav.setLang(currentLang);
   document.title = t('appTitle');
@@ -1327,7 +1082,6 @@ auth.onAuthStateChanged((user) => {
     subscribeToPages(user.uid);
     subscribeToSavings(user.uid);
     subscribeToSavingsGoals(user.uid);
-    subscribeToRecurring(user.uid);
     loadExchangeRates();
     openFromHash(() => openForm('expense'));
   } else {
@@ -1336,8 +1090,6 @@ auth.onAuthStateChanged((user) => {
     if (unsubscribePages) { unsubscribePages(); unsubscribePages = null; }
     if (unsubscribeSavings) { unsubscribeSavings(); unsubscribeSavings = null; }
     if (unsubscribeSavingsGoals) { unsubscribeSavingsGoals(); unsubscribeSavingsGoals = null; }
-    if (unsubscribeRecurring) { unsubscribeRecurring(); unsubscribeRecurring = null; }
-    recurringRules = [];
     transactions = [];
     pages = [];
     savings = [];
@@ -2514,300 +2266,10 @@ async function submitForm() {
   }
 }
 
-// ---- Регулярні операції ----
-// Оренда, підписки, зарплата. Правило зберігається окремо від транзакцій
-// (users/{uid}/recurringTx), а сама транзакція народжується лише тоді, коли
-// людина підтвердила, що операція справді відбулась. Чому не автоматично —
-// див. коментар угорі budget/recurring.js.
-const REC_EVERY = {
-  week:    { type: 'weekly',  interval: 1 },
-  month:   { type: 'monthly', interval: 1 },
-  quarter: { type: 'monthly', interval: 3 },
-  year:    { type: 'monthly', interval: 12 },
-};
-
-function subscribeToRecurring(uid) {
-  if (unsubscribeRecurring) unsubscribeRecurring();
-  const col = db.collection('users').doc(uid).collection('recurringTx');
-  unsubscribeRecurring = col.onSnapshot((snapshot) => {
-    recurringRules = snapshot.docs.map(d => ({ id: d.id, ...d.data() }))
-      .sort((a, b) => (a.nextDate || '').localeCompare(b.nextDate || ''));
-    renderRecurringBanner();
-    if (document.getElementById('recurringOverlay').classList.contains('show')) renderRecurringScreen();
-  }, (err) => console.error('subscribeToRecurring:', err));
-}
-
-// Правило + одна конкретна дата, що вже настала.
-function dueEntries() {
-  const out = [];
-  recurringRules.forEach((rule) => {
-    BudgetRecurring.dueDates(rule, { today: todayISO() })
-      .forEach((date) => out.push({ rule, date }));
-  });
-  return out.sort((a, b) => a.date.localeCompare(b.date));
-}
-
-function renderRecurringBanner() {
-  const banner = document.getElementById('recBanner');
-  if (!banner) return;
-  const summary = BudgetRecurring.pendingSummary(recurringRules, { today: todayISO() });
-  // Банер живе над списком операцій, а не в шапці: на статистиці чи в
-  // нотатках він був би не до місця.
-  if (!summary.occurrences || currentTab !== 'entries') { banner.style.display = 'none'; return; }
-  document.getElementById('recBannerText').textContent = t('recBanner', summary.occurrences);
-  banner.style.display = 'flex';
-}
-
-function everyKeyOf(rule) {
-  const r = (rule && rule.recurrence) || {};
-  if (r.type === 'weekly') return 'week';
-  if (r.interval === 12) return 'year';
-  if (r.interval === 3) return 'quarter';
-  return 'month';
-}
-function everyLabel(key) {
-  return t({ week: 'recEveryWeek', month: 'recEveryMonth', quarter: 'recEveryQuarter', year: 'recEveryYear' }[key] || 'recEveryMonth');
-}
-
-function recItemHtml(rule, date) {
-  const sign = rule.type === 'income' ? '+' : '−';
-  return `
-    <div class="rec-item-head">
-      <div class="rec-item-name">${escapeHtml(rule.note || catLabel(rule.type, rule.category))}</div>
-      <div class="rec-item-sum ${rule.type}">${sign}${escapeHtml(formatMoney(rule.amount))}</div>
-    </div>
-    <div class="rec-item-meta">${escapeHtml(catLabel(rule.type, rule.category))} · ${escapeHtml(date || everyLabel(everyKeyOf(rule)))}</div>`;
-}
-
-function renderRecurringScreen() {
-  // 1. Те, що вже настало й чекає рішення.
-  const due = dueEntries();
-  const dueSection = document.getElementById('recDueSection');
-  dueSection.style.display = due.length ? 'block' : 'none';
-  if (due.length) {
-    document.getElementById('recDueHint').textContent = t('recDueHint');
-    document.getElementById('recDueList').innerHTML = due.map((entry, i) => `
-      <div class="rec-item" data-due-idx="${i}">
-        ${recItemHtml(entry.rule, entry.date)}
-        <div class="rec-item-actions">
-          <button type="button" class="rec-post" data-post="${i}">${escapeHtml(t('recPost'))}</button>
-          <button type="button" class="rec-skip" data-skip="${i}">${escapeHtml(t('recSkip'))}</button>
-        </div>
-      </div>`).join('');
-    document.querySelectorAll('[data-post]').forEach((btn) => {
-      btn.addEventListener('click', () => resolveDue(due[Number(btn.dataset.post)], true));
-    });
-    document.querySelectorAll('[data-skip]').forEach((btn) => {
-      btn.addEventListener('click', () => resolveDue(due[Number(btn.dataset.skip)], false));
-    });
-  }
-
-  // 2. Самі правила.
-  const list = document.getElementById('recRulesList');
-  document.getElementById('recRulesLabel').textContent = t('recRulesLabel');
-  if (!recurringRules.length) {
-    list.innerHTML = `<div class="rec-empty">${escapeHtml(t('recEmpty'))}</div>`;
-    return;
-  }
-  list.innerHTML = recurringRules.map((rule) => `
-    <div class="rec-item rec-rule-row${rule.active === false ? ' rec-off' : ''}">
-      <div class="rec-rule-body" data-edit-rec="${rule.id}">
-        ${recItemHtml(rule, null)}
-        <div class="rec-item-meta">${escapeHtml(rule.active === false ? t('recPaused') : t('recNextOn', rule.nextDate || '—'))}</div>
-      </div>
-      <button type="button" class="rec-rule-del" data-del-rec="${rule.id}" aria-label="${escapeHtml(t('deleteBtn'))}">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg>
-      </button>
-    </div>`).join('');
-  list.querySelectorAll('[data-edit-rec]').forEach((el) => {
-    el.addEventListener('click', () => openRecurringForm(recurringRules.find(r => r.id === el.dataset.editRec)));
-  });
-  list.querySelectorAll('[data-del-rec]').forEach((btn) => {
-    btn.addEventListener('click', () => deleteRecurring(btn.dataset.delRec));
-  });
-}
-
-// Записати або пропустити — в обох випадках правило зсувається вперед, інакше
-// та сама дата висіла б вічно.
-async function resolveDue(entry, post) {
-  const uid = auth.currentUser && auth.currentUser.uid;
-  if (!uid || !entry) return;
-  const { rule, date } = entry;
-  try {
-    if (post) {
-      await addTransactionRemote({
-        type: rule.type,
-        amount: rule.amount,
-        category: rule.category,
-        note: rule.note || '',
-        date,
-        // Позначка джерела: у списку видно, що запис народився з правила,
-        // а не набраний руками. Правила Firestore `source` уже дозволяють.
-        source: 'recurring',
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-      });
-    }
-    const next = BudgetRecurring.advance(rule, date);
-    if (next) {
-      await db.collection('users').doc(uid).collection('recurringTx').doc(rule.id)
-        .update({ nextDate: next, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
-    }
-  } catch (err) {
-    console.error('resolveDue:', err);
-  }
-}
-
-function renderRecEveryPicker() {
-  const picker = document.getElementById('recEveryPicker');
-  picker.innerHTML = Object.keys(REC_EVERY).map((key) => `
-    <button type="button" class="cat-choice${key === recFormEvery ? ' selected' : ''}" data-every="${key}"
-      style="${key === recFormEvery ? 'background:var(--accent);' : ''}">${escapeHtml(everyLabel(key))}</button>`).join('');
-  picker.querySelectorAll('[data-every]').forEach((btn) => {
-    btn.addEventListener('click', () => { recFormEvery = btn.dataset.every; renderRecEveryPicker(); });
-  });
-}
-
-function renderRecCatPicker() {
-  const cats = recFormType === 'expense' ? categoriesExpense : categoriesIncome;
-  if (!cats.some(c => c.id === recFormCategory)) recFormCategory = cats[0] ? cats[0].id : null;
-  const picker = document.getElementById('recCatPicker');
-  picker.innerHTML = cats.map(c => `<button type="button" class="cat-choice${c.id === recFormCategory ? ' selected' : ''}"
-    data-rec-cat="${c.id}" style="${c.id === recFormCategory ? `background:${catColor(recFormType, c.id)};` : ''}">${escapeHtml(catLabel(recFormType, c.id))}</button>`).join('');
-  picker.querySelectorAll('[data-rec-cat]').forEach((btn) => {
-    btn.addEventListener('click', () => { recFormCategory = btn.dataset.recCat; renderRecCatPicker(); });
-  });
-}
-
-function updateRecTypeToggle() {
-  document.getElementById('recTypeExpense').classList.toggle('active', recFormType === 'expense');
-  document.getElementById('recTypeIncome').classList.toggle('active', recFormType === 'income');
-}
-
-function openRecurringForm(rule) {
-  editingRecId = rule ? rule.id : null;
-  recFormType = rule ? rule.type : 'expense';
-  recFormCategory = rule ? rule.category : null;
-  recFormEvery = rule ? everyKeyOf(rule) : 'month';
-  document.getElementById('recFormTitle').textContent = t('recFormTitle');
-  document.getElementById('recAmountInput').value = rule ? String(rule.amount).replace('.', ',') : '';
-  document.getElementById('recNoteInput').value = rule ? (rule.note || '') : '';
-  document.getElementById('recNextInput').value = rule ? rule.nextDate : todayISO();
-  document.getElementById('recDeleteBtn').style.display = rule ? 'block' : 'none';
-  document.getElementById('recFormError').style.display = 'none';
-  updateRecTypeToggle();
-  renderRecCatPicker();
-  renderRecEveryPicker();
-  recGuard.arm();
-  document.getElementById('recurringFormOverlay').classList.add('show');
-}
-
-async function submitRecurringForm() {
-  const uid = auth.currentUser && auth.currentUser.uid;
-  const errEl = document.getElementById('recFormError');
-  if (!uid) return;
-  const num = parseFloat(document.getElementById('recAmountInput').value.replace(',', '.'));
-  if (!Number.isFinite(num) || num <= 0) {
-    errEl.textContent = t('recAmountError'); errEl.style.display = 'block'; return;
-  }
-  const nextDate = document.getElementById('recNextInput').value;
-  if (!nextDate) { errEl.textContent = t('recDateError'); errEl.style.display = 'block'; return; }
-  errEl.style.display = 'none';
-
-  const every = REC_EVERY[recFormEvery] || REC_EVERY.month;
-  const payload = {
-    type: recFormType,
-    amount: Math.round(num * 100) / 100,
-    category: recFormCategory,
-    note: document.getElementById('recNoteInput').value.trim(),
-    recurrence: {
-      type: every.type,
-      interval: every.interval,
-      weekdays: [],
-      // Число місяця беремо з дати наступної операції: оренда 1-го лишається
-      // 1-м, навіть якщо правило заводили 20-го.
-      day: every.type === 'monthly' ? Number(nextDate.slice(8, 10)) : null,
-      anchor: 'schedule',
-    },
-    nextDate,
-    active: true,
-    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-  };
-  const btn = document.getElementById('recSubmitBtn');
-  btn.disabled = true;
-  try {
-    const col = db.collection('users').doc(uid).collection('recurringTx');
-    if (editingRecId) await col.doc(editingRecId).update(payload);
-    else await col.add({ ...payload, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-    recGuard.close();
-  } catch (err) {
-    console.error('submitRecurring:', err);
-    errEl.textContent = t('saveError'); errEl.style.display = 'block';
-  } finally {
-    btn.disabled = false;
-  }
-}
-
-async function deleteRecurring(id) {
-  const uid = auth.currentUser && auth.currentUser.uid;
-  if (!uid) return;
-  try {
-    await db.collection('users').doc(uid).collection('recurringTx').doc(id).delete();
-  } catch (err) { console.error('deleteRecurring:', err); }
-}
-
-function openRecurringScreen() {
-  renderRecurringScreen();
-  document.getElementById('recurringOverlay').classList.add('show');
-}
-
-// Форма правила — теж під захистом від втрати незбереженого.
-const recGuard = UnsavedGuard.create({
-  overlay: 'recurringFormOverlay',
-  snapshot: () => JSON.stringify({
-    type: recFormType,
-    amount: document.getElementById('recAmountInput').value,
-    category: recFormCategory,
-    note: document.getElementById('recNoteInput').value.trim(),
-    every: recFormEvery,
-    next: document.getElementById('recNextInput').value,
-  }),
-  save: () => submitRecurringForm(),
-  onClose: () => { editingRecId = null; },
-  // Через стрілку, а не `texts: unsavedTexts`: сам unsavedTexts оголошений
-  // нижче по файлу (const, тимчасова мертва зона), і пряме посилання тут
-  // впало б ще на завантаженні сторінки.
-  texts: () => unsavedTexts(),
-});
-
-document.getElementById('recBanner').addEventListener('click', openRecurringScreen);
-document.getElementById('closeRecurring').addEventListener('click', () => {
-  document.getElementById('recurringOverlay').classList.remove('show');
-});
-document.getElementById('recurringOverlay').addEventListener('click', (e) => {
-  if (e.target.id === 'recurringOverlay') e.currentTarget.classList.remove('show');
-});
-document.getElementById('addRecurringBtn').addEventListener('click', () => openRecurringForm(null));
-document.getElementById('closeRecurringForm').addEventListener('click', () => recGuard.requestClose());
-document.getElementById('recSubmitBtn').addEventListener('click', submitRecurringForm);
-document.getElementById('recDeleteBtn').addEventListener('click', () => {
-  if (!editingRecId) return;
-  const id = editingRecId;
-  recGuard.close();
-  deleteRecurring(id);
-});
-document.querySelectorAll('[data-rec-type]').forEach((btn) => {
-  btn.addEventListener('click', () => {
-    recFormType = btn.dataset.recType;
-    updateRecTypeToggle();
-    renderRecCatPicker();
-  });
-});
-
 // ---- Події ----
 function selectTab(tabKey) {
   currentTab = tabKey;
   if (!tabKey.startsWith('page:')) pageOriginTab = 'entries';
-  renderRecurringBanner();
   document.getElementById('bnEntries').classList.toggle('active', tabKey === 'entries');
   document.getElementById('bnStats').classList.toggle('active', tabKey === 'stats');
   document.getElementById('bnSavings').classList.toggle('active', tabKey === 'savings');
@@ -3086,11 +2548,6 @@ document.getElementById('savingsToggleWithdraw').addEventListener('click', () =>
 document.getElementById('savingsToggleDeposit').addEventListener('click', () => switchSavingsFormType('deposit'));
 document.getElementById('closeSavingsForm').addEventListener('click', () => savingsGuard.requestClose());
 document.getElementById('savingsSubmitBtn').addEventListener('click', submitSavingsForm);
-document.getElementById('importCsvInput').addEventListener('change', (e) => {
-  const file = e.target.files && e.target.files[0];
-  e.target.value = '';
-  if (file) importTransactionsFromCsv(file);
-});
 document.getElementById('closeCategoryTx').addEventListener('click', () => document.getElementById('categoryTxOverlay').classList.remove('show'));
 document.getElementById('categoryTxOverlay').addEventListener('click', (e) => { if (e.target.id === 'categoryTxOverlay') e.currentTarget.classList.remove('show'); });
 document.getElementById('categoriesBtn').addEventListener('click', () => {

@@ -64,10 +64,6 @@
       remindNever: 'Не треба',
       remindElsewhere: 'Сповіщення вмикаються для пристрою в розділі «Завдання» — там живе служба, яка їх приймає.',
       goToTasks: 'Відкрити «Завдання»',
-      recurring: 'Регулярні операції',
-      recurringSub: 'Оренда, підписки, зарплата — щоб не вбивати їх щомісяця руками.',
-      importCsv: 'Імпорт транзакцій з CSV',
-      importCsvSub: 'Колонки: дата (РРРР-ММ-ДД), тип (дохід/витрата), категорія, сума, нотатка.',
       taskTemplates: 'Шаблони завдань',
       taskTemplatesSub: 'Те, що заводиш раз у раз, — одним тапом у швидкому додаванні.',
       workoutTemplates: 'Шаблони тренувань',
@@ -105,10 +101,6 @@
       remindNever: 'Не надо',
       remindElsewhere: 'Уведомления включаются для устройства в разделе «Задачи» — там живёт служба, которая их принимает.',
       goToTasks: 'Открыть «Задачи»',
-      recurring: 'Регулярные операции',
-      recurringSub: 'Аренда, подписки, зарплата — чтобы не вбивать их каждый месяц руками.',
-      importCsv: 'Импорт транзакций из CSV',
-      importCsvSub: 'Колонки: дата (ГГГГ-ММ-ДД), тип (доход/расход), категория, сумма, заметка.',
       taskTemplates: 'Шаблоны задач',
       taskTemplatesSub: 'То, что заводишь раз за разом, — одним тапом в быстром добавлении.',
       workoutTemplates: 'Шаблоны тренировок',
@@ -146,10 +138,6 @@
       remindNever: 'Nie trzeba',
       remindElsewhere: 'Powiadomienia włącza się dla urządzenia w sekcji „Zadania" — tam działa usługa, która je odbiera.',
       goToTasks: 'Otwórz „Zadania"',
-      recurring: 'Operacje cykliczne',
-      recurringSub: 'Czynsz, subskrypcje, wypłata — żeby nie wbijać ich co miesiąc ręcznie.',
-      importCsv: 'Import transakcji z CSV',
-      importCsvSub: 'Kolumny: data (RRRR-MM-DD), typ (przychód/wydatek), kategoria, kwota, notatka.',
       taskTemplates: 'Szablony zadań',
       taskTemplatesSub: 'To, co zakładasz raz po raz — jednym tapnięciem w szybkim dodawaniu.',
       workoutTemplates: 'Szablony treningów',
@@ -187,10 +175,6 @@
       remindNever: 'Off',
       remindElsewhere: 'Notifications are switched on for a device in the Tasks section — that is where the service receiving them lives.',
       goToTasks: 'Open Tasks',
-      recurring: 'Recurring transactions',
-      recurringSub: 'Rent, subscriptions, salary — so you do not enter them by hand every month.',
-      importCsv: 'Import transactions from CSV',
-      importCsvSub: 'Columns: date (YYYY-MM-DD), type (income/expense), category, amount, note.',
       taskTemplates: 'Task templates',
       taskTemplatesSub: 'What you create over and over — one tap in quick add.',
       workoutTemplates: 'Workout templates',
@@ -516,8 +500,6 @@
   }
 
   var ICON_ARROW = '<path d="M5 12h14"/><path d="M13 6l6 6-6 6"/>';
-  var ICON_REPEAT = '<path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v6h-6"/>';
-  var ICON_UP = '<path d="M12 21V9"/><path d="M7 14l5-5 5 5"/><path d="M4 5h16"/>';
   var ICON_DOWN = '<path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 19h16"/>';
   var ICON_LIST = '<path d="M8 6h12"/><path d="M8 12h12"/><path d="M8 18h12"/><path d="M4 6h.01"/><path d="M4 12h.01"/><path d="M4 18h.01"/>';
   var ICON_EXIT = '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/>';
@@ -686,13 +668,7 @@
         return { value: c, label: c + ' ' + CURRENCIES[c] };
       }), currency, 'data-currency') +
         catEditorHtml('expense') +
-        catEditorHtml('income') +
-        '<div class="settings-section">' +
-          sectionRow('recurring', 'budget', '#recurring',
-            { icon: ICON_REPEAT, title: t('recurring'), sub: t('recurringSub') }) +
-          sectionRow('import', 'budget', '#import',
-            { icon: ICON_UP, title: t('importCsv'), sub: t('importCsvSub') }) +
-        '</div>';
+        catEditorHtml('income');
     }
 
     if (tab === 'tasks') {
