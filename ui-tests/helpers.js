@@ -10,7 +10,9 @@ const STUB = fs.readFileSync(path.join(__dirname, 'firebase-stub.js'), 'utf8');
  * Відкриває сторінку модуля так, ніби користувач уже увійшов.
  * @param {import('@playwright/test').Page} page
  * @param {string} modulePath напр. 'workout/index.html'
- * @param {{seed?:object, theme?:string, lang?:string, ready?:string}} [opts]
+ * @param {{seed?:object, theme?:string, lang?:string, ready?:string,
+ *           noUser?:boolean}} [opts]
+ *   noUser — заглушка віддає «нікого не залогінено», тобто екран входу.
  *   ready — селектор, поява якого означає «сторінка готова». Модулі показують
  *   #appScreen, домашній хаб — #homeScreen.
  *   profileDelay — на скільки мілісекунд затримати снапшот профілю; потрібен,
@@ -54,15 +56,17 @@ async function openModule(page, modulePath, opts = {}) {
   }));
   await page.route('**/fonts.googleapis.com/**', (route) => route.fulfill({ status: 200, contentType: 'text/css', body: '' }));
 
-  await page.addInitScript(([seed, theme, lang, profileDelay]) => {
+  await page.addInitScript(([seed, theme, lang, profileDelay, noUser]) => {
     window.__fbSeed = seed;
     // Скільки мілісекунд заглушка тримає снапшот профілю (0 — віддає одразу).
     window.__fbProfileDelay = profileDelay;
+    // Заглушка за замовчуванням «уже увійшла»; noUser дає екран входу.
+    window.__fbNoUser = noUser;
     try {
       localStorage.setItem('financeAppTheme', theme);
       localStorage.setItem('financeAppLang', lang);
     } catch (err) { /* приватний режим — тест від цього не залежить */ }
-  }, [opts.seed || {}, opts.theme || 'light', opts.lang || 'uk', opts.profileDelay || 0]);
+  }, [opts.seed || {}, opts.theme || 'light', opts.lang || 'uk', opts.profileDelay || 0, !!opts.noUser]);
 
   await page.goto(`/${modulePath}`);
   await page.waitForSelector(opts.ready || '#appScreen', { state: 'visible' });

@@ -447,6 +447,7 @@ function applyTranslations() {
   document.getElementById('calNext').setAttribute('aria-label', t('calNext'));
   applyQuickTranslations();
   document.getElementById('authSub').textContent = t('authSub');
+  renderAuthLangRow();
   document.getElementById('authEmailLabel').textContent = t('emailLabel');
   document.getElementById('authPasswordLabel').textContent = t('passwordLabel');
   document.getElementById('authPasswordHint').textContent = t('passwordHint');
@@ -643,6 +644,29 @@ function openSettings(tab) {
 }
 document.getElementById('menuBtn').addEventListener('click', () => openSettings());
 document.getElementById('sideSettingsBtn').addEventListener('click', () => openSettings());
+
+// Курсор одразу в пошті — але тільки на широкому екрані. На телефоні фокус
+// піднімає клавіатуру, а вона з'їдає половину екрана ще до того, як людина
+// встигла глянути, куди потрапила.
+function focusEmailOnWide() {
+  if (!window.matchMedia('(min-width:880px)').matches) return;
+  const email = document.getElementById('authEmail');
+  if (email && !email.value) email.focus();
+}
+
+// Мова на екрані входу. Вікно налаштувань живе ЗА входом, тож людині, яка
+// не читає поточної мови, до нього не дійти — той самий рядок стоїть на
+// сторінках розділів і з тієї ж причини.
+function renderAuthLangRow() {
+  const row = document.getElementById('authLangRow');
+  if (!row) return;
+  row.innerHTML = LANGS
+    .map((l) => `<button type="button" class="lang-chip${l === currentLang ? ' selected' : ''}" data-lang="${l}">${LANG_NAMES[l]}</button>`)
+    .join('');
+  row.querySelectorAll('[data-lang]').forEach((btn) => {
+    btn.addEventListener('click', () => setLang(btn.dataset.lang));
+  });
+}
 
 function setAuthMode(mode) {
   authMode = mode;
@@ -2076,6 +2100,7 @@ auth.onAuthStateChanged((user) => {
   } else {
     document.getElementById('homeScreen').style.display = 'none';
     document.getElementById('authScreen').style.display = 'flex';
+    focusEmailOnWide();
     document.getElementById('authPassword').value = '';
     document.getElementById('authInfo').style.display = 'none';
     const savedEmail = localStorage.getItem('financeAppLastEmail');

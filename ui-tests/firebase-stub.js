@@ -164,7 +164,10 @@
     return ref;
   }
 
-  const user = { uid: 'test-uid', email: 'test@example.com' };
+  // Заглушка за замовчуванням «уже увійшла»: майже кожному тесту потрібен
+  // сам застосунок, а не двері до нього. `__fbNoUser` дає протилежне —
+  // екран входу, який теж треба вміти перевірити.
+  const user = window.__fbNoUser ? null : { uid: 'test-uid', email: 'test@example.com' };
   const authObj = {
     currentUser: user,
     onAuthStateChanged: (cb) => { setTimeout(() => cb(user), 0); return () => {}; },
