@@ -765,7 +765,10 @@ AppSettings.init({
   onLang: setLang,
   onLogout: () => auth.signOut(),
 });
-document.getElementById('sideSettingsBtn').addEventListener('click', () => AppSettings.open());
+// Бічне меню відкриває вікно одразу на вкладці ЦЬОГО розділу: людина
+// натискає «Налаштування», стоячи в «Бюджеті», — отже хоче налаштування
+// бюджету, а не загальний список.
+document.getElementById('sideSettingsBtn').addEventListener('click', () => AppSettings.open('budget'));
 
 function applyStaticTranslations() {
   document.getElementById('htmlRoot').setAttribute('lang', currentLang);
@@ -2298,7 +2301,18 @@ function selectTab(tabKey) {
   document.getElementById('savingsTab').style.display = isSavings ? 'block' : 'none';
   document.getElementById('notesTab').style.display = isNotes ? 'block' : 'none';
   document.getElementById('pageViewTab').style.display = isPage ? 'block' : 'none';
-  document.getElementById('categoriesBtn').style.display = isPage ? 'none' : 'flex';
+  // Видимість кнопки «⋮» вирішує CSS за двома класами, а не інлайновий
+  // `display` із JS: інлайновий перебиває будь-який медіазапит, і саме через
+  // нього кнопка не хотіла зникати на широкому екрані.
+  //
+  // `hidden-here` — перегляд нотатки: там своя шапка з «назад».
+  // `has-own-settings` — вкладка, у якої є ВЛАСНІ налаштування (діаграми,
+  // сортування нотаток, валюта підсумку заощаджень). Тільки такі вкладки
+  // лишають кнопку на широкому екрані: на решті вона вела б у те саме вікно,
+  // що й «Налаштування» в бічній колонці.
+  const catBtn = document.getElementById('categoriesBtn');
+  catBtn.classList.toggle('hidden-here', isPage);
+  catBtn.classList.toggle('has-own-settings', ['stats', 'savings', 'notes'].includes(tabKey));
   document.getElementById('monthNavHeader').classList.toggle('show', showsMonth);
   document.getElementById('backToEntriesBtn').classList.toggle('show', isPage);
   document.getElementById('headerTopRow').classList.toggle('show', isPage);

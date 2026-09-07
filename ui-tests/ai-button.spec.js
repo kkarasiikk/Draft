@@ -38,6 +38,9 @@ for (const [name, path] of MODULES) {
 }
 
 test('бюджет: помічник стоїть поруч із налаштуваннями, а не замість них', async ({ page }) => {
+  // Саме на телефоні: на широкому екрані кнопки налаштувань у шапці немає —
+  // вхід один, із бічної колонки.
+  await page.setViewportSize({ width: 390, height: 844 });
   await openModule(page, 'budget/index.html', { ready: '#appScreen' });
   await expect(page.locator('.app-topbar #aiChatBtn')).toBeVisible();
   await expect(page.locator('.app-topbar #categoriesBtn')).toBeVisible();

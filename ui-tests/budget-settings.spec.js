@@ -14,9 +14,11 @@
 const { test, expect } = require('@playwright/test');
 const { openModule } = require('./helpers');
 
+// Вхід — «Налаштування» в бічній колонці: кнопки в шапці на широкому екрані
+// більше немає, а вікно й так відкривається одразу на вкладці розділу.
 const openSettings = async (page, seed) => {
   await openModule(page, 'budget/index.html', seed ? { seed } : {});
-  await page.click('#categoriesBtn');
+  await page.click('#sideSettingsBtn');
   await expect(page.locator('#settingsOverlay')).toHaveClass(/show/);
   await expect(page.locator('.settings-tab.current')).toHaveText('Гроші');
 };
