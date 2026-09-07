@@ -29,14 +29,10 @@
       ageHint: 'Розмова сама зникає через добу — стирати вручну треба лише щоб почати спочатку раніше.',
       added: (a) => `Записано: ${a.categoryLabel} · ${a.amount} ${a.currency || ''}`.trim(),
       taskAdded: (a) => `Завдання: ${a.title}${a.dueDate ? ' · ' + a.dueDate : ''}`,
-      taskDone: (a) => `Виконано: ${a.title}${a.goal ? ' · крок до цілі «' + a.goal + '»' : ''}`,
+      taskDone: (a) => `Виконано: ${a.title}`,
       workout: (a) => `Тренування: ${a.exercises.join(', ')}${a.name ? ' · ' + a.name : ''}`,
       goal: (a) => `Ціль: ${a.title}${a.targetDate ? ' · до ' + a.targetDate : ''}`,
-      checkin: (a) => `Відмічено: ${a.title}`,
-      progress: (a) => `Прогрес: ${a.title} — ${a.current} / ${a.target}${a.unit ? ' ' + a.unit : ''}`,
-      rescued: (a) => `Серію врятовано: ${a.title} — ${a.streak} дн.`,
       readiness: (a) => `Самопочуття: ${{ ready: 'повний сил', ok: 'так собі', low: 'розбитий' }[a.level] || a.level}`,
-      blocker: (a) => `Завадило: ${a.reason} · ${a.title}`,
       savingsGoal: (a) => `Скарбничка: ${a.name}`,
       savings: (a) => `${a.type === 'withdraw' ? 'Знято' : 'Відкладено'}: ${a.amount} ${a.currency || ''} · ${a.goal}`.trim(),
       renamed: (a) => `Перейменовано: ${a.from} → ${a.to}`,
@@ -64,14 +60,10 @@
       ageHint: 'Разговор сам исчезает через сутки — стирать вручную нужно лишь чтобы начать заново раньше.',
       added: (a) => `Записано: ${a.categoryLabel} · ${a.amount} ${a.currency || ''}`.trim(),
       taskAdded: (a) => `Задача: ${a.title}${a.dueDate ? ' · ' + a.dueDate : ''}`,
-      taskDone: (a) => `Выполнено: ${a.title}${a.goal ? ' · шаг к цели «' + a.goal + '»' : ''}`,
+      taskDone: (a) => `Выполнено: ${a.title}`,
       workout: (a) => `Тренировка: ${a.exercises.join(', ')}${a.name ? ' · ' + a.name : ''}`,
       goal: (a) => `Цель: ${a.title}${a.targetDate ? ' · до ' + a.targetDate : ''}`,
-      checkin: (a) => `Отмечено: ${a.title}`,
-      progress: (a) => `Прогресс: ${a.title} — ${a.current} / ${a.target}${a.unit ? ' ' + a.unit : ''}`,
-      rescued: (a) => `Серия спасена: ${a.title} — ${a.streak} дн.`,
       readiness: (a) => `Самочувствие: ${{ ready: 'полон сил', ok: 'так себе', low: 'разбит' }[a.level] || a.level}`,
-      blocker: (a) => `Помешало: ${a.reason} · ${a.title}`,
       savingsGoal: (a) => `Копилка: ${a.name}`,
       savings: (a) => `${a.type === 'withdraw' ? 'Снято' : 'Отложено'}: ${a.amount} ${a.currency || ''} · ${a.goal}`.trim(),
       renamed: (a) => `Переименовано: ${a.from} → ${a.to}`,
@@ -99,14 +91,10 @@
       ageHint: 'Rozmowa znika sama po dobie — ręczne czyszczenie przydaje się tylko, gdy chcesz zacząć od nowa wcześniej.',
       added: (a) => `Zapisano: ${a.categoryLabel} · ${a.amount} ${a.currency || ''}`.trim(),
       taskAdded: (a) => `Zadanie: ${a.title}${a.dueDate ? ' · ' + a.dueDate : ''}`,
-      taskDone: (a) => `Zrobione: ${a.title}${a.goal ? ' · krok do celu \u201E' + a.goal + '\u201D' : ''}`,
+      taskDone: (a) => `Zrobione: ${a.title}`,
       workout: (a) => `Trening: ${a.exercises.join(', ')}${a.name ? ' · ' + a.name : ''}`,
       goal: (a) => `Cel: ${a.title}${a.targetDate ? ' · do ' + a.targetDate : ''}`,
-      checkin: (a) => `Odhaczono: ${a.title}`,
-      progress: (a) => `Postęp: ${a.title} — ${a.current} / ${a.target}${a.unit ? ' ' + a.unit : ''}`,
-      rescued: (a) => `Seria uratowana: ${a.title} — ${a.streak} dni`,
       readiness: (a) => `Samopoczucie: ${{ ready: 'pełen sił', ok: 'tak sobie', low: 'rozbity' }[a.level] || a.level}`,
-      blocker: (a) => `Przeszkodziło: ${a.reason} · ${a.title}`,
       savingsGoal: (a) => `Skarbonka: ${a.name}`,
       savings: (a) => `${a.type === 'withdraw' ? 'Wypłacono' : 'Odłożono'}: ${a.amount} ${a.currency || ''} · ${a.goal}`.trim(),
       renamed: (a) => `Zmieniono nazwę: ${a.from} → ${a.to}`,
@@ -134,14 +122,10 @@
       ageHint: 'The conversation clears itself after a day — wiping it by hand only helps if you want a fresh start sooner.',
       added: (a) => `Logged: ${a.categoryLabel} · ${a.amount} ${a.currency || ''}`.trim(),
       taskAdded: (a) => `Task: ${a.title}${a.dueDate ? ' · ' + a.dueDate : ''}`,
-      taskDone: (a) => `Done: ${a.title}${a.goal ? ' · a step toward \u201C' + a.goal + '\u201D' : ''}`,
+      taskDone: (a) => `Done: ${a.title}`,
       workout: (a) => `Workout: ${a.exercises.join(', ')}${a.name ? ' · ' + a.name : ''}`,
       goal: (a) => `Goal: ${a.title}${a.targetDate ? ' · by ' + a.targetDate : ''}`,
-      checkin: (a) => `Checked in: ${a.title}`,
-      progress: (a) => `Progress: ${a.title} — ${a.current} / ${a.target}${a.unit ? ' ' + a.unit : ''}`,
-      rescued: (a) => `Streak rescued: ${a.title} — ${a.streak} days`,
       readiness: (a) => `Readiness: ${{ ready: 'fresh', ok: 'so-so', low: 'wrecked' }[a.level] || a.level}`,
-      blocker: (a) => `Got in the way: ${a.reason} · ${a.title}`,
       savingsGoal: (a) => `Savings pot: ${a.name}`,
       savings: (a) => `${a.type === 'withdraw' ? 'Withdrew' : 'Set aside'}: ${a.amount} ${a.currency || ''} · ${a.goal}`.trim(),
       renamed: (a) => `Renamed: ${a.from} → ${a.to}`,
@@ -703,11 +687,7 @@
     if (a.kind === 'task_completed') return t('taskDone')(a);
     if (a.kind === 'workout_added') return t('workout')(a);
     if (a.kind === 'goal_added') return t('goal')(a);
-    if (a.kind === 'goal_checkin') return t('checkin')(a);
-    if (a.kind === 'goal_progress') return t('progress')(a);
-    if (a.kind === 'streak_rescued') return t('rescued')(a);
     if (a.kind === 'readiness_logged') return t('readiness')(a);
-    if (a.kind === 'blocker_logged') return t('blocker')(a);
     if (a.kind === 'savings_goal_added') return t('savingsGoal')(a);
     if (a.kind === 'savings_entry') return t('savings')(a);
     if (a.kind === 'renamed') return t('renamed')(a);

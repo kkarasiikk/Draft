@@ -82,7 +82,6 @@ const T = {
     progressNotEnough: (n) => `Замало даних — ще ${n} ${plural(n, { one: 'тренування', few: 'тренування', many: 'тренувань' })}, і зʼявиться порівняння з минулим місяцем.`,
     progressNoCompare: 'Ще немає з чим порівнювати — потрібен місяць історії тих самих вправ.',
     progressVolumeLabel: 'Обсяг', progressNewMark: 'нове',
-    creditTitle: 'Зарахувати в ціль', creditDay: 'Зарахувати день',
     creditCounted: 'День зараховано',
     unitKg: 'кг', unitReps: 'повт.',
     prToastText: (name, w, r) => `Новий рекорд: ${name} — ${w}×${r}`,
@@ -158,7 +157,6 @@ const T = {
     progressNotEnough: (n) => `Мало данных — ещё ${n} ${plural(n, { one: 'тренировка', few: 'тренировки', many: 'тренировок' })}, и появится сравнение с прошлым месяцем.`,
     progressNoCompare: 'Пока не с чем сравнивать — нужен месяц истории тех же упражнений.',
     progressVolumeLabel: 'Объём', progressNewMark: 'новое',
-    creditTitle: 'Засчитать в цель', creditDay: 'Засчитать день',
     creditCounted: 'День засчитан',
     unitKg: 'кг', unitReps: 'повт.',
     prToastText: (name, w, r) => `Новый рекорд: ${name} — ${w}×${r}`,
@@ -234,7 +232,6 @@ const T = {
     progressNotEnough: (n) => `Za mało danych — jeszcze ${n} ${plural(n, { one: 'trening', few: 'treningi', many: 'treningów' })} i pojawi się porównanie z poprzednim miesiącem.`,
     progressNoCompare: 'Nie ma jeszcze do czego porównać — potrzeba miesiąca historii tych samych ćwiczeń.',
     progressVolumeLabel: 'Objętość', progressNewMark: 'nowe',
-    creditTitle: 'Zalicz do celu', creditDay: 'Zalicz dzień',
     creditCounted: 'Dzień zaliczony',
     unitKg: 'kg', unitReps: 'powt.',
     prToastText: (name, w, r) => `Nowy rekord: ${name} — ${w}×${r}`,
@@ -310,7 +307,6 @@ const T = {
     progressNotEnough: (n) => `Not enough data — ${n} more ${plural(n, { one: 'workout', other: 'workouts' })} and the month-over-month comparison appears.`,
     progressNoCompare: 'Nothing to compare yet — needs a month of history on the same exercises.',
     progressVolumeLabel: 'Volume', progressNewMark: 'new',
-    creditTitle: 'Count toward a goal', creditDay: 'Count the day',
     creditCounted: 'Day counted',
     unitKg: 'kg', unitReps: 'reps',
     prToastText: (name, w, r) => `New PR: ${name} — ${w}×${r}`,
@@ -850,10 +846,6 @@ function refreshDatePickersLang() {
 let sessions = [];
 let unsubscribeSessions = null;
 // Самопочуття на сьогодні: 'ready' | 'ok' | 'low' або null, поки не питали.
-// Цілі здоровʼя: тренування вміє зарахуватись у них просто тут, не
-// змушуючи йти в інший розділ і повторювати те саме руками.
-let goals = [];
-let unsubscribeGoals = null;
 // Власні вправи людини — ті, яких немає в бібліотеці. Зберігаються окремо
 // від тренувань (users/{uid}/customExercises), тож обрана один раз вправа
 // лишається в пікері для наступних тренувань, а не набирається щоразу
@@ -897,42 +889,23 @@ function subscribeToTemplates(uid) {
   }, (err) => console.error('subscribeToTemplates:', err));
 }
 
-// Категорії цілей людина редагує в розділі «Цілі», і сюди вони потрібні рівно
-// заради одного: зрозуміти, чи існує ще категорія 'health', за якою
-// відбирається, що зарахувати після тренування. `null` — профіль ще не
-// приїхав або списку в ньому немає (значить, стандартний, а в ньому 'health'
-// є), і тоді відбір лишається таким, як був.
-let goalCategoryIds = null;
-let unsubscribeGoalCategories = null;
+let unsubscribeProfile = null;
 // Вбудовані вправи, які людина прибрала зі списку вибору. Лежать у
 // профілі, а не в колекції: це не сутності, а лише перелік id з
 // бібліотеки, і документ на кожен був би надто дорогим способом
 // сказати «цю не показуй».
 let hiddenExercises = [];
 
-function subscribeToGoalCategories(uid) {
-  if (unsubscribeGoalCategories) unsubscribeGoalCategories();
-  unsubscribeGoalCategories = db.collection('users').doc(uid).onSnapshot((doc) => {
+function subscribeToProfile(uid) {
+  if (unsubscribeProfile) unsubscribeProfile();
+  unsubscribeProfile = db.collection('users').doc(uid).onSnapshot((doc) => {
     const data = doc.data();
-    const list = data && Array.isArray(data.categoriesGoals) ? data.categoriesGoals : null;
-    goalCategoryIds = list && list.length ? list.map((c) => c && c.id) : null;
-    // Той самий документ, та сама підписка: другий слухач на профіль коштував
-    // би зайвого читання щоразу й нічого б не додав.
     hiddenExercises = data && Array.isArray(data.hiddenExercises)
       ? data.hiddenExercises.filter((id) => typeof id === 'string')
       : [];
     renderPickerGroups(document.getElementById('pickerSearch').value);
     renderCurrentScreen();
-  }, (err) => console.error('subscribeToGoalCategories:', err));
-}
-
-function subscribeToGoals(uid) {
-  if (unsubscribeGoals) unsubscribeGoals();
-  unsubscribeGoals = db.collection('users').doc(uid).collection('goals')
-    .onSnapshot((snap) => {
-      goals = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-      renderCurrentScreen();
-    }, (err) => console.error('subscribeToGoals:', err));
+  }, (err) => console.error('subscribeToProfile:', err));
 }
 
 // Сортуємо за назвою одразу тут — інакше довелось би робити це при
@@ -1170,7 +1143,7 @@ function renderSessionsTab() {
       <button type="button" id="wcalClearBtn">${escapeHtml(t('calShowAll'))}</button>
     </div>` : '';
 
-  root.innerHTML = renderCalendar() + renderGoalCreditCard() + filterBar + shownGroups.map((g) => `
+  root.innerHTML = renderCalendar() + filterBar + shownGroups.map((g) => `
     <div class="day-group">
       <div class="day-label">${escapeHtml(dayLabel(g.date))}</div>
       ${g.items.map((s) => renderSessionCard(s)).join('')}
@@ -1180,51 +1153,6 @@ function renderSessionsTab() {
   root.querySelectorAll('[data-open-session]').forEach((el) => {
     el.addEventListener('click', () => openSessionForm(sessions.find((s) => s.id === el.dataset.openSession)));
   });
-  wireGoalCreditCard(root);
-}
-
-// ---- Тренування зараховується в ціль ----
-// Записаний біг нічого не знав про ціль «пробігти 100 км»: два розділи жили
-// поруч і не бачили одне одного, тож те саме доводилось відмічати двічі.
-// Тут — місток, і саме такий, як усюди в застосунку: він КАЖЕ, що можна
-// зарахувати, але сам не вирішує. Скільки кілометрів було, знає лише людина:
-// у тренуванні лежать підходи й ваги, і вигадувати з них дистанцію не можна.
-function renderGoalCreditCard() {
-  // Пропонуємо тільки після сьогоднішнього тренування: без нього це просто
-  // ще один список цілей у чужому розділі.
-  if (!sessions.some((s) => s.date === todayISO())) return '';
-  const list = window.GoalStreak.trainingGoals(goals, todayISO(), goalCategoryIds);
-  if (!list.length) return '';
-
-  return `
-    <div class="plan-card goal-credit">
-      <div class="plan-title">${escapeHtml(t('creditTitle'))}</div>
-      ${list.map((g) => `
-        <div class="credit-row">
-          <div class="credit-title">${escapeHtml(g.title || '')}</div>
-          <div class="credit-actions">
-            <button type="button" class="credit-btn" data-credit-day="${g.id}">${escapeHtml(t('creditDay'))}</button>
-          </div>
-        </div>`).join('')}
-    </div>`;
-}
-
-function wireGoalCreditCard(root) {
-  root.querySelectorAll('[data-credit-day]').forEach((btn) => {
-    btn.addEventListener('click', () => creditGoalCheckin(btn.dataset.creditDay));
-  });
-}
-
-// Запис іде через goals/streak.js — тією ж арифметикою, що й на сторінці
-// цілей. Своя копія тут розійшлася б із серією.
-async function creditGoalCheckin(goalId) {
-  const goal = goals.find((g) => g.id === goalId);
-  if (!goal || !auth.currentUser) return;
-  const result = window.GoalStreak.applyCheckin(goal, todayISO());
-  if (!result) return;
-  await db.collection('users').doc(auth.currentUser.uid).collection('goals').doc(goalId).update({
-    checkins: result.checkins, updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-  }).catch((err) => console.error('creditGoalCheckin:', err));
 }
 
 function renderSessionCard(session) {
@@ -2283,15 +2211,13 @@ auth.onAuthStateChanged((user) => {
       }
     }).catch(() => {});
     subscribeToSessions(user.uid);
-    subscribeToGoals(user.uid);
-    subscribeToGoalCategories(user.uid);
+    subscribeToProfile(user.uid);
     openFromHash(() => openSessionForm(null));
     subscribeToTemplates(user.uid);
     subscribeToCustomExercises(user.uid);
   } else {
     if (unsubscribeSessions) { unsubscribeSessions(); unsubscribeSessions = null; }
-    if (unsubscribeGoals) { unsubscribeGoals(); unsubscribeGoals = null; goals = []; }
-    if (unsubscribeGoalCategories) { unsubscribeGoalCategories(); unsubscribeGoalCategories = null; goalCategoryIds = null; hiddenExercises = []; }
+    if (unsubscribeProfile) { unsubscribeProfile(); unsubscribeProfile = null; hiddenExercises = []; }
     if (unsubscribeTemplates) { unsubscribeTemplates(); unsubscribeTemplates = null; }
     if (unsubscribeCustomExercises) { unsubscribeCustomExercises(); unsubscribeCustomExercises = null; }
     customExercises = [];

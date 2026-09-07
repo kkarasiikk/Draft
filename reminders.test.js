@@ -301,29 +301,28 @@ describe("sendDigests", () => {
   // за вечір читаються як спам.
   const EVENING = new Date(Date.UTC(2026, 7, 18, 17, 30)); // 20:30 у Києві
   const goal = (over) => ({ id: "g1", uid: "u1", title: "Біг", status: "active",
-    checkins: [], blockers: [], targetDate: null, ...over });
+    checkins: [], targetDate: null, ...over });
 
-  test("серія під загрозою витісняє завдання із заголовка", async () => {
+  test("незакрите завдання стоїть у заголовку", async () => {
     resetState({
       tokens: { u1: ["tk"] },
       users: [{ id: "u1", data: { taskReminders: settings } }],
       tasks: [{ id: "a", uid: "u1", title: "Лишилось", done: false, dueDate: "2026-08-18" }],
-      // Серія тримається включно з учора, сьогодні відмітки ще немає.
-      goals: [goal({ checkins: ["2026-08-16", "2026-08-17"] })],
+      goals: [goal({})],
     });
     await _internal.sendDigests(EVENING);
-    // Незакрите завдання перенесеться на завтра, а обірвана серія — ні.
-    expect(state.sent[0].data.title).toBe("Серія 2 дні урветься");
-    expect(state.sent[0].data.body).toContain("Біг");
+    expect(state.sent[0].data.title).toBe("Не закрито: 1");
     expect(state.sent[0].data.body).toContain("на завтра");
   });
 
-  test("відмічена сьогодні ціль у підсумок не потрапляє", async () => {
+  // Ціль без дедлайну ввечері мовчить. Раніше сам факт «сьогодні не було
+  // кроку» був приводом озватись — разом із серією це пішло.
+  test("ціль без близького дедлайну підсумок не турбує", async () => {
     resetState({
       tokens: { u1: ["tk"] },
       users: [{ id: "u1", data: { taskReminders: settings } }],
       tasks: [],
-      goals: [goal({ checkins: ["2026-08-17", "2026-08-18"] })],
+      goals: [goal({})],
     });
     await _internal.sendDigests(EVENING);
     expect(state.sent[0].data.title).toBe("День закрито 🎉");
@@ -337,19 +336,10 @@ describe("sendDigests", () => {
       goals: [goal({ title: "Звіт", targetDate: "2026-08-20" })],
     });
     await _internal.sendDigests(EVENING);
+    expect(state.sent[0].data.title).toBe("Дедлайн близько");
     expect(state.sent[0].data.body).toContain("Звіт");
   });
 
-  test("цілі без кроку, коли завдань не лишилось", async () => {
-    resetState({
-      tokens: { u1: ["tk"] },
-      users: [{ id: "u1", data: { taskReminders: settings } }],
-      tasks: [],
-      goals: [goal({ checkins: [] })],   // серії ще немає — лише сам факт
-    });
-    await _internal.sendDigests(EVENING);
-    expect(state.sent[0].data.title).toBe("Цілі: 1 без кроку");
-  });
 });
 
 describe("plural", () => {

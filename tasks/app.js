@@ -1944,25 +1944,6 @@ function toggleDone(id) {
     completedAt: done ? firebase.firestore.FieldValue.serverTimestamp() : null,
     updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
   }).catch((err) => console.error('toggleDone:', err));
-
-  // Завдання, що прийшло з довгострокової цілі, само відмічає її день у
-  // серії — інакше довелось би робити ту саму дію двічі, в двох розділах.
-  // Знята галочка чекін не прибирає: до одного дня могли вести кілька дій.
-  if (done && task.goalId) markGoalCheckin(task.goalId);
-}
-
-async function markGoalCheckin(goalId) {
-  if (!auth.currentUser) return;
-  const ref = db.collection('users').doc(auth.currentUser.uid).collection('goals').doc(goalId);
-  try {
-    const doc = await ref.get();
-    if (!doc.exists) return;
-    const result = window.GoalStreak.applyCheckin(doc.data(), todayISO());
-    if (!result) return;
-    await ref.update({ checkins: result.checkins, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
-  } catch (err) {
-    console.error('markGoalCheckin:', err);
-  }
 }
 
 // ---- Навігація календаря ----

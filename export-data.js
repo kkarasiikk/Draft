@@ -18,6 +18,18 @@
   var SECTION_KEYS = ['budget', 'goals', 'tasks', 'workout'];
   var FORMATS = ['xlsx', 'csv', 'json'];
 
+  /** Нотатки цілі. Правило те саме, що на сторінці, тому й береться з
+   *  goals/review.js: у браузері модуль уже в window, у Jest — через require.
+   *  Без нього лишається чесний запасний варіант замість порожнечі. */
+  function goalNotes(goal) {
+    var api = root.GoalReview;
+    if (!api && typeof require !== 'undefined') {
+      try { api = require('./goals/review.js'); } catch (err) { api = null; }
+    }
+    if (api) return api.notesText(goal);
+    return ((goal && goal.journal) || []).map(function (e) { return (e && e.text) || ''; }).join('\n\n');
+  }
+
   function timestampText(value) {
     if (!value) return '';
     if (typeof value.toDate === 'function') value = value.toDate();
@@ -122,20 +134,20 @@
         // Дедлайн ціль отримує з місяця, а не окремим полем: у місячної це
         // кінець її місяця, у річної його немає.
         row[L.colDeadline] = g.targetDate || '';
-        row[L.colCheckins] = (g.checkins || []).length;
         row[L.colWhy] = g.why || '';
         return row;
       }) },
-      // Щоденник — окремим аркушем: у клітинку його не запхати, а це
-      // найцінніше, що є в цілях.
-      { key: 'goal-journal', name: L.sheetJournal, rows: (d.goals || []).reduce(function (acc, g) {
-        (g.journal || []).forEach(function (entry) {
-          var row = {};
-          row[L.colGoal] = g.title || '';
-          row[L.colCreated] = timestampText(entry.createdAt);
-          row[L.colContent] = entry.text || '';
-          acc.push(row);
-        });
+      // Нотатки — окремим аркушем: у клітинку поруч із назвою їх не запхати,
+      // а це найцінніше, що є в цілях. Лежать вони в полі `journal` — див.
+      // goals/review.js, — і старий щоденник із кількох записів так само
+      // читається одним текстом.
+      { key: 'goal-notes', name: L.sheetGoalNotes, rows: (d.goals || []).reduce(function (acc, g) {
+        var text = goalNotes(g);
+        if (!text) return acc;
+        var row = {};
+        row[L.colGoal] = g.title || '';
+        row[L.colContent] = text;
+        acc.push(row);
         return acc;
       }, []) },
     ];

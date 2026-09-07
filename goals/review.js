@@ -1,39 +1,47 @@
-// ---- Темп цілі ----
+// ---- Цілі: чисті обчислення ----
 //
-// Модуль називається «довгострокові цілі», а вся його механіка досі працювала
-// з одним днем: серія, вечірнє «чи був крок», причини пропуску. Ціль із
-// дедлайном через вісім місяців отримувала щовечора «так/ні» — і попередження
-// за три дні до кінця. Між ними не було нічого: застосунок знав і дедлайн, і
-// прогрес, але ніде не рахував звʼязок між ними.
+// Усе, що в розділі цілей рахується від даних і поточної дати, живе тут:
+// арифметика днів, місяць цілі, тривалість закритої цілі, ретроспектива й
+// попередження про дедлайн. Ні DOM, ні Firestore — тільки чисті функції
+// (див. goals/review.test.js).
 //
-// Тут — саме цей звʼязок:
-//   pace()         чи встигаєш до дедлайну таким темпом;
-//   weekMovement() що зрушило за тиждень.
+// Той самий модуль читає AI-помічник і розсилка нагадувань на сервері:
+// інакше в чаті звучала б одна оцінка, у сповіщенні друга, а на екрані
+// третя.
 //
-// Ні DOM, ні Firestore — тільки чисті функції від даних і поточної дати
-// (див. goals/review.test.js). Той самий модуль читає й AI-помічник: інакше
-// в чаті звучала б одна оцінка темпу, а на екрані стояла інша.
+// Раніше поруч лежав goals/streak.js — серія, рятунок серії, вечірня черга
+// «чи був сьогодні крок». Серії більше немає: ціль рухають не щоденні
+// галочки, а те, що людина записує в нотатках, і власний статус цілі. Разом
+// із серією пішли й похідні від неї — сітка відміток, причини пропусків,
+// «довга перерва». Арифметика дат була в тому ж файлі й до серії стосунку не
+// мала, тож переїхала сюди.
 (function (root) {
   'use strict';
 
-  // Вікно, за яким рахується «що зрушило»: тиждень. Довше — і рух місячної
-  // цілі губиться в середньому; коротше — кожен вихідний виглядає застоєм.
-  var REVIEW_PERIOD_DAYS = 7;
+  function pad2(n) { return String(n).padStart(2, '0'); }
 
-  // Скільки днів мовчання роблять паузу «перервою», а не звичайним
-  // пропуском. Два тижні: тиждень без кроку буває в кожної живої цілі, а от
-  // три — це вже не збій ритму, це вихід із нього.
-  var LAPSE_DAYS = 14;
+  /** Локальна дата як YYYY-MM-DD. Саме локальна: `toISOString()` у поясах
+   *  на схід від Гринвіча ввечері вже показує завтра. */
+  function isoOf(date) {
+    return date.getFullYear() + '-' + pad2(date.getMonth() + 1) + '-' + pad2(date.getDate());
+  }
 
-  // Арифметика дат живе в streak.js — другої копії «що таке локальний день»
-  // у проєкті бути не повинно. У браузері модуль уже в window, у Jest
-  // підтягуємо через require.
-  function streak() {
-    var api = root.GoalStreak;
-    if (!api && typeof require !== 'undefined') {
-      try { api = require('./streak.js'); } catch (err) { api = null; }
-    }
-    return api;
+  /** Парсить "YYYY-MM-DD" як локальну дату — на відміну від `new Date(s)`,
+   *  який трактує рядок як UTC-північ і зсуває день назад на заході. */
+  function parseISO(s) {
+    if (!s) return new Date(NaN);
+    var parts = String(s).split('-').map(Number);
+    return new Date(parts[0], (parts[1] || 1) - 1, parts[2] || 1);
+  }
+
+  function shift(iso, days) {
+    var d = parseISO(iso);
+    d.setDate(d.getDate() + days);
+    return isoOf(d);
+  }
+
+  function daysBetween(fromIso, toIso) {
+    return Math.round((parseISO(toIso) - parseISO(fromIso)) / 86400000);
   }
 
   /**
@@ -67,7 +75,7 @@
    *  записів не буває, але в цілей, заведених раніше, вони лежать — і це такі
    *  самі справжні дати життя цілі, як чекіни. Викинути їх означало б
    *  «омолодити» стару ціль на кілька місяців. Те саме нижче в latestSignal
-   *  і в lapse. */
+   */
   function earliestSignal(goal) {
     var dates = [];
     ((goal && goal.progressLog) || []).forEach(function (e) {
@@ -91,38 +99,6 @@
     });
     dates.sort();
     return dates.length ? dates[dates.length - 1] : null;
-  }
-
-  /**
-   * Що зрушило за останні `days` днів. Саме це показує екран огляду: не «як
-   * справи», а перелік того, що реально сталося, — і чесне «нічого», коли
-   * нічого.
-   */
-  function weekMovement(goal, todayIso, days) {
-    var S = streak();
-    if (!S) return null;
-    var span = days || REVIEW_PERIOD_DAYS;
-    var from = S.shift(todayIso, -(span - 1));
-
-    var checkins = ((goal && goal.checkins) || []).filter(function (d) {
-      return typeof d === 'string' && d >= from && d <= todayIso;
-    }).length;
-
-    // Записи щоденника мають createdAt у мілісекундах (serverTimestamp
-    // усередині елемента масиву Firestore заборонений), тож день доводиться
-    // діставати з Date, а не порівнювати рядки.
-    var journal = ((goal && goal.journal) || []).filter(function (e) {
-      if (!e || typeof e.createdAt !== 'number') return false;
-      var day = S.isoOf(new Date(e.createdAt));
-      return day >= from && day <= todayIso;
-    }).length;
-
-    return {
-      from: from,
-      checkins: checkins,
-      journal: journal,
-      moved: checkins > 0,
-    };
   }
 
   /**
@@ -150,6 +126,12 @@
    * рівно та ціль, про яку треба памʼятати найбільше. У минулих місяцях
    * такого перенесення немає: там показуємо, що було саме тоді.
    *
+   * Перенесена ціль лишається у видимому місяці й ПІСЛЯ того, як її закрили:
+   * інакше вийшло б, що людина ставить липневій цілі «Виконано» — і та
+   * зникає з екрана тієї ж миті, ніби дію не зарахували. `completedAt`
+   * пишеться і для «виконано», і для «не виконано»: це день, коли питання
+   * закрили, яким би не була відповідь.
+   *
    * @param {Array} goals
    * @param {string} monthKey 'YYYY-MM', який дивляться
    * @param {{currentMonth?: string, startIsoOf?: function}} [opts]
@@ -163,61 +145,10 @@
       // Місяць невідомий узагалі — краще в поточному, ніж ніде.
       if (!m) return isCurrent;
       if (m === monthKey) return true;
+      // Закрита саме в цьому місяці — показуємо тут, хоч заведена була раніше.
+      if (typeof g.completedAt === 'string' && g.completedAt.slice(0, 7) === monthKey) return true;
       return isCurrent && m < monthKey && (g.status === 'active' || g.status === 'paused');
     });
-  }
-
-  /**
-   * Довга перерва — і момент повернення.
-   *
-   * Типовий кінець довгої цілі виглядає так: тиждень руху, пропуск, провина,
-   * і застосунок більше не відкривають. Різниця між тимчасовим збоєм і
-   * повним крахом — у тому, чи є куди повернутись. Досі ціль після трьох
-   * тижнів мовчання зустрічала обірваною серією й вердиктом «не встигаєш» —
-   * тобто рівно тим, від чого й тікають.
-   *
-   * Рахуємо від останнього СЛІДУ будь-якого роду: відмітка, прогрес, закрита
-   * віха. Слідом вважається й запис про те, що завадило: людина приходила й
-   * чесно сказала «не вийшло», і це не мовчання.
-   *
-   * Повертає null, коли перерви немає або говорити про неї не час: ціль на
-   * паузі (про неї свідомо не питають), закрита чи архівна.
-   */
-  function lapse(goal, todayIso, opts) {
-    if (!goal || goal.status !== 'active') return null;
-    var S = streak();
-    if (!S) return null;
-
-    var marks = [];
-    (goal.checkins || []).forEach(function (d) {
-      if (typeof d === 'string') marks.push(d);
-    });
-    (goal.progressLog || []).forEach(function (e) {
-      if (e && typeof e.date === 'string') marks.push(e.date);
-    });
-    (goal.blockers || []).forEach(function (b) {
-      if (b && typeof b.date === 'string') marks.push(b.date);
-    });
-
-    var last = null;
-    marks.forEach(function (d) {
-      if (d <= todayIso && (last === null || d > last)) last = d;
-    });
-
-    // Точка відліку — ПІЗНІШЕ з двох: останній слід і початок цілі. Початок
-    // тут не лише «коли завели»: після перезапуску (restartedAt) він
-    // зсувається на день повернення, а сам перезапуск — це вже дія, тож
-    // мовчання від нього й рахується. Брати просто останній слід означало б,
-    // що ціль, до якої людина щойно повернулась, назавжди лишається
-    // покинутою через торішню відмітку.
-    var startIso = (opts && opts.startIso) || null;
-    var from = last;
-    if (!from || (startIso && startIso > from)) from = startIso;
-    if (!from) return null;
-
-    var days = S.daysBetween(from, todayIso);
-    if (days < LAPSE_DAYS) return null;
-    return { days: days, lastIso: last, everMoved: last !== null };
   }
 
   /**
@@ -243,8 +174,6 @@
    * ціль у ретроспективі лишається, але без тривалості.
    */
   function goalSpan(goal, opts) {
-    var S = streak();
-    if (!S) return null;
     var doneIso = closedOn(goal);
     if (!doneIso) return null;
     var startIso = (opts && opts.startIso) || earliestSignal(goal);
@@ -252,7 +181,7 @@
     // Дата закриття раніша за заведення трапляється лише на зіпсованих даних
     // (або коли startIso — це вже слід із середини шляху). Відʼємну тривалість
     // показувати нема сенсу.
-    var days = Math.max(0, S.daysBetween(startIso, doneIso));
+    var days = Math.max(0, daysBetween(startIso, doneIso));
     return { startIso: startIso, doneIso: doneIso, days: days };
   }
 
@@ -270,10 +199,8 @@
    *     Firestore Timestamp, а модуль про Firestore нічого не знає).
    */
   function retrospective(goals, todayIso, opts) {
-    var S = streak();
-    if (!S) return null;
     var span = opts && opts.days;
-    var from = span ? S.shift(todayIso, -(span - 1)) : null;
+    var from = span ? shift(todayIso, -(span - 1)) : null;
     var startIsoOf = (opts && opts.startIsoOf) || function () { return null; };
 
     var items = [];
@@ -325,12 +252,123 @@
     };
   }
 
+  /** Скільки днів лишилось до дедлайну цілі (може бути відʼємно). */
+  function daysToDeadline(goal, todayIso) {
+    if (!goal || typeof goal.targetDate !== 'string' || !goal.targetDate) return null;
+    return daysBetween(todayIso, goal.targetDate);
+  }
+
+  /**
+   * За скільки днів попереджати про дедлайн ЦІЄЇ цілі.
+   *
+   * Три дні — розумно для справи на два тижні й безглуздо для цілі на вісім
+   * місяців: там це вже не попередження, а співчуття, бо зробити нічого не
+   * можна. Тому поріг — частка від довжини самої цілі, з підлогою (коротка
+   * ціль не має мовчати до останнього дня) і стелею (багаторічна не має
+   * гудіти чотири місяці поспіль).
+   */
+  var WARN_SHARE = 0.1;
+  var WARN_MIN_DAYS = 3;
+  var WARN_MAX_DAYS = 30;
+
+  function deadlineWarnDays(goal, todayIso, opts) {
+    if (!goal || !goal.targetDate) return WARN_MIN_DAYS;
+    var startIso = (opts && opts.startIsoOf && opts.startIsoOf(goal)) || earliestSignal(goal);
+    // Довжину цілі нізвідки взяти — лишається обережна підлога.
+    if (!startIso) return WARN_MIN_DAYS;
+    var span = daysBetween(startIso, goal.targetDate);
+    if (!(span > 0)) return WARN_MIN_DAYS;
+    return Math.max(WARN_MIN_DAYS, Math.min(WARN_MAX_DAYS, Math.round(span * WARN_SHARE)));
+  }
+
+  /**
+   * Що сказати про цілі у вечірньому дайджесті.
+   *
+   * Раніше головним тут була серія: ввечері ще є час не обірвати ланцюг.
+   * Серії немає, і щовечірнє «чи був крок» пішло разом із нею — про ціль на
+   * вісім місяців питати щодня однаково не було сенсу. Лишився єдиний
+   * привід озватись увечері: дедлайн, який ось-ось або вже минув. Це не
+   * питання, а факт, і людина його могла просто не побачити.
+   *
+   * @param {Array} goals усі цілі користувача
+   * @param {string} todayIso «сьогодні»
+   * @param {{deadlineDays?: number, startIsoOf?: function}} [opts]
+   * @returns {{deadline:number|null, deadlineTitle:string|null}}
+   */
+  function goalsDigest(goals, todayIso, opts) {
+    // Найближчий дедлайн серед цілей у роботі: прострочений або той, що
+    // ось-ось. «Ось-ось» у кожної цілі своє — див. deadlineWarnDays.
+    var deadline = null;
+    var deadlineTitle = null;
+    (goals || []).forEach(function (g) {
+      if (!g || g.status !== 'active') return;
+      var left = daysToDeadline(g, todayIso);
+      if (left === null) return;
+      var warn = (opts && opts.deadlineDays) || deadlineWarnDays(g, todayIso, opts);
+      if (left > warn) return;
+      if (deadline === null || left < deadline) { deadline = left; deadlineTitle = g.title || null; }
+    });
+
+    return { deadline: deadline, deadlineTitle: deadlineTitle };
+  }
+
+  // ---- Нотатки цілі ----
+  //
+  // Одне вільне поле на ціль: усе, що людина хоче про неї сказати. Раніше на
+  // цьому місці був щоденник — стрічка окремих записів із датами, — і його
+  // головна вада була саме в стрічці: щоб дописати рядок до вчорашньої думки,
+  // доводилось заводити другий запис, а зв'язного тексту про ціль не виходило
+  // ніколи.
+  //
+  // У базі нотатки лежать у полі `journal` — тому самому масиві. Це не
+  // недогляд, а свідомий вибір: правила Firestore перелічують дозволені ключі
+  // документа поіменно, і нове поле `notes` вимагало б їх розгортати. Формат
+  // елемента лишився тим самим {id, text, createdAt}, тож старі записи
+  // читаються без жодної міграції — просто показуються одним текстом.
+  var NOTES_MAX = 20000;
+
+  /** Текст нотаток цілі. Кілька старих записів щоденника зливаються в один
+   *  текст у хронологічному порядку: нічого не губиться, а перший же запис
+   *  згортає їх в один елемент. */
+  function notesText(goal) {
+    var list = (goal && goal.journal) || [];
+    if (!list.length) return '';
+    return list
+      .slice()
+      .sort(function (a, b) { return (a && a.createdAt || 0) - (b && b.createdAt || 0); })
+      .map(function (e) { return (e && e.text) || ''; })
+      .filter(function (x) { return x !== ''; })
+      .join('\n\n');
+  }
+
+  /** Масив `journal`, який треба записати для цього тексту. Порожній текст —
+   *  порожній масив: нотатка, яку стерли, має зникнути, а не лишитись
+   *  порожнім записом.
+   *
+   *  createdAt — саме клієнтський Date.now(), а не serverTimestamp(): останній
+   *  заборонений усередині елемента масиву Firestore. */
+  function notesPatch(text) {
+    var body = typeof text === 'string' ? text.trim() : '';
+    if (!body) return [];
+    return [{
+      id: 'n' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8),
+      text: body.slice(0, NOTES_MAX),
+      createdAt: Date.now(),
+    }];
+  }
+
   var api = {
-    REVIEW_PERIOD_DAYS: REVIEW_PERIOD_DAYS,
-    LAPSE_DAYS: LAPSE_DAYS,
+    isoOf: isoOf,
+    parseISO: parseISO,
+    shift: shift,
+    daysBetween: daysBetween,
     deadlineForMonth: deadlineForMonth,
-    weekMovement: weekMovement,
-    lapse: lapse,
+    daysToDeadline: daysToDeadline,
+    deadlineWarnDays: deadlineWarnDays,
+    goalsDigest: goalsDigest,
+    NOTES_MAX: NOTES_MAX,
+    notesText: notesText,
+    notesPatch: notesPatch,
     monthKeyOf: monthKeyOf,
     goalsOfMonth: goalsOfMonth,
     closedOn: closedOn,

@@ -11,7 +11,7 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const { digestDue, isoInZone } = require("./tasks/reminders");
-const goalStreak = require("./goals/streak");
+const goalReview = require("./goals/review");
 
 const db = admin.firestore();
 
@@ -31,23 +31,22 @@ const TEXTS = {
     }),
     // Вечірній підсумок — єдине сповіщення за вечір, тож цілі живуть у ньому,
     // а не окремим пушем: два повідомлення поспіль читаються як спам.
-    // Серія попереду завдань свідомо: незакрите завдання перенесеться на
-    // завтра, а обірвана серія не відновиться ніколи.
+    // Раніше тут головною була серія, яка урветься до півночі. Серії немає, і
+    // щовечірнє «чи був крок» пішло разом із нею: про ціль на вісім місяців
+    // питати щодня однаково не було сенсу. Лишився дедлайн — його людина
+    // могла просто не побачити.
     evening: (left, goals) => {
-      const g = goals || { pending: 0, streak: 0, deadline: null };
+      const g = goals || { deadline: null };
       let title;
-      if (g.streak > 0) {
-        title = `Серія ${g.streak} ${plural(g.streak, "день", "дні", "днів")} урветься`;
-      } else if (left) {
+      if (left) {
         title = `Не закрито: ${left}`;
-      } else if (g.pending) {
-        title = `Цілі: ${g.pending} без кроку`;
+      } else if (g.deadline !== null) {
+        title = g.deadline < 0 ? "Дедлайн минув" : "Дедлайн близько";
       } else {
         title = "День закрито 🎉";
       }
 
       const parts = [];
-      if (g.streak > 0 && g.streakTitle) parts.push(g.streakTitle);
       if (left) parts.push(`${left} ${plural(left, "справа", "справи", "справ")} на завтра`);
       if (g.deadline !== null && g.deadlineTitle) {
         parts.push(g.deadline < 0
@@ -174,9 +173,9 @@ async function sendDigests(now) {
         // Довжину цілі бере з createdAt: без неї поріг попередження про
         // дедлайн лишився б однаковим для справи на два тижні й для цілі на
         // вісім місяців.
-        goalsPart = goalStreak.goalsDigest(goalsSnap.docs.map((d) => d.data()), today, {
+        goalsPart = goalReview.goalsDigest(goalsSnap.docs.map((d) => d.data()), today, {
           startIsoOf: (g) => (g && g.createdAt && typeof g.createdAt.toDate === "function"
-            ? goalStreak.isoOf(g.createdAt.toDate()) : null),
+            ? goalReview.isoOf(g.createdAt.toDate()) : null),
         });
       } catch (err) {
         // Цілі не прочитались — підсумок по завданнях однаково має піти.

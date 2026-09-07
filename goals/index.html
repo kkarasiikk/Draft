@@ -183,10 +183,15 @@
   .content{padding:20px 20px 0;}
 
   /* ---- Dashboard ---- */
-  .badges-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;}
-  .badge-chip{font-size:12px;font-weight:600;padding:6px 12px;border-radius:999px;background:var(--gold-light);color:var(--gold);white-space:nowrap;}
 
-  .status-filter-row, .tag-filter-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;}
+  /* Рядок категорій. Він може бути довшим за екран — категорій вісім, і
+     кожна зі своєю назвою, — тож гортається вбік замість того, щоб
+     переносити список на три рядки й з'їдати висоту над самим списком. */
+  .cat-filter-row{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;
+    scrollbar-width:none;-webkit-overflow-scrolling:touch;padding-bottom:2px;}
+  .cat-filter-row::-webkit-scrollbar{display:none;}
+  .cat-filter-row .tag-filter-chip{flex-shrink:0;}
+  .tag-filter-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;}
   .tag-filter-chip{padding:5px 12px;border-radius:20px;font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;
     border:1px solid var(--border);background:transparent;color:var(--ink-muted);white-space:nowrap;}
   .tag-filter-chip.selected{background:var(--accent-light);color:var(--accent);border-color:transparent;font-weight:600;}
@@ -203,37 +208,10 @@
   .month-name:not(.current){color:var(--accent);background:var(--accent-light);}
   .goal-carried{color:var(--gold);font-weight:600;}
 
-  /* Сітка відміток: серія каже про поточний ланцюг, сітка — про частоту. */
-  .grid-block{margin-bottom:16px;}
-  .grid{display:grid;grid-template-columns:repeat(7, 1fr);gap:4px;margin-top:8px;}
-  .grid-cell{display:block;aspect-ratio:1;border-radius:4px;background:var(--control-bg);}
-  .grid-cell.done, .grid-key.done{background:var(--income);}
-  .grid-cell.blocked, .grid-key.blocked{background:var(--gold-light);border:1px solid var(--gold);}
-  .grid-cell.future{background:transparent;border:1px dashed var(--border);}
-  .grid-cell.today{outline:2px solid var(--accent);outline-offset:1px;}
-  .grid-legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:9px;font-size:11px;color:var(--ink-muted);}
-  .grid-legend span{display:flex;align-items:center;gap:5px;}
-  .grid-key{width:10px;height:10px;border-radius:3px;flex-shrink:0;display:block;background:var(--control-bg);}
-
-  /* Повернення після перерви. Кольори теплі, а не тривожні: це не помилка
-     й не борг, це момент, у який людина прийшла назад. */
-  .lapse{background:var(--gold-light);border-radius:16px;padding:14px;margin-bottom:14px;}
-  .lapse-title{font-size:15px;font-weight:700;color:var(--ink);margin-bottom:4px;}
-  .lapse-sub{font-size:12.5px;color:var(--ink-soft);line-height:1.45;margin-bottom:11px;}
-  .lapse-actions{display:flex;flex-wrap:wrap;gap:6px;}
-  .lapse-btn{cursor:pointer;font-family:'Inter',sans-serif;font-size:12.5px;font-weight:600;
-    padding:8px 13px;border-radius:10px;white-space:nowrap;
-    border:1px solid var(--border);background:var(--surface-flat);color:var(--ink-soft);}
-  .lapse-btn.primary{background:var(--gold);border-color:transparent;color:#fff;}
-
-  /* Скільки разів дедлайн уже їхав. Тон рівний: це факт, а не докір. */
-
-  /* Ретроспектива: єдине місце, де закрита ціль лишає слід на екрані. */
-  .retro{margin-bottom:14px;}
-  .retro-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:8px;}
-  .retro-count{font-size:15px;font-weight:700;color:var(--ink);}
-  .retro-span{font-size:12.5px;color:var(--ink-muted);}
-  .retro-periods{display:flex;gap:6px;margin-bottom:12px;}
+  /* Підсумок під списком: скільки цілей закрито й скільки типово займали.
+     Один тихий рядок, а не блок із власним перемикачем періоду: закрита ціль
+     має лишати слід на екрані, але не забирати верх списку в живих. */
+  .retro-line{margin:18px 2px 8px;font-size:12.5px;color:var(--ink-muted);text-align:center;}
   .goal-card-days{color:var(--ink-muted);}
 
   .category-chip{font-size:10.5px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap;display:inline-block;}
@@ -313,16 +291,19 @@
   .goal-card:hover{border-color:var(--card-border-hover);}
   .goal-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;position:relative;}
   .goal-card-title{font-family:'Inter',sans-serif;font-size:16.5px;font-weight:700;margin:0 0 6px;position:relative;}
-  .goal-card-status-badge{flex-shrink:0;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;
-    color:var(--ink-muted);background:var(--glass-btn-bg);border:1px solid var(--glass-btn-border);padding:4px 9px;border-radius:999px;}
   .goal-card-meta{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-top:10px;font-size:12px;color:var(--ink-muted);position:relative;}
-  .goal-streak-flame{color:var(--expense);font-weight:700;}
   .goal-card-deadline.overdue{color:var(--expense);font-weight:600;}
+  /* Закрита ціль лишається в списку, але не сперечається за увагу з живими:
+     тихіша рамка й приглушена назва. Закреслення тут було б зайвим — назву
+     цілі читають, а не звіряють. */
+  .goal-card.state-done, .goal-card.state-failed{background:transparent;}
+  .goal-card.state-done .goal-card-title, .goal-card.state-failed .goal-card-title{color:var(--ink-muted);}
   /* Обрана ціль у списку. Без цього на широкому екрані не видно, чию саме
      сторінку показує права колонка. */
   .goal-card.selected{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent);}
-  /* Категорія як роздільник у списку: групування, у якому порожні категорії
-     просто не малюються — на відміну від колонки-стопки на кожну. */
+  /* Стан як роздільник у списку: «В роботі», «Виконано», «Не виконано».
+     Порожні групи не малюються — заголовок без жодної картки під ним казав би
+     про порожнечу там, де про неї нема чого казати. */
   .goal-group-label{font-size:11.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
     color:var(--ink-muted);margin:22px 2px 10px;}
   .goal-group-label:first-child{margin-top:2px;}
@@ -379,94 +360,36 @@
   .detail-badges-row{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px;}
   .why-block{background:var(--accent-light);border-radius:16px;padding:14px 16px;margin-bottom:18px;font-size:14px;color:var(--ink-soft);line-height:1.5;font-style:italic;}
 
-  .progress-ring{position:relative;width:112px;height:112px;border-radius:50%;margin:0 auto 20px;
-    background:conic-gradient(var(--accent) calc(var(--pct,0)*1%), var(--card-border) 0);}
-  .progress-ring::before{content:"";position:absolute;inset:11px;border-radius:50%;background:var(--bg);}
-  .progress-ring-value{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
-  .progress-ring-pct{font-size:22px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums;}
-  .progress-ring-frac{font-size:11px;color:var(--ink-muted);}
+  /* ---- Стан цілі ----
+     Один вибір із трьох, тож і виглядає як один елемент: сегменти в спільній
+     рамці, а не три окремі кнопки, з яких не читалось, що це вибір.
+     Обраний сегмент забарвлений за змістом: робота — колір застосунку,
+     виконано — зелений, не виконано — приглушений сірий, а не червоний:
+     закинута ціль не помилка. */
+  .status-row{margin-bottom:22px;}
+  .status-switch{display:flex;gap:4px;padding:4px;border-radius:14px;
+    background:var(--surface-flat);border:1px solid var(--border);}
+  .status-opt{flex:1;min-width:0;cursor:pointer;border:none;background:transparent;color:var(--ink-muted);
+    font-family:'Inter',sans-serif;font-size:13px;font-weight:600;padding:9px 6px;border-radius:10px;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:background .15s, color .15s;}
+  .status-opt:hover{color:var(--ink-soft);}
+  .status-opt:active{transform:scale(.97);}
+  .status-opt.selected{background:var(--accent-light);color:var(--accent);}
+  .status-opt.state-done.selected{background:var(--income-light);color:var(--income);}
+  .status-opt.state-failed.selected{background:var(--glass-btn-bg);color:var(--ink-soft);}
 
-  /* Рятунок серії: попередження, а не свято, — тому теплий колір
-     видатків, а не зелений. Кнопка поруч, щоб рішення було одним дотиком. */
-  .rescue-banner{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;
-    background:var(--expense-light);color:var(--expense);border-radius:16px;padding:12px 16px;margin-bottom:12px;
-    font-size:13.5px;font-weight:600;line-height:1.45;text-align:center;}
-  .rescue-banner button{flex-shrink:0;border:none;background:var(--expense);color:#fff;font-family:'Inter',sans-serif;
-    font-size:13px;font-weight:600;padding:8px 14px;border-radius:999px;cursor:pointer;}
-  .rescue-banner button:active{transform:scale(.96);}
-  .rescue-banner.waiting{background:var(--surface-flat);color:var(--ink-muted);}
-
-  /* Пауза — тиха дія, тож і кнопка тиха: не червона й не на всю ширину. */
-  .pause-row{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:10px;}
-  .pause-btn{border:1px solid var(--border);background:transparent;color:var(--ink-muted);
-    font-family:'Inter',sans-serif;font-size:13px;font-weight:600;padding:9px 16px;
-    border-radius:999px;cursor:pointer;}
-  .pause-btn:active{transform:scale(.97);}
-  /* «Виконано» — головна дія цього рядка, і єдина, яку не хочеться шукати
-     очима серед однакових кнопок. */
-  .pause-btn.primary{border-color:transparent;background:var(--income-light);color:var(--income);font-weight:600;}
-  .paused-note{background:var(--surface-flat);color:var(--ink-muted);border-radius:14px;
-    padding:10px 14px;margin-bottom:12px;font-size:12.5px;line-height:1.45;text-align:center;}
-
-  .linked-note{margin-top:10px;font-size:12px;color:var(--ink-muted);text-align:center;line-height:1.4;}
-
-  /* Що заважає найчастіше. Не докір, а спостереження: список причин, які
-     людина сама назвала, зібраний за частотою. Тон навмисно нейтральний —
-     сірий, дрібний, без червоного: це матеріал для висновку, а не вирок. */
-  .blockers{background:var(--surface-flat);border-radius:14px;padding:11px 14px;margin-bottom:12px;}
-  .blockers-title{font-size:11px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;
-    color:var(--ink-muted);margin-bottom:7px;}
-  .blockers-row{display:flex;flex-wrap:wrap;gap:6px;}
-  .blocker-chip{display:inline-flex;align-items:baseline;gap:5px;background:var(--surface);
-    border:1px solid var(--border);border-radius:999px;padding:4px 10px;font-size:12px;color:var(--ink-soft);}
-  .blocker-count{font-size:11px;font-weight:700;color:var(--ink-muted);font-variant-numeric:tabular-nums;}
-
-  /* Драбина місяць -> рік. На річній цілі — що на неї працює цього місяця;
-     на місячній — кому вона служить. Обидва блоки навмисно тихі: це контекст,
-     а не дія. */
-  /* Щоденні дії з цілі — ті самі завдання, що й у розділі «Завдання»,
-     просто показані звідси. Виконав таку дію — день у серії відмічається сам. */
-  .actions-block{margin-bottom:20px;}
-  /* Роздільник саме МІЖ рядками: :first-of-type тут не спрацював би —
-     першим елементом того ж типу в блоці йде заголовок секції. */
-  .action-row{display:flex;align-items:flex-start;gap:10px;padding:9px 0;}
-  .action-row + .action-row{border-top:1px solid var(--border);}
-  .action-check{flex-shrink:0;width:22px;height:22px;margin-top:1px;border-radius:7px;border:2px solid var(--glass-btn-border);
-    background:none;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;color:#fff;}
-  .action-check svg{width:13px;height:13px;display:none;}
-  .action-check.checked{background:var(--income);border-color:var(--income);}
-  .action-check.checked svg{display:block;}
-  .action-title{font-size:14.5px;color:var(--ink);line-height:1.4;}
-  .action-row.done .action-title{color:var(--ink-muted);text-decoration:line-through;}
-  .action-due{font-size:11.5px;color:var(--ink-muted);margin-top:2px;}
-  .action-due.overdue{color:var(--expense);}
-  .action-add-row{display:flex;gap:8px;margin-top:10px;}
-  .action-add-row input{margin:0;flex:1;}
-  .action-add-btn{flex-shrink:0;border:none;background:var(--accent);color:#fff;border-radius:10px;padding:0 16px;
-    font-family:'Inter',sans-serif;font-size:14px;font-weight:600;cursor:pointer;}
-  .actions-empty{font-size:13px;color:var(--ink-muted);padding:6px 0;line-height:1.45;}
-
-  .streak-row{display:flex;justify-content:center;margin-bottom:22px;}
-  .streak-btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--glass-btn-border);background:var(--glass-btn-bg);
-    border-radius:999px;padding:11px 20px;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;color:var(--ink);cursor:pointer;
-    transition:background .2s, transform .15s;}
-  .streak-btn:active{transform:scale(.96);}
-  .streak-btn.checked-today{background:var(--income-light);color:var(--income);border-color:transparent;}
-  .streak-count{font-weight:800;font-variant-numeric:tabular-nums;}
-
-  .journal-add-row{display:flex;gap:8px;margin-bottom:14px;}
-  .journal-add-row textarea{margin:0;flex:1;min-height:40px;}
-  .journal-add-btn{flex-shrink:0;border:none;background:var(--accent);color:#fff;border-radius:10px;padding:0 16px;
-    font-family:'Inter',sans-serif;font-size:14px;font-weight:600;cursor:pointer;}
-  .journal-entry{padding:10px 0;border-top:1px solid var(--border);}
-  .journal-entry:first-child{border-top:none;}
-  .journal-entry-text{font-size:14px;color:var(--ink);line-height:1.5;white-space:pre-wrap;word-break:break-word;}
-  .journal-entry-date{font-size:11px;color:var(--ink-muted);margin-top:4px;}
+  /* ---- Нотатки ----
+     Поле зберігається саме, тож кнопки «зберегти» немає — замість неї рядок
+     праворуч від заголовка, який озивається після запису й гасне. Мовчазне
+     автозбереження лишало б людину гадати, чи текст узагалі десь є. */
+  .notes-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;}
+  .notes-state{font-size:11.5px;color:var(--income);font-weight:600;margin-bottom:10px;}
+  /* Порожнє поле — не рядок, а видима площина: вона й каже, що сюди пишуть
+     багато, а не два слова. Далі висоту веде JS (autoGrow). */
+  textarea.notes-field{margin-top:0;min-height:160px;line-height:1.55;}
 
   .section-label{font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-muted);
     font-family:'Inter',sans-serif;font-weight:600;margin-bottom:10px;}
-
-  .card-title{font-family:'Inter',sans-serif;font-size:15.5px;font-weight:600;margin-bottom:4px;position:relative;}
 
   .modal-overlay{position:fixed;inset:0;background:var(--overlay);display:none;align-items:flex-end;justify-content:center;z-index:50;}
   .modal-overlay.show{display:flex;}
@@ -663,9 +586,10 @@
   <div id="dashboardScreen">
   <div class="content">
     <div id="monthHeader"></div>
-    <div class="badges-row" id="badgesRow"></div>
-    <div class="status-filter-row" id="statusFilterRow"></div>
-    <div id="retroBlock"></div>
+    <!-- Категорії: те, за чим ціль справді шукають. На їхньому місці стояли
+         бейджі досягнень і фільтр станів — стан тепер написаний над кожною
+         групою списку. -->
+    <div class="cat-filter-row" id="categoryFilterRow"></div>
     <div id="goalsList"></div>
   </div>
   </div>
@@ -694,19 +618,15 @@
     </div>
     <div class="detail-badges-row" id="detailBadgesRow"></div>
     <div id="detailWhyBlock"></div>
-    <div id="detailLapseBlock"></div>
-    <div id="detailActionsBlock"></div>
-    <div id="detailRescueBlock"></div>
-    <div class="streak-row" id="detailStreakRow"></div>
-    <div id="detailGridBlock"></div>
-    <div id="detailBlockersBlock"></div>
-    <div id="detailPauseRow"></div>
-    <div class="section-label" id="journalSectionLabel">Щоденник</div>
-    <div class="journal-add-row">
-      <textarea id="journalInput" maxlength="2000"></textarea>
-      <button type="button" class="journal-add-btn" id="journalAddBtn">+</button>
+    <!-- Стан цілі: один вибір із трьох, а не три різні кнопки. -->
+    <div class="status-row" id="detailStatusRow"></div>
+    <!-- Нотатки. Поле зберігається саме, тож кнопки «зберегти» тут немає —
+         замість неї рядок стану під полем. -->
+    <div class="notes-head">
+      <div class="section-label" id="notesLabel">Нотатки</div>
+      <div class="notes-state" id="notesState" aria-live="polite"></div>
     </div>
-    <div id="journalList"></div>
+    <textarea id="goalNotes" class="grow-field notes-field" maxlength="20000"></textarea>
     </div><!-- /detailBody -->
   </div>
   </div><!-- /screens -->
@@ -793,7 +713,6 @@
 <script defer src="../budget/firebase-config.js"></script>
 <script defer src="../unsaved-guard.js"></script>
 <script defer src="../categories-default.js"></script>
-<script defer src="streak.js"></script>
 <script defer src="review.js"></script>
 <script defer src="../side-nav.js"></script>
 <script defer src="../settings.js"></script>

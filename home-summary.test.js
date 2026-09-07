@@ -1,5 +1,4 @@
 const H = require('./home-summary');
-const GoalStreak = require('./goals/streak');
 
 const TODAY = '2026-08-26';
 
