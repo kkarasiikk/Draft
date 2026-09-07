@@ -70,6 +70,7 @@ const T = {
     deleteBtn: 'Видалити', saveBtn: 'Зберегти',
     titleRequiredError: 'Введи назву завдання',
     confirmDeleteTitle: 'Видалити завдання?', confirmDeleteSub: 'Цю дію не можна скасувати.',
+    planConfirmDeleteTitle: 'Видалити запис?',
     cancelBtn: 'Скасувати', deleteConfirmBtn: 'Видалити',
     unsavedTitle: 'Зберегти зміни?',
     unsavedSub: 'Є незбережені зміни. Якщо вийти зараз, вони пропадуть.',
@@ -142,6 +143,7 @@ const T = {
     deleteBtn: 'Удалить', saveBtn: 'Сохранить',
     titleRequiredError: 'Введи название задачи',
     confirmDeleteTitle: 'Удалить задачу?', confirmDeleteSub: 'Это действие нельзя отменить.',
+    planConfirmDeleteTitle: 'Удалить запись?',
     cancelBtn: 'Отмена', deleteConfirmBtn: 'Удалить',
     unsavedTitle: 'Сохранить изменения?',
     unsavedSub: 'Есть несохранённые изменения. Если выйти сейчас, они пропадут.',
@@ -212,6 +214,7 @@ const T = {
     deleteBtn: 'Usuń', saveBtn: 'Zapisz',
     titleRequiredError: 'Wpisz nazwę zadania',
     confirmDeleteTitle: 'Usunąć zadanie?', confirmDeleteSub: 'Tej czynności nie można cofnąć.',
+    planConfirmDeleteTitle: 'Usunąć wpis?',
     cancelBtn: 'Anuluj', deleteConfirmBtn: 'Usuń',
     unsavedTitle: 'Zapisać zmiany?',
     unsavedSub: 'Są niezapisane zmiany. Jeśli teraz wyjdziesz, przepadną.',
@@ -282,6 +285,7 @@ const T = {
     deleteBtn: 'Delete', saveBtn: 'Save',
     titleRequiredError: 'Enter a task title',
     confirmDeleteTitle: 'Delete task?', confirmDeleteSub: 'This action cannot be undone.',
+    planConfirmDeleteTitle: 'Delete the entry?',
     cancelBtn: 'Cancel', deleteConfirmBtn: 'Delete',
     unsavedTitle: 'Save changes?',
     unsavedSub: 'There are unsaved changes. Leaving now discards them.',
@@ -401,6 +405,7 @@ function applyTranslations() {
   document.getElementById('dueDateLabel').textContent = t('dueDateLabel');
   document.getElementById('dueTimeLabel').textContent = t('dueTimeLabel');
   document.getElementById('deleteTaskBtn').textContent = t('deleteBtn');
+  document.getElementById('planDeleteBtn').textContent = t('deleteBtn');
   document.getElementById('taskSubmitBtn').textContent = t('saveBtn');
   document.getElementById('taskTitleInput').placeholder = t('titlePlaceholder');
   document.getElementById('confirmTitle').textContent = t('confirmDeleteTitle');
@@ -1581,6 +1586,8 @@ function openPlanForm(entry) {
   document.getElementById('planFormTitle').textContent = t(entry ? 'planFormEdit' : 'planFormTitle');
   document.getElementById('planText').value = entry ? (entry.title || '') : '';
   document.getElementById('planError').textContent = '';
+  // Стирати нема чого, доки запису ще немає.
+  document.getElementById('planDeleteBtn').style.display = entry ? 'block' : 'none';
   renderPlanCatPicker();
   document.getElementById('planFormOverlay').classList.add('show');
   focusWhenIdle('planText', 'planFormOverlay');
@@ -1666,6 +1673,15 @@ document.getElementById('planLabel').addEventListener('click', () => {
   renderWeekPlanScreen();
 });
 document.getElementById('planSaveBtn').addEventListener('click', savePlanEntry);
+// Форму при цьому закриваємо: діалог підтвердження стоїть шаром вище, і два
+// вікна одне над одним читались би як одне з двома заголовками. Скасування
+// вертає в список, а не у форму, — так само, як у завданнях.
+document.getElementById('planDeleteBtn').addEventListener('click', () => {
+  if (!editingPlanId) return;
+  const id = editingPlanId;
+  closePlanForm();
+  askDelete(id, 'planConfirmDeleteTitle');
+});
 document.getElementById('planFormClose').addEventListener('click', closePlanForm);
 document.getElementById('planFormOverlay').addEventListener('click', (e) => {
   if (e.target.id === 'planFormOverlay') closePlanForm();
@@ -2059,12 +2075,20 @@ async function saveTaskForm() {
   }
 }
 
+// Діалог підтвердження один на весь розділ, а заголовок у нього різний:
+// «Видалити завдання?» і «Видалити запис?» — це різні речі, і питання має
+// називати ту, яку зараз стирають.
+function askDelete(id, titleKey) {
+  pendingDeleteId = id;
+  document.getElementById('confirmTitle').textContent = t(titleKey);
+  document.getElementById('confirmOverlay').classList.add('show');
+}
+
 document.getElementById('deleteTaskBtn').addEventListener('click', () => {
   if (!editingTaskId) return;
-  pendingDeleteId = editingTaskId;
   // Питати «зберегти зміни?» перед видаленням безглуздо — зберігати нема куди.
   taskGuard.close();
-  document.getElementById('confirmOverlay').classList.add('show');
+  askDelete(editingTaskId, 'confirmDeleteTitle');
 });
 document.getElementById('confirmCancel').addEventListener('click', () => {
   document.getElementById('confirmOverlay').classList.remove('show');
