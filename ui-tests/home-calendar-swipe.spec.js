@@ -175,8 +175,16 @@ test.describe('Стрілки й назва місяця', () => {
     // на підмінному годиннику в home-fill.spec.js).
     await openHub(page);
     await expect(label(page)).toHaveText(new RegExp(monthOf(iso()), 'i'));
+
     // Один день гортання — сьогодні ще в кадрі, підпис не міняється.
-    await scrollDays(page, 1);
+    //
+    // Бік гортання рахується, а не задається сталою. Смуга починається
+    // календарним тижнем пн—нд, тож у понеділок сьогодні стоїть ПЕРШИМ, і
+    // крок уперед виносив би його з кадру; у неділю — останнім, і з кадру
+    // виносив би крок назад. Тест мовчки залежав від дня тижня й падав
+    // щопонеділка: гортав уперед завжди.
+    const before = await visible(page);
+    await scrollDays(page, before.indexOf(iso()) === 0 ? -1 : 1);
     expect((await visible(page)).includes(iso())).toBe(true);
     await expect(label(page)).toHaveText(new RegExp(monthOf(iso()), 'i'));
   });

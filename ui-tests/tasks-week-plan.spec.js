@@ -24,6 +24,12 @@ const mondayOf = (base) => {
 };
 const THIS_WEEK = mondayOf(iso());
 const PREV_WEEK = mondayOf(iso(-7));
+/** День цього тижня зі зсувом від понеділка. */
+const weekDay = (shift) => {
+  const d = new Date(THIS_WEEK + 'T00:00:00');
+  d.setDate(d.getDate() + shift);
+  return d.toISOString().slice(0, 10);
+};
 
 const task = (over) => ({ done: false, subtasks: [], tags: [], ...over });
 const SEED = {
@@ -165,11 +171,14 @@ test.describe('Тижневик: тиждень, назва, групи', () => 
   });
 
   test('крапка означає те саме, що скрізь: є справи / усе закрито', async ({ page }) => {
+    // Дні задані зсувом від понеділка, а не «понеділок і сьогодні»: у
+    // понеділок це був ОДИН день, обидва завдання лягали на нього, і крапки
+    // «усе закрито» не було зовсім. Тест падав щопонеділка.
     await openTasks(page, {
       profile: {},
       tasks: [
-        task({ id: 'a', title: 'Є що робити', dueDate: THIS_WEEK }),
-        task({ id: 'b', title: 'Усе закрито', dueDate: iso(0), done: true }),
+        task({ id: 'a', title: 'Є що робити', dueDate: weekDay(0) }),
+        task({ id: 'b', title: 'Усе закрито', dueDate: weekDay(2), done: true }),
       ],
     });
     await page.click('#bnWeek');
