@@ -1450,6 +1450,42 @@ function renderCalendarHead(anchorOverride) {
   monthEl.title = atToday ? '' : t('calBackToday');
 }
 
+// Скільки назв показує клітинка місяця.
+//
+// Одна — і це не економія, а те, що клітинка тут завширшки з півтора
+// сантиметра. Два однорядкові чипи давали б «Зроб…» і «Пров…»: два обрубки,
+// з яких не впізнати жодного завдання. Вільне місце в цій сітці вертикальне
+// (рядки тягнуться на висоту картки), тож одна назва у два рядки читається,
+// а решта чесно рахується в «+N».
+const CAL_CELL_TASKS = 1;
+
+/**
+ * Вміст клітинки місяця: назви завдань і, якщо їх більше, «+N».
+ *
+ * Назва, а не крапка, — бо крапка каже лише «щось є», лишаючи все місце
+ * порожнім. Той самий підхід, що в календарі розділу завдань: назва, а що
+ * не вміщається — три крапки.
+ *
+ * Порожній день лишається порожнім: рядок «нічого» був би шумом у кожній
+ * другій клітинці.
+ *
+ * Крапка при цьому малюється завжди — і в сітці теж. У сітці її не видно
+ * (CSS), але на низькому вікні ноутбука назви ховаються, і крапка лишається
+ * єдиним, що каже про день: головна мусить триматись в один екран, а сім
+ * рядків із назвами туди не влазять. Малювати її з JS за висотою вікна
+ * означало б перемальовувати календар на кожну зміну розміру.
+ */
+function calChipsHtml(day) {
+  const items = day.items || [];
+  if (!items.length) return '';
+  const shown = items.slice(0, CAL_CELL_TASKS);
+  const extra = items.length - shown.length;
+  const chips = shown.map((task) =>
+    `<span class="cal-chip${task.done ? ' done' : ''}">${escapeHtml(task.title || '')}</span>`).join('');
+  const more = extra > 0 ? `<span class="cal-more">+${extra}</span>` : '';
+  return `<span class="cal-chips">${chips}${more}</span>`;
+}
+
 function renderCalendar() {
   const monthEl = document.getElementById('calMonth');
   const weekEl = document.getElementById('calWeek');
@@ -1492,6 +1528,7 @@ function renderCalendar() {
         ${wide ? '' : `<span class="cal-dow">${escapeHtml(dow.format(at))}</span>`}
         <span class="cal-num">${d.dayNum}</span>
         <span class="cal-dot${dot}"></span>
+        ${wide ? calChipsHtml(d) : ''}
       </a>`;
   }).join('');
 
