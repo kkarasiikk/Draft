@@ -749,7 +749,13 @@
       <label class="field-label" id="planCatLabel">Категорія</label>
       <div class="cat-picker" id="planCatPicker"></div>
       <div class="form-error" id="planError" role="alert" aria-live="assertive"></div>
-      <button class="submit-btn" id="planSaveBtn">Зберегти</button>
+      <!-- «Видалити» стоїть поруч зі «Зберегти», як і у формі завдання: та
+           сама пара дій, той самий рядок. Показується лише при правці — у
+           новому записі стирати нема чого. -->
+      <div class="modal-actions">
+        <button type="button" class="btn-delete" id="planDeleteBtn" style="display:none;">Видалити</button>
+        <button class="submit-btn" id="planSaveBtn">Зберегти</button>
+      </div>
     </div>
   </div>
 

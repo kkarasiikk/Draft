@@ -327,6 +327,69 @@ test.describe('Тижневик: запис через «+»', () => {
     await expect(page.locator('#planText')).toHaveValue('Розібрати шафу');
     await expect(page.locator('[data-plan-cat="home"]')).toHaveClass(/selected/);
   });
+
+  // Запис можна було завести й виправити, але не стерти: помилковий або
+  // передумав — і він висів у тижні назавжди.
+  test('у формі запису є «Видалити», а в новому записі його немає', async ({ page }) => {
+    await openTasks(page);
+    await page.click('#bnWeek');
+    await page.click('[data-open="w4"]');
+    await expect(page.locator('#planDeleteBtn')).toBeVisible();
+
+    await page.click('#planFormClose');
+    await page.click('#openQuickAdd');
+    // Стирати нема чого, доки запису ще немає.
+    await expect(page.locator('#planDeleteBtn')).toBeHidden();
+  });
+
+  test('видалення питає — і питає саме про ЗАПИС, а не про завдання', async ({ page }) => {
+    await openTasks(page);
+    await page.click('#bnWeek');
+    await page.click('[data-open="w4"]');
+    await page.click('#planDeleteBtn');
+    await expect(page.locator('#confirmOverlay')).toHaveClass(/show/);
+    await expect(page.locator('#confirmTitle')).toHaveText('Видалити запис?');
+    // Два вікна одне над одним читались би як одне з двома заголовками.
+    await expect(page.locator('#planFormOverlay')).not.toHaveClass(/show/);
+  });
+
+  test('«Скасувати» справді нічого не стирає', async ({ page }) => {
+    await openTasks(page);
+    await page.click('#bnWeek');
+    await page.click('[data-open="w4"]');
+    await page.click('#planDeleteBtn');
+    await page.click('#confirmCancel');
+    await expect(page.locator('#confirmOverlay')).not.toHaveClass(/show/);
+    expect(await page.evaluate(() => window.__fbCalls.delete.length)).toBe(0);
+    await expect(page.locator('[data-open="w4"]')).toBeVisible();
+  });
+
+  test('підтвердження стирає саме той запис', async ({ page }) => {
+    await openTasks(page);
+    await page.click('#bnWeek');
+    await page.click('[data-open="w4"]');
+    await page.click('#planDeleteBtn');
+    await page.click('#confirmDelete');
+    await expect.poll(() => page.evaluate(() => window.__fbCalls.delete.length)).toBe(1);
+    const del = await page.evaluate(() => window.__fbCalls.delete.at(-1));
+    expect(del).toMatchObject({ col: 'tasks', id: 'w4' });
+    await expect(page.locator('#confirmOverlay')).not.toHaveClass(/show/);
+  });
+
+  // Заголовок діалогу спільний на весь розділ, тож він мусить вертатись до
+  // «завдання», коли стирають завдання, а не лишатись «записом».
+  test('у завданнях діалог і далі питає про завдання', async ({ page }) => {
+    await openTasks(page);
+    await page.click('#bnWeek');
+    await page.click('[data-open="w4"]');
+    await page.click('#planDeleteBtn');
+    await page.click('#confirmCancel');
+
+    await page.click('#bnDay');
+    await page.click('.task-row');
+    await page.click('#deleteTaskBtn');
+    await expect(page.locator('#confirmTitle')).toHaveText('Видалити завдання?');
+  });
 });
 
 test.describe('Тижневик: свої категорії', () => {
