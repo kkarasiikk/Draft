@@ -118,10 +118,11 @@ test.describe('Дії без гамбургера', () => {
     await expect(page.locator('[data-lang-choice]').first()).toBeVisible();
   });
 
-  test('«Експорт даних» із колонки відкриває той самий діалог', async ({ page }) => {
+  test('«Експорт даних» із колонки відкриває вікно на вкладці «Дані»', async ({ page }) => {
     await openHub(page);
     await page.click('#sideExportBtn');
-    await expect(page.locator('#exportOverlay')).toHaveClass(/show/);
+    await expect(page.locator('#settingsOverlay')).toHaveClass(/show/);
+    await expect(page.locator('.settings-tab.current')).toHaveText('Дані');
   });
 
   test('розділи відкриваються з колонки', async ({ page }) => {

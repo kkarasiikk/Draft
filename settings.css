@@ -109,6 +109,15 @@
 .settings-action.danger .settings-action-title{color:var(--expense);}
 .settings-action.danger .settings-action-icon{color:var(--expense);}
 
+/* Головна дія панелі — зараз це «Зберегти» в експорті. Широка кнопка, бо
+   вона тут одна: рядок-дія (.settings-action) означає «веде кудись», а ця
+   робить справу на місці. */
+.settings-submit{width:100%;margin-top:14px;border:none;border-radius:12px;padding:13px 0;
+  background:var(--accent);color:#fff;font-family:'Inter',sans-serif;font-size:14.5px;
+  font-weight:600;cursor:pointer;transition:opacity .2s, transform .15s;}
+.settings-submit:disabled{opacity:.55;cursor:default;}
+.settings-submit:active:not(:disabled){transform:scale(.98);}
+
 /* Проста пара «підпис — значення»: пошта акаунта. */
 .settings-value{font-size:14px;color:var(--ink);word-break:break-all;}
 
