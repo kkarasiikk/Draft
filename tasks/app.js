@@ -1592,13 +1592,17 @@ function closePlanForm() {
 }
 
 // Останнім чипом стоїть «Змінити» — той самий прийом, що в категоріях цілей:
-// правити список найзручніше там, де його видно.
+// правити список найзручніше там, де його видно. І клас у нього окремий:
+// поки він був такою самою `.cat-choice`, дія читалась як ще одна категорія,
+// яку можна обрати.
+const PLAN_PENCIL_ICON = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>';
+
 function renderPlanCatPicker() {
   const picker = document.getElementById('planCatPicker');
-  picker.innerHTML = planCategories.map((cat) => `
-    <button type="button" class="cat-choice${cat.id === planCat ? ' selected' : ''}"
-      data-plan-cat="${escapeHtml(cat.id)}">${escapeHtml(cat.label)}</button>`).join('')
-    + `<button type="button" class="cat-choice" data-plan-cats-edit>${escapeHtml(t('planCatsEdit'))}</button>`;
+  picker.innerHTML = planCategories.map((cat) =>
+    `<button type="button" class="cat-choice${cat.id === planCat ? ' selected' : ''}" data-plan-cat="${escapeHtml(cat.id)}">${escapeHtml(cat.label)}</button>`
+  ).join('')
+    + `<button type="button" class="cat-edit-chip" data-plan-cats-edit>${PLAN_PENCIL_ICON}${escapeHtml(t('planCatsEdit'))}</button>`;
   picker.querySelectorAll('[data-plan-cat]').forEach((btn) => {
     btn.addEventListener('click', () => { planCat = btn.dataset.planCat; renderPlanCatPicker(); });
   });
