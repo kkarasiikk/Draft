@@ -409,7 +409,8 @@ AppSettings.init({
   onLang: setLang,
   onLogout: () => auth.signOut(),
 });
-document.getElementById('sideSettingsBtn').addEventListener('click', () => AppSettings.open());
+// Бічне меню відкриває вікно одразу на вкладці ЦЬОГО розділу.
+document.getElementById('sideSettingsBtn').addEventListener('click', () => AppSettings.open('goals'));
 document.getElementById('pageSettingsBtn').addEventListener('click', () => AppSettings.open('goals'));
 
 function applyTranslations() {

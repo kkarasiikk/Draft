@@ -8,9 +8,11 @@
 const { test, expect } = require('@playwright/test');
 const { openModule } = require('./helpers');
 
-// Сторінка, як її відкрити з неї самої, і на якій вкладці вона має стати.
+// Сторінка, кнопка розділу в її шапці, і на якій вкладці вікно має стати.
+// Кнопка розділу — телефонна: на широкому екрані її немає, там вхід один,
+// із бічної колонки (див. окремий блок нижче).
 const PAGES = [
-  ['головна', 'index.html', '#homeScreen', '#sideSettingsBtn', null],
+  ['головна', 'index.html', '#homeScreen', '#menuBtn', null],
   ['бюджет', 'budget/index.html', '#appScreen', '#categoriesBtn', 'Гроші'],
   ['завдання', 'tasks/index.html', '#appScreen', '#pageMenuBtn', 'Завдання'],
   ['цілі', 'goals/index.html', '#appScreen', '#pageSettingsBtn', 'Цілі'],
@@ -18,6 +20,9 @@ const PAGES = [
 ];
 
 test.describe('Вікно відкривається з кожної сторінки', () => {
+  // Телефон: бічної колонки немає, і кнопка в шапці — єдиний вхід.
+  test.use({ viewport: { width: 390, height: 844 } });
+
   for (const [name, path, ready, opener, tab] of PAGES) {
     test(`${name}: кнопка розділу відкриває вікно${tab ? ' на «' + tab + '»' : ''}`, async ({ page }) => {
       await openModule(page, path, { ready });
@@ -29,6 +34,65 @@ test.describe('Вікно відкривається з кожної сторі�
       if (tab) await expect(page.locator('.settings-tab.current')).toHaveText(tab);
     });
   }
+});
+
+// На широкому екрані вхід у налаштування один — бічна колонка. Кнопка в
+// шапці робила рівно те саме, тільки мовчки: два входи в одне вікно, з яких
+// другий ще й треба знайти очима.
+test.describe('Комп’ютер: вхід один, і він знає свій розділ', () => {
+  test.use({ viewport: { width: 1280, height: 800 } });
+
+  const SECTIONS = [
+    ['бюджет', 'budget/index.html', '#appScreen', 'Гроші'],
+    ['завдання', 'tasks/index.html', '#appScreen', 'Завдання'],
+    ['цілі', 'goals/index.html', '#appScreen', 'Цілі'],
+    ['тренування', 'workout/index.html', '#appScreen', 'Тренування'],
+  ];
+
+  for (const [name, path, ready, tab] of SECTIONS) {
+    test(`${name}: «Налаштування» зліва відкриває вікно одразу на «${tab}»`, async ({ page }) => {
+      await openModule(page, path, { ready });
+      await page.click('#sideSettingsBtn');
+      await expect(page.locator('#settingsOverlay')).toHaveClass(/show/);
+      await expect(page.locator('.settings-tab.current')).toHaveText(tab);
+    });
+  }
+
+  for (const [name, path, ready] of SECTIONS) {
+    test(`${name}: кнопки в шапці більше немає`, async ({ page }) => {
+      await openModule(page, path, { ready });
+      await expect(page.locator('#pageSettingsBtn, #pageMenuBtn, #categoriesBtn')).toBeHidden();
+    });
+  }
+
+  // Хаб — не розділ, і власної вкладки в нього немає: там «Загальні» — саме
+  // те, що треба показати.
+  test('головна відкриває «Загальні», а шапки з гамбургером на ПК немає', async ({ page }) => {
+    await openModule(page, 'index.html', { ready: '#homeScreen' });
+    await expect(page.locator('#menuBtn')).toBeHidden();
+    await page.click('#sideSettingsBtn');
+    await expect(page.locator('.settings-tab.current')).toHaveText('Загальні');
+  });
+
+  // У бюджету три вкладки мають ВЛАСНІ налаштування (діаграми, сортування
+  // нотаток, валюта підсумку заощаджень) — цього бічна колонка не вміє, тож
+  // там кнопка лишається. Правило просте: вона є рівно тоді, коли їй є що
+  // запропонувати від себе.
+  test('у бюджеті кнопка вертається на вкладки з власними налаштуваннями', async ({ page }) => {
+    await openModule(page, 'budget/index.html', { ready: '#appScreen' });
+    await expect(page.locator('#categoriesBtn')).toBeHidden();
+
+    await page.click('#bnStats');
+    await expect(page.locator('#categoriesBtn')).toBeVisible();
+    await page.click('#categoriesBtn');
+    // І відкриває саме їх, а не спільне вікно.
+    await expect(page.locator('#statsSettingsOverlay')).toHaveClass(/show/);
+    await expect(page.locator('#settingsOverlay')).not.toHaveClass(/show/);
+
+    await page.click('#closeStatsSettings');
+    await page.click('#bnEntries');
+    await expect(page.locator('#categoriesBtn')).toBeHidden();
+  });
 });
 
 test.describe('Вкладка показує лише свої параметри', () => {

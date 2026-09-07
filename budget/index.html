@@ -191,6 +191,7 @@
      розкидало б вільний простір між ними, і навігація місяця налізала б зверху. */
   .header-actions{margin-left:auto;display:flex;align-items:center;gap:2px;flex-shrink:0;}
   .header-icon-btn{background:none;border:none;cursor:pointer;color:var(--ink-muted);padding:6px;border-radius:8px;display:flex;align-items:center;flex-shrink:0;}
+  .header-icon-btn.hidden-here{display:none;}
   .header-icon-btn:hover{background:var(--bg);color:var(--ink);}
   .header-icon-btn.active{background:var(--accent-light);color:var(--accent);}
   .header-section-title{display:none;}
@@ -565,6 +566,19 @@
        тримати «Life» ще й у шапці означало б показати те саме двічі. */
     .wrap{max-width:none;margin:0;padding:26px 40px 0 278px;}
     .app-topbar-brand{display:none;}
+    /* Кнопка «⋮» угорі праворуч теж переїхала — у бічну колонку. На вкладці
+       «Кошти» вона робила рівно те саме, що рядок «Налаштування» зліва:
+       два входи в одне вікно, з яких другий ще й треба знайти очима.
+       Той самий випадок, що з логотипом рядком вище.
+
+       Але на трьох інших вкладках вона відкриває НЕ спільне вікно, а власні
+       налаштування самої вкладки — які діаграми показувати, як сортувати
+       нотатки, у якій валюті рахувати підсумок заощаджень. Цього бічна
+       колонка не вміє, тож там кнопка лишається: правило просте — вона є
+       рівно тоді, коли їй є що запропонувати від себе. Клас ставить
+       selectTab у app.js.
+       На телефоні кнопка лишається завжди: там бічної колонки немає. */
+    #categoriesBtn:not(.has-own-settings){display:none;}
     .app-topbar{padding:2px 0 0;}
     /* На широкому екрані баланс — картка в ряд з рештою карток, тож скло
        й тінь тут доречні (на телефоні той самий блок іде на всю ширину). */

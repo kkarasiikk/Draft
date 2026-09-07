@@ -440,7 +440,8 @@ AppSettings.init({
   onLogout: () => auth.signOut(),
   actions: { workoutTemplates: () => openTemplatesManager() },
 });
-document.getElementById('sideSettingsBtn').addEventListener('click', () => AppSettings.open());
+// Бічне меню відкриває вікно одразу на вкладці ЦЬОГО розділу.
+document.getElementById('sideSettingsBtn').addEventListener('click', () => AppSettings.open('workout'));
 document.getElementById('pageSettingsBtn').addEventListener('click', () => AppSettings.open('workout'));
 
 function applyTranslations() {
