@@ -206,15 +206,41 @@
    * Невиконані йдуть першими: якщо в колонці вміщається один рядок, це має
    * бути те, що ще треба зробити, а не закреслене.
    */
-  /** Скільки завдань на кожен день: { 'YYYY-MM-DD': {open, done} }. */
+  /**
+   * Що на кожен день: { 'YYYY-MM-DD': {open, done, items} }.
+   *
+   * `items` — самі завдання, а не лише лічильники: сітка місяця показує в
+   * клітинці назви, і брати їх звідкись іще означало б пройти список удруге.
+   * Смуга днів на телефоні читає з того самого місця тільки лічильники — там
+   * клітинка завширшки з палець, і назві в ній немає де стати.
+   */
   function tasksByDay(tasks) {
     var byDay = {};
     (tasks || []).forEach(function (task) {
       if (!task || typeof task.dueDate !== 'string') return;
-      var slot = byDay[task.dueDate] || (byDay[task.dueDate] = { open: 0, done: 0 });
+      var slot = byDay[task.dueDate] || (byDay[task.dueDate] = { open: 0, done: 0, items: [] });
       if (task.done) slot.done += 1; else slot.open += 1;
+      slot.items.push(task);
     });
     return byDay;
+  }
+
+  /**
+   * Порядок завдань усередині дня — той самий, що в списку розділу:
+   * невиконане першим, далі за часом, потім за назвою.
+   *
+   * Порядок тут важить більше, ніж у списку: у клітинку вміщається два
+   * рядки, тож він вирішує не «що вище», а «що взагалі видно».
+   */
+  function sortDayTasks(items) {
+    return items.slice().sort(function (a, b) {
+      if (!a.done !== !b.done) return a.done ? 1 : -1;
+      // Без часу — у кінець дня: «колись сьогодні» після того, що на 9:00.
+      var ta = a.dueTime || '99:99';
+      var tb = b.dueTime || '99:99';
+      if (ta !== tb) return ta < tb ? -1 : 1;
+      return String(a.title || '').localeCompare(String(b.title || ''));
+    });
   }
 
   /** Понеділок того тижня, у якому лежить дата. */
@@ -229,9 +255,9 @@
 
   /** Один день сітки. Спільний для тижня й місяця, щоб крапка означала те
    *  саме в обох. */
-  function calendarDay(date, byDay, todayIso, monthNum) {
+  function calendarDay(date, byDay, todayIso, monthNum, withTitles) {
     var iso = isoOf(date);
-    var slot = byDay[iso] || { open: 0, done: 0 };
+    var slot = byDay[iso] || { open: 0, done: 0, items: [] };
     return {
       date: iso,
       dayNum: date.getDate(),
@@ -239,8 +265,11 @@
       past: iso < todayIso,
       open: slot.open,
       done: slot.done,
-      // Назви справ звідси пішли разом із чипами в смузі тижня: під числом
-      // тепер крапка, а їй досить знати, чи є щось і чи все закрито.
+      // Назви потрібні лише сітці місяця на широкому екрані — там у клітинці
+      // є місце під два рядки тексту. У смузі днів на телефоні під числом
+      // стоїть крапка, і їй досить знати, чи є щось і чи все закрито; масив
+      // назв там був би полем, якого ніхто не читає.
+      items: withTitles ? sortDayTasks(slot.items || []) : [],
       hasTasks: slot.open + slot.done > 0,
       // День, де все закрито, — не те саме, що день, де ще є що робити.
       allDone: slot.done > 0 && slot.open === 0,
@@ -333,7 +362,7 @@
     var days = [];
     // Доки не пройшли останній день місяця й не дійшли до кінця тижня.
     while (cursor <= last || days.length % 7 !== 0) {
-      days.push(calendarDay(cursor, byDay, todayIso, monthNum));
+      days.push(calendarDay(cursor, byDay, todayIso, monthNum, true));
       cursor = new Date(cursor);
       cursor.setDate(cursor.getDate() + 1);
     }

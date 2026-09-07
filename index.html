@@ -443,7 +443,31 @@
   .cal-grid{display:grid;grid-template-columns:repeat(7, 1fr);gap:4px;}
   .cal-dow-head{font-size:11px;font-weight:600;color:var(--ink-muted);text-transform:lowercase;
     text-align:center;padding-bottom:2px;}
-  .cal-grid .cal-day{justify-content:center;min-height:46px;}
+  .cal-grid .cal-day{justify-content:flex-start;min-height:46px;}
+
+  /* ---- Назви завдань у клітинці місяця ----
+     Клітинка місяця завширшки з півтора сантиметра, і крапка в ній казала
+     лише «щось є», лишаючи все місце порожнім. Тепер там стоять назви — той
+     самий підхід, що в календарі розділу завдань: коротка назва, а що не
+     вміщається — три крапки.
+
+     Назва переноситься на другий рядок і обрізається трьома крапками саме
+     там. В один рядок вона не має сенсу: у клітинку такої ширини вміщається
+     сім літер, тобто «Зроб…» — рівно нічого. Два рядки дають слово-два, і
+     завдання вже впізнається. */
+  .cal-chips{display:flex;flex-direction:column;gap:2px;min-width:0;margin-top:3px;}
+  .cal-chip{font-size:9.5px;font-weight:600;line-height:1.3;padding:2px 3px;border-radius:5px;
+    display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;
+    /* break-word, а не anywhere: перше ріже слово, лише коли воно й саме не
+       вміщається в рядок, друге — щойно так виходить вужче. З `anywhere`
+       «Зробити сайт» ставало «Зробит / и сай…», тобто нечитабельним рівно
+       там, де ми й намагаємось дати прочитати. */
+    overflow-wrap:break-word;
+    background:var(--accent-light);color:var(--accent);text-align:left;}
+  /* Виконане не зникає, але й не тягне на себе увагу: воно тут як факт дня,
+     а не як те, що ще треба зробити. */
+  .cal-chip.done{opacity:.55;text-decoration:line-through;}
+  .cal-more{font-size:9.5px;font-weight:600;color:var(--ink-muted);padding:0 4px;text-align:left;}
   /* Хвости сусідніх місяців лишаються в сітці, інакше перший тиждень
      починався б із дірки, і число стояло б не під своїм днем тижня. Але
      читаються вони тихіше: це не цей місяць. */
@@ -464,9 +488,12 @@
   .cal-day.today{background:var(--accent);}
   .cal-day.today .cal-dow, .cal-day.today .cal-num{color:#fff;}
 
-  /* Крапка під числом. Місце під неї є завжди — інакше дні зі справами були
-     б вищими за порожні, і числа стрибали б по вертикалі. Ті самі три стани,
-     що й у смузі тижня в розділі завдань: нічого / є справи / все закрито. */
+  /* Крапка під числом у СМУЗІ днів. Місце під неї є завжди — інакше дні зі
+     справами були б вищими за порожні, і числа стрибали б по вертикалі. Ті
+     самі три стани, що й у смузі тижня в розділі завдань: нічого / є справи /
+     все закрито.
+
+     У сітці місяця крапки немає: там під числом стоять назви (.cal-chips). */
   .cal-dot{width:5px;height:5px;margin:3px auto 0;border-radius:50%;background:transparent;}
   .cal-dot.has{background:var(--accent);}
   .cal-dot.all-done{background:transparent;border:1px solid var(--income);}
@@ -611,13 +638,51 @@
     .cal-month{font-size:15px;font-weight:700;color:var(--ink);}
     .cal-month:not(.current){color:var(--accent);}
     .cal-arrow{width:30px;height:30px;}
+    /* Поля клітинки вузькі саме заради назв: кожні два пікселі з боків —
+       це літера, якої інакше не було б у підписі. */
     .cal-day{padding:8px 5px 7px;}
+    .cal-grid .cal-day{padding-left:3px;padding-right:3px;}
     .cal-num{font-size:17px;}
     .cal-dot{width:6px;height:6px;margin-top:4px;}
     /* Клітинка місяця дихає вільніше за клітинку тижня: рядків шість, і
        тісні квадрати читались би як таблиця, а не як календар. */
     .cal-grid{gap:6px;}
     .cal-grid .cal-day{min-height:58px;}
+    /* Число в сітці місяця тримається лівого краю — під ним стоять назви, і
+       центроване число висіло б над ними ні до чого не прив'язане. */
+    .cal-grid .cal-num{text-align:left;padding-left:3px;}
+
+    /* Сьогодні в сітці — кружечок під числом, а не залитий синім прямокутник.
+       Заливка була доречна, доки в клітинці стояло саме число: тепер вона
+       з'їдала б назви разом із їхнім тлом. Той самий прийом, що в календарях,
+       на які це схоже: позначено ЧИСЛО, а день лишається днем.
+       У смузі днів на телефоні заливка лишається — там нічого поглинати. */
+    .cal-grid .cal-day.today{background:transparent;}
+    .cal-grid .cal-day.today:hover{background:var(--surface-flat);}
+    .cal-grid .cal-day.today .cal-num{color:#fff;background:var(--accent);
+      width:24px;height:24px;line-height:24px;border-radius:50%;text-align:center;
+      padding-left:0;margin-left:1px;}
+    /* У сітці замість крапки стоїть назва. Крапка лишається в розмітці — на
+       низькому вікні вона повертається (нижче). */
+    .cal-grid .cal-dot{display:none;}
+
+    /* ---- Низьке вікно ноутбука ----
+       Головна мусить триматись в один екран — заради цього її й розкладали.
+       Шість рядків із назвами додають ~15px кожен, і на вікні 1366x640
+       сторінка вилазила за край на 88 пікселів, тобто рівно на смугу
+       прокрутки. Там назви поступаються місцем крапці: вона відповідає на
+       те саме питання «чи є щось на цей день», лише коротше.
+
+       Поріг за ВИСОТОЮ вікна, а не за шириною: місця бракує саме вертикально,
+       і на широкому, але низькому екрані назви так само нікуди подіти. */
+    @media (max-height:759px){
+      .cal-grid .cal-chips{display:none;}
+      .cal-grid .cal-dot{display:block;}
+      /* Без назв під числом центрувати його знову доречно — воно єдине, що
+         в клітинці є. */
+      .cal-grid .cal-num{text-align:center;padding-left:0;}
+      .cal-grid .cal-day.today .cal-num{margin:0 auto;}
+    }
 
     .sections{grid-area:tiles;gap:18px;}
     .tile:hover{border-color:var(--card-border-hover);box-shadow:var(--card-hover-shadow);}
@@ -643,7 +708,13 @@
      колонки, з яких одну не прочитати. Пропорція теж не з макета (там праворуч
      стояла щільна сітка активності) — календарю потрібна ширина. */
   @media (min-width:1240px){
-    .home-main{grid-template-columns:1.3fr 1fr;
+    /* Колонки зрівнялись. Було 1.3fr на «Сьогодні» — доки в клітинці
+       календаря стояло саме число, ширина йому була ні до чого. Відколи там
+       назва завдання, кожен зайвий піксель — це літера: на 1280 клітинка при
+       1.3fr виходила 52px, тобто «Зроб…», і сенсу в такому підписі немає.
+       Список «Сьогодні» від цього не постраждав: назви в ньому й так в один
+       рядок, а час стоїть праворуч. */
+    .home-main{grid-template-columns:1fr 1fr;
       grid-template-areas:
         "head  head"
         "panel cal"
