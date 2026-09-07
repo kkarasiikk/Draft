@@ -9,7 +9,7 @@ LifeSW({
     '../boot-guard.js', '../side-nav.js', '../side-nav.css', '../settings.js', '../settings.css',
     '../scroll-lock.js', '../unsaved-guard.js',
     '../sw-register.js',
-    '../ai-chat.js', '../ai-chat.css', '../categories-default.js',
+    '../categories-default.js',
     './manifest.json',
     '../budget/firebase-config.js',
     '../icons/icon-192.png', '../icons/icon-512.png',

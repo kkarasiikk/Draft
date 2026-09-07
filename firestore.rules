@@ -20,7 +20,7 @@ rules_version = '2';
 //                                         estimateMin, subtasks,
 //                                         createdAt, updatedAt}
 //   users/{uid}/fcmTokens/{token}     -- {createdAt, ua, tz}
-//   users/{uid}/aiMessages/{id}       -- {role, text, at}
+//   users/{uid}/aiMessages/{id}       -- СПАДЩИНА {role, text, at}
 //   users/{uid}/workouts/{id}         -- {date, name, notes, exercises: [
 //                                         {id, libId, customId, muscle, name, sets: [
 //                                         {weight, reps}]}], createdAt, updatedAt}
@@ -246,11 +246,13 @@ service cloud.firestore {
         allow create, update: if isOwner(uid) && isValidTemplate(request.resource.data);
       }
 
-      // Історія чату з AI-помічником. Лежить у Firestore, а не в
-      // localStorage, щоб розмова не зникала після перезавантаження і була
-      // та сама на телефоні й на комп'ютері. Порядок задає `at` (мілісекунди
-      // клієнта): serverTimestamp дав би однаковий час кільком реплікам,
-      // записаним однією відповіддю, і вони переставлялися б місцями.
+      // СПАДЩИНА. Історія чату з AI-помічником. Самого помічника в застосунку
+      // більше немає — аналіз даних робиться експортом у файл і будь-яким
+      // зовнішнім AI, — тож нових записів тут не буває.
+      //
+      // Правило лишається, щоб уже написане можна було прочитати й видалити.
+      // Прибрати цей блок можна тільки разом із деплоєм правил, а сенсу в
+      // ньому мало: писати сюди однаково нікому.
       match /aiMessages/{messageId} {
         function isValidAiMessage(d) {
           return d.role in ['user', 'assistant', 'action'] &&

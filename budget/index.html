@@ -45,7 +45,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../side-nav.css">
 <link rel="stylesheet" href="../settings.css">
-<link rel="stylesheet" href="../ai-chat.css">
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
 <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -378,7 +377,7 @@
      Меню від цього стає тим, чим і має бути: рядком сторінок без чужої
      кнопки посередині.
      Відступ знизу — висота меню (62px) плюс його власний відступ і просвіт;
-     (помічник переїхав у шапку — див. .ai-topbar-btn в ai-chat.css). */
+     */
   .bn-fab{position:fixed;right:var(--fab-right, 14px);
     bottom:calc(var(--fab-bottom, 86px) + env(safe-area-inset-bottom));z-index:26;
     width:52px;height:52px;border-radius:50%;
@@ -655,7 +654,6 @@
       <circle cx="163" cy="43.5" r="22.5" fill="currentColor" stroke="none"/>
     </svg></a>
     <div class="topbar-actions">
-      <button class="ai-topbar-btn" id="aiChatBtn" aria-label="AI-помічник">AI</button>
       <button class="header-icon-btn" id="categoriesBtn" aria-label="Налаштування">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
       </button>
@@ -1037,7 +1035,6 @@
 <script defer src="../settings.js"></script>
 <script defer src="../sw-register.js"></script>
 <script defer src="app.js"></script>
-<script defer src="../ai-chat.js"></script>
 <script defer src="../scroll-lock.js"></script>
 </body>
 </html>
