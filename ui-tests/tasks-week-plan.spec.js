@@ -352,6 +352,45 @@ test.describe('Тижневик: свої категорії', () => {
     await expect(catRows(page)).toHaveCount(3);
   });
 
+  // Розмітка носила класи `.cat-picker` / `.cat-choice`, узяті з форми
+  // бюджету, — а самих правил на цій сторінці не було, тож чипи малювались
+  // типовими кнопками браузера: сірі прямокутники в рамці, дрібніші за все
+  // навколо. Перевіряємо не «є клас», а те, що стилі справді доїхали: чип
+  // круглий, без сірої заливки браузера, і обраний видно за кольором.
+  test('чипи категорій виглядають як у цілях, а не як кнопки браузера', async ({ page }) => {
+    await openTasks(page);
+    await page.click('#bnWeek');
+    await page.click('#openQuickAdd');
+    const chip = page.locator('#planCatPicker .cat-choice').first();
+    const css = await chip.evaluate((el) => {
+      const cs = getComputedStyle(el);
+      return { radius: parseFloat(cs.borderTopLeftRadius), bg: cs.backgroundColor, size: parseFloat(cs.fontSize) };
+    });
+    expect(css.radius).toBeGreaterThanOrEqual(16);
+    expect(css.size).toBeGreaterThanOrEqual(12);
+    // Перший чип обраний за замовчуванням — і це видно кольором застосунку,
+    // а не самим лише класом.
+    await expect(chip).toHaveClass(/selected/);
+    expect(css.bg).not.toBe('rgba(0, 0, 0, 0)');
+    // Невибраний чип лишається прозорим у рамці.
+    const idle = await page.locator('#planCatPicker .cat-choice').nth(1)
+      .evaluate((el) => getComputedStyle(el).backgroundColor);
+    expect(idle).toBe('rgba(0, 0, 0, 0)');
+  });
+
+  // «Змінити» — дія, а не ще одна категорія: поки клас у нього був той самий,
+  // чип читався як категорія, яку можна обрати.
+  test('«Змінити» відрізняється від категорій пунктиром', async ({ page }) => {
+    await openTasks(page);
+    await page.click('#bnWeek');
+    await page.click('#openQuickAdd');
+    const edit = page.locator('[data-plan-cats-edit]');
+    await expect(edit).not.toHaveClass(/cat-choice/);
+    expect(await edit.evaluate((el) => getComputedStyle(el).borderTopStyle)).toBe('dashed');
+    // Обрати його не можна — вибір лишається на категорії.
+    await expect(page.locator('#planCatPicker .cat-choice.selected')).toHaveCount(1);
+  });
+
   test('нова категорія лягає в профіль і одразу зʼявляється чипом', async ({ page }) => {
     await openTasks(page);
     await openCats(page);

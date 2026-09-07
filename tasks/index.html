@@ -438,6 +438,32 @@
   .chip-picker.multiline{flex-wrap:wrap;}
   .chip-picker.multiline .chip-choice{flex:0 1 auto;white-space:normal;}
 
+  /* ---- Категорія запису тижня ----
+     Розмітка тут стояла з класами `.cat-picker` / `.cat-choice`, узятими з
+     форми бюджету, — але самих правил на цій сторінці ніколи не було, тож
+     чипи малювались типовими кнопками браузера: сірі прямокутники в рамці,
+     дрібніші за все навколо. Тепер це той самий чип, що в цілях: та сама
+     геометрія, той самий вибраний стан.
+
+     Кольору в категорій тижня немає (на відміну від цілей і бюджету, де він
+     несе значення в списку), тож вибране позначається кольором застосунку —
+     як у решти пікерів без власної палітри. */
+  .cat-picker{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;margin-bottom:16px;}
+  .cat-choice{padding:6px 12px;border-radius:20px;font-size:12.5px;cursor:pointer;
+    font-family:'Inter',sans-serif;font-weight:600;white-space:nowrap;
+    border:1px solid var(--border);background:transparent;color:var(--ink-muted);
+    transition:background .15s,color .15s,border-color .15s;}
+  .cat-choice:hover{color:var(--ink-soft);}
+  .cat-choice.selected{background:var(--accent);color:#fff;border-color:transparent;}
+  /* «Змінити» стоїть останнім чипом у тому ж рядку: правити список найзручніше
+     там, де його видно. Пунктир відрізняє дію від вибору — інакше чип читався
+     б як ще одна категорія. */
+  .cat-edit-chip{padding:6px 11px;border-radius:20px;font-size:12.5px;cursor:pointer;
+    font-family:'Inter',sans-serif;font-weight:600;white-space:nowrap;
+    border:1px dashed var(--border);background:transparent;color:var(--ink-muted);
+    display:inline-flex;align-items:center;gap:5px;transition:color .15s,border-color .15s;}
+  .cat-edit-chip:hover{color:var(--ink-soft);border-color:var(--card-border-hover);}
+
   .day-group{margin-bottom:18px;}
   .day-label{display:flex;align-items:baseline;gap:6px;font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-muted);
     font-family:'Inter',sans-serif;font-weight:600;margin-bottom:8px;padding-left:2px;}
