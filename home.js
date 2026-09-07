@@ -30,7 +30,7 @@ const STRINGS = {
     amountsShow: 'Показати суму', amountsHide: 'Сховати суму',
     settingsLabel: 'Налаштування',
     exportBusy: 'Готую файл…', exportError: 'Не вдалося зібрати файл. Спробуй ще раз.',
-    exportModalTitle: 'Експорт даних', exportWhat: 'Що зберегти', exportFormat: 'Формат',
+    exportWhat: 'Що зберегти', exportFormat: 'Формат',
     exportSave: 'Зберегти', exportNothing: 'Обери хоча б один розділ.',
     sec_budget: 'Бюджет', sec_goals: 'Цілі', sec_tasks: 'Завдання', sec_workout: 'Тренування',
     fmt_xlsx: 'Excel (.xlsx)', fmt_csv: 'CSV', fmt_json: 'JSON',
@@ -120,7 +120,7 @@ const STRINGS = {
     amountsShow: 'Показать сумму', amountsHide: 'Скрыть сумму',
     settingsLabel: 'Настройки',
     exportBusy: 'Готовлю файл…', exportError: 'Не удалось собрать файл. Попробуй ещё раз.',
-    exportModalTitle: 'Экспорт данных', exportWhat: 'Что сохранить', exportFormat: 'Формат',
+    exportWhat: 'Что сохранить', exportFormat: 'Формат',
     exportSave: 'Сохранить', exportNothing: 'Выбери хотя бы один раздел.',
     sec_budget: 'Бюджет', sec_goals: 'Цели', sec_tasks: 'Задачи', sec_workout: 'Тренировки',
     fmt_xlsx: 'Excel (.xlsx)', fmt_csv: 'CSV', fmt_json: 'JSON',
@@ -210,7 +210,7 @@ const STRINGS = {
     amountsShow: 'Pokaż kwotę', amountsHide: 'Ukryj kwotę',
     settingsLabel: 'Ustawienia',
     exportBusy: 'Przygotowuję plik…', exportError: 'Nie udało się zebrać pliku. Spróbuj ponownie.',
-    exportModalTitle: 'Eksport danych', exportWhat: 'Co zapisać', exportFormat: 'Format',
+    exportWhat: 'Co zapisać', exportFormat: 'Format',
     exportSave: 'Zapisz', exportNothing: 'Wybierz przynajmniej jedną sekcję.',
     sec_budget: 'Budżet', sec_goals: 'Cele', sec_tasks: 'Zadania', sec_workout: 'Treningi',
     fmt_xlsx: 'Excel (.xlsx)', fmt_csv: 'CSV', fmt_json: 'JSON',
@@ -300,7 +300,7 @@ const STRINGS = {
     amountsShow: 'Show the amount', amountsHide: 'Hide the amount',
     settingsLabel: 'Settings',
     exportBusy: 'Preparing the file…', exportError: 'Could not build the file. Try again.',
-    exportModalTitle: 'Export data', exportWhat: 'What to save', exportFormat: 'Format',
+    exportWhat: 'What to save', exportFormat: 'Format',
     exportSave: 'Save', exportNothing: 'Pick at least one section.',
     sec_budget: 'Budget', sec_goals: 'Goals', sec_tasks: 'Tasks', sec_workout: 'Workouts',
     fmt_xlsx: 'Excel (.xlsx)', fmt_csv: 'CSV', fmt_json: 'JSON',
@@ -636,8 +636,21 @@ AppSettings.init({
   theme: () => themeChoice,
   onTheme: setTheme,
   onLang: setLang,
-  onExport: openExportDialog,
   onLogout: () => auth.signOut(),
+  // Тексти віддаються функцією, а не готовим обʼєктом: мову міняють у тому
+  // самому вікні, і знімок, зроблений при init(), лишився б старою мовою.
+  export: {
+    sections: LifeExport.SECTION_KEYS,
+    formats: LifeExport.FORMATS,
+    sectionLabel: (key) => t('sec_' + key),
+    formatLabel: (fmt) => t('fmt_' + fmt),
+    hint: (fmt, sections) => (fmt === 'csv' ? t('hint_csv', countCsvFiles(sections)) : t('hint_' + fmt)),
+    text: () => ({
+      what: t('exportWhat'), format: t('exportFormat'), save: t('exportSave'),
+      busy: t('exportBusy'), error: t('exportError'), nothing: t('exportNothing'),
+    }),
+    run: runExport,
+  },
 });
 function openSettings(tab) {
   AppSettings.open(tab);
@@ -1983,128 +1996,69 @@ async function collectDocs(userRef, name) {
 // Кнопка більше не тягне файл одразу: спершу людина каже, ЩО зберегти й у
 // ЯКОМУ вигляді. За замовчуванням обрано все й xlsx — тобто попередня
 // поведінка лишається за два дотики, а не зникає.
-let exportSections = LifeExport.SECTION_KEYS.slice();
-let exportFormat = 'xlsx';
+// ---- Експорт даних ----
+// Вибір розділів і формату малює вікно налаштувань (вкладка «Дані»); тут
+// лишається те, чого воно зробити не може, — зібрати файл. Для цього
+// потрібні export-data.js, бібліотека xlsx і читання всіх колекцій, а вони
+// підключені лише на цій сторінці: тягти їх у кожен розділ заради кнопки,
+// якою користуються раз на місяць, було б дорожче за перехід на головну.
+//
+// Діалог, який тут стояв, пішов: він відкривався з того самого рядка, що й
+// налаштування, і був другим вікном про те саме.
 
-function renderExportOptions() {
-  document.getElementById('exportSections').innerHTML = LifeExport.SECTION_KEYS.map((key) => `
-    <button type="button" class="export-chip${exportSections.includes(key) ? ' selected' : ''}" data-section="${key}">${escapeHtml(t('sec_' + key))}</button>`).join('');
-  document.getElementById('exportFormats').innerHTML = LifeExport.FORMATS.map((fmt) => `
-    <button type="button" class="export-chip${exportFormat === fmt ? ' selected' : ''}" data-format="${fmt}">${escapeHtml(t('fmt_' + fmt))}</button>`).join('');
-
-  // Скільки файлів вийде — це те, що людині варто знати ДО натискання, а
-  // не побачити потім у теці завантажень.
-  const hintEl = document.getElementById('exportFormatHint');
-  if (exportFormat === 'csv') {
-    hintEl.textContent = t('hint_csv', countCsvFiles());
-  } else {
-    hintEl.textContent = t('hint_' + exportFormat);
-  }
-
-  document.getElementById('exportSections').querySelectorAll('[data-section]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const key = btn.dataset.section;
-      exportSections = exportSections.includes(key)
-        ? exportSections.filter((k) => k !== key)
-        : exportSections.concat([key]);
-      document.getElementById('exportModalError').textContent = '';
-      renderExportOptions();
-    });
-  });
-  document.getElementById('exportFormats').querySelectorAll('[data-format]').forEach((btn) => {
-    btn.addEventListener('click', () => { exportFormat = btn.dataset.format; renderExportOptions(); });
-  });
+// Скільки файлів вийде — це те, що людині варто знати ДО натискання, а не
+// побачити потім у теці завантажень. Рахуємо на порожніх даних: кількість
+// аркушів залежить тільки від того, які розділи обрано, а не від того,
+// скільки в них записів.
+function countCsvFiles(sections) {
+  return LifeExport.buildSheets(sections, {}, EXPORT_LABELS[currentLang] || EXPORT_LABELS.uk).length;
 }
 
-// Рахуємо на порожніх даних: кількість аркушів залежить тільки від того,
-// які розділи обрано, а не від того, скільки в них записів.
-function countCsvFiles() {
-  return LifeExport.buildSheets(exportSections, {}, EXPORT_LABELS[currentLang] || EXPORT_LABELS.uk).length;
+async function runExport(sections, format) {
+  const user = auth.currentUser;
+  if (!user) throw new Error('no-auth');
+  const userRef = db.collection('users').doc(user.uid);
+  // Читаємо лише те, що обрали: вивантажувати всю базу заради однієї
+  // вкладки — це і час, і чужі читання Firestore.
+  const wants = (key) => sections.includes(key);
+  // Цілі потрібні й самі по собі, і як назви для завдань, привʼязаних до них.
+  const needGoals = wants('goals') || wants('tasks');
+  const [profile, transactions, savings, savingsGoals, notes, goals, tasks, workouts] = await Promise.all([
+    userRef.get(),
+    wants('budget') ? collectDocs(userRef, 'transactions') : [],
+    wants('budget') ? collectDocs(userRef, 'savings') : [],
+    wants('budget') ? collectDocs(userRef, 'savingsGoals') : [],
+    wants('budget') ? collectDocs(userRef, 'pages') : [],
+    needGoals ? collectDocs(userRef, 'goals') : [],
+    wants('tasks') ? collectDocs(userRef, 'tasks') : [],
+    wants('workout') ? collectDocs(userRef, 'workouts') : [],
+  ]);
+  const data = profile.exists ? (profile.data() || {}) : {};
+  const result = LifeExport.exportData(sections, format, {
+    transactions, savings, savingsGoals, notes, goals, tasks, workouts,
+    // Поки людина не редагувала категорії, у профілі їх немає — тоді
+    // беремо стандартні, щоб у файлі були слова, а не службові id.
+    categoriesExpense: data.categoriesExpense || defaultCategoryList('expense', currentLang),
+    categoriesIncome: data.categoriesIncome || defaultCategoryList('income', currentLang),
+  }, EXPORT_LABELS[currentLang] || EXPORT_LABELS.uk);
+  if (!result.files) throw new Error('nothing exported');
 }
 
-function openExportDialog() {
-  document.getElementById('exportModalTitle').textContent = t('exportModalTitle');
-  document.getElementById('exportWhatLabel').textContent = t('exportWhat');
-  document.getElementById('exportFormatLabel').textContent = t('exportFormat');
-  document.getElementById('exportSaveBtn').textContent = t('exportSave');
-  document.getElementById('exportModalError').textContent = '';
-  document.getElementById('exportSaveBtn').disabled = false;
-  renderExportOptions();
-  document.getElementById('exportOverlay').classList.add('show');
-}
-
-function closeExportDialog() {
-  document.getElementById('exportOverlay').classList.remove('show');
-}
-
-document.getElementById('sideExportBtn').addEventListener('click', openExportDialog);
-
-// Колонка розділів веде сюди з хешем: у розділі кнопки «Експорт даних» і
-// «Налаштування» нічого відкрити не можуть — і діалог експорту, і меню
-// налаштувань живуть на головній. Хеш прибираємо одразу, щоб оновлення
-// сторінки не відкривало те саме вдруге, а «назад» вело туди, звідки
-// прийшли: той самий прийом, що й #new у розділах.
+// Колонка розділів веде сюди з хешем: у розділі кнопка «Експорт даних»
+// нічого відкрити не може — файл збирає код цієї сторінки. Хеш прибираємо
+// одразу, щоб оновлення сторінки не відкривало те саме вдруге, а «назад»
+// вело туди, звідки прийшли: той самий прийом, що й #new у розділах.
 function openFromHash() {
   const hash = location.hash;
   if (hash !== '#export' && hash !== '#settings') return;
   try { history.replaceState(null, '', location.pathname + location.search); }
   catch (err) { /* file:// */ }
-  // Даємо сторінці домалювати перший кадр — інакше діалог відкривається
+  // Даємо сторінці домалювати перший кадр — інакше вікно відкривається
   // над ще порожнім екраном.
-  setTimeout(() => {
-    if (hash === '#export') openExportDialog(); else openSettings();
-  }, 0);
+  setTimeout(() => openSettings(hash === '#export' ? 'data' : undefined), 0);
 }
 openFromHash();
-document.getElementById('exportCloseBtn').addEventListener('click', closeExportDialog);
-document.getElementById('exportOverlay').addEventListener('click', (e) => {
-  if (e.target.id === 'exportOverlay') closeExportDialog();
-});
-
-document.getElementById('exportSaveBtn').addEventListener('click', async () => {
-  const btn = document.getElementById('exportSaveBtn');
-  const errorEl = document.getElementById('exportModalError');
-  const user = auth.currentUser;
-  if (!user || btn.disabled) return;
-  if (!exportSections.length) { errorEl.textContent = t('exportNothing'); return; }
-
-  btn.disabled = true;
-  btn.textContent = t('exportBusy');
-  errorEl.textContent = '';
-  try {
-    const userRef = db.collection('users').doc(user.uid);
-    // Читаємо лише те, що обрали: вивантажувати всю базу заради однієї
-    // вкладки — це і час, і чужі читання Firestore.
-    const wants = (key) => exportSections.includes(key);
-    // Цілі потрібні й самі по собі, і як назви для завдань, привʼязаних до них.
-    const needGoals = wants('goals') || wants('tasks');
-    const [profile, transactions, savings, savingsGoals, notes, goals, tasks, workouts] = await Promise.all([
-      userRef.get(),
-      wants('budget') ? collectDocs(userRef, 'transactions') : [],
-      wants('budget') ? collectDocs(userRef, 'savings') : [],
-      wants('budget') ? collectDocs(userRef, 'savingsGoals') : [],
-      wants('budget') ? collectDocs(userRef, 'pages') : [],
-      needGoals ? collectDocs(userRef, 'goals') : [],
-      wants('tasks') ? collectDocs(userRef, 'tasks') : [],
-      wants('workout') ? collectDocs(userRef, 'workouts') : [],
-    ]);
-    const data = profile.exists ? (profile.data() || {}) : {};
-    const result = LifeExport.exportData(exportSections, exportFormat, {
-      transactions, savings, savingsGoals, notes, goals, tasks, workouts,
-      // Поки людина не редагувала категорії, у профілі їх немає — тоді
-      // беремо стандартні, щоб у файлі були слова, а не службові id.
-      categoriesExpense: data.categoriesExpense || defaultCategoryList('expense', currentLang),
-      categoriesIncome: data.categoriesIncome || defaultCategoryList('income', currentLang),
-    }, EXPORT_LABELS[currentLang] || EXPORT_LABELS.uk);
-    if (!result.files) throw new Error('nothing exported');
-    closeExportDialog();
-  } catch (err) {
-    console.error('export:', err);
-    errorEl.textContent = t('exportError');
-  }
-  btn.textContent = t('exportSave');
-  btn.disabled = false;
-});
+document.getElementById('sideExportBtn').addEventListener('click', () => openSettings('data'));
 
 auth.onAuthStateChanged((user) => {
   document.getElementById('authLoading').style.display = 'none';

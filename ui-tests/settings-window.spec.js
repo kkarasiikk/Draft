@@ -141,6 +141,75 @@ test.describe('Категорії пишуться в профіль', () => {
   });
 });
 
+// Експорт мав власний діалог, який відкривався з того самого рядка бічної
+// колонки, що й налаштування, — тобто два вікна про те саме. Тепер вибір
+// розділів і формату стоїть просто у вкладці «Дані».
+test.describe('Експорт живе у вкладці «Дані»', () => {
+  const openData = async (page) => {
+    await openModule(page, 'index.html', { ready: '#homeScreen' });
+    await page.click('#sideExportBtn');
+    await expect(page.locator('#settingsOverlay')).toHaveClass(/show/);
+    await expect(page.locator('.settings-tab.current')).toHaveText('Дані');
+  };
+
+  test('окремого діалогу експорту більше немає', async ({ page }) => {
+    await openData(page);
+    await expect(page.locator('#exportOverlay')).toHaveCount(0);
+  });
+
+  test('розділи й формат стоять прямо у вкладці', async ({ page }) => {
+    await openData(page);
+    await expect(page.locator('[data-export-section]')).toHaveCount(4);
+    await expect(page.locator('[data-export-format]')).toHaveCount(3);
+    await expect(page.locator('[data-export-run]')).toHaveText('Зберегти');
+    // За замовчуванням обрано все: людина частіше зберігає всю базу, ніж
+    // один розділ.
+    await expect(page.locator('[data-export-section].selected')).toHaveCount(4);
+  });
+
+  test('розділів можна обрати кілька, а формат — один', async ({ page }) => {
+    await openData(page);
+    await page.click('[data-export-section="budget"]');
+    await expect(page.locator('[data-export-section].selected')).toHaveCount(3);
+    await page.click('[data-export-section="budget"]');
+    await expect(page.locator('[data-export-section].selected')).toHaveCount(4);
+
+    await page.click('[data-export-format="json"]');
+    await expect(page.locator('[data-export-format].selected')).toHaveCount(1);
+    await expect(page.locator('[data-export-format="json"]')).toHaveClass(/selected/);
+  });
+
+  // Скільки файлів вийде — це те, що варто знати ДО натискання, а не
+  // побачити потім у теці завантажень.
+  test('підказка під форматом каже, що саме вийде', async ({ page }) => {
+    await openData(page);
+    await expect(page.locator('.settings-pane .settings-hint'))
+      .toContainText('Один файл');
+    await page.click('[data-export-format="csv"]');
+    await expect(page.locator('.settings-pane .settings-hint')).toContainText('файл');
+  });
+
+  test('без жодного розділу зберігати нема чого — і про це сказано', async ({ page }) => {
+    await openData(page);
+    for (const key of ['budget', 'goals', 'tasks', 'workout']) {
+      await page.click(`[data-export-section="${key}"]`);
+    }
+    await page.click('[data-export-run]');
+    await expect(page.locator('.settings-error')).toHaveText('Обери хоча б один розділ.');
+  });
+
+  // Збирає файл сторінка, а не вікно: для цього потрібні export-data.js,
+  // бібліотека xlsx і читання всіх колекцій. У розділах їх немає, тож там
+  // лишається рядок, що веде на головну.
+  test('у розділі — рядок на головну, а не сам вибір', async ({ page }) => {
+    await openModule(page, 'tasks/index.html', { ready: '#appScreen' });
+    await page.click('#sideSettingsBtn');
+    await page.click('[data-tab="data"]');
+    await expect(page.locator('[data-export-section]')).toHaveCount(0);
+    await expect(page.locator('.settings-pane a[href$="index.html#export"]')).toHaveCount(1);
+  });
+});
+
 test.describe('Телефон: спершу список розділів', () => {
   test.use({ viewport: { width: 390, height: 844 } });
 

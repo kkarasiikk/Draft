@@ -480,12 +480,19 @@
 
   // ---- Дрібні цеглинки панелі ----
 
-  function choicesHtml(label, options, selected, attr) {
+  /**
+   * Ряд кнопок-варіантів.
+   *
+   * `many` — список обраних, коли вибір не один із багатьох, а кілька
+   * одночасно (розділи експорту). Без нього обраним вважається `selected`.
+   */
+  function choicesHtml(label, options, selected, attr, many) {
     return '<div class="settings-section">' +
       '<span class="settings-label">' + escapeHtml(label) + '</span>' +
       '<div class="settings-choices">' + options.map(function (o) {
+        var on = many ? many.indexOf(o.value) !== -1 : o.value === selected;
         return '<button type="button" class="settings-choice' +
-          (o.value === selected ? ' selected' : '') + '" ' + attr + '="' +
+          (on ? ' selected' : '') + '" ' + attr + '="' +
           escapeHtml(String(o.value)) + '">' + escapeHtml(o.label) + '</button>';
       }).join('') + '</div></div>';
   }
@@ -529,6 +536,71 @@
     return actionHtml(Object.assign({}, opts, action
       ? { attr: 'data-action="' + key + '"' }
       : { href: sectionHref(section) + hash }));
+  }
+
+  // ---- Експорт ----
+  // Вибір розділів і формату малюється тут, а збирає файл сторінка
+  // (`cfg.export.run`). Поділ саме такий, бо збирання тягне за собою і
+  // export-data.js, і бібліотеку xlsx, і читання всіх колекцій — на кожній
+  // сторінці це зайва вага заради кнопки, якою користуються раз на місяць.
+  // Тому вибір є скрізь, а працює він там, де сторінка дала цю можливість;
+  // з решти сторінок стоїть рядок, що веде на головну.
+  var exportSections = null;
+  var exportFormat = null;
+  var exportBusy = false;
+
+  function exportState() {
+    var ex = cfg.export;
+    if (!exportSections) exportSections = ex.sections.slice();
+    if (!exportFormat) exportFormat = ex.formats[0];
+    return { sections: exportSections, format: exportFormat };
+  }
+
+  function exportHtml() {
+    var ex = cfg.export;
+    if (!ex) {
+      return '<div class="settings-section">' + actionHtml({
+        icon: ICON_DOWN, title: t('exportTitle'), sub: t('exportSub'),
+        href: (cfg.base || '') + 'index.html#export',
+      }) + '</div>';
+    }
+    var state = exportState();
+    var text = ex.text();
+    return choicesHtml(text.what, ex.sections.map(function (key) {
+      return { value: key, label: ex.sectionLabel(key) };
+    }), null, 'data-export-section', state.sections) +
+      choicesHtml(text.format, ex.formats.map(function (fmt) {
+        return { value: fmt, label: ex.formatLabel(fmt) };
+      }), state.format, 'data-export-format') +
+      '<div class="settings-section">' +
+        '<div class="settings-hint" style="margin-top:-14px;">' +
+          escapeHtml(ex.hint(state.format, state.sections)) + '</div>' +
+        '<button type="button" class="settings-submit" data-export-run' +
+          (exportBusy ? ' disabled' : '') + '>' +
+          escapeHtml(exportBusy ? text.busy : text.save) + '</button>' +
+      '</div>';
+  }
+
+  function runExport() {
+    var ex = cfg.export;
+    var state = exportState();
+    var text = ex.text();
+    if (!state.sections.length) { showError(text.nothing); return; }
+    showError('');
+    exportBusy = true;
+    renderPane();
+    Promise.resolve(ex.run(state.sections, state.format)).then(function () {
+      exportBusy = false;
+      // Файл пішов у завантаження — вікно закривається саме: лишати його
+      // відкритим означало б питати «і що далі?» там, де все вже зроблено.
+      close();
+      renderPane();
+    }, function (err) {
+      console.error('export:', err);
+      exportBusy = false;
+      renderPane();
+      showError(text.error);
+    });
   }
 
   // ---- Нагадування ----
@@ -642,14 +714,7 @@
         '</div>';
     }
 
-    if (tab === 'data') {
-      return '<div class="settings-section">' + (cfg.onExport
-        ? actionHtml({ icon: ICON_DOWN, title: t('exportTitle'), sub: t('exportSub'), attr: 'data-export' })
-        : actionHtml({
-          icon: ICON_DOWN, title: t('exportTitle'), sub: t('exportSub'),
-          href: (cfg.base || '') + 'index.html#export',
-        })) + '</div>';
-    }
+    if (tab === 'data') return exportHtml();
 
     if (tab === 'account') {
       var user = cfg.auth && cfg.auth.currentUser;
@@ -753,8 +818,23 @@
       });
     });
 
-    var exportBtn = pane.querySelector('[data-export]');
-    if (exportBtn) exportBtn.addEventListener('click', function () { close(); cfg.onExport(); });
+    pane.querySelectorAll('[data-export-section]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var key = btn.dataset.exportSection;
+        var at = exportSections.indexOf(key);
+        if (at === -1) exportSections.push(key); else exportSections.splice(at, 1);
+        showError('');
+        renderPane();
+      });
+    });
+    pane.querySelectorAll('[data-export-format]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        exportFormat = btn.dataset.exportFormat;
+        renderPane();
+      });
+    });
+    var runBtn = pane.querySelector('[data-export-run]');
+    if (runBtn) runBtn.addEventListener('click', runExport);
 
     var logoutBtn = pane.querySelector('[data-logout]');
     if (logoutBtn) logoutBtn.addEventListener('click', function () { close(); cfg.onLogout(); });
@@ -816,7 +896,7 @@
    *  @param {{db, auth, base?:string, lang?:string,
    *           theme:function():string, onTheme:function(string),
    *           onLang:function(string), onLogout:function(),
-   *           onExport?:function(), push?:object}} options
+   *           export?:object, actions?:object, push?:object}} options
    */
   function init(options) {
     cfg = options || {};
