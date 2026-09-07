@@ -22,7 +22,6 @@
     '.task-menu-overlay.show',
     '.picker-overlay.show',
     '.settings-overlay.show',
-    '.aic-overlay.show',
   ].join(',');
 
   var locked = false;
