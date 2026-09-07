@@ -107,9 +107,9 @@ test.describe('Плитки', () => {
     checkins: [], milestones: [], blockers: [],
   }, over);
 
-  test('цілі рахують місяць, а не серію', async ({ page }) => {
+  test('плитка рахує цілі місяця', async ({ page }) => {
     await openHub(page, { goals: [
-      monthGoal({ id: 'g1', title: 'Перша', checkins: [iso(-2), iso(-1), iso()] }),
+      monthGoal({ id: 'g1', title: 'Перша' }),
       monthGoal({ id: 'g2', title: 'Друга' }),
     ] });
     await expect(stat(page, 'goals')).toHaveText('2');
@@ -487,7 +487,9 @@ test.describe('Швидкий запис', () => {
     await openHub(page, { goals: [goal('g1', 'Біг')] });
     await page.click('#addFab');
     await expect(page.locator('#addOverlay')).toHaveClass(/show/);
-    await expect(page.locator('.add-row')).toHaveCount(5);
+    // Чотири: витрата, завдання, ціль, тренування. П'ятим був «Крок до цілі»
+    // — він пішов разом із щоденними відмітками.
+    await expect(page.locator('.add-row')).toHaveCount(4);
     await expect(page.locator('.add-row[disabled]')).toHaveCount(0);
   });
 
@@ -514,41 +516,14 @@ test.describe('Швидкий запис', () => {
     await expect(page.locator('.add-row[href="goals/index.html#new"]')).toBeVisible();
   });
 
-  test('крок до цілі нікуди не веде — це один тап, а не форма', async ({ page }) => {
-    await openHub(page, { goals: [goal('g1', 'Біг')] });
-    await page.click('#addFab');
-    await expect(page.locator('[data-add-goal]')).toBeVisible();
-    await expect(page.locator('[data-add-goal]')).not.toHaveAttribute('href', /./);
-  });
-
-  test('крок питає, у яку саме ціль, і зараховує його', async ({ page }) => {
+  // «Крок до цілі» був пʼятим рядком: він розкривав список активних цілей і
+  // одним тапом відмічав день у серії. Серії немає — відмічати нічого.
+  test('рядка «Крок до цілі» більше немає', async ({ page }) => {
     await openHub(page, { goals: [goal('g1', 'Біг'), goal('g2', 'Книжки')] });
     await page.click('#addFab');
-    await page.click('[data-add-goal]');
-    await expect(page.locator('[data-step]')).toHaveCount(2);
-    await expect(page.locator('[data-step="g1"] .add-name')).toHaveText('Біг');
-
-    await page.click('[data-step="g2"]');
-    await expect.poll(() => page.evaluate(() => window.__fbCalls.update.length)).toBeGreaterThan(0);
-    const upd = await page.evaluate(() => window.__fbCalls.update.at(-1));
-    expect(upd.payload.checkins).toEqual([iso()]);
-    // Обрана ціль — і шторка закривається сама.
-    await expect(page.locator('#addOverlay')).not.toHaveClass(/show/);
-  });
-
-  test('коли крок нема куди зарахувати, рядка просто немає', async ({ page }) => {
-    // Неактивний рядок лише займав місце й читався як поламаний.
-    await openHub(page, { goals: [{ ...goal('g1', 'Біг'), checkins: [iso()] }] });
-    await page.click('#addFab');
     await expect(page.locator('[data-add-goal]')).toHaveCount(0);
-    await expect(page.locator('.add-row')).toHaveCount(4);
-  });
-
-  test('без жодної цілі крок теж не пропонується, а завести ціль — так', async ({ page }) => {
-    await openHub(page, { goals: [] });
-    await page.click('#addFab');
-    await expect(page.locator('[data-add-goal]')).toHaveCount(0);
-    await expect(page.locator('.add-row[href="goals/index.html#new"]')).toBeVisible();
+    await expect(page.locator('[data-step]')).toHaveCount(0);
+    await expect(page.locator('#addOverlay')).not.toContainText('Крок до цілі');
   });
 
   test('тап повз меню закриває, а по самому меню — ні', async ({ page }) => {

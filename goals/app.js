@@ -38,47 +38,25 @@ const T = {
     unsavedSub: 'Є незбережені зміни. Якщо вийти зараз, вони пропадуть.',
     unsavedSave: 'Зберегти', unsavedDiscard: 'Не зберігати', unsavedKeep: 'Продовжити редагування',
     confirmDeleteTitle: 'Видалити ціль?',
-    confirmDeleteSub: 'Цю дію не можна скасувати. Нотатки й серія теж зникнуть.',
+    confirmDeleteSub: 'Цю дію не можна скасувати. Нотатки теж зникнуть.',
     fabNewGoalLabel: 'Нова ціль', bnMonth: 'Місяць', bnYear: 'Рік',
     horizonLabel: 'Горизонт', horizonMonth: 'Місячна', horizonYear: 'Річна',
     horizonHint: 'Місячна — що робиш цього місяця. Річна — куди йдеш загалом.',
     emptyMonthTitle: 'Немає цілей на місяць', emptyMonthSub: 'Що хочеш зрушити саме цього місяця?',
     emptyYearTitle: 'Немає річних цілей', emptyYearSub: 'Куди ти йдеш цього року?',
-    statusAll: 'Усі', statusActive: 'Активні', statusDone: 'Завершені', statusArchived: 'Архів',
-    statusPaused: 'На паузі', pauseBtn: 'Поставити на паузу', resumeBtn: 'Повернути в роботу',
-    archiveBtn: 'Перенести в архів', markGoalDoneBtn: 'Виконано',
-    checkinBtnLabel: 'Зробив крок сьогодні', checkinBtnLabelDone: 'Зроблено сьогодні',
-    rescueMsg: (n) => `Вчора пропущено. Серія на ${n} дн. ще ціла — врятувати?`,
-    rescueBtn: 'Врятувати серію',
-    actionsLabel: 'Щоденні дії',
-    actionsHint: 'Дрібні кроки, які ведуть до цілі. Виконав — день у серії відмічається сам.',
-    actionPlaceholder: 'Що зробити для цієї цілі?',
-    actionsEmpty: 'Ще немає щоденних дій — додай перший крок нижче.',
-    actionOverdue: 'прострочено',
-    rescueWait: (n) => `Серія обірвалась. Наступний рятунок буде доступний через ${n} дн.`,
-    blockersTitle: 'Що заважає найчастіше',
-    reason_noTime: 'Не було часу', reason_forgot: 'Забув(ла)', reason_tired: 'Втома',
-    reason_mood: 'Не було настрою', reason_other: 'Інше',
-    journalPlaceholder: 'Що сьогодні зробив(ла) для цієї цілі?',
-    journalEmpty: 'Ще нема нотаток', journalSectionLabel: 'Щоденник',
-    badge_streak7: '🔥 Серія 7 днів', badge_firstDone: '🏆 Перша ціль завершена',
-    badge_firstStep: '🌱 Перший крок',
+    statusWorking: 'В роботі', statusDone: 'Виконано', statusFailed: 'Не виконано',
+    statusLabel: 'Стан', catAll: 'Усі',
+    notesLabel: 'Нотатки', notesSaved: 'Збережено',
+    notesPlaceholder: 'Пиши сюди все про цю ціль: думки, що вже зроблено, що далі.',
     dashboardEmptyTitle: 'Ще немає цілей', dashboardEmptySub: 'Додай першу ціль кнопкою внизу.',
     daysLeftLabel: (n) => `${n} дн. до дедлайну`, overdueLabel: 'Прострочено',
-    lapseTitle: (n) => `Тебе не було ${n} дн.`,
-    lapseNeverTitle: (n) => `Ціль стоїть ${n} дн. без жодного кроку`,
-    lapseSub: 'Це буває. Питання не в тому, чому так вийшло, а в тому, куди повертатись.',
-    lapseRestart: 'Почати відлік заново', lapseEdit: 'Змінити ціль', lapsePause: 'На паузу',
-    gridLabel: 'Останні вісім тижнів', gridDone: 'був крок', gridBlocked: 'сказав, що завадило',
     monthPrev: 'Попередній місяць', monthNext: 'Наступний місяць',
     pickGoalTitle: 'Обери ціль зліва',
-    pickGoalSub: 'Тут буде все про неї: навіщо, темп, серія і щоденник.',
+    pickGoalSub: 'Тут буде все про неї: навіщо, стан і нотатки.',
     emptyMonthNamed: (m) => `Немає цілей на ${m}`,
     carriedFrom: (m) => `з ${m}`,
     horizonHintMonth: (m) => `Ціль піде в ${m}.`,
-    retroYear: 'За рік', retroAll: 'За весь час',
     retroClosed: (n) => `Закрито цілей: ${n}`,
-    retroEmptyPeriod: 'За цей період нічого не закрито',
     retroTypical: (n) => `типово ${n} дн.`,
     retroRange: (a, b) => `від ${a} до ${b} дн.`,
     goalSpanDays: (n) => `${n} дн.`, goalSpanSameDay: 'того ж дня',
@@ -113,47 +91,25 @@ const T = {
     unsavedSub: 'Есть несохранённые изменения. Если выйти сейчас, они пропадут.',
     unsavedSave: 'Сохранить', unsavedDiscard: 'Не сохранять', unsavedKeep: 'Продолжить редактирование',
     confirmDeleteTitle: 'Удалить цель?',
-    confirmDeleteSub: 'Это действие нельзя отменить. Заметки и серия тоже исчезнут.',
+    confirmDeleteSub: 'Это действие нельзя отменить. Заметки тоже исчезнут.',
     fabNewGoalLabel: 'Новая цель', bnMonth: 'Месяц', bnYear: 'Год',
     horizonLabel: 'Горизонт', horizonMonth: 'Месячная', horizonYear: 'Годовая',
     horizonHint: 'Месячная — что делаешь в этом месяце. Годовая — куда идёшь в целом.',
     emptyMonthTitle: 'Нет целей на месяц', emptyMonthSub: 'Что хочешь сдвинуть именно в этом месяце?',
     emptyYearTitle: 'Нет годовых целей', emptyYearSub: 'Куда ты идёшь в этом году?',
-    statusAll: 'Все', statusActive: 'Активные', statusDone: 'Завершённые', statusArchived: 'Архив',
-    statusPaused: 'На паузе', pauseBtn: 'Поставить на паузу', resumeBtn: 'Вернуть в работу',
-    archiveBtn: 'Перенести в архив', markGoalDoneBtn: 'Выполнено',
-    checkinBtnLabel: 'Сделал шаг сегодня', checkinBtnLabelDone: 'Сделано сегодня',
-    rescueMsg: (n) => `Вчера пропущено. Серия на ${n} дн. ещё цела — спасти?`,
-    rescueBtn: 'Спасти серию',
-    actionsLabel: 'Ежедневные действия',
-    actionsHint: 'Мелкие шаги к цели. Выполнил — день в серии отмечается сам.',
-    actionPlaceholder: 'Что сделать для этой цели?',
-    actionsEmpty: 'Ещё нет ежедневных действий — добавь первый шаг ниже.',
-    actionOverdue: 'просрочено',
-    rescueWait: (n) => `Серия оборвалась. Следующее спасение будет доступно через ${n} дн.`,
-    blockersTitle: 'Что мешает чаще всего',
-    reason_noTime: 'Не было времени', reason_forgot: 'Забыл(а)', reason_tired: 'Усталость',
-    reason_mood: 'Не было настроения', reason_other: 'Другое',
-    journalPlaceholder: 'Что сегодня сделал(а) для этой цели?',
-    journalEmpty: 'Ещё нет заметок', journalSectionLabel: 'Дневник',
-    badge_streak7: '🔥 Серия 7 дней', badge_firstDone: '🏆 Первая цель завершена',
-    badge_firstStep: '🌱 Первый шаг',
+    statusWorking: 'В работе', statusDone: 'Выполнено', statusFailed: 'Не выполнено',
+    statusLabel: 'Состояние', catAll: 'Все',
+    notesLabel: 'Заметки', notesSaved: 'Сохранено',
+    notesPlaceholder: 'Пиши сюда всё об этой цели: мысли, что уже сделано, что дальше.',
     dashboardEmptyTitle: 'Пока нет целей', dashboardEmptySub: 'Добавь первую цель кнопкой внизу.',
     daysLeftLabel: (n) => `${n} дн. до дедлайна`, overdueLabel: 'Просрочено',
-    lapseTitle: (n) => `Тебя не было ${n} дн.`,
-    lapseNeverTitle: (n) => `Цель стоит ${n} дн. без единого шага`,
-    lapseSub: 'Так бывает. Вопрос не в том, почему так вышло, а в том, куда возвращаться.',
-    lapseRestart: 'Начать отсчёт заново', lapseEdit: 'Изменить цель', lapsePause: 'На паузу',
-    gridLabel: 'Последние восемь недель', gridDone: 'был шаг', gridBlocked: 'сказал, что помешало',
     monthPrev: 'Предыдущий месяц', monthNext: 'Следующий месяц',
     pickGoalTitle: 'Выбери цель слева',
-    pickGoalSub: 'Здесь будет всё о ней: зачем, темп, серия и дневник.',
+    pickGoalSub: 'Здесь будет всё о ней: зачем, состояние и заметки.',
     emptyMonthNamed: (m) => `Нет целей на ${m}`,
     carriedFrom: (m) => `с ${m}`,
     horizonHintMonth: (m) => `Цель пойдёт в ${m}.`,
-    retroYear: 'За год', retroAll: 'За всё время',
     retroClosed: (n) => `Закрыто целей: ${n}`,
-    retroEmptyPeriod: 'За этот период ничего не закрыто',
     retroTypical: (n) => `обычно ${n} дн.`,
     retroRange: (a, b) => `от ${a} до ${b} дн.`,
     goalSpanDays: (n) => `${n} дн.`, goalSpanSameDay: 'в тот же день',
@@ -188,47 +144,25 @@ const T = {
     unsavedSub: 'Są niezapisane zmiany. Jeśli teraz wyjdziesz, przepadną.',
     unsavedSave: 'Zapisz', unsavedDiscard: 'Nie zapisuj', unsavedKeep: 'Wróć do edycji',
     confirmDeleteTitle: 'Usunąć cel?',
-    confirmDeleteSub: 'Tej czynności nie można cofnąć. Notatki i seria też znikną.',
+    confirmDeleteSub: 'Tej czynności nie można cofnąć. Notatki też znikną.',
     fabNewGoalLabel: 'Nowy cel', bnMonth: 'Miesiąc', bnYear: 'Rok',
     horizonLabel: 'Horyzont', horizonMonth: 'Miesięczny', horizonYear: 'Roczny',
     horizonHint: 'Miesięczny — co robisz w tym miesiącu. Roczny — dokąd zmierzasz ogólnie.',
     emptyMonthTitle: 'Brak celów na miesiąc', emptyMonthSub: 'Co chcesz ruszyć właśnie w tym miesiącu?',
     emptyYearTitle: 'Brak celów rocznych', emptyYearSub: 'Dokąd zmierzasz w tym roku?',
-    statusAll: 'Wszystkie', statusActive: 'Aktywne', statusDone: 'Ukończone', statusArchived: 'Archiwum',
-    statusPaused: 'Wstrzymane', pauseBtn: 'Wstrzymaj', resumeBtn: 'Wznów',
-    archiveBtn: 'Przenieś do archiwum', markGoalDoneBtn: 'Ukończony',
-    checkinBtnLabel: 'Zrobiłem krok dzisiaj', checkinBtnLabelDone: 'Zrobione dzisiaj',
-    rescueMsg: (n) => `Wczoraj wypadło. Seria ${n} dni jest jeszcze cała — uratować?`,
-    rescueBtn: 'Uratuj serię',
-    actionsLabel: 'Codzienne działania',
-    actionsHint: 'Drobne kroki do celu. Zrobione — dzień w serii zaznacza się sam.',
-    actionPlaceholder: 'Co zrobić dla tego celu?',
-    actionsEmpty: 'Brak codziennych działań — dodaj pierwszy krok poniżej.',
-    actionOverdue: 'po terminie',
-    rescueWait: (n) => `Seria się urwała. Kolejny ratunek będzie dostępny za ${n} dni.`,
-    blockersTitle: 'Co przeszkadza najczęściej',
-    reason_noTime: 'Brak czasu', reason_forgot: 'Zapomniałem', reason_tired: 'Zmęczenie',
-    reason_mood: 'Brak nastroju', reason_other: 'Inne',
-    journalPlaceholder: 'Co dziś zrobiłeś(aś) dla tego celu?',
-    journalEmpty: 'Jeszcze brak notatek', journalSectionLabel: 'Dziennik',
-    badge_streak7: '🔥 Seria 7 dni', badge_firstDone: '🏆 Pierwszy ukończony cel',
-    badge_firstStep: '🌱 Pierwszy krok',
+    statusWorking: 'W trakcie', statusDone: 'Zrobione', statusFailed: 'Niezrobione',
+    statusLabel: 'Stan', catAll: 'Wszystkie',
+    notesLabel: 'Notatki', notesSaved: 'Zapisano',
+    notesPlaceholder: 'Pisz tu wszystko o tym celu: myśli, co już zrobione, co dalej.',
     dashboardEmptyTitle: 'Jeszcze brak celów', dashboardEmptySub: 'Dodaj pierwszy cel przyciskiem poniżej.',
     daysLeftLabel: (n) => `${n} dni do terminu`, overdueLabel: 'Po terminie',
-    lapseTitle: (n) => `Nie było cię ${n} dni`,
-    lapseNeverTitle: (n) => `Cel stoi ${n} dni bez żadnego kroku`,
-    lapseSub: 'Tak bywa. Pytanie nie brzmi dlaczego, tylko dokąd wracasz.',
-    lapseRestart: 'Zacznij liczyć od nowa', lapseEdit: 'Zmień cel', lapsePause: 'Wstrzymaj',
-    gridLabel: 'Ostatnie osiem tygodni', gridDone: 'był krok', gridBlocked: 'powiedziałeś, co przeszkodziło',
     monthPrev: 'Poprzedni miesiąc', monthNext: 'Następny miesiąc',
     pickGoalTitle: 'Wybierz cel po lewej',
-    pickGoalSub: 'Tu będzie wszystko o nim: po co, tempo, seria i dziennik.',
+    pickGoalSub: 'Tu będzie wszystko o nim: po co, stan i notatki.',
     emptyMonthNamed: (m) => `Brak celów na ${m}`,
     carriedFrom: (m) => `z ${m}`,
     horizonHintMonth: (m) => `Cel trafi do ${m}.`,
-    retroYear: 'Za rok', retroAll: 'Cały czas',
     retroClosed: (n) => `Ukończonych celów: ${n}`,
-    retroEmptyPeriod: 'W tym okresie nic nie ukończono',
     retroTypical: (n) => `zwykle ${n} dni`,
     retroRange: (a, b) => `od ${a} do ${b} dni`,
     goalSpanDays: (n) => `${n} dni`, goalSpanSameDay: 'tego samego dnia',
@@ -263,47 +197,25 @@ const T = {
     unsavedSub: 'There are unsaved changes. Leaving now discards them.',
     unsavedSave: 'Save', unsavedDiscard: "Don't save", unsavedKeep: 'Keep editing',
     confirmDeleteTitle: 'Delete goal?',
-    confirmDeleteSub: 'This action cannot be undone. Notes and streak will be lost too.',
+    confirmDeleteSub: 'This action cannot be undone. Notes will be lost too.',
     fabNewGoalLabel: 'New goal', bnMonth: 'Month', bnYear: 'Year',
     horizonLabel: 'Horizon', horizonMonth: 'Monthly', horizonYear: 'Yearly',
     horizonHint: 'Monthly — what you are moving this month. Yearly — where you are heading overall.',
     emptyMonthTitle: 'No goals for this month', emptyMonthSub: 'What do you want to move this month?',
     emptyYearTitle: 'No yearly goals', emptyYearSub: 'Where are you heading this year?',
-    statusAll: 'All', statusActive: 'Active', statusDone: 'Done', statusArchived: 'Archived',
-    statusPaused: 'Paused', pauseBtn: 'Pause this goal', resumeBtn: 'Resume',
-    archiveBtn: 'Move to archive', markGoalDoneBtn: 'Done',
-    checkinBtnLabel: 'I took a step today', checkinBtnLabelDone: 'Done for today',
-    rescueMsg: (n) => `You missed yesterday. A ${n}-day streak is still savable — rescue it?`,
-    rescueBtn: 'Rescue the streak',
-    actionsLabel: 'Daily actions',
-    actionsHint: 'Small steps toward the goal. Tick one off and the day is checked in for you.',
-    actionPlaceholder: 'What should you do for this goal?',
-    actionsEmpty: 'No daily actions yet — add the first step below.',
-    actionOverdue: 'overdue',
-    rescueWait: (n) => `The streak broke. The next rescue unlocks in ${n} days.`,
-    blockersTitle: 'What gets in the way most',
-    reason_noTime: 'No time', reason_forgot: 'Forgot', reason_tired: 'Too tired',
-    reason_mood: 'Not in the mood', reason_other: 'Other',
-    journalPlaceholder: 'What did you do for this goal today?',
-    journalEmpty: 'No notes yet', journalSectionLabel: 'Journal',
-    badge_streak7: '🔥 7-day streak', badge_firstDone: '🏆 First goal completed',
-    badge_firstStep: '🌱 First step',
+    statusWorking: 'In progress', statusDone: 'Done', statusFailed: 'Not done',
+    statusLabel: 'State', catAll: 'All',
+    notesLabel: 'Notes', notesSaved: 'Saved',
+    notesPlaceholder: 'Write anything about this goal here: thoughts, what is done, what is next.',
     dashboardEmptyTitle: 'No goals yet', dashboardEmptySub: 'Add your first goal with the button below.',
     daysLeftLabel: (n) => `${n}d left`, overdueLabel: 'Overdue',
-    lapseTitle: (n) => `You were away ${n} days`,
-    lapseNeverTitle: (n) => `This goal has stood ${n} days without a single step`,
-    lapseSub: 'It happens. The question is not why, but where you come back to.',
-    lapseRestart: 'Start the count over', lapseEdit: 'Change the goal', lapsePause: 'Pause',
-    gridLabel: 'Last eight weeks', gridDone: 'a step happened', gridBlocked: 'said what got in the way',
     monthPrev: 'Previous month', monthNext: 'Next month',
     pickGoalTitle: 'Pick a goal on the left',
-    pickGoalSub: 'Everything about it lands here: why, pace, streak and journal.',
+    pickGoalSub: 'Everything about it lands here: why, state and notes.',
     emptyMonthNamed: (m) => `No goals for ${m}`,
     carriedFrom: (m) => `from ${m}`,
     horizonHintMonth: (m) => `This goal goes to ${m}.`,
-    retroYear: 'Past year', retroAll: 'All time',
     retroClosed: (n) => `Goals closed: ${n}`,
-    retroEmptyPeriod: 'Nothing closed in this period',
     retroTypical: (n) => `typically ${n}d`,
     retroRange: (a, b) => `from ${a}d to ${b}d`,
     goalSpanDays: (n) => `${n}d`, goalSpanSameDay: 'same day',
@@ -515,8 +427,8 @@ function applyTranslations() {
   document.getElementById('deleteGoalBtn').textContent = t('deleteBtn');
   document.getElementById('goalSubmitBtn').textContent = t('saveBtn');
   document.getElementById('goalTitleInput').placeholder = t('titlePlaceholder');
-  document.getElementById('journalInput').placeholder = t('journalPlaceholder');
-  document.getElementById('journalSectionLabel').textContent = t('journalSectionLabel');
+  document.getElementById('goalNotes').placeholder = t('notesPlaceholder');
+  document.getElementById('notesLabel').textContent = t('notesLabel');
   document.getElementById('confirmTitle').textContent = t('confirmDeleteTitle');
   document.getElementById('confirmSub').textContent = t('confirmDeleteSub');
   document.getElementById('confirmCancel').textContent = t('cancelBtn');
@@ -631,50 +543,19 @@ function parseISODate(s) {
   const [y, m, d] = s.split('-').map(Number);
   return new Date(y, (m || 1) - 1, d || 1);
 }
-function isoDateShift(iso, deltaDays) {
-  const dt = parseISODate(iso);
-  dt.setDate(dt.getDate() + deltaDays);
-  return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
-}
 function escapeHtml(s) {
   return (s || '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
-function uid4() {
-  return (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}_${Math.random().toString(36).slice(2)}`).slice(0, 36);
-}
-// Дата прогнозу словами: «12 березня». Рік не пишемо, поки він поточний —
-// у прогнозі на пів року вперед він тільки заважає читати.
-function formatDateShort(iso) {
-  const d = Streak.parseISO(iso);
-  if (isNaN(d)) return iso;
-  const locale = LOCALE_MAP[currentLang] || 'uk-UA';
-  const sameYear = d.getFullYear() === new Date().getFullYear();
-  const opts = sameYear ? { day: 'numeric', month: 'long' } : { day: 'numeric', month: 'long', year: 'numeric' };
-  return new Intl.DateTimeFormat(locale, opts).format(d);
-}
-
-function weekdayShortLabels() {
-  const locale = LOCALE_MAP[currentLang] || 'uk-UA';
-  const fmt = new Intl.DateTimeFormat(locale, { weekday: 'short' });
-  // 2024-01-01 — відомий понеділок; тиждень завжди рендеримо з понеділка.
-  const monday = new Date(2024, 0, 1);
-  const labels = [];
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(monday);
-    d.setDate(monday.getDate() + i);
-    labels.push(fmt.format(d));
-  }
-  return labels;
-}
-
 // ---- Стан ----
 let goals = [];
 let unsubscribeGoals = null;
 let currentScreen = 'dashboard'; // 'dashboard' | 'detail'
 let activeDetailGoalId = null;
-let statusFilter = 'active'; // null(all) | 'active' | 'paused' | 'done' | 'archived'
-// Вікно ретроспективи: 365 днів або null — за весь час.
-let retroWindowDays = 365;
+// Обрана категорія або null — «усі». Категорії стали тим, чим раніше був
+// фільтр статусів: цілей у людини десятки, і шукати серед них корисніше за
+// сферою («що там зі здоровʼям»), ніж за станом — стан і так написаний над
+// кожною групою списку.
+let categoryFilter = null;
 // Горизонт планування: дві вкладки внизу — «Місяць» і «Рік». Це не фільтр
 // поверх одного списку, а два різні питання: що я роблю ЦЬОГО МІСЯЦЯ і куди
 // я взагалі йду. Тримати їх в одному списку означало б, що дрібне щоразу
@@ -692,12 +573,6 @@ let editingGoalId = null;
 let formCategory = 'other';
 let formHorizon = 'month';
 let pendingDeleteId = null;
-// Яка ціль у вечірньому підсумку зараз питає «що завадило».
-// Щоденні дії відкритої цілі — це звичайні завдання з розділу «Завдання»,
-// просто відфільтровані за goalId. Слухаємо їх лише поки ціль відкрита:
-// тримати підписку на весь список заради екрана, якого не видно, ні до чого.
-let goalActions = [];
-let unsubscribeActions = null;
 
 // ---- Дані (Firestore, реалтайм) ----
 // Профіль тут потрібен заради двох речей: мови (сторінку могли відкрити з
@@ -743,36 +618,38 @@ function subscribeToGoals(uid) {
 }
 
 // ---- Обчислення (завжди похідні від живих даних, нічого не кешується) ----
-// Серія, рятунок і вечірня черга живуть у goals/streak.js — тим самим
-// модулем користується AI-помічник на сервері. Правило «коли рятунок
-// доступний» мусить бути одне: інакше в чаті пишеться одне, а на сторінці
-// показується інше.
-const Streak = window.GoalStreak;
-// Темп цілі — goals/review.js. Той самий модуль читає помічник на сервері:
-// інакше в чаті звучала б одна оцінка, а на екрані стояла інша.
+// Місяць цілі, тривалість закритої, ретроспектива й нотатки — goals/review.js.
+// Той самий модуль читає помічник на сервері: інакше в чаті звучало б одне
+// число, а на екрані стояло інше.
 const Review = window.GoalReview;
-function computeStreak(checkins) {
-  return Streak.computeStreak(checkins, todayISO());
+
+// ---- Стан цілі: три, і рівно три ----
+//
+// «В роботі», «Виконано», «Не виконано». У базі перші два лежать під своїми
+// іменами, а «не виконано» — під `archived`, і це не недогляд: правила
+// Firestore перелічують дозволені значення поіменно, тож нове довелось би
+// туди дописувати й розгортати правила. Слово в базі старе, зміст новий —
+// ціль, за яку більше не беруться.
+//
+// 'paused' у базі теж трапляється: пауза була четвертим станом і жила рівно
+// заради серії — щоб ланцюг не рвався, поки людина у відпустці. Серії немає,
+// і пауза разом із нею втратила сенс; старі цілі на паузі читаються як «в
+// роботі», бо саме там вони й лишились.
+const STATUSES = ['active', 'done', 'failed'];
+const STATUS_DB = { active: 'active', done: 'done', failed: 'archived' };
+const STATUS_LABEL = { active: 'statusWorking', done: 'statusDone', failed: 'statusFailed' };
+
+function statusOf(goal) {
+  const raw = goal && goal.status;
+  if (raw === 'done') return 'done';
+  if (raw === 'archived') return 'failed';
+  return 'active';
 }
 
-// Причини зберігаємо ключами, а не перекладеним текстом: людина може
-// перемкнути мову, і тоді «Не було часу» та «No time» рахувалися б як дві
-// різні причини. Вільний текст (з чату) лишається як є.
-const BLOCKER_KEYS = ['noTime', 'forgot', 'tired', 'mood', 'other'];
-function blockerLabel(reason) {
-  return BLOCKER_KEYS.includes(reason) ? t('reason_' + reason) : reason;
-}
 function daysToDeadline(targetDate) {
   const today = parseISODate(todayISO());
   const target = parseISODate(targetDate);
   return Math.round((target - today) / 86400000);
-}
-function computeBadges(list) {
-  const badges = [];
-  if (list.some((g) => computeStreak(g.checkins) >= 7)) badges.push('badge_streak7');
-  if (list.filter((g) => g.status === 'done').length >= 1) badges.push('badge_firstDone');
-  if (list.some((g) => (g.checkins || []).length >= 1)) badges.push('badge_firstStep');
-  return badges;
 }
 
 // ---- Рендер: дашборд ----
@@ -791,7 +668,6 @@ function autoSelectFirstGoal() {
   if (!first) return;
   activeDetailGoalId = first.id;
   autoSelectedGoal = true;
-  subscribeToActions(first.id);
   setScreen('detail');
 }
 
@@ -809,7 +685,6 @@ function renderCurrentScreen() {
     }
     // Ціль зникла (видалена з іншого пристрою) — повертаємось на дашборд.
     activeDetailGoalId = null;
-    stopActions();
     setScreen('dashboard');
   }
   // Права колонка без обраної цілі не порожня: вона каже, що з нею робити.
@@ -827,97 +702,79 @@ function renderDetailPlaceholder() {
 }
 
 function renderDashboard() {
-  renderBadgesRow();
   renderMonthHeader();
-  renderStatusFilterRow();
-  renderRetro();
+  renderCategoryFilterRow();
   renderGoalsList();
 }
 
-function renderBadgesRow() {
-  const badges = computeBadges(goalsOfHorizon());
-  const row = document.getElementById('badgesRow');
-  row.innerHTML = badges.map((key) => `<span class="badge-chip">${escapeHtml(t(key))}</span>`).join('');
-}
-
-function renderStatusFilterRow() {
-  const options = [[null, t('statusAll')], ['active', t('statusActive')], ['paused', t('statusPaused')],
-    ['done', t('statusDone')], ['archived', t('statusArchived')]];
-  const row = document.getElementById('statusFilterRow');
-  row.innerHTML = options.map(([val, label]) =>
-    `<button type="button" class="tag-filter-chip${statusFilter === val ? ' selected' : ''}" data-status="${val === null ? '' : val}">${escapeHtml(label)}</button>`
-  ).join('');
-  row.querySelectorAll('[data-status]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      statusFilter = btn.dataset.status || null;
-      renderStatusFilterRow();
-      renderMonthHeader();
-      renderRetro();
-      renderGoalsList();
-    });
-  });
-}
-
-// Ретроспектива над списком «Завершені». Закрита ціль досі просто зникала:
-// статус міняється, картка випадає з активного списку — і рік роботи не
-// лишає на екрані жодного сліду. А для довгих цілей винагорода саме в
-// озиранні назад, і всі дані для нього вже лежать у записах.
-function renderRetro() {
-  const el = document.getElementById('retroBlock');
-  if (statusFilter !== 'done') { el.innerHTML = ''; return; }
-
+// Рядок категорій. На його місці стояли два: бейджі («🏆 Перша ціль
+// завершена») і фільтр станів. Бейджі хвалили за те, що й так видно, а
+// фільтр станів дублював те, що тепер написано над кожною групою списку.
+//
+// Категорія — те, за чим ціль справді шукають: «що там зі здоровʼям», а не
+// «покажи архівні». Показуємо лише ті, у яких на цій вкладці щось є, і лише
+// коли їх більше однієї: рядок із двох чипів, один з яких «Усі», нічого не
+// фільтрує й лише займає місце.
+function renderCategoryFilterRow() {
+  const row = document.getElementById('categoryFilterRow');
   const scoped = goalsOfHorizon();
-  const opts = { startIsoOf: createdIso };
-  // Якщо не закрито взагалі нічого — блок мовчить: порожній стан списку вже
-  // сказав усе, що треба, і другий раз цього повторювати не варто.
-  const ever = Review.retrospective(scoped, todayISO(), { ...opts, days: null });
-  if (!ever || !ever.count) { el.innerHTML = ''; return; }
+  const present = goalCategories
+    .map((c) => c.id)
+    .filter((id) => scoped.some((g) => (g.category || '') === id));
+  // Категорія, якої в списку вже немає (стара ціль), теж має бути видимою —
+  // інакше її цілі неможливо відфільтрувати.
+  scoped.forEach((g) => {
+    const id = g.category || '';
+    if (present.indexOf(id) === -1) present.push(id);
+  });
 
-  const r = Review.retrospective(scoped, todayISO(), { ...opts, days: retroWindowDays });
-  const head = r.count
-    ? `<span class="retro-count">${escapeHtml(t('retroClosed', r.count))}</span>`
-    : `<span class="retro-count">${escapeHtml(t('retroEmptyPeriod'))}</span>`;
-  // Розкид показуємо лише тоді, коли він є: «від 40 до 40» — не інформація.
-  const spanParts = [];
-  if (r.medianDays !== null) spanParts.push(t('retroTypical', r.medianDays));
-  if (r.fastestDays !== null && r.fastestDays !== r.slowestDays) {
-    spanParts.push(t('retroRange', r.fastestDays, r.slowestDays));
-  }
-  const span = spanParts.length
-    ? `<span class="retro-span">${escapeHtml(spanParts.join(' · '))}</span>` : '';
+  if (present.length < 2) { row.innerHTML = ''; categoryFilter = null; return; }
+  // Обрана категорія могла зникнути разом з останньою своєю ціллю.
+  if (categoryFilter && present.indexOf(categoryFilter) === -1) categoryFilter = null;
 
-  const periods = [[365, t('retroYear')], [null, t('retroAll')]];
-  const chips = periods.map(([val, label]) =>
-    `<button type="button" class="tag-filter-chip${retroWindowDays === val ? ' selected' : ''}" data-retro="${val === null ? '' : val}">${escapeHtml(label)}</button>`
+  const chips = [[null, t('catAll')]].concat(present.map((id) => [id, categoryLabel(id)]));
+  row.innerHTML = chips.map(([val, label]) =>
+    `<button type="button" class="tag-filter-chip${categoryFilter === val ? ' selected' : ''}" data-cat="${val === null ? '' : escapeHtml(val)}">${escapeHtml(label)}</button>`
   ).join('');
-
-  el.innerHTML = `
-    <div class="retro">
-      <div class="retro-periods">${chips}</div>
-      <div class="retro-head">${head}${span}</div>
-    </div>`;
-  el.querySelectorAll('[data-retro]').forEach((btn) => {
+  row.querySelectorAll('[data-cat]').forEach((btn) => {
     btn.addEventListener('click', () => {
-      retroWindowDays = btn.dataset.retro ? Number(btn.dataset.retro) : null;
-      renderRetro();
+      categoryFilter = btn.dataset.cat || null;
+      renderCategoryFilterRow();
       renderGoalsList();
     });
   });
+}
+
+// Підсумок під списком: скільки цілей закрито й скільки типово займали.
+//
+// Закрита ціль досі просто зникала — статус міняється, картка випадає з
+// активного списку, і рік роботи не лишає на екрані жодного сліду. А для
+// довгих цілей винагорода саме в озиранні назад.
+//
+// Раніше цей блок жив над списком і мав власний перемикач періоду; він
+// показувався лише у фільтрі «Завершені», якого більше немає. Тепер це один
+// тихий рядок унизу за весь час — рахувати ретроспективу вікнами було
+// цікавою можливістю рівно доти, доки хтось нею користувався.
+function retroHtml() {
+  const scoped = goals.filter((g) => horizonOf(g) === horizon);
+  const r = Review.retrospective(scoped, todayISO(), { startIsoOf: createdIso, days: null });
+  if (!r || !r.count) return '';
+  const parts = [t('retroClosed', r.count)];
+  if (r.medianDays !== null) parts.push(t('retroTypical', r.medianDays));
+  return `<div class="retro-line">${escapeHtml(parts.join(' · '))}</div>`;
 }
 
 function goalCardHtml(goal) {
-  const streak = computeStreak(goal.checkins);
   const metaParts = [];
-  if (streak > 0) metaParts.push(`<span class="goal-streak-flame">🔥 ${streak}</span>`);
-  if (goal.targetDate) {
+  const state = statusOf(goal);
+  if (goal.targetDate && state === 'active') {
     const days = daysToDeadline(goal.targetDate);
     const overdue = days < 0;
-    const activeOverdue = overdue && goal.status === 'active';
-    metaParts.push(`<span class="goal-card-deadline${activeOverdue ? ' overdue' : ''}">${escapeHtml(overdue ? t('overdueLabel') : t('daysLeftLabel', days))}</span>`);
+    metaParts.push(`<span class="goal-card-deadline${overdue ? ' overdue' : ''}">${escapeHtml(overdue ? t('overdueLabel') : t('daysLeftLabel', days))}</span>`);
   }
   // Скільки ціль зайняла — головне число ретроспективи, тож стоїть на самій
-  // картці, а не лише в підсумку над списком.
-  if (goal.status === 'done') {
+  // картці, а не лише в підсумку під списком.
+  if (state === 'done') {
     const sp = Review.goalSpan(goal, { startIso: createdIso(goal) });
     if (sp && sp.days !== null) {
       metaParts.push(`<span class="goal-card-days">${escapeHtml(sp.days === 0 ? t('goalSpanSameDay') : t('goalSpanDays', sp.days))}</span>`);
@@ -925,26 +782,22 @@ function goalCardHtml(goal) {
   }
   // Ціль, перенесена з минулого місяця, має про це сказати: інакше липнева
   // серед серпневих виглядала б як щойно заведена.
-  if (horizon === 'month' && statusFilter !== 'done') {
+  if (horizon === 'month') {
     const own = Review.monthKeyOf(goal, { startIso: createdIso(goal) });
     if (own && own !== viewMonth) {
       metaParts.push(`<span class="goal-carried">${escapeHtml(t('carriedFrom', monthLabel(own)))}</span>`);
     }
   }
-  const statusBadge = goal.status !== 'active'
-    ? `<span class="goal-card-status-badge">${escapeHtml(goal.status === 'done' ? t('statusDone') : t('statusArchived'))}</span>`
-    : '';
-  // Обрана ціль підсвічена: у режимі двох колонок інакше не видно, чию саме
-  // сторінку показує права колонка.
+  // Значка стану на картці немає: стан написаний над групою, у якій вона
+  // стоїть, і писати те саме вдруге на кожній картці — шум.
   const selected = goal.id === activeDetailGoalId ? ' selected' : '';
   return `
-    <div class="card goal-card${selected}" data-open-goal="${goal.id}">
+    <div class="card goal-card state-${state}${selected}" data-open-goal="${goal.id}">
       <div class="goal-card-top">
         <div>
           <span class="category-chip ${categoryColorClass(goal.category)}">${escapeHtml(categoryLabel(goal.category))}</span>
           <div class="goal-card-title">${escapeHtml(goal.title)}</div>
         </div>
-        ${statusBadge}
       </div>
       ${metaParts.length ? `<div class="goal-card-meta">${metaParts.join('')}</div>` : ''}
     </div>`;
@@ -952,11 +805,6 @@ function goalCardHtml(goal) {
 
 function goalsOfHorizon() {
   if (horizon !== 'month') return goals.filter((g) => horizonOf(g) === 'year');
-  // Ретроспектива дивиться НАЗАД через місяці — у неї свій перемикач періоду
-  // («за рік / за весь час»), і місячна рамка його б душила: на вкладці
-  // лишились би тільки цілі, закриті цього місяця. Тому у фільтрі
-  // «Завершені» місяць не обмежує, і заголовок місяця там теж ховається.
-  if (statusFilter === 'done') return goals.filter((g) => horizonOf(g) === 'month');
   return Review.goalsOfMonth(goals, viewMonth, {
     currentMonth: todayISO().slice(0, 7),
     startIsoOf: createdIso,
@@ -984,7 +832,7 @@ function shiftViewMonth(delta) {
 function renderMonthHeader() {
   const el = document.getElementById('monthHeader');
   if (!el) return;
-  if (horizon !== 'month' || statusFilter === 'done') { el.innerHTML = ''; return; }
+  if (horizon !== 'month') { el.innerHTML = ''; return; }
   const current = todayISO().slice(0, 7);
   el.innerHTML = `
     <div class="month-header">
@@ -1002,34 +850,24 @@ function renderMonthHeader() {
   });
 }
 
-/** Цілі, які зараз у списку: горизонт плюс обраний статус. */
+/** Цілі, які зараз у списку: горизонт плюс обрана категорія. */
 function visibleGoals() {
   const scoped = goalsOfHorizon();
-  return statusFilter ? scoped.filter((g) => g.status === statusFilter) : scoped;
+  return categoryFilter === null ? scoped : scoped.filter((g) => (g.category || '') === categoryFilter);
 }
 
-/** Порядок груп — той самий, що в списку категорій, а не алфавітний: людина
- *  сама його й склала. Категорія, якої в списку вже немає (стара ціль), стає
- *  власною групою в кінці, а не зникає. */
+/** Список, розкладений по станах у сталому порядку: спершу те, над чим
+ *  працюють, потім зроблене, потім закинуте. Порожні групи не малюються. */
 function goalGroups(list) {
-  const order = goalCategories.map((c) => c.id);
-  const seen = [];
-  list.forEach((g) => {
-    const id = g.category || '';
-    if (seen.indexOf(id) === -1) seen.push(id);
-  });
-  seen.sort((a, b) => {
-    const ia = order.indexOf(a), ib = order.indexOf(b);
-    return (ia === -1 ? order.length : ia) - (ib === -1 ? order.length : ib);
-  });
-  return seen.map((id) => ({ id, goals: list.filter((g) => (g.category || '') === id) }));
+  return STATUSES
+    .map((state) => ({ state, goals: list.filter((g) => statusOf(g) === state) }))
+    .filter((grp) => grp.goals.length);
 }
 
-/** Цілі в тому порядку, в якому вони стоять на екрані. У двох колонках список
- *  згрупований, тож «перша» там — перша у ПЕРШІЙ групі, а не в сирому списку. */
+/** Цілі в тому порядку, в якому вони стоять на екрані: перша — перша у
+ *  ПЕРШІЙ групі, а не в сирому списку. */
 function goalsInDisplayOrder(list) {
-  if (!isSplitView()) return list;
-  return goalGroups(list).reduce((acc, g) => acc.concat(g.goals), []);
+  return goalGroups(list).reduce((acc, grp) => acc.concat(grp.goals), []);
 }
 
 function renderGoalsList() {
@@ -1040,18 +878,16 @@ function renderGoalsList() {
     // питання на різних вкладках.
     const title = horizon === 'month' ? t('emptyMonthNamed', monthLabel(viewMonth)) : t('emptyYearTitle');
     const sub = horizon === 'month' ? t('emptyMonthSub') : t('emptyYearSub');
-    el.innerHTML = `<div class="empty-state"><div class="title">${escapeHtml(title)}</div><div>${escapeHtml(sub)}</div></div>`;
+    el.innerHTML = `<div class="empty-state"><div class="title">${escapeHtml(title)}</div><div>${escapeHtml(sub)}</div></div>${retroHtml()}`;
     return;
   }
-  // У вузькій колонці двох-колонкового вигляду категорія стає РОЗДІЛЬНИКОМ:
-  // порожні категорії при цьому просто не малюються — на відміну від
-  // колонки-стопки на кожну, де п'ять із восьми стояли б порожніми, а
-  // місячний вид дав би колонки заввишки в одну картку. На телефоні список
-  // лишається суцільним: там групи лише додали б прокрутки.
-  el.innerHTML = isSplitView()
-    ? goalGroups(list).map((grp) =>
-      `<div class="goal-group-label">${escapeHtml(categoryLabel(grp.id))}</div>${grp.goals.map(goalCardHtml).join('')}`).join('')
-    : list.map(goalCardHtml).join('');
+  // Заголовок групи — це СТАН, а не категорія: категорії переїхали в рядок
+  // фільтра над списком, і другий раз групувати за ними означало б показати
+  // те саме двічі. Стан же інакше ніде не видно: значок на кожній картці був
+  // би шумом, а список без поділу змішував би закрите з живим.
+  el.innerHTML = goalGroups(list).map((grp) =>
+    `<div class="goal-group-label">${escapeHtml(t(STATUS_LABEL[grp.state]))}</div>${grp.goals.map(goalCardHtml).join('')}`
+  ).join('') + retroHtml();
   el.querySelectorAll('[data-open-goal]').forEach((card) => {
     card.addEventListener('click', () => showGoalDetail(card.dataset.openGoal));
   });
@@ -1076,15 +912,15 @@ function isSplitView() {
 function showGoalDetail(id) {
   activeDetailGoalId = id;
   autoSelectedGoal = false;
-  subscribeToActions(id);
-  document.getElementById('journalInput').value = '';
   setScreen('detail');
   renderCurrentScreen();
 }
 function showDashboard() {
+  // Нотатку, набрану й не дописану, зберігаємо перед виходом: у списку її
+  // вже нікуди буде повернути.
+  flushNotes();
   activeDetailGoalId = null;
   autoSelectedGoal = false;
-  stopActions();
   setScreen('dashboard');
   renderCurrentScreen();
 }
@@ -1115,415 +951,171 @@ document.getElementById('bnMonth').addEventListener('click', () => selectHorizon
 document.getElementById('bnYear').addEventListener('click', () => selectHorizon('year'));
 
 // ---- Рендер: деталі цілі ----
+// Тут лишилось рівно те, з чого ціль тепер складається: навіщо вона, у якому
+// вона стані й що людина про неї написала.
+//
+// Пішли звідси: серія з кнопкою «зробив крок сьогодні», сітка відміток за
+// вісім тижнів, банер рятунку серії, «що заважає найчастіше», банер довгої
+// перерви, список щоденних дій і стрічка щоденника. Усе це трималось на
+// щоденній галочці, і ціль на вісім місяців отримувала щовечора питання
+// «так/ні» — механіку звички, накинуту на те, що звичкою не є.
 function renderGoalDetail(goal) {
   document.getElementById('detailTitleLabel').textContent = goal.title;
   document.getElementById('detailEditBtn').onclick = () => openGoalForm(goal);
 
-  const statusBadge = goal.status !== 'active'
-    ? `<span class="goal-card-status-badge">${escapeHtml(goal.status === 'done' ? t('statusDone') : t('statusArchived'))}</span>`
-    : '';
   document.getElementById('detailBadgesRow').innerHTML =
-    `<span class="category-chip ${categoryColorClass(goal.category)}">${escapeHtml(categoryLabel(goal.category))}</span>${statusBadge}`;
+    `<span class="category-chip ${categoryColorClass(goal.category)}">${escapeHtml(categoryLabel(goal.category))}</span>`;
 
   document.getElementById('detailWhyBlock').innerHTML = goal.why
     ? `<div class="why-block">“${escapeHtml(goal.why)}”</div>` : '';
 
-  renderLapseBanner(goal);
+  renderStatusSwitch(goal);
+  renderNotes(goal);
+}
 
-  renderActionsBlock(goal.id);
+// Перемикач стану. Раніше на цьому місці стояв рядок із трьох різнорідних
+// кнопок — «Виконано», «Поставити на паузу», «Перенести в архів», — і з них
+// геть не читалось, що це один вибір із кількох, а не три різні дії.
+//
+// Тепер це перемикач: три стани поруч, поточний підсвічений. Натиснути на
+// вже обраний — не помилка й не «зняти», а просто нічого: стан у цілі є
+// завжди, і порожнього значення серед них немає.
+function renderStatusSwitch(goal) {
+  const el = document.getElementById('detailStatusRow');
+  const current = statusOf(goal);
+  el.innerHTML = `
+    <div class="section-label">${escapeHtml(t('statusLabel'))}</div>
+    <div class="status-switch" role="group">
+      ${STATUSES.map((state) => `
+        <button type="button" class="status-opt state-${state}${state === current ? ' selected' : ''}"
+          data-status="${state}"${state === current ? ' aria-pressed="true"' : ''}>${escapeHtml(t(STATUS_LABEL[state]))}</button>`).join('')}
+    </div>`;
+  el.querySelectorAll('[data-status]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      if (btn.dataset.status === current) return;
+      setGoalStatus(goal.id, btn.dataset.status);
+    });
+  });
+}
 
-  // Рятунок серії показуємо тільки тоді, коли є що рятувати: вчора
-  // пропущено, а до того ланцюг тягнувся. Якщо рятунок на паузі — чесно
-  // кажемо, коли він знову буде, а не мовчимо.
-  const rescue = Streak.rescueState(goal, todayISO());
-  const rescueEl = document.getElementById('detailRescueBlock');
-  if (rescue && rescue.available) {
-    rescueEl.innerHTML = `
-      <div class="rescue-banner">
-        <span>${escapeHtml(t('rescueMsg', rescue.lost))}</span>
-        <button type="button" id="rescueBtn">${escapeHtml(t('rescueBtn'))}</button>
-      </div>`;
-    document.getElementById('rescueBtn').addEventListener('click', () => rescueStreak(goal.id));
-  } else if (rescue) {
-    rescueEl.innerHTML = `<div class="rescue-banner waiting"><span>${escapeHtml(t('rescueWait', rescue.cooldownLeft))}</span></div>`;
-  } else {
-    rescueEl.innerHTML = '';
+// ---- Нотатки ----
+//
+// Одне вільне поле на ціль замість щоденника. Щоденник був стрічкою окремих
+// записів із датами, і його головна вада була саме в стрічці: дописати рядок
+// до вчорашньої думки не виходило — доводилось заводити другий запис, — а
+// звʼязного тексту про ціль не складалось ніколи.
+//
+// Зберігається саме поле, а не кнопка «зберегти»: текст, який треба окремо
+// підтверджувати, губиться щоразу, коли сторінку закривають на півдумці.
+// Пишемо через паузу після останньої літери, а не на кожну — інакше на
+// сторінку з тисячею символів пішла б тисяча записів у базу.
+const NOTES_DEBOUNCE_MS = 800;
+// Чия саме нотатка зараз у полі. Порівняння з ним — єдине, що відрізняє
+// «людина відкрила іншу ціль» від «приїхав знімок тієї самої».
+let notesGoalId = null;
+let notesTimer = null;
+let notesSavedTimer = null;
+
+function renderNotes(goal) {
+  const el = document.getElementById('goalNotes');
+  const incoming = Review.notesText(goal);
+  if (notesGoalId !== goal.id) {
+    // Спершу дописуємо те, що лишилось від попередньої цілі: інакше швидкий
+    // перехід між цілями з'їдав би останню фразу.
+    flushNotes();
+    notesGoalId = goal.id;
+    el.value = incoming;
+    autoGrow(el);
+    setNotesState('');
+    return;
   }
-
-  const streak = computeStreak(goal.checkins);
-  const checkedToday = (goal.checkins || []).includes(todayISO());
-  document.getElementById('detailStreakRow').innerHTML = `
-    <button type="button" class="streak-btn${checkedToday ? ' checked-today' : ''}" id="streakToggleBtn">
-      <span>${checkedToday ? '✓' : '🔥'}</span>
-      <span>${escapeHtml(checkedToday ? t('checkinBtnLabelDone') : t('checkinBtnLabel'))}</span>
-      ${streak > 0 ? `<span class="streak-count">${streak}</span>` : ''}
-    </button>`;
-  document.getElementById('streakToggleBtn').addEventListener('click', () => toggleTodayCheckin(goal.id));
-
-  renderCheckinGrid(goal);
-  renderBlockers(goal);
-  renderPauseRow(goal);
-  renderJournalList(goal);
+  // Та сама ціль. Знімки приїжджають і на наш власний запис, тож поле, у
+  // якому зараз пишуть (або чий запис ще не пішов), не чіпаємо: інакше текст
+  // стрибав би під пальцями.
+  if (notesTimer || document.activeElement === el) return;
+  if (el.value !== incoming) { el.value = incoming; autoGrow(el); }
 }
 
-// Сітка відміток. Серія показує лише ПОТОЧНИЙ ланцюг — і однаково виглядає
-// в того, хто відмічався тричі на тиждень пів року, і в того, хто вчора
-// почав. Сітка показує частоту: де густо, де діри, і чи ритм узагалі був.
-const GRID_WEEKS = 8;
-
-function renderCheckinGrid(goal) {
-  const el = document.getElementById('detailGridBlock');
-  if (!el) return;
-  // Порожня сітка нічого не каже, а місце займає: показуємо, коли є хоч
-  // одна відмітка.
-  if (!((goal.checkins || []).length)) { el.innerHTML = ''; return; }
-  const grid = Streak.checkinGrid(goal, todayISO(), GRID_WEEKS);
-  const cells = grid.map((week) => week.map((d) => {
-    const cls = ['grid-cell'];
-    if (d.future) cls.push('future');
-    else if (d.done) cls.push('done');
-    else if (d.blocked) cls.push('blocked');
-    if (d.today) cls.push('today');
-    return `<span class="${cls.join(' ')}" title="${escapeHtml(d.date)}"></span>`;
-  }).join('')).join('');
-  el.innerHTML = `
-    <div class="grid-block">
-      <div class="section-label">${escapeHtml(t('gridLabel'))}</div>
-      <div class="grid">${cells}</div>
-      <div class="grid-legend">
-        <span><i class="grid-key done"></i>${escapeHtml(t('gridDone'))}</span>
-        <span><i class="grid-key blocked"></i>${escapeHtml(t('gridBlocked'))}</span>
-      </div>
-    </div>`;
+function setNotesState(text) {
+  const el = document.getElementById('notesState');
+  if (el) el.textContent = text;
 }
 
-// Повернення після довгої перерви.
-//
-// Так помирає більшість довгих цілей: тиждень руху, пропуск, провина — і
-// застосунок більше не відкривають. Різниця між тимчасовим збоєм і повним
-// крахом у тому, чи є куди повернутись. Досі ціль після трьох тижнів
-// мовчання зустрічала обірваною серією й вердиктом «не встигаєш», тобто
-// рівно тим, від чого й тікають.
-//
-// Тому тут — три виходи й жодного докору. Нічого не робиться само: банер
-// каже, що сталось, а вирішує людина.
-function renderLapseBanner(goal) {
-  const el = document.getElementById('detailLapseBlock');
-  if (!el) return;
-  const l = Review.lapse(goal, todayISO(), { startIso: createdIso(goal) });
-  if (!l) { el.innerHTML = ''; return; }
-  el.innerHTML = `
-    <div class="lapse">
-      <div class="lapse-title">${escapeHtml(l.everMoved ? t('lapseTitle', l.days) : t('lapseNeverTitle', l.days))}</div>
-      <div class="lapse-sub">${escapeHtml(t('lapseSub'))}</div>
-      <div class="lapse-actions">
-        <button type="button" class="lapse-btn primary" id="lapseRestartBtn">${escapeHtml(t('lapseRestart'))}</button>
-        <button type="button" class="lapse-btn" id="lapseEditBtn">${escapeHtml(t('lapseEdit'))}</button>
-        <button type="button" class="lapse-btn" id="lapsePauseBtn">${escapeHtml(t('lapsePause'))}</button>
-      </div>
-    </div>`;
-  document.getElementById('lapseRestartBtn').addEventListener('click', () => restartGoal(goal.id));
-  document.getElementById('lapseEditBtn').addEventListener('click', () => openGoalForm(goal));
-  document.getElementById('lapsePauseBtn').addEventListener('click', () => setGoalStatus(goal.id, 'paused'));
+function scheduleNotesSave() {
+  if (notesTimer) clearTimeout(notesTimer);
+  notesTimer = setTimeout(() => { notesTimer = null; saveNotes(notesGoalId); }, NOTES_DEBOUNCE_MS);
 }
 
-// Перезапуск НЕ стирає історію: пройдені кілометри лишаються пройденими, а
-// журнал — журналом. Міняється лише точка, від якої ведеться відлік, бо
-// рахувати темп від дати, з якої півроку нічого не було, безглуздо.
-async function restartGoal(goalId) {
-  if (!auth.currentUser) return;
+/** Дописати негайно те, що чекає на таймері. Викликається перед переходом на
+ *  іншу ціль і коли сторінку згортають чи закривають. */
+function flushNotes() {
+  if (!notesTimer) return;
+  clearTimeout(notesTimer);
+  notesTimer = null;
+  saveNotes(notesGoalId);
+}
+
+async function saveNotes(goalId) {
+  const el = document.getElementById('goalNotes');
+  if (!goalId || !auth.currentUser || !el) return;
+  const goal = goals.find((g) => g.id === goalId);
+  // Текст не змінився — писати нічого: знімок від власного запису інакше
+  // ганяв би коло «запис → знімок → запис».
+  if (goal && Review.notesText(goal) === el.value.trim()) return;
   await db.collection('users').doc(auth.currentUser.uid).collection('goals').doc(goalId).update({
-    restartedAt: todayISO(),
+    journal: Review.notesPatch(el.value),
     updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-  }).catch((err) => console.error('restartGoal:', err));
+  }).catch((err) => console.error('saveNotes:', err));
+  if (notesGoalId !== goalId) return;
+  setNotesState(t('notesSaved'));
+  if (notesSavedTimer) clearTimeout(notesSavedTimer);
+  notesSavedTimer = setTimeout(() => setNotesState(''), 2000);
 }
 
-// Намір «якщо ситуація — то дія». Порожню половину зберігаємо як є: людина
+document.getElementById('goalNotes').addEventListener('input', (e) => {
+  autoGrow(e.target);
+  setNotesState('');
+  scheduleNotesSave();
+});
+// Пішли з поля — не чекаємо паузи: людина вже перевела погляд деінде.
+document.getElementById('goalNotes').addEventListener('blur', flushNotes);
+// Вкладку згорнули, закрили чи перемкнули — останній шанс дописати.
+// `pagehide` разом із `visibilitychange`, бо на телефоні перший не завжди
+// встигає, а другий не буває при закритті.
+window.addEventListener('pagehide', flushNotes);
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') flushNotes();
+});
+
 // createdAt приходить із Firestore як Timestamp; тим, хто рахує вік цілі
-// (ретроспектива, довга перерва, місяць «свого» місяця), потрібен день, від
-// якого вести відлік. Якщо поля ще немає (щойно створений документ до
-// підтвердження сервером) — review.js сам візьме найраніший слід у даних.
+// (ретроспектива, місяць «свого» місяця), потрібен день, від якого вести
+// відлік. Якщо поля ще немає (щойно створений документ до підтвердження
+// сервером) — review.js сам візьме найраніший слід у даних.
 function createdIso(goal) {
-  // Після перезапуску відлік цілі ведеться від нього, а не від заведення:
-  // саме в цьому й полягає «почати заново».
+  // Після перезапуску відлік цілі ведеться від нього, а не від заведення.
+  // Самої кнопки «почати заново» більше немає — вона піднімала обірвану
+  // серію, — але цілі, у яких дата вже проставлена, мають і далі рахуватись
+  // від неї: інакше їхня тривалість у ретроспективі стрибнула б.
   if (goal && typeof goal.restartedAt === 'string' && goal.restartedAt.length === 10) {
     return goal.restartedAt;
   }
   const ts = goal && goal.createdAt;
-  if (ts && typeof ts.toDate === 'function') return Streak.isoOf(ts.toDate());
+  if (ts && typeof ts.toDate === 'function') return Review.isoOf(ts.toDate());
   return null;
 }
 
-// ---- Що заважає найчастіше ----
-// Щовечора застосунок питає «що завадило» і зберігає відповідь. Рахунок за
-// частотою вже вмів goals/streak.js (blockerStats), але показувати його було
-// ніде: цифри бачив лише помічник у чаті. Виходило, що людина відповідає на
-// питання, відповіді на яке ніколи не отримує.
-//
-// Три найчастіші причини, не більше: список із десяти — це вже не висновок,
-// а сирий журнал. Одна-єдина причина теж показується: коли пропуск був один,
-// це все одно чесна відповідь на «чому не виходить».
-function renderBlockers(goal) {
-  const el = document.getElementById('detailBlockersBlock');
-  const top = Streak.blockerStats(goal, 3);
-  if (!top.length) { el.innerHTML = ''; return; }
-  el.innerHTML = `
-    <div class="blockers">
-      <div class="blockers-title">${escapeHtml(t('blockersTitle'))}</div>
-      <div class="blockers-row">
-        ${top.map((b) => `<span class="blocker-chip">${escapeHtml(blockerLabel(b.reason))}<span class="blocker-count">${b.count}</span></span>`).join('')}
-      </div>
-    </div>`;
-}
-
-// ---- Пауза й архів ----
-// Пауза — це середнє між «ціль тисне» і «поховати в архів»: ціль жива, але
-// свідомо відкладена, і серія при цьому не рветься.
-//
-// Архів колись жив лише в екрані щотижневого огляду. Огляд прибрано, а
-// фільтр «Архів» лишився й далі показує складене туди раніше, тож кнопка
-// переїхала сюди — інакше застосунок умів би показувати архів, але не вмів
-// би нічого туди покласти.
-// «Виконано» стоїть тут, поруч із паузою й архівом, бо це така сама зміна
-// статусу. Раніше воно жило в банері «усі віхи пройдено» — тобто ціль без
-// віх завершити було нічим, хоч фільтр «Завершені» в застосунку є.
-function renderPauseRow(goal) {
-  const el = document.getElementById('detailPauseRow');
-  if (goal.status === 'done' || goal.status === 'archived') { el.innerHTML = ''; return; }
-  const paused = goal.status === 'paused';
-  el.innerHTML = `
-    <div class="pause-row">
-      <button type="button" class="pause-btn primary" id="markDoneBtn">${escapeHtml(t('markGoalDoneBtn'))}</button>
-      <button type="button" class="pause-btn" id="pauseToggleBtn">${escapeHtml(paused ? t('resumeBtn') : t('pauseBtn'))}</button>
-      <button type="button" class="pause-btn" id="archiveGoalBtn">${escapeHtml(t('archiveBtn'))}</button>
-    </div>`;
-  document.getElementById('markDoneBtn').addEventListener('click', () => {
-    setGoalStatus(goal.id, 'done');
-  });
-  document.getElementById('pauseToggleBtn').addEventListener('click', () => {
-    setGoalStatus(goal.id, paused ? 'active' : 'paused');
-  });
-  document.getElementById('archiveGoalBtn').addEventListener('click', () => {
-    setGoalStatus(goal.id, 'archived');
-  });
-}
-
-// ---- Щоденні дії ----
-function subscribeToActions(goalId) {
-  if (unsubscribeActions) { unsubscribeActions(); unsubscribeActions = null; }
-  goalActions = [];
-  if (!auth.currentUser || !goalId) return;
-  unsubscribeActions = db.collection('users').doc(auth.currentUser.uid).collection('tasks')
-    .where('goalId', '==', goalId)
-    .onSnapshot((snap) => {
-      goalActions = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-      if (currentScreen === 'detail' && activeDetailGoalId === goalId) {
-        renderActionsBlock(goalId);
-      }
-    }, (err) => console.error('actions:', err));
-}
-
-function stopActions() {
-  if (unsubscribeActions) { unsubscribeActions(); unsubscribeActions = null; }
-  goalActions = [];
-}
-
-/** Показуємо невиконані й те, що закрито сьогодні. Учорашні галочки тут
- *  тільки заважали б: список щоденних дій має лишатись коротким. */
-function visibleActions() {
-  const today = todayISO();
-  return goalActions
-    // Виконане показуємо ще сьогодні — інакше галочка змушувала б рядок
-    // зникнути з-під пальця. Дата виконання приходить із сервера з
-    // затримкою, тож поки її немає, орієнтуємось на день, на який дія
-    // ставилась.
-    .filter((a) => !a.done || a.dueDate === today || completedToday(a))
-    .sort((a, b) => (a.done === b.done ? String(a.dueDate || '').localeCompare(String(b.dueDate || '')) : (a.done ? 1 : -1)));
-}
-
-function completedToday(task) {
-  const at = task.completedAt;
-  if (!at) return false;
-  // Поки запис не долетів до сервера, у знімку лежить не Timestamp, а те,
-  // що поклав клієнт, — приймаємо обидва.
-  const d = typeof at.toDate === 'function' ? at.toDate() : (at instanceof Date ? at : null);
-  if (!d) return false;
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` === todayISO();
-}
-
-function renderActionsBlock(goalId) {
-  const host = document.getElementById('detailActionsBlock');
-  if (!host) return;
-  const list = visibleActions();
-  const today = todayISO();
-  host.innerHTML = `
-    <div class="actions-block">
-      <div class="section-label">${escapeHtml(t('actionsLabel'))}</div>
-      ${list.length
-        ? list.map((a) => {
-            const overdue = !a.done && a.dueDate && a.dueDate < today;
-            return `
-        <div class="action-row${a.done ? ' done' : ''}">
-          <button type="button" class="action-check${a.done ? ' checked' : ''}" data-action-toggle="${a.id}" aria-label="done">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
-          </button>
-          <div>
-            <div class="action-title">${escapeHtml(a.title || '')}</div>
-            ${overdue ? `<div class="action-due overdue">${escapeHtml(t('actionOverdue'))}</div>` : ''}
-          </div>
-        </div>`;
-          }).join('')
-        : `<div class="actions-empty">${escapeHtml(t('actionsEmpty'))}</div>`}
-      <div class="action-add-row">
-        <input type="text" id="actionInput" maxlength="200" placeholder="${escapeHtml(t('actionPlaceholder'))}">
-        <button type="button" class="action-add-btn" id="actionAddBtn">+</button>
-      </div>
-      <div class="field-hint">${escapeHtml(t('actionsHint'))}</div>
-    </div>`;
-
-  host.querySelectorAll('[data-action-toggle]').forEach((btn) => {
-    btn.addEventListener('click', () => toggleAction(btn.dataset.actionToggle, goalId));
-  });
-  const input = document.getElementById('actionInput');
-  const commit = () => {
-    const title = input.value.trim();
-    if (!title) return;
-    input.value = '';
-    addAction(goalId, title);
-  };
-  document.getElementById('actionAddBtn').addEventListener('click', commit);
-  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); commit(); } });
-}
-
-// Дія — звичайне завдання, тому поля тут ті самі, що й у формі завдання:
-// інакше правила Firestore відкинули б документ, а сторінка «Завдання»
-// не знала б, що з ним робити.
-async function addAction(goalId, title, dueDate) {
+async function setGoalStatus(goalId, state) {
   if (!auth.currentUser) return;
-  await db.collection('users').doc(auth.currentUser.uid).collection('tasks').add({
-    title: title.slice(0, 200),
-    notes: '', done: false, completedAt: null,
-    priority: null, tags: [],
-    dueDate: dueDate || todayISO(), dueTime: null,
-    estimateMin: null, recurrence: null,
-    reminderAt: null, notifiedAt: null,
-    subtasks: [],
-    goalId,
-    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-  }).catch((err) => console.error('addAction:', err));
-}
-
-async function toggleAction(taskId, goalId) {
-  const task = goalActions.find((a) => a.id === taskId);
-  if (!task || !auth.currentUser) return;
-  const done = !task.done;
-  await db.collection('users').doc(auth.currentUser.uid).collection('tasks').doc(taskId).update({
-    done,
-    completedAt: done ? firebase.firestore.FieldValue.serverTimestamp() : null,
-    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-  }).catch((err) => console.error('toggleAction:', err));
-  if (done) markGoalCheckin(goalId);
-}
-
-// Знята галочка чекін НЕ прибирає: до одного дня могли вести кілька дій,
-// та й мовчки скасовувати вже відзначений день було б несподівано.
-async function markGoalCheckin(goalId) {
-  const goal = goals.find((g) => g.id === goalId);
-  if (!goal || !auth.currentUser) return;
-  const result = Streak.applyCheckin(goal, todayISO());
-  if (!result) return;
-  await db.collection('users').doc(auth.currentUser.uid).collection('goals').doc(goalId).update({
-    checkins: result.checkins, updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-  }).catch((err) => console.error('markGoalCheckin:', err));
-}
-
-function renderJournalList(goal) {
-  const entries = [...(goal.journal || [])].sort((a, b) => b.createdAt - a.createdAt);
-  const el = document.getElementById('journalList');
-  if (!entries.length) {
-    el.innerHTML = `<div class="empty-state" style="padding:20px 10px;"><div>${escapeHtml(t('journalEmpty'))}</div></div>`;
-    return;
-  }
-  const locale = LOCALE_MAP[currentLang] || 'uk-UA';
-  el.innerHTML = entries.map((entry) => {
-    const dateLabel = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }).format(new Date(entry.createdAt));
-    return `<div class="journal-entry"><div class="journal-entry-text">${escapeHtml(entry.text)}</div><div class="journal-entry-date">${escapeHtml(dateLabel)}</div></div>`;
-  }).join('');
-}
-document.getElementById('journalAddBtn').addEventListener('click', () => {
-  if (!activeDetailGoalId) return;
-  const input = document.getElementById('journalInput');
-  const text = input.value.trim();
-  if (!text) return;
-  addJournalEntry(activeDetailGoalId, text);
-  input.value = '';
-});
-
-// ---- Дії над ціллю: усі — повний read-modify-write масиву з живого
-// стану `goals` (Firestore SDK не вміє точково оновити елемент масиву
-// об'єктів), і серверний updatedAt при кожному записі. ----
-// Додаємо, а не задаємо: людина думає «пробіг ще 2 км», а не «тепер у мене
-// 6.4». Нижче нуля не опускаємось — відʼємний пробіг ні про що не каже.
-// Рятунок дописує вчорашній день у чекіни й лишає слід у rescues — інакше
-// рятувати можна було б щодня, і серія перестала б щось означати.
-async function rescueStreak(goalId) {
-  const goal = goals.find((g) => g.id === goalId);
-  if (!goal || !auth.currentUser) return;
-  const result = Streak.applyRescue(goal, todayISO());
-  if (!result) return;
-  await db.collection('users').doc(auth.currentUser.uid).collection('goals').doc(goalId).update({
-    checkins: result.checkins, rescues: result.rescues,
-    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-  }).catch((err) => console.error('rescueStreak:', err));
-}
-
-// «Не вийшло» — теж відповідь. Записуємо причину, щоб через місяць було
-// видно, що саме заважає найчастіше, а не самий лише факт пропуску.
-async function logBlocker(goalId, reason) {
-  const goal = goals.find((g) => g.id === goalId);
-  if (!goal || !auth.currentUser) return;
-  const result = Streak.applyBlocker(goal, reason, todayISO());
-  if (!result) return;
-  await db.collection('users').doc(auth.currentUser.uid).collection('goals').doc(goalId).update({
-    blockers: result.blockers, updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-  }).catch((err) => console.error('logBlocker:', err));
-}
-
-async function toggleTodayCheckin(goalId) {
-  const goal = goals.find((g) => g.id === goalId);
-  if (!goal || !auth.currentUser) return;
-  const today = todayISO();
-  const has = (goal.checkins || []).includes(today);
-  let next = has
-    ? (goal.checkins || []).filter((d) => d !== today)
-    : [...new Set([...(goal.checkins || []), today])].sort();
-  if (next.length > 400) next = next.slice(next.length - 400); // ISO-рядки сортуються хронологічно — обрізаємо найстаріші
-  await db.collection('users').doc(auth.currentUser.uid).collection('goals').doc(goalId).update({
-    checkins: next, updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-  }).catch((err) => console.error('toggleTodayCheckin:', err));
-}
-
-async function addJournalEntry(goalId, text) {
-  const goal = goals.find((g) => g.id === goalId);
-  if (!goal || !auth.currentUser) return;
-  // createdAt — саме клієнтський Date.now(), а не serverTimestamp(): останній
-  // заборонений усередині елемента масиву в Firestore.
-  let next = [...(goal.journal || []), { id: uid4(), text: text.slice(0, 2000), createdAt: Date.now() }];
-  if (next.length > 200) next = next.slice(next.length - 200);
-  await db.collection('users').doc(auth.currentUser.uid).collection('goals').doc(goalId).update({
-    journal: next, updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-  }).catch((err) => console.error('addJournalEntry:', err));
-}
-
-async function setGoalStatus(goalId, status) {
-  if (!auth.currentUser) return;
-  // completedAt — день, коли ціль закрили. Без нього ретроспектива могла б
-  // хіба вгадувати тривалість за останнім слідом у даних; а якщо ціль
-  // відкривають назад, стара дата має піти разом зі статусом.
+  // completedAt — день, коли питання закрили, яким би не була відповідь:
+  // пишеться і для «виконано», і для «не виконано». Ретроспектива від нього
+  // рахує тривалість (і бере лише виконані — див. closedOn у review.js), а
+  // вкладка місяця з нього знає, що перенесену ціль, закриту сьогодні, треба
+  // лишити перед очима, а не відправити назад у її давній місяць.
+  // Ціль, відкриту назад у роботу, стара дата супроводжувати не має.
   const patch = {
-    status, updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-    completedAt: status === 'done' ? todayISO() : null,
+    status: STATUS_DB[state] || 'active',
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    completedAt: state === 'active' ? null : todayISO(),
   };
   await db.collection('users').doc(auth.currentUser.uid).collection('goals').doc(goalId)
     .update(patch).catch((err) => console.error('setGoalStatus:', err));
@@ -1728,7 +1320,10 @@ async function saveGoalForm() {
       await col.add({
         ...payload,
         status: 'active',
+        // СПАДЩИНА. Відміток у застосунку немає, але правило вимагає поле.
         checkins: [],
+        // Нотатки цілі лежать саме тут — див. goals/review.js. Нова ціль
+        // заводиться без них.
         journal: [],
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       });

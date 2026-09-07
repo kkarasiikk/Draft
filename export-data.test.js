@@ -3,12 +3,12 @@ const E = require('./export-data');
 // Мінімальний словник: тестуємо структуру, а не переклади.
 const L = {
   sheetTx: 'Транзакції', sheetSavings: 'Заощадження', sheetSavingsGoals: 'Цілі заощаджень',
-  sheetNotes: 'Нотатки', sheetCats: 'Категорії', sheetLifeGoals: 'Цілі', sheetJournal: 'Щоденник цілей',
+  sheetNotes: 'Нотатки', sheetCats: 'Категорії', sheetLifeGoals: 'Цілі', sheetGoalNotes: 'Нотатки цілей',
   sheetTasks: 'Завдання', sheetWorkouts: 'Тренування',
   colDate: 'Дата', colType: 'Тип', colCategory: 'Категорія', colAmount: 'Сума', colCurrency: 'Валюта',
   colNote: 'Нотатка', colGoal: 'Ціль', colName: 'Назва', colCreated: 'Створено', colUpdated: 'Оновлено',
   colTitle: 'Заголовок', colContent: 'Зміст', colStatus: 'Статус', colDeadline: 'Дедлайн',
-  colCheckins: 'Чекінів', colWhy: 'Навіщо', colDone: 'Виконано', colTime: 'Час', colPriority: 'Пріоритет',
+  colWhy: 'Навіщо', colDone: 'Виконано', colTime: 'Час', colPriority: 'Пріоритет',
   colTags: 'Теги', colEstimate: 'Хвилин', colRepeat: 'Повтор', colSubtasks: 'Підзадачі',
   colCompleted: 'Завершено', colExercise: 'Вправа', colMuscle: 'Група', colSets: 'Підходів',
   colDetails: 'Підходи', colVolume: 'Обсяг, кг',
@@ -33,7 +33,7 @@ const DATA = {
     targetValue: 42.2, currentValue: 10, unit: 'км', why: 'хочу дожити до 90',
     milestones: [{ title: '10 км', done: true }, { title: '21 км', done: false }],
     checkins: ['2026-08-18', '2026-08-19'],
-    journal: [{ text: 'перший забіг', createdAt: '2026-08-18T10:00:00Z' }],
+    journal: [{ text: 'перший забіг', createdAt: 1755511200000 }],
   }],
   tasks: [
     { title: 'Купити молоко', done: false, dueDate: '2026-08-20', priority: 'high', tags: ['дім'], subtasks: [] },
@@ -50,7 +50,7 @@ const sheet = (keys, name) => E.buildSheets(keys, DATA, L).find((s) => s.name ==
 describe('buildSheets', () => {
   test('віддає лише обрані розділи, у сталому порядку', () => {
     expect(E.buildSheets(['workout', 'goals'], DATA, L).map((s) => s.name))
-      .toEqual([L.sheetLifeGoals, L.sheetJournal, L.sheetWorkouts]);
+      .toEqual([L.sheetLifeGoals, L.sheetGoalNotes, L.sheetWorkouts]);
     expect(E.buildSheets([], DATA, L)).toEqual([]);
   });
 
@@ -90,9 +90,9 @@ describe('бюджет', () => {
 });
 
 describe('цілі', () => {
-  test('ціль іде рядком: назва, статус, відмітки', () => {
+  test('ціль іде рядком: назва, категорія, статус', () => {
     const row = sheet(['goals'], L.sheetLifeGoals).rows[0];
-    expect(row[L.colCheckins]).toBe(2);
+    expect(row[L.colTitle]).toBe('Пробігти марафон');
     expect(row[L.colStatus]).toBe('Активна');
   });
 
@@ -107,11 +107,20 @@ describe('цілі', () => {
     expect(rows[1][L.colDeadline]).toBe('');
   });
 
-  test('щоденник — окремим аркушем, із назвою цілі', () => {
-    const rows = sheet(['goals'], L.sheetJournal).rows;
+  // Нотатки — один рядок на ціль, а не рядок на запис: поле в застосунку
+  // одне, і старий щоденник із кількох записів читається одним текстом.
+  test('нотатки — окремим аркушем, по рядку на ціль', () => {
+    const rows = sheet(['goals'], L.sheetGoalNotes).rows;
     expect(rows).toHaveLength(1);
     expect(rows[0][L.colGoal]).toBe('Пробігти марафон');
     expect(rows[0][L.colContent]).toBe('перший забіг');
+  });
+
+  test('ціль без нотаток порожнього рядка не додає', () => {
+    const rows = E.buildSheets(['goals'], { goals: [
+      { title: 'Без нотаток', status: 'active', milestones: [], checkins: [], journal: [] },
+    ] }, L).find((x) => x.name === L.sheetGoalNotes).rows;
+    expect(rows).toEqual([]);
   });
 });
 

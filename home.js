@@ -42,7 +42,6 @@ const STRINGS = {
     budgetTitle: 'Бюджет', budgetSub: 'витрати й доходи',
     sumLoading: '…',
     sumBudget: (s) => `цього місяця ${s}`,
-    sumStreak: (n) => `серія ${n} ${plural(n, { one: 'день', few: 'дні', many: 'днів', other: 'дня' })}`,
     sumGoalsPending: (n) => `${n} без кроку сьогодні`,
     sumWorkoutToday: 'сьогодні тренувався',
     sumGoalDays: (days) => days < 0 ? 'дедлайн минув' : `${days} дн. лишилось`,
@@ -54,9 +53,6 @@ const STRINGS = {
     sumWorkoutAgo: (n) => `востаннє ${n} ${plural(n, { one: 'день', few: 'дні', many: 'днів', other: 'дня' })} тому`,
     addExpense: 'Витрата', addExpenseHint: 'сума, категорія, опис',
     addTask: 'Завдання', addTaskHint: 'на сьогодні або з датою',
-    addGoalStep: 'Крок до цілі',
-    addGoalStepHint: (n) => `${n} ${plural(n, { one: 'ціль', few: 'цілі', many: 'цілей', other: 'цілі' })} без кроку`,
-    addGoalStepNone: 'сьогодні всі відмічені', addGoalStepNoGoals: 'цілей ще немає',
     calPrev: 'Попередній період', calNext: 'Наступний період',
     calBackToday: 'Вернутись у сьогодні',
     quickClose: 'Закрити',
@@ -74,7 +70,6 @@ const STRINGS = {
     unsavedSub: 'Є незбережені зміни. Якщо вийти зараз, вони пропадуть.',
     unsavedSave: 'Зберегти', unsavedDiscard: 'Не зберігати', unsavedKeep: 'Продовжити редагування',
     addGoal: 'Нова ціль', addGoalHint: 'на місяць або на рік',
-    addGoalPickHint: 'зарахувати крок',
     addWorkout: 'Тренування', addWorkoutHint: 'вправи й підходи',
     todayTitle: 'Сьогодні',
     todayCount: (n) => `${n} ${plural(n, { one: 'пункт', few: 'пункти', many: 'пунктів', other: 'пункту' })}`,
@@ -132,7 +127,6 @@ const STRINGS = {
     budgetTitle: 'Бюджет', budgetSub: 'расходы и доходы',
     sumLoading: '…',
     sumBudget: (s) => `в этом месяце ${s}`,
-    sumStreak: (n) => `серия ${n} ${plural(n, { one: 'день', few: 'дня', many: 'дней', other: 'дня' })}`,
     sumGoalsPending: (n) => `${n} без шага сегодня`,
     sumWorkoutToday: 'сегодня тренировался',
     sumGoalDays: (days) => days < 0 ? 'дедлайн прошёл' : `${days} дн. осталось`,
@@ -144,9 +138,6 @@ const STRINGS = {
     sumWorkoutAgo: (n) => `последний раз ${n} ${plural(n, { one: 'день', few: 'дня', many: 'дней', other: 'дня' })} назад`,
     addExpense: 'Расход', addExpenseHint: 'сумма, категория, описание',
     addTask: 'Задача', addTaskHint: 'на сегодня или с датой',
-    addGoalStep: 'Шаг к цели',
-    addGoalStepHint: (n) => `${n} ${plural(n, { one: 'цель', few: 'цели', many: 'целей', other: 'цели' })} без шага`,
-    addGoalStepNone: 'сегодня все отмечены', addGoalStepNoGoals: 'целей ещё нет',
     calPrev: 'Предыдущий период', calNext: 'Следующий период',
     calBackToday: 'Вернуться в сегодня',
     quickClose: 'Закрыть',
@@ -164,7 +155,6 @@ const STRINGS = {
     unsavedSub: 'Есть несохранённые изменения. Если выйти сейчас, они пропадут.',
     unsavedSave: 'Сохранить', unsavedDiscard: 'Не сохранять', unsavedKeep: 'Продолжить редактирование',
     addGoal: 'Новая цель', addGoalHint: 'на месяц или на год',
-    addGoalPickHint: 'засчитать шаг',
     addWorkout: 'Тренировка', addWorkoutHint: 'упражнения и подходы',
     todayTitle: 'Сегодня',
     todayCount: (n) => `${n} ${plural(n, { one: 'пункт', few: 'пункта', many: 'пунктов', other: 'пункта' })}`,
@@ -222,7 +212,6 @@ const STRINGS = {
     budgetTitle: 'Budżet', budgetSub: 'wydatki i dochody',
     sumLoading: '…',
     sumBudget: (s) => `w tym miesiącu ${s}`,
-    sumStreak: (n) => `seria ${n} ${plural(n, { one: 'dzień', few: 'dni', many: 'dni', other: 'dnia' })}`,
     sumGoalsPending: (n) => `${n} bez kroku dziś`,
     sumWorkoutToday: 'dziś trenowałeś',
     sumGoalDays: (days) => days < 0 ? 'termin minął' : `zostało ${days} dni`,
@@ -234,9 +223,6 @@ const STRINGS = {
     sumWorkoutAgo: (n) => `ostatnio ${n} ${plural(n, { one: 'dzień', few: 'dni', many: 'dni', other: 'dnia' })} temu`,
     addExpense: 'Wydatek', addExpenseHint: 'kwota, kategoria, opis',
     addTask: 'Zadanie', addTaskHint: 'na dziś lub z datą',
-    addGoalStep: 'Krok do celu',
-    addGoalStepHint: (n) => `${n} ${plural(n, { one: 'cel', few: 'cele', many: 'celów', other: 'celu' })} bez kroku`,
-    addGoalStepNone: 'dziś wszystkie odhaczone', addGoalStepNoGoals: 'nie ma jeszcze celów',
     calPrev: 'Poprzedni okres', calNext: 'Następny okres',
     calBackToday: 'Wróć do dziś',
     quickClose: 'Zamknij',
@@ -254,7 +240,6 @@ const STRINGS = {
     unsavedSub: 'Są niezapisane zmiany. Jeśli teraz wyjdziesz, przepadną.',
     unsavedSave: 'Zapisz', unsavedDiscard: 'Nie zapisuj', unsavedKeep: 'Wróć do edycji',
     addGoal: 'Nowy cel', addGoalHint: 'na miesiąc lub na rok',
-    addGoalPickHint: 'zalicz krok',
     addWorkout: 'Trening', addWorkoutHint: 'ćwiczenia i serie',
     todayTitle: 'Dziś',
     todayCount: (n) => `${n} ${plural(n, { one: 'pozycja', few: 'pozycje', many: 'pozycji', other: 'pozycji' })}`,
@@ -312,7 +297,6 @@ const STRINGS = {
     budgetTitle: 'Budget', budgetSub: 'spending & income',
     sumLoading: '…',
     sumBudget: (s) => `this month ${s}`,
-    sumStreak: (n) => `${n}-day streak`,
     sumGoalsPending: (n) => `${n} with no step today`,
     sumWorkoutToday: 'trained today',
     sumGoalDays: (days) => days < 0 ? 'deadline passed' : `${days} days left`,
@@ -324,9 +308,6 @@ const STRINGS = {
     sumWorkoutAgo: (n) => `last ${n} ${plural(n, { one: 'day', other: 'days' })} ago`,
     addExpense: 'Expense', addExpenseHint: 'amount, category, note',
     addTask: 'Task', addTaskHint: 'for today or with a date',
-    addGoalStep: 'Step toward a goal',
-    addGoalStepHint: (n) => `${n} ${plural(n, { one: 'goal', other: 'goals' })} without a step`,
-    addGoalStepNone: 'all marked today', addGoalStepNoGoals: 'no goals yet',
     calPrev: 'Previous period', calNext: 'Next period',
     calBackToday: 'Back to today',
     quickClose: 'Close',
@@ -344,7 +325,6 @@ const STRINGS = {
     unsavedSub: 'You have unsaved changes. Leaving now discards them.',
     unsavedSave: 'Save', unsavedDiscard: 'Discard', unsavedKeep: 'Keep editing',
     addGoal: 'New goal', addGoalHint: 'monthly or yearly',
-    addGoalPickHint: 'count the step',
     addWorkout: 'Workout', addWorkoutHint: 'exercises and sets',
     todayTitle: 'Today',
     todayCount: (n) => `${n} ${plural(n, { one: 'item', other: 'items' })}`,
@@ -778,11 +758,11 @@ document.getElementById('forgotPasswordLink').addEventListener('click', async ()
 // однієї кнопки.
 const EXPORT_LABELS = {
   uk: { sheetTx: 'Транзакції', sheetSavings: 'Заощадження', sheetSavingsGoals: 'Цілі заощаджень', sheetNotes: 'Нотатки', sheetCats: 'Категорії',
-        sheetLifeGoals: 'Цілі', sheetJournal: 'Щоденник цілей', sheetTasks: 'Завдання', sheetWorkouts: 'Тренування',
+        sheetLifeGoals: 'Цілі', sheetGoalNotes: 'Нотатки цілей', sheetTasks: 'Завдання', sheetWorkouts: 'Тренування',
         colDate: 'Дата', colType: 'Тип', colCategory: 'Категорія', colAmount: 'Сума', colCurrency: 'Валюта', colNote: 'Нотатка',
         colGoal: 'Ціль', colName: 'Назва', colCreated: 'Створено', colUpdated: 'Оновлено', colTitle: 'Заголовок', colContent: 'Зміст',
         colStatus: 'Статус', colDeadline: 'Дедлайн',
-        colCheckins: 'Чекінів', colWhy: 'Навіщо',
+        colWhy: 'Навіщо',
         colDone: 'Виконано', colTime: 'Час', colPriority: 'Пріоритет', colTags: 'Теги', colEstimate: 'Хвилин',
         colRepeat: 'Повтор', colSubtasks: 'Підзадачі', colCompleted: 'Завершено',
         colExercise: 'Вправа', colMuscle: 'Група', colSets: 'Підходів', colDetails: 'Підходи', colVolume: 'Обсяг, кг',
@@ -792,11 +772,11 @@ const EXPORT_LABELS = {
         yes: 'Так', no: 'Ні',
         defaultGoalName: 'Заощадження', noTitle: 'Без заголовка' },
   ru: { sheetTx: 'Транзакции', sheetSavings: 'Накопления', sheetSavingsGoals: 'Цели накоплений', sheetNotes: 'Заметки', sheetCats: 'Категории',
-        sheetLifeGoals: 'Цели', sheetJournal: 'Дневник целей', sheetTasks: 'Задачи', sheetWorkouts: 'Тренировки',
+        sheetLifeGoals: 'Цели', sheetGoalNotes: 'Заметки целей', sheetTasks: 'Задачи', sheetWorkouts: 'Тренировки',
         colDate: 'Дата', colType: 'Тип', colCategory: 'Категория', colAmount: 'Сумма', colCurrency: 'Валюта', colNote: 'Заметка',
         colGoal: 'Цель', colName: 'Название', colCreated: 'Создано', colUpdated: 'Обновлено', colTitle: 'Заголовок', colContent: 'Содержимое',
         colStatus: 'Статус', colDeadline: 'Дедлайн',
-        colCheckins: 'Чекинов', colWhy: 'Зачем',
+        colWhy: 'Зачем',
         colDone: 'Выполнено', colTime: 'Время', colPriority: 'Приоритет', colTags: 'Теги', colEstimate: 'Минут',
         colRepeat: 'Повтор', colSubtasks: 'Подзадачи', colCompleted: 'Завершено',
         colExercise: 'Упражнение', colMuscle: 'Группа', colSets: 'Подходов', colDetails: 'Подходы', colVolume: 'Объём, кг',
@@ -806,11 +786,11 @@ const EXPORT_LABELS = {
         yes: 'Да', no: 'Нет',
         defaultGoalName: 'Накопления', noTitle: 'Без заголовка' },
   pl: { sheetTx: 'Transakcje', sheetSavings: 'Oszczędności', sheetSavingsGoals: 'Cele oszczędnościowe', sheetNotes: 'Notatki', sheetCats: 'Kategorie',
-        sheetLifeGoals: 'Cele', sheetJournal: 'Dziennik celów', sheetTasks: 'Zadania', sheetWorkouts: 'Treningi',
+        sheetLifeGoals: 'Cele', sheetGoalNotes: 'Notatki celów', sheetTasks: 'Zadania', sheetWorkouts: 'Treningi',
         colDate: 'Data', colType: 'Typ', colCategory: 'Kategoria', colAmount: 'Kwota', colCurrency: 'Waluta', colNote: 'Notatka',
         colGoal: 'Cel', colName: 'Nazwa', colCreated: 'Utworzono', colUpdated: 'Zaktualizowano', colTitle: 'Tytuł', colContent: 'Treść',
         colStatus: 'Status', colDeadline: 'Termin',
-        colCheckins: 'Odhaczeń', colWhy: 'Po co',
+        colWhy: 'Po co',
         colDone: 'Zrobione', colTime: 'Godzina', colPriority: 'Priorytet', colTags: 'Tagi', colEstimate: 'Minut',
         colRepeat: 'Powtarzanie', colSubtasks: 'Podzadania', colCompleted: 'Ukończono',
         colExercise: 'Ćwiczenie', colMuscle: 'Partia', colSets: 'Serii', colDetails: 'Serie', colVolume: 'Objętość, kg',
@@ -820,11 +800,11 @@ const EXPORT_LABELS = {
         yes: 'Tak', no: 'Nie',
         defaultGoalName: 'Oszczędności', noTitle: 'Bez tytułu' },
   en: { sheetTx: 'Transactions', sheetSavings: 'Savings', sheetSavingsGoals: 'Savings goals', sheetNotes: 'Notes', sheetCats: 'Categories',
-        sheetLifeGoals: 'Goals', sheetJournal: 'Goal journal', sheetTasks: 'Tasks', sheetWorkouts: 'Workouts',
+        sheetLifeGoals: 'Goals', sheetGoalNotes: 'Goal notes', sheetTasks: 'Tasks', sheetWorkouts: 'Workouts',
         colDate: 'Date', colType: 'Type', colCategory: 'Category', colAmount: 'Amount', colCurrency: 'Currency', colNote: 'Note',
         colGoal: 'Goal', colName: 'Name', colCreated: 'Created', colUpdated: 'Updated', colTitle: 'Title', colContent: 'Content',
         colStatus: 'Status', colDeadline: 'Deadline',
-        colCheckins: 'Check-ins', colWhy: 'Why',
+        colWhy: 'Why',
         colDone: 'Done', colTime: 'Time', colPriority: 'Priority', colTags: 'Tags', colEstimate: 'Minutes',
         colRepeat: 'Repeat', colSubtasks: 'Subtasks', colCompleted: 'Completed',
         colExercise: 'Exercise', colMuscle: 'Muscle', colSets: 'Sets', colDetails: 'Set detail', colVolume: 'Volume, kg',
@@ -992,24 +972,6 @@ async function toggleHomeTask(taskId) {
     completedAt: done ? firebase.firestore.FieldValue.serverTimestamp() : null,
     updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
   }).catch((err) => console.error('toggleHomeTask:', err));
-  // Виконане завдання, привʼязане до цілі, відмічає її день — так само, як
-  // у самому розділі завдань.
-  if (done && task.goalId) stepHomeGoal(task.goalId);
-}
-
-async function stepHomeGoal(goalId) {
-  const goal = (homeData.goals || []).find((g) => g.id === goalId);
-  if (!goal || !auth.currentUser || !window.GoalStreak) return;
-  const result = window.GoalStreak.applyCheckin(goal, todayISO());
-  if (!result) return;
-  goal.checkins = result.checkins;
-  renderToday();
-  renderCalendar();
-  renderLine();
-  await db.collection('users').doc(auth.currentUser.uid).collection('goals').doc(goalId).update({
-    checkins: result.checkins,
-    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-  }).catch((err) => console.error('stepHomeGoal:', err));
 }
 
 // ---- «+»: одна кнопка на всі чотири розділи ----
@@ -1020,14 +982,9 @@ async function stepHomeGoal(goalId) {
 // варті перезавантаження сторінки й дороги назад. Ціль і тренування ведуть
 // у розділ за #new — там не форма, а екран, і стиснути його до аркуша
 // означало б зробити другу, гіршу форму замість наявної.
-//
-// «Крок до цілі» — виняток серед винятків: це не форма, а один тап, і код
-// для нього на головній уже є. Тому рядок не веде нікуди, а розкриває список
-// активних цілей просто тут.
 const ADD_ICONS = {
   expense: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5.5" width="19" height="13" rx="2.5"/><path d="M2.5 10h19"/></svg>',
   task: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6.5l2 2 3.5-3.5"/><path d="M3 17.5l2 2 3.5-3.5"/><path d="M12 7h9"/><path d="M12 18h9"/></svg>',
-  goal: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg>',
   newGoal: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="11" cy="13" r="7.5"/><circle cx="11" cy="13" r="3.4"/><path d="M18.5 3v6M21.5 6h-6"/></svg>',
   workout: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M6.5 8v8"/><path d="M17.5 8v8"/><path d="M3.5 10.5v3"/><path d="M20.5 10.5v3"/><path d="M6.5 12h11"/></svg>',
 };
@@ -1047,19 +1004,12 @@ function renderAddSheet() {
   const host = document.getElementById('addChoices');
   if (!host) return;
 
-  // Крок можна зарахувати лише в ціль, яку сьогодні ще не відмічали, — та
-  // сама черга, що й у списку «Сьогодні».
-  const pending = (homeData.goals && window.GoalStreak)
-    ? window.GoalStreak.eveningQueue(homeData.goals, todayISO()) : [];
-  // Коли крок нема куди зарахувати, рядка просто немає: неактивний він лише
-  // займав місце й читався як поламаний. Завести ціль однаково є чим —
-  // рядок «Нова ціль» стоїть поруч.
+  // Рядка «Крок до цілі» тут більше немає: щоденних відміток у цілях не
+  // лишилось, і зараховувати нічого. Ціль рухає те, що людина про неї
+  // напише, а це вже не одна кнопка, а розділ.
   host.innerHTML = [
     addRow('expense', t('addExpense'), t('addExpenseHint'), null, 'data-quick="expense"'),
     addRow('task', t('addTask'), t('addTaskHint'), null, 'data-quick="task"'),
-    pending.length
-      ? addRow('goal', t('addGoalStep'), t('addGoalStepHint', pending.length), null, 'data-add-goal')
-      : '',
     addRow('newGoal', t('addGoal'), t('addGoalHint'), 'goals/index.html#new'),
     addRow('workout', t('addWorkout'), t('addWorkoutHint'), 'workout/index.html#new'),
   ].join('');
@@ -1068,25 +1018,6 @@ function renderAddSheet() {
   // закривається — інакше вікно виїжджало б поверх власного меню.
   host.querySelectorAll('[data-quick]').forEach((btn) => {
     btn.addEventListener('click', () => { closeAddSheet(); openQuick(btn.dataset.quick); });
-  });
-
-  const goalBtn = host.querySelector('[data-add-goal]');
-  if (goalBtn) goalBtn.addEventListener('click', () => renderAddGoalList(pending));
-}
-
-/** Другий крок: яку саме ціль відмітити. Заголовка немає — рядки з тим самим
- *  значком і назвами цілей самі кажуть, що обирають; підпис «крок» лишається
- *  на кожному, щоб дія не загубилась. */
-function renderAddGoalList(pending) {
-  const host = document.getElementById('addChoices');
-  host.innerHTML = pending
-    .map((g) => addRow('goal', g.title || '', t('addGoalPickHint'), null, `data-step="${escapeHtml(g.id)}"`))
-    .join('');
-  host.querySelectorAll('[data-step]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      stepHomeGoal(btn.dataset.step);
-      closeAddSheet();
-    });
   });
 }
 

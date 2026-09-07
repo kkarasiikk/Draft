@@ -13,12 +13,9 @@ const { suggestSession, adjustForReadiness, READINESS } = require("./workout/pla
 // Ті самі категорії, що показує бюджет, доки людина їх не редагувала —
 // у профілі їх у цей момент ще немає (див. коментар у файлі).
 const { defaultCategoryList, defaultGoalCategoryList } = require("./categories-default");
-// Серія, рятунок і причини пропусків — той самий модуль, що й на сторінці
-// цілей. Правило «коли рятунок доступний» мусить бути одне.
-const goalStreak = require("./goals/streak");
-// Темп («чи встигаєш до дедлайну»). Той самий модуль, що читає сторінка
-// цілей: інакше в чаті звучала б одна оцінка, а на екрані стояла інша —
-// рівно те, чого уникає спільний streak.js.
+// Обчислення про цілі — той самий модуль, що читає сторінка цілей: місяць
+// цілі, тривалість закритої, ретроспектива, нотатки. Інакше в чаті звучало б
+// одне число, а на екрані стояло інше.
 const goalReview = require("./goals/review");
 
 // admin.initializeApp() уже викликано в index.js — тут просто перевикористовуємо
@@ -191,8 +188,7 @@ const tools = [
         notes: { type: "string", description: "Деталі, якщо є" },
         goalId: {
           type: "string",
-          description: "id довгострокової цілі, якщо це щоденна дія з неї (бери з goals_progress). " +
-            "Виконання такого завдання само відмічає день у серії цілі",
+          description: "id довгострокової цілі, якщо завдання — крок до неї (бери з goals_progress)",
         },
       },
       required: ["title"],
@@ -246,7 +242,7 @@ const tools = [
   },
   {
     name: "goals_progress",
-    description: "Довгострокові цілі: статус, дата дедлайну, серія відміток. " +
+    description: "Довгострокові цілі: статус, дата дедлайну, нотатки. " +
       "Плюс retrospective — що закрито за останній рік і скільки кожна ціль зайняла.",
     input_schema: { type: "object", properties: {} },
   },
@@ -324,43 +320,6 @@ const tools = [
         month: { type: "string", description: "Місяць місячної цілі, YYYY-MM. Лише для horizon month; за замовчуванням поточний" },
       },
       required: ["title"],
-    },
-  },
-  {
-    name: "goal_checkin",
-    description:
-      "Відзначити сьогоднішній чекін по довгостроковій цілі — це те, що тримає серію (streak). " +
-      "Спершу виклич goals_progress, щоб узяти id потрібної цілі.",
-    input_schema: {
-      type: "object",
-      properties: { id: { type: "string", description: "id цілі зі списку goals_progress" } },
-      required: ["id"],
-    },
-  },
-  {
-    name: "rescue_streak",
-    description:
-      "Врятувати серію: дописати ВЧОРАШНІЙ пропущений день, щоб ланцюг не обірвався. " +
-      "Працює лише коли пропущено рівно вчора, а до того серія тривала, і лише раз на тиждень — " +
-      "goals_progress показує в полі rescue, чи доступно. Не використовуй, щоб просто відзначити сьогодні: для цього goal_checkin.",
-    input_schema: {
-      type: "object",
-      properties: { id: { type: "string", description: "id цілі зі списку goals_progress" } },
-      required: ["id"],
-    },
-  },
-  {
-    name: "log_blocker",
-    description:
-      "Записати, що завадило сьогодні попрацювати над ціллю: «не встиг, не було часу» -> reason «не було часу». " +
-      "Один запис на день — повторний виклик замінює попередній. Не вигадуй причину сам: пиши те, що сказала людина.",
-    input_schema: {
-      type: "object",
-      properties: {
-        id: { type: "string", description: "id цілі зі списку goals_progress" },
-        reason: { type: "string", description: "Коротко, кількома словами: «не було часу», «втома», «забув»" },
-      },
-      required: ["id", "reason"],
     },
   },
   {
@@ -478,7 +437,7 @@ const tools = [
   {
     name: "edit_goal",
     description:
-      "Змінити довгострокову ціль: формулювання, сферу, дедлайн або статус. id бери з goals_progress.",
+      "Змінити довгострокову ціль: формулювання, сферу, нотатки або статус. id бери з goals_progress.",
     input_schema: {
       type: "object",
       properties: {
@@ -487,9 +446,12 @@ const tools = [
         category: { type: "string", description: "ID категорії цілі зі списку в контексті" },
         why: { type: "string" },
         horizon: { type: "string", enum: ["month", "year"], description: "Перенести ціль між вкладками «Місяць» і «Рік»" },
-        status: { type: "string", enum: ["active", "done", "archived", "paused"],
-          description: "paused — ціль жива, але свідомо відкладена (відпустка, зміна обставин): " +
-            "серія не рветься й ціль не тисне" },
+        notes: { type: "string",
+          description: "Нотатки цілі — одне вільне поле. ЗАМІНЮЄ те, що там було: щоб дописати, " +
+            "візьми поточний текст із goals_progress і надішли його разом із доповненням." },
+        status: { type: "string", enum: ["active", "done", "archived"],
+          description: "active — ціль у роботі, done — виконана, archived — не виконана " +
+            "(відклали, передумали, не вийшло)" },
       },
       required: ["id"],
     },
@@ -644,9 +606,6 @@ async function executeTool(uid, name, input, ctx) {
   if (name === "edit_task") return editTask(uid, input);
   if (name === "edit_workout") return editWorkout(uid, input, ctx);
   if (name === "edit_goal") return editGoal(uid, input, ctx);
-  if (name === "goal_checkin") return goalCheckin(uid, input);
-  if (name === "rescue_streak") return rescueStreak(uid, input, ctx);
-  if (name === "log_blocker") return logBlocker(uid, input, ctx);
 
   return { output: { ok: false, error: "unknown tool" }, isError: true };
 }
@@ -863,27 +822,10 @@ async function completeTask(uid, input, ctx) {
   });
   const task = doc.data() || {};
   const title = task.title || "";
-  // Завдання з цілі само відмічає її день у серії — так само, як на сторінці.
-  // Інакше людина, що просить «познач, що пробіжку зробив», отримала б
-  // галочку в завданнях і мертву серію в цілях.
-  const checkedIn = task.goalId ? await checkinFromTask(uid, task.goalId, ctx) : null;
   return {
-    output: { ok: true, id, title, goalCheckin: checkedIn },
-    action: { kind: "task_completed", title, goal: checkedIn || undefined },
+    output: { ok: true, id, title },
+    action: { kind: "task_completed", title },
   };
-}
-
-/** Ставить чекін цілі, до якої привʼязане завдання. Повертає назву цілі,
- *  якщо день справді відмічено, і null, якщо він уже був або цілі немає. */
-async function checkinFromTask(uid, goalId, ctx) {
-  const ref = userCol(uid, "goals").doc(goalId);
-  const doc = await ref.get();
-  if (!doc.exists) return null;
-  const goal = doc.data() || {};
-  const result = goalStreak.applyCheckin(goal, ctx.today);
-  if (!result) return null;
-  await ref.update({ checkins: result.checkins, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
-  return goal.title || "";
 }
 
 // ---- Тренування ----
@@ -1276,7 +1218,7 @@ async function editGoal(uid, input, ctx) {
   const found = await loadForEdit(uid, "goals", input.id, "ціль не знайдена");
   if (found.error) return found.error;
 
-  const patch = pickPatch(input, ["title", "category", "why", "month", "status", "horizon"]);
+  const patch = pickPatch(input, ["title", "category", "why", "month", "status", "horizon", "notes"]);
   if (!Object.keys(patch).length) return { output: { ok: false, error: "нічого міняти" }, isError: true };
 
   const merged = { ...found.data, ...patch };
@@ -1290,12 +1232,16 @@ async function editGoal(uid, input, ctx) {
     // на іншому пристрої, інакше тихо переїжджала б в «Інше» від будь-якої
     // сусідньої правки: зміни статусу, дедлайну, назви.
     category: "category" in patch ? result.value.category : (found.data.category || result.value.category),
-    status: ["active", "done", "archived", "paused"].includes(patch.status) ? patch.status : (found.data.status || "active"),
-    // СПАДЩИНА. Віх у застосунку більше немає, але правила Firestore досі
-    // вимагають це поле, тож переносимо те, що вже лежить у документі.
+    // 'paused' у застосунку більше немає: статусів рівно три, і «не
+    // виконано» лежить у базі як archived — див. коментар у goals/app.js.
+    status: ["active", "done", "archived"].includes(patch.status) ? patch.status : (found.data.status || "active"),
+    // СПАДЩИНА. Віх і відміток у застосунку більше немає, але правила
+    // Firestore досі вимагають ці поля, тож переносимо те, що вже лежить
+    // у документі.
     milestones: found.data.milestones || [],
     checkins: found.data.checkins || [],
-    journal: found.data.journal || [],
+    // Нотатки цілі лежать саме в journal — див. goals/review.js.
+    journal: "notes" in patch ? goalReview.notesPatch(patch.notes) : (found.data.journal || []),
     updatedAt: admin.firestore.FieldValue.serverTimestamp(),
   };
   await found.ref.update(value);
@@ -1354,8 +1300,8 @@ async function addGoal(uid, input, ctx) {
   const now = admin.firestore.FieldValue.serverTimestamp();
   const ref = await userCol(uid, "goals").add({ ...result.value, createdAt: now, updatedAt: now });
   return {
-    // id повертаємо в тому ж раунді: інакше, щоб одразу відзначити чекін по
-    // щойно створеній цілі, моделі довелося б окремо ходити в goals_progress.
+    // id повертаємо в тому ж раунді: інакше, щоб одразу дописати нотатку до
+    // щойно створеної цілі, моделі довелося б окремо ходити в goals_progress.
     output: { ok: true, id: ref.id },
     action: {
       kind: "goal_added",
@@ -1365,75 +1311,6 @@ async function addGoal(uid, input, ctx) {
   };
 }
 
-
-// Обидві дії ідемпотентні: повторний виклик нічого не псує. Модель може
-// викликати інструмент двічі (наприклад, не розпізнавши, що вже зробила це
-// в попередньому раунді), і чекін від цього не має задвоїтись чи зникнути —
-// тому тут саме «поставити», а не «перемкнути», як у кнопці на сторінці.
-// Додаємо, а не задаємо: людина каже «пробіг ще три кілометри», а не «тепер
-// у мене 9». Нижче нуля не опускаємось.
-async function goalCheckin(uid, input) {
-  const id = typeof input.id === "string" ? input.id : "";
-  const ref = userCol(uid, "goals").doc(id);
-  const doc = await ref.get();
-  if (!doc.exists) return { output: { ok: false, error: "ціль не знайдена" }, isError: true };
-
-  const goal = doc.data() || {};
-  const today = new Date().toISOString().slice(0, 10);
-  const had = (goal.checkins || []).includes(today);
-  let checkins = had ? goal.checkins : [...new Set([...(goal.checkins || []), today])].sort();
-  // ISO-рядки сортуються хронологічно, тож зайве відрізається з початку.
-  if (checkins.length > 400) checkins = checkins.slice(checkins.length - 400);
-
-  if (!had) {
-    await ref.update({ checkins, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
-  }
-  return {
-    output: { ok: true, date: today, alreadyDone: had, totalCheckins: checkins.length },
-    action: { kind: "goal_checkin", title: goal.title || "", date: today },
-  };
-}
-
-// Рятунок і причина пропуску рахуються тим самим модулем, що й на сторінці
-// (goals/streak.js), тож у чаті та в застосунку правила збігаються до дня.
-async function rescueStreak(uid, input, ctx) {
-  const found = await loadForEdit(uid, "goals", input.id, "ціль не знайдена");
-  if (found.error) return found.error;
-
-  const state = goalStreak.rescueState(found.data, ctx.today);
-  if (!state) {
-    return { output: { ok: false, error: "рятувати нічого: вчора або відмічено, або серії до того не було" }, isError: true };
-  }
-  if (!state.available) {
-    return {
-      output: { ok: false, error: `рятунок буде доступний через ${state.cooldownLeft} дн.`, cooldownLeft: state.cooldownLeft },
-      isError: true,
-    };
-  }
-  const result = goalStreak.applyRescue(found.data, ctx.today);
-  await found.ref.update({
-    checkins: result.checkins, rescues: result.rescues,
-    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-  });
-  return {
-    output: { ok: true, day: result.day, streak: result.streak },
-    action: { kind: "streak_rescued", title: found.data.title || "", day: result.day, streak: result.streak },
-  };
-}
-
-async function logBlocker(uid, input, ctx) {
-  const found = await loadForEdit(uid, "goals", input.id, "ціль не знайдена");
-  if (found.error) return found.error;
-
-  const result = goalStreak.applyBlocker(found.data, input.reason, ctx.today);
-  if (!result) return { output: { ok: false, error: "потрібна причина" }, isError: true };
-
-  await found.ref.update({ blockers: result.blockers, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
-  return {
-    output: { ok: true, date: ctx.today, reason: result.reason, top: goalStreak.blockerStats({ blockers: result.blockers }) },
-    action: { kind: "blocker_logged", title: found.data.title || "", reason: result.reason },
-  };
-}
 
 async function goalsProgress(uid) {
   const snap = await userCol(uid, "goals").get();
@@ -1446,7 +1323,7 @@ async function goalsProgress(uid) {
     // дати, з якої півроку нічого не було.
     if (g && typeof g.restartedAt === "string" && g.restartedAt.length === 10) return g.restartedAt;
     return g && g.createdAt && typeof g.createdAt.toDate === "function"
-      ? goalStreak.isoOf(g.createdAt.toDate()) : null;
+      ? goalReview.isoOf(g.createdAt.toDate()) : null;
   };
   const allGoals = snap.docs.map((d) => ({ ...(d.data() || {}), id: d.id }));
   return {
@@ -1458,9 +1335,8 @@ async function goalsProgress(uid) {
       retrospective: goalReview.retrospective(allGoals, todayIso, { days: 365, startIsoOf }),
       goals: snap.docs.map((d) => {
         const g = d.data() || {};
-        const today = new Date().toISOString().slice(0, 10);
         return {
-          // id потрібен, щоб було чим адресувати goal_checkin —
+          // id потрібен, щоб було чим адресувати edit_goal —
           // без нього модель могла б хіба вгадувати.
           id: d.id,
           title: g.title || "",
@@ -1471,16 +1347,9 @@ async function goalsProgress(uid) {
           month: g.horizon === "month"
             ? goalReview.monthKeyOf(g, { startIso: startIsoOf(g) }) : null,
           targetDate: g.targetDate || null,
-          checkins: (g.checkins || []).length,
-          checkedInToday: (g.checkins || []).includes(today),
-          // Серію рахуємо тут, а не залишаємо моделі рахувати з дат:
-          // від неї залежить, чи взагалі пропонувати рятунок.
-          streak: goalStreak.computeStreak(g.checkins, today),
-          rescue: goalStreak.rescueState(g, today),
-          blockers: goalStreak.blockerStats(g),
-          weekMovement: goalReview.weekMovement({ ...g, id: d.id }, today),
-          // Довга перерва: скільки днів без жодного сліду.
-          lapse: goalReview.lapse({ ...g, id: d.id }, today, { startIso: startIsoOf(g) }),
+          // Нотатки цілі — єдине, що людина в ній пише вільним текстом, і
+          // саме там лежить усе, що про ціль узагалі відомо понад назву.
+          notes: goalReview.notesText(g),
         };
       }),
     },
@@ -1503,10 +1372,10 @@ function buildSystemPrompt(ctx) {
     "",
     "ГОРИЗОНТ ЦІЛЕЙ. Розділ поділений на дві вкладки: «Місяць» (що людина робить саме цього місяця) і «Рік» (куди йде загалом). Місячна ціль належить конкретному місяцю (поле month, YYYY-MM): за замовчуванням поточному, але якщо людина каже «на вересень» — постав той. У add_goal це поле horizon; за замовчуванням year. Якщо з формулювання видно масштаб — «цього місяця прочитати дві книжки» це month, «вивчити польську» це year — став його сам, не перепитуючи. Перенести ціль між вкладками можна через edit_goal horizon, а на інший місяць — через edit_goal month; дедлайн їде за місяцем сам.",
     "ПЕРЕРВА Й ПОВЕРНЕННЯ. lapse не порожнє означає, що ціль стоїть без жодного сліду два тижні або довше (days — скільки саме). Так помирає більшість довгих цілей: пропуск, провина, і застосунок більше не відкривають. Тому тут особливо важливо НЕ докоряти й не питати «чому так вийшло»: питання не в цьому, а в тому, куди повертатись. Назви факт спокійно й запропонуй один із трьох виходів — почати відлік заново (сторінка має кнопку, вона ставить restartedAt), перенести ціль на інший місяць (edit_goal), поставити на паузу. Якщо людина сама каже, що закинула ціль, — це той самий випадок, навіть коли lapse ще порожнє. Ніколи не пропонуй архів першим: архів — це для того, чого людина більше не хоче, а не для того, від чого вона просто відстала.",
-    "РЕТРОСПЕКТИВА. У goals_progress є retrospective: що закрито за останній рік, скільки кожна ціль зайняла (days), типова тривалість (medianDays), найшвидша й найдовша. Питають «що я зробив цього року», «скільки цілей закрив» — бери числа звідти, а не рахуй дати сам: те саме людина бачить на екрані у фільтрі «Завершені». Ціль, закрита до появи поля completedAt, датується останнім слідом у даних — тоді days може бути приблизним, і краще сказати «близько», ніж вдавати точність. Коли days порожній, дня заведення цілі просто немає — так і скажи, а не вигадуй тривалість. Це привід похвалити: закрита довга ціль — рідкість, і озирнутись на неї важливіше, ніж одразу питати про наступну.",
-    "ПАУЗА. Коли людина каже, що зараз не до цілі — їде, хворіє, змінились обставини — це edit_goal зі status 'paused', а НЕ архів. На паузі серія не рветься, а ціль лишається живою. Архів — це для того, чого людина більше не хоче.",
+    "РЕТРОСПЕКТИВА. У goals_progress є retrospective: що закрито за останній рік, скільки кожна ціль зайняла (days), типова тривалість (medianDays), найшвидша й найдовша. Питають «що я зробив цього року», «скільки цілей закрив» — бери числа звідти, а не рахуй дати сам: те саме людина бачить на екрані над списком закритих цілей. Ціль, закрита до появи поля completedAt, датується останнім слідом у даних — тоді days може бути приблизним, і краще сказати «близько», ніж вдавати точність. Коли days порожній, дня заведення цілі просто немає — так і скажи, а не вигадуй тривалість. Це привід похвалити: закрита довга ціль — рідкість, і озирнутись на неї важливіше, ніж одразу питати про наступну.",
+    "СТАТУС ЦІЛІ. Їх рівно три, і міняє їх edit_goal: 'active' — у роботі, 'done' — виконана, 'archived' — НЕ виконана (відклали, передумали, не вийшло). Ставити 'archived' сам не поспішай: людина може просто розповідати, що тиждень не бралась за ціль, — це ще не відмова від неї.",
     "",
-    "ЦІЛІ. Ціль рухається ВІДМІТКАМИ: кожен день, коли людина зробила крок, — це чекін, і з них складається серія. Окремої числової мети чи списку проміжних кроків у застосунку немає: якщо число важливе («пробігти 100 км»), воно стоїть у самій назві цілі. Не пропонуй завести ні число, ні віхи окремим полем: таких полів немає. add_goal створює довгострокову ціль — не плутай із завданням: «купити молоко» це add_task, «вивчити польську до літа» це add_goal. goal_checkin відзначає сьогоднішній день у серії. Якщо людина каже, що вчора пропустила, — подивись поле rescue: коли available true, запропонуй rescue_streak (дописує вчорашній день, доступно раз на тиждень). Коли каже, що сьогодні не вийшло, — спитай, що завадило, і запиши через log_blocker її словами. Не докоряй за пропуски: у полі blockers видно, що заважає найчастіше, і корисніше запропонувати, як це обійти. Інструменти беруть id, тож спершу виклич goals_progress і візьми id звідти — вгадувати id не можна. Якщо назва цілі збігається з кількома — перепитай, з якою саме. Щоденну дію з цілі («щодня бігати по 3 км») створюй через add_task із goalId — це звичайне завдання, просто привʼязане: коли його виконають, день у серії цілі відмітиться сам, окремий goal_checkin не потрібен.",
+    "ЦІЛІ. У цілі є назва, категорія, «навіщо», статус і НОТАТКИ — одне вільне поле, де людина пише про неї все. Ні числової мети, ні віх, ні щоденних відміток у застосунку немає: якщо число важливе («пробігти 100 км»), воно стоїть у самій назві. Не пропонуй завести ні число, ні віхи окремим полем: таких полів немає. add_goal створює довгострокову ціль — не плутай із завданням: «купити молоко» це add_task, «вивчити польську до літа» це add_goal. Коли людина розповідає, як просувається ціль («пробіг сьогодні ще 5 км»), і хоче це зберегти — це edit_goal із notes: візьми поточний текст із goals_progress і надішли його разом із доповненням, бо поле замінюється цілком. Не докоряй за простій: ціль на вісім місяців не мусить рухатись щодня. Інструменти беруть id, тож спершу виклич goals_progress і візьми id звідти — вгадувати id не можна. Якщо назва цілі збігається з кількома — перепитай, з якою саме. Крок до цілі («сьогодні пробігти 3 км») створюй через add_task із goalId — це звичайне завдання, просто привʼязане до цілі.",
     "",
     "ВИПРАВЛЯТИ. Помічник уміє міняти вже записане, але не вміє нічого видаляти — так і кажи, якщо просять видалити, і поясни, що це робиться в самому розділі. Перед будь-якою правкою знайди запис інструментом читання (query_transactions, list_tasks, workout_history, goals_progress, savings_summary) і візьми звідти id — вгадувати id не можна. У edit_* передавай ТІЛЬКИ ті поля, які змінюються. Виняток — exercises у edit_workout: там треба надіслати повний новий список, тож спершу прочитай наявний. Якщо під опис підходить кілька записів — перепитай, який саме.",
     "",

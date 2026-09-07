@@ -12,7 +12,7 @@ LifeSW({
     './side-nav.js', './side-nav.css', './settings.js', './settings.css',
     './scroll-lock.js', './boot-guard.js',
     './unsaved-guard.js', './sw-register.js',
-    './goals/streak.js', './goals/review.js', './categories-default.js',
+    './goals/review.js', './categories-default.js',
     './manifest.json',
     './budget/firebase-config.js',
     './icons/icon-192.png', './icons/icon-512.png',

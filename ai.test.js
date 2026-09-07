@@ -569,31 +569,15 @@ describe("executeTool", () => {
       expect(snap.docs.length).toBe(0);
     });
 
-    // id повертається одразу, щоб чекін по щойно створеній цілі не вимагав
-    // окремого походу в goals_progress.
-    test("щойно створену ціль одразу можна відзначити чекіном", async () => {
+    // id повертається одразу, щоб нотатку до щойно створеної цілі не
+    // довелось шукати окремим походом у goals_progress.
+    test("щойно створеній цілі одразу можна дописати нотатку", async () => {
       const created = await ai.executeTool("uid1", "add_goal", { title: "Марафон" }, ctx);
-      const r = await ai.executeTool("uid1", "goal_checkin", { id: created.output.id }, ctx);
+      const r = await ai.executeTool("uid1", "edit_goal",
+        { id: created.output.id, notes: "Стартую з 5 км" }, ctx);
       expect(r.output.ok).toBe(true);
-      expect(r.output.totalCheckins).toBe(1);
-    });
-
-    test("goal_checkin додає сьогоднішній день", async () => {
-      const ref = await seedGoal();
-      const r = await ai.executeTool("uid1", "goal_checkin", { id: ref.id }, ctx);
-      expect(r.output).toMatchObject({ ok: true, alreadyDone: false, totalCheckins: 1 });
-      const doc = await mockCurrent.collection("users").doc("uid1").collection("goals").doc(ref.id).get();
-      expect(doc.data().checkins).toEqual([today()]);
-    });
-
-    // Модель може викликати інструмент двічі — від цього не має ні
-    // задвоїтись, ні зникнути вже поставлений чекін.
-    test("повторний goal_checkin нічого не змінює", async () => {
-      const ref = await seedGoal({ checkins: [today()] });
-      const r = await ai.executeTool("uid1", "goal_checkin", { id: ref.id }, ctx);
-      expect(r.output.alreadyDone).toBe(true);
-      const doc = await mockCurrent.collection("users").doc("uid1").collection("goals").doc(ref.id).get();
-      expect(doc.data().checkins).toEqual([today()]);
+      const g = (await mockCurrent.collection("users").doc("uid1").collection("goals").doc(created.output.id).get()).data();
+      expect(g.journal.map((e) => e.text)).toEqual(["Стартую з 5 км"]);
     });
 
     // ---- Дедлайн, виведений із місяця ----
@@ -645,86 +629,42 @@ describe("executeTool", () => {
       expect(g.currentValue).toBeUndefined();
     });
 
-    // ---- Серія: рятунок і причини пропусків ----
-    // Правила рятунку перевіряє goals/streak.test.js — тут важливо, що
-    // інструмент справді пише в документ і не пише, коли не можна.
-    const back = (n) => {
-      const d = new Date();
-      d.setDate(d.getDate() - n);
-      return d.toISOString().slice(0, 10);
-    };
-
-    test("rescue_streak дописує вчорашній день і лишає слід", async () => {
-      const ref = await seedGoal({ checkins: [back(4), back(3), back(2)] });
-      const r = await ai.executeTool("uid1", "rescue_streak", { id: ref.id }, ctx);
-      expect(r.output).toMatchObject({ ok: true, day: back(1), streak: 4 });
-      const g = (await mockCurrent.collection("users").doc("uid1").collection("goals").doc(ref.id).get()).data();
-      expect(g.checkins).toContain(back(1));
-      expect(g.rescues).toEqual([back(1)]);
-    });
-
-    test("rescue_streak не рятує, коли вчора й так відмічено", async () => {
-      const ref = await seedGoal({ checkins: [back(2), back(1)] });
-      const r = await ai.executeTool("uid1", "rescue_streak", { id: ref.id }, ctx);
-      expect(r.isError).toBe(true);
-      const g = (await mockCurrent.collection("users").doc("uid1").collection("goals").doc(ref.id).get()).data();
-      expect(g.rescues).toBeUndefined();
-    });
-
-    // Раз на тиждень — інакше «серія» перестає щось означати, і модель має
-    // отримати не мовчазний успіх, а відмову з датою.
-    test("свіжий рятунок повертає, скільки лишилось чекати", async () => {
-      const ref = await seedGoal({ checkins: [back(4), back(3), back(2)], rescues: [back(3)] });
-      const r = await ai.executeTool("uid1", "rescue_streak", { id: ref.id }, ctx);
-      expect(r.isError).toBe(true);
-      expect(r.output.cooldownLeft).toBe(4);
-      const g = (await mockCurrent.collection("users").doc("uid1").collection("goals").doc(ref.id).get()).data();
-      expect(g.checkins).not.toContain(back(1));
-    });
-
-    test("log_blocker пише причину сьогоднішнім днем", async () => {
+    // ---- Нотатки цілі ----
+    // Одне вільне поле замість щоденника. У базі воно лежить у `journal` —
+    // правила Firestore перелічують ключі поіменно, і нове поле вимагало б
+    // їх розгортати; формат елемента лишився тим самим.
+    test("нотатка замінює те, що було, а не дописується другим записом", async () => {
       const ref = await seedGoal();
-      const r = await ai.executeTool("uid1", "log_blocker", { id: ref.id, reason: "не було часу" }, ctx);
-      expect(r.output).toMatchObject({ ok: true, date: today(), reason: "не було часу" });
+      await ai.executeTool("uid1", "edit_goal", { id: ref.id, notes: "перше" }, ctx);
+      await ai.executeTool("uid1", "edit_goal", { id: ref.id, notes: "перше\n\nдруге" }, ctx);
       const g = (await mockCurrent.collection("users").doc("uid1").collection("goals").doc(ref.id).get()).data();
-      expect(g.blockers).toEqual([{ date: today(), reason: "не було часу" }]);
+      expect(g.journal.length).toBe(1);
+      expect(g.journal[0].text).toBe("перше\n\nдруге");
     });
 
-    test("повторний log_blocker замінює сьогоднішню причину", async () => {
-      const ref = await seedGoal({ blockers: [{ date: today(), reason: "забув" }] });
-      await ai.executeTool("uid1", "log_blocker", { id: ref.id, reason: "втома" }, ctx);
+    test("порожня нотатка стирає поле, а не лишає порожній запис", async () => {
+      const ref = await seedGoal({ journal: [{ id: "j1", text: "було", createdAt: 1 }] });
+      await ai.executeTool("uid1", "edit_goal", { id: ref.id, notes: "   " }, ctx);
       const g = (await mockCurrent.collection("users").doc("uid1").collection("goals").doc(ref.id).get()).data();
-      expect(g.blockers).toEqual([{ date: today(), reason: "втома" }]);
+      expect(g.journal).toEqual([]);
     });
 
-    test("порожня причина й вигаданий id нічого не пишуть", async () => {
-      const ref = await seedGoal();
-      expect((await ai.executeTool("uid1", "log_blocker", { id: ref.id, reason: "  " }, ctx)).isError).toBe(true);
-      expect((await ai.executeTool("uid1", "log_blocker", { id: "вигаданий", reason: "втома" }, ctx)).isError).toBe(true);
-      expect((await ai.executeTool("uid1", "rescue_streak", { id: "вигаданий" }, ctx)).isError).toBe(true);
+    test("правка без нотаток їх не чіпає", async () => {
+      const ref = await seedGoal({ journal: [{ id: "j1", text: "було", createdAt: 1 }] });
+      await ai.executeTool("uid1", "edit_goal", { id: ref.id, title: "Інша назва" }, ctx);
       const g = (await mockCurrent.collection("users").doc("uid1").collection("goals").doc(ref.id).get()).data();
-      expect(g.blockers).toBeUndefined();
+      expect(g.journal.map((e) => e.text)).toEqual(["було"]);
     });
 
-    // Модель має бачити стан серії готовим числом, а не вираховувати його
-    // з чотирьохсот дат — інакше рятунок пропонувався б навмання.
-    test("goals_progress показує серію, рятунок і що заважає найчастіше", async () => {
-      await seedGoal({
-        checkins: [back(4), back(3), back(2)],
-        blockers: [{ date: back(2), reason: "не було часу" }, { date: back(3), reason: "не було часу" },
-          { date: back(5), reason: "втома" }],
-      });
+    // Старий щоденник із кількох записів читається одним текстом: нічого не
+    // губиться, а перший же запис згортає його в один елемент.
+    test("goals_progress віддає нотатки одним текстом", async () => {
+      await seedGoal({ journal: [
+        { id: "j2", text: "друге", createdAt: 2 },
+        { id: "j1", text: "перше", createdAt: 1 },
+      ] });
       const g = (await ai.executeTool("uid1", "goals_progress", {}, ctx)).output.goals[0];
-      expect(g.streak).toBe(0);
-      expect(g.rescue).toMatchObject({ day: back(1), lost: 3, available: true });
-      expect(g.blockers).toEqual([{ reason: "не було часу", count: 2 }, { reason: "втома", count: 1 }]);
-    });
-
-    test("без розриву поле rescue порожнє", async () => {
-      await seedGoal({ checkins: [back(1), today()] });
-      const g = (await ai.executeTool("uid1", "goals_progress", {}, ctx)).output.goals[0];
-      expect(g.streak).toBe(2);
-      expect(g.rescue).toBe(null);
+      expect(g.notes).toBe("перше\n\nдруге");
     });
 
     // ---- Щоденні дії з цілі ----
@@ -745,29 +685,13 @@ describe("executeTool", () => {
       expect((await col.doc(blank.output.id).get()).data().goalId).toBe(null);
     });
 
-    test("complete_task відмічає день у серії цілі", async () => {
+    // Завдання, привʼязане до цілі, більше нічого в ній не міняє: щоденних
+    // відміток немає, а ціль рухає те, що людина сама про неї напише.
+    test("виконане завдання з ціллю просто закривається", async () => {
       const goal = await seedGoal();
       const task = await ai.executeTool("uid1", "add_task", { title: "Пробігти 3 км", goalId: goal.id }, ctx);
       const r = await ai.executeTool("uid1", "complete_task", { id: task.output.id }, ctx);
-      expect(r.output.goalCheckin).toBe("Марафон");
-      const g = (await mockCurrent.collection("users").doc("uid1").collection("goals").doc(goal.id).get()).data();
-      expect(g.checkins).toEqual([today()]);
-    });
-
-    test("день, уже відмічений, не дублюється", async () => {
-      const goal = await seedGoal({ checkins: [today()] });
-      const task = await ai.executeTool("uid1", "add_task", { title: "Пробігти 3 км", goalId: goal.id }, ctx);
-      const r = await ai.executeTool("uid1", "complete_task", { id: task.output.id }, ctx);
-      expect(r.output.goalCheckin).toBe(null);
-      const g = (await mockCurrent.collection("users").doc("uid1").collection("goals").doc(goal.id).get()).data();
-      expect(g.checkins).toEqual([today()]);
-    });
-
-    test("завдання без цілі нічого не відмічає", async () => {
-      const goal = await seedGoal();
-      const task = await ai.executeTool("uid1", "add_task", { title: "Купити молоко" }, ctx);
-      const r = await ai.executeTool("uid1", "complete_task", { id: task.output.id }, ctx);
-      expect(r.output.goalCheckin).toBe(null);
+      expect(r.output).toMatchObject({ ok: true, title: "Пробігти 3 км" });
       const g = (await mockCurrent.collection("users").doc("uid1").collection("goals").doc(goal.id).get()).data();
       expect(g.checkins).toEqual([]);
     });
@@ -776,7 +700,7 @@ describe("executeTool", () => {
     test("завдання з мертвим goalId просто закривається", async () => {
       const task = await ai.executeTool("uid1", "add_task", { title: "Крок", goalId: "вигаданий" }, ctx);
       const r = await ai.executeTool("uid1", "complete_task", { id: task.output.id }, ctx);
-      expect(r.output).toMatchObject({ ok: true, goalCheckin: null });
+      expect(r.output).toMatchObject({ ok: true });
     });
 
     test("правка завдання не рве звʼязок із ціллю", async () => {
@@ -1029,19 +953,18 @@ describe("executeTool", () => {
 
   // ---- Цілі й заощадження ----
   describe("цілі й заощадження", () => {
-    test("goals_progress рахує відмітки", async () => {
+    test("goals_progress віддає назву, статус і дедлайн", async () => {
       await mockCurrent.collection("users").doc("uid1").collection("goals").add({
         title: "Вивчити польську", status: "active", targetDate: "2026-12-31",
-        milestones: [], checkins: ["2026-08-01", "2026-08-02"],
+        milestones: [], checkins: [],
       });
       const r = await ai.executeTool("uid1", "goals_progress", {}, ctx);
       expect(r.output.goals[0]).toMatchObject({
-        title: "Вивчити польську", status: "active", targetDate: "2026-12-31",
-        checkins: 2, checkedInToday: false,
+        title: "Вивчити польську", status: "active", targetDate: "2026-12-31", notes: "",
       });
     });
 
-    // Без id адресувати goal_checkin нічим — модель могла б хіба вгадувати,
+    // Без id адресувати edit_goal нічим — модель могла б хіба вгадувати,
     // а вгадані id мовчки нічого не зроблять.
     test("goals_progress віддає id цілі", async () => {
       const ref = await mockCurrent.collection("users").doc("uid1").collection("goals").add({
@@ -1216,9 +1139,9 @@ describe("категорії за замовчуванням", () => {
       const add = await ai.executeTool("uid1", "add_goal", { title: "Ціль", category: "gcat_x1" }, own);
       // Категорію тим часом видалили на іншому пристрої.
       const narrowed = { ...own, categoriesGoals: [{ id: "other", label: "Інше" }] };
-      await ai.executeTool("uid1", "edit_goal", { id: add.output.id, status: "paused" }, narrowed);
+      await ai.executeTool("uid1", "edit_goal", { id: add.output.id, status: "done" }, narrowed);
       const g = (await mockCurrent.collection("users").doc("uid1").collection("goals").doc(add.output.id).get()).data();
-      expect(g.status).toBe("paused");
+      expect(g.status).toBe("done");
       expect(g.category).toBe("gcat_x1");
     });
 

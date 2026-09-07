@@ -1,8 +1,8 @@
-// Темп цілі та щотижневий огляд (goals/review.js).
+// Чисті обчислення розділу цілей (goals/review.js).
 //
 // Перевіряємо не «функція щось повертає», а рішення, заради яких модуль
-// написаний: коли застосунок має право сказати «не встигаєш», коли зобовʼязаний
-// промовчати, і про що саме питати на огляді.
+// написаний: якому місяцю належить ціль, скільки вона прожила, що лишається
+// на екрані після її закриття і коли про дедлайн уже час озватись увечері.
 const R = require('./review');
 
 const TODAY = '2026-08-27';
@@ -40,45 +40,6 @@ describe('deadlineForMonth — дедлайн, виведений із міся�
     expect(R.deadlineForMonth('2026')).toBeNull();
     expect(R.deadlineForMonth('серпень')).toBeNull();
     expect(R.deadlineForMonth('2026-13')).toBeNull();
-  });
-});
-
-describe('weekMovement — що зрушило', () => {
-  test('рахує чекіни й записи щоденника за вікно', () => {
-    const m = R.weekMovement(goal({
-      checkins: ['2026-08-26', '2026-08-24', '2026-07-01'],
-      journal: [
-        { id: 'j1', text: 'нотатка', createdAt: new Date('2026-08-26T10:00:00').getTime() },
-        { id: 'j2', text: 'стара', createdAt: new Date('2026-01-02T10:00:00').getTime() },
-      ],
-    }), TODAY);
-
-    expect(m.checkins).toBe(2);
-    expect(m.journal).toBe(1);
-    expect(m.moved).toBe(true);
-  });
-
-  test('тиждень без жодного руху — і про це кажемо чесно', () => {
-    const m = R.weekMovement(goal({ checkins: ['2026-06-01'] }), TODAY);
-    expect(m.moved).toBe(false);
-    expect(m.checkins).toBe(0);
-  });
-
-  test('вікно включає сьогодні й не залазить у майбутнє', () => {
-    const m = R.weekMovement(goal({
-      checkins: [TODAY, '2026-09-30'],
-    }), TODAY);
-    expect(m.checkins).toBe(1);
-  });
-
-  // Запис у щоденнику — це слід, але не рух: людина могла прийти й написати,
-  // що нічого не вийшло. Рухом рахуються тільки відмітки.
-  test('сам лише запис у щоденнику рухом не вважається', () => {
-    const m = R.weekMovement(goal({
-      journal: [{ id: 'j1', text: 'нічого', createdAt: new Date('2026-08-26T10:00:00').getTime() }],
-    }), TODAY);
-    expect(m.journal).toBe(1);
-    expect(m.moved).toBe(false);
   });
 });
 
@@ -233,84 +194,6 @@ describe('retrospective — що закрито за період', () => {
   });
 });
 
-describe('lapse — довга перерва і момент повернення', () => {
-  const start = { startIso: '2026-01-01' };
-
-  test('свіжий рух — жодної перерви', () => {
-    expect(R.lapse(goal({ checkins: ['2026-08-25'] }), TODAY, start)).toBeNull();
-  });
-
-  test('тиждень без кроку — це ще не перерва, це живе життя', () => {
-    expect(R.lapse(goal({ checkins: ['2026-08-21'] }), TODAY, start)).toBeNull();
-  });
-
-  test('три тижні мовчання — перерва, і про неї варто сказати', () => {
-    const l = R.lapse(goal({ checkins: ['2026-08-06'] }), TODAY, start);
-    expect(l.days).toBe(21);
-    expect(l.lastIso).toBe('2026-08-06');
-    expect(l.everMoved).toBe(true);
-  });
-
-  test('слідом вважається будь-який рух, не лише відмітка', () => {
-    expect(R.lapse(goal({ progressLog: [{ date: '2026-08-25', delta: 3 }] }), TODAY, start)).toBeNull();
-  });
-
-  test('«не вийшло» — теж слід: людина приходила й чесно відповіла', () => {
-    expect(R.lapse(goal({
-      blockers: [{ date: '2026-08-24', reason: 'Втома' }],
-    }), TODAY, start)).toBeNull();
-  });
-
-  test('береться найсвіжіший слід, а не перший-ліпший', () => {
-    expect(R.lapse(goal({
-      checkins: ['2026-05-01'],
-      progressLog: [{ date: '2026-08-26', delta: 1 }],
-    }), TODAY, start)).toBeNull();
-  });
-
-  test('ціль без жодного руху рахується від заведення', () => {
-    const l = R.lapse(goal(), TODAY, { startIso: '2026-07-01' });
-    expect(l.days).toBe(57);
-    expect(l.everMoved).toBe(false);
-  });
-
-  test('щойно заведена ціль покинутою не виглядає', () => {
-    expect(R.lapse(goal(), TODAY, { startIso: '2026-08-25' })).toBeNull();
-  });
-
-  test('пауза мовчить: про неї свідомо не питають', () => {
-    expect(R.lapse(goal({ status: 'paused', checkins: ['2026-01-05'] }), TODAY, start)).toBeNull();
-  });
-
-  test('закриту й архівну не турбуємо', () => {
-    expect(R.lapse(goal({ status: 'done' }), TODAY, start)).toBeNull();
-    expect(R.lapse(goal({ status: 'archived' }), TODAY, start)).toBeNull();
-  });
-
-  test('відмітка з майбутнього перерву не скасовує', () => {
-    const l = R.lapse(goal({ checkins: ['2026-08-06', '2027-01-01'] }), TODAY, start);
-    expect(l.days).toBe(21);
-  });
-});
-
-describe('lapse: перезапуск — це вже повернення', () => {
-  test('після перезапуску ціль не лишається покинутою через стару відмітку', () => {
-    // Останній рух був 30 днів тому, але вчора людина натиснула «почати заново».
-    expect(R.lapse(goal({ checkins: ['2026-07-28'] }), TODAY, { startIso: '2026-08-26' })).toBeNull();
-  });
-
-  test('якщо після перезапуску знову тиша — перерва рахується від нього', () => {
-    const l = R.lapse(goal({ checkins: ['2026-01-01'] }), TODAY, { startIso: '2026-08-01' });
-    expect(l.days).toBe(26);
-    // Рух колись усе-таки був — це не та сама ситуація, що ціль без кроків.
-    expect(l.everMoved).toBe(true);
-  });
-
-  test('свіжий рух після перезапуску важливіший за сам перезапуск', () => {
-    expect(R.lapse(goal({ checkins: ['2026-08-25'] }), TODAY, { startIso: '2026-08-01' })).toBeNull();
-  });
-});
-
 describe('monthKeyOf — якого місяця ця ціль', () => {
   test('записаний місяць беремо як є', () => {
     expect(R.monthKeyOf(goal({ month: '2026-03' }))).toBe('2026-03');
@@ -351,6 +234,17 @@ describe('goalsOfMonth — що показує вкладка місяця', () 
     expect(R.goalsOfMonth(list, CUR, opts).map((g) => g.id)).toEqual(['a', 'old']);
   });
 
+  // Ціль, закриту саме цього місяця, лишаємо перед очима: інакше «Виконано»
+  // на липневій цілі змусило б її зникнути тієї ж миті, ніби дію не зарахували.
+  test('закрита цього місяця лишається у видимому місяці, хоч заведена раніше', () => {
+    const g = { id: 'g1', horizon: 'month', month: '2026-07', status: 'done', completedAt: '2026-08-14' };
+    expect(R.goalsOfMonth([g], '2026-08', { currentMonth: '2026-08' }).map((x) => x.id)).toEqual(['g1']);
+    // І в липні теж: це його місяць, і те, що там сталось, нікуди не поділось.
+    expect(R.goalsOfMonth([g], '2026-07', { currentMonth: '2026-08' }).map((x) => x.id)).toEqual(['g1']);
+    // А у вересні її вже немає — питання закрите в серпні.
+    expect(R.goalsOfMonth([g], '2026-09', { currentMonth: '2026-09' })).toEqual([]);
+  });
+
   test('закрита й архівна з минулого не переносяться — питання закрите', () => {
     const list = [
       m('done', '2026-07', { status: 'done' }),
@@ -386,5 +280,104 @@ describe('goalsOfMonth — що показує вкладка місяця', () 
     delete lost.month;
     expect(R.goalsOfMonth([lost], CUR, opts).map((g) => g.id)).toEqual(['l']);
     expect(R.goalsOfMonth([lost], '2026-07', opts)).toHaveLength(0);
+  });
+});
+
+// Арифметика днів переїхала сюди з goals/streak.js разом із рештою того, що
+// в тому файлі не було про серію. Перевірка та сама: місцевий день, не UTC.
+describe('дати', () => {
+  // `new Date('2026-08-20')` — це UTC-північ; на заході вона показує
+  // 19 серпня. Тому парсимо вручну.
+  test('shift не з’їжджає через пояси', () => {
+    expect(R.shift('2026-03-01', -1)).toBe('2026-02-28');
+    expect(R.shift('2026-12-31', 1)).toBe('2027-01-01');
+  });
+  test('daysBetween рахує повні доби', () => {
+    expect(R.daysBetween('2026-08-13', '2026-08-20')).toBe(7);
+  });
+});
+
+describe('deadlineWarnDays — «ось-ось» у кожної цілі своє', () => {
+  const g = (start, target) => ({
+    status: 'active', targetDate: target, checkins: [],
+    __start: start,
+  });
+  const opts = { startIsoOf: (x) => x.__start };
+
+  test('коротка ціль: підлога в три дні, а не частка від двох тижнів', () => {
+    // 14 днів × 0.1 = 1.4 — попереджати за півтора дня безглуздо.
+    expect(R.deadlineWarnDays(g('2026-08-20', '2026-09-03'), TODAY, opts)).toBe(3);
+  });
+
+  test('ціль на квартал попереджає приблизно за тиждень-півтора', () => {
+    // 92 дні × 0.1 ≈ 9.
+    expect(R.deadlineWarnDays(g('2026-06-01', '2026-09-01'), TODAY, opts)).toBe(9);
+  });
+
+  test('ціль на вісім місяців — не три дні співчуття, а майже місяць', () => {
+    expect(R.deadlineWarnDays(g('2026-01-01', '2026-09-01'), TODAY, opts)).toBe(24);
+  });
+
+  test('багаторічна не гуде чотири місяці — стеля 30 днів', () => {
+    expect(R.deadlineWarnDays(g('2024-01-01', '2027-01-01'), TODAY, opts)).toBe(30);
+  });
+
+  test('без дедлайну попереджати нема про що', () => {
+    expect(R.deadlineWarnDays(g('2026-01-01', null), TODAY, opts)).toBe(3);
+  });
+
+  test('коли початок невідомий, лишається обережна підлога', () => {
+    expect(R.deadlineWarnDays(g(null, '2026-12-31'), TODAY, {})).toBe(3);
+  });
+
+  // Запасний початок — найраніший слід у самих даних. Нових відміток більше
+  // не буває, але в старих цілей вони лежать, і це чесна дата початку.
+  test('запасний початок — найраніший слід у даних', () => {
+    const old = { status: 'active', targetDate: '2026-09-01', checkins: ['2026-06-01', '2026-07-01'] };
+    expect(R.deadlineWarnDays(old, TODAY, {})).toBe(9);
+  });
+});
+
+// Вечірній підсумок про цілі. Серії в ньому більше немає — лишився єдиний
+// привід озватись увечері: дедлайн, який ось-ось або вже минув.
+describe('goalsDigest — про що цілі нагадують увечері', () => {
+  const opts = { startIsoOf: (x) => x.start };
+
+  test('довга ціль потрапляє у вечірній підсумок за 20 днів до кінця', () => {
+    // Ціль на 8 місяців: поріг 24 дні, до дедлайну 20.
+    const d = R.goalsDigest([{
+      title: 'Вивчити польську', status: 'active', start: '2026-01-01',
+      targetDate: '2026-09-16', checkins: [],
+    }], TODAY, opts);
+    expect(d.deadlineTitle).toBe('Вивчити польську');
+    expect(d.deadline).toBe(20);
+  });
+
+  test('коротка ціль за 20 днів ще мовчить — там це не терміново', () => {
+    const d = R.goalsDigest([{
+      title: 'Здати звіт', status: 'active', start: '2026-08-20',
+      targetDate: '2026-09-16', checkins: [],
+    }], TODAY, opts);
+    expect(d.deadline).toBeNull();
+  });
+
+  test('прострочений дедлайн — відʼємне число, і воно найважливіше', () => {
+    const d = R.goalsDigest([
+      goal({ title: 'Здати звіт', targetDate: '2026-08-20' }),
+      goal({ title: 'Пробігти 100 км', targetDate: '2026-08-28' }),
+    ], TODAY, { deadlineDays: 3 });
+    expect(d.deadline).toBe(-7);
+    expect(d.deadlineTitle).toBe('Здати звіт');
+  });
+
+  test('закрита ціль дедлайном не турбує', () => {
+    const d = R.goalsDigest([
+      goal({ title: 'Здати звіт', targetDate: '2026-08-28', status: 'done' }),
+    ], TODAY, { deadlineDays: 3 });
+    expect(d.deadline).toBeNull();
+  });
+
+  test('порожній список нічого не вигадує', () => {
+    expect(R.goalsDigest([], TODAY)).toEqual({ deadline: null, deadlineTitle: null });
   });
 });

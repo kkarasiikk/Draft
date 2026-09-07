@@ -5,10 +5,9 @@
 // «назад» і шукати її заново — при тому що порівнювати цілі якраз і є те,
 // заради чого в розділ заходять.
 //
-// Категорії в списку — роздільники, а не колонки-стопки: колонка означала б
-// стан, крізь який ціль проходить, а категорія не змінюється. З восьми
-// категорій у місячному виді зайняті дві-три, тож п'ять колонок стояли б
-// порожніми, а зайняті були б заввишки в одну картку.
+// Список тут поділений за СТАНОМ («В роботі» / «Виконано» / «Не виконано»),
+// однаково на широкому екрані й на телефоні. Категорії, які колись були
+// роздільниками, переїхали в рядок фільтра над списком.
 const { test, expect } = require('@playwright/test');
 const { openModule } = require('./helpers');
 
@@ -74,25 +73,22 @@ test.describe('Широкий екран', () => {
     await expect(page.locator('#detailBody')).toBeHidden();
   });
 
-  test('категорії стають роздільниками, і порожніх серед них немає', async ({ page }) => {
+  // Роздільник тепер один на всі категорії — стан цілі; самі категорії стоять
+  // рядком фільтра над списком.
+  test('роздільники в списку — стани, а не категорії', async ({ page }) => {
     await openGoals(page);
-    // Рівно три: у восьми стандартних категоріях зайняті три.
-    await expect(page.locator('.goal-group-label')).toHaveCount(3);
-    await expect(page.locator('.goal-group-label')).toHaveText([/Здоров/i, /Кар/i, /Інше/i]);
-  });
-
-  test('порядок груп — той самий, що в списку категорій, а не алфавітний', async ({ page }) => {
-    // «Кар'єра» стоїть у стандартному списку раніше за «Інше», хоч за
-    // алфавітом було б навпаки.
-    await openGoals(page, [goal('a', 'Раз', 'other'), goal('b', 'Два', 'career')]);
-    await expect(page.locator('.goal-group-label')).toHaveText([/Кар/i, /Інше/i]);
+    await expect(page.locator('.goal-group-label')).toHaveText(['В роботі']);
+    await expect(page.locator('.cat-filter-row .tag-filter-chip')).not.toHaveCount(0);
   });
 
   test('перша обрана — перша у ПЕРШІЙ групі, а не в сирому списку', async ({ page }) => {
-    // У сирому списку першою йде ціль «Інше», але на екрані вище стоїть група
-    // «Кар'єра» — обиратись має та, що людина бачить першою.
-    await openGoals(page, [goal('a', 'Раз', 'other'), goal('b', 'Два', 'career')]);
-    await expect(page.locator('#detailTitleLabel')).toHaveText('Два');
+    // У сирому списку першою йде закрита ціль, але на екрані вище стоїть
+    // група «В роботі» — обиратись має та, що людина бачить першою.
+    await openGoals(page, [
+      goal('a', 'Закрита', 'other', { status: 'done' }),
+      goal('b', 'Жива', 'career'),
+    ]);
+    await expect(page.locator('#detailTitleLabel')).toHaveText('Жива');
   });
 });
 
@@ -115,8 +111,14 @@ test.describe('Телефон', () => {
     await expect(page.locator('#goalDetailScreen')).toBeHidden();
   });
 
-  test('список суцільний — групи за категоріями лише додали б прокрутки', async ({ page }) => {
-    await openGoals(page);
-    await expect(page.locator('.goal-group-label')).toHaveCount(0);
+  // Поділ за станом однаковий скрізь: він каже те, чого інакше ніде не видно,
+  // і на телефоні теж. Колись тут групували за категоріями — і саме тому на
+  // вузькому екрані групи доводилось вимикати.
+  test('поділ за станом лишається й на телефоні', async ({ page }) => {
+    await openGoals(page, [
+      goal('a', 'Жива', 'health'),
+      goal('b', 'Закрита', 'career', { status: 'done' }),
+    ]);
+    await expect(page.locator('.goal-group-label')).toHaveText(['В роботі', 'Виконано']);
   });
 });
