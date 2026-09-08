@@ -807,7 +807,7 @@ function applyStaticTranslations() {
   document.getElementById('cancelDelete').textContent = t('cancelBtn');
   document.getElementById('confirmDelete').textContent = t('deleteBtn');
   document.getElementById('bnStats').setAttribute('aria-label', t('tabStats'));
-  document.getElementById('categoriesBtn').setAttribute('aria-label', t('settingsTitle'));
+  document.getElementById('pageSettingsBtn').setAttribute('aria-label', t('settingsTitle'));
   document.getElementById('statsSettingsTitle').textContent = t('statsSettingsTitle');
   document.getElementById('statsSettingsChartsLabel').textContent = t('statsSettingsChartsLabel');
   document.getElementById('showChartPieLabel').textContent = t('statsCatTitle');
@@ -2310,13 +2310,13 @@ function selectTab(tabKey) {
   // сортування нотаток, валюта підсумку заощаджень). Тільки такі вкладки
   // лишають кнопку на широкому екрані: на решті вона вела б у те саме вікно,
   // що й «Налаштування» в бічній колонці.
-  const catBtn = document.getElementById('categoriesBtn');
+  const catBtn = document.getElementById('pageSettingsBtn');
   catBtn.classList.toggle('hidden-here', isPage);
   catBtn.classList.toggle('has-own-settings', ['stats', 'savings', 'notes'].includes(tabKey));
   document.getElementById('monthNavHeader').classList.toggle('show', showsMonth);
   document.getElementById('backToEntriesBtn').classList.toggle('show', isPage);
   document.getElementById('headerTopRow').classList.toggle('show', isPage);
-  document.getElementById('categoriesBtn').setAttribute('aria-label',
+  document.getElementById('pageSettingsBtn').setAttribute('aria-label',
     tabKey === 'stats' ? t('statsSettingsTitle') : tabKey === 'savings' ? t('savingsSettingsTitle') : tabKey === 'notes' ? t('notesSettingsTitle') : t('settingsTitle'));
   updateHeaderSectionTitle();
   if (isSavings) {
@@ -2564,7 +2564,7 @@ document.getElementById('closeSavingsForm').addEventListener('click', () => savi
 document.getElementById('savingsSubmitBtn').addEventListener('click', submitSavingsForm);
 document.getElementById('closeCategoryTx').addEventListener('click', () => document.getElementById('categoryTxOverlay').classList.remove('show'));
 document.getElementById('categoryTxOverlay').addEventListener('click', (e) => { if (e.target.id === 'categoryTxOverlay') e.currentTarget.classList.remove('show'); });
-document.getElementById('categoriesBtn').addEventListener('click', () => {
+document.getElementById('pageSettingsBtn').addEventListener('click', () => {
   if (currentTab === 'stats') {
     document.getElementById('statsSettingsOverlay').classList.add('show');
   } else if (currentTab === 'savings') {

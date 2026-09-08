@@ -114,7 +114,11 @@
   }
   .wrap{max-width:480px;margin:0 auto;padding:20px 20px 48px;}
 
-  /* ---- Верхня панель: логотип зліва, гамбургер справа (тема / мова / вихід) ---- */
+  /* ---- Верхня панель: логотип зліва, шестерня справа ---- */
+  /* Тут стояв гамбургер. Він означає «меню» — а за ним завжди були самі
+     налаштування, і зрозуміти це можна було, лише натиснувши. Шестерня
+     каже те саме, що й відкривається, і тепер вона однакова на всіх пʼяти
+     сторінках. */
   .home-topbar{display:flex;align-items:center;justify-content:flex-start;margin-bottom:8px;}
   /* Ті самі значення, що в .app-topbar-brand решти сторінок: логотип має
      виглядати однаково скрізь, а не дрібнішати на головній. */
@@ -124,15 +128,12 @@
      темний, у темній білий, і другого файлу для цього не треба. */
   .brand-mark{height:46px;width:auto;display:block;}
   .topbar-spacer{flex-grow:1;}
-  .menu-btn{background:none;border:none;cursor:pointer;color:var(--ink);padding:13px;display:flex;border-radius:10px;transition:background .2s, transform .15s;touch-action:manipulation;}
-  .menu-btn:hover{background:var(--glass-btn-bg-hover);}
+  /* Колір той самий, що в розділах: приглушений, щоб не сперечатися з
+     логотипом. Поле навколо більше — на головній це єдина кнопка шапки,
+     і промахнутись по ній не мало б бути легко. */
+  .menu-btn{background:none;border:none;cursor:pointer;color:var(--ink-muted);padding:13px;display:flex;border-radius:10px;transition:background .2s, color .2s, transform .15s;touch-action:manipulation;}
+  .menu-btn:hover{background:var(--glass-btn-bg-hover);color:var(--ink);}
   .menu-btn:active{transform:scale(.92);}
-  .menu-btn-lines{width:20px;height:16px;position:relative;display:inline-block;flex-shrink:0;}
-  .menu-btn-lines span{position:absolute;left:0;width:100%;height:2px;border-radius:2px;background:currentColor;
-    transition:top .3s cubic-bezier(.4,0,.2,1), transform .3s cubic-bezier(.4,0,.2,1), opacity .2s ease;}
-  .menu-btn-lines span:nth-child(1){top:0;}
-  .menu-btn-lines span:nth-child(2){top:7px;}
-  .menu-btn-lines span:nth-child(3){top:14px;}
   /* ---- Форма швидкого запису просто тут ----
      Рядки «Витрата» й «Завдання» більше нікуди не ведуть: форма відкривається
      на самій головній. Перехід у розділ заради двох полів коштував повного
@@ -576,7 +577,7 @@
        окремим шаром, і місце під неї сторінка звільняє сама. */
     .wrap{max-width:none;margin:0;padding:26px 40px 48px 278px;}
 
-    /* Логотип і гамбургер переїхали в бічне меню: тримати їх іще й угорі
+    /* Логотип і шестерня переїхали в бічне меню: тримати їх іще й угорі
        означало б показати ті самі дві речі двічі. */
     .home-topbar{display:none;}
 
@@ -814,8 +815,8 @@
       <circle cx="163" cy="43.5" r="22.5" fill="currentColor" stroke="none"/>
     </svg></span>
         <span class="topbar-spacer"></span>
-        <button class="menu-btn" id="menuBtn" aria-label="Меню">
-          <span class="menu-btn-lines" aria-hidden="true"><span></span><span></span><span></span></span>
+        <button class="menu-btn" id="pageSettingsBtn" aria-label="Налаштування">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.1"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a1.9 1.9 0 1 1-2.7 2.7l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.03 1.56v.17a1.9 1.9 0 1 1-3.8 0v-.1a1.7 1.7 0 0 0-1.11-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a1.9 1.9 0 1 1-2.7-2.7l.06-.06A1.7 1.7 0 0 0 5 15a1.7 1.7 0 0 0-1.56-1.04H3.3a1.9 1.9 0 1 1 0-3.8h.1A1.7 1.7 0 0 0 5 9.05a1.7 1.7 0 0 0-.34-1.87l-.06-.06a1.9 1.9 0 1 1 2.7-2.7l.06.06a1.7 1.7 0 0 0 1.87.34H9.3a1.7 1.7 0 0 0 1.03-1.56V3.3a1.9 1.9 0 1 1 3.8 0v.1a1.7 1.7 0 0 0 1.03 1.56 1.7 1.7 0 0 0 1.87-.34l.06-.06a1.9 1.9 0 1 1 2.7 2.7l-.06.06A1.7 1.7 0 0 0 19.4 9v.09a1.7 1.7 0 0 0 1.56 1.03h.17a1.9 1.9 0 1 1 0 3.8h-.1A1.7 1.7 0 0 0 19.4 15z"/></svg>
         </button>
       </div>
 

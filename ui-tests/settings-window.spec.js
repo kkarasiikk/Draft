@@ -1,7 +1,7 @@
 // Вікно налаштувань — одне на всі пʼять сторінок.
 //
 // До нього налаштування жили в чотирьох різних місцях: тема й мова — в
-// гамбургері головної, валюта й категорії витрат — у «⋮» бюджету,
+// шестерні головної, валюта й категорії витрат — у шестерні бюджету,
 // нагадування — в «⋮» завдань, категорії цілей — усередині форми цілі. Тож
 // тут стережеться передусім те, заради чого вікно й робилось: воно
 // відкривається звідусіль, і вкладка показує ЛИШЕ свої параметри.
@@ -12,9 +12,9 @@ const { openModule } = require('./helpers');
 // Кнопка розділу — телефонна: на широкому екрані її немає, там вхід один,
 // із бічної колонки (див. окремий блок нижче).
 const PAGES = [
-  ['головна', 'index.html', '#homeScreen', '#menuBtn', null],
-  ['бюджет', 'budget/index.html', '#appScreen', '#categoriesBtn', 'Гроші'],
-  ['завдання', 'tasks/index.html', '#appScreen', '#pageMenuBtn', 'Завдання'],
+  ['головна', 'index.html', '#homeScreen', '#pageSettingsBtn', null],
+  ['бюджет', 'budget/index.html', '#appScreen', '#pageSettingsBtn', 'Гроші'],
+  ['завдання', 'tasks/index.html', '#appScreen', '#pageSettingsBtn', 'Завдання'],
   ['цілі', 'goals/index.html', '#appScreen', '#pageSettingsBtn', 'Цілі'],
   ['тренування', 'workout/index.html', '#appScreen', '#pageSettingsBtn', 'Тренування'],
 ];
@@ -61,15 +61,15 @@ test.describe('Комп’ютер: вхід один, і він знає сві
   for (const [name, path, ready] of SECTIONS) {
     test(`${name}: кнопки в шапці більше немає`, async ({ page }) => {
       await openModule(page, path, { ready });
-      await expect(page.locator('#pageSettingsBtn, #pageMenuBtn, #categoriesBtn')).toBeHidden();
+      await expect(page.locator('#pageSettingsBtn')).toBeHidden();
     });
   }
 
   // Хаб — не розділ, і власної вкладки в нього немає: там «Загальні» — саме
   // те, що треба показати.
-  test('головна відкриває «Загальні», а шапки з гамбургером на ПК немає', async ({ page }) => {
+  test('головна відкриває «Загальні», а шапки з шестернею на ПК немає', async ({ page }) => {
     await openModule(page, 'index.html', { ready: '#homeScreen' });
-    await expect(page.locator('#menuBtn')).toBeHidden();
+    await expect(page.locator('#pageSettingsBtn')).toBeHidden();
     await page.click('#sideSettingsBtn');
     await expect(page.locator('.settings-tab.current')).toHaveText('Загальні');
   });
@@ -80,18 +80,18 @@ test.describe('Комп’ютер: вхід один, і він знає сві
   // запропонувати від себе.
   test('у бюджеті кнопка вертається на вкладки з власними налаштуваннями', async ({ page }) => {
     await openModule(page, 'budget/index.html', { ready: '#appScreen' });
-    await expect(page.locator('#categoriesBtn')).toBeHidden();
+    await expect(page.locator('#pageSettingsBtn')).toBeHidden();
 
     await page.click('#bnStats');
-    await expect(page.locator('#categoriesBtn')).toBeVisible();
-    await page.click('#categoriesBtn');
+    await expect(page.locator('#pageSettingsBtn')).toBeVisible();
+    await page.click('#pageSettingsBtn');
     // І відкриває саме їх, а не спільне вікно.
     await expect(page.locator('#statsSettingsOverlay')).toHaveClass(/show/);
     await expect(page.locator('#settingsOverlay')).not.toHaveClass(/show/);
 
     await page.click('#closeStatsSettings');
     await page.click('#bnEntries');
-    await expect(page.locator('#categoriesBtn')).toBeHidden();
+    await expect(page.locator('#pageSettingsBtn')).toBeHidden();
   });
 });
 
@@ -277,9 +277,9 @@ test.describe('Експорт живе у вкладці «Дані»', () => {
 test.describe('Телефон: спершу список розділів', () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
-  test('гамбургер відкриває список, тап по розділу — його параметри', async ({ page }) => {
+  test('шестерня відкриває список, тап по розділу — його параметри', async ({ page }) => {
     await openModule(page, 'index.html', { ready: '#homeScreen' });
-    await page.click('#menuBtn');
+    await page.click('#pageSettingsBtn');
     await expect(page.locator('#settingsOverlay')).toHaveClass(/show/);
     // Колонки вкладок і панелі поруч немає — спершу лише список.
     await expect(page.locator('.settings-tabs')).toBeVisible();

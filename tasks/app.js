@@ -576,7 +576,7 @@ AppSettings.init({
     },
   },
 });
-document.getElementById('pageMenuBtn').addEventListener('click', () => AppSettings.open('tasks'));
+document.getElementById('pageSettingsBtn').addEventListener('click', () => AppSettings.open('tasks'));
 // Бічне меню відкриває вікно одразу на вкладці ЦЬОГО розділу.
 document.getElementById('sideSettingsBtn').addEventListener('click', () => AppSettings.open('tasks'));
 

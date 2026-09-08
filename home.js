@@ -607,7 +607,7 @@ darkMediaQuery.addEventListener('change', () => {
 // ---- Вікно налаштувань ----
 // Тема, мова, категорії, нагадування, експорт і вихід живуть в одному вікні
 // (../settings.js), спільному для всіх пʼятьох сторінок. На телефоні його
-// відкриває гамбургер, на комп'ютері — «Налаштування» в бічній колонці:
+// відкриває шестерня в шапці, на комп'ютері — «Налаштування» в бічній колонці:
 // кнопки різні, вікно одне.
 AppSettings.init({
   db, auth,
@@ -635,7 +635,7 @@ AppSettings.init({
 function openSettings(tab) {
   AppSettings.open(tab);
 }
-document.getElementById('menuBtn').addEventListener('click', () => openSettings());
+document.getElementById('pageSettingsBtn').addEventListener('click', () => openSettings());
 document.getElementById('sideSettingsBtn').addEventListener('click', () => openSettings());
 
 // Курсор одразу в пошті — але тільки на широкому екрані. На телефоні фокус
