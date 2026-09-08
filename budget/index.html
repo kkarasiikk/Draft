@@ -160,10 +160,6 @@
   .auth-options-row{display:flex;align-items:center;justify-content:space-between;margin:-6px 0 14px;gap:10px;}
   .remember-me{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink-muted);cursor:pointer;user-select:none;}
   .remember-me input{width:15px;height:15px;accent-color:var(--accent);cursor:pointer;margin:0;}
-  .setting-toggle-row{display:flex;align-items:center;gap:10px;padding:13px 2px;font-size:14px;color:var(--ink);
-    cursor:pointer;user-select:none;border-bottom:1px solid var(--border);}
-  .setting-toggle-row:last-child{border-bottom:none;}
-  .setting-toggle-row input{width:17px;height:17px;accent-color:var(--accent);cursor:pointer;margin:0;flex-shrink:0;}
   #forgotPasswordLink{font-size:12.5px;color:var(--accent);font-weight:600;cursor:pointer;text-decoration:none;white-space:nowrap;}
   .auth-submit{width:100%;padding:12px 0;border-radius:10px;border:none;cursor:pointer;color:#fff;background:var(--accent);
     font-size:14.5px;font-weight:600;font-family:'Inter',sans-serif;}
@@ -563,19 +559,18 @@
        тримати «Life» ще й у шапці означало б показати те саме двічі. */
     .wrap{max-width:none;margin:0;padding:26px 40px 0 278px;}
     .app-topbar-brand{display:none;}
-    /* Кнопка «⋮» угорі праворуч теж переїхала — у бічну колонку. На вкладці
-       «Кошти» вона робила рівно те саме, що рядок «Налаштування» зліва:
-       два входи в одне вікно, з яких другий ще й треба знайти очима.
-       Той самий випадок, що з логотипом рядком вище.
+    /* Шестерня вгорі праворуч переїхала — у бічну колонку. Вона робить рівно
+       те саме, що рядок «Налаштування» зліва: два входи в одне вікно, з яких
+       другий ще й треба знайти очима. Той самий випадок, що з логотипом
+       рядком вище.
 
-       Але на трьох інших вкладках вона відкриває НЕ спільне вікно, а власні
-       налаштування самої вкладки — які діаграми показувати, як сортувати
-       нотатки, у якій валюті рахувати підсумок заощаджень. Цього бічна
-       колонка не вміє, тож там кнопка лишається: правило просте — вона є
-       рівно тоді, коли їй є що запропонувати від себе. Клас ставить
-       selectTab у app.js.
+       Раніше тут стояв виняток: на трьох вкладках із чотирьох шестерня
+       відкривала не спільне вікно, а власні налаштування вкладки, тож на
+       широкому екрані її доводилось лишати. Тепер тих вікон немає — усе
+       переїхало у вкладку «Гроші» спільного вікна, і виняток пішов разом
+       із ними.
        На телефоні кнопка лишається завжди: там бічної колонки немає. */
-    #pageSettingsBtn:not(.has-own-settings){display:none;}
+    #pageSettingsBtn{display:none;}
     .app-topbar{padding:2px 0 0;}
     /* На широкому екрані баланс — картка в ряд з рештою карток, тож скло
        й тінь тут доречні (на телефоні той самий блок іде на всю ширину). */
@@ -936,65 +931,6 @@
   </div>
 </div>
 
-
-<div class="modal-overlay" id="statsSettingsOverlay">
-  <div class="modal">
-    <div class="modal-head">
-      <div class="modal-title" id="statsSettingsTitle">Налаштування статистики</div>
-      <button class="close-btn" id="closeStatsSettings" aria-label="Закрити"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
-    </div>
-    <label class="field-label" id="statsSettingsChartsLabel">Видимі діаграми</label>
-    <label class="setting-toggle-row">
-      <input type="checkbox" id="showChartPie" checked>
-      <span id="showChartPieLabel">Витрати за категоріями</span>
-    </label>
-    <label class="setting-toggle-row">
-      <input type="checkbox" id="showChartTrend" checked>
-      <span id="showChartTrendLabel">Дохід і витрати</span>
-    </label>
-    <label class="setting-toggle-row">
-      <input type="checkbox" id="showChartSavings" checked>
-      <span id="showChartSavingsLabel">Заощадження</span>
-    </label>
-  </div>
-</div>
-
-<div class="modal-overlay" id="savingsSettingsOverlay">
-  <div class="modal">
-    <div class="modal-head">
-      <div class="modal-title" id="savingsSettingsTitle">Налаштування заощаджень</div>
-      <button class="close-btn" id="closeSavingsSettings" aria-label="Закрити"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
-    </div>
-    <label class="setting-toggle-row">
-      <input type="checkbox" id="showSavingsTotalToggle" checked>
-      <span id="showSavingsTotalToggleLabel">Показувати загальний баланс заощаджень</span>
-    </label>
-    <label class="field-label" id="savingsTotalModeLabel" style="margin-top:14px;">Загальний баланс — валюта</label>
-    <div class="cat-picker" id="savingsTotalModePicker"></div>
-    <div id="savingsTotalCurrencyWrap" style="margin-top:10px;display:none;">
-      <select id="savingsTotalCurrencySelect" class="trend-currency-select"></select>
-    </div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="notesSettingsOverlay">
-  <div class="modal">
-    <div class="modal-head">
-      <div class="modal-title" id="notesSettingsTitle">Налаштування нотаток</div>
-      <button class="close-btn" id="closeNotesSettings" aria-label="Закрити"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
-    </div>
-    <label class="field-label" id="notesSortLabel">Сортування</label>
-    <select id="notesSortSelect" class="trend-currency-select">
-      <option value="updated">Спочатку нещодавно оновлені</option>
-      <option value="created">Спочатку нещодавно створені</option>
-      <option value="title">За назвою (А-Я)</option>
-    </select>
-    <label class="setting-toggle-row" style="margin-top:14px;">
-      <input type="checkbox" id="showNoteSnippetToggle" checked>
-      <span id="showNoteSnippetToggleLabel">Показувати текст нотатки в списку</span>
-    </label>
-  </div>
-</div>
 
 <div class="modal-overlay" id="pageOverlay">
   <div class="modal">

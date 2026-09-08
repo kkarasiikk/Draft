@@ -65,6 +65,9 @@
 .settings-pane{flex:1;min-width:0;overflow-y:auto;padding:18px 16px calc(24px + env(safe-area-inset-bottom));}
 .settings-pane-title{display:none;}
 .settings-section{margin-bottom:26px;}
+/* Продовження попереднього рядка: власного підпису немає, тож і відступу
+   зверху бути не повинно — інакше воно читається як окремий параметр. */
+.settings-section-cont{margin-top:-16px;}
 .settings-section:last-child{margin-bottom:0;}
 .settings-label{display:block;font-size:12px;letter-spacing:.03em;text-transform:uppercase;
   color:var(--ink-muted);font-family:'Inter',sans-serif;font-weight:600;margin-bottom:8px;}

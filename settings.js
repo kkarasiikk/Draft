@@ -45,6 +45,17 @@
       theme: 'Тема', themeLight: 'Світла', themeDark: 'Темна', themeSystem: 'Як у системі',
       lang: 'Мова',
       currency: 'Валюта',
+      // Вигляд бюджету: що показувати й у якому порядку. Раніше це жило
+      // в трьох окремих вікнах — по одному на вкладку.
+      charts: 'Видимі діаграми',
+      chartPie: 'Витрати за категоріями', chartTrend: 'Дохід і витрати', chartSavings: 'Заощадження',
+      savingsTotal: 'Загальний баланс заощаджень',
+      savingsTotalCur: 'Валюта загального балансу',
+      savingsMulti: 'Кілька валют', savingsSingle: 'Одна валюта',
+      notesSort: 'Сортування нотаток',
+      notesSortUpdated: 'Нещодавно оновлені', notesSortCreated: 'Нещодавно створені', notesSortTitle: 'За назвою',
+      noteSnippet: 'Текст нотатки в списку',
+      show: 'Показувати', hide: 'Сховати',
       catExpense: 'Категорії витрат', catIncome: 'Категорії доходів',
       catGoals: 'Категорії цілей', catWeek: 'Категорії тижневика',
       newCat: 'Нова категорія', addCat: 'Додати категорію', delCat: 'Видалити категорію',
@@ -82,6 +93,15 @@
       theme: 'Тема', themeLight: 'Светлая', themeDark: 'Тёмная', themeSystem: 'Как в системе',
       lang: 'Язык',
       currency: 'Валюта',
+      charts: 'Видимые диаграммы',
+      chartPie: 'Расходы по категориям', chartTrend: 'Доход и расходы', chartSavings: 'Сбережения',
+      savingsTotal: 'Общий баланс сбережений',
+      savingsTotalCur: 'Валюта общего баланса',
+      savingsMulti: 'Несколько валют', savingsSingle: 'Одна валюта',
+      notesSort: 'Сортировка заметок',
+      notesSortUpdated: 'Недавно обновлённые', notesSortCreated: 'Недавно созданные', notesSortTitle: 'По названию',
+      noteSnippet: 'Текст заметки в списке',
+      show: 'Показывать', hide: 'Скрыть',
       catExpense: 'Категории расходов', catIncome: 'Категории доходов',
       catGoals: 'Категории целей', catWeek: 'Категории недели',
       newCat: 'Новая категория', addCat: 'Добавить категорию', delCat: 'Удалить категорию',
@@ -119,6 +139,15 @@
       theme: 'Motyw', themeLight: 'Jasny', themeDark: 'Ciemny', themeSystem: 'Jak w systemie',
       lang: 'Język',
       currency: 'Waluta',
+      charts: 'Widoczne wykresy',
+      chartPie: 'Wydatki wg kategorii', chartTrend: 'Przychód i wydatki', chartSavings: 'Oszczędności',
+      savingsTotal: 'Łączne saldo oszczędności',
+      savingsTotalCur: 'Waluta łącznego salda',
+      savingsMulti: 'Kilka walut', savingsSingle: 'Jedna waluta',
+      notesSort: 'Sortowanie notatek',
+      notesSortUpdated: 'Ostatnio zaktualizowane', notesSortCreated: 'Ostatnio utworzone', notesSortTitle: 'Według nazwy',
+      noteSnippet: 'Tekst notatki na liście',
+      show: 'Pokazuj', hide: 'Ukryj',
       catExpense: 'Kategorie wydatków', catIncome: 'Kategorie przychodów',
       catGoals: 'Kategorie celów', catWeek: 'Kategorie tygodnia',
       newCat: 'Nowa kategoria', addCat: 'Dodaj kategorię', delCat: 'Usuń kategorię',
@@ -156,6 +185,15 @@
       theme: 'Theme', themeLight: 'Light', themeDark: 'Dark', themeSystem: 'System',
       lang: 'Language',
       currency: 'Currency',
+      charts: 'Visible charts',
+      chartPie: 'Spending by category', chartTrend: 'Income and spending', chartSavings: 'Savings',
+      savingsTotal: 'Total savings balance',
+      savingsTotalCur: 'Total balance currency',
+      savingsMulti: 'Multiple currencies', savingsSingle: 'Single currency',
+      notesSort: 'Sort notes by',
+      notesSortUpdated: 'Recently updated', notesSortCreated: 'Recently created', notesSortTitle: 'By title',
+      noteSnippet: 'Note text in the list',
+      show: 'Show', hide: 'Hide',
       catExpense: 'Expense categories', catIncome: 'Income categories',
       catGoals: 'Goal categories', catWeek: 'Week categories',
       newCat: 'New category', addCat: 'Add category', delCat: 'Delete category',
@@ -471,8 +509,10 @@
    * одночасно (розділи експорту). Без нього обраним вважається `selected`.
    */
   function choicesHtml(label, options, selected, attr, many) {
-    return '<div class="settings-section">' +
-      '<span class="settings-label">' + escapeHtml(label) + '</span>' +
+    // Порожній підпис — це продовження попереднього рядка (валюта підсумку
+    // під вибором «одна валюта»), і порожній <span> лишав би там повітря.
+    return '<div class="settings-section' + (label ? '' : ' settings-section-cont') + '">' +
+      (label ? '<span class="settings-label">' + escapeHtml(label) + '</span>' : '') +
       '<div class="settings-choices">' + options.map(function (o) {
         var on = many ? many.indexOf(o.value) !== -1 : o.value === selected;
         return '<button type="button" class="settings-choice' +
@@ -650,6 +690,54 @@
       hoursHtml(t('remindEvening'), EVENING_HOURS, s.eveningHour, 'data-evening');
   }
 
+  // ---- Вигляд бюджету ----
+  // Які діаграми показувати, як сортувати нотатки, у чому рахувати підсумок
+  // заощаджень. Це вибір ПРИСТРОЮ, а не людини (на телефоні хочеться менше,
+  // ніж на комп'ютері), тому воно й далі лежить у localStorage, а не в
+  // профілі — сюди переїхало саме вікно, а не сховище.
+  //
+  // Раніше кожна з трьох вкладок бюджету мала власне вікно, і шестерня в
+  // шапці відкривала то одне, то інше, то спільне — залежно від того, де ти
+  // стояв. Тепер налаштування одні, і лежать вони там, де їх шукають.
+  var VIEW = {
+    chartPie: { key: 'financeAppShowChartPie', type: 'bool', def: true },
+    chartTrend: { key: 'financeAppShowChartTrend', type: 'bool', def: true },
+    chartSavings: { key: 'financeAppShowChartSavings', type: 'bool', def: true },
+    savingsTotal: { key: 'financeAppShowSavingsTotal', type: 'bool', def: true },
+    savingsMode: { key: 'financeAppSavingsTotalMode', type: 'enum', values: ['multi', 'single'], def: 'multi' },
+    savingsCurrency: { key: 'financeAppSavingsTotalCurrency', type: 'enum', values: CURRENCY_CODES, def: 'UAH' },
+    notesSort: { key: 'financeAppNotesSortMode', type: 'enum', values: ['updated', 'created', 'title'], def: 'updated' },
+    noteSnippet: { key: 'financeAppShowNoteSnippet', type: 'bool', def: true },
+  };
+
+  function viewGet(name) {
+    var spec = VIEW[name];
+    var raw = null;
+    try { raw = root.localStorage.getItem(spec.key); } catch (e) { raw = null; }
+    if (spec.type === 'bool') return raw === null ? spec.def : raw !== '0';
+    return spec.values.indexOf(raw) === -1 ? spec.def : raw;
+  }
+
+  function viewSet(name, value) {
+    var spec = VIEW[name];
+    try {
+      root.localStorage.setItem(spec.key, spec.type === 'bool' ? (value ? '1' : '0') : String(value));
+    } catch (e) { /* приватний режим — вибір просто не переживе перезавантаження */ }
+    // Сторінка бюджету перемальовується одразу; решта сторінок цього не
+    // вміють, і не мусять: побачать при наступному відкритті розділу.
+    if (cfg.onBudgetView) cfg.onBudgetView(name, value);
+    renderPane();
+  }
+
+  // Двійковий вибір тими самими чипами, що й усе інше у вікні: окремий
+  // перемикач був би ще одним елементом керування заради тієї самої відповіді.
+  function boolHtml(label, name) {
+    return choicesHtml(label, [
+      { value: 'on', label: t('show') },
+      { value: 'off', label: t('hide') },
+    ], viewGet(name) ? 'on' : 'off', 'data-view-bool="' + name + '" data-view-value');
+  }
+
   // ---- Вміст вкладок ----
 
   function paneHtml(tab) {
@@ -664,9 +752,31 @@
 
     if (tab === 'budget') {
       var currency = profile.currency || root.localStorage.getItem('financeAppCurrency') || 'UAH';
+      var charts = [];
+      if (viewGet('chartPie')) charts.push('chartPie');
+      if (viewGet('chartTrend')) charts.push('chartTrend');
+      if (viewGet('chartSavings')) charts.push('chartSavings');
+      var single = viewGet('savingsMode') === 'single';
       return choicesHtml(t('currency'), CURRENCY_CODES.map(function (c) {
         return { value: c, label: c + ' ' + CURRENCIES[c] };
       }), currency, 'data-currency') +
+        choicesHtml(t('charts'), ['chartPie', 'chartTrend', 'chartSavings'].map(function (k) {
+          return { value: k, label: t(k) };
+        }), null, 'data-view-chart', charts) +
+        boolHtml(t('savingsTotal'), 'savingsTotal') +
+        choicesHtml(t('savingsTotalCur'), [
+          { value: 'multi', label: t('savingsMulti') },
+          { value: 'single', label: t('savingsSingle') },
+        ], viewGet('savingsMode'), 'data-view-savings-mode') +
+        // Валюта підсумку має сенс, лише коли підсумок зводиться в одну:
+        // при «кількох валютах» рядок стояв би без роботи.
+        (single ? choicesHtml('', CURRENCY_CODES.map(function (c) {
+          return { value: c, label: c + ' ' + CURRENCIES[c] };
+        }), viewGet('savingsCurrency'), 'data-view-savings-currency') : '') +
+        choicesHtml(t('notesSort'), ['updated', 'created', 'title'].map(function (k) {
+          return { value: k, label: t('notesSort' + k.charAt(0).toUpperCase() + k.slice(1)) };
+        }), viewGet('notesSort'), 'data-view-notes-sort') +
+        boolHtml(t('noteSnippet'), 'noteSnippet') +
         catEditorHtml('expense') +
         catEditorHtml('income');
     }
@@ -763,6 +873,28 @@
     });
     pane.querySelectorAll('[data-currency]').forEach(function (btn) {
       btn.addEventListener('click', function () { setCurrency(btn.dataset.currency); });
+    });
+    pane.querySelectorAll('[data-view-bool]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        viewSet(btn.dataset.viewBool, btn.dataset.viewValue === 'on');
+      });
+    });
+    pane.querySelectorAll('[data-view-chart]').forEach(function (btn) {
+      // Чипи діаграм перемикаються незалежно: це не вибір одного з трьох,
+      // а «показувати цю».
+      btn.addEventListener('click', function () {
+        var name = btn.dataset.viewChart;
+        viewSet(name, !viewGet(name));
+      });
+    });
+    pane.querySelectorAll('[data-view-savings-mode]').forEach(function (btn) {
+      btn.addEventListener('click', function () { viewSet('savingsMode', btn.dataset.viewSavingsMode); });
+    });
+    pane.querySelectorAll('[data-view-savings-currency]').forEach(function (btn) {
+      btn.addEventListener('click', function () { viewSet('savingsCurrency', btn.dataset.viewSavingsCurrency); });
+    });
+    pane.querySelectorAll('[data-view-notes-sort]').forEach(function (btn) {
+      btn.addEventListener('click', function () { viewSet('notesSort', btn.dataset.viewNotesSort); });
     });
     pane.querySelectorAll('[data-morning]').forEach(function (btn) {
       btn.addEventListener('click', function () {
