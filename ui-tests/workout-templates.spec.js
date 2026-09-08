@@ -156,7 +156,7 @@ test('у вже записаному тренуванні чипів шабло�
     workouts: [{ id: 'w1', date: '2026-08-20', name: 'Старе', notes: '', exercises: SEED.workoutTemplates[0].exercises }],
   };
   await openModule(page, 'workout/index.html', { seed });
-  await page.click('.session-card, [data-open-session]');
+  await page.click('[data-open-session]');
   await page.waitForSelector('#sessionFormOverlay.show');
   await expect(page.locator('#sessionTemplateRow [data-template]'),
     'підмінювати вправи в історії — не те, чого чекають від кнопки').toHaveCount(0);

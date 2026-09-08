@@ -214,7 +214,177 @@
     }).sort(function (a, b) { return b.daysAgo - a.daysAgo; });
   }
 
+  // ---- Що показує вкладка: наступне, минулі, міточки ----
+  // Розділ перестав бути стрічкою однакових карток. Згори — тренування,
+  // яке має бути, з вагами минулого разу; нижче зліва — минулі, справа —
+  // календар лише з міточками. Числа для всіх трьох частин рахуються тут,
+  // без DOM і без перекладів (див. progress.test.js).
+
+  /** Тренування зроблене, щойно в ньому є хоч один підхід із повтореннями.
+   *  Порожні підходи — це план, навіть якщо дата вже минула: намір і
+   *  результат розрізняє робота, а не календар. */
+  function isDone(session) {
+    return (session && session.exercises || []).some(function (ex) {
+      return (ex && ex.sets || []).some(function (set) { return num(set.reps) > 0; });
+    });
+  }
+
+  /** Тоннаж: скільки кілограмів піднято за тренування. Одне число, яким
+   *  тренування нарешті відрізняються одне від одного — раніше в кожної
+   *  картки стояло однакове «6 вправ · 19 підходів». */
+  function tonnage(session) {
+    var total = 0;
+    (session && session.exercises || []).forEach(function (ex) {
+      (ex && ex.sets || []).forEach(function (set) {
+        var r = num(set.reps);
+        if (r > 0) total += num(set.weight) * r;
+      });
+    });
+    return Math.round(total);
+  }
+
+  /** Зроблені підходи (для минулих) — порожні не рахуються. */
+  function doneSetCount(session) {
+    var n = 0;
+    (session && session.exercises || []).forEach(function (ex) {
+      (ex && ex.sets || []).forEach(function (set) { if (num(set.reps) > 0) n++; });
+    });
+    return n;
+  }
+
+  /** Усі підходи (для запланованого) — там жоден ще не зроблений. */
+  function setCount(session) {
+    var n = 0;
+    (session && session.exercises || []).forEach(function (ex) {
+      n += (ex && ex.sets || []).length;
+    });
+    return n;
+  }
+
+  /** Групи мʼязів тренування, у порядку, в якому людина набрала вправи. */
+  function sessionMuscles(session) {
+    var seen = {}, out = [];
+    (session && session.exercises || []).forEach(function (ex) {
+      var m = ex && ex.muscle;
+      if (!m || seen[m]) return;
+      seen[m] = true;
+      out.push(m);
+    });
+    return out;
+  }
+
+  /**
+   * Тренування, яке має бути. Спершу найближче заплановане від сьогодні
+   * вперед — саме воно відповідає на «що мені робити». Якщо попереду
+   * порожньо, беремо найсвіжіший невиконаний план із минулого: він нікуди
+   * не подівся, і мовчки ховати його було б гірше, ніж показати з датою.
+   */
+  function nextSession(sessions, todayIso) {
+    var planned = (sessions || []).filter(function (s) {
+      return s && typeof s.date === 'string' && !isDone(s);
+    });
+    var ahead = planned.filter(function (s) { return s.date >= todayIso; })
+      .sort(function (a, b) { return a.date < b.date ? -1 : (a.date > b.date ? 1 : 0); });
+    if (ahead.length) return ahead[0];
+    var behind = planned.sort(function (a, b) { return a.date < b.date ? 1 : (a.date > b.date ? -1 : 0); });
+    return behind.length ? behind[0] : null;
+  }
+
+  /** Минулі тренування — тільки зроблені, від найсвіжішого. */
+  function pastSessions(sessions) {
+    return (sessions || []).filter(function (s) { return s && isDone(s); })
+      .sort(function (a, b) { return a.date < b.date ? 1 : (a.date > b.date ? -1 : 0); });
+  }
+
+  /**
+   * Що було минулого разу в цій вправі. Саме це треба знати, стоячи біля
+   * штанги, і саме цього на вкладці не було: у плані ваги ще немає, тож
+   * навпроти кожної вправи стояло «—».
+   * @returns {weight, reps, date} або null
+   */
+  function lastResultFor(sessions, key, excludeId) {
+    var best = null;
+    (sessions || []).forEach(function (s) {
+      if (!s || typeof s.date !== 'string') return;
+      if (excludeId && s.id === excludeId) return;
+      if (best && s.date < best.date) return;
+      (s.exercises || []).forEach(function (ex) {
+        if (exerciseKey(ex) !== key) return;
+        var done = (ex.sets || []).filter(function (set) { return num(set.reps) > 0; });
+        if (!done.length) return;
+        var b = bestSet(done);
+        var cand = { weight: num(b.weight), reps: num(b.reps), date: s.date };
+        // Свіжіша дата виграє завжди; за рівних дат — важчий підхід, бо
+        // порядок сесій у списку нічого не означає.
+        var better = !best || cand.date > best.date
+          || (cand.date === best.date && (cand.weight > best.weight
+            || (cand.weight === best.weight && cand.reps > best.reps)));
+        if (better) best = cand;
+      });
+    });
+    return best;
+  }
+
+  /**
+   * Найбільший приріст тренування проти попереднього разу — те, що варто
+   * винести на картку: «+2,5 кг жим». Вправи з власною вагою міряються
+   * повтореннями, бо кілограмів на штанзі там нуль.
+   * @returns {key, libId, name, unit:'kg'|'reps', delta} або null
+   */
+  function topGain(sessions, session) {
+    if (!session || !isDone(session)) return null;
+    var earlier = (sessions || []).filter(function (s) {
+      return s && s.id !== session.id && typeof s.date === 'string' && s.date <= session.date && isDone(s);
+    });
+    var best = null;
+    (session.exercises || []).forEach(function (ex) {
+      var key = exerciseKey(ex);
+      if (!key) return;
+      var done = (ex.sets || []).filter(function (set) { return num(set.reps) > 0; });
+      if (!done.length) return;
+      var now = bestSet(done);
+      var prev = lastResultFor(earlier, key, session.id);
+      if (!prev) return;
+      var unit = (num(now.weight) > 0 || prev.weight > 0) ? 'kg' : 'reps';
+      var delta = unit === 'kg'
+        ? num(now.weight) - prev.weight
+        : num(now.reps) - prev.reps;
+      if (delta <= 0) return;
+      if (!best || delta > best.delta) {
+        best = { key: key, libId: ex.libId || null, name: ex.name || '', unit: unit, delta: Math.round(delta * 100) / 100 };
+      }
+    });
+    return best;
+  }
+
+  /**
+   * Міточки місяця: дата -> 'done' | 'planned'. Календар справа тепер лише
+   * позначає дні, а не переказує їх, тож більше про день йому й не треба.
+   * @param month — 'YYYY-MM'
+   */
+  function monthMarks(sessions, month) {
+    var marks = {};
+    (sessions || []).forEach(function (s) {
+      if (!s || typeof s.date !== 'string' || s.date.slice(0, 7) !== month) return;
+      // Зроблене перебиває заплановане: якщо того дня щось таки відбулось,
+      // порожня крапка збрехала б.
+      if (isDone(s)) marks[s.date] = 'done';
+      else if (!marks[s.date]) marks[s.date] = 'planned';
+    });
+    return marks;
+  }
+
   var api = {
+    isDone: isDone,
+    tonnage: tonnage,
+    doneSetCount: doneSetCount,
+    setCount: setCount,
+    sessionMuscles: sessionMuscles,
+    nextSession: nextSession,
+    pastSessions: pastSessions,
+    lastResultFor: lastResultFor,
+    topGain: topGain,
+    monthMarks: monthMarks,
     daysBetween: daysBetween,
     restByMuscle: restByMuscle,
     WINDOW_DAYS: WINDOW_DAYS,
