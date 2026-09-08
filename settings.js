@@ -2,7 +2,7 @@
  *  Вікно налаштувань — одне на всі пʼять сторінок.
  *
  *  До нього налаштування жили в чотирьох різних місцях: тема й мова — в
- *  гамбургері головної, валюта й категорії витрат — у «⋮» бюджету,
+ *  шестерні головної, валюта й категорії витрат — у шестерні бюджету,
  *  нагадування — в «⋮» завдань, категорії цілей — усередині форми цілі.
  *  Щоб змінити мову, треба було спершу згадати, що вона на головній.
  *  Тепер вхід один, а вкладка каже, до чого належить параметр.
@@ -921,6 +921,12 @@
     document.getElementById('settingsTitle').textContent = t('title');
     document.getElementById('settingsClose').setAttribute('aria-label', t('close'));
     document.getElementById('settingsBack').setAttribute('aria-label', t('back'));
+    // Кнопку, яка це вікно відкриває, підписує саме вікно: слово
+    // «Налаштування» живе тут, у всіх чотирьох мовах, і дублювати його ще
+    // раз у кожній зі сторінок означало б чотири нагоди розійтись.
+    // Сторінка лише ставить у шапку <button id="pageSettingsBtn">.
+    var opener = document.getElementById('pageSettingsBtn');
+    if (opener) opener.setAttribute('aria-label', t('title'));
     renderTabs();
     if (isOpen()) renderPane();
   }

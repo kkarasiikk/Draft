@@ -5,7 +5,7 @@
 // лівого краю — два різні центри в одному вікні. Тут інша розкладка, і
 // стережемо саме те, що в ній може мовчки поламатись: щоб блоки стояли
 // поруч, а не один під одним, щоб їхні краї збігались, і щоб дії, які на
-// телефоні робить гамбургер і «+», лишились доступними без них.
+// телефоні робить шестерня й «+», лишились доступними без них.
 const { test, expect } = require('@playwright/test');
 const { openModule } = require('./helpers');
 
@@ -70,10 +70,10 @@ test.describe('Розкладка', () => {
   });
 });
 
-test.describe('Дії без гамбургера', () => {
-  test('гамбургер на комп’ютері схований, а «+» — ні', async ({ page }) => {
+test.describe('Дії без шапки', () => {
+  test('шестерня на комп’ютері схована, а «+» — ні', async ({ page }) => {
     await openHub(page);
-    await expect(page.locator('#menuBtn')).toBeHidden();
+    await expect(page.locator('#pageSettingsBtn')).toBeHidden();
     // Той самий круглий «+», що й у розділах. Колись його тут ховали, а
     // замість нього в шапці стояла кнопка «Записати» — виходило дві звички
     // на одну дію, залежно від того, з чого відкрив застосунок.
@@ -192,7 +192,7 @@ test.describe('Вузький екран: колонка є, розкладка 
 });
 
 // На телефоні розкладка лишається тією, що є: колонка, календар угорі,
-// гамбургер і «+». Комп'ютерні блоки туди не мають протікати.
+// шестерня і «+». Комп'ютерні блоки туди не мають протікати.
 test.describe('Телефон не змінився', () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
@@ -200,7 +200,7 @@ test.describe('Телефон не змінився', () => {
     await openHub(page);
     await expect(page.locator('.side-nav')).toBeHidden();
     await expect(page.locator('#todayDate')).toBeHidden();
-    await expect(page.locator('#menuBtn')).toBeVisible();
+    await expect(page.locator('#pageSettingsBtn')).toBeVisible();
     await expect(page.locator('#addFab')).toBeVisible();
   });
 

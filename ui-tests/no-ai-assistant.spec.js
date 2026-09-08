@@ -51,7 +51,7 @@ test('бюджет: у шапці лишились логотип і «⋮», б
   await page.setViewportSize({ width: 390, height: 844 });
   await openModule(page, 'budget/index.html', { ready: '#appScreen' });
   await expect(page.locator('.app-topbar-brand')).toBeVisible();
-  await expect(page.locator('#categoriesBtn')).toBeVisible();
+  await expect(page.locator('#pageSettingsBtn')).toBeVisible();
   // Рівно одна кнопка в правій групі — та, що лишилась.
   await expect(page.locator('.topbar-actions > *')).toHaveCount(1);
 });
