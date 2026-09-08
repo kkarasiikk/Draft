@@ -74,24 +74,15 @@ test.describe('Комп’ютер: вхід один, і він знає сві
     await expect(page.locator('.settings-tab.current')).toHaveText('Загальні');
   });
 
-  // У бюджету три вкладки мають ВЛАСНІ налаштування (діаграми, сортування
-  // нотаток, валюта підсумку заощаджень) — цього бічна колонка не вміє, тож
-  // там кнопка лишається. Правило просте: вона є рівно тоді, коли їй є що
-  // запропонувати від себе.
-  test('у бюджеті кнопка вертається на вкладки з власними налаштуваннями', async ({ page }) => {
+  // Виняток, який тут був, зник разом із трьома окремими вікнами бюджету:
+  // тепер шестерня на КОЖНІЙ вкладці веде в те саме вікно, що й «Налаштування»
+  // в бічній колонці, тож на широкому екрані вона зайва скрізь.
+  test('у бюджеті кнопка схована на всіх вкладках, а не лише на «Коштах»', async ({ page }) => {
     await openModule(page, 'budget/index.html', { ready: '#appScreen' });
-    await expect(page.locator('#pageSettingsBtn')).toBeHidden();
-
-    await page.click('#bnStats');
-    await expect(page.locator('#pageSettingsBtn')).toBeVisible();
-    await page.click('#pageSettingsBtn');
-    // І відкриває саме їх, а не спільне вікно.
-    await expect(page.locator('#statsSettingsOverlay')).toHaveClass(/show/);
-    await expect(page.locator('#settingsOverlay')).not.toHaveClass(/show/);
-
-    await page.click('#closeStatsSettings');
-    await page.click('#bnEntries');
-    await expect(page.locator('#pageSettingsBtn')).toBeHidden();
+    for (const tab of ['#bnStats', '#bnSavings', '#bnNotes', '#bnEntries']) {
+      await page.click(tab);
+      await expect(page.locator('#pageSettingsBtn'), tab).toBeHidden();
+    }
   });
 });
 

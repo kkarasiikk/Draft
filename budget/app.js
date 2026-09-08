@@ -74,7 +74,7 @@ const T = {
     confirmTitlePage: 'Видалити сторінку?',
     pageNoTitle: 'Без назви',
     emptyTitle: 'Тут поки порожньо', emptySub: 'Додай перший запис кнопкою внизу', searchPlaceholder: 'Пошук по нотатках і категоріях', searchEmptyTitle: 'Нічого не знайдено', searchEmptySub: 'Спробуй інше слово для пошуку',
-    deleteAria: 'Видалити запис', entryMenuAria: 'Дії із записом', menuEdit: 'Редагувати', menuDelete: 'Видалити', toggleCatAria: 'Показати/приховати категорію', rateAsOf: 'курс НБУ на', rateUnavailable: 'курс недоступний офлайн', rateStaleSuffix: 'можливо застарів', statsSettingsTitle: 'Налаштування статистики', statsSettingsChartsLabel: 'Видимі діаграми', savingsSettingsTitle: 'Налаштування заощаджень', showSavingsTotalLabel: 'Показувати загальний баланс заощаджень', savingsTotalModeLabel: 'Загальний баланс — валюта', savingsTotalModeMulti: 'Кілька валют', savingsTotalModeSingle: 'Одна валюта', notesSettingsTitle: 'Налаштування нотаток', notesSortLabel: 'Сортування', notesSortUpdated: 'Спочатку нещодавно оновлені', notesSortCreated: 'Спочатку нещодавно створені', notesSortTitle: 'За назвою (А-Я)', showNoteSnippetLabel: 'Показувати текст нотатки в списку', passwordHint: 'Мінімум 6 символів',
+    deleteAria: 'Видалити запис', entryMenuAria: 'Дії із записом', menuEdit: 'Редагувати', menuDelete: 'Видалити', toggleCatAria: 'Показати/приховати категорію', rateAsOf: 'курс НБУ на', rateUnavailable: 'курс недоступний офлайн', rateStaleSuffix: 'можливо застарів', passwordHint: 'Мінімум 6 символів',
     statsCatTitle: 'Витрати за категоріями', statsNoExpenses: 'Немає витрат цього місяця',
     statsTrendTitle: 'Дохід і витрати', statsTrendSub: 'Останні 6 місяців', lastLabel: 'Останні',
     chartIncome: 'Дохід', chartExpense: 'Витрати',
@@ -122,7 +122,7 @@ const T = {
     confirmTitlePage: 'Удалить страницу?',
     pageNoTitle: 'Без названия',
     emptyTitle: 'Здесь пока пусто', emptySub: 'Добавь первую запись кнопкой внизу', searchPlaceholder: 'Поиск по заметкам и категориям', searchEmptyTitle: 'Ничего не найдено', searchEmptySub: 'Попробуй другое слово для поиска',
-    deleteAria: 'Удалить запись', entryMenuAria: 'Действия с записью', menuEdit: 'Редактировать', menuDelete: 'Удалить', toggleCatAria: 'Показать/скрыть категорию', rateAsOf: 'курс НБУ на', rateUnavailable: 'курс недоступен офлайн', rateStaleSuffix: 'возможно устарел', statsSettingsTitle: 'Настройки статистики', statsSettingsChartsLabel: 'Видимые диаграммы', savingsSettingsTitle: 'Настройки сбережений', showSavingsTotalLabel: 'Показывать общий баланс сбережений', savingsTotalModeLabel: 'Общий баланс — валюта', savingsTotalModeMulti: 'Несколько валют', savingsTotalModeSingle: 'Одна валюта', notesSettingsTitle: 'Настройки заметок', notesSortLabel: 'Сортировка', notesSortUpdated: 'Сначала недавно обновлённые', notesSortCreated: 'Сначала недавно созданные', notesSortTitle: 'По названию (А-Я)', showNoteSnippetLabel: 'Показывать текст заметки в списке', passwordHint: 'Минимум 6 символов',
+    deleteAria: 'Удалить запись', entryMenuAria: 'Действия с записью', menuEdit: 'Редактировать', menuDelete: 'Удалить', toggleCatAria: 'Показать/скрыть категорию', rateAsOf: 'курс НБУ на', rateUnavailable: 'курс недоступен офлайн', rateStaleSuffix: 'возможно устарел', passwordHint: 'Минимум 6 символов',
     statsCatTitle: 'Расходы по категориям', statsNoExpenses: 'Нет расходов в этом месяце',
     statsTrendTitle: 'Доход и расходы', statsTrendSub: 'Последние 6 месяцев', lastLabel: 'Последние',
     chartIncome: 'Доход', chartExpense: 'Расходы',
@@ -170,7 +170,7 @@ const T = {
     confirmTitlePage: 'Usunąć stronę?',
     pageNoTitle: 'Bez tytułu',
     emptyTitle: 'Tu jeszcze pusto', emptySub: 'Dodaj pierwszy wpis przyciskiem poniżej', searchPlaceholder: 'Szukaj w notatkach i kategoriach', searchEmptyTitle: 'Nic nie znaleziono', searchEmptySub: 'Spróbuj innego słowa',
-    deleteAria: 'Usuń wpis', entryMenuAria: 'Działania na wpisie', menuEdit: 'Edytuj', menuDelete: 'Usuń', toggleCatAria: 'Pokaż/ukryj kategorię', rateAsOf: 'kurs NBU na', rateUnavailable: 'kurs niedostępny offline', rateStaleSuffix: 'może być nieaktualny', statsSettingsTitle: 'Ustawienia statystyk', statsSettingsChartsLabel: 'Widoczne wykresy', savingsSettingsTitle: 'Ustawienia oszczędności', showSavingsTotalLabel: 'Pokazuj łączne saldo oszczędności', savingsTotalModeLabel: 'Łączne saldo — waluta', savingsTotalModeMulti: 'Kilka walut', savingsTotalModeSingle: 'Jedna waluta', notesSettingsTitle: 'Ustawienia notatek', notesSortLabel: 'Sortowanie', notesSortUpdated: 'Najpierw ostatnio zaktualizowane', notesSortCreated: 'Najpierw ostatnio utworzone', notesSortTitle: 'Według nazwy (A-Z)', showNoteSnippetLabel: 'Pokazuj tekst notatki na liście', passwordHint: 'Minimum 6 znaków',
+    deleteAria: 'Usuń wpis', entryMenuAria: 'Działania na wpisie', menuEdit: 'Edytuj', menuDelete: 'Usuń', toggleCatAria: 'Pokaż/ukryj kategorię', rateAsOf: 'kurs NBU na', rateUnavailable: 'kurs niedostępny offline', rateStaleSuffix: 'może być nieaktualny', passwordHint: 'Minimum 6 znaków',
     statsCatTitle: 'Wydatki wg kategorii', statsNoExpenses: 'Brak wydatków w tym miesiącu',
     statsTrendTitle: 'Przychody i wydatki', statsTrendSub: 'Ostatnie 6 miesięcy', lastLabel: 'Ostatnie',
     chartIncome: 'Przychód', chartExpense: 'Wydatki',
@@ -218,7 +218,7 @@ const T = {
     confirmTitlePage: 'Delete page?',
     pageNoTitle: 'Untitled',
     emptyTitle: 'Nothing here yet', emptySub: 'Add your first entry using the button below', searchPlaceholder: 'Search notes and categories', searchEmptyTitle: 'Nothing found', searchEmptySub: 'Try a different search term',
-    deleteAria: 'Delete entry', entryMenuAria: 'Entry actions', menuEdit: 'Edit', menuDelete: 'Delete', toggleCatAria: 'Show/hide category', rateAsOf: 'NBU rate as of', rateUnavailable: 'rate unavailable offline', rateStaleSuffix: 'may be outdated', statsSettingsTitle: 'Statistics settings', statsSettingsChartsLabel: 'Visible charts', savingsSettingsTitle: 'Savings settings', showSavingsTotalLabel: 'Show total savings balance', savingsTotalModeLabel: 'Total balance currency', savingsTotalModeMulti: 'Multiple currencies', savingsTotalModeSingle: 'Single currency', notesSettingsTitle: 'Notes settings', notesSortLabel: 'Sort by', notesSortUpdated: 'Recently updated first', notesSortCreated: 'Recently created first', notesSortTitle: 'By title (A-Z)', showNoteSnippetLabel: 'Show note text in list', passwordHint: 'At least 6 characters',
+    deleteAria: 'Delete entry', entryMenuAria: 'Entry actions', menuEdit: 'Edit', menuDelete: 'Delete', toggleCatAria: 'Show/hide category', rateAsOf: 'NBU rate as of', rateUnavailable: 'rate unavailable offline', rateStaleSuffix: 'may be outdated', passwordHint: 'At least 6 characters',
     statsCatTitle: 'Expenses by category', statsNoExpenses: 'No expenses this month',
     statsTrendTitle: 'Income & expenses', statsTrendSub: 'Last 6 months', lastLabel: 'Last',
     chartIncome: 'Income', chartExpense: 'Expenses',
@@ -764,7 +764,24 @@ AppSettings.init({
   onTheme: setTheme,
   onLang: setLang,
   onLogout: () => auth.signOut(),
+  // Дрібні налаштування вигляду бюджету живуть у вікні, а зберігає їх воно
+  // саме (localStorage). Сторінці лишається перемалюватись — щоб діаграма
+  // зникала, поки вікно ще відкрите, а не при наступному заході.
+  onBudgetView: applyBudgetView,
 });
+
+// Значення вже записане вікном; тут лише підхоплюємо його в свою змінну й
+// перемальовуємо те, на що воно впливає.
+function applyBudgetView(name, value) {
+  if (name === 'chartPie') { showChartPie = value; render(); return; }
+  if (name === 'chartTrend') { showChartTrend = value; render(); return; }
+  if (name === 'chartSavings') { showChartSavings = value; render(); return; }
+  if (name === 'savingsTotal') { showSavingsTotal = value; renderSavingsGoalsList(); return; }
+  if (name === 'savingsMode') { savingsTotalMode = value; renderSavingsGoalsList(); return; }
+  if (name === 'savingsCurrency') { savingsTotalCurrency = value; renderSavingsGoalsList(); return; }
+  if (name === 'notesSort') { notesSortMode = value; renderNotesTab(); return; }
+  if (name === 'noteSnippet') { showNoteSnippet = value; renderNotesTab(); }
+}
 // Бічне меню відкриває вікно одразу на вкладці ЦЬОГО розділу: людина
 // натискає «Налаштування», стоячи в «Бюджеті», — отже хоче налаштування
 // бюджету, а не загальний список.
@@ -808,29 +825,6 @@ function applyStaticTranslations() {
   document.getElementById('confirmDelete').textContent = t('deleteBtn');
   document.getElementById('bnStats').setAttribute('aria-label', t('tabStats'));
   document.getElementById('pageSettingsBtn').setAttribute('aria-label', t('settingsTitle'));
-  document.getElementById('statsSettingsTitle').textContent = t('statsSettingsTitle');
-  document.getElementById('statsSettingsChartsLabel').textContent = t('statsSettingsChartsLabel');
-  document.getElementById('showChartPieLabel').textContent = t('statsCatTitle');
-  document.getElementById('showChartTrendLabel').textContent = t('statsTrendTitle');
-  document.getElementById('showChartSavingsLabel').textContent = t('savingsTrendTitle');
-  document.getElementById('savingsSettingsTitle').textContent = t('savingsSettingsTitle');
-  document.getElementById('showSavingsTotalToggleLabel').textContent = t('showSavingsTotalLabel');
-  document.getElementById('notesSettingsTitle').textContent = t('notesSettingsTitle');
-  document.getElementById('notesSortLabel').textContent = t('notesSortLabel');
-  document.getElementById('notesSortSelect').innerHTML = `
-    <option value="updated">${t('notesSortUpdated')}</option>
-    <option value="created">${t('notesSortCreated')}</option>
-    <option value="title">${t('notesSortTitle')}</option>`;
-  document.getElementById('notesSortSelect').value = notesSortMode;
-  document.getElementById('showNoteSnippetToggleLabel').textContent = t('showNoteSnippetLabel');
-  document.getElementById('showNoteSnippetToggle').checked = showNoteSnippet;
-  document.getElementById('showChartPie').checked = showChartPie;
-  document.getElementById('showChartTrend').checked = showChartTrend;
-  document.getElementById('showChartSavings').checked = showChartSavings;
-  document.getElementById('showSavingsTotalToggle').checked = showSavingsTotal;
-  document.getElementById('savingsTotalModeLabel').textContent = t('savingsTotalModeLabel');
-  renderSavingsTotalModePicker();
-  renderSavingsTotalCurrencySelect();
   document.getElementById('searchInput').setAttribute('placeholder', t('searchPlaceholder'));
   const cur = CURRENCIES[currentCurrency] || CURRENCIES.UAH;
   document.getElementById('amountLabel').textContent = t('amountLabel', { symbol: cur.symbol });
@@ -884,36 +878,6 @@ function renderSavingsTrendCurrencySelect() {
     select.dataset.bound = '1';
   }
   select.value = savingsTrendCurrency;
-}
-
-function renderSavingsTotalModePicker() {
-  const picker = document.getElementById('savingsTotalModePicker');
-  picker.innerHTML = `
-    <button type="button" class="cat-choice${savingsTotalMode === 'multi' ? ' selected' : ''}" data-mode="multi" style="${savingsTotalMode === 'multi' ? 'background:var(--accent);' : ''}">${t('savingsTotalModeMulti')}</button>
-    <button type="button" class="cat-choice${savingsTotalMode === 'single' ? ' selected' : ''}" data-mode="single" style="${savingsTotalMode === 'single' ? 'background:var(--accent);' : ''}">${t('savingsTotalModeSingle')}</button>`;
-  picker.querySelectorAll('.cat-choice').forEach(btn => {
-    btn.addEventListener('click', () => {
-      savingsTotalMode = btn.dataset.mode;
-      localStorage.setItem('financeAppSavingsTotalMode', savingsTotalMode);
-      renderSavingsTotalModePicker();
-      renderSavingsGoalsList();
-    });
-  });
-  document.getElementById('savingsTotalCurrencyWrap').style.display = savingsTotalMode === 'single' ? 'block' : 'none';
-}
-
-function renderSavingsTotalCurrencySelect() {
-  const select = document.getElementById('savingsTotalCurrencySelect');
-  if (select.dataset.bound !== '1') {
-    select.innerHTML = CURRENCY_CODES.map(c => `<option value="${c}">${c} ${CURRENCIES[c].symbol}</option>`).join('');
-    select.addEventListener('change', () => {
-      savingsTotalCurrency = select.value;
-      localStorage.setItem('financeAppSavingsTotalCurrency', savingsTotalCurrency);
-      renderSavingsGoalsList();
-    });
-    select.dataset.bound = '1';
-  }
-  select.value = savingsTotalCurrency;
 }
 
 // Колір беремо через catColor(), а не з CATEGORY_PALETTE навпростець.
@@ -1787,14 +1751,7 @@ function formatPageDate(ts) {
   return `${d.getDate()} ${genMonths[d.getMonth()]} ${d.getFullYear()}`;
 }
 
-function saveNotesSettings() {
-  localStorage.setItem('financeAppNotesSortMode', notesSortMode);
-  localStorage.setItem('financeAppShowNoteSnippet', showNoteSnippet ? '1' : '0');
-}
-
 function renderNotesTab() {
-  document.getElementById('notesSortSelect').value = notesSortMode;
-  document.getElementById('showNoteSnippetToggle').checked = showNoteSnippet;
   const sorted = [...pages].sort((a, b) => {
     if (notesSortMode === 'title') {
       return (a.title || '').localeCompare(b.title || '', undefined, { sensitivity: 'base' });
@@ -2301,23 +2258,14 @@ function selectTab(tabKey) {
   document.getElementById('savingsTab').style.display = isSavings ? 'block' : 'none';
   document.getElementById('notesTab').style.display = isNotes ? 'block' : 'none';
   document.getElementById('pageViewTab').style.display = isPage ? 'block' : 'none';
-  // Видимість кнопки «⋮» вирішує CSS за двома класами, а не інлайновий
-  // `display` із JS: інлайновий перебиває будь-який медіазапит, і саме через
-  // нього кнопка не хотіла зникати на широкому екрані.
-  //
+  // Видимість шестерні вирішує CSS за класом, а не інлайновий `display` із
+  // JS: інлайновий перебиває будь-який медіазапит, і саме через нього кнопка
+  // колись не хотіла зникати на широкому екрані.
   // `hidden-here` — перегляд нотатки: там своя шапка з «назад».
-  // `has-own-settings` — вкладка, у якої є ВЛАСНІ налаштування (діаграми,
-  // сортування нотаток, валюта підсумку заощаджень). Тільки такі вкладки
-  // лишають кнопку на широкому екрані: на решті вона вела б у те саме вікно,
-  // що й «Налаштування» в бічній колонці.
-  const catBtn = document.getElementById('pageSettingsBtn');
-  catBtn.classList.toggle('hidden-here', isPage);
-  catBtn.classList.toggle('has-own-settings', ['stats', 'savings', 'notes'].includes(tabKey));
+  document.getElementById('pageSettingsBtn').classList.toggle('hidden-here', isPage);
   document.getElementById('monthNavHeader').classList.toggle('show', showsMonth);
   document.getElementById('backToEntriesBtn').classList.toggle('show', isPage);
   document.getElementById('headerTopRow').classList.toggle('show', isPage);
-  document.getElementById('pageSettingsBtn').setAttribute('aria-label',
-    tabKey === 'stats' ? t('statsSettingsTitle') : tabKey === 'savings' ? t('savingsSettingsTitle') : tabKey === 'notes' ? t('notesSettingsTitle') : t('settingsTitle'));
   updateHeaderSectionTitle();
   if (isSavings) {
     currentSavingsGoalId = null;
@@ -2564,55 +2512,10 @@ document.getElementById('closeSavingsForm').addEventListener('click', () => savi
 document.getElementById('savingsSubmitBtn').addEventListener('click', submitSavingsForm);
 document.getElementById('closeCategoryTx').addEventListener('click', () => document.getElementById('categoryTxOverlay').classList.remove('show'));
 document.getElementById('categoryTxOverlay').addEventListener('click', (e) => { if (e.target.id === 'categoryTxOverlay') e.currentTarget.classList.remove('show'); });
-document.getElementById('pageSettingsBtn').addEventListener('click', () => {
-  if (currentTab === 'stats') {
-    document.getElementById('statsSettingsOverlay').classList.add('show');
-  } else if (currentTab === 'savings') {
-    document.getElementById('savingsSettingsOverlay').classList.add('show');
-  } else if (currentTab === 'notes') {
-    document.getElementById('notesSettingsOverlay').classList.add('show');
-  } else {
-    AppSettings.open('budget');
-  }
-});
-
-document.getElementById('closeStatsSettings').addEventListener('click', () => document.getElementById('statsSettingsOverlay').classList.remove('show'));
-document.getElementById('statsSettingsOverlay').addEventListener('click', (e) => { if (e.target.id === 'statsSettingsOverlay') e.currentTarget.classList.remove('show'); });
-document.getElementById('showChartPie').addEventListener('change', (e) => {
-  showChartPie = e.target.checked;
-  localStorage.setItem('financeAppShowChartPie', showChartPie ? '1' : '0');
-  render();
-});
-document.getElementById('showChartTrend').addEventListener('change', (e) => {
-  showChartTrend = e.target.checked;
-  localStorage.setItem('financeAppShowChartTrend', showChartTrend ? '1' : '0');
-  render();
-});
-document.getElementById('showChartSavings').addEventListener('change', (e) => {
-  showChartSavings = e.target.checked;
-  localStorage.setItem('financeAppShowChartSavings', showChartSavings ? '1' : '0');
-  render();
-});
-
-document.getElementById('closeSavingsSettings').addEventListener('click', () => document.getElementById('savingsSettingsOverlay').classList.remove('show'));
-document.getElementById('savingsSettingsOverlay').addEventListener('click', (e) => { if (e.target.id === 'savingsSettingsOverlay') e.currentTarget.classList.remove('show'); });
-document.getElementById('closeNotesSettings').addEventListener('click', () => document.getElementById('notesSettingsOverlay').classList.remove('show'));
-document.getElementById('notesSettingsOverlay').addEventListener('click', (e) => { if (e.target.id === 'notesSettingsOverlay') e.currentTarget.classList.remove('show'); });
-document.getElementById('notesSortSelect').addEventListener('change', (e) => {
-  notesSortMode = e.target.value;
-  saveNotesSettings();
-  renderNotesTab();
-});
-document.getElementById('showNoteSnippetToggle').addEventListener('change', (e) => {
-  showNoteSnippet = e.target.checked;
-  saveNotesSettings();
-  renderNotesTab();
-});
-document.getElementById('showSavingsTotalToggle').addEventListener('change', (e) => {
-  showSavingsTotal = e.target.checked;
-  localStorage.setItem('financeAppShowSavingsTotal', showSavingsTotal ? '1' : '0');
-  renderSavingsGoalsList();
-});
+// Шестерня скрізь відкриває те саме вікно на вкладці «Гроші». Раніше вона
+// відкривала то одне з трьох окремих вікон, то спільне — залежно від того,
+// на якій вкладці бюджету ти стояв, і передбачити це було неможливо.
+document.getElementById('pageSettingsBtn').addEventListener('click', () => AppSettings.open('budget'));
 document.getElementById('savingsBalanceToggle').addEventListener('click', () => {
   savingsBalanceHidden = !savingsBalanceHidden;
   localStorage.setItem('financeAppSavingsBalanceHidden', savingsBalanceHidden ? '1' : '0');
