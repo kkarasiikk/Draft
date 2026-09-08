@@ -62,7 +62,20 @@ const T = {
     templatesTitle: 'Шаблони', manageTemplates: 'Керувати шаблонами',
     reorderExercise: 'Перемістити вправу',
     calPrevMonth: 'Попередній місяць', calNextMonth: 'Наступний місяць',
-    calDayHasWorkout: '— є тренування', calShowAll: 'Усі дні',
+    calDayHasWorkout: '— є тренування', calDayPlanned: '— заплановано', calShowAll: 'Усі дні',
+    calLegendDone: 'було', calLegendPlanned: 'заплановано',
+    // Блок наступного тренування
+    whenToday: 'Сьогодні', whenTomorrow: 'Завтра', whenYesterday: 'Учора',
+    whenOverdue: (words) => `Було заплановано на ${words}`,
+    startBtn: 'Почати',
+    colExercise: 'Вправа', colLastTime: 'Минулого разу', colSets: 'Підходів',
+    lastNone: 'уперше',
+    nextEmpty: 'Наступного тренування ще немає. Заплануй його — і тут стоятимуть вправи з вагами минулого разу.',
+    nextPlanBtn: 'Запланувати',
+    // Журнал зліва
+    pastTitle: 'Минулі тренування', pastAll: 'Весь журнал', pastCollapse: 'Згорнути',
+    pastEmpty: 'Тут стануть тренування, які ти вже зробив.',
+    unitTon: 'т',
     saveAsTemplate: 'Зберегти як шаблон', templateSaved: 'Збережено ✓',
     exCount: (n) => `${n} ${plural(n, { one: 'вправа', few: 'вправи', many: 'вправ', other: 'вправи' })}`,
     setCount: (n) => `${n} ${plural(n, { one: 'підхід', few: 'підходи', many: 'підходів', other: 'підходу' })}`,
@@ -87,7 +100,6 @@ const T = {
     prToastText: (name, w, r) => `Новий рекорд: ${name} — ${w}×${r}`,
     emptySessionsTitle: 'Ще немає тренувань', emptySessionsSub: 'Додай перше тренування кнопкою внизу.',
     emptyRecordsTitle: 'Ще немає рекордів', emptyRecordsSub: 'Записуй тренування — рекорди зʼявляться тут.',
-    exMore: (n) => `ще ${n}`,
     historyBestLabel: 'Найкраще', historyEstLabel: '1ПМ (оцінка)', historySessionsLabel: 'Тренувань',
     prBadge: 'PR', trendUp: (p) => `+${p}% від першого разу`, trendFlat: 'Без змін',
     muscle_chest: "Груди", muscle_back: 'Спина', muscle_legs: 'Ноги', muscle_shoulders: 'Плечі', muscle_arms: 'Руки', muscle_core: 'Кор',
@@ -137,7 +149,18 @@ const T = {
     templatesTitle: 'Шаблоны', manageTemplates: 'Управлять шаблонами',
     reorderExercise: 'Переместить упражнение',
     calPrevMonth: 'Предыдущий месяц', calNextMonth: 'Следующий месяц',
-    calDayHasWorkout: '— есть тренировка', calShowAll: 'Все дни',
+    calDayHasWorkout: '— есть тренировка', calDayPlanned: '— запланировано', calShowAll: 'Все дни',
+    calLegendDone: 'было', calLegendPlanned: 'запланировано',
+    whenToday: 'Сегодня', whenTomorrow: 'Завтра', whenYesterday: 'Вчера',
+    whenOverdue: (words) => `Было запланировано на ${words}`,
+    startBtn: 'Начать',
+    colExercise: 'Упражнение', colLastTime: 'В прошлый раз', colSets: 'Подходов',
+    lastNone: 'впервые',
+    nextEmpty: 'Следующей тренировки пока нет. Запланируй её — и здесь будут упражнения с весами прошлого раза.',
+    nextPlanBtn: 'Запланировать',
+    pastTitle: 'Прошлые тренировки', pastAll: 'Весь журнал', pastCollapse: 'Свернуть',
+    pastEmpty: 'Здесь появятся тренировки, которые ты уже сделал.',
+    unitTon: 'т',
     saveAsTemplate: 'Сохранить как шаблон', templateSaved: 'Сохранено ✓',
     exCount: (n) => `${n} ${plural(n, { one: 'упражнение', few: 'упражнения', many: 'упражнений', other: 'упражнения' })}`,
     setCount: (n) => `${n} ${plural(n, { one: 'подход', few: 'подхода', many: 'подходов', other: 'подхода' })}`,
@@ -162,7 +185,6 @@ const T = {
     prToastText: (name, w, r) => `Новый рекорд: ${name} — ${w}×${r}`,
     emptySessionsTitle: 'Пока нет тренировок', emptySessionsSub: 'Добавь первую тренировку кнопкой внизу.',
     emptyRecordsTitle: 'Пока нет рекордов', emptyRecordsSub: 'Записывай тренировки — рекорды появятся здесь.',
-    exMore: (n) => `ещё ${n}`,
     historyBestLabel: 'Лучшее', historyEstLabel: '1ПМ (оценка)', historySessionsLabel: 'Тренировок',
     prBadge: 'PR', trendUp: (p) => `+${p}% с первого раза`, trendFlat: 'Без изменений',
     muscle_chest: 'Грудь', muscle_back: 'Спина', muscle_legs: 'Ноги', muscle_shoulders: 'Плечи', muscle_arms: 'Руки', muscle_core: 'Кор',
@@ -212,7 +234,18 @@ const T = {
     templatesTitle: 'Szablony', manageTemplates: 'Zarządzaj szablonami',
     reorderExercise: 'Przenieś ćwiczenie',
     calPrevMonth: 'Poprzedni miesiąc', calNextMonth: 'Następny miesiąc',
-    calDayHasWorkout: '— jest trening', calShowAll: 'Wszystkie dni',
+    calDayHasWorkout: '— jest trening', calDayPlanned: '— zaplanowano', calShowAll: 'Wszystkie dni',
+    calLegendDone: 'było', calLegendPlanned: 'zaplanowane',
+    whenToday: 'Dzisiaj', whenTomorrow: 'Jutro', whenYesterday: 'Wczoraj',
+    whenOverdue: (words) => `Zaplanowano na ${words}`,
+    startBtn: 'Zacznij',
+    colExercise: 'Ćwiczenie', colLastTime: 'Ostatnio', colSets: 'Serii',
+    lastNone: 'pierwszy raz',
+    nextEmpty: 'Nie ma jeszcze następnego treningu. Zaplanuj go — a tutaj staną ćwiczenia z ciężarami z ostatniego razu.',
+    nextPlanBtn: 'Zaplanuj',
+    pastTitle: 'Minione treningi', pastAll: 'Cały dziennik', pastCollapse: 'Zwiń',
+    pastEmpty: 'Tu pojawią się treningi, które już zrobiłeś.',
+    unitTon: 't',
     saveAsTemplate: 'Zapisz jako szablon', templateSaved: 'Zapisano ✓',
     exCount: (n) => `${n} ${plural(n, { one: 'ćwiczenie', few: 'ćwiczenia', many: 'ćwiczeń', other: 'ćwiczenia' })}`,
     setCount: (n) => `${n} ${plural(n, { one: 'seria', few: 'serie', many: 'serii', other: 'serii' })}`,
@@ -237,7 +270,6 @@ const T = {
     prToastText: (name, w, r) => `Nowy rekord: ${name} — ${w}×${r}`,
     emptySessionsTitle: 'Brak treningów', emptySessionsSub: 'Dodaj pierwszy trening przyciskiem poniżej.',
     emptyRecordsTitle: 'Brak rekordów', emptyRecordsSub: 'Zapisuj treningi — rekordy pojawią się tutaj.',
-    exMore: (n) => `jeszcze ${n}`,
     historyBestLabel: 'Najlepszy', historyEstLabel: '1RM (szac.)', historySessionsLabel: 'Treningów',
     prBadge: 'PR', trendUp: (p) => `+${p}% od pierwszego razu`, trendFlat: 'Bez zmian',
     muscle_chest: 'Klatka', muscle_back: 'Plecy', muscle_legs: 'Nogi', muscle_shoulders: 'Barki', muscle_arms: 'Ręce', muscle_core: 'Core',
@@ -287,7 +319,18 @@ const T = {
     templatesTitle: 'Templates', manageTemplates: 'Manage templates',
     reorderExercise: 'Move exercise',
     calPrevMonth: 'Previous month', calNextMonth: 'Next month',
-    calDayHasWorkout: '— has a workout', calShowAll: 'All days',
+    calDayHasWorkout: '— has a workout', calDayPlanned: '— planned', calShowAll: 'All days',
+    calLegendDone: 'done', calLegendPlanned: 'planned',
+    whenToday: 'Today', whenTomorrow: 'Tomorrow', whenYesterday: 'Yesterday',
+    whenOverdue: (words) => `Was planned for ${words}`,
+    startBtn: 'Start',
+    colExercise: 'Exercise', colLastTime: 'Last time', colSets: 'Sets',
+    lastNone: 'first time',
+    nextEmpty: 'No next workout yet. Plan one — and its exercises will show up here with last time\'s weights.',
+    nextPlanBtn: 'Plan a workout',
+    pastTitle: 'Past workouts', pastAll: 'Full log', pastCollapse: 'Collapse',
+    pastEmpty: 'Workouts you have done will show up here.',
+    unitTon: 't',
     saveAsTemplate: 'Save as template', templateSaved: 'Saved ✓',
     exCount: (n) => `${n} ${plural(n, { one: 'exercise', other: 'exercises' })}`,
     setCount: (n) => `${n} ${plural(n, { one: 'set', other: 'sets' })}`,
@@ -312,7 +355,6 @@ const T = {
     prToastText: (name, w, r) => `New PR: ${name} — ${w}×${r}`,
     emptySessionsTitle: 'No workouts yet', emptySessionsSub: 'Add your first workout with the button below.',
     emptyRecordsTitle: 'No records yet', emptyRecordsSub: 'Log workouts — your records will show up here.',
-    exMore: (n) => `+${n} more`,
     historyBestLabel: 'Best', historyEstLabel: 'Est. 1RM', historySessionsLabel: 'Workouts',
     prBadge: 'PR', trendUp: (p) => `+${p}% since first log`, trendFlat: 'No change',
     muscle_chest: 'Chest', muscle_back: 'Back', muscle_legs: 'Legs', muscle_shoulders: 'Shoulders', muscle_arms: 'Arms', muscle_core: 'Core',
@@ -610,12 +652,24 @@ function weekdayShortLabels() {
 }
 function fmtNum(n) {
   // Прибирає зайві .0, залишає до 2 знаків після коми (для дробової ваги).
-  return Number.isFinite(n) ? (Math.round(n * 100) / 100).toString() : '0';
+  // Кома чи крапка — за мовою інтерфейсу: українською пишуть «12,5 кг», і
+  // «12.5» в списку вправ виглядало чужим. Функція суто показова — у полях
+  // форми ваги лежать числами, а не рядками.
+  if (!Number.isFinite(n)) return '0';
+  return (Math.round(n * 100) / 100).toLocaleString(LOCALE_MAP[currentLang] || 'uk-UA');
 }
-function dayLabel(dateStr) {
+// «субота, 5 вересня» — так дату називають уголос. Скорочення («сб, 5 вер.»)
+// економили місце там, де його й так вистачало.
+function longDayLabel(dateStr) {
   const d = new Date(`${dateStr}T00:00:00`);
   if (Number.isNaN(d.getTime())) return dateStr;
-  return d.toLocaleDateString(LOCALE_MAP[currentLang] || 'uk-UA', { weekday: 'short', day: 'numeric', month: 'short' });
+  const locale = LOCALE_MAP[currentLang] || 'uk-UA';
+  // День тижня форматуємо ОКРЕМО від числа. Частина збірок ICU на запит
+  // «weekday + day + month» віддає знахідний відмінок — «суботу, 5 вересня».
+  // У реченні «у суботу» це правильно, у підписі — ні.
+  const weekday = d.toLocaleDateString(locale, { weekday: 'long' });
+  const dayMonth = d.toLocaleDateString(locale, { day: 'numeric', month: 'long' });
+  return `${weekday}, ${dayMonth}`;
 }
 function shortDate(dateStr) {
   const d = new Date(`${dateStr}T00:00:00`);
@@ -1011,10 +1065,13 @@ function monthShift(month, delta) {
 
 function monthTitle(month) {
   const [y, m] = month.split('-').map(Number);
-  const label = new Date(y, m - 1, 1)
-    .toLocaleDateString(LOCALE_MAP[currentLang] || 'uk-UA', { month: 'long', year: 'numeric' });
-  // Велика літера лише на першій: CSS-capitalize підняв би ще й «р.» у
-  // «серпень 2026 р.».
+  const locale = LOCALE_MAP[currentLang] || 'uk-UA';
+  // Рік дописуємо, лише коли він не цей: «Вересень 2027» щось означає,
+  // «Вересень 2026 р.» — просто довше. Той самий підпис, що в календарі
+  // на головній.
+  const monthName = new Date(y, m - 1, 1).toLocaleDateString(locale, { month: 'long' });
+  const label = y === new Date().getFullYear() ? monthName : `${monthName} ${y}`;
+  // Велика літера лише на першій: CSS-capitalize підняв би ще й рік.
   return label.charAt(0).toUpperCase() + label.slice(1);
 }
 
@@ -1026,15 +1083,6 @@ function weekdayShortLabels() {
   return [0, 1, 2, 3, 4, 5, 6].map((i) => fmt.format(new Date(2024, 0, 1 + i)));
 }
 
-function sessionsByDate() {
-  const map = new Map();
-  sessions.forEach((s) => {
-    if (!map.has(s.date)) map.set(s.date, []);
-    map.get(s.date).push(s);
-  });
-  return map;
-}
-
 function renderCalendar() {
   const [y, m] = calMonth.split('-').map(Number);
   const first = new Date(y, m - 1, 1);
@@ -1042,21 +1090,22 @@ function renderCalendar() {
   // getDay(): неділя = 0. Переводимо в «скільки порожніх клітинок до 1 числа»
   // для тижня, що починається з понеділка.
   const lead = (first.getDay() + 6) % 7;
-  const byDate = sessionsByDate();
+  const marks = window.WorkoutProgress.monthMarks(sessions, calMonth);
   const today = todayISO();
 
   const cells = [];
   for (let i = 0; i < lead; i++) cells.push('<button type="button" class="wcal-day blank" tabindex="-1"></button>');
   for (let day = 1; day <= daysInMonth; day++) {
     const iso = `${calMonth}-${pad2(day)}`;
-    const has = byDate.has(iso);
+    const mark = marks[iso] || null;
     const cls = ['wcal-day'];
-    if (has) cls.push('has');
+    if (mark) cls.push('has');
     if (iso === today) cls.push('today');
     if (iso === calSelectedDate) cls.push('selected');
-    const label = has ? ` ${t('calDayHasWorkout')}` : '';
-    cells.push(`<button type="button" class="${cls.join(' ')}"${has ? ` data-cal-day="${iso}"` : ' tabindex="-1"'} aria-label="${day}${escapeHtml(label)}">
-      <span>${day}</span><span class="wcal-dot${has ? '' : ' ghost'}"></span>
+    const label = mark ? ` ${t(mark === 'done' ? 'calDayHasWorkout' : 'calDayPlanned')}` : '';
+    const dotCls = mark ? (mark === 'planned' ? ' planned' : '') : ' ghost';
+    cells.push(`<button type="button" class="${cls.join(' ')}"${mark ? ` data-cal-day="${iso}"` : ' tabindex="-1"'} aria-label="${day}${escapeHtml(label)}">
+      <span class="wcal-num">${day}</span><span class="wcal-dot${dotCls}"></span>
     </button>`);
   }
 
@@ -1064,26 +1113,30 @@ function renderCalendar() {
     <div class="wcal">
       <div class="wcal-head">
         <button type="button" class="wcal-nav" data-cal-shift="-1" aria-label="${escapeHtml(t('calPrevMonth'))}">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
         </button>
         <button type="button" class="wcal-title" id="wcalTitle">${escapeHtml(monthTitle(calMonth))}</button>
         <button type="button" class="wcal-nav" data-cal-shift="1" aria-label="${escapeHtml(t('calNextMonth'))}">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
         </button>
       </div>
       <div class="wcal-grid">
         ${weekdayShortLabels().map((w) => `<div class="wcal-wd">${escapeHtml(w)}</div>`).join('')}
         ${cells.join('')}
       </div>
+      <div class="wcal-legend">
+        <span><i class="wcal-dot"></i>${escapeHtml(t('calLegendDone'))}</span>
+        <span><i class="wcal-dot planned"></i>${escapeHtml(t('calLegendPlanned'))}</span>
+      </div>
     </div>`;
 }
 
 // Тап по дню — це «покажи мені той день». Коли тренування одне (а так майже
 // завжди), «той день» і є саме тренування, тож відкриваємо його одразу.
-// Коли їх кілька — звужуємо список, бо вгадувати, яке з них мали на увазі,
+// Коли їх кілька — звужуємо журнал, бо вгадувати, яке з них мали на увазі,
 // було б гірше, ніж показати обидва.
 function openCalendarDay(iso) {
-  const items = sessionsByDate().get(iso) || [];
+  const items = sessions.filter((s) => s.date === iso);
   if (!items.length) return;
   if (items.length === 1) {
     calSelectedDate = null;
@@ -1119,10 +1172,158 @@ function attachCalendarEvents(root) {
   });
 }
 
+// ---- Розкладка вкладки ----
+// Згори — тренування, яке має бути. Під ним журнал зліва й календар
+// справа. Так відповідає на «що робити» найперший блок, а не той, до
+// якого треба догортати.
+
+// «Завтра», «сьогодні», «вчора» замість дати — так це називають уголос.
+// Далі трьох днів слова закінчуються, і повертається звичайна дата.
+function whenLabel(iso) {
+  const diff = window.WorkoutProgress.daysBetween(todayISO(), iso);
+  const words = longDayLabel(iso);
+  // «Завтра» відповідає швидше за дату, але сама дата теж потрібна: без неї
+  // не видно, чи це той день, на який ти розраховував.
+  if (diff === 0) return `${t('whenToday')} · ${words}`;
+  if (diff === 1) return `${t('whenTomorrow')} · ${words}`;
+  if (diff === -1) return `${t('whenYesterday')} · ${words}`;
+  // Прострочений план не мовчить про те, що він прострочений.
+  return diff < 0 ? t('whenOverdue', words) : words;
+}
+
+// Тоннаж у тоннах: «4,3 т» читається, «4260 кг» — вже треба рахувати.
+// Нижче тонни вагу лишаємо в кілограмах, інакше все зіллється в «0,4 т».
+function tonnageHtml(session) {
+  const P = window.WorkoutProgress;
+  const kg = P.tonnage(session);
+  // Тренування з власною вагою тоннажу не дає зовсім: підтягування — це
+  // нуль кілограмів на штанзі. «0 кг» читалось би як «нічого не робив»,
+  // тож там міряємо повтореннями.
+  if (!kg) {
+    const reps = (session.exercises || []).reduce((sum, ex) => sum
+      + (ex.sets || []).reduce((n, set) => n + (Number(set.reps) > 0 ? Number(set.reps) : 0), 0), 0);
+    return `${escapeHtml(fmtInt(reps))}<span>${escapeHtml(t('unitReps'))}</span>`;
+  }
+  if (kg >= 1000) {
+    const tons = Math.round(kg / 100) / 10;
+    const locale = LOCALE_MAP[currentLang] || 'uk-UA';
+    return `${escapeHtml(tons.toLocaleString(locale))}<span>${escapeHtml(t('unitTon'))}</span>`;
+  }
+  return `${escapeHtml(fmtInt(kg))}<span>${escapeHtml(t('unitKg'))}</span>`;
+}
+
+function gainChipHtml(gain) {
+  if (!gain) return '';
+  const name = gain.libId ? exerciseLabel(gain.libId) : (gain.name || '');
+  const delta = gain.unit === 'kg'
+    ? `+${fmtNum(gain.delta)} ${t('unitKg')}`
+    : `+${fmtNum(gain.delta)} ${t('unitReps')}`;
+  const text = name ? `${delta} · ${name}` : delta;
+  // Назва вправи лежить окремим шматком: на телефоні вона ховається, бо
+  // інакше чип відтісняє назву тренування у «Fullbod…». Повний текст — у title.
+  return `<span class="gain-chip" title="${escapeHtml(text)}">${escapeHtml(delta)}${
+    name ? `<span class="gain-ex"> · ${escapeHtml(name)}</span>` : ''}</span>`;
+}
+
+// Блок наступного тренування. Колонка «минулого разу» — те, чого вкладці
+// бракувало найбільше: у плані ваг ще немає, тож навпроти кожної вправи
+// стояло «—», і згадувати доводилось самому.
+function renderNextBlock() {
+  const P = window.WorkoutProgress;
+  const next = P.nextSession(sessions, todayISO());
+  if (!next) {
+    return `
+      <div class="next-empty">
+        ${escapeHtml(t('nextEmpty'))}
+        <div><button type="button" id="planSessionBtn">${escapeHtml(t('nextPlanBtn'))}</button></div>
+      </div>`;
+  }
+  const exs = next.exercises || [];
+  const rows = exs.map((ex) => {
+    const last = P.lastResultFor(sessions, exerciseKey(ex), next.id);
+    const lastStr = last ? setLabel(last.weight, last.reps) : t('lastNone');
+    const setsCount = (ex.sets || []).length;
+    return `
+      <div class="next-td">${escapeHtml(exerciseDisplayName(ex))}</div>
+      <div class="next-td last${last ? '' : ' none'}">${escapeHtml(lastStr)}</div>
+      <div class="next-td num">${setsCount ? escapeHtml(String(setsCount)) : '—'}</div>`;
+  }).join('');
+  const muscles = P.sessionMuscles(next)
+    .map((m) => `<span class="muscle-chip">${escapeHtml(muscleLabel(m))}</span>`).join('');
+
+  return `
+    <div class="next-when">${escapeHtml(whenLabel(next.date))}</div>
+    <div class="next-card" data-open-session="${next.id}">
+      <div class="next-head">
+        <div>
+          <div class="next-name">${escapeHtml(next.name || t('newSessionLabel'))}</div>
+          ${muscles ? `<div class="next-muscles">${muscles}</div>` : ''}
+        </div>
+        <button type="button" class="next-start" data-open-session="${next.id}">${escapeHtml(t('startBtn'))}</button>
+      </div>
+      ${exs.length ? `
+      <div class="next-table">
+        <div class="next-th">${escapeHtml(t('colExercise'))}</div>
+        <div class="next-th">${escapeHtml(t('colLastTime'))}</div>
+        <div class="next-th num">${escapeHtml(t('colSets'))}</div>
+        ${rows}
+      </div>` : ''}
+    </div>`;
+}
+
+// Скільки минулих тренувань показуємо, поки не попросили весь журнал.
+const PAST_SHOWN = 5;
+let pastExpanded = false;
+
+function renderPastCard(session, withDate) {
+  const P = window.WorkoutProgress;
+  const gain = P.topGain(sessions, session);
+  const sets = P.doneSetCount(session);
+  // Коли журнал звужений до одного дня, дата вже стоїть у заголовку колонки —
+  // повторювати її на кожній картці нема сенсу.
+  const meta = withDate
+    ? `${escapeHtml(longDayLabel(session.date))} · ${escapeHtml(t('setCount', sets))}`
+    : escapeHtml(t('setCount', sets));
+  return `
+    <div class="past-card" data-open-session="${session.id}">
+      <div class="past-main">
+        <div class="past-name-row">
+          <span class="past-name">${escapeHtml(session.name || t('newSessionLabel'))}</span>
+          ${gainChipHtml(gain)}
+        </div>
+        <div class="past-meta">${meta}</div>
+      </div>
+      <div class="past-tonnage">${tonnageHtml(session)}</div>
+    </div>`;
+}
+
+function renderPastColumn() {
+  const P = window.WorkoutProgress;
+  // Обраний у календарі день показує все, що там було, — і зроблене, і план.
+  const all = calSelectedDate
+    ? sortedSessions().filter((s) => s.date === calSelectedDate)
+    : P.pastSessions(sessions);
+  const shown = (calSelectedDate || pastExpanded) ? all : all.slice(0, PAST_SHOWN);
+  const link = calSelectedDate
+    ? `<button type="button" class="col-link" id="wcalClearBtn">${escapeHtml(t('calShowAll'))}</button>`
+    : (all.length > PAST_SHOWN
+      ? `<button type="button" class="col-link" id="pastToggleBtn">${escapeHtml(t(pastExpanded ? 'pastCollapse' : 'pastAll'))}</button>`
+      : '');
+
+  return `
+    <section>
+      <div class="col-head">
+        <span class="col-title">${escapeHtml(calSelectedDate ? longDayLabel(calSelectedDate) : t('pastTitle'))}</span>
+        ${link}
+      </div>
+      ${shown.length ? shown.map((s) => renderPastCard(s, !calSelectedDate)).join('')
+        : `<div class="past-empty">${escapeHtml(t('pastEmpty'))}</div>`}
+    </section>`;
+}
+
 function renderSessionsTab() {
   const root = document.getElementById('sessionsTab');
-  const list = sortedSessions();
-  if (!list.length) {
+  if (!sessions.length) {
     root.innerHTML = `
       <div class="empty-state">
         <svg width="52" height="52" viewBox="0 0 24 24" fill="currentColor"><rect x="8.2" y="10.4" width="7.6" height="3.2" rx="1.6"/><rect x="0.8" y="5.8" width="3.4" height="12.4" rx="1.7"/><rect x="4.8" y="4.2" width="3.8" height="15.6" rx="1.9"/><rect x="15.4" y="4.2" width="3.8" height="15.6" rx="1.9"/><rect x="19.8" y="5.8" width="3.4" height="12.4" rx="1.7"/></svg>
@@ -1131,50 +1332,30 @@ function renderSessionsTab() {
       </div>`;
     return;
   }
-  // Групування за датою (список уже відсортований desc).
-  const groups = [];
-  list.forEach((s) => {
-    const last = groups[groups.length - 1];
-    if (last && last.date === s.date) last.items.push(s); else groups.push({ date: s.date, items: [s] });
-  });
-  const shownGroups = calSelectedDate ? groups.filter((g) => g.date === calSelectedDate) : groups;
-  const filterBar = calSelectedDate ? `
-    <div class="wcal-filter">
-      <span class="day-label" style="margin:0;">${escapeHtml(dayLabel(calSelectedDate))}</span>
-      <button type="button" id="wcalClearBtn">${escapeHtml(t('calShowAll'))}</button>
-    </div>` : '';
 
-  root.innerHTML = renderCalendar() + filterBar + shownGroups.map((g) => `
-    <div class="day-group">
-      <div class="day-label">${escapeHtml(dayLabel(g.date))}</div>
-      ${g.items.map((s) => renderSessionCard(s)).join('')}
-    </div>
-  `).join('');
-  attachCalendarEvents(root);
-  root.querySelectorAll('[data-open-session]').forEach((el) => {
-    el.addEventListener('click', () => openSessionForm(sessions.find((s) => s.id === el.dataset.openSession)));
-  });
-}
-
-function renderSessionCard(session) {
-  const exs = session.exercises || [];
-  const shown = exs.slice(0, 4);
-  const rows = shown.map((ex) => {
-    const b = bestSet(ex.sets);
-    const bestStr = b ? `${fmtNum(b.weight)}×${b.reps}` : '—';
-    return `<div class="session-ex-row"><span class="session-ex-name">${escapeHtml(exerciseDisplayName(ex))}</span><span class="session-ex-best">${escapeHtml(bestStr)}</span></div>`;
-  }).join('');
-  const more = exs.length > shown.length ? `<div class="session-more">${escapeHtml(t('exMore', exs.length - shown.length))}</div>` : '';
-  const setTotal = exs.reduce((sum, ex) => sum + (ex.sets ? ex.sets.length : 0), 0);
-  return `
-    <div class="session-card" data-open-session="${session.id}">
-      <div class="session-head">
-        <div class="session-name">${escapeHtml(session.name || t('newSessionLabel'))}</div>
-        <div class="session-meta">${escapeHtml(t('exCount', exs.length))} · ${escapeHtml(t('setCount', setTotal))}</div>
-      </div>
-      <div class="session-ex-list">${rows}</div>
-      ${more}
+  root.innerHTML = `
+    ${renderNextBlock()}
+    <div class="sessions-split">
+      ${renderPastColumn()}
+      <aside>${renderCalendar()}</aside>
     </div>`;
+
+  attachCalendarEvents(root);
+  const plan = root.querySelector('#planSessionBtn');
+  if (plan) plan.addEventListener('click', () => openSessionForm(null));
+  const toggle = root.querySelector('#pastToggleBtn');
+  if (toggle) toggle.addEventListener('click', () => {
+    pastExpanded = !pastExpanded;
+    renderCurrentScreen();
+  });
+  root.querySelectorAll('[data-open-session]').forEach((el) => {
+    el.addEventListener('click', (e) => {
+      // Кнопка «Почати» лежить усередині картки: без цього форма
+      // відкрилась би двічі поспіль.
+      e.stopPropagation();
+      openSessionForm(sessions.find((s) => s.id === el.dataset.openSession));
+    });
+  });
 }
 
 // ---- Прогрес: одна відповідь замість двадцяти графіків ----

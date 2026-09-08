@@ -51,7 +51,7 @@ test('застосунок не пропонує, що тренувати сьо
     ],
   };
   await openModule(page, 'workout/index.html', { seed });
-  await page.waitForSelector('.session-card');
+  await page.waitForSelector('.past-card');
   await expect(page.locator('.plan-card')).toHaveCount(0);
   await expect(page.locator('#planStartBtn')).toHaveCount(0);
   await expect(page.locator('[data-ready]')).toHaveCount(0);
@@ -79,11 +79,11 @@ test.describe('Календар', () => {
     await openModule(page, 'workout/index.html', { seed: SEED });
     await page.click(`[data-cal-day="${day(20)}"]`);
     expect(await isShown(page, '#sessionFormOverlay'), 'вгадувати, яке з двох — гірше').toBe(false);
-    await expect(page.locator('.session-card')).toHaveCount(2);
+    await expect(page.locator('.past-card')).toHaveCount(2);
 
     // «Усі дні» знімає звуження.
     await page.click('#wcalClearBtn');
-    await expect(page.locator('.session-card')).toHaveCount(4);
+    await expect(page.locator('.past-card')).toHaveCount(4);
   });
 
   test('стрілки гортають місяці, назва вертає в поточний', async ({ page }) => {
@@ -302,7 +302,7 @@ test.describe('Підказки у формі', () => {
   });
 });
 
-test.describe('Підпис у картці тренування', () => {
+test.describe('Підпис у картці минулого тренування', () => {
   const seed = {
     workouts: [{
       id: 's1', date: day(20), name: 'Ноги', notes: '',
@@ -315,16 +315,32 @@ test.describe('Підпис у картці тренування', () => {
 
   test('рахує підходи й називає їх підходами, а не повтореннями', async ({ page }) => {
     await openModule(page, 'workout/index.html', { seed });
-    // Дві вправи, три підходи. Раніше тут стояло «2 вправи · 3 повт.» —
-    // рахувались підходи, а підписувались повтореннями.
-    await expect(page.locator('.session-meta')).toHaveText('2 вправи · 3 підходи');
+    // Три підходи. Раніше тут стояло «2 вправи · 3 повт.» — рахувались
+    // підходи, а підписувались повтореннями. Кількість вправ пішла звідси
+    // зовсім: вона стояла однакова на всіх картках і нічого не розрізняла.
+    await expect(page.locator('.past-meta')).toContainText('3 підходи');
   });
 
   test('однина не ламається', async ({ page }) => {
     const one = { workouts: [{ id: 's2', date: day(20), name: 'Швидке', notes: '',
       exercises: [ex('plank', 'Планка', 'core', [{ weight: 0, reps: 60 }])] }] };
     await openModule(page, 'workout/index.html', { seed: one });
-    // Було «1 вправи · 1 повт.».
-    await expect(page.locator('.session-meta')).toHaveText('1 вправа · 1 підхід');
+    await expect(page.locator('.past-meta')).toContainText('1 підхід');
+  });
+
+  // Головне число картки: воно й відрізняє важке тренування від легкого.
+  // «6 вправ · 19 підходів» стояло однакове на всіх, і картки зливались.
+  test('замість кількості вправ стоїть тоннаж', async ({ page }) => {
+    await openModule(page, 'workout/index.html', { seed });
+    // 100×5 + 100×5 + 20×10 = 1200 кг.
+    await expect(page.locator('.past-tonnage')).toHaveText('1,2т');
+    await expect(page.locator('#sessionsTab')).not.toContainText('2 вправи');
+  });
+
+  test('тренування з власною вагою міряється повтореннями, а не «0 кг»', async ({ page }) => {
+    const bw = { workouts: [{ id: 's3', date: day(20), name: 'Турнік', notes: '',
+      exercises: [ex('pullUp', 'Підтягування', 'back', [{ weight: 0, reps: 9 }, { weight: 0, reps: 8 }])] }] };
+    await openModule(page, 'workout/index.html', { seed: bw });
+    await expect(page.locator('.past-tonnage')).toHaveText('17повт.');
   });
 });
