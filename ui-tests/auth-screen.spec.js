@@ -41,7 +41,9 @@ test.describe('Широкий екран: дві половини', () => {
 
   test('рядок під знаком — саме той, і він не перекладається', async ({ page }) => {
     await openAuth(page, { lang: 'pl' });
-    await expect(page.locator('.auth-tagline')).toHaveText('Only you create your life.');
+    // Без крапки: це підпис-девіз, а не речення — крапка робила з нього
+    // обірвану фразу.
+    await expect(page.locator('.auth-tagline')).toHaveText('Only you create your life');
     // Решта екрана при цьому польською — тобто рядок лишився англійським
     // навмисно, а не тому, що переклад не доїхав.
     await expect(page.locator('#authTitle')).toHaveText('Logowanie');

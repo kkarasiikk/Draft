@@ -109,19 +109,42 @@ test.describe('Широкий екран: у клітинці стоїть на�
   });
 });
 
-// Головна мусить триматись в один екран. Шість рядків із назвами додають
-// по ~15px кожен, і на вікні 1366x640 сторінка вилазила за край рівно на
-// смугу прокрутки — тому там назви поступаються місцем крапці.
-test.describe('Низьке вікно: назви поступаються крапці', () => {
-  test.use({ viewport: { width: 1366, height: 640 } });
+// Ноутбук — місце, де людина сидить найдовше, і саме там назви раніше
+// зникали: шість рядків у дві строки виганяли сторінку за край на 90
+// пікселів, тож вибір стояв «назви або один екран».
+//
+// Тепер є третій варіант: назва лишається, просто в один рядок і дрібнішим
+// кеглем. «Оплатити ін…» упізнається, крапка — ні.
+test.describe('Вікно ноутбука: назва лишається, просто тісніша', () => {
+  test.use({ viewport: { width: 1366, height: 700 } });
 
-  test('назв немає, крапка на місці, сторінка не гортається', async ({ page }) => {
+  test('назва на місці, крапки немає, сторінка не гортається', async ({ page }) => {
+    await openHub(page);
+    await expect(cellOf(page, D1).locator('.cal-chip')).toBeVisible();
+    await expect(cellOf(page, D1).locator('.cal-dot')).toBeHidden();
+    const over = await page.evaluate(() =>
+      document.documentElement.scrollHeight - window.innerHeight);
+    expect(over, 'головна й далі тримається в один екран').toBeLessThanOrEqual(0);
+  });
+
+  // Запас беремо саме з другого рядка: він і коштував ті ~12px на клітинку.
+  test('назва стискається в один рядок, а не обрізається наполовину', async ({ page }) => {
+    await openHub(page);
+    const clamp = await cellOf(page, D1).locator('.cal-chip')
+      .evaluate((el) => getComputedStyle(el).webkitLineClamp);
+    expect(clamp).toBe('1');
+  });
+});
+
+// Нижче цього порога не вміщається навіть однорядкова назва — тоді крапка
+// знову стає єдиним, що каже про день.
+test.describe('Зовсім низьке вікно: крапка повертається', () => {
+  test.use({ viewport: { width: 1366, height: 520 } });
+
+  test('назв немає, крапка на місці', async ({ page }) => {
     await openHub(page);
     await expect(cellOf(page, D1).locator('.cal-chip')).toBeHidden();
     await expect(cellOf(page, D1).locator('.cal-dot')).toBeVisible();
-    const over = await page.evaluate(() =>
-      document.documentElement.scrollHeight - window.innerHeight);
-    expect(over).toBeLessThanOrEqual(0);
   });
 });
 
