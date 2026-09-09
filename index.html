@@ -264,6 +264,12 @@
   /* Плитки — сітка 2x2 зі стат-числами. Це вже не двері («Відкрити»), а
      факт, у який можна тицьнути: головне число розділу видно без заходу. */
   .sections{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  /* Клітинка сітки за замовчуванням не вужча за свій вміст, а в плитці є
+     нерозривні шматки (число з підписом в один рядок). На вузькому телефоні
+     (320px) це розпирало головну вбік. min-width:0 дозволяє плитці стиснутись
+     до своєї колонки — довгий підпис усередині й так обрізається трикрапкою.
+     Для плитки бюджету те саме вже стоїть на .tile-slot нижче. */
+  .sections > *{min-width:0;}
   .tile{background:var(--surface);border:1px solid var(--border);border-radius:20px;
     padding:15px 16px 16px;text-decoration:none;color:inherit;display:block;
     transition:transform .15s, box-shadow .25s;}

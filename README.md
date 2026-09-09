@@ -1170,7 +1170,13 @@ SDK (`initializeApp`, `auth`, `firestore` — `appCheck` і `functions`
 
   Шляхи до іконок перевіряє `assets.test.js` — див. «Тести».
 - Зовнішні бібліотеки (з `cdnjs.cloudflare.com`, дозволено через CSP): Chart.js,
-  DOMPurify (санітизація HTML нотаток), SheetJS/xlsx (експорт в Excel)
+  DOMPurify (санітизація HTML нотаток), SheetJS/xlsx (експорт в Excel).
+  Жодна з трьох не обовʼязкова для роботи: застосунок працює й офлайн, коли
+  CDN недосяжний. Кожна має свій запасний шлях — `sanitizeNoteHtml()` віддає
+  екранований текст, експорт в Excel каже, що бібліотеки немає, а `makeChart()`
+  у `budget/app.js` ховає полотно й підписується на завантаження скрипта, щоб
+  домалювати графіки, щойно він долетить. Перевіряє
+  `ui-tests/budget-charts-offline.spec.js`
 - Курс валют — публічне API НБУ (`bank.gov.ua`), кешується локально
 
 ## Локальний запуск

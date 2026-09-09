@@ -1249,12 +1249,6 @@ function deleteSavingRemote(id) {
   const uid = auth.currentUser.uid;
   return db.collection('users').doc(uid).collection('savings').doc(id).delete();
 }
-
-function saveCategoriesList(type, list) {
-  const uid = auth.currentUser.uid;
-  const field = type === 'income' ? 'categoriesIncome' : 'categoriesExpense';
-  return db.collection('users').doc(uid).set({ [field]: list }, { merge: true });
-}
 // ---- Обчислення на основі поточного місяця ----
 function getTargetDate() {
   const now = new Date();
@@ -1910,6 +1904,30 @@ function toggleSavingsTrendGoal(goalId) {
   render();
 }
 
+// Chart.js приходить із CDN, а застосунок працює й офлайн. Якщо бібліотеки
+// ще (або взагалі) немає, `new Chart` кидав виняток на першому ж графіку —
+// і весь renderStats обривався: підписи лишались нелокалізованими, а легенда
+// заощаджень порожньою. Тепер полотно просто ховається, решта вкладки
+// малюється, а графіки з'являються, щойно бібліотека долетить.
+let chartLibWaiting = false;
+function awaitChartLib() {
+  if (chartLibWaiting) return;
+  const el = document.getElementById('chartLib');
+  if (!el) return;
+  chartLibWaiting = true;
+  el.addEventListener('load', () => { chartLibWaiting = false; render(); }, { once: true });
+}
+function makeChart(canvas, config) {
+  if (typeof Chart === 'undefined') {
+    if (canvas) canvas.style.display = 'none';
+    awaitChartLib();
+    return null;
+  }
+  // Полотно могло бути сховане попереднім прогоном без бібліотеки.
+  if (canvas && canvas.style.display === 'none') canvas.style.display = 'block';
+  return new Chart(canvas, config);
+}
+
 function renderStats(monthTx, ty, tm) {
   document.getElementById('pieChartCard').style.display = showChartPie ? '' : 'none';
   document.getElementById('trendChartCard').style.display = showChartTrend ? '' : 'none';
@@ -1966,7 +1984,7 @@ function renderStats(monthTx, ty, tm) {
       const values = visibleEntries.map(e => e[1]);
       const colors = ids.map(id => catColor('expense', id));
       if (pieChart) pieChart.destroy();
-      pieChart = new Chart(pieCanvas, {
+      pieChart = makeChart(pieCanvas, {
         type: 'doughnut',
         data: { labels, datasets: [{ data: values, backgroundColor: colors, borderColor: themeVar('--surface'), borderWidth: 2 }] },
         options: {
@@ -1998,7 +2016,7 @@ function renderStats(monthTx, ty, tm) {
   document.getElementById('statsTrendSub').textContent = `${t('lastLabel')} ${trendPeriodMonths} ${wordMap[trendPeriodMonths] || wordMap[6]}`;
   const barCanvas = document.getElementById('barChart');
   if (barChart) barChart.destroy();
-  barChart = new Chart(barCanvas, {
+  barChart = makeChart(barCanvas, {
     type: 'bar',
     data: { labels, datasets: [
       { label: t('chartIncome'), data: incomeData, backgroundColor: themeVar('--income'), borderRadius: 3 },
@@ -2117,7 +2135,7 @@ function renderStats(monthTx, ty, tm) {
       trendEmptyEl.style.display = 'none';
       savingsCanvas.style.display = 'block';
       if (savingsTrendChart) savingsTrendChart.destroy();
-      savingsTrendChart = new Chart(savingsCanvas, {
+      savingsTrendChart = makeChart(savingsCanvas, {
         type: 'line',
         data: { labels: svLabels, datasets: visibleDatasets },
         options: {
