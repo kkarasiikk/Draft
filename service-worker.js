@@ -10,7 +10,7 @@ LifeSW({
   files: [
     './', './index.html', './home.js', './home-summary.js', './export-data.js',
     './side-nav.js', './side-nav.css', './settings.js', './settings.css',
-    './scroll-lock.js', './boot-guard.js',
+    './scroll-lock.js', './boot-guard.js', './splash.js',
     './unsaved-guard.js', './sw-register.js',
     './goals/review.js', './categories-default.js',
     './manifest.json',
