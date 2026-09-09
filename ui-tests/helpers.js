@@ -17,8 +17,6 @@ const STUB = fs.readFileSync(path.join(__dirname, 'firebase-stub.js'), 'utf8');
  *   #appScreen, домашній хаб — #homeScreen.
  *   profileDelay — на скільки мілісекунд затримати снапшот профілю; потрібен,
  *   щоб відтворити випадок «сторінка намалювалась раніше за свої категорії».
- *   splash — показати заставку. За замовчуванням її вимкнено: вона накриває
- *   екран і ловить тапи, тож усім іншим тестам лише заважає.
  */
 async function openModule(page, modulePath, opts = {}) {
   // Скрипти Firebase із gstatic підміняються заглушкою: перший запит віддає
@@ -58,7 +56,7 @@ async function openModule(page, modulePath, opts = {}) {
   }));
   await page.route('**/fonts.googleapis.com/**', (route) => route.fulfill({ status: 200, contentType: 'text/css', body: '' }));
 
-  await page.addInitScript(([seed, theme, lang, profileDelay, noUser, splash]) => {
+  await page.addInitScript(([seed, theme, lang, profileDelay, noUser]) => {
     window.__fbSeed = seed;
     // Скільки мілісекунд заглушка тримає снапшот профілю (0 — віддає одразу).
     window.__fbProfileDelay = profileDelay;
@@ -67,15 +65,8 @@ async function openModule(page, modulePath, opts = {}) {
     try {
       localStorage.setItem('financeAppTheme', theme);
       localStorage.setItem('financeAppLang', lang);
-      // Заставка накриває екран на півтори секунди й ловить тапи — у тестах
-      // це просто перешкода. Ставимо позначку «вже показана»: рівно те саме
-      // робить сама заставка після першого показу за сеанс. Тести самої
-      // заставки (splash.spec.js) передають splash:true й бачать її.
-      if (splash) sessionStorage.removeItem('lifeSplashShown');
-      else sessionStorage.setItem('lifeSplashShown', '1');
     } catch (err) { /* приватний режим — тест від цього не залежить */ }
-  }, [opts.seed || {}, opts.theme || 'light', opts.lang || 'uk', opts.profileDelay || 0,
-      !!opts.noUser, !!opts.splash]);
+  }, [opts.seed || {}, opts.theme || 'light', opts.lang || 'uk', opts.profileDelay || 0, !!opts.noUser]);
 
   await page.goto(`/${modulePath}`);
   await page.waitForSelector(opts.ready || '#appScreen', { state: 'visible' });

@@ -39,7 +39,20 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Встановити Chromium
-        run: npx playwright install --with-deps chromium
+        run: |
+          # `--with-deps` спершу робить apt-get update, а образ руннера має
+          # підключене дзеркало Google Chrome. Коли те дзеркало віддає биту
+          # контрольну суму (як 9 вересня: Release-файл оновили, а
+          # Packages.gz лишився старий), apt зупиняється — і встановлення
+          # падає, ще не дійшовши до тестів.
+          #
+          # При тому жодна потрібна нам бібліотека звідти не береться:
+          # Playwright ставить власну збірку Chromium, а системні
+          # залежності до неї — зі штатних репозиторіїв Ubuntu. Тобто це
+          # джерело нам не потрібне взагалі, і без нього перевірка більше
+          # не залежить від чужого дзеркала.
+          sudo rm -f /etc/apt/sources.list.d/google-chrome*
+          npx playwright install --with-deps chromium
       - name: UI-тести форм
         run: npm run test:ui
       - uses: actions/upload-artifact@v4
