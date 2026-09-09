@@ -1,5 +1,8 @@
 node_modules/
-.firebaserc
+# .firebaserc НЕ ігноруємо: у ньому лише id проєкту, який і так лежить
+# відкрито в budget/firebase-config.js. Зате з ним `firebase deploy`
+# працює без `--project`, а це та дрібниця, яку щоразу доводилось
+# згадувати.
 *.log
 .DS_Store
 .env
