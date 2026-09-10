@@ -332,6 +332,36 @@ describe('nextSession', () => {
     expect(P.nextSession([done], TODAY)).toBe(null);
     expect(P.nextSession([], TODAY)).toBe(null);
   });
+
+  // Найважливіше: те, що на сьогодні, лишається зверху ВЕСЬ ДЕНЬ.
+  // Було інакше — і це ламало саме той момент, заради якого блок існує:
+  // людина записувала перший підхід, тренування переставало бути
+  // «незробленим», і блок перескакував на наступне за розкладом посеред
+  // тренування, яке ще тривало.
+  test('сьогоднішнє лишається зверху й після того, як підходи записані', () => {
+    const todayDone = { id: 'today', date: TODAY, exercises: [bench(95, 3)] };
+    const saturday = { id: 'sat', date: ahead(2), exercises: [planBench(4)] };
+    expect(P.nextSession([todayDone, saturday], TODAY).id).toBe('today');
+  });
+
+  test('наступне спливає лише завтра, коли сьогоднішнього вже немає', () => {
+    const yesterdayDone = { id: 'yst', date: back(1), exercises: [bench(95, 3)] };
+    const saturday = { id: 'sat', date: ahead(2), exercises: [planBench(4)] };
+    expect(P.nextSession([yesterdayDone, saturday], TODAY).id).toBe('sat');
+  });
+
+  test('два на один день: спершу те, за яке ще не бралися', () => {
+    const doneToday = { id: 'a', date: TODAY, exercises: [bench(95, 3)] };
+    const freshToday = { id: 'b', date: TODAY, exercises: [planBench(3)] };
+    expect(P.nextSession([doneToday, freshToday], TODAY).id).toBe('b');
+  });
+
+  test('усе сьогоднішнє зроблено — показуємо останнє з них, а не завтрашнє', () => {
+    const first = { id: 'a', date: TODAY, exercises: [bench(95, 3)] };
+    const second = { id: 'b', date: TODAY, exercises: [squat(100, 5)] };
+    const tomorrow = { id: 'tmr', date: ahead(1), exercises: [planBench(3)] };
+    expect(P.nextSession([first, second, tomorrow], TODAY).id).toBe('b');
+  });
 });
 
 describe('pastSessions', () => {

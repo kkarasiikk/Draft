@@ -87,14 +87,22 @@ test.describe('Наступне тренування згори', () => {
     await expect(page.locator('#sessionFormOverlay.show')).toHaveCount(0);
   });
 
-  test('зроблене сьогодні наступним не стає', async ({ page }) => {
+  // Раніше цей тест перевіряв протилежне: щойно сьогоднішнє тренування
+  // ставало зробленим, блок згори порожнів. На папері виглядало логічно —
+  // «зроблене більше не треба робити», — а в залі виходило так: людина
+  // зберігала перший підхід і тренування зникало з-під носа. Тепер день
+  // належить своєму тренуванню до кінця.
+  test('зроблене сьогодні лишається зверху — день належить йому', async ({ page }) => {
     const seed = { workouts: [
       { id: 'done', date: iso(new Date()), name: 'Сьогоднішнє', notes: '',
         exercises: [ex('squat', 'Присідання', 'legs', [{ weight: 80, reps: 8 }])] },
     ] };
     await openModule(page, 'workout/index.html', { seed });
-    await expect(page.locator('.next-card')).toHaveCount(0);
-    await expect(page.locator('.next-empty')).toHaveCount(1);
+    await expect(page.locator('.next-card')).toHaveCount(1);
+    await expect(page.locator('.next-name')).toHaveText('Сьогоднішнє');
+    await expect(page.locator('.next-empty')).toHaveCount(0);
+    // У журналі воно теж лишається: там видно тоннаж і приріст, яких у
+    // блоці згори немає.
     await expect(page.locator('.past-card')).toHaveCount(1);
   });
 
@@ -133,6 +141,32 @@ test.describe('Журнал зліва', () => {
     await expect(page.locator('.past-card').nth(0).locator('.gain-chip')).toContainText('Присідання');
     // У найстарішого порівнювати нема з чим — чипа немає.
     await expect(page.locator('.past-card').nth(2).locator('.gain-chip')).toHaveCount(0);
+  });
+
+  // Той випадок, через який блок і переписали: людина тренується, зберігає
+  // перший підхід — і тренування дня зникає з-під носа, поступаючись
+  // наступному за розкладом.
+  test('записане сьогоднішнє тренування лишається зверху, а не поступається наступному', async ({ page }) => {
+    await openModule(page, 'workout/index.html', { seed: { workouts: [
+      { id: 'today', date: iso(new Date()), name: 'Fullbody ЧТ', notes: '',
+        exercises: [{ id: 'e1', libId: 'benchPress', name: 'Жим лежачи', muscle: 'chest',
+          sets: [{ weight: 95, reps: 3 }] }] },
+      { id: 'sat', date: shift(2), name: 'Fullbody СБ', notes: '',
+        exercises: [{ id: 'e2', libId: 'benchPress', name: 'Жим лежачи', muscle: 'chest',
+          sets: [{ weight: 0, reps: 0 }] }] },
+    ] } });
+    await expect(page.locator('.next-name')).toHaveText('Fullbody ЧТ');
+    // І кнопка вже не кличе «почати» те, що почате.
+    await expect(page.locator('.next-start')).toHaveText('Продовжити');
+  });
+
+  test('незапочате сьогоднішнє кличе почати', async ({ page }) => {
+    await openModule(page, 'workout/index.html', { seed: { workouts: [
+      { id: 'today', date: iso(new Date()), name: 'Fullbody ЧТ', notes: '',
+        exercises: [{ id: 'e1', libId: 'benchPress', name: 'Жим лежачи', muscle: 'chest',
+          sets: [{ weight: 0, reps: 0 }] }] },
+    ] } });
+    await expect(page.locator('.next-start')).toHaveText('Почати');
   });
 
   test('дата пишеться словами в називному відмінку', async ({ page }) => {

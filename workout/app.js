@@ -67,7 +67,7 @@ const T = {
     // Блок наступного тренування
     whenToday: 'Сьогодні', whenTomorrow: 'Завтра', whenYesterday: 'Учора',
     whenOverdue: (words) => `Було заплановано на ${words}`,
-    startBtn: 'Почати',
+    startBtn: 'Почати', continueBtn: 'Продовжити',
     colExercise: 'Вправа', colLastTime: 'Минулого разу', colSets: 'Підходів',
     lastNone: 'уперше',
     nextEmpty: 'Наступного тренування ще немає. Заплануй його — і тут стоятимуть вправи з вагами минулого разу.',
@@ -153,7 +153,7 @@ const T = {
     calLegendDone: 'было', calLegendPlanned: 'запланировано',
     whenToday: 'Сегодня', whenTomorrow: 'Завтра', whenYesterday: 'Вчера',
     whenOverdue: (words) => `Было запланировано на ${words}`,
-    startBtn: 'Начать',
+    startBtn: 'Начать', continueBtn: 'Продолжить',
     colExercise: 'Упражнение', colLastTime: 'В прошлый раз', colSets: 'Подходов',
     lastNone: 'впервые',
     nextEmpty: 'Следующей тренировки пока нет. Запланируй её — и здесь будут упражнения с весами прошлого раза.',
@@ -238,7 +238,7 @@ const T = {
     calLegendDone: 'było', calLegendPlanned: 'zaplanowane',
     whenToday: 'Dzisiaj', whenTomorrow: 'Jutro', whenYesterday: 'Wczoraj',
     whenOverdue: (words) => `Zaplanowano na ${words}`,
-    startBtn: 'Zacznij',
+    startBtn: 'Zacznij', continueBtn: 'Kontynuuj',
     colExercise: 'Ćwiczenie', colLastTime: 'Ostatnio', colSets: 'Serii',
     lastNone: 'pierwszy raz',
     nextEmpty: 'Nie ma jeszcze następnego treningu. Zaplanuj go — a tutaj staną ćwiczenia z ciężarami z ostatniego razu.',
@@ -323,7 +323,7 @@ const T = {
     calLegendDone: 'done', calLegendPlanned: 'planned',
     whenToday: 'Today', whenTomorrow: 'Tomorrow', whenYesterday: 'Yesterday',
     whenOverdue: (words) => `Was planned for ${words}`,
-    startBtn: 'Start',
+    startBtn: 'Start', continueBtn: 'Continue',
     colExercise: 'Exercise', colLastTime: 'Last time', colSets: 'Sets',
     lastNone: 'first time',
     nextEmpty: 'No next workout yet. Plan one — and its exercises will show up here with last time\'s weights.',
@@ -1259,7 +1259,10 @@ function renderNextBlock() {
           <div class="next-name">${escapeHtml(next.name || t('newSessionLabel'))}</div>
           ${muscles ? `<div class="next-muscles">${muscles}</div>` : ''}
         </div>
-        <button type="button" class="next-start" data-open-session="${next.id}">${escapeHtml(t('startBtn'))}</button>
+        <button type="button" class="next-start" data-open-session="${next.id}">${escapeHtml(
+          // Сьогоднішнє тренування лишається зверху й після того, як підходи
+          // записані, — тоді «Почати» вводило б в оману: воно вже почате.
+          P.isDone(next) ? t('continueBtn') : t('startBtn'))}</button>
       </div>
       ${exs.length ? `
       <div class="next-table">
