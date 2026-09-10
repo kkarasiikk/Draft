@@ -13,7 +13,7 @@ const { openModule } = require('./helpers');
 // із бічної колонки (див. окремий блок нижче).
 const PAGES = [
   ['головна', 'index.html', '#homeScreen', '#pageSettingsBtn', null],
-  ['бюджет', 'budget/index.html', '#appScreen', '#pageSettingsBtn', 'Гроші'],
+  ['бюджет', 'budget/index.html', '#appScreen', '#pageSettingsBtn', 'Бюджет'],
   ['завдання', 'tasks/index.html', '#appScreen', '#pageSettingsBtn', 'Завдання'],
   ['цілі', 'goals/index.html', '#appScreen', '#pageSettingsBtn', 'Цілі'],
   ['тренування', 'workout/index.html', '#appScreen', '#pageSettingsBtn', 'Тренування'],
@@ -43,7 +43,7 @@ test.describe('Комп’ютер: вхід один, і він знає сві
   test.use({ viewport: { width: 1280, height: 800 } });
 
   const SECTIONS = [
-    ['бюджет', 'budget/index.html', '#appScreen', 'Гроші'],
+    ['бюджет', 'budget/index.html', '#appScreen', 'Бюджет'],
     ['завдання', 'tasks/index.html', '#appScreen', 'Завдання'],
     ['цілі', 'goals/index.html', '#appScreen', 'Цілі'],
     ['тренування', 'workout/index.html', '#appScreen', 'Тренування'],
@@ -101,7 +101,7 @@ test.describe('Вкладка показує лише свої параметр�
     await expect(page.locator('[data-currency]')).toHaveCount(0);
   });
 
-  test('«Гроші» — валюта й два списки категорій, без теми', async ({ page }) => {
+  test('«Бюджет» — валюта й два списки категорій, без теми', async ({ page }) => {
     await openHub(page);
     await page.click('[data-tab="budget"]');
     await expect(page.locator('[data-currency]')).toHaveCount(4);

@@ -336,6 +336,10 @@
   /* Група записів однієї категорії. Назва — та сама плашка, що й підписи днів
      у списку дня: вкладка не має вигадувати власну типографіку. */
   .plan-group{margin-bottom:18px;}
+  /* Міточка кольору категорії. Тижневик довго був єдиним розділом, де
+     категорії не мали кольору, — тепер він такий самий, як бюджет і цілі. */
+  .plan-group-dot{display:inline-block;width:7px;height:7px;border-radius:50%;
+    margin-right:7px;vertical-align:middle;flex-shrink:0;}
   .plan-group-label{font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;
     color:var(--ink-muted);font-family:'Inter',sans-serif;font-weight:600;
     margin-bottom:8px;padding-left:2px;}
@@ -441,9 +445,11 @@
      дрібніші за все навколо. Тепер це той самий чип, що в цілях: та сама
      геометрія, той самий вибраний стан.
 
-     Кольору в категорій тижня немає (на відміну від цілей і бюджету, де він
-     несе значення в списку), тож вибране позначається кольором застосунку —
-     як у решти пікерів без власної палітри. */
+     Обраний чип бере власний колір категорії — так само, як у бюджеті.
+     Довгий час кольору тут не було зовсім: тижневик лишався єдиним списком
+     категорій без нього, і на тлі кольорових бюджету та цілей його чипи
+     виглядали чужими. Запасний колір застосунку лишається на випадок, коли
+     палітра з categories-default.js чомусь не приїхала. */
   .cat-picker{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;margin-bottom:16px;}
   .cat-choice{padding:6px 12px;border-radius:20px;font-size:12.5px;cursor:pointer;
     font-family:'Inter',sans-serif;font-weight:600;white-space:nowrap;
@@ -451,6 +457,7 @@
     transition:background .15s,color .15s,border-color .15s;}
   .cat-choice:hover{color:var(--ink-soft);}
   .cat-choice.selected{background:var(--accent);color:#fff;border-color:transparent;}
+  /* Інлайновий колір категорії перекриває тло, тож текст лишається білим. */
   /* «Змінити» стоїть останнім чипом у тому ж рядку: правити список найзручніше
      там, де його видно. Пунктир відрізняє дію від вибору — інакше чип читався
      б як ще одна категорія. */

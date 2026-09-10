@@ -1492,7 +1492,26 @@ let usingDefaultPlanCats = true;
 // Стандартний набір лежить у ../categories-default.js разом із рештою
 // стандартних категорій: його читає і ця сторінка, і вікно налаштувань.
 function defaultPlanCategories() {
-  return defaultWeekCategoryList(currentLang);
+  return defaultWeekCategoryList(currentLang, (window.CATEGORY_PALETTE || []).length || 8);
+}
+
+// Колір категорії тижневика. Той самий розрахунок, що в бюджеті й цілях:
+// colorIndex обирає слот палітри, а категорія без нього — такою її міг
+// записати давніший запис — отримує стабільний колір, виведений з id.
+function planCatColor(cat) {
+  const pal = window.CATEGORY_PALETTE || [];
+  if (!pal.length) return 'var(--accent)';
+  if (cat && typeof cat.colorIndex === 'number' && isFinite(cat.colorIndex)) {
+    return pal[Math.abs(cat.colorIndex) % pal.length].text;
+  }
+  const id = String((cat && cat.id) || '');
+  let h = 0;
+  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
+  return pal[h % pal.length].text;
+}
+
+function planCatById(id) {
+  return planCategories.filter((c) => c.id === id)[0] || null;
 }
 
 function planWeekIso() {
@@ -1562,7 +1581,9 @@ function renderWeekPlanScreen() {
   // давнішого тижня підписуємо — інакше він виглядав би як щойно записаний.
   el.innerHTML = WeekPlan.groupByCategory(entries, planCategories).map((group) => `
     <div class="plan-group">
-      <div class="plan-group-label">${escapeHtml(group.label || t('planCatNone'))}</div>
+      <div class="plan-group-label">${group.id
+        ? `<span class="plan-group-dot" style="background:${planCatColor(planCatById(group.id))}"></span>`
+        : ''}${escapeHtml(group.label || t('planCatNone'))}</div>
       <div class="day-card">${sortTasks(group.items).map((task) => taskRowHtml(task,
         WeekPlan.isCarried(task, weekIso)
           ? `<span class="plan-carried">${escapeHtml(t('planCarried'))}</span>` : null))
@@ -1608,7 +1629,8 @@ const PLAN_PENCIL_ICON = '<svg width="13" height="13" viewBox="0 0 24 24" fill="
 function renderPlanCatPicker() {
   const picker = document.getElementById('planCatPicker');
   picker.innerHTML = planCategories.map((cat) =>
-    `<button type="button" class="cat-choice${cat.id === planCat ? ' selected' : ''}" data-plan-cat="${escapeHtml(cat.id)}">${escapeHtml(cat.label)}</button>`
+    `<button type="button" class="cat-choice${cat.id === planCat ? ' selected' : ''}" data-plan-cat="${escapeHtml(cat.id)}"` +
+    `${cat.id === planCat ? ` style="background:${planCatColor(cat)}"` : ''}>${escapeHtml(cat.label)}</button>`
   ).join('')
     + `<button type="button" class="cat-edit-chip" data-plan-cats-edit>${PLAN_PENCIL_ICON}${escapeHtml(t('planCatsEdit'))}</button>`;
   picker.querySelectorAll('[data-plan-cat]').forEach((btn) => {

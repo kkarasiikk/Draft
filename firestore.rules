@@ -65,7 +65,7 @@ service cloud.firestore {
                // Категорії цілей: [{id, label, colorIndex}]. Форму елементів,
                // як і в categoriesIncome/Expense поруч, гарантує клієнт.
                (!('categoriesGoals' in d) || d.categoriesGoals is list) &&
-               // Категорії тижневика: [{id, label}]. Форму елементів, як і в
+               // Категорії тижневика: [{id, label, colorIndex}]. Форму елементів, як і в
                // категоріях бюджету й цілей поруч, гарантує клієнт.
                (!('categoriesWeek' in d) || d.categoriesWeek is list) &&
                // Вбудовані вправи, які людина прибрала зі списку вибору:

@@ -72,10 +72,15 @@
   };
 
   /** Стандартні категорії тижневика: [{ id, label }]. */
-  function defaultWeekCategoryList(lang) {
+  /** Стандартні категорії тижневика: [{ id, label, colorIndex }].
+   *  Колір тут зʼявився пізніше за самі категорії: спершу тижневик був
+   *  єдиним списком без кольору, і його категорії виглядали сірими там,
+   *  де решта застосунку кольорова. */
+  function defaultWeekCategoryList(lang, paletteSize) {
     var labels = WEEK_CAT_LABELS[lang] || WEEK_CAT_LABELS.uk;
-    return WEEK_CATEGORY_IDS.map(function (id) {
-      return { id: id, label: labels[id] || id };
+    var size = paletteSize || 8;
+    return WEEK_CATEGORY_IDS.map(function (id, i) {
+      return { id: id, label: labels[id] || id, colorIndex: i % size };
     });
   }
 

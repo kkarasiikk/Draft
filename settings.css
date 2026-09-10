@@ -85,7 +85,28 @@
 
 /* Список категорій: крапка кольору, поле назви, хрестик. */
 .settings-cat-row{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
-.settings-cat-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;background:var(--ink-muted);}
+.settings-cat-row{position:relative;flex-wrap:wrap;}
+/* Крапочка тепер кнопка: тап відкриває палітру. Розмір трохи більший за
+   колишні 10 пікселів — у кружечок на 10px пальцем не влучити. */
+.settings-cat-dot{width:16px;height:16px;border-radius:50%;flex-shrink:0;padding:0;
+  border:none;cursor:pointer;background:var(--ink-muted);
+  box-shadow:0 0 0 2px var(--surface), 0 0 0 3px transparent;transition:box-shadow .15s;}
+.settings-cat-dot:hover,.settings-cat-dot:focus-visible{box-shadow:0 0 0 2px var(--surface), 0 0 0 3px var(--border);}
+/* Палітра розсуває список, а не накриває його. Спершу вона була спливною
+   (position:absolute) — і закривала собою крапочку наступної категорії:
+   щоб перефарбувати другу, доводилось спершу тапнути повз палітру, аби
+   та зникла. Тепер рядок просто переносить її на новий рядок під собою. */
+.settings-cat-palette{flex-basis:100%;order:9;margin:8px 0 2px 26px;
+  display:flex;flex-wrap:wrap;gap:7px;padding:9px 10px;border-radius:12px;
+  background:var(--surface-flat,var(--surface));border:1px solid var(--border);}
+/* Без цього рядка палітра не ховається: атрибут hidden ставить display:none
+   через стиль браузера, а правило вище з display:flex його перебиває — і всі
+   вісім палітр висіли б розгорнутими одночасно. */
+.settings-cat-palette[hidden]{display:none;}
+.settings-swatch{width:20px;height:20px;border-radius:50%;border:none;cursor:pointer;padding:0;
+  box-shadow:0 0 0 2px var(--surface), 0 0 0 3px transparent;transition:box-shadow .15s;}
+.settings-swatch:hover{box-shadow:0 0 0 2px var(--surface), 0 0 0 3px var(--border);}
+.settings-swatch.on{box-shadow:0 0 0 2px var(--surface), 0 0 0 3px var(--ink);}
 .settings-cat-input{flex:1;min-width:0;margin:0;border:1px solid var(--border);background:var(--bg);
   color:var(--ink);font-family:'Inter',sans-serif;font-size:14px;padding:9px 12px;border-radius:10px;}
 .settings-cat-input:focus{outline:none;border-color:var(--accent);}

@@ -1,4 +1,4 @@
-// Дрібні налаштування вигляду бюджету — в одному місці, у вкладці «Гроші»
+// Дрібні налаштування вигляду бюджету — в одному місці, у вкладці «Бюджет»
 // спільного вікна.
 //
 // Було три окремі вікна, по одному на вкладку, і шестерня в шапці відкривала
@@ -43,18 +43,18 @@ test.describe('Телефон: усе в одному вікні', () => {
       await page.click(tab);
       await page.click('#pageSettingsBtn');
       await expect(page.locator('#settingsOverlay'), tab).toHaveClass(/show/);
-      // І одразу на вкладці «Гроші», а не в списку розділів.
-      await expect(page.locator('.settings-pane-title')).toHaveText('Гроші');
+      // І одразу на вкладці «Бюджет», а не в списку розділів.
+      await expect(page.locator('.settings-pane-title')).toHaveText('Бюджет');
       await page.click('#settingsClose');
     }
   });
 
-  test('усі сім параметрів стоять поруч, у вкладці «Гроші»', async ({ page }) => {
+  test('усі сім параметрів стоять поруч, у вкладці «Бюджет»', async ({ page }) => {
     await open(page);
     const pane = page.locator('.settings-pane');
     // Великими вони лише на вигляд — це text-transform, а не сам текст.
     for (const label of ['Валюта', 'Видимі діаграми', 'Загальний баланс заощаджень',
-      'Валюта загального балансу', 'Сортування нотаток', 'Текст нотатки в списку',
+      'Валюта балансу заощаджень', 'Сортування нотаток', 'Текст нотатки в списку',
       'Категорії витрат', 'Категорії доходів']) {
       await expect(pane).toContainText(label);
     }
@@ -170,7 +170,7 @@ test.describe('Вікно однакове звідусіль', () => {
   test.use({ viewport: { width: 390, height: 900 } });
 
   // Налаштування лежать у localStorage, спільному для всього застосунку,
-  // тож вкладка «Гроші» показує їх і з інших сторінок — і зміна доїжджає.
+  // тож вкладка «Бюджет» показує їх і з інших сторінок — і зміна доїжджає.
   test('те саме видно й із цілей, і звідти ж міняється', async ({ page }) => {
     await openModule(page, 'goals/index.html', { ready: '#appScreen' });
     await page.click('#pageSettingsBtn');

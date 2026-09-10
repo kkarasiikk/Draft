@@ -5,11 +5,11 @@
 // кільце, і рядок «лишилось N з плану».
 //
 // Потім саме вікно розділу зникло: валюта й категорії переїхали у спільне
-// вікно налаштувань (../settings.js), вкладка «Гроші». Шестерня в шапці
+// вікно налаштувань (../settings.js), вкладка «Бюджет». Шестерня в шапці
 // відкриває тепер його, і перевіряти треба саме там.
 //
 // Насамкінець пішли регулярні операції й імпорт CSV — обидві можливості
-// цілком, а не лише рядки, що їх відкривали. У вкладці «Гроші» лишились
+// цілком, а не лише рядки, що їх відкривали. У вкладці «Бюджет» лишились
 // рівно валюта й два списки категорій.
 const { test, expect } = require('@playwright/test');
 const { openModule } = require('./helpers');
@@ -20,7 +20,7 @@ const openSettings = async (page, seed) => {
   await openModule(page, 'budget/index.html', seed ? { seed } : {});
   await page.click('#sideSettingsBtn');
   await expect(page.locator('#settingsOverlay')).toHaveClass(/show/);
-  await expect(page.locator('.settings-tab.current')).toHaveText('Гроші');
+  await expect(page.locator('.settings-tab.current')).toHaveText('Бюджет');
 };
 
 test('поля «План витрат на місяць» у налаштуваннях немає', async ({ page }) => {
@@ -30,7 +30,7 @@ test('поля «План витрат на місяць» у налаштува
   await expect(page.locator('#settingsOverlay')).not.toContainText('План витрат');
 });
 
-test('валюта й категорії лишились на місці — тільки вже у вкладці «Гроші»', async ({ page }) => {
+test('валюта й категорії лишились на місці — тільки вже у вкладці «Бюджет»', async ({ page }) => {
   await openSettings(page);
   await expect(page.locator('[data-currency="UAH"]')).toBeVisible();
   await expect(page.locator('[data-cat-kind="expense"]')).toBeVisible();
@@ -45,7 +45,7 @@ test('старе число з профілю не воскрешає поле',
 // Обидві можливості прибрано цілком: не сховано рядок, а видалено екрани,
 // форму, банер, підписку на правила й парсер CSV. Тому стережемо не лише
 // відсутність рядків, а й те, що за ними нічого не лишилось.
-test('рядків «Регулярні операції» й «Імпорт» у вкладці «Гроші» немає', async ({ page }) => {
+test('рядків «Регулярні операції» й «Імпорт» у вкладці «Бюджет» немає', async ({ page }) => {
   await openSettings(page);
   await expect(page.locator('[data-action="recurring"]')).toHaveCount(0);
   await expect(page.locator('[data-action="import"]')).toHaveCount(0);
@@ -53,7 +53,7 @@ test('рядків «Регулярні операції» й «Імпорт» �
   await expect(page.locator('#settingsOverlay')).not.toContainText('CSV');
 });
 
-test('у вкладці «Гроші» не лишилось жодного рядка-дії', async ({ page }) => {
+test('у вкладці «Бюджет» не лишилось жодного рядка-дії', async ({ page }) => {
   await openSettings(page);
   // Валюта й два списки категорій — це поля, а не дії; жодного рядка, що
   // кудись веде або щось відкриває, у вкладці більше немає.

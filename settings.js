@@ -40,7 +40,7 @@
     uk: {
       title: 'Налаштування', close: 'Закрити', back: 'Назад',
       groupApp: 'Застосунок', groupSections: 'Розділи', groupOther: 'Дані й акаунт',
-      tabGeneral: 'Загальні', tabBudget: 'Гроші', tabTasks: 'Завдання',
+      tabGeneral: 'Загальні', tabBudget: 'Бюджет', tabTasks: 'Завдання',
       tabGoals: 'Цілі', tabWorkout: 'Тренування', tabData: 'Дані', tabAccount: 'Акаунт',
       theme: 'Тема', themeLight: 'Світла', themeDark: 'Темна', themeSystem: 'Як у системі',
       lang: 'Мова',
@@ -50,13 +50,14 @@
       charts: 'Видимі діаграми',
       chartPie: 'Витрати за категоріями', chartTrend: 'Дохід і витрати', chartSavings: 'Заощадження',
       savingsTotal: 'Загальний баланс заощаджень',
-      savingsTotalCur: 'Валюта загального балансу',
+      savingsTotalCur: 'Валюта балансу заощаджень',
       savingsMulti: 'Кілька валют', savingsSingle: 'Одна валюта',
       notesSort: 'Сортування нотаток',
       notesSortUpdated: 'Нещодавно оновлені', notesSortCreated: 'Нещодавно створені', notesSortTitle: 'За назвою',
       noteSnippet: 'Текст нотатки в списку',
       show: 'Показувати', hide: 'Сховати',
       catExpense: 'Категорії витрат', catIncome: 'Категорії доходів',
+      catColor: 'Колір категорії',
       catGoals: 'Категорії цілей', catWeek: 'Категорії тижневика',
       newCat: 'Нова категорія', addCat: 'Додати категорію', delCat: 'Видалити категорію',
       catDuplicate: 'Така категорія вже є.',
@@ -88,7 +89,7 @@
     ru: {
       title: 'Настройки', close: 'Закрыть', back: 'Назад',
       groupApp: 'Приложение', groupSections: 'Разделы', groupOther: 'Данные и аккаунт',
-      tabGeneral: 'Общие', tabBudget: 'Деньги', tabTasks: 'Задачи',
+      tabGeneral: 'Общие', tabBudget: 'Бюджет', tabTasks: 'Задачи',
       tabGoals: 'Цели', tabWorkout: 'Тренировки', tabData: 'Данные', tabAccount: 'Аккаунт',
       theme: 'Тема', themeLight: 'Светлая', themeDark: 'Тёмная', themeSystem: 'Как в системе',
       lang: 'Язык',
@@ -96,13 +97,14 @@
       charts: 'Видимые диаграммы',
       chartPie: 'Расходы по категориям', chartTrend: 'Доход и расходы', chartSavings: 'Сбережения',
       savingsTotal: 'Общий баланс сбережений',
-      savingsTotalCur: 'Валюта общего баланса',
+      savingsTotalCur: 'Валюта баланса сбережений',
       savingsMulti: 'Несколько валют', savingsSingle: 'Одна валюта',
       notesSort: 'Сортировка заметок',
       notesSortUpdated: 'Недавно обновлённые', notesSortCreated: 'Недавно созданные', notesSortTitle: 'По названию',
       noteSnippet: 'Текст заметки в списке',
       show: 'Показывать', hide: 'Скрыть',
       catExpense: 'Категории расходов', catIncome: 'Категории доходов',
+      catColor: 'Цвет категории',
       catGoals: 'Категории целей', catWeek: 'Категории недели',
       newCat: 'Новая категория', addCat: 'Добавить категорию', delCat: 'Удалить категорию',
       catDuplicate: 'Такая категория уже есть.',
@@ -134,7 +136,7 @@
     pl: {
       title: 'Ustawienia', close: 'Zamknij', back: 'Wstecz',
       groupApp: 'Aplikacja', groupSections: 'Sekcje', groupOther: 'Dane i konto',
-      tabGeneral: 'Ogólne', tabBudget: 'Pieniądze', tabTasks: 'Zadania',
+      tabGeneral: 'Ogólne', tabBudget: 'Budżet', tabTasks: 'Zadania',
       tabGoals: 'Cele', tabWorkout: 'Treningi', tabData: 'Dane', tabAccount: 'Konto',
       theme: 'Motyw', themeLight: 'Jasny', themeDark: 'Ciemny', themeSystem: 'Jak w systemie',
       lang: 'Język',
@@ -142,13 +144,14 @@
       charts: 'Widoczne wykresy',
       chartPie: 'Wydatki wg kategorii', chartTrend: 'Przychód i wydatki', chartSavings: 'Oszczędności',
       savingsTotal: 'Łączne saldo oszczędności',
-      savingsTotalCur: 'Waluta łącznego salda',
+      savingsTotalCur: 'Waluta salda oszczędności',
       savingsMulti: 'Kilka walut', savingsSingle: 'Jedna waluta',
       notesSort: 'Sortowanie notatek',
       notesSortUpdated: 'Ostatnio zaktualizowane', notesSortCreated: 'Ostatnio utworzone', notesSortTitle: 'Według nazwy',
       noteSnippet: 'Tekst notatki na liście',
       show: 'Pokazuj', hide: 'Ukryj',
       catExpense: 'Kategorie wydatków', catIncome: 'Kategorie przychodów',
+      catColor: 'Kolor kategorii',
       catGoals: 'Kategorie celów', catWeek: 'Kategorie tygodnia',
       newCat: 'Nowa kategoria', addCat: 'Dodaj kategorię', delCat: 'Usuń kategorię',
       catDuplicate: 'Taka kategoria już jest.',
@@ -180,7 +183,7 @@
     en: {
       title: 'Settings', close: 'Close', back: 'Back',
       groupApp: 'App', groupSections: 'Sections', groupOther: 'Data and account',
-      tabGeneral: 'General', tabBudget: 'Money', tabTasks: 'Tasks',
+      tabGeneral: 'General', tabBudget: 'Budget', tabTasks: 'Tasks',
       tabGoals: 'Goals', tabWorkout: 'Workouts', tabData: 'Data', tabAccount: 'Account',
       theme: 'Theme', themeLight: 'Light', themeDark: 'Dark', themeSystem: 'System',
       lang: 'Language',
@@ -188,13 +191,14 @@
       charts: 'Visible charts',
       chartPie: 'Spending by category', chartTrend: 'Income and spending', chartSavings: 'Savings',
       savingsTotal: 'Total savings balance',
-      savingsTotalCur: 'Total balance currency',
+      savingsTotalCur: 'Savings balance currency',
       savingsMulti: 'Multiple currencies', savingsSingle: 'Single currency',
       notesSort: 'Sort notes by',
       notesSortUpdated: 'Recently updated', notesSortCreated: 'Recently created', notesSortTitle: 'By title',
       noteSnippet: 'Note text in the list',
       show: 'Show', hide: 'Hide',
       catExpense: 'Expense categories', catIncome: 'Income categories',
+      catColor: 'Category colour',
       catGoals: 'Goal categories', catWeek: 'Week categories',
       newCat: 'New category', addCat: 'Add category', delCat: 'Delete category',
       catDuplicate: 'That category already exists.',
@@ -254,7 +258,7 @@
     expense: { field: 'categoriesExpense', colored: true, reassign: 'transactions', label: 'catExpense' },
     income: { field: 'categoriesIncome', colored: true, reassign: 'transactions', label: 'catIncome' },
     goals: { field: 'categoriesGoals', colored: true, reassign: 'goals', label: 'catGoals' },
-    week: { field: 'categoriesWeek', colored: false, reassign: null, label: 'catWeek' },
+    week: { field: 'categoriesWeek', colored: true, reassign: null, label: 'catWeek' },
   };
 
   var cfg = null;
@@ -314,6 +318,25 @@
     var h = 0;
     for (var i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
     return pal[h % pal.length].text;
+  }
+
+  function colorIndexOf(cat) {
+    var pal = palette();
+    if (cat && typeof cat.colorIndex === 'number' && isFinite(cat.colorIndex)) {
+      return Math.abs(cat.colorIndex) % pal.length;
+    }
+    var id = String((cat && cat.id) || '');
+    var h = 0;
+    for (var i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
+    return h % pal.length;
+  }
+
+  function recolorCategory(kind, id, index) {
+    var list = categoriesOf(kind);
+    var next = list.map(function (c) {
+      return c.id === id ? Object.assign({}, c, { colorIndex: index }) : c;
+    });
+    return saveCategories(kind, next);
   }
 
   function defaultsFor(kind) {
@@ -423,7 +446,17 @@
     var kindCfg = CAT_KINDS[kind];
     var rows = categoriesOf(kind).map(function (cat) {
       var dot = kindCfg.colored
-        ? '<span class="settings-cat-dot" style="background:' + catColor(cat) + '"></span>'
+        ? '<button type="button" class="settings-cat-dot" data-cat-color="' + escapeHtml(cat.id) +
+            '" style="background:' + catColor(cat) + '" aria-label="' + escapeHtml(t('catColor')) +
+            '" aria-haspopup="true"></button>' +
+          '<div class="settings-cat-palette" data-cat-palette="' + escapeHtml(cat.id) + '" hidden>' +
+            palette().map(function (pair, i) {
+              var on = colorIndexOf(cat) === i;
+              return '<button type="button" class="settings-swatch' + (on ? ' on' : '') +
+                '" style="background:' + pair.text + '" data-cat-swatch="' + i +
+                '" aria-label="' + escapeHtml(t('catColor')) + ' ' + (i + 1) + '"></button>';
+            }).join('') +
+          '</div>'
         : '';
       return '<div class="settings-cat-row">' + dot +
         '<input type="text" class="settings-cat-input" maxlength="40" value="' +
@@ -451,6 +484,37 @@
 
   function bindCatEditor(section) {
     var kind = section.dataset.catKind;
+
+    // Палітра відкривається тапом по крапочці. Відкрита лише одна: дві
+    // розгорнуті палітри поруч зробили б із рядка категорій кашу.
+    function closePalettes(except) {
+      section.querySelectorAll('[data-cat-palette]').forEach(function (box) {
+        if (box !== except) box.hidden = true;
+      });
+    }
+    section.querySelectorAll('[data-cat-color]').forEach(function (dot) {
+      dot.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var box = section.querySelector('[data-cat-palette="' + CSS.escape(dot.dataset.catColor) + '"]');
+        if (!box) return;
+        var open = box.hidden;
+        closePalettes(box);
+        box.hidden = !open;
+      });
+    });
+    section.querySelectorAll('[data-cat-palette]').forEach(function (box) {
+      var id = box.dataset.catPalette;
+      box.querySelectorAll('[data-cat-swatch]').forEach(function (sw) {
+        sw.addEventListener('click', function () {
+          showError('');
+          recolorCategory(kind, id, Number(sw.dataset.catSwatch))
+            .catch(function () { showError(t('catSaveError')); });
+        });
+      });
+    });
+    // Тап повз палітру закриває її — так само, як закривається будь-яке
+    // випадне меню; інакше вона лишалась би висіти після вибору кольору.
+    section.addEventListener('click', function () { closePalettes(null); });
 
     section.querySelectorAll('[data-cat-name]').forEach(function (input) {
       var id = input.dataset.catName;
