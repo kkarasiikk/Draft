@@ -10,6 +10,11 @@
  *  тож у темній темі все стає темним само.
  */
 
+/* Ширина вмісту. На телефоні — на всю, на великому екрані тримається тієї
+   самої межі, що й решта сторінок (#dayViewScreen у завданнях, #notesTab у
+   бюджеті). Без неї список і кнопка розтягувались від краю до краю. */
+.notes-wrap{width:100%;}
+
 /* ---- Список ---- */
 .notes-cards{display:flex;flex-direction:column;gap:10px;}
 
@@ -140,6 +145,19 @@
   font-family:'Inter',sans-serif;font-size:14px;}
 .note-btn-cancel{border:1px solid var(--border);background:transparent;color:var(--ink-soft);}
 .note-confirm-actions .note-btn-delete{padding:10px 0;font-weight:500;font-size:14px;}
+
+/* ---- Широкий екран ---- */
+/* Той самий поріг і та сама поведінка, що й у рідних вікон застосунку
+   (@media (min-width:880px) у кожному модулі): вікно стає по центру, з
+   рівним скругленням з усіх боків. Без цього правила блокнот лишався
+   «шитом» знизу екрана й виглядав чужим поруч зі «Швидким додаванням». */
+@media (min-width:880px){
+  .notes-wrap{max-width:960px;margin:0 auto;}
+  .note-overlay{align-items:center;}
+  .note-modal{border-radius:18px;max-height:88vh;
+    padding:20px 20px 24px;}
+  .note-confirm-overlay{align-items:center;}
+}
 
 @media (prefers-reduced-motion: reduce){
   .note-card, .notes-add-btn, .note-tb-btn, .note-view-back,

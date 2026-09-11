@@ -107,6 +107,51 @@ for (const s of SECTIONS) {
   });
 }
 
+// На широкому екрані вікна застосунку стають ПО ЦЕНТРУ (@media min-width:880px
+// у кожному модулі). Вікно нотатки цього правила не мало й лишалось «шитом»
+// знизу — поруч зі «Швидким додаванням» воно виглядало чужим.
+test.describe('широкий екран', () => {
+  test.use({ viewport: { width: 1680, height: 900 } });
+
+  test('вікно нотатки стоїть по центру, як і рідні вікна', async ({ page }) => {
+    await openModule(page, 'goals/index.html', { seed: { pages: [] } });
+    await page.click('#bnNotes');
+    await page.click('#noteAddBtn');
+    await page.waitForSelector('#noteOverlay.show');
+
+    const box = await page.locator('.note-modal').boundingBox();
+    const gapTop = box.y;
+    const gapBottom = 900 - (box.y + box.height);
+    // Однакові проміжки згори й знизу — це і є «по центру». Допуск на
+    // непарні пікселі й округлення.
+    expect(Math.abs(gapTop - gapBottom)).toBeLessThan(4);
+  });
+
+  test('скруглення рівне з усіх боків, а не лише згори', async ({ page }) => {
+    await openModule(page, 'goals/index.html', { seed: { pages: [] } });
+    await page.click('#bnNotes');
+    await page.click('#noteAddBtn');
+    await page.waitForSelector('#noteOverlay.show');
+
+    const radius = await page.locator('.note-modal').evaluate((el) => {
+      const cs = getComputedStyle(el);
+      return [cs.borderTopLeftRadius, cs.borderBottomLeftRadius,
+        cs.borderTopRightRadius, cs.borderBottomRightRadius];
+    });
+    expect(new Set(radius).size).toBe(1);
+  });
+
+  test('список не розтягується від краю до краю', async ({ page }) => {
+    await openModule(page, 'goals/index.html', { seed: { pages: [
+      { id: 'g1', title: 'Плани на рік', content: 'Вивчити польську', section: 'goals' },
+    ] } });
+    await page.click('#bnNotes');
+    await page.waitForSelector('.note-card');
+    const box = await page.locator('.notes-wrap').boundingBox();
+    expect(box.width).toBeLessThanOrEqual(960);
+  });
+});
+
 test('у цілях пункт «Нотатки» стоїть поруч із «Місяць» і «Рік»', async ({ page }) => {
   await openModule(page, 'goals/index.html');
   const labels = await page.locator('#bottomNav .bn-item span').allTextContents();

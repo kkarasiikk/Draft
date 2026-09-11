@@ -282,7 +282,7 @@
   function renderList() {
     var list = visible(pages, cfg.section, cfg.sort ? cfg.sort() : 'updated');
     var withSnippet = cfg.snippet ? cfg.snippet() : true;
-    host.innerHTML =
+    host.innerHTML = '<div class="notes-wrap">' +
       (list.length ? '' :
         '<div class="notes-empty">' + ICON.sheet +
           '<div class="notes-empty-title">' + escapeHtml(t('emptyTitle')) + '</div>' +
@@ -302,7 +302,8 @@
         }).join('') +
       '</div>' +
       '<button type="button" class="notes-add-btn" id="noteAddBtn" data-note-add>' + ICON.plus +
-        '<span>' + escapeHtml(t('addBtn')) + '</span></button>';
+        '<span>' + escapeHtml(t('addBtn')) + '</span></button>' +
+      '</div>';
 
     host.querySelectorAll('[data-note]').forEach(function (card) {
       card.addEventListener('click', function () {
@@ -323,6 +324,7 @@
     // власними тінями й анімацією появи, і нотатка виглядала б у трьох
     // місцях по-різному — саме те, заради чого блокнот і виносили.
     host.innerHTML =
+      '<div class="notes-wrap">' +
       '<div class="note-view-card">' +
         '<div class="note-view-head">' +
           '<button type="button" class="note-view-back" data-note-back aria-label="' + escapeHtml(t('back')) + '">' +
@@ -337,6 +339,7 @@
           '</div>' +
         '</div>' +
         '<div class="note-view-content"></div>' +
+      '</div>' +
       '</div>';
 
     host.querySelector('.note-view-title').textContent = page.title || t('noTitle');
