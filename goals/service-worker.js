@@ -17,6 +17,7 @@ LifeSW({
     '../icons/icon-192-maskable.png', '../icons/icon-512-maskable.png',
   ],
   external: [
+    'https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js',
     'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js',
   'https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js',
   'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js',

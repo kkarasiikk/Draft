@@ -11,52 +11,81 @@
  */
 
 /* ---- Список ---- */
-.note-card{display:block;background:var(--surface);border:1px solid var(--border);border-radius:12px;
-  padding:14px 18px;margin-bottom:10px;cursor:pointer;text-align:left;width:100%;font-family:'Inter',sans-serif;}
+.notes-cards{display:flex;flex-direction:column;gap:10px;}
+
+.note-card{display:block;width:100%;text-align:left;cursor:pointer;
+  background:var(--surface);border:1px solid var(--border);border-radius:16px;
+  padding:15px 17px 14px;font-family:'Inter',sans-serif;position:relative;
+  transition:border-color .14s ease,transform .14s ease;}
 .note-card:hover{border-color:var(--accent);}
-.note-card-title{font-size:14.5px;font-weight:600;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.note-card-snippet{font-size:13px;color:var(--ink-muted);margin-top:4px;overflow:hidden;text-overflow:ellipsis;
-  white-space:nowrap;}
-.note-card-date{font-size:11.5px;color:var(--ink-muted);margin-top:6px;}
+.note-card:active{transform:scale(.992);}
 
-.notes-add-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px 0;
-  border-radius:12px;border:1.5px dashed var(--border);background:transparent;color:var(--ink-muted);
-  font-family:'Inter',sans-serif;font-size:14px;font-weight:600;cursor:pointer;margin-top:4px;}
-.notes-add-btn:hover{border-color:var(--accent);color:var(--accent);}
+.note-card-title{font-size:15px;font-weight:600;color:var(--ink);line-height:1.3;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 
-.notes-empty{text-align:center;padding:30px 0;font-size:13.5px;color:var(--ink-muted);}
-.notes-empty-title{font-family:'Inter',sans-serif;font-size:15px;font-weight:600;color:var(--ink-soft);margin-bottom:4px;}
+/* Два рядки, а не один. Нотатка — це абзац, і з одного обрізаного рядка
+   зрозуміти, яка з них яка, майже неможливо: усі починаються однаково. */
+.note-card-snippet{margin-top:5px;font-size:13.5px;line-height:1.45;color:var(--ink-soft);
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+
+.note-card-date{margin-top:9px;font-size:11.5px;font-weight:500;color:var(--ink-muted);
+  letter-spacing:.01em;}
+
+.notes-add-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;
+  padding:14px 0;margin-top:12px;border-radius:14px;border:1.5px dashed var(--border);
+  background:transparent;color:var(--ink-muted);font-family:'Inter',sans-serif;
+  font-size:14px;font-weight:600;cursor:pointer;
+  transition:border-color .14s ease,color .14s ease,background-color .14s ease;}
+.notes-add-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light);}
+
+/* Порожній екран стоїть НАД кнопкою: спершу пояснення, потім дія. Знизу
+   кнопка опинялась під текстом «додай першу кнопкою нижче», а нижче вже
+   нічого не було. */
+.notes-empty{display:flex;flex-direction:column;align-items:center;text-align:center;
+  padding:44px 16px 26px;color:var(--ink-muted);}
+.notes-empty svg{color:var(--border);margin-bottom:12px;}
+.notes-empty-title{font-family:'Inter',sans-serif;font-size:15.5px;font-weight:600;
+  color:var(--ink-soft);margin-bottom:5px;}
+.notes-empty-sub{font-size:13.5px;line-height:1.45;max-width:240px;}
 
 /* ---- Читання ---- */
-.note-view-card{padding:22px;}
-.note-view-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;}
-.note-view-back{background:none;border:none;cursor:pointer;color:var(--ink-muted);padding:0;margin-top:2px;
-  display:flex;flex-shrink:0;}
+.note-view-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;
+  padding:20px 20px 24px;}
+.note-view-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px;}
+.note-view-back{background:none;border:none;cursor:pointer;color:var(--ink-muted);padding:0;
+  margin-top:3px;display:flex;flex-shrink:0;transition:color .14s ease;}
 .note-view-back:hover{color:var(--accent);}
-.note-view-title{flex:1;min-width:0;font-family:'Inter',sans-serif;font-size:19px;font-weight:700;color:var(--ink);
-  word-break:break-word;}
-.note-view-actions{display:flex;gap:12px;flex-shrink:0;padding-top:2px;}
-.note-view-act{background:none;border:none;cursor:pointer;color:var(--ink-muted);padding:0;display:flex;}
+.note-view-heading{flex:1;min-width:0;}
+.note-view-title{font-family:'Inter',sans-serif;font-size:19px;font-weight:700;color:var(--ink);
+  line-height:1.25;word-break:break-word;}
+.note-view-date{margin-top:4px;font-size:11.5px;font-weight:500;color:var(--ink-muted);}
+.note-view-actions{display:flex;gap:14px;flex-shrink:0;padding-top:4px;}
+.note-view-act{background:none;border:none;cursor:pointer;color:var(--ink-muted);padding:0;
+  display:flex;transition:color .14s ease;}
 .note-view-act:hover{color:var(--accent);}
 
 /* Спільне для читання й редактора: те саме має виглядати однаково в обох. */
-.note-view-content, .note-editor{font-family:'Inter',sans-serif;font-size:14.5px;line-height:1.6;color:var(--ink-soft);
-  word-break:break-word;}
-.note-view-content h3, .note-editor h3{font-size:19px;font-weight:700;color:var(--ink);margin:14px 0 6px;}
+.note-view-content, .note-editor{font-family:'Inter',sans-serif;font-size:15px;line-height:1.65;
+  color:var(--ink-soft);word-break:break-word;}
+.note-view-content h3, .note-editor h3{font-size:17.5px;font-weight:700;color:var(--ink);
+  margin:18px 0 7px;line-height:1.3;}
 .note-view-content h3:first-child, .note-editor h3:first-child{margin-top:0;}
-.note-view-content h4, .note-editor h4{font-size:16px;font-weight:700;color:var(--ink);margin:12px 0 5px;}
+.note-view-content h4, .note-editor h4{font-size:15.5px;font-weight:700;color:var(--ink);
+  margin:15px 0 6px;line-height:1.35;}
 .note-view-content h4:first-child, .note-editor h4:first-child{margin-top:0;}
-.note-view-content ul, .note-editor ul{margin:0 0 8px;padding-left:20px;}
-.note-view-content ul li, .note-editor ul li{margin-bottom:3px;}
-.note-check-row{display:flex;align-items:flex-start;gap:8px;margin-bottom:4px;list-style:none;}
-.note-check-row input{width:17px;height:17px;accent-color:var(--accent);cursor:pointer;margin:2px 0 0;flex-shrink:0;}
+.note-view-content ul, .note-editor ul{margin:0 0 10px;padding-left:20px;}
+.note-view-content ul li, .note-editor ul li{margin-bottom:5px;}
+.note-view-content ul li::marker, .note-editor ul li::marker{color:var(--ink-muted);}
+.note-check-row{display:flex;align-items:flex-start;gap:9px;margin-bottom:6px;list-style:none;}
+.note-check-row input{width:17px;height:17px;accent-color:var(--accent);cursor:pointer;
+  margin:3px 0 0;flex-shrink:0;}
 .note-check-row .checked-text{color:var(--ink-muted);text-decoration:line-through;}
 
 /* ---- Вікно редактора ---- */
 .note-overlay{position:fixed;inset:0;background:var(--overlay,rgba(34,38,43,.32));display:none;
   align-items:flex-end;justify-content:center;z-index:50;}
 .note-overlay.show{display:flex;}
-.note-modal{background:var(--surface);border-radius:26px 26px 0 0;
+.note-modal{background:var(--surface);border-radius:24px 24px 0 0;
   padding:20px 20px calc(28px + env(safe-area-inset-bottom));width:100%;max-width:480px;
   max-height:85vh;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;
   /* Те саме, що й у вікнах сторінок: вбік вікно не возиться пальцем. */
@@ -71,20 +100,22 @@
 
 .note-field-label{display:block;font-size:12.5px;font-weight:600;color:var(--ink-muted);margin-bottom:6px;
   font-family:'Inter',sans-serif;}
-.note-title-input{width:100%;font-family:'Inter',sans-serif;font-size:14.5px;border:1px solid var(--border);
-  border-radius:8px;padding:11px 12px;outline:none;color:var(--ink);background:var(--bg);margin-bottom:14px;}
+.note-title-input{width:100%;font-family:'Inter',sans-serif;font-size:15px;font-weight:600;
+  border:1px solid var(--border);border-radius:10px;padding:12px 13px;outline:none;
+  color:var(--ink);background:var(--bg);margin-bottom:16px;
+  transition:border-color .14s ease;}
 .note-title-input:focus{border-color:var(--accent);}
 
 .note-toolbar{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;}
-.note-tb-btn{width:32px;height:32px;border-radius:10px;border:1px solid var(--border);background:var(--surface);
+.note-tb-btn{width:34px;height:34px;border-radius:10px;border:1px solid var(--border);background:var(--surface);
   color:var(--ink-soft);cursor:pointer;display:flex;align-items:center;justify-content:center;
   font-family:'Inter',sans-serif;font-size:12.5px;padding:0;
   transition:background-color .12s ease,border-color .12s ease,color .12s ease;}
 .note-tb-btn:hover{border-color:var(--accent);color:var(--accent);}
 
-.note-editor{width:100%;border:1px solid var(--border);border-radius:8px;padding:10px 12px;outline:none;
-  color:var(--ink);background:var(--bg);min-height:180px;margin-bottom:16px;
-  overflow-y:auto;max-height:50vh;line-height:1.55;
+.note-editor{width:100%;border:1px solid var(--border);border-radius:10px;padding:12px 13px;outline:none;
+  color:var(--ink);background:var(--bg);min-height:190px;margin-bottom:16px;
+  overflow-y:auto;max-height:50vh;
   scrollbar-width:thin;scrollbar-color:var(--card-border-hover,var(--border)) transparent;}
 .note-editor::-webkit-scrollbar{width:5px;}
 .note-editor::-webkit-scrollbar-thumb{background:var(--card-border-hover,var(--border));border-radius:999px;}
@@ -93,11 +124,11 @@
 
 .note-form-error{color:var(--expense);font-size:13px;margin-bottom:8px;}
 .note-modal-actions{display:flex;gap:8px;}
-.note-btn-save{flex:1;padding:13px 0;border-radius:10px;border:none;cursor:pointer;color:#fff;
+.note-btn-save{flex:1;padding:13px 0;border-radius:12px;border:none;cursor:pointer;color:#fff;
   font-size:15px;font-weight:600;font-family:'Inter',sans-serif;background:var(--accent);}
 .note-btn-save:disabled{opacity:.55;cursor:default;}
 .note-btn-delete{border:none;background:var(--expense);color:#fff;font-weight:600;font-size:15px;
-  border-radius:10px;padding:13px 18px;cursor:pointer;font-family:'Inter',sans-serif;}
+  border-radius:12px;padding:13px 18px;cursor:pointer;font-family:'Inter',sans-serif;}
 
 /* ---- Підтвердження видалення ---- */
 .note-confirm-overlay{align-items:center;padding:20px;z-index:60;}
@@ -111,5 +142,7 @@
 .note-confirm-actions .note-btn-delete{padding:10px 0;font-weight:500;font-size:14px;}
 
 @media (prefers-reduced-motion: reduce){
-  .note-tb-btn{transition:none;}
+  .note-card, .notes-add-btn, .note-tb-btn, .note-view-back,
+  .note-view-act, .note-title-input{transition:none;}
+  .note-card:active{transform:none;}
 }

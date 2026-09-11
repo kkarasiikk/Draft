@@ -271,6 +271,7 @@
     edit: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>',
     trash: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14Z"/></svg>',
     back: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>',
+    sheet: '<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4.5h11l5 5v10a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 19.5Z"/><path d="M14.5 4.5v5.5H20M8 13h8M8 16.5h5"/></svg>',
     close: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>',
     bullet: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="4" cy="6" r="1.5" fill="currentColor" stroke="none"/><circle cx="4" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="4" cy="18" r="1.5" fill="currentColor" stroke="none"/><path d="M9 6h11M9 12h11M9 18h11"/></svg>',
     check: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="14" height="14" rx="3"/><path d="M6 11l2 2 4-4"/></svg>',
@@ -282,21 +283,26 @@
     var list = visible(pages, cfg.section, cfg.sort ? cfg.sort() : 'updated');
     var withSnippet = cfg.snippet ? cfg.snippet() : true;
     host.innerHTML =
+      (list.length ? '' :
+        '<div class="notes-empty">' + ICON.sheet +
+          '<div class="notes-empty-title">' + escapeHtml(t('emptyTitle')) + '</div>' +
+          '<div class="notes-empty-sub">' + escapeHtml(t('emptySub')) + '</div>' +
+        '</div>') +
       '<div class="notes-cards">' +
         list.map(function (p) {
+          // Дата — лише коли вона є. Порожній рядок лишав під назвою
+          // необжитий проміжок, від якого картка виглядала недомальованою.
+          var date = formatDate(p.updatedAt);
+          var snippet = withSnippet && p.content ? snippetOf(p.content, 180) : '';
           return '<button type="button" class="note-card" data-note="' + escapeHtml(p.id) + '">' +
             '<div class="note-card-title">' + escapeHtml(p.title || t('noTitle')) + '</div>' +
-            ((withSnippet && p.content)
-              ? '<div class="note-card-snippet">' + escapeHtml(snippetOf(p.content)) + '</div>' : '') +
-            '<div class="note-card-date">' + escapeHtml(formatDate(p.updatedAt)) + '</div>' +
+            (snippet ? '<div class="note-card-snippet">' + escapeHtml(snippet) + '</div>' : '') +
+            (date ? '<div class="note-card-date">' + escapeHtml(date) + '</div>' : '') +
           '</button>';
         }).join('') +
       '</div>' +
       '<button type="button" class="notes-add-btn" id="noteAddBtn" data-note-add>' + ICON.plus +
-        '<span>' + escapeHtml(t('addBtn')) + '</span></button>' +
-      (list.length ? '' :
-        '<div class="notes-empty"><div class="notes-empty-title">' + escapeHtml(t('emptyTitle')) +
-        '</div><div>' + escapeHtml(t('emptySub')) + '</div></div>');
+        '<span>' + escapeHtml(t('addBtn')) + '</span></button>';
 
     host.querySelectorAll('[data-note]').forEach(function (card) {
       card.addEventListener('click', function () {
@@ -312,12 +318,19 @@
     // Нотатку могли видалити з іншого пристрою, поки вона відкрита тут.
     if (!page) { openId = null; renderList(); return; }
 
+    var date = formatDate(page.updatedAt);
+    // Своя картка, а не .card сторінки: той клас у кожного розділу свій, із
+    // власними тінями й анімацією появи, і нотатка виглядала б у трьох
+    // місцях по-різному — саме те, заради чого блокнот і виносили.
     host.innerHTML =
-      '<div class="card note-view-card">' +
+      '<div class="note-view-card">' +
         '<div class="note-view-head">' +
           '<button type="button" class="note-view-back" data-note-back aria-label="' + escapeHtml(t('back')) + '">' +
             ICON.back + '</button>' +
-          '<div class="note-view-title"></div>' +
+          '<div class="note-view-heading">' +
+            '<div class="note-view-title"></div>' +
+            (date ? '<div class="note-view-date">' + escapeHtml(date) + '</div>' : '') +
+          '</div>' +
           '<div class="note-view-actions">' +
             '<button type="button" class="note-view-act" data-note-edit aria-label="' + escapeHtml(t('edit')) + '">' + ICON.edit + '</button>' +
             '<button type="button" class="note-view-act" data-note-del aria-label="' + escapeHtml(t('del')) + '">' + ICON.trash + '</button>' +

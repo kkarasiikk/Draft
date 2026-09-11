@@ -79,6 +79,23 @@ for (const s of SECTIONS) {
       await expect(page.locator('#noteAddBtn')).toBeVisible();
     });
 
+    // DOMPurify підключався лише в бюджеті, а без нього sanitize() свідомо
+    // віддає ЕКРАНОВАНИЙ текст. Через це нотатка з форматуванням у цілях і
+    // тренуваннях показувалась тегами: «<h3>Мова</h3><div>Вивчити…».
+    test('форматування показується розміткою, а не тегами', async ({ page }) => {
+      const rich = {
+        id: 'rich', title: 'З форматуванням', section: s.section,
+        content: '<h3>Заголовок</h3><ul><li>пункт</li></ul>',
+      };
+      await openModule(page, s.path, { seed: { pages: [rich] } });
+      await page.click(s.open);
+      await page.click('.note-card');
+      const view = page.locator('.note-view-content');
+      await expect(view.locator('h3')).toHaveText('Заголовок');
+      await expect(view.locator('li')).toHaveText('пункт');
+      await expect(view).not.toContainText('<h3>');
+    });
+
     test('порожній заголовок не зберігається', async ({ page }) => {
       await openModule(page, s.path, { seed: { pages: SEED } });
       await page.click(s.open);

@@ -959,6 +959,11 @@ function showNotes(on) {
   document.getElementById('screens').hidden = !!on;
   document.getElementById('notesScreen').hidden = !on;
   document.getElementById('bnNotes').classList.toggle('active', !!on);
+  // Кругла «+» заводить ЦІЛЬ, а не нотатку: у блокнота своя кнопка під
+  // списком. Дві кнопки «додати» на одному екрані, що роблять різне, —
+  // найкоротший шлях завести ціль замість нотатки.
+  const fab = document.getElementById('openNewGoalBtn');
+  if (fab) fab.style.display = on ? 'none' : '';
   if (on) {
     document.getElementById('bnMonth').classList.remove('active');
     document.getElementById('bnYear').classList.remove('active');
