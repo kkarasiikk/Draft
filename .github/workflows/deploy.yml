@@ -148,9 +148,23 @@ jobs:
             sleep 20
           done
 
+          # Що саме там лежить — це і є діагноз. Плейсхолдер означає файл прямо
+          # з репозиторію, тобто гілкове складання. Чужий SHA — що нас перебив
+          # інший деплой. Нічого — що сайт не віддається взагалі.
           fail() {
             echo "::error::$target не містить ${GITHUB_SHA} — на сайті не наша збірка."
-            echo "Найімовірніша причина: Pages складає сайт ще й з гілки."
+            live=$(curl -fsS --max-time 20 "$target" 2>/dev/null || true)
+            if [ -z "$live" ]; then
+              echo "Сайт не віддав файл узагалі — перевір, чи Pages увімкнено."
+            else
+              printf '%s' "$live" | grep -n "^const BUILD" || true
+              if printf '%s' "$live" | grep -q "__BUILD__"; then
+                echo "Версія не підставлена: це файл як у репозиторії, тобто"
+                echo "сайт склало вбудоване гілкове складання, а не цей workflow."
+              else
+                echo "Версія підставлена, але чужа — нас перебив інший деплой."
+              fi
+            fi
             echo "Лікується один раз: Settings → Pages → Build and deployment →"
             echo "Source: GitHub Actions. Тоді гілкове складання зникає."
             exit 1
