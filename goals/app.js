@@ -39,7 +39,7 @@ const T = {
     unsavedSave: 'Зберегти', unsavedDiscard: 'Не зберігати', unsavedKeep: 'Продовжити редагування',
     confirmDeleteTitle: 'Видалити ціль?',
     confirmDeleteSub: 'Цю дію не можна скасувати. Нотатки теж зникнуть.',
-    fabNewGoalLabel: 'Нова ціль', bnMonth: 'Місяць', bnYear: 'Рік',
+    fabNewGoalLabel: 'Нова ціль', bnMonth: 'Місяць', bnYear: 'Рік', bnNotes: 'Нотатки',
     horizonLabel: 'Горизонт', horizonMonth: 'Місячна', horizonYear: 'Річна',
     horizonHint: 'Місячна — що робиш цього місяця. Річна — куди йдеш загалом.',
     emptyMonthTitle: 'Немає цілей на місяць', emptyMonthSub: 'Що хочеш зрушити саме цього місяця?',
@@ -92,7 +92,7 @@ const T = {
     unsavedSave: 'Сохранить', unsavedDiscard: 'Не сохранять', unsavedKeep: 'Продолжить редактирование',
     confirmDeleteTitle: 'Удалить цель?',
     confirmDeleteSub: 'Это действие нельзя отменить. Заметки тоже исчезнут.',
-    fabNewGoalLabel: 'Новая цель', bnMonth: 'Месяц', bnYear: 'Год',
+    fabNewGoalLabel: 'Новая цель', bnMonth: 'Месяц', bnYear: 'Год', bnNotes: 'Заметки',
     horizonLabel: 'Горизонт', horizonMonth: 'Месячная', horizonYear: 'Годовая',
     horizonHint: 'Месячная — что делаешь в этом месяце. Годовая — куда идёшь в целом.',
     emptyMonthTitle: 'Нет целей на месяц', emptyMonthSub: 'Что хочешь сдвинуть именно в этом месяце?',
@@ -145,7 +145,7 @@ const T = {
     unsavedSave: 'Zapisz', unsavedDiscard: 'Nie zapisuj', unsavedKeep: 'Wróć do edycji',
     confirmDeleteTitle: 'Usunąć cel?',
     confirmDeleteSub: 'Tej czynności nie można cofnąć. Notatki też znikną.',
-    fabNewGoalLabel: 'Nowy cel', bnMonth: 'Miesiąc', bnYear: 'Rok',
+    fabNewGoalLabel: 'Nowy cel', bnMonth: 'Miesiąc', bnYear: 'Rok', bnNotes: 'Notatki',
     horizonLabel: 'Horyzont', horizonMonth: 'Miesięczny', horizonYear: 'Roczny',
     horizonHint: 'Miesięczny — co robisz w tym miesiącu. Roczny — dokąd zmierzasz ogólnie.',
     emptyMonthTitle: 'Brak celów na miesiąc', emptyMonthSub: 'Co chcesz ruszyć właśnie w tym miesiącu?',
@@ -198,7 +198,7 @@ const T = {
     unsavedSave: 'Save', unsavedDiscard: "Don't save", unsavedKeep: 'Keep editing',
     confirmDeleteTitle: 'Delete goal?',
     confirmDeleteSub: 'This action cannot be undone. Notes will be lost too.',
-    fabNewGoalLabel: 'New goal', bnMonth: 'Month', bnYear: 'Year',
+    fabNewGoalLabel: 'New goal', bnMonth: 'Month', bnYear: 'Year', bnNotes: 'Notes',
     horizonLabel: 'Horizon', horizonMonth: 'Monthly', horizonYear: 'Yearly',
     horizonHint: 'Monthly — what you are moving this month. Yearly — where you are heading overall.',
     emptyMonthTitle: 'No goals for this month', emptyMonthSub: 'What do you want to move this month?',
@@ -375,6 +375,7 @@ function setLang(lang) {
   applyTranslations();
   renderAuthLangRow();
   AppSettings.setLang(lang);
+  AppNotes.setLang(lang);
 }
 
 // ---- Переклад статичних елементів ----
@@ -409,6 +410,20 @@ AppSettings.init({
   onLang: setLang,
   onLogout: () => auth.signOut(),
 });
+
+// Блокнот розділу — той самий компонент, що в бюджеті й тренуваннях.
+// Сторінка дає йому контейнер; чим показувати список, вирішує нижня
+// навігація, і вона в кожного розділу своя.
+AppNotes.init({
+  db, auth, firebase,
+  section: 'goals',
+  host: '#notesHost',
+  lang: currentLang,
+  guardTexts: () => ({
+    title: t('unsavedTitle'), sub: t('unsavedSub'),
+    save: t('unsavedSave'), discard: t('unsavedDiscard'), keep: t('unsavedKeep'),
+  }),
+});
 // Бічне меню відкриває вікно одразу на вкладці ЦЬОГО розділу.
 document.getElementById('sideSettingsBtn').addEventListener('click', () => AppSettings.open('goals'));
 document.getElementById('pageSettingsBtn').addEventListener('click', () => AppSettings.open('goals'));
@@ -420,6 +435,7 @@ function applyTranslations() {
   document.getElementById('openNewGoalBtn').setAttribute('aria-label', t('fabNewGoalLabel'));
   renderDetailPlaceholder();
   document.getElementById('bnMonthLabel').textContent = t('bnMonth');
+  document.getElementById('bnNotesLabel').textContent = t('bnNotes');
   document.getElementById('bnYearLabel').textContent = t('bnYear');
   document.getElementById('goalModalTitle').textContent = editingGoalId ? t('editGoalTitle') : t('newGoalTitle');
   document.getElementById('categoryLabel').textContent = t('categoryLabel');
@@ -930,10 +946,26 @@ document.getElementById('detailBackBtn').addEventListener('click', showDashboard
 function selectHorizon(next) {
   horizon = next === 'year' ? 'year' : 'month';
   try { localStorage.setItem(HORIZON_KEY, horizon); } catch (err) { /* приватний режим */ }
+  showNotes(false);
   document.getElementById('bnMonth').classList.toggle('active', horizon === 'month');
   document.getElementById('bnYear').classList.toggle('active', horizon === 'year');
   showDashboard();
 }
+
+// Нотатки лежать ПОРУЧ із .screens, а не третім їхнім станом: усередині
+// на широкому екрані стоїть двоколонкова сітка, і блокнот опинився б у
+// колонці завширшки 380px замість цілої сторінки.
+function showNotes(on) {
+  document.getElementById('screens').hidden = !!on;
+  document.getElementById('notesScreen').hidden = !on;
+  document.getElementById('bnNotes').classList.toggle('active', !!on);
+  if (on) {
+    document.getElementById('bnMonth').classList.remove('active');
+    document.getElementById('bnYear').classList.remove('active');
+    AppNotes.showList();
+  }
+}
+document.getElementById('bnNotes').addEventListener('click', () => showNotes(true));
 // Розкладка живе за медіазапитом, а список за нього ЗНАЄ (групи за
 // категоріями є лише у двох колонках). Тож перетин порогу — це не лише
 // справа CSS: сторінку треба перемалювати, інакше після зміни ширини вона
@@ -1405,6 +1437,7 @@ auth.onAuthStateChanged((user) => {
     document.getElementById('appScreen').style.display = 'block';
     subscribeToProfile(user.uid);
     subscribeToGoals(user.uid);
+    AppNotes.start();
     openFromHash(() => openGoalForm(null));
   } else {
     if (unsubscribeGoals) { unsubscribeGoals(); unsubscribeGoals = null; }
@@ -1414,6 +1447,8 @@ auth.onAuthStateChanged((user) => {
     goalCategories = defaultGoalCategoryList(currentLang, CATEGORY_SLOTS);
     usingDefaultCategories = true;
     goals = [];
+    AppNotes.stop();
+    showNotes(false);
     showDashboard();
     document.getElementById('appScreen').style.display = 'none';
     document.getElementById('authScreen').style.display = 'flex';

@@ -37,6 +37,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../side-nav.css">
 <link rel="stylesheet" href="../settings.css">
+<link rel="stylesheet" href="../notes.css">
 <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -677,6 +678,7 @@
   <div class="content">
     <div id="sessionsTab"></div>
     <div id="recordsTab" style="display:none;"></div>
+    <div id="notesTab" style="display:none;"><div id="notesHost"></div></div>
   </div>
 
   
@@ -696,6 +698,12 @@
       <button type="button" class="bn-item" data-tab="records" id="bnRecords">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0Z"/><path d="M17 5h3v2a3 3 0 0 1-3 3"/><path d="M7 5H4v2a3 3 0 0 0 3 3"/></svg>
         <span id="bnRecordsLabel">Рекорди</span>
+      </button>
+    </div>
+    <div class="bn-side">
+      <button type="button" class="bn-item" data-tab="notes" id="bnNotes">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4.5h11l5 5v10a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 19.5Z"/><path d="M14.5 4.5v5.5H20M8 13h8M8 16.5h5"/></svg>
+        <span id="bnNotesLabel">Нотатки</span>
       </button>
     </div>
   </nav>
@@ -813,6 +821,7 @@
 <script defer src="../categories-default.js"></script>
 <script defer src="../side-nav.js"></script>
 <script defer src="../settings.js"></script>
+<script defer src="../notes.js"></script>
 <script defer src="../sw-register.js"></script>
 <script defer src="app.js"></script>
 <script defer src="../scroll-lock.js"></script>

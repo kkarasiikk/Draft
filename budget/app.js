@@ -65,15 +65,7 @@ const T = {
     incomeMonthLabel: 'Дохід за місяць', expenseMonthLabel: 'Витрати за місяць',
     tabEntries: 'Кошти', tabStats: 'Статистика', tabPages: 'Нотатки', tabSavings: 'Збереження', savingsBalanceLabel: 'Баланс заощаджень', savingsEmptySub: 'Додай першу операцію кнопкою внизу', fabDepositLabel: 'Поповнити', fabWithdrawLabel: 'Зняти', newDepositTitle: 'Поповнення', newWithdrawTitle: 'Зняття коштів', editDepositTitle: 'Редагувати поповнення', editWithdrawTitle: 'Редагувати зняття', savingsTotalLabel: 'Загальний баланс', hideBalanceAria: 'Приховати баланс', showBalanceAria: 'Показати баланс', addGoalLabel: 'Нова ціль', goalFormTitleNew: 'Нова ціль', goalFormTitleEdit: 'Редагувати ціль', goalNameLabel: 'Назва', goalNamePlaceholder: 'Напр. На відпустку', goalNameError: 'Введи назву цілі', deleteGoalLabel: 'Видалити ціль', confirmTitleGoal: 'Видалити ціль?', confirmSubGoal: 'Усі операції в цій цілі теж буде видалено.', defaultGoalName: 'Загальні заощадження', savingsTrendTitle: 'Збереження', savingsTrendSub: 'Динаміка за 6 місяців', savingsTrendEmpty: 'Ще немає заощаджень',
     prevMonthAria: 'Попередній місяць', nextMonthAria: 'Наступний місяць',
-    newPageBtn: 'Нова нотатка', pageTitleLabel: 'Назва', pageContentLabel: 'Текст', tabNotes: 'Нотатки', addNoteBtnLabel: 'Нова нотатка', notesEmptyTitle: 'Тут поки порожньо', notesEmptySub: 'Додай першу нотатку кнопкою нижче',
-    pageTitlePlaceholder: 'Напр. Ідеї на відпустку', pageContentPlaceholder: 'Пиши тут що завгодно…',
-    editPageTitle: 'Редагувати нотатку', newPageTitle: 'Нова нотатка',
-    savePageBtn: 'Зберегти', deletePageBtn: 'Видалити',
-    pageEmptyTitle: 'Ще немає сторінок', pageEmptySub: 'Створи першу кнопкою внизу',
-    pageError: 'Введи назву нотатки', pageSaveError: 'Не вдалося зберегти. Перевір інтернет-з’єднання',
-    confirmTitlePage: 'Видалити сторінку?',
-    pageNoTitle: 'Без назви',
-    emptyTitle: 'Тут поки порожньо', emptySub: 'Додай перший запис кнопкою внизу', searchPlaceholder: 'Пошук по нотатках і категоріях', searchEmptyTitle: 'Нічого не знайдено', searchEmptySub: 'Спробуй інше слово для пошуку',
+    tabNotes: 'Нотатки', emptyTitle: 'Тут поки порожньо', emptySub: 'Додай перший запис кнопкою внизу', searchPlaceholder: 'Пошук по нотатках і категоріях', searchEmptyTitle: 'Нічого не знайдено', searchEmptySub: 'Спробуй інше слово для пошуку',
     deleteAria: 'Видалити запис', entryMenuAria: 'Дії із записом', menuEdit: 'Редагувати', menuDelete: 'Видалити', toggleCatAria: 'Показати/приховати категорію', rateAsOf: 'курс НБУ на', rateUnavailable: 'курс недоступний офлайн', rateStaleSuffix: 'можливо застарів', passwordHint: 'Мінімум 6 символів',
     statsCatTitle: 'Витрати за категоріями', statsNoExpenses: 'Немає витрат цього місяця',
     statsTrendTitle: 'Дохід і витрати', statsTrendSub: 'Останні 6 місяців', lastLabel: 'Останні',
@@ -113,15 +105,7 @@ const T = {
     incomeMonthLabel: 'Доход за месяц', expenseMonthLabel: 'Расходы за месяц',
     tabEntries: 'Средства', tabStats: 'Статистика', tabPages: 'Заметки', tabSavings: 'Сбережения', savingsBalanceLabel: 'Баланс сбережений', savingsEmptySub: 'Добавь первую операцию кнопкой внизу', fabDepositLabel: 'Пополнить', fabWithdrawLabel: 'Снять', newDepositTitle: 'Пополнение', newWithdrawTitle: 'Снятие средств', editDepositTitle: 'Редактировать пополнение', editWithdrawTitle: 'Редактировать снятие', savingsTotalLabel: 'Общий баланс', hideBalanceAria: 'Скрыть баланс', showBalanceAria: 'Показать баланс', addGoalLabel: 'Новая цель', goalFormTitleNew: 'Новая цель', goalFormTitleEdit: 'Редактировать цель', goalNameLabel: 'Название', goalNamePlaceholder: 'Напр. На отпуск', goalNameError: 'Введи название цели', deleteGoalLabel: 'Удалить цель', confirmTitleGoal: 'Удалить цель?', confirmSubGoal: 'Все операции в этой цели тоже будут удалены.', defaultGoalName: 'Общие сбережения', savingsTrendTitle: 'Сбережения', savingsTrendSub: 'Динамика за 6 месяцев', savingsTrendEmpty: 'Пока нет сбережений',
     prevMonthAria: 'Предыдущий месяц', nextMonthAria: 'Следующий месяц',
-    newPageBtn: 'Новая заметка', pageTitleLabel: 'Название', pageContentLabel: 'Текст', tabNotes: 'Заметки', addNoteBtnLabel: 'Новая заметка', notesEmptyTitle: 'Здесь пока пусто', notesEmptySub: 'Добавь первую заметку кнопкой снизу',
-    pageTitlePlaceholder: 'Напр. Идеи на отпуск', pageContentPlaceholder: 'Пиши здесь что угодно…',
-    editPageTitle: 'Редактировать заметку', newPageTitle: 'Новая заметка',
-    savePageBtn: 'Сохранить', deletePageBtn: 'Удалить',
-    pageEmptyTitle: 'Пока нет страниц', pageEmptySub: 'Создай первую кнопкой внизу',
-    pageError: 'Введи название заметки', pageSaveError: 'Не удалось сохранить. Проверь интернет-соединение',
-    confirmTitlePage: 'Удалить страницу?',
-    pageNoTitle: 'Без названия',
-    emptyTitle: 'Здесь пока пусто', emptySub: 'Добавь первую запись кнопкой внизу', searchPlaceholder: 'Поиск по заметкам и категориям', searchEmptyTitle: 'Ничего не найдено', searchEmptySub: 'Попробуй другое слово для поиска',
+    tabNotes: 'Заметки', emptyTitle: 'Здесь пока пусто', emptySub: 'Добавь первую запись кнопкой внизу', searchPlaceholder: 'Поиск по заметкам и категориям', searchEmptyTitle: 'Ничего не найдено', searchEmptySub: 'Попробуй другое слово для поиска',
     deleteAria: 'Удалить запись', entryMenuAria: 'Действия с записью', menuEdit: 'Редактировать', menuDelete: 'Удалить', toggleCatAria: 'Показать/скрыть категорию', rateAsOf: 'курс НБУ на', rateUnavailable: 'курс недоступен офлайн', rateStaleSuffix: 'возможно устарел', passwordHint: 'Минимум 6 символов',
     statsCatTitle: 'Расходы по категориям', statsNoExpenses: 'Нет расходов в этом месяце',
     statsTrendTitle: 'Доход и расходы', statsTrendSub: 'Последние 6 месяцев', lastLabel: 'Последние',
@@ -161,15 +145,7 @@ const T = {
     incomeMonthLabel: 'Przychód w tym miesiącu', expenseMonthLabel: 'Wydatki w tym miesiącu',
     tabEntries: 'Środki', tabStats: 'Statystyki', tabPages: 'Notatki', tabSavings: 'Oszczędności', savingsBalanceLabel: 'Saldo oszczędności', savingsEmptySub: 'Dodaj pierwszą operację przyciskiem poniżej', fabDepositLabel: 'Wpłać', fabWithdrawLabel: 'Wypłać', newDepositTitle: 'Wpłata', newWithdrawTitle: 'Wypłata środków', editDepositTitle: 'Edytuj wpłatę', editWithdrawTitle: 'Edytuj wypłatę', savingsTotalLabel: 'Łączne saldo', hideBalanceAria: 'Ukryj saldo', showBalanceAria: 'Pokaż saldo', addGoalLabel: 'Nowy cel', goalFormTitleNew: 'Nowy cel', goalFormTitleEdit: 'Edytuj cel', goalNameLabel: 'Nazwa', goalNamePlaceholder: 'Np. Na wakacje', goalNameError: 'Wpisz nazwę celu', deleteGoalLabel: 'Usuń cel', confirmTitleGoal: 'Usunąć cel?', confirmSubGoal: 'Wszystkie operacje w tym celu też zostaną usunięte.', defaultGoalName: 'Ogólne oszczędności', savingsTrendTitle: 'Oszczędności', savingsTrendSub: 'Dynamika za 6 miesięcy', savingsTrendEmpty: 'Jeszcze brak oszczędności',
     prevMonthAria: 'Poprzedni miesiąc', nextMonthAria: 'Następny miesiąc',
-    newPageBtn: 'Nowa notatka', pageTitleLabel: 'Tytuł', pageContentLabel: 'Treść', tabNotes: 'Notatki', addNoteBtnLabel: 'Nowa notatka', notesEmptyTitle: 'Tu jeszcze pusto', notesEmptySub: 'Dodaj pierwszą notatkę przyciskiem poniżej',
-    pageTitlePlaceholder: 'Np. Pomysły na wakacje', pageContentPlaceholder: 'Napisz tu cokolwiek…',
-    editPageTitle: 'Edytuj notatkę', newPageTitle: 'Nowa notatka',
-    savePageBtn: 'Zapisz', deletePageBtn: 'Usuń',
-    pageEmptyTitle: 'Jeszcze brak stron', pageEmptySub: 'Utwórz pierwszą przyciskiem poniżej',
-    pageError: 'Wpisz tytuł notatki', pageSaveError: 'Nie udało się zapisać. Sprawdź połączenie z internetem',
-    confirmTitlePage: 'Usunąć stronę?',
-    pageNoTitle: 'Bez tytułu',
-    emptyTitle: 'Tu jeszcze pusto', emptySub: 'Dodaj pierwszy wpis przyciskiem poniżej', searchPlaceholder: 'Szukaj w notatkach i kategoriach', searchEmptyTitle: 'Nic nie znaleziono', searchEmptySub: 'Spróbuj innego słowa',
+    tabNotes: 'Notatki', emptyTitle: 'Tu jeszcze pusto', emptySub: 'Dodaj pierwszy wpis przyciskiem poniżej', searchPlaceholder: 'Szukaj w notatkach i kategoriach', searchEmptyTitle: 'Nic nie znaleziono', searchEmptySub: 'Spróbuj innego słowa',
     deleteAria: 'Usuń wpis', entryMenuAria: 'Działania na wpisie', menuEdit: 'Edytuj', menuDelete: 'Usuń', toggleCatAria: 'Pokaż/ukryj kategorię', rateAsOf: 'kurs NBU na', rateUnavailable: 'kurs niedostępny offline', rateStaleSuffix: 'może być nieaktualny', passwordHint: 'Minimum 6 znaków',
     statsCatTitle: 'Wydatki wg kategorii', statsNoExpenses: 'Brak wydatków w tym miesiącu',
     statsTrendTitle: 'Przychody i wydatki', statsTrendSub: 'Ostatnie 6 miesięcy', lastLabel: 'Ostatnie',
@@ -209,15 +185,7 @@ const T = {
     incomeMonthLabel: 'Income this month', expenseMonthLabel: 'Expenses this month',
     tabEntries: 'Funds', tabStats: 'Stats', tabPages: 'Notes', tabSavings: 'Savings', savingsBalanceLabel: 'Savings balance', savingsEmptySub: 'Add your first entry using the button below', fabDepositLabel: 'Deposit', fabWithdrawLabel: 'Withdraw', newDepositTitle: 'Deposit', newWithdrawTitle: 'Withdrawal', editDepositTitle: 'Edit deposit', editWithdrawTitle: 'Edit withdrawal', savingsTotalLabel: 'Total balance', hideBalanceAria: 'Hide balance', showBalanceAria: 'Show balance', addGoalLabel: 'New goal', goalFormTitleNew: 'New goal', goalFormTitleEdit: 'Edit goal', goalNameLabel: 'Name', goalNamePlaceholder: 'E.g. Vacation fund', goalNameError: 'Enter a goal name', deleteGoalLabel: 'Delete goal', confirmTitleGoal: 'Delete goal?', confirmSubGoal: 'All entries in this goal will be deleted too.', defaultGoalName: 'General savings', savingsTrendTitle: 'Savings', savingsTrendSub: 'Trend over 6 months', savingsTrendEmpty: 'No savings yet',
     prevMonthAria: 'Previous month', nextMonthAria: 'Next month',
-    newPageBtn: 'New note', pageTitleLabel: 'Title', pageContentLabel: 'Content', tabNotes: 'Notes', addNoteBtnLabel: 'New note', notesEmptyTitle: 'Nothing here yet', notesEmptySub: 'Add your first note using the button below',
-    pageTitlePlaceholder: 'E.g. Vacation ideas', pageContentPlaceholder: 'Write anything here…',
-    editPageTitle: 'Edit note', newPageTitle: 'New note',
-    savePageBtn: 'Save', deletePageBtn: 'Delete',
-    pageEmptyTitle: 'No pages yet', pageEmptySub: 'Create your first one with the button below',
-    pageError: 'Enter a note title', pageSaveError: 'Could not save. Check your internet connection',
-    confirmTitlePage: 'Delete page?',
-    pageNoTitle: 'Untitled',
-    emptyTitle: 'Nothing here yet', emptySub: 'Add your first entry using the button below', searchPlaceholder: 'Search notes and categories', searchEmptyTitle: 'Nothing found', searchEmptySub: 'Try a different search term',
+    tabNotes: 'Notes', emptyTitle: 'Nothing here yet', emptySub: 'Add your first entry using the button below', searchPlaceholder: 'Search notes and categories', searchEmptyTitle: 'Nothing found', searchEmptySub: 'Try a different search term',
     deleteAria: 'Delete entry', entryMenuAria: 'Entry actions', menuEdit: 'Edit', menuDelete: 'Delete', toggleCatAria: 'Show/hide category', rateAsOf: 'NBU rate as of', rateUnavailable: 'rate unavailable offline', rateStaleSuffix: 'may be outdated', passwordHint: 'At least 6 characters',
     statsCatTitle: 'Expenses by category', statsNoExpenses: 'No expenses this month',
     statsTrendTitle: 'Income & expenses', statsTrendSub: 'Last 6 months', lastLabel: 'Last',
@@ -462,7 +430,6 @@ let pendingDeleteId = null;
 let pendingDeleteType = 'entry'; // 'entry' | 'page' | 'saving' | 'goal' | 'logout' | 'account'
 let entryMenuTxId = null;
 let editingTxId = null;
-let pages = [];
 let unsubscribePages = null;
 let savings = [];
 let unsubscribeSavings = null;
@@ -478,8 +445,6 @@ let savingsDataLoaded = false;
 let goalsDataLoaded = false;
 let migrationDone = false;
 let entryMenuKind = 'tx'; // 'tx' | 'saving'
-let currentPageId = null; // page being edited, null = new page
-let pageOriginTab = 'entries'; // where to return to when leaving a page view
 let pieChart = null, barChart = null, savingsTrendChart = null;
 let unsubscribeSnapshot = null;
 let unsubscribeProfile = null;
@@ -770,6 +735,22 @@ AppSettings.init({
   onBudgetView: applyBudgetView,
 });
 
+// Блокнот розділу — той самий компонент, що в цілях і тренуваннях. Сортування
+// й підпис під назвою лишились налаштуваннями бюджету: компонент питає їх
+// щоразу, коли малює список, а зберігає їх, як і раніше, вікно налаштувань.
+AppNotes.init({
+  db, auth, firebase,
+  section: 'budget',
+  host: '#notesHost',
+  lang: currentLang,
+  guardTexts: () => ({
+    title: t('unsavedTitle'), sub: t('unsavedSub'),
+    save: t('unsavedSave'), discard: t('unsavedDiscard'), keep: t('unsavedKeep'),
+  }),
+  sort: () => notesSortMode,
+  snippet: () => showNoteSnippet,
+});
+
 // Значення вже записане вікном; тут лише підхоплюємо його в свою змінну й
 // перемальовуємо те, на що воно впливає.
 function applyBudgetView(name, value) {
@@ -779,8 +760,8 @@ function applyBudgetView(name, value) {
   if (name === 'savingsTotal') { showSavingsTotal = value; renderSavingsGoalsList(); return; }
   if (name === 'savingsMode') { savingsTotalMode = value; renderSavingsGoalsList(); return; }
   if (name === 'savingsCurrency') { savingsTotalCurrency = value; renderSavingsGoalsList(); return; }
-  if (name === 'notesSort') { notesSortMode = value; renderNotesTab(); return; }
-  if (name === 'noteSnippet') { showNoteSnippet = value; renderNotesTab(); }
+  if (name === 'notesSort') { notesSortMode = value; AppNotes.render(); return; }
+  if (name === 'noteSnippet') { showNoteSnippet = value; AppNotes.render(); }
 }
 // Бічне меню відкриває вікно одразу на вкладці ЦЬОГО розділу: людина
 // натискає «Налаштування», стоячи в «Бюджеті», — отже хоче налаштування
@@ -799,12 +780,6 @@ function applyStaticTranslations() {
   setAuthMode(authMode);
   document.getElementById('incomeLabel').textContent = t('incomeMonthLabel');
   document.getElementById('expenseLabel').textContent = t('expenseMonthLabel');
-  document.getElementById('pageTitleLabel').textContent = t('pageTitleLabel');
-  document.getElementById('pageContentLabel').textContent = t('pageContentLabel');
-  document.getElementById('pageTitleInput').placeholder = t('pageTitlePlaceholder');
-  document.getElementById('pageContentInput').setAttribute('data-placeholder', t('pageContentPlaceholder'));
-  document.getElementById('savePageBtn').textContent = t('savePageBtn');
-  document.getElementById('deletePageBtn').textContent = t('deletePageBtn');
   document.getElementById('prevMonth').setAttribute('aria-label', t('prevMonthAria'));
   document.getElementById('nextMonth').setAttribute('aria-label', t('nextMonthAria'));
   document.getElementById('statsCatTitle').textContent = t('statsCatTitle');
@@ -836,9 +811,6 @@ function applyStaticTranslations() {
   document.getElementById('bnEntriesLabel').textContent = t('tabEntries');
   document.getElementById('bnNotes').setAttribute('aria-label', t('tabNotes'));
   document.getElementById('bnSavings').setAttribute('aria-label', t('tabSavings'));
-  document.getElementById('addNoteBtnLabel').textContent = t('addNoteBtnLabel');
-  document.getElementById('notesEmptyTitle').textContent = t('notesEmptyTitle');
-  document.getElementById('notesEmptySub').textContent = t('notesEmptySub');
   document.getElementById('savingsBalanceLabel').textContent = t('savingsBalanceLabel');
   document.getElementById('savingsTotalLabel').textContent = t('savingsTotalLabel');
   document.getElementById('addGoalLabel').textContent = t('addGoalLabel');
@@ -896,6 +868,7 @@ function setLang(lang) {
   }
   applyStaticTranslations();
   AppSettings.setLang(lang);
+  AppNotes.setLang(lang);
   render();
 }
 
@@ -1046,7 +1019,7 @@ auth.onAuthStateChanged((user) => {
     document.getElementById('appScreen').style.display = 'block';
     subscribeToTransactions(user.uid);
     subscribeToProfile(user.uid);
-    subscribeToPages(user.uid);
+    AppNotes.start();
     subscribeToSavings(user.uid);
     subscribeToSavingsGoals(user.uid);
     loadExchangeRates();
@@ -1058,7 +1031,7 @@ auth.onAuthStateChanged((user) => {
     if (unsubscribeSavings) { unsubscribeSavings(); unsubscribeSavings = null; }
     if (unsubscribeSavingsGoals) { unsubscribeSavingsGoals(); unsubscribeSavingsGoals = null; }
     transactions = [];
-    pages = [];
+    AppNotes.stop();
     savings = [];
     savingsGoals = [];
     currentSavingsGoalId = null;
@@ -1284,7 +1257,6 @@ function render() {
   const searchResults = searchTransactions(searchQuery);
   renderEntries(searchResults !== null ? searchResults : monthTx, searchResults !== null);
   if (currentTab === 'stats') renderStats(monthTx, ty, tm);
-  if (currentTab.startsWith('page:')) renderPageView(currentTab.slice(5));
 }
 
 function searchTransactions(query) {
@@ -1615,9 +1587,6 @@ function openEntryMenu(btn, kind) {
   menu.style.top = top + 'px';
 }
 
-function inlineFormat(text) {
-  return escapeHtml(text).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-}
 
 // Чи вміст нотатки — це HTML з редактора, а не старий текстовий формат.
 //
@@ -1633,229 +1602,19 @@ function inlineFormat(text) {
 // літера, «/» або «!»).
 const HTMLISH_RE = /<[a-z!/][^>]*>|&[a-z]+;|&#\d+;/i;
 
-function looksLikeHtml(content) {
-  return HTMLISH_RE.test(content || '');
-}
 
-// Старий текстовий формат (нотатки, збережені до появи WYSIWYG-редактора) —
-// конвертує "# Заголовок", "**жирний**", "- пункт", "[ ] діло" у нормальний HTML.
-function legacyNoteToHtml(text) {
-  const lines = (text || '').split('\n');
-  let html = '';
-  let listBuffer = [];
-  let listType = null; // 'bullet' | 'checklist'
 
-  function flushList() {
-    if (!listBuffer.length) return;
-    if (listType === 'checklist') {
-      html += listBuffer.map(item => `
-        <div class="note-check-row"><input type="checkbox" ${item.checked ? 'checked' : ''}><span${item.checked ? ' class="checked-text"' : ''}>${inlineFormat(item.text)}</span></div>`).join('');
-    } else {
-      html += '<ul>' + listBuffer.map(item => `<li>${inlineFormat(item.text)}</li>`).join('') + '</ul>';
-    }
-    listBuffer = [];
-    listType = null;
-  }
 
-  lines.forEach(line => {
-    const checkMatch = line.match(/^\[([ x])\]\s?(.*)$/i);
-    const bulletMatch = line.match(/^-\s+(.*)$/);
-    const h2Match = line.match(/^##\s+(.*)$/);
-    const h1Match = line.match(/^#\s+(.*)$/);
 
-    if (checkMatch) {
-      if (listType !== 'checklist') flushList();
-      listType = 'checklist';
-      listBuffer.push({ checked: checkMatch[1].toLowerCase() === 'x', text: checkMatch[2] });
-    } else if (bulletMatch) {
-      if (listType !== 'bullet') flushList();
-      listType = 'bullet';
-      listBuffer.push({ text: bulletMatch[1] });
-    } else {
-      flushList();
-      if (h2Match) html += `<h4>${inlineFormat(h2Match[1])}</h4>`;
-      else if (h1Match) html += `<h3>${inlineFormat(h1Match[1])}</h3>`;
-      else if (line.trim() === '') html += '';
-      else html += `<div>${inlineFormat(line)}</div>`;
-    }
-  });
-  flushList();
-  return html;
-}
 
-// Стара нотатка зберігалась як звичайний текст, нова — як HTML з редактора.
-function noteContentToHtml(content) {
-  const c = content || '';
-  return sanitizeNoteHtml(looksLikeHtml(c) ? c : legacyNoteToHtml(c));
-}
 
-// Санітизація HTML нотаток. Нотатки містять лише простий текст, чекбокси,
-// заголовки, списки й жирний шрифт — тому дозволяємо вузький білий список
-// тегів/атрибутів і відкидаємо все інше (скрипти, обробники подій, посилання тощо).
-// Це захищає від XSS, якщо в контент потрапить шкідливий HTML (напр. вставка
-// зі буфера обміну, або чужий запис, якщо колись зʼявиться шеринг нотаток).
-function sanitizeNoteHtml(html) {
-  if (typeof DOMPurify === 'undefined') {
-    // Немає бібліотеки-санітайзера — краще показати як текст, ніж виконати неперевірений HTML.
-    return escapeHtml(html);
-  }
-  return DOMPurify.sanitize(html || '', {
-    ALLOWED_TAGS: ['div', 'span', 'h3', 'h4', 'ul', 'li', 'strong', 'br', 'input'],
-    ALLOWED_ATTR: ['type', 'checked', 'class'],
-    ALLOW_DATA_ATTR: false,
-  });
-}
 
-function toggleNoteCheckboxAndSave(pageId, containerEl) {
-  const uid = auth.currentUser.uid;
-  db.collection('users').doc(uid).collection('pages').doc(pageId)
-    .update({ content: sanitizeNoteHtml(containerEl.innerHTML), updatedAt: firebase.firestore.FieldValue.serverTimestamp() })
-    .catch(e => console.error(e));
-}
 
-// Підпис під назвою нотатки — звичайний текст, тож HTML із нього треба
-// прибрати, а не показати (див. looksLikeHtml вище).
-function pageSnippet(content) {
-  const c = content || '';
-  let text;
-  if (looksLikeHtml(c)) {
-    // Розриви рядків і кінці блоків — це проміжки між словами: без них
-    // «за серпень<br>Діма» злиплось би в одне слово.
-    const spaced = c.replace(/<br\s*\/?>|<\/(p|div|li|h[1-6]|tr)>/gi, ' ');
-    // DOMParser, а не innerHTML живого елемента: документ інертний, тож
-    // <img onerror> у ньому нічого не запускає, а сутності однаково
-    // розкриваються.
-    const doc = new DOMParser().parseFromString(spaced, 'text/html');
-    text = (doc.body && doc.body.textContent) || '';
-  } else {
-    text = c
-      .replace(/^\[([ x])\]\s?/gim, '')
-      .replace(/^#{1,2}\s+/gim, '')
-      .replace(/^-\s+/gim, '')
-      .replace(/\*\*(.+?)\*\*/g, '$1');
-  }
-  const clean = text.replace(/\s+/g, ' ').trim();
-  return clean.length > 90 ? clean.slice(0, 90) + '…' : clean;
-}
 
-function formatPageDate(ts) {
-  if (!ts || !ts.toDate) return '';
-  const d = ts.toDate();
-  const genMonths = MONTHS_GEN[currentLang] || MONTHS_GEN.uk;
-  return `${d.getDate()} ${genMonths[d.getMonth()]} ${d.getFullYear()}`;
-}
 
-function renderNotesTab() {
-  const sorted = [...pages].sort((a, b) => {
-    if (notesSortMode === 'title') {
-      return (a.title || '').localeCompare(b.title || '', undefined, { sensitivity: 'base' });
-    }
-    if (notesSortMode === 'created') {
-      const ca = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : 0;
-      const cb = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : 0;
-      return cb - ca;
-    }
-    const ta = a.updatedAt && a.updatedAt.toMillis ? a.updatedAt.toMillis() : 0;
-    const tb = b.updatedAt && b.updatedAt.toMillis ? b.updatedAt.toMillis() : 0;
-    return tb - ta;
-  });
-  const container = document.getElementById('notesCards');
-  document.getElementById('notesEmpty').style.display = sorted.length === 0 ? 'block' : 'none';
-  container.innerHTML = sorted.map(p => `
-    <button type="button" class="note-card" data-id="${p.id}">
-      <div class="note-card-title">${escapeHtml(p.title || t('pageNoTitle'))}</div>
-      ${(showNoteSnippet && p.content) ? `<div class="note-card-snippet">${escapeHtml(pageSnippet(p.content))}</div>` : ''}
-      <div class="note-card-date">${formatPageDate(p.updatedAt)}</div>
-    </button>`).join('');
-  container.querySelectorAll('.note-card').forEach(card => {
-    card.addEventListener('click', () => {
-      pageOriginTab = 'notes';
-      selectTab('page:' + card.dataset.id);
-    });
-  });
-}
 
-function renderPageTabs() {
-  if (currentTab.startsWith('page:') && !pages.find(p => 'page:' + p.id === currentTab)) {
-    selectTab(pageOriginTab === 'notes' ? 'notes' : 'entries');
-  } else if (currentTab.startsWith('page:')) {
-    renderPageView(currentTab.slice(5));
-  }
-}
 
-function renderPageView(id) {
-  const page = pages.find(p => p.id === id);
-  if (!page) return;
-  document.getElementById('pageViewTitle').textContent = page.title || t('pageNoTitle');
-  const contentEl = document.getElementById('pageViewContent');
-  contentEl.innerHTML = noteContentToHtml(page.content || '');
-  contentEl.querySelectorAll('.note-check-row input[type=checkbox]').forEach(cb => {
-    cb.addEventListener('change', () => {
-      if (cb.checked) cb.setAttribute('checked', ''); else cb.removeAttribute('checked');
-      const span = cb.nextElementSibling;
-      if (span) span.classList.toggle('checked-text', cb.checked);
-      toggleNoteCheckboxAndSave(id, contentEl);
-    });
-  });
-}
 
-function openPageEditor(id) {
-  currentPageId = id || null;
-  const page = id ? pages.find(p => p.id === id) : null;
-  document.getElementById('pageModalTitle').textContent = page ? t('editPageTitle') : t('newPageTitle');
-  document.getElementById('pageTitleInput').value = page ? (page.title || '') : '';
-  document.getElementById('pageContentInput').innerHTML = page ? noteContentToHtml(page.content || '') : '';
-  document.getElementById('pageError').style.display = 'none';
-  document.getElementById('deletePageBtn').style.display = page ? 'block' : 'none';
-  pageGuard.arm();
-  document.getElementById('pageOverlay').classList.add('show');
-}
-
-async function savePage() {
-  const title = document.getElementById('pageTitleInput').value.trim();
-  const content = sanitizeNoteHtml(document.getElementById('pageContentInput').innerHTML);
-  const errEl = document.getElementById('pageError');
-  errEl.style.display = 'none';
-  if (!title) {
-    errEl.textContent = t('pageError');
-    errEl.style.display = 'block';
-    return;
-  }
-  const btn = document.getElementById('savePageBtn');
-  btn.disabled = true;
-  const uid = auth.currentUser.uid;
-  try {
-    const now = firebase.firestore.FieldValue.serverTimestamp();
-    if (currentPageId) {
-      await db.collection('users').doc(uid).collection('pages').doc(currentPageId).update({ title, content, updatedAt: now });
-    } else {
-      const ref = await db.collection('users').doc(uid).collection('pages').add({ title, content, createdAt: now, updatedAt: now });
-      selectTab('page:' + ref.id);
-    }
-    pageGuard.close();
-  } catch (e) {
-    errEl.textContent = t('pageSaveError');
-    errEl.style.display = 'block';
-  } finally {
-    btn.disabled = false;
-  }
-}
-
-function deletePageRemote(id) {
-  const uid = auth.currentUser.uid;
-  return db.collection('users').doc(uid).collection('pages').doc(id).delete();
-}
-
-function subscribeToPages(uid) {
-  if (unsubscribePages) unsubscribePages();
-  const col = db.collection('users').doc(uid).collection('pages');
-  unsubscribePages = col.onSnapshot((snapshot) => {
-    pages = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-    renderPageTabs();
-  }, (err) => {
-    console.error('Pages sync error', err);
-  });
-}
 
 function openCategoryTxModal(catId, monthTx, ty, tm) {
   const nomMonths = MONTHS_NOM[currentLang] || MONTHS_NOM.uk;
@@ -2247,20 +2006,17 @@ async function submitForm() {
 // ---- Події ----
 function selectTab(tabKey) {
   currentTab = tabKey;
-  if (!tabKey.startsWith('page:')) pageOriginTab = 'entries';
   document.getElementById('bnEntries').classList.toggle('active', tabKey === 'entries');
   document.getElementById('bnStats').classList.toggle('active', tabKey === 'stats');
   document.getElementById('bnSavings').classList.toggle('active', tabKey === 'savings');
   document.getElementById('bnNotes').classList.toggle('active', tabKey === 'notes');
-  const isPage = tabKey.startsWith('page:');
   const isSavings = tabKey === 'savings';
   const isNotes = tabKey === 'notes';
   document.getElementById('balanceSummary').style.display = tabKey === 'entries' ? 'block' : 'none';
   document.getElementById('header').classList.toggle('slim', tabKey !== 'entries');
-  // Відколи місяць і налаштування переїхали, шапці лишилось тільки двоє
-  // мешканців: баланс у записах і кнопка «назад» у перегляді нотатки. Без
-  // жодного з них вона перетворювалась на порожню білу смугу.
-  document.getElementById('header').style.display = (tabKey === 'entries' || isPage) ? '' : 'none';
+  // Відколи місяць і налаштування переїхали, у шапці лишився тільки баланс
+  // у записах. Без нього вона перетворювалась на порожню білу смугу.
+  document.getElementById('header').style.display = tabKey === 'entries' ? '' : 'none';
   document.getElementById('entriesTab').style.display = tabKey === 'entries' ? 'block' : 'none';
   // Рядок тепер несе не заголовок, а місяць, тож потрібен і в статистиці.
   // Пошук лишається тільки в записах — шукати в діаграмі нема чого.
@@ -2275,15 +2031,10 @@ function selectTab(tabKey) {
   document.getElementById('statsTab').style.display = tabKey === 'stats' ? 'block' : 'none';
   document.getElementById('savingsTab').style.display = isSavings ? 'block' : 'none';
   document.getElementById('notesTab').style.display = isNotes ? 'block' : 'none';
-  document.getElementById('pageViewTab').style.display = isPage ? 'block' : 'none';
   // Видимість шестерні вирішує CSS за класом, а не інлайновий `display` із
   // JS: інлайновий перебиває будь-який медіазапит, і саме через нього кнопка
   // колись не хотіла зникати на широкому екрані.
-  // `hidden-here` — перегляд нотатки: там своя шапка з «назад».
-  document.getElementById('pageSettingsBtn').classList.toggle('hidden-here', isPage);
   document.getElementById('monthNavHeader').classList.toggle('show', showsMonth);
-  document.getElementById('backToEntriesBtn').classList.toggle('show', isPage);
-  document.getElementById('headerTopRow').classList.toggle('show', isPage);
   updateHeaderSectionTitle();
   if (isSavings) {
     currentSavingsGoalId = null;
@@ -2292,7 +2043,7 @@ function selectTab(tabKey) {
     renderSavingsGoalsList();
   }
   updateAddButton();
-  if (isNotes) renderNotesTab();
+  if (isNotes) AppNotes.showList();
   render();
 }
 
@@ -2338,19 +2089,6 @@ function updateHeaderSectionTitle() {
   titleEl.textContent = '';
   titleEl.classList.remove('show');
 }
-document.getElementById('editPageBtn').addEventListener('click', () => {
-  if (!currentTab.startsWith('page:')) return;
-  openPageEditor(currentTab.slice(5));
-});
-document.getElementById('deletePageInlineBtn').addEventListener('click', () => {
-  if (!currentTab.startsWith('page:')) return;
-  pendingDeleteId = currentTab.slice(5);
-  pendingDeleteType = 'page';
-  document.getElementById('confirmTitle').textContent = t('confirmTitlePage');
-  document.getElementById('confirmSub').textContent = t('confirmSub');
-  document.getElementById('confirmDelete').textContent = t('deleteBtn');
-  document.getElementById('confirmOverlay').classList.add('show');
-});
 document.getElementById('prevMonth').addEventListener('click', () => { monthOffset--; render(); });
 document.getElementById('nextMonth').addEventListener('click', () => { if (monthOffset < 0) { monthOffset++; render(); } });
 function closeSearchBar() {
@@ -2389,9 +2127,6 @@ document.getElementById('clearSearchBtn').addEventListener('click', () => {
   document.getElementById('searchInput').value = '';
   document.getElementById('clearSearchBtn').style.display = 'none';
   render();
-});
-document.getElementById('backToEntriesBtn').addEventListener('click', () => {
-  selectTab(currentTab.startsWith('page:') && pageOriginTab === 'notes' ? 'notes' : 'entries');
 });
 document.getElementById('trendPeriodPicker').addEventListener('click', (e) => {
   const btn = e.target.closest('.period-btn');
@@ -2445,19 +2180,6 @@ const savingsGuard = UnsavedGuard.create({
   onClose: () => { editingSavingId = null; },
   texts: unsavedTexts,
 });
-const pageGuard = UnsavedGuard.create({
-  overlay: 'pageOverlay',
-  snapshot: () => JSON.stringify({
-    title: document.getElementById('pageTitleInput').value.trim(),
-    // Порожній contenteditable браузер сам добудовує тегом <br> при фокусі —
-    // без цієї нормалізації нотатка вважалась би зміненою від самого лише
-    // дотику до поля.
-    content: document.getElementById('pageContentInput').innerHTML
-      .replace(/<br\s*\/?>\s*$/i, '').replace(/\s+/g, ' ').trim(),
-  }),
-  save: () => savePage(),
-  texts: unsavedTexts,
-});
 
 document.getElementById('closeForm').addEventListener('click', () => txGuard.requestClose());
 document.getElementById('submitBtn').addEventListener('click', submitForm);
@@ -2469,11 +2191,7 @@ document.getElementById('confirmDelete').addEventListener('click', async () => {
   pendingDeleteId = null;
   document.getElementById('confirmOverlay').classList.remove('show');
   try {
-    if (type === 'page') {
-      await deletePageRemote(id);
-      // Питати «зберегти зміни?» після видалення безглуздо — зберігати нема куди.
-      pageGuard.close();
-    } else if (type === 'saving') {
+    if (type === 'saving') {
       await deleteSavingRemote(id);
     } else if (type === 'goal') {
       await deleteSavingsGoalRemote(id);
@@ -2538,83 +2256,6 @@ document.getElementById('savingsBalanceToggle').addEventListener('click', () => 
   savingsBalanceHidden = !savingsBalanceHidden;
   localStorage.setItem('financeAppSavingsBalanceHidden', savingsBalanceHidden ? '1' : '0');
   renderSavingsGoalsList();
-});
-document.getElementById('addNoteBtn').addEventListener('click', () => {
-  pageOriginTab = 'notes';
-  openPageEditor(null);
-});
-function insertChecklistItem() {
-  const editor = document.getElementById('pageContentInput');
-  editor.focus();
-  const sel = window.getSelection();
-  if (!sel.rangeCount) return;
-  const range = sel.getRangeAt(0);
-  if (!editor.contains(range.commonAncestorContainer)) return;
-  range.deleteContents();
-
-  const row = document.createElement('div');
-  row.className = 'note-check-row';
-  const checkbox = document.createElement('input');
-  checkbox.type = 'checkbox';
-  checkbox.contentEditable = 'false';
-  const span = document.createElement('span');
-  span.textContent = '\u00A0';
-  row.appendChild(checkbox);
-  row.appendChild(span);
-
-  range.insertNode(row);
-  const after = document.createElement('div');
-  after.innerHTML = '<br>';
-  row.after(after);
-
-  const newRange = document.createRange();
-  newRange.selectNodeContents(span);
-  newRange.collapse(false);
-  sel.removeAllRanges();
-  sel.addRange(newRange);
-}
-
-function applyNoteFormat(fmt) {
-  const editor = document.getElementById('pageContentInput');
-  editor.focus();
-  if (fmt === 'bold') {
-    document.execCommand('bold');
-  } else if (fmt === 'h1') {
-    document.execCommand('formatBlock', false, 'h3');
-  } else if (fmt === 'h2') {
-    document.execCommand('formatBlock', false, 'h4');
-  } else if (fmt === 'bullet') {
-    document.execCommand('insertUnorderedList');
-  } else if (fmt === 'check') {
-    insertChecklistItem();
-  }
-}
-document.querySelectorAll('.note-tb-btn').forEach(btn => {
-  btn.addEventListener('click', () => applyNoteFormat(btn.dataset.fmt));
-});
-document.getElementById('pageContentInput').addEventListener('paste', (e) => {
-  e.preventDefault();
-  const text = (e.clipboardData || window.clipboardData).getData('text/plain');
-  document.execCommand('insertText', false, text);
-});
-document.getElementById('pageContentInput').addEventListener('change', (e) => {
-  const cb = e.target;
-  if (cb.tagName === 'INPUT' && cb.type === 'checkbox') {
-    if (cb.checked) cb.setAttribute('checked', ''); else cb.removeAttribute('checked');
-    const span = cb.nextElementSibling;
-    if (span) span.classList.toggle('checked-text', cb.checked);
-  }
-});
-document.getElementById('closePage').addEventListener('click', () => pageGuard.requestClose());
-document.getElementById('savePageBtn').addEventListener('click', savePage);
-document.getElementById('deletePageBtn').addEventListener('click', () => {
-  if (!currentPageId) return;
-  pendingDeleteId = currentPageId;
-  pendingDeleteType = 'page';
-  document.getElementById('confirmTitle').textContent = t('confirmTitlePage');
-  document.getElementById('confirmSub').textContent = t('confirmSub');
-  document.getElementById('confirmDelete').textContent = t('deleteBtn');
-  document.getElementById('confirmOverlay').classList.add('show');
 });
 
 // ---- Старт ----

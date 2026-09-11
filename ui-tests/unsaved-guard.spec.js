@@ -182,41 +182,41 @@ test.describe('Бюджет', () => {
     await openModule(page, 'budget/index.html');
     const open = async () => {
       await page.click('.bn-item[data-tab="notes"]');
-      await page.click('#addNoteBtn');
-      await page.waitForSelector('#pageOverlay.show');
+      await page.click('#noteAddBtn');
+      await page.waitForSelector('#noteOverlay.show');
     };
     await checksOutUnsavedGuard({
       page,
-      overlay: 'pageOverlay',
-      closeBtn: '#closePage',
+      overlay: 'noteOverlay',
+      closeBtn: '[data-note-cancel]',
       open,
-      dirty: () => page.fill('#pageTitleInput', 'Ідеї'),
+      dirty: () => page.fill('#noteTitleInput', 'Ідеї'),
     });
   });
 
   test('порожній редактор нотатки не вважається зміненим від самого дотику', async ({ page }) => {
     await openModule(page, 'budget/index.html');
     await page.click('.bn-item[data-tab="notes"]');
-    await page.click('#addNoteBtn');
-    await page.waitForSelector('#pageOverlay.show');
+    await page.click('#noteAddBtn');
+    await page.waitForSelector('#noteOverlay.show');
     // Клік у contenteditable: браузер сам добудовує порожнє поле тегом <br>,
     // і без нормалізації нотатка «змінювалась» би від самого лише дотику.
-    await page.click('#pageContentInput');
-    await tapBackdrop(page, 'pageOverlay');
+    await page.click('#noteContentInput');
+    await tapBackdrop(page, 'noteOverlay');
     expect(await dialog.shown(page), 'нічого ж не написали').toBe(false);
-    expect(await isShown(page, '#pageOverlay')).toBe(false);
+    expect(await isShown(page, '#noteOverlay')).toBe(false);
   });
 
   test('текст нотатки рахується за зміну', async ({ page }) => {
     await openModule(page, 'budget/index.html');
     await page.click('.bn-item[data-tab="notes"]');
-    await page.click('#addNoteBtn');
-    await page.waitForSelector('#pageOverlay.show');
-    await page.click('#pageContentInput');
+    await page.click('#noteAddBtn');
+    await page.waitForSelector('#noteOverlay.show');
+    await page.click('#noteContentInput');
     await page.keyboard.type('Купити квитки до Львова');
-    await tapBackdrop(page, 'pageOverlay');
+    await tapBackdrop(page, 'noteOverlay');
     expect(await dialog.shown(page)).toBe(true);
     await dialog.keep(page);
-    await expect(page.locator('#pageContentInput')).toContainText('Купити квитки до Львова');
+    await expect(page.locator('#noteContentInput')).toContainText('Купити квитки до Львова');
   });
 });

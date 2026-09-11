@@ -10,7 +10,8 @@ rules_version = '2';
 //   users/{uid}/recurringTx/{id}      -- СПАДЩИНА: правила регулярних
 //                                         операцій. Застосунок їх більше не
 //                                         створює й не читає.
-//   users/{uid}/pages/{id}            -- {title, content, createdAt, updatedAt}
+//   users/{uid}/pages/{id}            -- {title, content, section, createdAt, updatedAt}
+//                                         section: budget|goals|workout; у старих немає
 //   users/{uid}/tasks/{id}            -- {title, notes, done, completedAt,
 //                                         priority, tags, dueDate, dueTime,
 //                                         weekStart, weekCat, estimateMin, recurrence, subtasks,
@@ -161,8 +162,14 @@ service cloud.firestore {
         function isValidPage(d) {
           return d.title is string && d.title.size() <= 300 &&
                  d.content is string && d.content.size() <= 500000 &&
+                 // Розділ, якому належить нотатка. Документи, записані до
+                 // появи блокнота в цілях і тренуваннях, поля не мають — вони
+                 // бюджетні, бо тоді блокнот був лише там (див. sectionOf у
+                 // notes.js). Тому поле необовʼязкове: інакше жодну стару
+                 // нотатку не можна було б навіть відкрити й зберегти.
+                 (!('section' in d) || d.section in ['budget', 'goals', 'workout']) &&
                  d.createdAt is timestamp && d.updatedAt is timestamp &&
-                 d.keys().hasOnly(['title', 'content', 'createdAt', 'updatedAt']);
+                 d.keys().hasOnly(['title', 'content', 'section', 'createdAt', 'updatedAt']);
         }
         allow read, delete: if isOwner(uid);
         allow create, update: if isOwner(uid) && isValidPage(request.resource.data);

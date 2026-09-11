@@ -34,7 +34,7 @@ const { EXERCISE_LIB, MUSCLE_ORDER, exerciseLabel: libLabel } = window.WorkoutEx
 const T = {
   uk: {
     pageTitle: 'Тренування',
-    tabSessions: 'Тренування', tabRecords: 'Рекорди',
+    tabSessions: 'Тренування', tabRecords: 'Рекорди', tabNotes: 'Нотатки',
     newSessionLabel: 'Нове тренування',
     newSessionTitle: 'Нове тренування', editSessionTitle: 'Редагувати тренування',
     sessionNamePlaceholder: 'Назва (необовʼязково)',
@@ -123,7 +123,7 @@ const T = {
   },
   ru: {
     pageTitle: 'Тренировки',
-    tabSessions: 'Тренировки', tabRecords: 'Рекорды',
+    tabSessions: 'Тренировки', tabRecords: 'Рекорды', tabNotes: 'Заметки',
     newSessionLabel: 'Новая тренировка',
     newSessionTitle: 'Новая тренировка', editSessionTitle: 'Редактировать тренировку',
     sessionNamePlaceholder: 'Название (необязательно)',
@@ -208,7 +208,7 @@ const T = {
   },
   pl: {
     pageTitle: 'Treningi',
-    tabSessions: 'Treningi', tabRecords: 'Rekordy',
+    tabSessions: 'Treningi', tabRecords: 'Rekordy', tabNotes: 'Notatki',
     newSessionLabel: 'Nowy trening',
     newSessionTitle: 'Nowy trening', editSessionTitle: 'Edytuj trening',
     sessionNamePlaceholder: 'Nazwa (opcjonalnie)',
@@ -293,7 +293,7 @@ const T = {
   },
   en: {
     pageTitle: 'Workouts',
-    tabSessions: 'Workouts', tabRecords: 'Records',
+    tabSessions: 'Workouts', tabRecords: 'Records', tabNotes: 'Notes',
     newSessionLabel: 'New workout',
     newSessionTitle: 'New workout', editSessionTitle: 'Edit workout',
     sessionNamePlaceholder: 'Name (optional)',
@@ -446,6 +446,7 @@ function setLang(lang) {
   }
   applyTranslations();
   renderAuthLangRow();
+  AppNotes.setLang(lang);
   renderCurrentScreen();
 }
 
@@ -482,6 +483,18 @@ AppSettings.init({
   onLogout: () => auth.signOut(),
   actions: { workoutTemplates: () => openTemplatesManager() },
 });
+
+// Блокнот розділу — той самий компонент, що в бюджеті й цілях.
+AppNotes.init({
+  db, auth, firebase,
+  section: 'workout',
+  host: '#notesHost',
+  lang: currentLang,
+  guardTexts: () => ({
+    title: t('unsavedTitle'), sub: t('unsavedSub'),
+    save: t('unsavedSave'), discard: t('unsavedDiscard'), keep: t('unsavedKeep'),
+  }),
+});
 // Бічне меню відкриває вікно одразу на вкладці ЦЬОГО розділу.
 document.getElementById('sideSettingsBtn').addEventListener('click', () => AppSettings.open('workout'));
 document.getElementById('pageSettingsBtn').addEventListener('click', () => AppSettings.open('workout'));
@@ -492,6 +505,7 @@ function applyTranslations() {
   document.title = `${t('pageTitle')} · Life`;
   document.getElementById('bnSessionsLabel').textContent = t('tabSessions');
   document.getElementById('bnRecordsLabel').textContent = t('tabRecords');
+  document.getElementById('bnNotesLabel').textContent = t('tabNotes');
   document.getElementById('newSessionBtn').setAttribute('aria-label', t('newSessionLabel'));
   document.getElementById('sessionNameInput').placeholder = t('sessionNamePlaceholder');
   document.getElementById('sessionDateLabel').textContent = t('sessionDateLabel');
@@ -1526,6 +1540,9 @@ function switchTab(tab) {
   });
   document.getElementById('sessionsTab').style.display = tab === 'sessions' ? 'block' : 'none';
   document.getElementById('recordsTab').style.display = tab === 'records' ? 'block' : 'none';
+  document.getElementById('notesTab').style.display = tab === 'notes' ? 'block' : 'none';
+  // Повернулись на вкладку — бачимо список, а не нотатку, відкриту минулого разу.
+  if (tab === 'notes') AppNotes.showList();
   // «Рекорди» лише показують історію — додавати там нема чого. Ховаємо
   // кнопку зовсім, а не робимо невидимою: інакше помічник над нею лишався б
   // висіти з порожнім місцем під собою. Клас на <body> опускає його на
@@ -2400,6 +2417,7 @@ auth.onAuthStateChanged((user) => {
     openFromHash(() => openSessionForm(null));
     subscribeToTemplates(user.uid);
     subscribeToCustomExercises(user.uid);
+    AppNotes.start();
   } else {
     if (unsubscribeSessions) { unsubscribeSessions(); unsubscribeSessions = null; }
     if (unsubscribeProfile) { unsubscribeProfile(); unsubscribeProfile = null; hiddenExercises = []; }
@@ -2408,6 +2426,7 @@ auth.onAuthStateChanged((user) => {
     customExercises = [];
     sessions = [];
     templates = [];
+    AppNotes.stop();
     document.getElementById('appScreen').style.display = 'none';
     document.getElementById('authScreen').style.display = 'flex';
     document.getElementById('authPassword').value = '';

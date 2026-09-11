@@ -20,6 +20,11 @@ const RULES = fs.readFileSync(path.join(__dirname, 'firestore.rules'), 'utf8');
 // id поля -> куди воно пише. field: null означає «у правилах межі немає»
 // (текст лягає всередину елемента списку, а списки міряються довжиною).
 const FIELDS = [
+  // Поле заголовка нотатки малює notes.js, а не розмітка сторінки: блокнот
+  // спільний на три розділи. Межа однаково має сходитись із правилом —
+  // інакше довга назва мовчки відхилялась би сервером, як це вже було з
+  // записом тижневика.
+  { id: 'noteTitleInput', file: 'notes.js', field: 'pages.title' },
   { id: 'planText', file: 'tasks/index.html', field: 'tasks.title' },
   { id: 'quickAddInput', file: 'tasks/index.html', field: 'tasks.title' },
   { id: 'taskTitleInput', file: 'tasks/index.html', field: 'tasks.title' },
@@ -53,6 +58,8 @@ function serverLimit(ref) {
 
 /** Усі maxlength сторінки: id -> число. */
 function clientLimits(file) {
+  // notes.js містить ту саму розмітку, лише всередині рядків JS: теги там
+  // дослівні, тож той самий розбір знаходить і їх.
   const html = fs.readFileSync(path.join(__dirname, file), 'utf8');
   const found = {};
   const tag = /<(?:input|textarea)\b[^>]*>/g;
@@ -66,7 +73,7 @@ function clientLimits(file) {
 }
 
 const PAGES = ['index.html', 'budget/index.html', 'goals/index.html',
-  'tasks/index.html', 'workout/index.html'];
+  'tasks/index.html', 'workout/index.html', 'notes.js'];
 
 describe('поле не дозволяє набрати більше, ніж прийме сервер', () => {
   FIELDS.forEach((f) => {

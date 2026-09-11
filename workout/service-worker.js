@@ -8,6 +8,7 @@ LifeSW({
     './', './index.html', './app.js', './exercises.js',
     './progress.js',
     '../boot-guard.js', '../side-nav.js', '../side-nav.css', '../settings.js', '../settings.css',
+    '../notes.js', '../notes.css',
     '../categories-default.js', '../scroll-lock.js', '../unsaved-guard.js',
     '../sw-register.js',
         './manifest.json',

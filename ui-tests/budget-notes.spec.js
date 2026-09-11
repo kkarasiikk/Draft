@@ -16,6 +16,9 @@ const openNotes = async (page, pages) => {
   await page.waitForSelector('.note-card');
 };
 
+// Блокнот однаковий у трьох розділах (notes.js), тож те, що перевіряється
+// тут на бюджеті, справедливе й для цілей із тренуваннями.
+
 test('у підписі під назвою немає ні тегів, ні сутностей', async ({ page }) => {
   await openNotes(page, [{ id: 'p1', title: 'Борги', content: FROM_EDITOR }]);
   const snippet = page.locator('.note-card-snippet');
@@ -28,7 +31,7 @@ test('у підписі під назвою немає ні тегів, ні с�
 test('нотатка з редактора відкривається текстом, а не розміткою', async ({ page }) => {
   await openNotes(page, [{ id: 'p1', title: 'Борги', content: FROM_EDITOR }]);
   await page.click('.note-card');
-  const view = page.locator('#pageViewContent');
+  const view = page.locator('.note-view-content');
   await expect(view).toContainText('Міша винен за серпень');
   await expect(view).not.toContainText('<br>');
   await expect(view).not.toContainText('&nbsp;');
@@ -39,7 +42,7 @@ test('нотатка з редактора відкривається текст
 test('стара текстова нотатка й далі читається як розмітка', async ({ page }) => {
   await openNotes(page, [{ id: 'p1', title: 'Список', content: '# Заголовок\n- перше\n- друге' }]);
   await page.click('.note-card');
-  const view = page.locator('#pageViewContent');
+  const view = page.locator('.note-view-content');
   await expect(view.locator('h3')).toHaveText('Заголовок');
   await expect(view.locator('li')).toHaveCount(2);
 });
@@ -50,5 +53,5 @@ test('«R&D» і «a < b» за розмітку не рахуються', async
   await openNotes(page, [{ id: 'p1', title: 'Текст', content: 'R&D: якщо a < b, то все гаразд' }]);
   await expect(page.locator('.note-card-snippet')).toHaveText('R&D: якщо a < b, то все гаразд');
   await page.click('.note-card');
-  await expect(page.locator('#pageViewContent')).toContainText('R&D: якщо a < b, то все гаразд');
+  await expect(page.locator('.note-view-content')).toContainText('R&D: якщо a < b, то все гаразд');
 });

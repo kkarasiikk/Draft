@@ -37,6 +37,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../side-nav.css">
 <link rel="stylesheet" href="../settings.css">
+<link rel="stylesheet" href="../notes.css">
 <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -343,6 +344,7 @@
      style із JS. Так широкий екран може показати обидва ПОРУЧ: інлайновий
      display перебив би медіазапит. На телефоні поведінка та сама, що й була. */
   #goalDetailScreen{padding:16px 20px 40px;}
+  .screens[hidden]{display:none;}
   .screens[data-screen="dashboard"] #goalDetailScreen{display:none;}
   .screens[data-screen="detail"] #dashboardScreen{display:none;}
   /* Підказка «обери ціль» має сенс лише поруч зі списком: на телефоні
@@ -587,6 +589,12 @@
        не JS інлайновим style, а атрибут data-screen плюс CSS. Інакше
        широкий екран не міг би показати їх ПОРУЧ: інлайновий display
        перебиває будь-який медіазапит. -->
+  <div id="notesScreen" hidden>
+    <div class="content">
+      <div id="notesHost"></div>
+    </div>
+  </div>
+
   <div class="screens" id="screens" data-screen="dashboard">
   <div id="dashboardScreen">
   <div class="content">
@@ -657,6 +665,12 @@
         <span id="bnYearLabel">Рік</span>
       </button>
     </div>
+    <div class="bn-side">
+      <button type="button" class="bn-item" id="bnNotes">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4.5h11l5 5v10a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 19.5Z"/><path d="M14.5 4.5v5.5H20M8 13h8M8 16.5h5"/></svg>
+        <span id="bnNotesLabel">Нотатки</span>
+      </button>
+    </div>
   </nav>
 </div>
 </div>
@@ -721,6 +735,7 @@
 <script defer src="review.js"></script>
 <script defer src="../side-nav.js"></script>
 <script defer src="../settings.js"></script>
+<script defer src="../notes.js"></script>
 <script defer src="../sw-register.js"></script>
 <script defer src="app.js"></script>
 <script defer src="../scroll-lock.js"></script>

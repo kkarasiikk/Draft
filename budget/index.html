@@ -45,6 +45,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../side-nav.css">
 <link rel="stylesheet" href="../settings.css">
+<link rel="stylesheet" href="../notes.css">
 <script defer id="chartLib" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
 <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -122,19 +123,18 @@
      комп'ютері він картка серед карток — там скло повертається окремо, у
      блоці @media нижче. */
   .auth-box, .app-menu, .entry-menu, .tab-btn.active, .search-bar, .day-card, .card,
-  .period-btn.active, .modal, .data-action-btn, .confirm-box, .goal-card, .note-card,
-  .note-tb-btn, .stat-card{
+  .period-btn.active, .modal, .data-action-btn, .confirm-box, .goal-card, .stat-card{
     box-shadow: var(--glass-shadow);
   }
 
 
   /* ---- Glass button (Apple/Vercel style) for neutral secondary actions ---- */
-  .btn-cancel, .data-action-btn, .note-tb-btn{
+  .btn-cancel, .data-action-btn{
     background:var(--glass-btn-bg) !important;
     border:1px solid var(--glass-btn-border) !important;
     transition:background .35s, transform .35s, border-color .35s;
   }
-  .btn-cancel:hover, .data-action-btn:hover, .note-tb-btn:hover{
+  .btn-cancel:hover, .data-action-btn:hover{
     background:var(--glass-btn-bg-hover) !important;
     transform:translateY(-3px);
   }
@@ -383,10 +383,10 @@
   .modal-overlay.show{display:flex;}
   /* Системна смуга гортання з кнопками-стрілками випадає зі стилю шитів:
      власна — тонка й напівпрозора, як у чаті помічника. */
-  .modal, .app-menu #tabsList, #pageContentInput{scrollbar-width:thin;scrollbar-color:var(--card-border-hover) transparent;}
-  .modal::-webkit-scrollbar, .app-menu #tabsList::-webkit-scrollbar, #pageContentInput::-webkit-scrollbar{width:5px;}
-  .modal::-webkit-scrollbar-track, .app-menu #tabsList::-webkit-scrollbar-track, #pageContentInput::-webkit-scrollbar-track{background:transparent;}
-  .modal::-webkit-scrollbar-thumb, .app-menu #tabsList::-webkit-scrollbar-thumb, #pageContentInput::-webkit-scrollbar-thumb{background:var(--card-border-hover);border-radius:999px;}
+  .modal, .app-menu #tabsList{scrollbar-width:thin;scrollbar-color:var(--card-border-hover) transparent;}
+  .modal::-webkit-scrollbar, .app-menu #tabsList::-webkit-scrollbar{width:5px;}
+  .modal::-webkit-scrollbar-track, .app-menu #tabsList::-webkit-scrollbar-track{background:transparent;}
+  .modal::-webkit-scrollbar-thumb, .app-menu #tabsList::-webkit-scrollbar-thumb{background:var(--card-border-hover);border-radius:999px;}
   .modal{background:var(--surface);border-radius:26px 26px 0 0;padding:20px 20px calc(28px + env(safe-area-inset-bottom));width:100%;max-width:480px;
     max-height:85vh;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;
     /* Вікно гортається лише вгору-вниз. touch-action:pan-y забороняє браузеру
@@ -479,8 +479,6 @@
   .btn-cancel{border:1px solid var(--border);background:transparent;color:var(--ink-soft);}
   .btn-delete{border:none;background:var(--expense);color:#fff;font-weight:500;}
   svg.icon{display:inline-block;vertical-align:middle;}
-  .page-view-card{padding:22px;}
-  .page-view-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px;}
   .goal-card{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--surface);border-radius:18px;
     border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:10px;cursor:pointer;
     text-align:left;width:100%;font-family:'Inter',sans-serif;}
@@ -493,48 +491,17 @@
     border-radius:12px;border:1.5px dashed var(--border);background:transparent;color:var(--ink-muted);
     font-family:'Inter',sans-serif;font-size:14px;font-weight:600;cursor:pointer;margin-top:4px;}
   .goal-add-btn:hover{border-color:var(--accent);color:var(--accent);}
-  .note-card{display:block;background:var(--surface);border:1px solid var(--border);border-radius:12px;
     padding:14px 18px;margin-bottom:10px;cursor:pointer;text-align:left;width:100%;font-family:'Inter',sans-serif;}
-  .note-card:hover{border-color:var(--accent);}
-  .note-card-title{font-size:14.5px;font-weight:600;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .note-card-snippet{font-size:13px;color:var(--ink-muted);margin-top:4px;overflow:hidden;text-overflow:ellipsis;
     white-space:nowrap;}
-  .note-card-date{font-size:11.5px;color:var(--ink-muted);margin-top:6px;}
   .goal-detail-head{display:flex;align-items:center;gap:6px;margin-bottom:14px;}
   .goal-detail-title{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
     color:var(--ink);font-family:'Inter',sans-serif;font-size:16px;font-weight:700;}
-  .page-view-title{font-family:'Inter',sans-serif;font-size:19px;font-weight:700;color:var(--ink);word-break:break-word;}
-  .page-view-actions{display:flex;gap:12px;flex-shrink:0;padding-top:2px;}
-  .page-view-content{font-size:14.5px;line-height:1.65;color:var(--ink-soft);white-space:pre-wrap;word-break:break-word;}
   .tab-btn.tab-add{display:flex;align-items:center;gap:7px;color:var(--ink-muted);}
   .tab-btn.tab-btn-with-icon{display:flex;align-items:center;gap:9px;}
-  #pageTitleInput{margin-bottom:14px;}
-  .note-toolbar{display:flex;gap:6px;margin-bottom:8px;}
-  .note-tb-btn{width:32px;height:32px;border-radius:10px;border:1px solid var(--border);background:var(--surface);
     color:var(--ink-soft);cursor:pointer;display:flex;align-items:center;justify-content:center;
     font-family:'Inter',sans-serif;font-size:12.5px;padding:0;}
-  .note-tb-btn:hover{border-color:var(--accent);color:var(--accent);}
-  .note-view-content{font-family:'Inter',sans-serif;font-size:14.5px;line-height:1.6;color:var(--ink-soft);}
-  .note-view-content h3{font-size:19px;font-weight:700;color:var(--ink);margin:14px 0 6px;}
-  .note-view-content h3:first-child{margin-top:0;}
-  .note-view-content h4{font-size:16px;font-weight:700;color:var(--ink);margin:12px 0 5px;}
-  .note-view-content h4:first-child{margin-top:0;}
-  .note-view-content ul{margin:0 0 8px;padding-left:20px;}
-  .note-view-content ul li{margin-bottom:3px;}
-  .note-check-row{display:flex;align-items:flex-start;gap:8px;margin-bottom:4px;list-style:none;}
-  .note-check-row input{width:17px;height:17px;accent-color:var(--accent);cursor:pointer;margin:2px 0 0;flex-shrink:0;}
-  .note-check-row .checked-text{color:var(--ink-muted);text-decoration:line-through;}
-  #pageContentInput{width:100%;font-family:'Inter',sans-serif;font-size:14.5px;line-height:1.55;border:1px solid var(--border);
     border-radius:8px;padding:10px 12px;outline:none;color:var(--ink);background:var(--bg);min-height:180px;margin-bottom:16px;
     overflow-y:auto;max-height:50vh;}
-  #pageContentInput:focus{border-color:var(--accent);}
-  #pageContentInput:empty:before{content:attr(data-placeholder);color:var(--ink-muted);}
-  .note-editor h3{font-size:19px;font-weight:700;color:var(--ink);margin:10px 0 6px;}
-  .note-editor h4{font-size:16px;font-weight:700;color:var(--ink);margin:8px 0 4px;}
-  .note-editor ul{margin:0 0 8px;padding-left:20px;}
-  .page-modal-actions{display:flex;gap:8px;}
-  .page-modal-actions .submit-btn{margin-top:0;flex:1;}
-  .page-modal-actions .btn-delete{border-radius:10px;padding:13px 18px;font-weight:600;font-size:15px;}
   .cat-manage-list{margin-top:8px;}
   .cat-manage-row{display:flex;align-items:center;gap:9px;padding:7px 2px;}
   .cat-manage-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
@@ -582,7 +549,7 @@
     .month-nav-header .month-label{font-size:14px;}
     .month-nav{justify-content:center;padding:20px 4px 0;max-width:960px;margin:0 auto;}
     .content{padding:14px 4px 40px;}
-    #entriesTab, #pageViewTab, #savingsTab, #notesTab{max-width:960px;margin:0 auto;}
+    #entriesTab, #savingsTab, #notesTab{max-width:960px;margin:0 auto;}
     #searchBar{max-width:960px;margin-left:auto;margin-right:auto;}
     .recent-header{max-width:960px;margin-left:auto;margin-right:auto;}
 
@@ -779,31 +746,7 @@
       </div>
     </div>
     <div id="notesTab" style="display:none;">
-      <div id="notesCards"></div>
-      <button type="button" class="goal-add-btn" id="addNoteBtn">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
-        <span id="addNoteBtnLabel">Нова нотатка</span>
-      </button>
-      <div id="notesEmpty" class="empty" style="display:none;padding:30px 0;font-size:13.5px;">
-        <div class="title" id="notesEmptyTitle">Тут поки порожньо</div>
-        <div id="notesEmptySub">Додай першу нотатку кнопкою нижче</div>
-      </div>
-    </div>
-    <div id="pageViewTab" style="display:none;">
-      <div class="card page-view-card">
-        <div class="page-view-head">
-          <div class="page-view-title" id="pageViewTitle"></div>
-          <div class="page-view-actions">
-            <button class="logout-link" id="editPageBtn" aria-label="Редагувати">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-            </button>
-            <button class="logout-link" id="deletePageInlineBtn" aria-label="Видалити">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14Z"/></svg>
-            </button>
-          </div>
-        </div>
-        <div class="page-view-content note-view-content" id="pageViewContent"></div>
-      </div>
+      <div id="notesHost"></div>
     </div>
   </div>
 </div>
@@ -932,34 +875,6 @@
 </div>
 
 
-<div class="modal-overlay" id="pageOverlay">
-  <div class="modal">
-    <div class="modal-head">
-      <div class="modal-title" id="pageModalTitle">Нова сторінка</div>
-      <button class="close-btn" id="closePage" aria-label="Закрити"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
-    </div>
-    <label class="field-label" id="pageTitleLabel">Назва</label>
-    <input type="text" id="pageTitleInput" placeholder="Напр. Ідеї на відпустку">
-    <label class="field-label" id="pageContentLabel">Текст</label>
-    <div class="note-toolbar" id="noteToolbar">
-      <button type="button" class="note-tb-btn" data-fmt="bold" title="Жирний"><b>Ж</b></button>
-      <button type="button" class="note-tb-btn" data-fmt="h1" title="Заголовок">H1</button>
-      <button type="button" class="note-tb-btn" data-fmt="h2" title="Підзаголовок">H2</button>
-      <button type="button" class="note-tb-btn" data-fmt="bullet" title="Список" aria-label="Список">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="4" cy="6" r="1.5" fill="currentColor" stroke="none"/><circle cx="4" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="4" cy="18" r="1.5" fill="currentColor" stroke="none"/><path d="M9 6h11M9 12h11M9 18h11"/></svg>
-      </button>
-      <button type="button" class="note-tb-btn" data-fmt="check" title="Чек-лист" aria-label="Чек-лист">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="14" height="14" rx="3"/><path d="M6 11l2 2 4-4"/></svg>
-      </button>
-    </div>
-    <div id="pageContentInput" class="note-editor" contenteditable="true" data-placeholder="Пиши тут що завгодно…"></div>
-    <div class="form-error" id="pageError" style="display:none;" role="alert" aria-live="assertive"></div>
-    <div class="page-modal-actions">
-      <button class="btn-delete" id="deletePageBtn" style="display:none;">Видалити</button>
-      <button class="submit-btn" id="savePageBtn">Зберегти</button>
-    </div>
-  </div>
-</div>
 </div><!-- /appScreen -->
 
 <script defer src="firebase-config.js"></script>
@@ -967,6 +882,7 @@
 <script defer src="../categories-default.js"></script>
 <script defer src="../side-nav.js"></script>
 <script defer src="../settings.js"></script>
+<script defer src="../notes.js"></script>
 <script defer src="../sw-register.js"></script>
 <script defer src="app.js"></script>
 <script defer src="../scroll-lock.js"></script>
