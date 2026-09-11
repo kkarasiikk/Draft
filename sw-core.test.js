@@ -14,6 +14,13 @@ const vm = require('vm');
 
 const SOURCE = fs.readFileSync(path.join(__dirname, 'sw-core.js'), 'utf8');
 
+// Крок «Зібрати статику» в deploy.yml підставляє замість плейсхолдера SHA
+// коміта, і саме такий файл віддається браузеру. Тести за замовчуванням
+// піднімають ядро в цьому — живому — вигляді; варіант без підстановки
+// перевіряється окремо, бо поведінка там навмисно інша.
+const FAKE_SHA = 'c0ffee1';
+const DEPLOYED = SOURCE.split('__BUILD__').join(FAKE_SHA);
+
 const CDN = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js';
 
 /** Відповідь, схожа на Response рівно настільки, скільки треба ядру. */
@@ -98,7 +105,9 @@ function bootSw(opts = {}) {
   sandbox.self.self = sandbox.self;
 
   vm.createContext(sandbox);
-  vm.runInContext(SOURCE, sandbox);
+  // unversioned — ядро таким, яким воно лежить у репозиторії: з плейсхолдером
+  // на місці версії. Так виглядає сайт, складений в обхід нашого workflow.
+  vm.runInContext(opts.unversioned ? SOURCE : DEPLOYED, sandbox);
   sandbox.self.LifeSW({
     name: 'budget',
     legacyPrefixes: ['moi-finansy-'],
@@ -240,6 +249,49 @@ describe('оболонка віддається з кешу — заради ц�
   });
 });
 
+// ---- Коли версії кешу немає ----
+// Назва кеша — 'life-<розділ>-<SHA>'. Якщо SHA не підставився, назва однакова
+// для всіх деплоїв: кеш-перший тоді означає, що людина після кожного оновлення
+// мусить відкрити застосунок двічі, і в застосунку нічого про це не скаже.
+//
+// Не гіпотеза: Pages у Life складав сайт двічі на кожен пуш — нашим workflow
+// (з підстановкою) і власним гілковим Jekyll-складанням (без неї), — і живим
+// лишалось те, що добігало останнім. Дві правки поспіль так і не дійшли до
+// телефона.
+describe('без підставленої версії кеш не головний', () => {
+  test('плейсхолдер на місці — оболонка йде з мережі, хоч у кеші й лежить старе', async () => {
+    const sw = bootSw({
+      unversioned: true,
+      cached: { 'https://example.test/budget/app.js': response({ body: 'старе' }) },
+    });
+    const r = await sw.handle('https://example.test/budget/app.js');
+    expect(r.body).toBe('свіже');
+  });
+
+  test('версія підставлена — кеш знову головний, як і задумано', async () => {
+    const sw = bootSw({
+      cached: { 'https://example.test/budget/app.js': response({ body: 'старе' }) },
+    });
+    const r = await sw.handle('https://example.test/budget/app.js');
+    expect(r.body).toBe('старе');
+  });
+
+  test('без версії й без мережі — рятує кеш, застосунок не падає', async () => {
+    const sw = bootSw({
+      unversioned: true,
+      cached: { 'https://example.test/budget/app.js': response({ body: 'старе' }) },
+      network: () => Promise.reject(new Error('офлайн')),
+    });
+    const r = await sw.handle('https://example.test/budget/app.js');
+    expect(r.body).toBe('старе');
+  });
+
+  test('без версії, без мережі й без кешу — помилка доходить до сторінки', async () => {
+    const sw = bootSw({ unversioned: true, network: () => Promise.reject(new Error('офлайн')) });
+    await expect(sw.handle('https://example.test/budget/app.js')).rejects.toThrow();
+  });
+});
+
 describe('що потрапляє в кеш', () => {
   // Перевірки не було: у кеш лягали й 404, і 500, і потім віддавались
   // офлайн як «сторінка».
@@ -270,7 +322,7 @@ describe('що потрапляє в кеш', () => {
 describe('прибирання старих кешів', () => {
   test('чистить свої попередні версії й спадщину, чуже не чіпає', async () => {
     const sw = bootSw({
-      cacheKeys: ['life-budget-old', 'moi-finansy-v3', 'life-goals-old', 'life-budget-__BUILD__'],
+      cacheKeys: ['life-budget-old', 'moi-finansy-v3', 'life-goals-old', 'life-budget-' + FAKE_SHA],
     });
     let waited;
     sw.listeners.activate({ waitUntil: (p) => { waited = p; } });

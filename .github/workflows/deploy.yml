@@ -101,6 +101,66 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+    outputs:
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  # Контроль: на сайті лежить САМЕ наша збірка.
+  #
+  # «Зелений деплой» не означає «оновлений сайт». Pages можна складати двома
+  # шляхами водночас — цим workflow (Settings → Pages → Source: GitHub Actions)
+  # і вбудованим гілковим складанням (Source: гілка). Тоді на кожен пуш іде два
+  # деплої на ту саму адресу, живим лишається той, що добіг останнім, і обидва
+  # звітують «success».
+  #
+  # Гілкове складання викладає файли як вони лежать у репозиторії — тобто з
+  # плейсхолдером замість версії кешу. Назва кеша перестає змінюватись між
+  # деплоями, і правки доходять до телефона з запізненням на один запуск
+  # застосунку. Рівно це вже сталось: дві правки поспіль не було видно, а всі
+  # перевірки при цьому стояли зелені.
+  #
+  # Тому після деплою просто читаємо sw-core.js з живого сайту й шукаємо в
+  # ньому SHA цього коміта. Перевіряємо двічі з перервою: другий деплой, якщо
+  # він є, встигає перебити перший за секунди.
+  verify:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: На сайті лежить версія цього коміта
+        env:
+          SITE: ${{ needs.deploy.outputs.url }}
+        run: |
+          target="${SITE%/}/sw-core.js"
+          echo "Перевіряю $target"
+
+          has_sha() {
+            body=$(curl -fsS --max-time 20 "$target" 2>/dev/null || true)
+            [ -n "$body" ] && printf '%s' "$body" | grep -q "${GITHUB_SHA}"
+          }
+
+          # Перший раз — з очікуванням: Pages роздає нову версію не миттєво.
+          found=""
+          for attempt in 1 2 3 4 5 6; do
+            if has_sha; then found="yes"; break; fi
+            echo "спроба $attempt: версії ${GITHUB_SHA} ще немає, чекаю 20 с"
+            sleep 20
+          done
+
+          fail() {
+            echo "::error::$target не містить ${GITHUB_SHA} — на сайті не наша збірка."
+            echo "Найімовірніша причина: Pages складає сайт ще й з гілки."
+            echo "Лікується один раз: Settings → Pages → Build and deployment →"
+            echo "Source: GitHub Actions. Тоді гілкове складання зникає."
+            exit 1
+          }
+
+          [ -n "$found" ] || fail
+
+          # Другий раз — чи не перебив нас паралельний деплой.
+          echo "версія на місці; перевіряю ще раз за 45 с"
+          sleep 45
+          has_sha || fail
+
+          echo "Готово: на сайті sw-core.js версії ${GITHUB_SHA}"

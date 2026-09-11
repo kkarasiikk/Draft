@@ -28,6 +28,14 @@
 // правильно: у розробці сторінку перезавантажують із вимкненим кешем.
 const BUILD = '__BUILD__';
 
+// Чи справді підставилась версія.
+//
+// Плейсхолдер нижче складений із двох половин НАВМИСНО: sed на деплої замінює
+// кожен його дослівний запис у цьому файлі. Написаний цілим, він став би тим
+// самим SHA — і порівняння завжди відповідало б «підставилось», тобто рівно
+// те, що ця перевірка й має вміти розрізняти.
+const VERSIONED = BUILD !== '__' + 'BUILD__';
+
 /**
  * @param {{
  *   name: string,                 назва розділу: 'budget', 'goals', …
@@ -127,29 +135,54 @@ self.LifeSW = function LifeSW(config) {
     return caches.open(CACHE_NAME).then((cache) => cache.match(request));
   }
 
+  /** Тягне з мережі й кладе свіже в кеш. */
+  function refresh(event) {
+    return fetch(event.request).then((response) => {
+      const saving = put(event.request, response);
+      // waitUntil тримає SW живим до кінця запису: без цього браузер міг
+      // приспати воркер посеред нього, і кеш лишався б старим назавжди.
+      if (saving && event.waitUntil) event.waitUntil(saving);
+      return response;
+    });
+  }
+
+  /** Оболонка — з кешу, свіже — у фон, на наступний раз. */
+  function cacheFirst(event) {
+    return matchOwn(event.request).then((cached) => {
+      const fromNetwork = refresh(event);
+      if (cached) {
+        // Мережа могла й не відповісти — тоді просто нічого не оновиться.
+        fromNetwork.catch(() => {});
+        return cached;
+      }
+      // Нема в кеші (перший захід у розділ) — лишається чекати на мережу.
+      return fromNetwork;
+    });
+  }
+
+  /** Спершу мережа, кеш — лише запас на випадок обриву. */
+  function networkFirst(event) {
+    return refresh(event).catch(() => matchOwn(event.request).then((cached) => {
+      if (cached) return cached;
+      throw new Error('поза мережею і не в кеші: ' + event.request.url);
+    }));
+  }
+
   self.addEventListener('fetch', (event) => {
     if (!shouldHandle(event.request)) return;
 
-    event.respondWith(
-      matchOwn(event.request).then((cached) => {
-        // Оновлення у фоні: сторінка вже отримала свою відповідь із кешу, а
-        // свіжа версія ляже туди для наступного разу.
-        const fromNetwork = fetch(event.request).then((response) => {
-          const saving = put(event.request, response);
-          // waitUntil тримає SW живим до кінця запису: без цього браузер міг
-          // приспати воркер посеред нього, і кеш лишався б старим назавжди.
-          if (saving && event.waitUntil) event.waitUntil(saving);
-          return response;
-        });
-
-        if (cached) {
-          // Мережа могла й не відповісти — тоді просто нічого не оновиться.
-          fromNetwork.catch(() => {});
-          return cached;
-        }
-        // Нема в кеші (перший захід у розділ) — лишається чекати на мережу.
-        return fromNetwork;
-      })
-    );
+    // Віддавати оболонку з кешу можна лише тоді, коли версію кешу підставили
+    // при складанні сайту: саме SHA коміта й робить кожен деплой новим кешем.
+    //
+    // Якщо плейсхолдер лишився на місці, назва кеша НЕ ЗМІНЮЄТЬСЯ між
+    // деплоями — а тоді кеш-перший означає, що людина після кожного оновлення
+    // мусить відкрити застосунок двічі, і нічого в застосунку про це не
+    // скаже. Таке вже сталося: Pages у Life складав сайт ДВІЧІ на кожен пуш —
+    // нашим workflow (з підстановкою) і своїм гілковим Jekyll-складанням (без
+    // неї), — і вигравало те, що добігало останнім.
+    //
+    // Тому без версії — мережа першою: трохи повільніше, але завжди те, що
+    // справді викладено. Локально в розробці це так само правильна поведінка.
+    event.respondWith(VERSIONED ? cacheFirst(event) : networkFirst(event));
   });
 };
