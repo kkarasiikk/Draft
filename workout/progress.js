@@ -390,6 +390,60 @@
     return marks;
   }
 
+  // ---- Вага підходу ----
+  //
+  // Поле ваги було type="number", а такий інпут КОМИ не приймає: браузер
+  // вважає «12,5» недійсним і віддає порожній рядок. Виходило, що застосунок
+  // пише «12,5 кг» у списку вправ (fmtNum, українська локаль), а набрати те
+  // саме в полі не дає — і половина ваги мовчки зникала при збереженні.
+  //
+  // Тому поле стало текстовим, а розбір — ось тут: приймає і кому, і крапку,
+  // однаково в усіх чотирьох мовах.
+
+  var WEIGHT_MAX = 2000;
+
+  /**
+   * Текст із поля ваги -> число. Порожньо або сміття -> '' (а не 0: нуль
+   * означав би «штанга без млинців», і план із порожньою вагою перетворився б
+   * на запис про підхід з нульовою вагою).
+   * @param {string|number} text
+   * @returns {number|''}
+   */
+  function parseWeight(text) {
+    if (typeof text === 'number') {
+      return isFinite(text) ? clampWeight(text) : '';
+    }
+    var raw = String(text === null || text === undefined ? '' : text)
+      // Пробіли всередині числа бувають від вставки з буфера («12 ,5»),
+      // нерозривний — від toLocaleString.
+      .replace(/[\s\u00A0]/g, '')
+      .replace(',', '.');
+    if (raw === '') return '';
+    if (!/^\d*\.?\d*$/.test(raw)) return '';
+    var n = Number(raw);
+    if (!isFinite(n)) return '';
+    return clampWeight(n);
+  }
+
+  function clampWeight(n) {
+    var v = Math.min(Math.max(n, 0), WEIGHT_MAX);
+    // Два знаки — рівно стільки ж, скільки показує список вправ.
+    return Math.round(v * 100) / 100;
+  }
+
+  /**
+   * Число -> текст для ПОЛЯ вводу. Не fmtNum: той для показу й на вазі 1500
+   * вставляє розділювач тисяч («1 500»), який у полі був би вже не числом.
+   * @param {number|''} value
+   * @param {string} [sep] роздільник дробової частини: ',' або '.'
+   */
+  function weightField(value, sep) {
+    if (value === '' || value === null || value === undefined) return '';
+    var n = Number(value);
+    if (!isFinite(n)) return '';
+    return String(clampWeight(n)).replace('.', sep === '.' ? '.' : (sep || ','));
+  }
+
   var api = {
     isDone: isDone,
     tonnage: tonnage,
@@ -412,6 +466,9 @@
     pctChange: pctChange,
     summarize: summarize,
     analyze: analyze,
+    parseWeight: parseWeight,
+    weightField: weightField,
+    WEIGHT_MAX: WEIGHT_MAX,
   };
 
   root.WorkoutProgress = api;

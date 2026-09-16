@@ -664,6 +664,14 @@ function weekdayShortLabels() {
   }
   return labels;
 }
+// Кома чи крапка — за мовою інтерфейсу. Питаємо це в самого браузера, а не
+// тримаємо власну табличку: fmtNum нижче теж покладається на локаль, і два
+// незалежні джерела правди розійшлися б.
+function decimalSep() {
+  const locale = LOCALE_MAP[currentLang] || 'uk-UA';
+  return (1.5).toLocaleString(locale).indexOf(',') === -1 ? '.' : ',';
+}
+
 function fmtNum(n) {
   // Прибирає зайві .0, залишає до 2 знаків після коми (для дробової ваги).
   // Кома чи крапка — за мовою інтерфейсу: українською пишуть «12,5 кг», і
@@ -1663,8 +1671,9 @@ function renderExerciseBlocks() {
 // і його якраз показуємо.
 function setInputValue(s) {
   const done = Number(s.reps) > 0;
+  const showWeight = done || Number(s.weight);
   return {
-    weight: done || Number(s.weight) ? s.weight : '',
+    weight: showWeight ? window.WorkoutProgress.weightField(s.weight, decimalSep()) : '',
     reps: done ? s.reps : '',
   };
 }
@@ -1673,7 +1682,7 @@ function renderExerciseBlock(ex) {
   const setsHtml = ex.sets.map((s, i) => `
     <div class="set-row" data-set-idx="${i}">
       <div class="set-num">${i + 1}</div>
-      <input type="number" inputmode="decimal" step="0.5" min="0" max="2000" class="set-weight" placeholder="${escapeHtml(t('setPlaceholderWeight'))}" value="${setInputValue(s).weight}">
+      <input type="text" inputmode="decimal" autocomplete="off" class="set-weight" placeholder="${escapeHtml(t('setPlaceholderWeight'))}" value="${escapeHtml(setInputValue(s).weight)}">
       <input type="number" inputmode="numeric" step="1" min="0" max="999" class="set-reps" placeholder="${escapeHtml(t('setPlaceholderReps'))}" value="${setInputValue(s).reps}">
       <button type="button" class="set-remove" data-remove-set="${i}" aria-label="Remove set">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
@@ -1725,7 +1734,15 @@ function attachExerciseBlockEvents() {
       });
     });
     blockEl.querySelectorAll('.set-weight').forEach((input, i) => {
-      input.addEventListener('input', () => { ex.sets[i].weight = input.value === '' ? '' : Number(input.value); });
+      // Поки людина набирає, поле НЕ переписуємо: на «12,» розбір дасть 12, і
+      // кома зникала б з-під пальця разом із наміром дописати половину.
+      input.addEventListener('input', () => {
+        ex.sets[i].weight = window.WorkoutProgress.parseWeight(input.value);
+      });
+      // А от коли поле лишили — показуємо те, що справді збережеться.
+      input.addEventListener('blur', () => {
+        input.value = window.WorkoutProgress.weightField(ex.sets[i].weight, decimalSep());
+      });
     });
     blockEl.querySelectorAll('.set-reps').forEach((input, i) => {
       input.addEventListener('input', () => { ex.sets[i].reps = input.value === '' ? '' : Number(input.value); });

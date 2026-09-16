@@ -450,3 +450,83 @@ describe('monthMarks', () => {
     expect(P.monthMarks([], '2026-08')).toEqual({});
   });
 });
+
+// ---- Вага підходу ----
+// Поле ваги було type="number", а такий інпут коми не приймає: браузер
+// вважає «12,5» недійсним і віддає порожній рядок. Виходило, що список вправ
+// пише «12,5 кг» українською, а набрати те саме в полі не дає — і половина
+// ваги мовчки зникала при збереженні.
+describe('розбір ваги з поля', () => {
+  test('кома й крапка означають одне й те саме', () => {
+    expect(P.parseWeight('12,5')).toBe(12.5);
+    expect(P.parseWeight('12.5')).toBe(12.5);
+  });
+
+  test('цілі числа лишаються цілими', () => {
+    expect(P.parseWeight('25')).toBe(25);
+    expect(P.parseWeight('127,5')).toBe(127.5);
+  });
+
+  test('пробіли всередині не заважають — їх приносить вставка з буфера', () => {
+    expect(P.parseWeight(' 12 ,5 ')).toBe(12.5);
+    expect(P.parseWeight('1 500')).toBe(1500);
+  });
+
+  // Нуль означав би «штанга без млинців», і план із ще не відомою вагою
+  // перетворився б на запис про підхід з нульовою вагою.
+  test('порожнє лишається порожнім, а не стає нулем', () => {
+    expect(P.parseWeight('')).toBe('');
+    expect(P.parseWeight('   ')).toBe('');
+    expect(P.parseWeight(null)).toBe('');
+    expect(P.parseWeight(undefined)).toBe('');
+  });
+
+  test('сміття не стає числом', () => {
+    expect(P.parseWeight('абв')).toBe('');
+    expect(P.parseWeight('12кг')).toBe('');
+    expect(P.parseWeight('1,2,3')).toBe('');
+    expect(P.parseWeight('-3')).toBe('');
+  });
+
+  test('межі: вище стелі — стеля, нижче нуля не буває', () => {
+    expect(P.parseWeight('2500')).toBe(P.WEIGHT_MAX);
+    expect(P.parseWeight('0')).toBe(0);
+  });
+
+  test('більше двох знаків не тримаємо — стільки ж показує список', () => {
+    expect(P.parseWeight('12,555')).toBe(12.56);
+  });
+
+  test('число на вході теж приймається — воно вже лежить у моделі', () => {
+    expect(P.parseWeight(12.5)).toBe(12.5);
+    expect(P.parseWeight(NaN)).toBe('');
+  });
+});
+
+describe('вага назад у поле', () => {
+  test('роздільник той, яким мова показує число', () => {
+    expect(P.weightField(12.5)).toBe('12,5');
+    expect(P.weightField(12.5, '.')).toBe('12.5');
+  });
+
+  test('ціле — без хвоста', () => {
+    expect(P.weightField(25)).toBe('25');
+  });
+
+  // fmtNum на 1500 вставив би розділювач тисяч («1 500»), і в полі це вже
+  // не було б числом.
+  test('розділювача тисяч у полі немає', () => {
+    expect(P.weightField(1500)).toBe('1500');
+  });
+
+  test('порожнє лишається порожнім', () => {
+    expect(P.weightField('')).toBe('');
+    expect(P.weightField(null)).toBe('');
+  });
+
+  test('туди й назад без втрат', () => {
+    ['12,5', '25', '127,5', '2,5', '0,25'].forEach((text) => {
+      expect(P.weightField(P.parseWeight(text))).toBe(text);
+    });
+  });
+});
